@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-08-18
 **Current phase:** Phase 0 — research and validation
-**Current task:** P0-RES-01 — Competitor study
+**Current task:** P0-RES-02 — Capability gap matrix
 **Product-code gate:** Closed until every Phase 0 deliverable is owner-reviewed
 
 ## Status legend
@@ -24,7 +24,7 @@
 
 | Task | Status | Deliverable / required evidence | Completion record |
 |---|---|---|---|
-| P0-RES-01 | PLANNED | `docs/competitor-analysis.md` with sourced competitor tables | Pending |
+| P0-RES-01 | COMPLETE | `docs/competitor-analysis.md` with 28 sourced competitor/informal-channel tables | `docs/completed/P0-RES-01.md` |
 | P0-RES-02 | PLANNED | Capability gap matrix appended to competitor analysis | Pending |
 | P0-RES-03 | PLANNED | `docs/market-research.md` with sourced Rajshahi evidence | Pending |
 | P0-RES-04 | BLOCKED | `docs/validation.md`; 35 interviews and 5 concierge transactions | Needs owner-provided field evidence |
@@ -48,6 +48,10 @@
 | P1-UI-08 | PLANNED | S01–S04 within the six-screen onboarding budget. |
 | P1-QA-09 | PLANNED | GitHub Actions gates. |
 | Phase 1 exit gate | PLANNED | Clean clone, real login, auth tests, envelopes, CI, Swagger. |
+
+### Owner-selected storage direction
+
+Turso/libSQL was selected by the owner on 2026-08-18 at `libsql://kaz-abusufyan.aws-ap-south-1.turso.io`. Before Phase 1, an architecture decision record must adapt the guide's PostgreSQL/Prisma assumptions for libSQL, including ORM compatibility, migrations, transaction semantics, geospatial queries/indexes, concurrency tests, backup/restore, and deployment topology. No database credential may enter Git history.
 
 ## Phases 2–8 — cash-first MVP
 
