@@ -6,6 +6,8 @@ All notable project changes are documented here.
 
 ### Documentation
 
+- Added the P0-RES-02 capability gap matrix with all 22 prescribed rows and eight comparison columns.
+- Documented the `Yes / Partial / No / Unknown` scoring rubric, evidence interpretation, and distinction between KAJ planned scope and implemented capability.
 - Added the P0-RES-01 competitor study with 28 field-by-field comparisons and 71 cited public sources.
 - Recorded confidence, explicit assumptions, evidence limitations, and the handoff to the capability gap matrix.
 - Recorded Turso/libSQL as the owner-selected storage direction pending a pre-Phase-1 compatibility ADR; no credential was stored.

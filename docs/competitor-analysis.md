@@ -1005,4 +1005,51 @@ These are channel/archetype comparisons, not assertions that every group, notice
 
 This study compares observable public mechanisms; it does not validate product legitimacy, current market liquidity, service quality, legal compliance, or claimed verification. Several local sources expose little more than marketing or directory information. P0-RES-03 must investigate Rajshahi channel usage, category frequency, neighbourhood coverage, phone/data constraints, payment habits, and broker/tutor practices. P0-RES-04 must then test these findings in interviews and concierge transactions.
 
-P0-RES-02 will turn this evidence into the prescribed capability gap matrix. It must keep facts distinct from KAJ design choices and must not treat a competitor's feature as proof of local desirability.
+## Capability gap matrix
+
+**Task:** P0-RES-02
+**Status:** draft — owner review required
+**Scored:** 2026-08-18
+
+### Scoring rubric
+
+- `Yes` — the reviewed evidence clearly shows the capability in the product's normal workflow.
+- `Partial` — an adjacent, limited, market-specific, or incomplete form is evidenced.
+- `No` — the observed product model excludes the capability or the reviewed workflow clearly does not provide it.
+- `Unknown` — public evidence is insufficient; this is not treated as `No`.
+- `KAJ (planned)` describes approved scope across all gated phases in [`KAJ_BUILD_GUIDE.md`](../KAJ_BUILD_GUIDE.md); it does not claim the capability is implemented or validated.
+
+| Capability | InstaHire | ProGo | Shomvob | Sheba | TaskRabbit | Instawork | Thumbtack | KAJ (planned) |
+|---|---|---|---|---|---|---|---|---|
+| local physical jobs | Yes | Yes | Partial | Yes | Yes | Yes | Yes | Yes |
+| household services | No | Yes | No | Yes | Yes | No | Yes | Yes |
+| student jobs | Yes | Partial | Partial | Unknown | Partial | Partial | Partial | Yes |
+| hourly work | Yes | Partial | Unknown | Partial | Yes | Yes | Partial | Yes |
+| shop/retail shifts | Yes | No | Partial | No | No | Yes | No | Yes |
+| recurring schedules | Unknown | Unknown | Unknown | Unknown | Partial | Yes | Partial | Yes |
+| full-time recruitment | Yes | No | Yes | No | No | Partial | No | Yes |
+| digital/remote work | Unknown | No | Unknown | No | No | No | Partial | Partial |
+| availability-aware matching | Partial | Partial | Unknown | Partial | Yes | Yes | Yes | Yes |
+| distance-aware matching | Partial | Yes | Partial | Partial | Partial | Yes | Yes | Yes |
+| AI/NL job creation | Unknown | Unknown | Unknown | Unknown | Unknown | Unknown | Unknown | Yes |
+| Bangla-first UX | Unknown | Unknown | Yes | Partial | No | No | No | Yes |
+| verified identity | Partial | Partial | Partial | Partial | Partial | Yes | Partial | Yes |
+| worker rating | Unknown | Yes | No | Yes | Yes | Yes | Yes | Yes |
+| customer rating | Unknown | Unknown | No | Unknown | Unknown | Partial | Unknown | Yes |
+| payment held until completion | Unknown | Unknown | No | Unknown | Partial | Partial | No | Yes |
+| dispute resolution | Unknown | Partial | Unknown | Partial | Yes | Partial | Partial | Yes |
+| check-in/check-out | Unknown | Partial | No | Unknown | Partial | Yes | No | Yes |
+| attendance export | Unknown | No | Unknown | No | No | Partial | No | Yes |
+| repeat-hire one tap | Unknown | Unknown | No | Unknown | Partial | Yes | Partial | Yes |
+| business workforce dashboard | Unknown | No | Partial | No | No | Yes | No | Yes |
+| low-end device performance | Unknown | Unknown | Unknown | Unknown | Unknown | Unknown | Unknown | Yes |
+
+### Evidence trace and interpretation notes
+
+- Competitor scores are derived from the corresponding C1 tables above, especially `Job types supported`, `Verification depth`, `Matching method`, `Payment methods`, `Escrow / payment protection`, `Review model`, `Dispute process`, `Location features`, `Scheduling / recurring`, `Check-in / attendance`, `Admin/ops visibility`, `Mobile UX notes`, and `Bangla support`. Those rows contain the direct public URLs and confidence levels.
+- `Verified identity` is `Partial` when a platform claims verification but does not disclose enough depth to establish strong identity assurance. Instawork is `Yes` because its reviewed workflow explicitly includes multiple eligibility/vetting controls; this remains a platform claim, not independent certification.
+- `Payment held until completion` is `Partial` for platforms that manage payment after work or provide conditional protection without clearly documented escrow. It is `No` where the reviewed flow normally pays off-platform or is only a recruitment/job-board flow.
+- `Check-in/check-out` is `Partial` when order tracking, time records, or arrival evidence exists without an explicit worker presence workflow. Instawork is `Yes` because GPS/geofence clock-in/out is directly documented.
+- `Low-end device performance` remains `Unknown` for competitors because app availability or mobile-first marketing is not performance evidence.
+- KAJ's `Yes` scores include gated later-phase scope: payments (Phase 9), trust/disputes/check-in (Phase 10), recurrence/repeat hire/full-time/business attendance (Phase 11), and AI/NL creation (Phase 12). `Digital/remote work` is `Partial` because KAJ supports project-style categories but is deliberately centred on Rajshahi local work.
+- These scores identify observable coverage only. P0-RES-03 and P0-RES-04 must determine which apparent gaps matter to Rajshahi users before they become product priorities.
