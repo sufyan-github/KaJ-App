@@ -82,7 +82,10 @@ test("README documents a quick start in no more than three commands", async () =
     readme,
     /docker compose --env-file \.env\.example -f infrastructure\/docker-compose\.yml up -d/,
   );
-  assert.match(readme, /corepack pnpm migrate && corepack pnpm dev/);
+  assert.match(
+    readme,
+    /corepack pnpm migrate && corepack pnpm seed && corepack pnpm dev/,
+  );
 });
 
 test("backend foundation exposes the health route required by quick start", async () => {

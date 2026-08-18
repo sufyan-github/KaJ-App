@@ -19,16 +19,15 @@ gates as passed. Online payments, AI features, and production launch remain gate
 
 ## Quick start
 
-These are the three clean-clone commands defined by P1-INF-01. They start the foundation API now;
-P1-INF-02 hardens that API and P1-INF-03 replaces the empty migration baseline with the domain
-schema.
+These are the three clean-clone commands defined by P1-INF-01. They start the API with the complete
+D2 domain schema and idempotent development seed.
 
 <!-- quick-start-commands: 3 -->
 
 ```sh
 corepack pnpm install
 docker compose --env-file .env.example -f infrastructure/docker-compose.yml up -d
-corepack pnpm migrate && corepack pnpm dev
+corepack pnpm migrate && corepack pnpm seed && corepack pnpm dev
 ```
 
 For day-to-day development, copy `.env.example` to `.env`, replace every blank secret, and pass
@@ -65,14 +64,19 @@ docker compose --env-file .env.example -f infrastructure/docker-compose.yml down
 
 ## Root commands
 
-| Command                   | Purpose                                                    |
-| ------------------------- | ---------------------------------------------------------- |
-| `corepack pnpm dev`       | Run every workspace development process in parallel.       |
-| `corepack pnpm test`      | Run foundation and workspace tests.                        |
-| `corepack pnpm lint`      | Check formatting and each workspace linter.                |
-| `corepack pnpm typecheck` | Type-check every supporting workspace.                     |
-| `corepack pnpm migrate`   | Run database migrations supplied by the backend workspace. |
-| `corepack pnpm seed`      | Seed development data through the backend workspace.       |
+| Command                       | Purpose                                                      |
+| ----------------------------- | ------------------------------------------------------------ |
+| `corepack pnpm dev`           | Run every workspace development process in parallel.         |
+| `corepack pnpm test`          | Run foundation and workspace tests.                          |
+| `corepack pnpm lint`          | Check formatting and each workspace linter.                  |
+| `corepack pnpm typecheck`     | Type-check every supporting workspace.                       |
+| `corepack pnpm migrate`       | Run database migrations supplied by the backend workspace.   |
+| `corepack pnpm migrate:reset` | Reset the local development database and reapply migrations. |
+| `corepack pnpm seed`          | Seed development data through the backend workspace.         |
+
+The seed is safe to rerun. It upserts the development admin, starter bilingual taxonomy, pilot
+location hierarchy, disabled feature flags, and required configuration defaults. Location
+coordinates remain null until the Phase 2 on-the-ground verification task supplies validated data.
 
 ## Repository map
 

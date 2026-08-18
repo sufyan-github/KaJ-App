@@ -3,7 +3,7 @@
 **Status:** Active
 **Owner:** Abu Sufyan
 **Last updated:** 2026-08-18
-**Current stage:** Phase 1 — P1-INF-03 blocked on the database ADR owner decision
+**Current stage:** Phase 1 — P1-AUTH-04 phone OTP authentication
 
 ## 1. Authority and conflict resolution
 
@@ -18,17 +18,17 @@ Conflict priority is: trust → reliability → simplicity → speed → feature
 
 ## 2. Current baseline
 
-| Item | State on 2026-08-18 | Consequence |
-|---|---|---|
-| Git repository | `main` tracks `origin/main` | Each completed step can be committed and pushed immediately. |
-| Product code | P1-INF-02 API foundation | Exact envelopes, validation, request context, logging, Swagger, health, and lazy data-service shells are implemented. |
-| Source documents | Four Markdown files read completely | Plan incorporates the build, UI, and pre-build constraints. |
-| Node.js | 24.18.0 | Compatibility and pinned engine must be verified in P1-INF-01. |
-| Corepack | 0.35.0 | Available for package-manager setup. |
-| pnpm | 10.34.5 via Corepack | Pinned in `package.json`; global Windows shim is unavailable without elevation. |
-| Docker | Desktop 4.87.0 / Engine 29.7.2 | Compose v2 runtime verified with all four local services. |
-| Flutter | 3.44.8 stable | Meets the locked Flutter 3.x stable decision. |
-| Dart | 3.12.2 stable | Meets the locked Dart 3 decision. |
+| Item             | State on 2026-08-18                 | Consequence                                                                                                  |
+| ---------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Git repository   | `main` tracks `origin/main`         | Each completed step can be committed and pushed immediately.                                                 |
+| Product code     | P1-INF-03 database foundation       | API foundation plus the complete PostgreSQL D2 schema, first migration, and idempotent seed are implemented. |
+| Source documents | Four Markdown files read completely | Plan incorporates the build, UI, and pre-build constraints.                                                  |
+| Node.js          | 24.18.0                             | Compatibility and pinned engine must be verified in P1-INF-01.                                               |
+| Corepack         | 0.35.0                              | Available for package-manager setup.                                                                         |
+| pnpm             | 10.34.5 via Corepack                | Pinned in `package.json`; global Windows shim is unavailable without elevation.                              |
+| Docker           | Desktop 4.87.0 / Engine 29.7.2      | Compose v2 runtime verified with all four local services.                                                    |
+| Flutter          | 3.44.8 stable                       | Meets the locked Flutter 3.x stable decision.                                                                |
+| Dart             | 3.12.2 stable                       | Meets the locked Dart 3 decision.                                                                            |
 
 ## 3. Mandatory execution loop
 
@@ -75,17 +75,17 @@ jobs; learning-to-rank requires real outcome data and shadow testing.
 
 ### Phase 0 — research and validation
 
-| Order | Task | Output | Completion gate |
-|---:|---|---|---|
-| 1 | P0-RES-01 | `docs/competitor-analysis.md` | Required competitor tables; each assertion sourced or labelled assumption. |
-| 2 | P0-RES-02 | Gap matrix appended to competitor analysis | Every listed capability scored Yes/Partial/No/Unknown. |
-| 3 | P0-RES-03 | `docs/market-research.md` | Rajshahi figures, observations, prices, devices, payments, and seasonality are sourced. |
-| 4 | P0-RES-04 | `docs/validation.md` | Owner supplies evidence from 35 interviews and 5 concierge transactions. This is human-fieldwork gated. |
-| 5 | P0-RES-05 | `docs/user-personas.md` | Six required personas grounded in validation evidence. |
-| 6 | P0-RES-06 | `docs/opportunity-map.md` | Each differentiation hypothesis validated or killed with P0-RES-04 evidence. |
-| 7 | P0-RES-07 | `docs/product-requirements.md` | MVP IN/OUT scope and success-metric rule recorded. |
-| 8 | P0-RES-08 | `docs/business-model.md`, `docs/risks.md` | Variable-based scenarios and full risk controls documented. |
-| Gate | P0 review | All Phase 0 documents plus `docs/legal-checklist.md` | Owner marks each `STATUS: reviewed`; legal questions remain labelled for professionals. |
+| Order | Task      | Output                                               | Completion gate                                                                                         |
+| ----: | --------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+|     1 | P0-RES-01 | `docs/competitor-analysis.md`                        | Required competitor tables; each assertion sourced or labelled assumption.                              |
+|     2 | P0-RES-02 | Gap matrix appended to competitor analysis           | Every listed capability scored Yes/Partial/No/Unknown.                                                  |
+|     3 | P0-RES-03 | `docs/market-research.md`                            | Rajshahi figures, observations, prices, devices, payments, and seasonality are sourced.                 |
+|     4 | P0-RES-04 | `docs/validation.md`                                 | Owner supplies evidence from 35 interviews and 5 concierge transactions. This is human-fieldwork gated. |
+|     5 | P0-RES-05 | `docs/user-personas.md`                              | Six required personas grounded in validation evidence.                                                  |
+|     6 | P0-RES-06 | `docs/opportunity-map.md`                            | Each differentiation hypothesis validated or killed with P0-RES-04 evidence.                            |
+|     7 | P0-RES-07 | `docs/product-requirements.md`                       | MVP IN/OUT scope and success-metric rule recorded.                                                      |
+|     8 | P0-RES-08 | `docs/business-model.md`, `docs/risks.md`            | Variable-based scenarios and full risk controls documented.                                             |
+|  Gate | P0 review | All Phase 0 documents plus `docs/legal-checklist.md` | Owner marks each `STATUS: reviewed`; legal questions remain labelled for professionals.                 |
 
 ### Phase 1 — foundation
 
@@ -144,16 +144,22 @@ These items may proceed alongside permitted build tasks but cannot be marked com
 
 ## 7. Output and operating behavior by milestone
 
-| Milestone | Usable output | How it operates |
-|---|---|---|
-| Phase 0 | Reviewed evidence pack and scoped product | Decisions are grounded in sources, interviews, and concierge transactions; no product code. |
-| Phase 1 | Login-capable Flutter shell and healthy API | Local PostgreSQL/Redis/storage stack; OTP session flow; standard API envelopes; CI. |
-| Phase 3 | Post → apply → select transaction spine | Cash-on-completion is recorded; addresses remain private until confirmation. |
-| Phase 5 | End-to-end work completion | Confirmation windows, immutable contracts, timers, cancellation, submission, and completion. |
-| Phase 8 | Pilot-ready cash-first MVP | Mobile marketplace plus audited admin rescue and concierge operations. |
-| Phase 9+ | Legally gated money and expansion modules | Feature flags keep unapproved or data-insufficient capabilities off. |
-| Phase 14 | Release candidate | Security/performance/load checks, observability, tested recovery, store compliance, staged rollout. |
+| Milestone | Usable output                               | How it operates                                                                                     |
+| --------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Phase 0   | Reviewed evidence pack and scoped product   | Decisions are grounded in sources, interviews, and concierge transactions; no product code.         |
+| Phase 1   | Login-capable Flutter shell and healthy API | Local PostgreSQL/Redis/storage stack; OTP session flow; standard API envelopes; CI.                 |
+| Phase 3   | Post → apply → select transaction spine     | Cash-on-completion is recorded; addresses remain private until confirmation.                        |
+| Phase 5   | End-to-end work completion                  | Confirmation windows, immutable contracts, timers, cancellation, submission, and completion.        |
+| Phase 8   | Pilot-ready cash-first MVP                  | Mobile marketplace plus audited admin rescue and concierge operations.                              |
+| Phase 9+  | Legally gated money and expansion modules   | Feature flags keep unapproved or data-insufficient capabilities off.                                |
+| Phase 14  | Release candidate                           | Security/performance/load checks, observability, tested recovery, store compliance, staged rollout. |
 
 ## 8. Immediate next task
 
-`P0-RES-04 — Problem validation` is next and currently blocked on owner-supplied field evidence. Completion requires 20 worker-side interviews, 15 demand-side interviews, and 5 manually brokered concierge transactions. Public-web research cannot substitute for those interviews or transactions, so P0-RES-05 and P0-RES-06 remain gated behind this step.
+`P1-AUTH-04 — Phone OTP authentication` is the next engineering task. It implements BD-number
+normalization, rate-limited OTP challenges, one-time verification, access/refresh issuance, refresh
+rotation and reuse-family revocation, and the console SMS adapter.
+
+In the parallel human workstream, `P0-RES-04 — Problem validation` remains blocked on 20 worker-side
+interviews, 15 demand-side interviews, and 5 manually brokered concierge transactions. Public-web
+research cannot substitute for those interviews or transactions.

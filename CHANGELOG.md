@@ -6,6 +6,10 @@ All notable project changes are documented here.
 
 ### Engineering
 
+- Added the complete D2 PostgreSQL/Prisma schema with 46 relational tables, UUID v7 database
+  defaults, foreign keys, required compound and geographic indexes, and the first migration.
+- Added an idempotent development seed for bilingual starter taxonomy, Rajshahi pilot locations,
+  the local admin, disabled feature flags, and fee/matching/cancellation configuration defaults.
 - Added the NestJS API foundation with Zod environment validation, `/api/v1` routing, strict global
   input validation, AsyncLocalStorage request IDs, exact E1 envelopes, and safe exception mapping.
 - Added structured Pino request logging with required secret/PII redaction and non-production
@@ -20,8 +24,8 @@ All notable project changes are documented here.
   loopback-only ports, and persistent volumes.
 - Added the shared-types workspace and the minimum NestJS `/health` plus Prisma bootstrap required
   to verify the clean-clone foundation.
-- Added environment, contribution, and security guidance and recorded the unresolved
-  PostgreSQL-versus-Turso production decision in ADR-0001.
+- Added environment, contribution, and security guidance; ADR-0001 now records PostgreSQL as the
+  authoritative transactional database.
 
 ### Documentation
 
