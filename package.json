@@ -15,6 +15,7 @@
     "format": "prettier --write README.md CONTRIBUTING.md SECURITY.md package.json pnpm-lock.yaml pnpm-workspace.yaml backend infrastructure packages test tools",
     "lint": "prettier --check README.md CONTRIBUTING.md SECURITY.md package.json pnpm-lock.yaml pnpm-workspace.yaml backend infrastructure packages test tools && corepack pnpm --recursive --if-present run lint",
     "migrate": "node --env-file=.env.example --env-file-if-exists=.env tools/run-workspace-script.mjs migrate",
+    "migrate:reset": "node --env-file=.env.example --env-file-if-exists=.env tools/run-workspace-script.mjs migrate:reset",
     "seed": "node --env-file=.env.example --env-file-if-exists=.env tools/run-workspace-script.mjs seed",
     "test": "node --test test/*.test.mjs && corepack pnpm --recursive --if-present run test",
     "typecheck": "corepack pnpm --recursive --if-present run typecheck",
@@ -32,6 +33,7 @@
       "@nestjs/core",
       "@prisma/client",
       "@prisma/engines",
+      "esbuild",
       "prisma"
     ],
     "overrides": {

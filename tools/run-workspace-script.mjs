@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 
-const allowedScripts = new Set(["dev", "migrate", "seed"]);
+const allowedScripts = new Set(["dev", "migrate", "migrate:reset", "seed"]);
 const script = process.argv[2];
 
 if (!allowedScripts.has(script)) {

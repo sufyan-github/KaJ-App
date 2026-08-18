@@ -7,4 +7,1083 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// P1-INF-03 owns the complete domain schema and first data migration.
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+  PENDING_DELETION
+}
+
+enum RoleMode {
+  CUSTOMER
+  WORKER
+  BUSINESS
+}
+
+enum TrustLevel {
+  NONE
+  PHONE
+  IDENTITY
+  SKILL
+  BUSINESS
+}
+
+enum JobType {
+  ONE_TIME
+  HOURLY
+  DAILY
+  WEEKLY
+  RECURRING
+  MONTHLY_PART_TIME
+  FULL_TIME
+  PROJECT
+  SERVICE_BOOKING
+}
+
+enum PaymentModel {
+  FIXED
+  HOURLY
+  DAILY
+  MONTHLY
+  NEGOTIABLE
+}
+
+enum JobStatus {
+  DRAFT
+  PUBLISHED
+  APPLICATIONS_OPEN
+  WORKER_SELECTED
+  CONFIRMATION_PENDING
+  CONFIRMED
+  UPCOMING
+  CHECKED_IN
+  IN_PROGRESS
+  SUBMITTED
+  CUSTOMER_REVIEW
+  COMPLETED
+  PAYMENT_RELEASED
+  REVIEWED
+  EXPIRED
+  CANCELLED_BY_CUSTOMER
+  CANCELLED_BY_WORKER
+  DISPUTED
+  SUSPENDED
+}
+
+enum ApplicationStatus {
+  PENDING
+  SHORTLISTED
+  WITHDRAWN
+  REJECTED
+  ACCEPTED
+  EXPIRED
+}
+
+enum UrgencyLevel {
+  FLEXIBLE
+  NORMAL
+  URGENT
+}
+
+enum VerificationStatus {
+  NOT_SUBMITTED
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum PaymentStatus {
+  NONE
+  PENDING
+  HELD
+  RELEASED
+  REFUNDED
+  PARTIALLY_REFUNDED
+  FAILED
+}
+
+enum DevicePlatform {
+  ANDROID
+  IOS
+  WEB
+  UNKNOWN
+}
+
+enum OtpPurpose {
+  LOGIN
+  PHONE_CHANGE
+  ACCOUNT_RECOVERY
+}
+
+enum Gender {
+  FEMALE
+  MALE
+  NON_BINARY
+  PREFER_NOT_TO_SAY
+}
+
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum LocationType {
+  CITY
+  THANA
+  AREA
+}
+
+enum AssignmentStatus {
+  PENDING_CONFIRMATION
+  CONFIRMED
+  DECLINED
+  CANCELLED
+  COMPLETED
+}
+
+enum JobActorType {
+  POSTER
+  WORKER
+  ADMIN
+  SYSTEM
+}
+
+enum WorkVerification {
+  CUSTOMER
+  SYSTEM
+  ADMIN
+}
+
+enum PaymentMethod {
+  CASH_ON_COMPLETION
+  MOBILE_FINANCIAL_SERVICE
+  CARD
+  BANK_TRANSFER
+}
+
+enum LedgerAccountType {
+  CUSTOMER_WALLET
+  WORKER_WALLET
+  PLATFORM_FEE
+  PLATFORM_ESCROW
+  PROVIDER_CLEARING
+}
+
+enum LedgerDirection {
+  DEBIT
+  CREDIT
+}
+
+enum PayoutStatus {
+  REQUESTED
+  PROCESSING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+enum ReviewDirection {
+  C2W
+  W2C
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  SYSTEM
+}
+
+enum NotificationChannel {
+  IN_APP
+  PUSH
+  SMS
+  EMAIL
+}
+
+enum VerificationKind {
+  PHONE
+  IDENTITY
+  SKILL
+  BUSINESS
+}
+
+enum DisputeStatus {
+  OPEN
+  EVIDENCE
+  UNDER_REVIEW
+  RESOLVED
+  CLOSED
+}
+
+enum ReportStatus {
+  OPEN
+  UNDER_REVIEW
+  ACTIONED
+  DISMISSED
+}
+
+model User {
+  id             String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  phone_e164     String?    @unique
+  email          String?    @unique
+  password_hash  String?
+  status         UserStatus @default(ACTIVE)
+  role_modes     RoleMode[] @default([CUSTOMER])
+  active_role    RoleMode   @default(CUSTOMER)
+  is_admin       Boolean    @default(false)
+  default_locale String     @default("bn")
+  timezone       String     @default("Asia/Dhaka")
+  last_active_at DateTime?
+  created_at     DateTime   @default(now())
+  updated_at     DateTime   @updatedAt
+  deleted_at     DateTime?
+
+  devices                     UserDevice[]
+  refresh_tokens              RefreshToken[]
+  profile                     Profile?
+  worker_profile              WorkerProfile?
+  customer_profile            CustomerProfile?
+  business_profiles           BusinessProfile[]
+  skills                      UserSkill[]
+  service_areas               ServiceArea[]
+  posted_jobs                 Job[]                     @relation("JobPoster")
+  job_status_changes          JobStatusHistory[]        @relation("JobStatusActor")
+  applications                Application[]
+  assignments                 Assignment[]
+  availability_rules          AvailabilityRule[]
+  availability_exceptions     AvailabilityException[]
+  payments                    Payment[]                 @relation("PaymentPayer")
+  payouts                     Payout[]
+  wallet                      Wallet?
+  reviews_written             Review[]                  @relation("ReviewWriter")
+  reviews_received            Review[]                  @relation("ReviewSubject")
+  conversation_participations ConversationParticipant[]
+  sent_messages               Message[]
+  notifications               Notification[]
+  notification_preferences    NotificationPreference[]
+  verification_requests       VerificationRequest[]     @relation("VerificationOwner")
+  verification_reviews        VerificationRequest[]     @relation("VerificationReviewer")
+  documents                   Document[]
+  disputes_opened             Dispute[]                 @relation("DisputeOpener")
+  disputes_resolved           Dispute[]                 @relation("DisputeResolver")
+  dispute_evidence            DisputeEvidence[]
+  reports                     Report[]
+  moderation_actions          ModerationAction[]
+  badges                      UserBadge[]
+  saved_searches              SavedSearch[]
+  favorites                   Favorite[]                @relation("FavoriteOwner")
+  favorited_by                Favorite[]                @relation("FavoriteTarget")
+  updated_config_settings     ConfigSetting[]
+  audit_logs                  AuditLog[]
+
+  @@index([status, deleted_at])
+  @@map("users")
+}
+
+model UserDevice {
+  id             String         @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id        String         @db.Uuid
+  fcm_token      String?
+  platform       DevicePlatform @default(UNKNOWN)
+  app_version    String?
+  last_seen_at   DateTime       @default(now())
+  user           User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  refresh_tokens RefreshToken[]
+
+  @@index([user_id])
+  @@map("user_devices")
+}
+
+model RefreshToken {
+  id         String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id    String     @db.Uuid
+  token_hash String     @unique
+  device_id  String     @db.Uuid
+  family_id  String     @db.Uuid
+  expires_at DateTime
+  revoked_at DateTime?
+  created_at DateTime   @default(now())
+  user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  device     UserDevice @relation(fields: [device_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, family_id])
+  @@index([expires_at])
+  @@map("refresh_tokens")
+}
+
+model OtpChallenge {
+  id          String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  phone_e164  String
+  code_hash   String
+  purpose     OtpPurpose @default(LOGIN)
+  attempts    Int        @default(0)
+  expires_at  DateTime
+  consumed_at DateTime?
+  created_at  DateTime   @default(now())
+
+  @@index([phone_e164, purpose, created_at(sort: Desc)])
+  @@index([expires_at])
+  @@map("otp_challenges")
+}
+
+model Profile {
+  id                  String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id             String     @unique @db.Uuid
+  display_name        String
+  photo_key           String?
+  bio                 String?
+  gender              Gender?
+  birth_year          Int?
+  primary_location_id String?    @db.Uuid
+  lat                 Decimal?   @db.Decimal(9, 6)
+  lng                 Decimal?   @db.Decimal(9, 6)
+  trust_level         TrustLevel @default(NONE)
+  locale              String     @default("bn")
+  created_at          DateTime   @default(now())
+  updated_at          DateTime   @updatedAt
+  deleted_at          DateTime?
+  user                User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  primary_location    Location?  @relation(fields: [primary_location_id], references: [id], onDelete: SetNull)
+
+  @@index([primary_location_id])
+  @@map("profiles")
+}
+
+model WorkerProfile {
+  id                    String    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id               String    @unique @db.Uuid
+  headline              String?
+  service_radius_km     Decimal?  @db.Decimal(6, 2)
+  hourly_rate_poisha    BigInt?
+  daily_rate_poisha     BigInt?
+  monthly_rate_poisha   BigInt?
+  experience_years      Int?
+  education             String?
+  transport_mode        String?
+  is_available_now      Boolean   @default(false)
+  accepts_urgent        Boolean   @default(false)
+  completed_jobs_count  Int       @default(0)
+  rating_avg            Decimal   @default(0) @db.Decimal(3, 2)
+  rating_count          Int       @default(0)
+  response_rate_bps     Int       @default(0)
+  completion_rate_bps   Int       @default(0)
+  cancellation_rate_bps Int       @default(0)
+  no_show_count         Int       @default(0)
+  reliability_score     Decimal   @default(0) @db.Decimal(5, 4)
+  last_active_at        DateTime?
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+  user                  User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([is_available_now, last_active_at])
+  @@map("worker_profiles")
+}
+
+model CustomerProfile {
+  id                      String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id                 String   @unique @db.Uuid
+  jobs_posted_count       Int      @default(0)
+  rating_avg              Decimal  @default(0) @db.Decimal(3, 2)
+  rating_count            Int      @default(0)
+  payment_reliability_bps Int      @default(0)
+  cancellation_count      Int      @default(0)
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+  user                    User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("customer_profiles")
+}
+
+model BusinessProfile {
+  id                  String             @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id             String             @db.Uuid
+  business_name       String
+  trade_licence_no    String?
+  address             String
+  location_id         String             @db.Uuid
+  verification_status VerificationStatus @default(NOT_SUBMITTED)
+  contact_person      String
+  employees_count     Int?
+  created_at          DateTime           @default(now())
+  updated_at          DateTime           @updatedAt
+  user                User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  location            Location           @relation(fields: [location_id], references: [id], onDelete: Restrict)
+
+  @@index([user_id])
+  @@index([location_id])
+  @@map("business_profiles")
+}
+
+model Category {
+  id                       String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  parent_id                String?    @db.Uuid
+  slug                     String     @unique
+  name_en                  String
+  name_bn                  String
+  icon                     String?
+  sort_order               Int        @default(0)
+  is_active                Boolean    @default(true)
+  requires_manual_approval Boolean    @default(false)
+  min_age                  Int        @default(18)
+  requires_certificate     Boolean    @default(false)
+  created_at               DateTime   @default(now())
+  updated_at               DateTime   @updatedAt
+  parent                   Category?  @relation("CategoryTree", fields: [parent_id], references: [id], onDelete: Restrict)
+  children                 Category[] @relation("CategoryTree")
+  skills                   Skill[]
+  primary_jobs             Job[]      @relation("JobCategory")
+  subcategory_jobs         Job[]      @relation("JobSubcategory")
+
+  @@index([parent_id, sort_order])
+  @@index([is_active, sort_order])
+  @@map("categories")
+}
+
+model Skill {
+  id          String      @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  slug        String      @unique
+  name_en     String
+  name_bn     String
+  category_id String      @db.Uuid
+  is_active   Boolean     @default(true)
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
+  category    Category    @relation(fields: [category_id], references: [id], onDelete: Restrict)
+  user_skills UserSkill[]
+  job_skills  JobSkill[]
+
+  @@index([category_id, is_active])
+  @@map("skills")
+}
+
+model UserSkill {
+  user_id     String     @db.Uuid
+  skill_id    String     @db.Uuid
+  level       SkillLevel @default(BEGINNER)
+  years       Decimal?   @db.Decimal(4, 1)
+  is_verified Boolean    @default(false)
+  verified_at DateTime?
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+  user        User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  skill       Skill      @relation(fields: [skill_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, skill_id])
+  @@index([skill_id, is_verified])
+  @@map("user_skills")
+}
+
+model Location {
+  id                String            @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  parent_id         String?           @db.Uuid
+  type              LocationType
+  name_en           String
+  name_bn           String
+  lat               Decimal?          @db.Decimal(9, 6)
+  lng               Decimal?          @db.Decimal(9, 6)
+  radius_km         Decimal?          @db.Decimal(6, 2)
+  is_active         Boolean           @default(true)
+  created_at        DateTime          @default(now())
+  updated_at        DateTime          @updatedAt
+  parent            Location?         @relation("LocationTree", fields: [parent_id], references: [id], onDelete: Restrict)
+  children          Location[]        @relation("LocationTree")
+  profiles          Profile[]
+  business_profiles BusinessProfile[]
+  service_areas     ServiceArea[]
+  jobs              Job[]
+
+  @@unique([parent_id, type, name_en])
+  @@index([parent_id, type, is_active])
+  @@map("locations")
+}
+
+model ServiceArea {
+  id          String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id     String   @db.Uuid
+  location_id String   @db.Uuid
+  radius_km   Decimal  @db.Decimal(6, 2)
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  location    Location @relation(fields: [location_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, location_id])
+  @@index([location_id])
+  @@map("service_areas")
+}
+
+model Job {
+  id                      String             @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  poster_user_id          String             @db.Uuid
+  title                   String
+  description             String
+  category_id             String             @db.Uuid
+  subcategory_id          String?            @db.Uuid
+  job_type                JobType
+  payment_model           PaymentModel
+  budget_min_poisha       BigInt?
+  budget_max_poisha       BigInt?
+  is_negotiable           Boolean            @default(false)
+  currency                String             @default("BDT") @db.Char(3)
+  location_id             String             @db.Uuid
+  area_label              String?
+  exact_address_encrypted String?
+  lat                     Decimal?           @db.Decimal(9, 6)
+  lng                     Decimal?           @db.Decimal(9, 6)
+  starts_at               DateTime?
+  ends_at                 DateTime?
+  duration_minutes        Int?
+  workers_required        Int                @default(1)
+  workers_filled          Int                @default(0)
+  experience_min_years    Int?
+  urgency                 UrgencyLevel       @default(NORMAL)
+  status                  JobStatus          @default(DRAFT)
+  published_at            DateTime?
+  expires_at              DateTime?
+  filled_at               DateTime?
+  completed_at            DateTime?
+  applications_count      Int                @default(0)
+  views_count             Int                @default(0)
+  is_featured             Boolean            @default(false)
+  recurrence_rule         Json?
+  parent_job_id           String?            @db.Uuid
+  created_at              DateTime           @default(now())
+  updated_at              DateTime           @updatedAt
+  deleted_at              DateTime?
+  poster                  User               @relation("JobPoster", fields: [poster_user_id], references: [id], onDelete: Restrict)
+  category                Category           @relation("JobCategory", fields: [category_id], references: [id], onDelete: Restrict)
+  subcategory             Category?          @relation("JobSubcategory", fields: [subcategory_id], references: [id], onDelete: Restrict)
+  location                Location           @relation(fields: [location_id], references: [id], onDelete: Restrict)
+  parent_job              Job?               @relation("RecurringJobs", fields: [parent_job_id], references: [id], onDelete: SetNull)
+  child_jobs              Job[]              @relation("RecurringJobs")
+  skills                  JobSkill[]
+  schedules               JobSchedule[]
+  status_history          JobStatusHistory[]
+  applications            Application[]
+  assignments             Assignment[]
+  payments                Payment[]
+  reviews                 Review[]
+  conversations           Conversation[]
+  disputes                Dispute[]
+
+  @@index([status, published_at(sort: Desc)])
+  @@index([category_id, status])
+  @@index([location_id, status])
+  @@index([poster_user_id, status])
+  @@index([parent_job_id])
+  @@map("jobs")
+}
+
+model JobSkill {
+  job_id      String  @db.Uuid
+  skill_id    String  @db.Uuid
+  is_required Boolean @default(true)
+  job         Job     @relation(fields: [job_id], references: [id], onDelete: Cascade)
+  skill       Skill   @relation(fields: [skill_id], references: [id], onDelete: Cascade)
+
+  @@id([job_id, skill_id])
+  @@index([skill_id])
+  @@map("job_skills")
+}
+
+model JobSchedule {
+  id          String    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  job_id      String    @db.Uuid
+  day_of_week Int?
+  date        DateTime? @db.Date
+  start_time  DateTime  @db.Time(0)
+  end_time    DateTime  @db.Time(0)
+  job         Job       @relation(fields: [job_id], references: [id], onDelete: Cascade)
+
+  @@index([job_id])
+  @@map("job_schedules")
+}
+
+model JobStatusHistory {
+  id            String       @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  job_id        String       @db.Uuid
+  from_status   JobStatus?
+  to_status     JobStatus
+  actor_user_id String?      @db.Uuid
+  actor_type    JobActorType
+  reason        String?
+  created_at    DateTime     @default(now())
+  job           Job          @relation(fields: [job_id], references: [id], onDelete: Cascade)
+  actor         User?        @relation("JobStatusActor", fields: [actor_user_id], references: [id], onDelete: SetNull)
+
+  @@index([job_id, created_at])
+  @@index([actor_user_id])
+  @@map("job_status_history")
+}
+
+model Application {
+  id                    String            @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  job_id                String            @db.Uuid
+  worker_user_id        String            @db.Uuid
+  status                ApplicationStatus @default(PENDING)
+  message               String?
+  proposed_price_poisha BigInt?
+  match_score           Int?
+  match_reasons         Json?
+  created_at            DateTime          @default(now())
+  responded_at          DateTime?
+  withdrawn_at          DateTime?
+  job                   Job               @relation(fields: [job_id], references: [id], onDelete: Cascade)
+  worker                User              @relation(fields: [worker_user_id], references: [id], onDelete: Cascade)
+  assignments           Assignment[]
+
+  @@unique([job_id, worker_user_id])
+  @@index([worker_user_id, status])
+  @@index([job_id, status])
+  @@map("applications")
+}
+
+model Assignment {
+  id                  String           @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  job_id              String           @db.Uuid
+  worker_user_id      String           @db.Uuid
+  application_id      String           @db.Uuid
+  agreed_price_poisha BigInt
+  agreed_starts_at    DateTime?
+  agreed_ends_at      DateTime?
+  status              AssignmentStatus @default(PENDING_CONFIRMATION)
+  confirmed_at        DateTime?
+  cancelled_at        DateTime?
+  cancel_reason       String?
+  created_at          DateTime         @default(now())
+  updated_at          DateTime         @updatedAt
+  job                 Job              @relation(fields: [job_id], references: [id], onDelete: Restrict)
+  worker              User             @relation(fields: [worker_user_id], references: [id], onDelete: Restrict)
+  application         Application      @relation(fields: [application_id], references: [id], onDelete: Restrict)
+  contract            Contract?
+  work_sessions       WorkSession[]
+  payments            Payment[]
+  reviews             Review[]
+  disputes            Dispute[]
+
+  @@unique([job_id, worker_user_id])
+  @@index([worker_user_id, status])
+  @@index([application_id])
+  @@map("assignments")
+}
+
+model Contract {
+  id                       String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  assignment_id            String     @unique @db.Uuid
+  snapshot_json            Json
+  platform_fee_poisha      BigInt
+  worker_earning_poisha    BigInt
+  cancellation_policy_json Json
+  created_at               DateTime   @default(now())
+  assignment               Assignment @relation(fields: [assignment_id], references: [id], onDelete: Restrict)
+
+  @@map("contracts")
+}
+
+model AvailabilityRule {
+  id          String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id     String   @db.Uuid
+  day_of_week Int
+  start_time  DateTime @db.Time(0)
+  end_time    DateTime @db.Time(0)
+  is_active   Boolean  @default(true)
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, day_of_week, is_active])
+  @@map("availability_rules")
+}
+
+model AvailabilityException {
+  id        String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id   String   @db.Uuid
+  starts_at DateTime
+  ends_at   DateTime
+  reason    String?
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, starts_at, ends_at])
+  @@map("availability_exceptions")
+}
+
+model WorkSession {
+  id                String            @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  assignment_id     String            @db.Uuid
+  checkin_at        DateTime?
+  checkin_lat       Decimal?          @db.Decimal(9, 6)
+  checkin_lng       Decimal?          @db.Decimal(9, 6)
+  checkin_photo_key String?
+  checkout_at       DateTime?
+  checkout_lat      Decimal?          @db.Decimal(9, 6)
+  checkout_lng      Decimal?          @db.Decimal(9, 6)
+  minutes_worked    Int?
+  verified_by       WorkVerification?
+  assignment        Assignment        @relation(fields: [assignment_id], references: [id], onDelete: Cascade)
+
+  @@index([assignment_id])
+  @@map("work_sessions")
+}
+
+model Payment {
+  id              String        @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  job_id          String        @db.Uuid
+  assignment_id   String        @db.Uuid
+  payer_user_id   String        @db.Uuid
+  amount_poisha   BigInt
+  fee_poisha      BigInt        @default(0)
+  status          PaymentStatus @default(NONE)
+  method          PaymentMethod @default(CASH_ON_COMPLETION)
+  provider_ref    String?
+  idempotency_key String        @unique
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+  job             Job           @relation(fields: [job_id], references: [id], onDelete: Restrict)
+  assignment      Assignment    @relation(fields: [assignment_id], references: [id], onDelete: Restrict)
+  payer           User          @relation("PaymentPayer", fields: [payer_user_id], references: [id], onDelete: Restrict)
+  ledger_entries  LedgerEntry[]
+
+  @@index([job_id, status])
+  @@index([assignment_id])
+  @@index([payer_user_id])
+  @@map("payments")
+}
+
+model LedgerEntry {
+  id            String            @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  payment_id    String?           @db.Uuid
+  account_type  LedgerAccountType
+  account_ref   String
+  direction     LedgerDirection
+  amount_poisha BigInt
+  currency      String            @default("BDT") @db.Char(3)
+  memo          String?
+  created_at    DateTime          @default(now())
+  payment       Payment?          @relation(fields: [payment_id], references: [id], onDelete: Restrict)
+
+  @@index([payment_id, created_at])
+  @@index([account_type, account_ref, created_at])
+  @@map("ledger_entries")
+}
+
+model Payout {
+  id             String       @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  worker_user_id String       @db.Uuid
+  amount_poisha  BigInt
+  status         PayoutStatus @default(REQUESTED)
+  method         String
+  provider_ref   String?
+  requested_at   DateTime     @default(now())
+  paid_at        DateTime?
+  worker         User         @relation(fields: [worker_user_id], references: [id], onDelete: Restrict)
+
+  @@index([worker_user_id, status])
+  @@map("payouts")
+}
+
+model Wallet {
+  id               String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id          String   @unique @db.Uuid
+  available_poisha BigInt   @default(0)
+  pending_poisha   BigInt   @default(0)
+  updated_at       DateTime @updatedAt
+  user             User     @relation(fields: [user_id], references: [id], onDelete: Restrict)
+
+  @@map("wallets")
+}
+
+model Review {
+  id               String          @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  job_id           String          @db.Uuid
+  assignment_id    String          @db.Uuid
+  reviewer_user_id String          @db.Uuid
+  reviewee_user_id String          @db.Uuid
+  direction        ReviewDirection
+  rating           Int
+  punctuality      Int?
+  quality          Int?
+  communication    Int?
+  reliability      Int?
+  comment          String?
+  is_visible       Boolean         @default(true)
+  created_at       DateTime        @default(now())
+  job              Job             @relation(fields: [job_id], references: [id], onDelete: Restrict)
+  assignment       Assignment      @relation(fields: [assignment_id], references: [id], onDelete: Restrict)
+  reviewer         User            @relation("ReviewWriter", fields: [reviewer_user_id], references: [id], onDelete: Restrict)
+  reviewee         User            @relation("ReviewSubject", fields: [reviewee_user_id], references: [id], onDelete: Restrict)
+
+  @@unique([assignment_id, reviewer_user_id])
+  @@index([reviewee_user_id, is_visible, created_at(sort: Desc)])
+  @@index([job_id])
+  @@map("reviews")
+}
+
+model Conversation {
+  id           String                    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  job_id       String?                   @db.Uuid
+  created_at   DateTime                  @default(now())
+  job          Job?                      @relation(fields: [job_id], references: [id], onDelete: SetNull)
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  @@index([job_id])
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  conversation_id String       @db.Uuid
+  user_id         String       @db.Uuid
+  last_read_at    DateTime?
+  is_muted        Boolean      @default(false)
+  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  user            User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@id([conversation_id, user_id])
+  @@index([user_id])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id              String       @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  conversation_id String       @db.Uuid
+  sender_user_id  String?      @db.Uuid
+  type            MessageType
+  body            String?
+  attachment_key  String?
+  created_at      DateTime     @default(now())
+  deleted_at      DateTime?
+  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  sender          User?        @relation(fields: [sender_user_id], references: [id], onDelete: SetNull)
+
+  @@index([conversation_id, created_at(sort: Desc)])
+  @@index([sender_user_id])
+  @@map("messages")
+}
+
+model Notification {
+  id           String    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id      String    @db.Uuid
+  type         String
+  title_key    String
+  body_key     String
+  payload_json Json?
+  read_at      DateTime?
+  created_at   DateTime  @default(now())
+  user         User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, read_at, created_at(sort: Desc)])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  user_id           String              @db.Uuid
+  channel           NotificationChannel
+  type              String
+  is_enabled        Boolean             @default(true)
+  quiet_hours_start DateTime?           @db.Time(0)
+  quiet_hours_end   DateTime?           @db.Time(0)
+  user              User                @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, channel, type])
+  @@map("notification_preferences")
+}
+
+model VerificationRequest {
+  id               String             @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id          String             @db.Uuid
+  kind             VerificationKind
+  status           VerificationStatus @default(NOT_SUBMITTED)
+  documents_json   Json?
+  reviewer_user_id String?            @db.Uuid
+  reviewed_at      DateTime?
+  rejection_reason String?
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @updatedAt
+  user             User               @relation("VerificationOwner", fields: [user_id], references: [id], onDelete: Cascade)
+  reviewer         User?              @relation("VerificationReviewer", fields: [reviewer_user_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id, kind, status])
+  @@index([status, created_at])
+  @@map("verification_requests")
+}
+
+model Document {
+  id           String    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id      String    @db.Uuid
+  kind         String
+  storage_key  String    @unique
+  mime         String
+  size_bytes   BigInt
+  is_sensitive Boolean   @default(true)
+  created_at   DateTime  @default(now())
+  deleted_at   DateTime?
+  user         User      @relation(fields: [user_id], references: [id], onDelete: Restrict)
+
+  @@index([user_id, kind])
+  @@map("documents")
+}
+
+model Dispute {
+  id                String            @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  job_id            String            @db.Uuid
+  assignment_id     String            @db.Uuid
+  opened_by_user_id String            @db.Uuid
+  reason_code       String
+  description       String
+  status            DisputeStatus     @default(OPEN)
+  resolution        String?
+  resolved_by       String?           @db.Uuid
+  resolved_at       DateTime?
+  refund_poisha     BigInt?
+  created_at        DateTime          @default(now())
+  updated_at        DateTime          @updatedAt
+  job               Job               @relation(fields: [job_id], references: [id], onDelete: Restrict)
+  assignment        Assignment        @relation(fields: [assignment_id], references: [id], onDelete: Restrict)
+  opened_by         User              @relation("DisputeOpener", fields: [opened_by_user_id], references: [id], onDelete: Restrict)
+  resolver          User?             @relation("DisputeResolver", fields: [resolved_by], references: [id], onDelete: SetNull)
+  evidence          DisputeEvidence[]
+
+  @@index([job_id, status])
+  @@index([assignment_id])
+  @@index([opened_by_user_id])
+  @@map("disputes")
+}
+
+model DisputeEvidence {
+  id          String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  dispute_id  String   @db.Uuid
+  user_id     String   @db.Uuid
+  kind        String
+  storage_key String?
+  text        String?
+  created_at  DateTime @default(now())
+  dispute     Dispute  @relation(fields: [dispute_id], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Restrict)
+
+  @@index([dispute_id, created_at])
+  @@index([user_id])
+  @@map("dispute_evidence")
+}
+
+model Report {
+  id               String       @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  reporter_user_id String       @db.Uuid
+  target_type      String
+  target_id        String       @db.Uuid
+  reason_code      String
+  description      String?
+  status           ReportStatus @default(OPEN)
+  created_at       DateTime     @default(now())
+  updated_at       DateTime     @updatedAt
+  reporter         User         @relation(fields: [reporter_user_id], references: [id], onDelete: Restrict)
+
+  @@index([target_type, target_id])
+  @@index([status, created_at])
+  @@map("reports")
+}
+
+model ModerationAction {
+  id            String    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  admin_user_id String    @db.Uuid
+  target_type   String
+  target_id     String    @db.Uuid
+  action        String
+  reason        String
+  expires_at    DateTime?
+  created_at    DateTime  @default(now())
+  admin         User      @relation(fields: [admin_user_id], references: [id], onDelete: Restrict)
+
+  @@index([target_type, target_id, created_at(sort: Desc)])
+  @@index([admin_user_id])
+  @@map("moderation_actions")
+}
+
+model Badge {
+  id         String      @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  slug       String      @unique
+  name_en    String
+  name_bn    String
+  rule_json  Json
+  icon       String?
+  created_at DateTime    @default(now())
+  updated_at DateTime    @updatedAt
+  users      UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  user_id    String    @db.Uuid
+  badge_id   String    @db.Uuid
+  granted_at DateTime  @default(now())
+  revoked_at DateTime?
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  badge      Badge     @relation(fields: [badge_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, badge_id])
+  @@index([badge_id, revoked_at])
+  @@map("user_badges")
+}
+
+model SavedSearch {
+  id           String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id      String   @db.Uuid
+  filters_json Json
+  notify       Boolean  @default(false)
+  created_at   DateTime @default(now())
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("saved_searches")
+}
+
+model Favorite {
+  user_id        String   @db.Uuid
+  target_user_id String   @db.Uuid
+  note           String?
+  created_at     DateTime @default(now())
+  user           User     @relation("FavoriteOwner", fields: [user_id], references: [id], onDelete: Cascade)
+  target         User     @relation("FavoriteTarget", fields: [target_user_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, target_user_id])
+  @@index([target_user_id])
+  @@map("favorites")
+}
+
+model FeatureFlag {
+  key             String   @id
+  is_enabled      Boolean  @default(false)
+  rollout_percent Int      @default(0)
+  payload_json    Json?
+  updated_at      DateTime @updatedAt
+
+  @@map("feature_flags")
+}
+
+model ConfigSetting {
+  key        String   @id
+  value_json Json
+  updated_by String?  @db.Uuid
+  updated_at DateTime @updatedAt
+  updater    User?    @relation(fields: [updated_by], references: [id], onDelete: SetNull)
+
+  @@index([updated_by])
+  @@map("config_settings")
+}
+
+model AuditLog {
+  id            String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  actor_user_id String?  @db.Uuid
+  action        String
+  entity        String
+  entity_id     String?  @db.Uuid
+  before_json   Json?
+  after_json    Json?
+  ip            String?  @db.Inet
+  ua            String?
+  created_at    DateTime @default(now())
+  actor         User?    @relation(fields: [actor_user_id], references: [id], onDelete: SetNull)
+
+  @@index([entity, entity_id, created_at(sort: Desc)])
+  @@index([actor_user_id, created_at(sort: Desc)])
+  @@map("audit_logs")
+}

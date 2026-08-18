@@ -1,6 +1,6 @@
 # ADR-0001 — Database platform direction
 
-**Status:** PROPOSED — owner decision required before P1-INF-03
+**Status:** ACCEPTED — PostgreSQL is authoritative
 **Date:** 2026-08-18
 **Decision owner:** Abu Sufyan
 
@@ -13,24 +13,28 @@ geographic querying, concurrency guarantees, backup/restore, and production topo
 
 No Turso credential is stored in this repository.
 
-## Current foundation decision
+## Decision
 
-P1-INF-01 retains PostgreSQL 16 for the local development stack because that is the explicit task
-contract and is sufficient for the database-independent API foundation. This does not select the
-production database and does not write application data to the owner-selected Turso database.
+PostgreSQL 16 is the authoritative development and production database for transactional domain
+data. Prisma remains the ORM and migration owner. Turso/libSQL is not used for transactional domain
+data and no synchronization path is introduced.
 
-## Decision required
+The owner instructed the agent to proceed after PostgreSQL was presented as the recommended choice
+and Turso/libSQL redesign was identified as the alternative. P1-INF-03 therefore implements the
+locked PostgreSQL path.
 
-Before P1-INF-03 creates the domain schema, the owner must accept one tested path:
+## Consequences
 
-1. PostgreSQL remains the authoritative development and production database; Turso is not used for
-   transactional domain data.
-2. Turso/libSQL becomes authoritative; P1-INF-03 is redesigned around a verified Prisma/libSQL
-   adapter or another approved ORM, with compatibility tests for migrations, transactions,
-   concurrency, geographic queries, backup/restore, and deployment.
-3. A deliberately split architecture is approved with explicit ownership and synchronization rules
-   for every data class. This is the highest-complexity option and is not recommended for the MVP.
+- PostgreSQL transactions, foreign keys, expression indexes, and later geographic ranking may be
+  implemented directly against the build contract.
+- Local development and CI use the same provider as production.
+- Any future Turso use requires a new ADR with an explicit non-authoritative data class, ownership,
+  synchronization, failure, backup, and recovery design.
+- The previously exposed Turso credential remains excluded from Git and must be rotated; this ADR
+  does not authorize its use.
 
-P1-INF-02 may proceed because its API envelope, validation, logging, health, and request-context work
-does not require the final database provider. P1-INF-03 is blocked until this ADR is accepted and the
-chosen path is verified.
+## Alternatives rejected
+
+Turso/libSQL as the authoritative database and a split transactional architecture were rejected for
+the MVP because they would contradict or materially complicate the locked transaction, concurrency,
+geographic-query, migration, backup, and operational requirements.
