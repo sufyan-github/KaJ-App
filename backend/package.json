@@ -1,0 +1,29 @@
+{
+  "name": "@kaj/backend",
+  "version": "0.0.0",
+  "private": true,
+  "description": "KAJ NestJS API",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "nest build",
+    "dev": "nest start --watch",
+    "lint": "prettier --check src test prisma nest-cli.json package.json tsconfig.json tsconfig.build.json",
+    "migrate": "prisma migrate deploy",
+    "start": "node dist/main.js",
+    "test": "corepack pnpm run build && node --test test/*.test.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@nestjs/common": "10.4.22",
+    "@nestjs/core": "10.4.22",
+    "@nestjs/platform-express": "10.4.22",
+    "@prisma/client": "6.19.3",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "10.4.9",
+    "@types/node": "26.2.0",
+    "prisma": "6.19.3"
+  }
+}

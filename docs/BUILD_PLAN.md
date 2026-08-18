@@ -3,7 +3,7 @@
 **Status:** Active
 **Owner:** Abu Sufyan
 **Last updated:** 2026-08-18
-**Current stage:** Phase 0 — research and validation
+**Current stage:** Phase 1 — foundation under an explicit owner sequencing override
 
 ## 1. Authority and conflict resolution
 
@@ -21,12 +21,12 @@ Conflict priority is: trust → reliability → simplicity → speed → feature
 | Item | State on 2026-08-18 | Consequence |
 |---|---|---|
 | Git repository | `main` tracks `origin/main` | Each completed step can be committed and pushed immediately. |
-| Product code | None | Start at Phase 0; do not scaffold Phase 1 early. |
+| Product code | P1-INF-01 foundation | Minimal NestJS health bootstrap exists; P1-INF-02 owns the full API foundation. |
 | Source documents | Four Markdown files read completely | Plan incorporates the build, UI, and pre-build constraints. |
 | Node.js | 24.18.0 | Compatibility and pinned engine must be verified in P1-INF-01. |
 | Corepack | 0.35.0 | Available for package-manager setup. |
-| pnpm | Missing | P1-INF-01 prerequisite. Do not choose an unverified version. |
-| Docker | Missing | P1-INF-01 cannot meet its clean-clone acceptance test until installed. |
+| pnpm | 10.34.5 via Corepack | Pinned in `package.json`; global Windows shim is unavailable without elevation. |
+| Docker | Desktop 4.87.0 / Engine 29.7.2 | Compose v2 runtime verified with all four local services. |
 | Flutter | 3.44.8 stable | Meets the locked Flutter 3.x stable decision. |
 | Dart | 3.12.2 stable | Meets the locked Dart 3 decision. |
 
@@ -65,7 +65,11 @@ Phases 9–13 only when their legal/data/market gates are satisfied
 Phase 14 hardening and staged release
 ```
 
-No application code is authorized before the Phase 0 owner-review gate. Online payments remain disabled until the legal/compliance gate is signed. AI price hints require at least 30 comparable completed jobs; learning-to-rank requires real outcome data and shadow testing.
+The owner explicitly instructed engineering to begin on 2026-08-18 before the Phase 0 owner-review
+gate. Phase 1 may proceed under that sequencing override, but all unfinished Phase 0 work remains
+blocked/unreviewed and cannot be represented as validated evidence. Online payments remain disabled
+until the legal/compliance gate is signed. AI price hints require at least 30 comparable completed
+jobs; learning-to-rank requires real outcome data and shadow testing.
 
 ## 5. Build sequence
 
