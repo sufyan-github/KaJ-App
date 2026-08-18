@@ -45,6 +45,18 @@ Local services:
 | MailHog SMTP / UI        | `localhost:1025` / `http://localhost:8025`        |
 | KAJ API (from P1-INF-02) | `http://localhost:3000`                           |
 
+## API foundation
+
+- Operational health: `GET /health`
+- Versioned business API base: `/api/v1`
+- Swagger UI in development/test only: `/docs`
+- Every JSON success: `{ "data": ..., "meta": { "requestId": ..., "serverTime": ... } }`
+- Every JSON error: `{ "error": { "code": ..., "messageKey": ..., "requestId": ... } }`
+
+The API generates its own request ID and returns it in both the response envelope and
+`x-request-id`. Logs are structured JSON and redact authorization, password, OTP code, token, and
+phone fields.
+
 Stop local infrastructure with:
 
 ```sh

@@ -3,7 +3,7 @@
 **Status:** Active
 **Owner:** Abu Sufyan
 **Last updated:** 2026-08-18
-**Current stage:** Phase 1 — foundation under an explicit owner sequencing override
+**Current stage:** Phase 1 — P1-INF-03 blocked on the database ADR owner decision
 
 ## 1. Authority and conflict resolution
 
@@ -21,7 +21,7 @@ Conflict priority is: trust → reliability → simplicity → speed → feature
 | Item | State on 2026-08-18 | Consequence |
 |---|---|---|
 | Git repository | `main` tracks `origin/main` | Each completed step can be committed and pushed immediately. |
-| Product code | P1-INF-01 foundation | Minimal NestJS health bootstrap exists; P1-INF-02 owns the full API foundation. |
+| Product code | P1-INF-02 API foundation | Exact envelopes, validation, request context, logging, Swagger, health, and lazy data-service shells are implemented. |
 | Source documents | Four Markdown files read completely | Plan incorporates the build, UI, and pre-build constraints. |
 | Node.js | 24.18.0 | Compatibility and pinned engine must be verified in P1-INF-01. |
 | Corepack | 0.35.0 | Available for package-manager setup. |
