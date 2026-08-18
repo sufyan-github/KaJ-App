@@ -56,6 +56,24 @@ The API generates its own request ID and returns it in both the response envelop
 `x-request-id`. Logs are structured JSON and redact authorization, password, OTP code, token, and
 phone fields.
 
+## Authentication
+
+The versioned API supports Bangladesh phone-number login through one-time challenges:
+
+| Endpoint                          | Purpose                                                 |
+| --------------------------------- | ------------------------------------------------------- |
+| `POST /api/v1/auth/otp/request`   | Normalize a BD number and queue a five-minute OTP.      |
+| `POST /api/v1/auth/otp/verify`    | Consume the challenge and issue an access/refresh pair. |
+| `POST /api/v1/auth/refresh`       | Rotate a device-bound refresh token.                    |
+| `POST /api/v1/auth/logout`        | Revoke the supplied refresh token.                      |
+| `POST /api/v1/auth/logout-all`    | Revoke the refresh-token family.                        |
+| `GET /api/v1/auth/session`        | Return the authenticated user, roles, and flags.        |
+| `POST /api/v1/auth/devices`       | Register notification metadata for the current device.  |
+| `DELETE /api/v1/auth/devices/:id` | Remove one device owned by the authenticated user.      |
+
+The console SMS adapter emits a masked development event and never logs the OTP. Provide real
+`JWT_ACCESS_SECRET` and `JWT_REFRESH_SECRET` values of at least 32 characters in production.
+
 Stop local infrastructure with:
 
 ```sh
