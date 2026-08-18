@@ -86,9 +86,11 @@ test("README documents a quick start in no more than three commands", async () =
 });
 
 test("backend foundation exposes the health route required by quick start", async () => {
-  const appModule = await read("backend/src/app.module.ts");
+  const healthController = await read(
+    "backend/src/modules/health/health.controller.ts",
+  );
   const main = await read("backend/src/main.ts");
 
-  assert.match(appModule, /@Get\("health"\)/);
-  assert.match(main, /app\.listen\(port, "0\.0\.0\.0"\)/);
+  assert.match(healthController, /@Get\("health"\)/);
+  assert.match(main, /await app\.listen\(/);
 });

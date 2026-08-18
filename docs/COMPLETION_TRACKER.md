@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-08-18
 **Current phase:** Phase 1 — foundation (started by explicit owner direction)
-**Current task:** P1-INF-02 — NestJS API foundation
+**Current task:** P1-INF-03 — Prisma schema v1 (blocked on ADR-0001 owner decision)
 **Product-code gate:** Owner overrode the sequencing gate on 2026-08-18; Phase 0 remains unreviewed
 
 ## Status legend
@@ -39,8 +39,8 @@
 | Task | Status | Notes |
 |---|---|---|
 | P1-INF-01 | COMPLETE | pnpm monorepo, four-service Compose stack, shared-types, minimal `/health` and Prisma bootstrap; completion record `docs/completed/P1-INF-01.md`. |
-| P1-INF-02 | PLANNED | NestJS skeleton, envelopes, logging/redaction, Swagger, health. |
-| P1-INF-03 | PLANNED | Complete D2 schema, migrations, indexes, idempotent seed. |
+| P1-INF-02 | COMPLETE | Exact E1 envelopes, strict validation, request context, redacted Pino logging, Swagger, health, and lazy infra shells; completion record `docs/completed/P1-INF-02.md`. |
+| P1-INF-03 | BLOCKED | Complete D2 schema, migrations, indexes, idempotent seed; requires owner acceptance of ADR-0001 database path. |
 | P1-AUTH-04 | PLANNED | BD phone OTP, refresh rotation and reuse detection. |
 | P1-AUTH-05 | PLANNED | Default-deny policies and growing authorization matrix. |
 | P1-INF-06 | PLANNED | SMS, push, storage, and payment ports/adapters. |
