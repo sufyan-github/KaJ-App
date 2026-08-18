@@ -1,0 +1,10 @@
+KAJ_BUILD_GUIDE.md
+KAJ_PREBUILD_PLAN.md
+KAJ_UI_REQUIREMENTS.md
+docs/competitor-analysis.md
+docs/market-research.md
+node_modules
+dist
+coverage
+.dart_tool
+build

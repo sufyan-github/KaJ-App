@@ -1,9 +1,9 @@
 # KAJ Completion Tracker
 
 **Last updated:** 2026-08-18
-**Current phase:** Phase 0 — research and validation
-**Current task:** P0-RES-04 — problem validation (blocked on owner fieldwork)
-**Product-code gate:** Closed until every Phase 0 deliverable is owner-reviewed
+**Current phase:** Phase 1 — foundation (started by explicit owner direction)
+**Current task:** P1-INF-02 — NestJS API foundation
+**Product-code gate:** Owner overrode the sequencing gate on 2026-08-18; Phase 0 remains unreviewed
 
 ## Status legend
 
@@ -38,7 +38,7 @@
 
 | Task | Status | Notes |
 |---|---|---|
-| P1-INF-01 | PLANNED | pnpm and Docker are currently missing; verify compatible versions before setup. |
+| P1-INF-01 | COMPLETE | pnpm monorepo, four-service Compose stack, shared-types, minimal `/health` and Prisma bootstrap; completion record `docs/completed/P1-INF-01.md`. |
 | P1-INF-02 | PLANNED | NestJS skeleton, envelopes, logging/redaction, Swagger, health. |
 | P1-INF-03 | PLANNED | Complete D2 schema, migrations, indexes, idempotent seed. |
 | P1-AUTH-04 | PLANNED | BD phone OTP, refresh rotation and reuse detection. |
@@ -51,7 +51,14 @@
 
 ### Owner-selected storage direction
 
-Turso/libSQL was selected by the owner on 2026-08-18 at `libsql://kaz-abusufyan.aws-ap-south-1.turso.io`. Before Phase 1, an architecture decision record must adapt the guide's PostgreSQL/Prisma assumptions for libSQL, including ORM compatibility, migrations, transaction semantics, geospatial queries/indexes, concurrency tests, backup/restore, and deployment topology. No database credential may enter Git history.
+Turso/libSQL was selected by the owner on 2026-08-18 at `libsql://kaz-abusufyan.aws-ap-south-1.turso.io`. `docs/decisions/ADR-0001-database-platform.md` records the unresolved conflict with the locked PostgreSQL/Prisma design. P1-INF-03 is blocked until the owner accepts a tested database path. No database credential may enter Git history.
+
+### Early-engineering override
+
+On 2026-08-18, the owner explicitly instructed the agent to start building the app. This authorizes
+Phase 1 engineering to proceed while P0-RES-04 through P0-RES-08 and the Phase 0 review remain open.
+It does not mark research as reviewed, validate demand, or authorize pilot launch, payments, AI, or
+production handling of personal data.
 
 ## Phases 2–8 — cash-first MVP
 

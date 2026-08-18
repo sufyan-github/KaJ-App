@@ -4,6 +4,17 @@ All notable project changes are documented here.
 
 ## Unreleased
 
+### Engineering
+
+- Initialized the pnpm monorepo with pinned Node/package-manager versions and recursive development,
+  test, lint, typecheck, migration, and seed commands.
+- Added the PostgreSQL 16, Redis 7, MinIO, and MailHog local Compose stack with health checks,
+  loopback-only ports, and persistent volumes.
+- Added the shared-types workspace and the minimum NestJS `/health` plus Prisma bootstrap required
+  to verify the clean-clone foundation.
+- Added environment, contribution, and security guidance and recorded the unresolved
+  PostgreSQL-versus-Turso production decision in ADR-0001.
+
 ### Documentation
 
 - Added the P0-RES-03 Rajshahi market analysis covering population, named neighbourhood clusters, a reproducible three-zone business sample, current hiring and earning channels, price observations, payments, connectivity, and seasonality.
