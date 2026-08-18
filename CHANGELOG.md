@@ -6,6 +6,12 @@ All notable project changes are documented here.
 
 ### Engineering
 
+- Added Bangladesh E.164 phone OTP authentication with bcrypt challenge hashes, Redis-backed
+  phone/IP throttles, one-time consumption, device-bound access/refresh sessions, refresh rotation,
+  family reuse revocation, logout, session, and device endpoints.
+- Added auth security and API coverage for invalid, expired, exhausted, replayed, and rate-limited
+  challenges; token expiry/rotation/reuse; protected routes; secret-safe SMS logs; and real
+  PostgreSQL transaction behavior.
 - Added the complete D2 PostgreSQL/Prisma schema with 46 relational tables, UUID v7 database
   defaults, foreign keys, required compound and geographic indexes, and the first migration.
 - Added an idempotent development seed for bilingual starter taxonomy, Rajshahi pilot locations,

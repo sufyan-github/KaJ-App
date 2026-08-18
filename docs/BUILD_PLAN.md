@@ -3,7 +3,7 @@
 **Status:** Active
 **Owner:** Abu Sufyan
 **Last updated:** 2026-08-18
-**Current stage:** Phase 1 — P1-AUTH-04 phone OTP authentication
+**Current stage:** Phase 1 — P1-AUTH-05 authorization foundation
 
 ## 1. Authority and conflict resolution
 
@@ -18,17 +18,17 @@ Conflict priority is: trust → reliability → simplicity → speed → feature
 
 ## 2. Current baseline
 
-| Item             | State on 2026-08-18                 | Consequence                                                                                                  |
-| ---------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Git repository   | `main` tracks `origin/main`         | Each completed step can be committed and pushed immediately.                                                 |
-| Product code     | P1-INF-03 database foundation       | API foundation plus the complete PostgreSQL D2 schema, first migration, and idempotent seed are implemented. |
-| Source documents | Four Markdown files read completely | Plan incorporates the build, UI, and pre-build constraints.                                                  |
-| Node.js          | 24.18.0                             | Compatibility and pinned engine must be verified in P1-INF-01.                                               |
-| Corepack         | 0.35.0                              | Available for package-manager setup.                                                                         |
-| pnpm             | 10.34.5 via Corepack                | Pinned in `package.json`; global Windows shim is unavailable without elevation.                              |
-| Docker           | Desktop 4.87.0 / Engine 29.7.2      | Compose v2 runtime verified with all four local services.                                                    |
-| Flutter          | 3.44.8 stable                       | Meets the locked Flutter 3.x stable decision.                                                                |
-| Dart             | 3.12.2 stable                       | Meets the locked Dart 3 decision.                                                                            |
+| Item             | State on 2026-08-18                  | Consequence                                                                                                            |
+| ---------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| Git repository   | `main` tracks `origin/main`          | Each completed step can be committed and pushed immediately.                                                           |
+| Product code     | P1-AUTH-04 authentication foundation | BD phone OTP, protected sessions, device-bound token rotation, reuse revocation, and auth persistence are implemented. |
+| Source documents | Four Markdown files read completely  | Plan incorporates the build, UI, and pre-build constraints.                                                            |
+| Node.js          | 24.18.0                              | Compatibility and pinned engine must be verified in P1-INF-01.                                                         |
+| Corepack         | 0.35.0                               | Available for package-manager setup.                                                                                   |
+| pnpm             | 10.34.5 via Corepack                 | Pinned in `package.json`; global Windows shim is unavailable without elevation.                                        |
+| Docker           | Desktop 4.87.0 / Engine 29.7.2       | Compose v2 runtime verified with all four local services.                                                              |
+| Flutter          | 3.44.8 stable                        | Meets the locked Flutter 3.x stable decision.                                                                          |
+| Dart             | 3.12.2 stable                        | Meets the locked Dart 3 decision.                                                                                      |
 
 ## 3. Mandatory execution loop
 
@@ -156,9 +156,8 @@ These items may proceed alongside permitted build tasks but cannot be marked com
 
 ## 8. Immediate next task
 
-`P1-AUTH-04 — Phone OTP authentication` is the next engineering task. It implements BD-number
-normalization, rate-limited OTP challenges, one-time verification, access/refresh issuance, refresh
-rotation and reuse-family revocation, and the console SMS adapter.
+`P1-AUTH-05 — AuthZ foundation` is the next engineering task. It adds default-deny JWT, role, and
+resource-policy guards plus the growing authorization matrix required by later domain modules.
 
 In the parallel human workstream, `P0-RES-04 — Problem validation` remains blocked on 20 worker-side
 interviews, 15 demand-side interviews, and 5 manually brokered concierge transactions. Public-web

@@ -9,6 +9,7 @@ import { Response } from "express";
 
 import { ApiErrorDescriptor, ApiErrorEnvelope } from "../api/api-envelope";
 import { KajHttpException } from "../errors/kaj-http.exception";
+import { RateLimitException } from "../errors/rate-limit.exception";
 import { RequestContextStorage } from "../context/request-context.storage";
 
 const errorByStatus: Partial<Record<HttpStatus, ApiErrorDescriptor>> = {
@@ -104,6 +105,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
         requestId: this.requestContext.getRequestId(),
       },
     };
+
+    if (exception instanceof RateLimitException) {
+      response.setHeader("Retry-After", exception.retryAfterSeconds.toString());
+    }
 
     response.status(status).json(envelope);
   }
