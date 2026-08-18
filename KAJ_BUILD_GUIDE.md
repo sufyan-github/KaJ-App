@@ -2159,7 +2159,7 @@ Remember: Trust > Reliability > Simplicity > Speed > Features.
 ```text
 PHASE 0 — RESEARCH
 [ ] competitor-analysis.md (per-competitor tables + gap matrix)
-[ ] market-research.md (Rajshahi, sourced)
+[x] market-research.md (Rajshahi, sourced)
 [ ] validation.md (35 interviews + 5 concierge transactions)
 [ ] user-personas.md (6 personas)
 [ ] opportunity-map.md (10+ validated gaps)

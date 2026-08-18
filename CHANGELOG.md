@@ -6,6 +6,8 @@ All notable project changes are documented here.
 
 ### Documentation
 
+- Added the P0-RES-03 Rajshahi market analysis covering population, named neighbourhood clusters, a reproducible three-zone business sample, current hiring and earning channels, price observations, payments, connectivity, and seasonality.
+- Separated sourced observations from inferences and documented the field measurements required for P0-RES-04.
 - Added the P0-RES-02 capability gap matrix with all 22 prescribed rows and eight comparison columns.
 - Documented the `Yes / Partial / No / Unknown` scoring rubric, evidence interpretation, and distinction between KAJ planned scope and implemented capability.
 - Added the P0-RES-01 competitor study with 28 field-by-field comparisons and 71 cited public sources.

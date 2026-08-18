@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-08-18
 **Current phase:** Phase 0 — research and validation
-**Current task:** P0-RES-03 — Rajshahi market analysis
+**Current task:** P0-RES-04 — problem validation (blocked on owner fieldwork)
 **Product-code gate:** Closed until every Phase 0 deliverable is owner-reviewed
 
 ## Status legend
@@ -26,7 +26,7 @@
 |---|---|---|---|
 | P0-RES-01 | COMPLETE | `docs/competitor-analysis.md` with 28 sourced competitor/informal-channel tables | `docs/completed/P0-RES-01.md` |
 | P0-RES-02 | COMPLETE | 22-capability evidence-derived gap matrix appended to competitor analysis | `docs/completed/P0-RES-02.md` |
-| P0-RES-03 | PLANNED | `docs/market-research.md` with sourced Rajshahi evidence | Pending |
+| P0-RES-03 | COMPLETE | `docs/market-research.md` with sourced Rajshahi evidence, three-zone OSM sample, price samples, limitations, and field handoff | `docs/completed/P0-RES-03.md` |
 | P0-RES-04 | BLOCKED | `docs/validation.md`; 35 interviews and 5 concierge transactions | Needs owner-provided field evidence |
 | P0-RES-05 | PLANNED | Six evidence-based personas | Depends on P0-RES-04 |
 | P0-RES-06 | PLANNED | Validated/killed opportunity hypotheses | Depends on P0-RES-04 |

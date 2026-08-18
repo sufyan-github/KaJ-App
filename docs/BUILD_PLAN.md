@@ -152,4 +152,4 @@ These items may proceed alongside permitted build tasks but cannot be marked com
 
 ## 8. Immediate next task
 
-`P0-RES-01 — Competitor study` is next. It requires current web research because competitor capabilities, pricing, availability, and policies can change. The deliverable will cite a source or observation for every populated claim and label unverified fields as `ASSUMPTION` or `Unknown`.
+`P0-RES-04 — Problem validation` is next and currently blocked on owner-supplied field evidence. Completion requires 20 worker-side interviews, 15 demand-side interviews, and 5 manually brokered concierge transactions. Public-web research cannot substitute for those interviews or transactions, so P0-RES-05 and P0-RES-06 remain gated behind this step.
