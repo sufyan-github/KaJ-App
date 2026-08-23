@@ -24,7 +24,7 @@ const environmentSchema = z
       .nonnegative()
       .default(60),
     OTP_TTL_SECONDS: z.coerce.number().int().positive().default(300),
-    PAYMENT_PROVIDER: z.string().min(1).default("manual"),
+    PAYMENT_PROVIDER: z.literal("manual").default("manual"),
     PLATFORM_FEE_DEFAULT_BPS: z.coerce
       .number()
       .int()
@@ -39,7 +39,9 @@ const environmentSchema = z
     S3_REGION: z.string().default("ap-south-1"),
     S3_SECRET: z.string().default("kaj_minio_local_only"),
     SENTRY_DSN: z.string().default(""),
-    SMS_PROVIDER: z.string().min(1).default("console"),
+    SMS_PROVIDER: z.enum(["console", "disabled"]).default("console"),
+    STORAGE_PROVIDER: z.literal("s3").default("s3"),
+    PUSH_PROVIDER: z.literal("disabled").default("disabled"),
   })
   .superRefine((environment, context) => {
     if (environment.NODE_ENV !== "production") return;
@@ -52,6 +54,13 @@ const environmentSchema = z
           path: [key],
         });
       }
+    }
+    if (environment.SMS_PROVIDER === "console") {
+      context.addIssue({
+        code: "custom",
+        message: "console SMS is not allowed in production",
+        path: ["SMS_PROVIDER"],
+      });
     }
   });
 

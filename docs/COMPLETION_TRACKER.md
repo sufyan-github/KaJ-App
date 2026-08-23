@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-08-23
 **Current phase:** Phase 1 — foundation (started by explicit owner direction)
-**Current task:** P1-INF-06 — adapter interfaces
+**Current task:** P1-UI-07 — Flutter foundation
 **Product-code gate:** Owner overrode the sequencing gate on 2026-08-18; Phase 0 remains unreviewed
 
 ## Status legend
@@ -44,7 +44,7 @@
 | P1-INF-03         | COMPLETE    | PostgreSQL D2 schema, 46-table migration, UUID v7 defaults, required indexes, and idempotent seed; completion record `docs/completed/P1-INF-03.md`.                                              |
 | P1-AUTH-04        | COMPLETE    | BD phone OTP, rate limits, hashed challenges/tokens, protected sessions, device binding, rotation, and family reuse revocation; completion record `docs/completed/P1-AUTH-04.md`.                |
 | P1-AUTH-05        | IMPLEMENTED | Global default-deny JWT/role/policy guards, CASL-style ability rules, private-resource 404 handling, and a growing authorization matrix; local completion record `docs/completed/P1-AUTH-05.md`. |
-| P1-INF-06         | PLANNED     | SMS, push, storage, and payment ports/adapters.                                                                                                                                                  |
+| P1-INF-06         | IMPLEMENTED | Provider-neutral SMS, push, S3 storage, and payment ports; environment-selected fail-closed adapters; local completion record `docs/completed/P1-INF-06.md`.                                     |
 | P1-UI-07          | PLANNED     | Flutter core, corrected UI tokens, l10n, network/offline foundation.                                                                                                                             |
 | P1-UI-08          | PLANNED     | S01–S04 within the six-screen onboarding budget.                                                                                                                                                 |
 | P1-QA-09          | PLANNED     | GitHub Actions gates.                                                                                                                                                                            |

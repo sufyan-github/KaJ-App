@@ -24,6 +24,7 @@ describe("environment validation", () => {
       JWT_ACCESS_SECRET: "a".repeat(32),
       JWT_REFRESH_SECRET: "b".repeat(32),
       NODE_ENV: "production",
+      SMS_PROVIDER: "disabled",
     });
 
     expect(environment.NODE_ENV).toBe("production");

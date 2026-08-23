@@ -6,6 +6,11 @@ All notable project changes are documented here.
 
 ### Engineering
 
+- Added provider-neutral SMS, push, object-storage, and payment ports with a single global
+  infrastructure module and environment-selected adapters.
+- Added deterministic S3-compatible signed URLs, unsafe-key rejection, a disabled push adapter,
+  production-safe SMS selection, and a manual payment adapter that cannot fabricate capture,
+  refund, or webhook success.
 - Added global default-deny authorization with explicit per-endpoint policies, JWT and role guards,
   a pure ability factory for admin/job-poster/assigned-worker/conversation-participant rules, and
   private-resource denials that return 404 without disclosing existence.

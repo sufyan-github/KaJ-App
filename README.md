@@ -80,6 +80,17 @@ and private job, assignment, or conversation policies return `404` when the requ
 permitted party. This prevents authorization failures from revealing whether a private object
 exists.
 
+## Provider adapters
+
+SMS, push, S3-compatible object storage, and payments are consumed through provider-neutral ports
+exported by the global infrastructure module. Development uses `SMS_PROVIDER=console`; production
+rejects that setting and currently requires `SMS_PROVIDER=disabled` until an approved vendor adapter
+is implemented. Disabled SMS/push operations fail explicitly rather than reporting false delivery.
+
+The S3 adapter signs uploads and downloads locally and validates object keys before signing. The
+manual payment adapter only creates/reports a pending reference. It cannot capture, refund, validate
+a webhook, or mark a payment successful.
+
 Stop local infrastructure with:
 
 ```sh

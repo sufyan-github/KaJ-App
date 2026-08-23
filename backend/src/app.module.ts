@@ -24,6 +24,7 @@ import { PolicyGuard } from "./common/policy/policy.guard";
 import { TimeModule } from "./common/time/time.module";
 import { validateEnvironment } from "./config/environment";
 import { createLoggerConfig } from "./config/logger.config";
+import { InfrastructureModule } from "./infra/infrastructure.module";
 import { HealthModule } from "./modules/health/health.module";
 import { AuthModule } from "./modules/auth/auth.module";
 
@@ -35,6 +36,7 @@ import { AuthModule } from "./modules/auth/auth.module";
       validate: validateEnvironment,
     }),
     TimeModule,
+    InfrastructureModule,
     LoggerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
