@@ -5,7 +5,7 @@ import {
   RequestMethod,
 } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { LoggerModule } from "nestjs-pino";
 
 import { RequestContextMiddleware } from "./common/context/request-context.middleware";
@@ -15,8 +15,12 @@ import {
 } from "./common/context/request-id.generator";
 import { RequestContextStorage } from "./common/context/request-context.storage";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
+import { JwtGuard } from "./common/guards/jwt.guard";
+import { RolesGuard } from "./common/guards/roles.guard";
 import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
 import { ResponseInterceptor } from "./common/interceptors/response.interceptor";
+import { AbilityFactory } from "./common/policy/ability.factory";
+import { PolicyGuard } from "./common/policy/policy.guard";
 import { TimeModule } from "./common/time/time.module";
 import { validateEnvironment } from "./config/environment";
 import { createLoggerConfig } from "./config/logger.config";
@@ -41,10 +45,14 @@ import { AuthModule } from "./modules/auth/auth.module";
     HealthModule,
   ],
   providers: [
+    AbilityFactory,
     RequestContextMiddleware,
     RequestContextStorage,
     { provide: REQUEST_ID_GENERATOR, useClass: CryptoRequestIdGenerator },
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
+    { provide: APP_GUARD, useClass: JwtGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
+    { provide: APP_GUARD, useClass: PolicyGuard },
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
     { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
   ],

@@ -74,6 +74,12 @@ The versioned API supports Bangladesh phone-number login through one-time challe
 The console SMS adapter emits a masked development event and never logs the OTP. Provide real
 `JWT_ACCESS_SECRET` and `JWT_REFRESH_SECRET` values of at least 32 characters in production.
 
+Authorization is globally default-deny. Every controller method must declare `@Policy(...)`;
+omitting it returns `AUTH_POLICY_REQUIRED`. Authenticated policies use the access-token claims,
+and private job, assignment, or conversation policies return `404` when the requester is not a
+permitted party. This prevents authorization failures from revealing whether a private object
+exists.
+
 Stop local infrastructure with:
 
 ```sh

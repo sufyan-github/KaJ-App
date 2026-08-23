@@ -9,14 +9,14 @@ import {
   ParseUUIDPipe,
   Post,
   Req,
-  UseGuards,
 } from "@nestjs/common";
 import { Request } from "express";
 
-import { AccessTokenGuard } from "./access-token.guard";
+import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { Policy } from "../../common/policy/policy.decorator";
+import { Policies } from "../../common/policy/policy.types";
 import { AuthService } from "./auth.service";
 import { AccessTokenClaims } from "./auth-token.service";
-import { CurrentAuth } from "./current-auth.decorator";
 import { RefreshTokenDto } from "./dto/refresh-token.dto";
 import { RegisterDeviceDto } from "./dto/register-device.dto";
 import { RequestOtpDto } from "./dto/request-otp.dto";
@@ -27,6 +27,7 @@ export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
   @Post("otp/request")
+  @Policy(Policies.public())
   requestOtp(@Body() body: RequestOtpDto, @Req() request: Request) {
     return this.auth.requestOtp(
       body.phone,
@@ -35,47 +36,51 @@ export class AuthController {
   }
 
   @Post("otp/verify")
+  @Policy(Policies.public())
   verifyOtp(@Body() body: VerifyOtpDto) {
     return this.auth.verifyOtp(body.challengeId, body.code, body.deviceId);
   }
 
   @Post("refresh")
+  @Policy(Policies.public())
   refresh(@Body() body: RefreshTokenDto) {
     return this.auth.refresh(body.refreshToken);
   }
 
   @Post("logout")
+  @Policy(Policies.public())
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(@Body() body: RefreshTokenDto): Promise<void> {
     await this.auth.logout(body.refreshToken);
   }
 
   @Post("logout-all")
+  @Policy(Policies.public())
   @HttpCode(HttpStatus.NO_CONTENT)
   async logoutAll(@Body() body: RefreshTokenDto): Promise<void> {
     await this.auth.logoutAll(body.refreshToken);
   }
 
   @Get("session")
-  @UseGuards(AccessTokenGuard)
-  getSession(@CurrentAuth() claims: AccessTokenClaims) {
+  @Policy(Policies.authenticated())
+  getSession(@CurrentUser() claims: AccessTokenClaims) {
     return this.auth.getSession(claims);
   }
 
   @Post("devices")
-  @UseGuards(AccessTokenGuard)
+  @Policy(Policies.authenticated())
   registerDevice(
-    @CurrentAuth() claims: AccessTokenClaims,
+    @CurrentUser() claims: AccessTokenClaims,
     @Body() body: RegisterDeviceDto,
   ) {
     return this.auth.registerDevice(claims, body);
   }
 
   @Delete("devices/:id")
-  @UseGuards(AccessTokenGuard)
+  @Policy(Policies.authenticated())
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteDevice(
-    @CurrentAuth() claims: AccessTokenClaims,
+    @CurrentUser() claims: AccessTokenClaims,
     @Param("id", new ParseUUIDPipe()) deviceId: string,
   ): Promise<void> {
     await this.auth.deleteDevice(claims, deviceId);

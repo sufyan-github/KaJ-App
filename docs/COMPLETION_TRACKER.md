@@ -1,14 +1,15 @@
 # KAJ Completion Tracker
 
-**Last updated:** 2026-08-18
+**Last updated:** 2026-08-23
 **Current phase:** Phase 1 — foundation (started by explicit owner direction)
-**Current task:** P1-AUTH-05 — authorization foundation
+**Current task:** P1-INF-06 — adapter interfaces
 **Product-code gate:** Owner overrode the sequencing gate on 2026-08-18; Phase 0 remains unreviewed
 
 ## Status legend
 
 - `PLANNED` — sequenced but not started.
 - `IN PROGRESS` — active work; acceptance is not yet satisfied.
+- `IMPLEMENTED` — locally committed with verification green; remote publication was not authorized.
 - `BLOCKED` — cannot proceed without stated evidence, authority, professional input, or environment capability.
 - `COMPLETE` — implemented/documented, verified, committed, and pushed.
 - `REVIEWED` — complete and explicitly accepted by the required human gate owner.
@@ -36,18 +37,18 @@
 
 ## Phase 1 — foundation
 
-| Task              | Status   | Notes                                                                                                                                                                             |
-| ----------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| P1-INF-01         | COMPLETE | pnpm monorepo, four-service Compose stack, shared-types, minimal `/health` and Prisma bootstrap; completion record `docs/completed/P1-INF-01.md`.                                 |
-| P1-INF-02         | COMPLETE | Exact E1 envelopes, strict validation, request context, redacted Pino logging, Swagger, health, and lazy infra shells; completion record `docs/completed/P1-INF-02.md`.           |
-| P1-INF-03         | COMPLETE | PostgreSQL D2 schema, 46-table migration, UUID v7 defaults, required indexes, and idempotent seed; completion record `docs/completed/P1-INF-03.md`.                               |
-| P1-AUTH-04        | COMPLETE | BD phone OTP, rate limits, hashed challenges/tokens, protected sessions, device binding, rotation, and family reuse revocation; completion record `docs/completed/P1-AUTH-04.md`. |
-| P1-AUTH-05        | PLANNED  | Default-deny policies and growing authorization matrix.                                                                                                                           |
-| P1-INF-06         | PLANNED  | SMS, push, storage, and payment ports/adapters.                                                                                                                                   |
-| P1-UI-07          | PLANNED  | Flutter core, corrected UI tokens, l10n, network/offline foundation.                                                                                                              |
-| P1-UI-08          | PLANNED  | S01–S04 within the six-screen onboarding budget.                                                                                                                                  |
-| P1-QA-09          | PLANNED  | GitHub Actions gates.                                                                                                                                                             |
-| Phase 1 exit gate | PLANNED  | Clean clone, real login, auth tests, envelopes, CI, Swagger.                                                                                                                      |
+| Task              | Status      | Notes                                                                                                                                                                                            |
+| ----------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| P1-INF-01         | COMPLETE    | pnpm monorepo, four-service Compose stack, shared-types, minimal `/health` and Prisma bootstrap; completion record `docs/completed/P1-INF-01.md`.                                                |
+| P1-INF-02         | COMPLETE    | Exact E1 envelopes, strict validation, request context, redacted Pino logging, Swagger, health, and lazy infra shells; completion record `docs/completed/P1-INF-02.md`.                          |
+| P1-INF-03         | COMPLETE    | PostgreSQL D2 schema, 46-table migration, UUID v7 defaults, required indexes, and idempotent seed; completion record `docs/completed/P1-INF-03.md`.                                              |
+| P1-AUTH-04        | COMPLETE    | BD phone OTP, rate limits, hashed challenges/tokens, protected sessions, device binding, rotation, and family reuse revocation; completion record `docs/completed/P1-AUTH-04.md`.                |
+| P1-AUTH-05        | IMPLEMENTED | Global default-deny JWT/role/policy guards, CASL-style ability rules, private-resource 404 handling, and a growing authorization matrix; local completion record `docs/completed/P1-AUTH-05.md`. |
+| P1-INF-06         | PLANNED     | SMS, push, storage, and payment ports/adapters.                                                                                                                                                  |
+| P1-UI-07          | PLANNED     | Flutter core, corrected UI tokens, l10n, network/offline foundation.                                                                                                                             |
+| P1-UI-08          | PLANNED     | S01–S04 within the six-screen onboarding budget.                                                                                                                                                 |
+| P1-QA-09          | PLANNED     | GitHub Actions gates.                                                                                                                                                                            |
+| Phase 1 exit gate | PLANNED     | Clean clone, real login, auth tests, envelopes, CI, Swagger.                                                                                                                                     |
 
 ### Accepted storage direction
 

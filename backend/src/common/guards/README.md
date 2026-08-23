@@ -1,4 +1,9 @@
 # Guards
 
-Authentication and policy guards are intentionally introduced by P1-AUTH-04 and P1-AUTH-05. This
-directory reserves their required location without adding permissive placeholder authorization.
+Authorization is globally default-deny. `JwtGuard` authenticates every route that is not explicitly
+public, `RolesGuard` applies optional role metadata, and `PolicyGuard` requires every controller
+method to declare `@Policy(...)`.
+
+Private-resource policies fail with `404`, not `403`, when the requester is not the job poster,
+assigned worker, or conversation participant. Resource loaders attach only the minimum ownership
+facts to `request.policyResource`; policy evaluation never trusts ownership values from a client.

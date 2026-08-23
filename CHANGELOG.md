@@ -6,6 +6,11 @@ All notable project changes are documented here.
 
 ### Engineering
 
+- Added global default-deny authorization with explicit per-endpoint policies, JWT and role guards,
+  a pure ability factory for admin/job-poster/assigned-worker/conversation-participant rules, and
+  private-resource denials that return 404 without disclosing existence.
+- Added a growing table-driven authorization matrix covering owner, other user, admin, anonymous,
+  missing-policy, public-route, role, and resource-policy behavior.
 - Added Bangladesh E.164 phone OTP authentication with bcrypt challenge hashes, Redis-backed
   phone/IP throttles, one-time consumption, device-bound access/refresh sessions, refresh rotation,
   family reuse revocation, logout, session, and device endpoints.

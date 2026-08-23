@@ -7,6 +7,8 @@ import request from "supertest";
 
 import { configureApp } from "../src/app.bootstrap";
 import { AppModule } from "../src/app.module";
+import { Policy } from "../src/common/policy/policy.decorator";
+import { Policies } from "../src/common/policy/policy.types";
 import { CLOCK, Clock } from "../src/common/time/clock";
 import {
   REQUEST_ID_GENERATOR,
@@ -21,11 +23,13 @@ class ValidationProbeDto {
 @Controller("__test")
 class ProbeController {
   @Post("validation")
+  @Policy(Policies.public())
   validate(@Body() body: ValidationProbeDto): ValidationProbeDto {
     return body;
   }
 
   @Get("unexpected-error")
+  @Policy(Policies.public())
   fail(): never {
     throw new Error("internal-secret-must-not-leak");
   }

@@ -6,7 +6,6 @@ import { SMS_PORT } from "../../infra/sms/sms.port";
 import { PrismaModule } from "../../infra/prisma/prisma.module";
 import { RedisModule } from "../../infra/redis/redis.module";
 import { TimeModule } from "../../common/time/time.module";
-import { AccessTokenGuard } from "./access-token.guard";
 import { AuthController } from "./auth.controller";
 import { AUTH_RATE_LIMITER } from "./auth-rate-limiter";
 import { AUTH_REPOSITORY } from "./auth.repository";
@@ -21,10 +20,9 @@ import { RedisAuthRateLimiter } from "./redis-auth-rate-limiter";
 
 @Module({
   controllers: [AuthController],
-  exports: [AccessTokenGuard, AuthService],
+  exports: [AuthService, AuthTokenService],
   imports: [JwtModule.register({}), PrismaModule, RedisModule, TimeModule],
   providers: [
-    AccessTokenGuard,
     AuthService,
     AuthTokenService,
     ConsoleSmsAdapter,
