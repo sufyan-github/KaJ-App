@@ -88,14 +88,23 @@ production handling of personal data.
 
 ## Phases 9–14 — gated expansion and release
 
-| Phase    | Status  | Gate / task family                                                                   |
-| -------- | ------- | ------------------------------------------------------------------------------------ |
-| Phase 9  | BLOCKED | P9 payment tasks require entity, provider, payout, tax, and written legal clearance. |
-| Phase 10 | PLANNED | P10 trust, verification, disputes, check-in, moderation, anti-fraud.                 |
-| Phase 11 | PLANNED | P11 recurrence, repeat hire, business profiles, shifts, workforce.                   |
-| Phase 12 | BLOCKED | P12 AI requires real data thresholds, evaluation, and approved flags.                |
-| Phase 13 | PLANNED | P13 canonical events, metrics, imbalance detection, admin analytics.                 |
-| Phase 14 | PLANNED | P14 security, performance, load, recovery, observability, legal/store, rollout.      |
+| Phase    | Status            | Gate / task family                                                                                  |
+| -------- | ----------------- | --------------------------------------------------------------------------------------------------- |
+| Phase 9  | PARTIAL / BLOCKED | P9-PAY-01 provider-neutral money core delivered; provider, payout, UI, tax, and legal gates remain. |
+| Phase 10 | PLANNED           | P10 trust, verification, disputes, check-in, moderation, anti-fraud.                                |
+| Phase 11 | PLANNED           | P11 recurrence, repeat hire, business profiles, shifts, workforce.                                  |
+| Phase 12 | BLOCKED           | P12 AI requires real data thresholds, evaluation, and approved flags.                               |
+| Phase 13 | PLANNED           | P13 canonical events, metrics, imbalance detection, admin analytics.                                |
+| Phase 14 | PLANNED           | P14 security, performance, load, recovery, observability, legal/store, rollout.                     |
+
+### Phase 9 task status
+
+| Task      | Status      | Evidence                                                                                                                                 |
+| --------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| P9-PAY-01 | IMPLEMENTED | Server-derived intent, fee chain, durable idempotency, balanced immutable ledger, live concurrency tests; `docs/completed/P9-PAY-01.md`. |
+| P9-PAY-02 | BLOCKED     | Requires signed legal/compliance checklist and selected provider contract before adapter/webhook work.                                   |
+| P9-PAY-03 | BLOCKED     | Requires approved payout, refund, tax, and flow-of-funds model.                                                                          |
+| P9-UI-04  | BLOCKED     | Digital-payment UI must not imply unavailable payment, wallet, refund, or payout capability.                                             |
 
 ## Human and professional gates
 

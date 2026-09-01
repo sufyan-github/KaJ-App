@@ -177,6 +177,13 @@ enum LedgerDirection {
   CREDIT
 }
 
+enum FeeScope {
+  USER
+  TIER
+  CATEGORY
+  GLOBAL
+}
+
 enum PayoutStatus {
   REQUESTED
   PROCESSING
@@ -243,6 +250,7 @@ model User {
   is_admin       Boolean    @default(false)
   default_locale String     @default("bn")
   timezone       String     @default("Asia/Dhaka")
+  fee_tier       String?
   last_active_at DateTime?
   created_at     DateTime   @default(now())
   updated_at     DateTime   @updatedAt
@@ -292,6 +300,8 @@ model User {
   admin_sessions              AdminSession[]
   config_revisions            ConfigRevision[]
   notification_campaigns      NotificationCampaign[]
+  fee_rules                   FeeRule[]
+  idempotency_records         IdempotencyRecord[]
 
   @@index([status, deleted_at])
   @@map("users")
@@ -802,31 +812,37 @@ model WorkSession {
 }
 
 model Payment {
-  id              String        @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  job_id          String        @db.Uuid
-  assignment_id   String        @db.Uuid
-  payer_user_id   String        @db.Uuid
-  amount_poisha   BigInt
-  fee_poisha      BigInt        @default(0)
-  status          PaymentStatus @default(NONE)
-  method          PaymentMethod @default(CASH_ON_COMPLETION)
-  provider_ref    String?
-  idempotency_key String        @unique
-  created_at      DateTime      @default(now())
-  updated_at      DateTime      @updatedAt
-  job             Job           @relation(fields: [job_id], references: [id], onDelete: Restrict)
-  assignment      Assignment    @relation(fields: [assignment_id], references: [id], onDelete: Restrict)
-  payer           User          @relation("PaymentPayer", fields: [payer_user_id], references: [id], onDelete: Restrict)
-  ledger_entries  LedgerEntry[]
+  id                    String        @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  job_id                String        @db.Uuid
+  assignment_id         String        @db.Uuid
+  payer_user_id         String        @db.Uuid
+  agreed_amount_poisha  BigInt
+  amount_poisha         BigInt
+  fee_poisha            BigInt        @default(0)
+  worker_earning_poisha BigInt
+  fee_rule_key          String
+  fee_payer             String
+  status                PaymentStatus @default(NONE)
+  method                PaymentMethod @default(CASH_ON_COMPLETION)
+  provider_ref          String?
+  idempotency_key       String
+  created_at            DateTime      @default(now())
+  updated_at            DateTime      @updatedAt
+  job                   Job           @relation(fields: [job_id], references: [id], onDelete: Restrict)
+  assignment            Assignment    @relation(fields: [assignment_id], references: [id], onDelete: Restrict)
+  payer                 User          @relation("PaymentPayer", fields: [payer_user_id], references: [id], onDelete: Restrict)
+  ledger_entries        LedgerEntry[]
 
+  @@unique([assignment_id])
+  @@unique([payer_user_id, idempotency_key])
   @@index([job_id, status])
-  @@index([assignment_id])
   @@index([payer_user_id])
   @@map("payments")
 }
 
 model LedgerEntry {
   id            String            @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  operation_id  String            @db.Uuid
   payment_id    String?           @db.Uuid
   account_type  LedgerAccountType
   account_ref   String
@@ -838,8 +854,47 @@ model LedgerEntry {
   payment       Payment?          @relation(fields: [payment_id], references: [id], onDelete: Restrict)
 
   @@index([payment_id, created_at])
+  @@index([operation_id])
   @@index([account_type, account_ref, created_at])
   @@map("ledger_entries")
+}
+
+model FeeRule {
+  id             String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  scope          FeeScope
+  scope_key      String   @unique
+  fee_bps        Int
+  min_fee_poisha BigInt   @default(0)
+  max_fee_poisha BigInt?
+  payer          String   @default("worker")
+  is_active      Boolean  @default(true)
+  updated_by     String?  @db.Uuid
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+  updater        User?    @relation(fields: [updated_by], references: [id], onDelete: SetNull)
+
+  @@index([scope, is_active])
+  @@index([updated_by])
+  @@map("fee_rules")
+}
+
+model IdempotencyRecord {
+  id            String    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  actor_user_id String    @db.Uuid
+  key           String
+  operation     String
+  request_hash  String
+  response_json Json?
+  response_code Int?
+  completed_at  DateTime?
+  expires_at    DateTime
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  actor         User      @relation(fields: [actor_user_id], references: [id], onDelete: Cascade)
+
+  @@unique([actor_user_id, key])
+  @@index([expires_at])
+  @@map("idempotency_records")
 }
 
 model Payout {

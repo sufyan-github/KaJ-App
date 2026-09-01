@@ -358,6 +358,24 @@ async function seed() {
     });
   }
 
+  await prisma.feeRule.upsert({
+    where: { scope_key: "GLOBAL:*" },
+    update: {
+      scope: "GLOBAL",
+      fee_bps: 800,
+      min_fee_poisha: 0,
+      max_fee_poisha: null,
+      payer: "worker",
+      is_active: true,
+    },
+    create: {
+      scope: "GLOBAL",
+      scope_key: "GLOBAL:*",
+      fee_bps: 800,
+      payer: "worker",
+    },
+  });
+
   for (const [slug, name_en, name_bn, icon, rule_json] of badges) {
     await prisma.badge.upsert({
       where: { slug },
