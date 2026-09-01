@@ -29,4 +29,22 @@ describe("environment validation", () => {
 
     expect(environment.NODE_ENV).toBe("production");
   });
+
+  it("accepts a six-digit fixed OTP only outside production", () => {
+    expect(
+      validateEnvironment({ OTP_FIXED_CODE: "123456" }).OTP_FIXED_CODE,
+    ).toBe("123456");
+    expect(() => validateEnvironment({ OTP_FIXED_CODE: "12345" })).toThrow(
+      "OTP_FIXED_CODE",
+    );
+    expect(() =>
+      validateEnvironment({
+        JWT_ACCESS_SECRET: "a".repeat(32),
+        JWT_REFRESH_SECRET: "b".repeat(32),
+        NODE_ENV: "production",
+        OTP_FIXED_CODE: "123456",
+        SMS_PROVIDER: "disabled",
+      }),
+    ).toThrow("OTP_FIXED_CODE");
+  });
 });

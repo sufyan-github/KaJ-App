@@ -48,3 +48,11 @@ export class CreateAvailabilityExceptionDto {
   @MaxLength(200)
   reason?: string;
 }
+
+export class AvailabilitySlotsQueryDto {
+  @IsDateString()
+  from!: string;
+
+  @IsDateString()
+  to!: string;
+}

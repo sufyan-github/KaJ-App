@@ -624,6 +624,8 @@ model Application {
   status                ApplicationStatus @default(PENDING)
   message               String?
   proposed_price_poisha BigInt?
+  proposed_starts_at    DateTime?
+  proposed_ends_at      DateTime?
   match_score           Int?
   match_reasons         Json?
   created_at            DateTime          @default(now())

@@ -1,10 +1,13 @@
 import { Module } from "@nestjs/common";
 
-import { AvailabilityController } from "./availability.controller";
+import {
+  AvailabilityController,
+  PublicAvailabilityController,
+} from "./availability.controller";
 import { AvailabilityService } from "./availability.service";
 
 @Module({
-  controllers: [AvailabilityController],
+  controllers: [AvailabilityController, PublicAvailabilityController],
   providers: [AvailabilityService],
   exports: [AvailabilityService],
 })

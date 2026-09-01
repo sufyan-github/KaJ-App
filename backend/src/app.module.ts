@@ -31,6 +31,7 @@ import { UsersModule } from "./modules/users/users.module";
 import { UploadsModule } from "./modules/uploads/uploads.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { CatalogModule } from "./modules/catalog/catalog.module";
+import { JobsModule } from "./modules/jobs/jobs.module";
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { CatalogModule } from "./modules/catalog/catalog.module";
     AvailabilityModule,
     CatalogModule,
     HealthModule,
+    JobsModule,
     UsersModule,
     UploadsModule,
   ],

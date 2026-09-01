@@ -147,6 +147,126 @@ export class AvailabilityService {
       travelBufferMinutes,
     });
   }
+
+  async getPublicSlots(userId: string, fromInput: string, toInput: string) {
+    const from = new Date(fromInput);
+    const to = new Date(toInput);
+    if (to <= from) {
+      throw new BadRequestException("Slot range end must be after its start.");
+    }
+    if (to.getTime() - from.getTime() > 31 * 24 * 60 * 60_000) {
+      throw new BadRequestException("Slot range cannot exceed 31 days.");
+    }
+
+    const user = await this.prisma.user.findFirst({
+      where: { id: userId, deleted_at: null, role_modes: { has: "WORKER" } },
+      select: { id: true },
+    });
+    if (!user) throw new NotFoundException();
+
+    const [rules, exceptions, assignments] = await Promise.all([
+      this.prisma.availabilityRule.findMany({
+        where: { user_id: userId, is_active: true },
+        orderBy: [{ day_of_week: "asc" }, { start_time: "asc" }],
+      }),
+      this.prisma.availabilityException.findMany({
+        where: {
+          user_id: userId,
+          starts_at: { lt: to },
+          ends_at: { gt: from },
+        },
+      }),
+      this.prisma.assignment.findMany({
+        where: {
+          worker_user_id: userId,
+          status: { in: BLOCKING_ASSIGNMENT_STATUSES },
+          agreed_starts_at: { not: null, lt: to },
+          agreed_ends_at: { not: null, gt: from },
+        },
+        select: { agreed_starts_at: true, agreed_ends_at: true },
+      }),
+    ]);
+
+    const blocked = [
+      ...exceptions.map((item) => ({
+        startsAt: item.starts_at,
+        endsAt: item.ends_at,
+      })),
+      ...assignments.flatMap((item) =>
+        item.agreed_starts_at && item.agreed_ends_at
+          ? [{ startsAt: item.agreed_starts_at, endsAt: item.agreed_ends_at }]
+          : [],
+      ),
+    ];
+    const slots: Array<{ startsAt: string; endsAt: string }> = [];
+    const cursor = new Date(
+      Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate()),
+    );
+    while (cursor < to) {
+      for (const rule of rules) {
+        if (rule.day_of_week !== cursor.getUTCDay()) continue;
+        const start = withUtcTime(cursor, rule.start_time);
+        const end = withUtcTime(cursor, rule.end_time);
+        if (end <= start) end.setUTCDate(end.getUTCDate() + 1);
+        const clippedStart = start < from ? from : start;
+        const clippedEnd = end > to ? to : end;
+        for (const available of subtractWindows(
+          { startsAt: clippedStart, endsAt: clippedEnd },
+          blocked,
+        )) {
+          if (available.endsAt > available.startsAt) {
+            slots.push({
+              startsAt: available.startsAt.toISOString(),
+              endsAt: available.endsAt.toISOString(),
+            });
+          }
+        }
+      }
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+    }
+    return { userId, from: from.toISOString(), to: to.toISOString(), slots };
+  }
+}
+
+function withUtcTime(day: Date, time: Date): Date {
+  return new Date(
+    Date.UTC(
+      day.getUTCFullYear(),
+      day.getUTCMonth(),
+      day.getUTCDate(),
+      time.getUTCHours(),
+      time.getUTCMinutes(),
+    ),
+  );
+}
+
+function subtractWindows(
+  window: TimeWindow,
+  blocked: TimeWindow[],
+): TimeWindow[] {
+  return blocked
+    .filter(
+      (item) => item.startsAt < window.endsAt && item.endsAt > window.startsAt,
+    )
+    .sort((left, right) => left.startsAt.getTime() - right.startsAt.getTime())
+    .reduce<TimeWindow[]>(
+      (remaining, item) => {
+        return remaining.flatMap((part) => {
+          if (item.startsAt >= part.endsAt || item.endsAt <= part.startsAt) {
+            return [part];
+          }
+          const split: TimeWindow[] = [];
+          if (item.startsAt > part.startsAt) {
+            split.push({ startsAt: part.startsAt, endsAt: item.startsAt });
+          }
+          if (item.endsAt < part.endsAt) {
+            split.push({ startsAt: item.endsAt, endsAt: part.endsAt });
+          }
+          return split;
+        });
+      },
+      [window],
+    );
 }
 
 function toCalculatorRule(rule: {

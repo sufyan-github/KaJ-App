@@ -18,6 +18,9 @@ const environmentSchema = z
       .enum(["development", "test", "production"])
       .default("development"),
     OTP_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
+    OTP_FIXED_CODE: z
+      .union([z.literal(""), z.string().regex(/^\d{6}$/)])
+      .default(""),
     OTP_RESEND_COOLDOWN_SECONDS: z.coerce
       .number()
       .int()
@@ -60,6 +63,13 @@ const environmentSchema = z
         code: "custom",
         message: "console SMS is not allowed in production",
         path: ["SMS_PROVIDER"],
+      });
+    }
+    if (environment.OTP_FIXED_CODE !== "") {
+      context.addIssue({
+        code: "custom",
+        message: "fixed OTP is not allowed in production",
+        path: ["OTP_FIXED_CODE"],
       });
     }
   });

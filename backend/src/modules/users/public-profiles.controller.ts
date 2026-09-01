@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseUUIDPipe } from "@nestjs/common";
+import { Controller, Get, Param, ParseUUIDPipe, Query } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 
 import { Policy } from "../../common/policy/policy.decorator";
@@ -9,6 +9,15 @@ import { PublicProfilesService } from "./public-profiles.service";
 @Controller("users")
 export class PublicProfilesController {
   constructor(private readonly profiles: PublicProfilesService) {}
+
+  @Get("workers")
+  @Policy(Policies.public())
+  listWorkers(
+    @Query("skillId") skillId?: string,
+    @Query("locationId") locationId?: string,
+  ) {
+    return this.profiles.listWorkers(skillId, locationId);
+  }
 
   @Get(":id/public")
   @Policy(Policies.public())

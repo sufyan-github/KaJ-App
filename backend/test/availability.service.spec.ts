@@ -8,6 +8,8 @@ describe("AvailabilityService", () => {
   const exceptionFindMany = jest.fn();
   const exceptionCreate = jest.fn();
   const exceptionDeleteMany = jest.fn();
+  const assignmentFindMany = jest.fn();
+  const userFindFirst = jest.fn();
   const transaction = {
     availabilityRule: {
       createMany: ruleCreateMany,
@@ -22,6 +24,8 @@ describe("AvailabilityService", () => {
       deleteMany: exceptionDeleteMany,
       findMany: exceptionFindMany,
     },
+    assignment: { findMany: assignmentFindMany },
+    user: { findFirst: userFindFirst },
   } as unknown as PrismaService;
   const service = new AvailabilityService(prisma);
 
@@ -38,6 +42,8 @@ describe("AvailabilityService", () => {
       },
     ]);
     exceptionFindMany.mockResolvedValue([]);
+    assignmentFindMany.mockResolvedValue([]);
+    userFindFirst.mockResolvedValue({ id: "worker-id" });
   });
 
   it("replaces the complete weekly rule set atomically", async () => {
@@ -81,5 +87,39 @@ describe("AvailabilityService", () => {
     expect(exceptionDeleteMany).toHaveBeenCalledWith({
       where: { id: "exception-id", user_id: "user-id" },
     });
+  });
+
+  it("returns concrete public slots with confirmed work removed", async () => {
+    ruleFindMany.mockResolvedValue([
+      {
+        id: "rule-id",
+        day_of_week: 3,
+        start_time: new Date("1970-01-01T08:00:00Z"),
+        end_time: new Date("1970-01-01T17:00:00Z"),
+      },
+    ]);
+    assignmentFindMany.mockResolvedValue([
+      {
+        agreed_starts_at: new Date("2026-09-02T12:00:00Z"),
+        agreed_ends_at: new Date("2026-09-02T14:00:00Z"),
+      },
+    ]);
+
+    const result = await service.getPublicSlots(
+      "worker-id",
+      "2026-09-02T00:00:00Z",
+      "2026-09-03T00:00:00Z",
+    );
+
+    expect(result.slots).toEqual([
+      {
+        startsAt: "2026-09-02T08:00:00.000Z",
+        endsAt: "2026-09-02T12:00:00.000Z",
+      },
+      {
+        startsAt: "2026-09-02T14:00:00.000Z",
+        endsAt: "2026-09-02T17:00:00.000Z",
+      },
+    ]);
   });
 });

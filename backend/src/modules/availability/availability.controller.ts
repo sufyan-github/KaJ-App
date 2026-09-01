@@ -7,6 +7,7 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
 } from "@nestjs/common";
 import { RoleMode } from "@prisma/client";
 import { ApiTags } from "@nestjs/swagger";
@@ -19,6 +20,7 @@ import { AccessTokenClaims } from "../auth/auth-token.service";
 import { AvailabilityService } from "./availability.service";
 import {
   CreateAvailabilityExceptionDto,
+  AvailabilitySlotsQueryDto,
   ReplaceAvailabilityDto,
 } from "./dto/availability.dto";
 
@@ -62,5 +64,20 @@ export class AvailabilityController {
     @Param("id", new ParseUUIDPipe()) id: string,
   ) {
     return this.availability.deleteException(claims.sub, id);
+  }
+}
+
+@ApiTags("availability")
+@Controller("workers/:workerId/availability")
+export class PublicAvailabilityController {
+  constructor(private readonly availability: AvailabilityService) {}
+
+  @Get("slots")
+  @Policy(Policies.authenticated())
+  getSlots(
+    @Param("workerId", new ParseUUIDPipe()) workerId: string,
+    @Query() query: AvailabilitySlotsQueryDto,
+  ) {
+    return this.availability.getPublicSlots(workerId, query.from, query.to);
   }
 }
