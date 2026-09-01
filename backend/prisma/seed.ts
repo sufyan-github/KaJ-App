@@ -1,4 +1,9 @@
-import { PrismaClient, RoleMode } from "@prisma/client";
+import { createHash } from "node:crypto";
+
+import { AdminRole, PrismaClient, RoleMode } from "@prisma/client";
+import { hash } from "bcryptjs";
+
+import { encryptTotpSecret } from "../src/modules/admin-auth/admin-auth.primitives";
 
 const prisma = new PrismaClient();
 
@@ -289,15 +294,51 @@ async function seed() {
     }
   }
 
-  await prisma.user.upsert({
-    where: { email: "admin@kaj.local" },
-    update: { is_admin: true, status: "ACTIVE" },
+  const adminEmail = process.env.ADMIN_SEED_EMAIL ?? "admin@kaj.local";
+  const adminPassword = process.env.ADMIN_SEED_PASSWORD ?? "KajAdminLocal123!";
+  const adminTotpSecret =
+    process.env.ADMIN_SEED_TOTP_SECRET ?? "JBSWY3DPEHPK3PXP";
+  const adminEncryptionKey =
+    process.env.ADMIN_TOTP_ENCRYPTION_KEY ||
+    createHash("sha256")
+      .update("kaj:admin-totp:local-development-only")
+      .digest("hex");
+  const passwordHash = await hash(adminPassword, 12);
+  const admin = await prisma.user.upsert({
+    where: { email: adminEmail },
+    update: {
+      is_admin: true,
+      password_hash: passwordHash,
+      status: "ACTIVE",
+    },
     create: {
       phone_e164: "+8801000000000",
-      email: "admin@kaj.local",
+      email: adminEmail,
+      password_hash: passwordHash,
       status: "ACTIVE",
       role_modes: [RoleMode.CUSTOMER, RoleMode.WORKER, RoleMode.BUSINESS],
       is_admin: true,
+    },
+  });
+  await prisma.adminCredential.upsert({
+    where: { user_id: admin.id },
+    update: {
+      role: AdminRole.ADMIN,
+      totp_secret_ciphertext: encryptTotpSecret(
+        adminTotpSecret,
+        adminEncryptionKey,
+      ),
+      totp_confirmed_at: new Date(),
+      last_totp_counter: null,
+    },
+    create: {
+      user_id: admin.id,
+      role: AdminRole.ADMIN,
+      totp_secret_ciphertext: encryptTotpSecret(
+        adminTotpSecret,
+        adminEncryptionKey,
+      ),
+      totp_confirmed_at: new Date(),
     },
   });
 

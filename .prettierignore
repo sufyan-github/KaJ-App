@@ -4,6 +4,8 @@ KAJ_UI_REQUIREMENTS.md
 docs/competitor-analysis.md
 docs/market-research.md
 node_modules
+.next
+*.tsbuildinfo
 dist
 coverage
 .dart_tool

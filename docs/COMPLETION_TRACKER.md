@@ -37,29 +37,29 @@
 
 ## Phase 1 — foundation
 
-| Task              | Status      | Notes                                                                                                                                                                                            |
-| ----------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| P1-INF-01         | COMPLETE    | pnpm monorepo, four-service Compose stack, shared-types, minimal `/health` and Prisma bootstrap; completion record `docs/completed/P1-INF-01.md`.                                                |
-| P1-INF-02         | COMPLETE    | Exact E1 envelopes, strict validation, request context, redacted Pino logging, Swagger, health, and lazy infra shells; completion record `docs/completed/P1-INF-02.md`.                          |
-| P1-INF-03         | COMPLETE    | PostgreSQL D2 schema, 46-table migration, UUID v7 defaults, required indexes, and idempotent seed; completion record `docs/completed/P1-INF-03.md`.                                              |
-| P1-AUTH-04        | COMPLETE    | BD phone OTP, rate limits, hashed challenges/tokens, protected sessions, device binding, rotation, and family reuse revocation; completion record `docs/completed/P1-AUTH-04.md`.                |
-| P1-AUTH-05        | IMPLEMENTED | Global default-deny JWT/role/policy guards, CASL-style ability rules, private-resource 404 handling, and a growing authorization matrix; local completion record `docs/completed/P1-AUTH-05.md`. |
-| P1-INF-06         | IMPLEMENTED | Provider-neutral SMS, push, S3 storage, and payment ports; environment-selected fail-closed adapters; local completion record `docs/completed/P1-INF-06.md`.                                     |
-| P1-UI-07          | IMPLEMENTED | Flutter core, English l10n owner override, shared UI states, network/token/offline/analytics/permission foundation, 18 tests, and all flavor builds; sibling `../Kaaj` commit `7a08d07`, record `../Kaaj/docs/completed/P1-UI-07.md`. |
-| P1-UI-08          | PLANNED     | S01–S04 within the six-screen onboarding budget.                                                                                                                                                 |
-| P1-QA-09          | PLANNED     | GitHub Actions gates.                                                                                                                                                                            |
+| Task       | Status      | Notes                                                                                                                                                                                                                                 |
+| ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P1-INF-01  | COMPLETE    | pnpm monorepo, four-service Compose stack, shared-types, minimal `/health` and Prisma bootstrap; completion record `docs/completed/P1-INF-01.md`.                                                                                     |
+| P1-INF-02  | COMPLETE    | Exact E1 envelopes, strict validation, request context, redacted Pino logging, Swagger, health, and lazy infra shells; completion record `docs/completed/P1-INF-02.md`.                                                               |
+| P1-INF-03  | COMPLETE    | PostgreSQL D2 schema, 46-table migration, UUID v7 defaults, required indexes, and idempotent seed; completion record `docs/completed/P1-INF-03.md`.                                                                                   |
+| P1-AUTH-04 | COMPLETE    | BD phone OTP, rate limits, hashed challenges/tokens, protected sessions, device binding, rotation, and family reuse revocation; completion record `docs/completed/P1-AUTH-04.md`.                                                     |
+| P1-AUTH-05 | IMPLEMENTED | Global default-deny JWT/role/policy guards, CASL-style ability rules, private-resource 404 handling, and a growing authorization matrix; local completion record `docs/completed/P1-AUTH-05.md`.                                      |
+| P1-INF-06  | IMPLEMENTED | Provider-neutral SMS, push, S3 storage, and payment ports; environment-selected fail-closed adapters; local completion record `docs/completed/P1-INF-06.md`.                                                                          |
+| P1-UI-07   | IMPLEMENTED | Flutter core, English l10n owner override, shared UI states, network/token/offline/analytics/permission foundation, 18 tests, and all flavor builds; sibling `../Kaaj` commit `7a08d07`, record `../Kaaj/docs/completed/P1-UI-07.md`. |
+| P1-UI-08   | PLANNED     | S01–S04 within the six-screen onboarding budget.                                                                                                                                                                                      |
+| P1-QA-09   | PLANNED     | GitHub Actions gates.                                                                                                                                                                                                                 |
 
 ## Phase 2 — identity, taxonomy, and profiles
 
-| Task      | Status  | Notes |
-| --------- | ------- | ----- |
-| P2-TAX-01 | IMPLEMENTED | Public bilingual catalog endpoints, tree integrity, Redis caching/invalidation, administrator mutations, typed Flutter contracts, and persistent Hive cache; full backend and Flutter gates green. Completion record: `docs/completed/P2-TAX-01.md`. |
-| P2-USR-02 | IMPLEMENTED | Profile updates, idempotent dual-role activation, lazy role profiles, PHONE trust initialization, home routing payload, and actionable role-only 403; full backend gates green. Completion record: `docs/completed/P2-USR-02.md`. |
-| P2-USR-03 | IMPLEMENTED | Atomic worker skill replacement, 15-skill cap, duplicate/unknown checks, bilingual output, and optional bounded rates; full backend gates green. Completion record: `docs/completed/P2-USR-03.md`. |
-| P2-USR-04 | IMPLEMENTED | Exact D4 calculator, fixed Dhaka time arithmetic, exceptions, buffered conflicts, recurrence rule, atomic persistence API, and 100% calculator branch coverage. Completion record: `docs/completed/P2-USR-04.md`. |
-| P2-USR-05 | IMPLEMENTED | Private signed uploads, byte-level verification, EXIF-free photo variants, sensitive documents, and owner-scoped signed reads; full backend gates green. Completion record: `docs/completed/P2-USR-05.md`. |
-| P2-UI-06 | IMPLEMENTED | Bangla-first persisted onboarding, role/location/skills/rates/availability flows, all required Phase 2 destinations, server-backed D10 preview, 35 tests, and all flavor builds. Timed human evidence remains exit-gate work. Record: `../Kaaj/docs/completed/P2-UI-06.md`. |
-| Phase 2 exit gate | BLOCKED | Engineering checks are green, including D10 public masking (`docs/completed/P2-D10-PROJECTION.md`). A human must complete a timed Bangla onboarding run in ≤90 seconds. |
+| Task              | Status      | Notes                                                                                                                                                                                                                                                                       |
+| ----------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P2-TAX-01         | IMPLEMENTED | Public bilingual catalog endpoints, tree integrity, Redis caching/invalidation, administrator mutations, typed Flutter contracts, and persistent Hive cache; full backend and Flutter gates green. Completion record: `docs/completed/P2-TAX-01.md`.                        |
+| P2-USR-02         | IMPLEMENTED | Profile updates, idempotent dual-role activation, lazy role profiles, PHONE trust initialization, home routing payload, and actionable role-only 403; full backend gates green. Completion record: `docs/completed/P2-USR-02.md`.                                           |
+| P2-USR-03         | IMPLEMENTED | Atomic worker skill replacement, 15-skill cap, duplicate/unknown checks, bilingual output, and optional bounded rates; full backend gates green. Completion record: `docs/completed/P2-USR-03.md`.                                                                          |
+| P2-USR-04         | IMPLEMENTED | Exact D4 calculator, fixed Dhaka time arithmetic, exceptions, buffered conflicts, recurrence rule, atomic persistence API, and 100% calculator branch coverage. Completion record: `docs/completed/P2-USR-04.md`.                                                           |
+| P2-USR-05         | IMPLEMENTED | Private signed uploads, byte-level verification, EXIF-free photo variants, sensitive documents, and owner-scoped signed reads; full backend gates green. Completion record: `docs/completed/P2-USR-05.md`.                                                                  |
+| P2-UI-06          | IMPLEMENTED | Bangla-first persisted onboarding, role/location/skills/rates/availability flows, all required Phase 2 destinations, server-backed D10 preview, 35 tests, and all flavor builds. Timed human evidence remains exit-gate work. Record: `../Kaaj/docs/completed/P2-UI-06.md`. |
+| Phase 2 exit gate | BLOCKED     | Engineering checks are green, including D10 public masking (`docs/completed/P2-D10-PROJECTION.md`). A human must complete a timed Bangla onboarding run in ≤90 seconds.                                                                                                     |
 
 ### Accepted storage direction
 
@@ -76,15 +76,15 @@ production handling of personal data.
 
 ## Phases 2–8 — cash-first MVP
 
-| Phase   | Status  | Task IDs / exit result                                              |
-| ------- | ------- | ------------------------------------------------------------------- |
+| Phase   | Status      | Task IDs / exit result                                                      |
+| ------- | ----------- | --------------------------------------------------------------------------- |
 | Phase 2 | IN PROGRESS | All engineering tasks implemented; timed human onboarding evidence remains. |
-| Phase 3 | PLANNED | P3-JOB-01..03, P3-APP-04..05, P3-UI-06; transaction-spine gate.     |
-| Phase 4 | PLANNED | P4-MATCH-01..02, P4-NOTIF-03, P4-UI-04; explainable matching gate.  |
-| Phase 5 | PLANNED | P5-ASSIGN-01..04, P5-UI-05; H4 completion-journey gate.             |
-| Phase 6 | PLANNED | P6-REV-01..02, P6-UI-03; two-sided reputation gate.                 |
-| Phase 7 | PLANNED | P7-CHAT-01..02, P7-UI-03; secure real-time chat gate.               |
-| Phase 8 | PLANNED | P8-ADMIN-01..02; audited admin/operations cash-first MVP gate.      |
+| Phase 3 | PLANNED     | P3-JOB-01..03, P3-APP-04..05, P3-UI-06; transaction-spine gate.             |
+| Phase 4 | PLANNED     | P4-MATCH-01..02, P4-NOTIF-03, P4-UI-04; explainable matching gate.          |
+| Phase 5 | PLANNED     | P5-ASSIGN-01..04, P5-UI-05; H4 completion-journey gate.                     |
+| Phase 6 | PLANNED     | P6-REV-01..02, P6-UI-03; two-sided reputation gate.                         |
+| Phase 7 | PLANNED     | P7-CHAT-01..02, P7-UI-03; secure real-time chat gate.                       |
+| Phase 8 | IN PROGRESS | P8-ADMIN-01 complete; P8-ADMIN-02 operational modules remain.               |
 
 ## Phases 9–14 — gated expansion and release
 

@@ -3,6 +3,8 @@ import { z } from "zod";
 const environmentSchema = z
   .object({
     API_BASE_URL: z.url().default("http://localhost:3000"),
+    ADMIN_SESSION_SECRET: z.string().default(""),
+    ADMIN_TOTP_ENCRYPTION_KEY: z.string().default(""),
     DATABASE_URL: z
       .string()
       .min(1)
@@ -49,7 +51,12 @@ const environmentSchema = z
   .superRefine((environment, context) => {
     if (environment.NODE_ENV !== "production") return;
 
-    for (const key of ["JWT_ACCESS_SECRET", "JWT_REFRESH_SECRET"] as const) {
+    for (const key of [
+      "JWT_ACCESS_SECRET",
+      "JWT_REFRESH_SECRET",
+      "ADMIN_SESSION_SECRET",
+      "ADMIN_TOTP_ENCRYPTION_KEY",
+    ] as const) {
       if (environment[key].length < 32) {
         context.addIssue({
           code: "custom",

@@ -9,7 +9,7 @@ describe("environment validation", () => {
     expect(environment.DEFAULT_TIMEZONE).toBe("Asia/Dhaka");
   });
 
-  it("requires long JWT secrets in production", () => {
+  it("requires long authentication secrets in production", () => {
     expect(() =>
       validateEnvironment({
         JWT_ACCESS_SECRET: "short",
@@ -19,8 +19,10 @@ describe("environment validation", () => {
     ).toThrow("Invalid environment configuration");
   });
 
-  it("accepts production when both JWT secrets are long enough", () => {
+  it("accepts production when all authentication secrets are long enough", () => {
     const environment = validateEnvironment({
+      ADMIN_SESSION_SECRET: "c".repeat(32),
+      ADMIN_TOTP_ENCRYPTION_KEY: "d".repeat(32),
       JWT_ACCESS_SECRET: "a".repeat(32),
       JWT_REFRESH_SECRET: "b".repeat(32),
       NODE_ENV: "production",
@@ -39,6 +41,8 @@ describe("environment validation", () => {
     );
     expect(() =>
       validateEnvironment({
+        ADMIN_SESSION_SECRET: "c".repeat(32),
+        ADMIN_TOTP_ENCRYPTION_KEY: "d".repeat(32),
         JWT_ACCESS_SECRET: "a".repeat(32),
         JWT_REFRESH_SECRET: "b".repeat(32),
         NODE_ENV: "production",

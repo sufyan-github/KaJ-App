@@ -35,6 +35,7 @@ import { JobsModule } from "./modules/jobs/jobs.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { ReviewsModule } from "./modules/reviews/reviews.module";
 import { ChatModule } from "./modules/chat/chat.module";
+import { AdminAuthModule } from "./modules/admin-auth/admin-auth.module";
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { ChatModule } from "./modules/chat/chat.module";
         createLoggerConfig(config.get<string>("NODE_ENV", "development")),
     }),
     AuthModule,
+    AdminAuthModule,
     AvailabilityModule,
     CatalogModule,
     HealthModule,

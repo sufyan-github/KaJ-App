@@ -225,6 +225,13 @@ enum ReportStatus {
   DISMISSED
 }
 
+enum AdminRole {
+  ADMIN
+  MODERATOR
+  SUPPORT
+  FINANCE
+}
+
 model User {
   id             String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   phone_e164     String?    @unique
@@ -280,9 +287,59 @@ model User {
   blocked_by                  UserBlock[]               @relation("BlockedUser")
   updated_config_settings     ConfigSetting[]
   audit_logs                  AuditLog[]
+  admin_credential            AdminCredential?
+  admin_login_challenges      AdminLoginChallenge[]
+  admin_sessions              AdminSession[]
 
   @@index([status, deleted_at])
   @@map("users")
+}
+
+model AdminCredential {
+  user_id                String    @id @db.Uuid
+  role                   AdminRole
+  totp_secret_ciphertext String
+  totp_confirmed_at      DateTime?
+  last_totp_counter      BigInt?
+  created_at             DateTime  @default(now())
+  updated_at             DateTime  @updatedAt
+  user                   User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([role])
+  @@map("admin_credentials")
+}
+
+model AdminLoginChallenge {
+  id          String    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id     String    @db.Uuid
+  token_hash  String    @unique
+  attempts    Int       @default(0)
+  expires_at  DateTime
+  consumed_at DateTime?
+  ip          String?   @db.Inet
+  ua          String?
+  created_at  DateTime  @default(now())
+  user        User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, expires_at])
+  @@map("admin_login_challenges")
+}
+
+model AdminSession {
+  id             String    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id        String    @db.Uuid
+  token_hash     String    @unique
+  expires_at     DateTime
+  last_active_at DateTime  @default(now())
+  revoked_at     DateTime?
+  ip             String?   @db.Inet
+  ua             String?
+  created_at     DateTime  @default(now())
+  user           User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, expires_at])
+  @@index([expires_at, revoked_at])
+  @@map("admin_sessions")
 }
 
 model UserDevice {
@@ -644,30 +701,30 @@ model Application {
 }
 
 model Assignment {
-  id                  String           @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  job_id              String           @db.Uuid
-  worker_user_id      String           @db.Uuid
-  application_id      String           @db.Uuid
-  agreed_price_poisha BigInt
-  agreed_starts_at    DateTime?
-  agreed_ends_at      DateTime?
-  status              AssignmentStatus @default(PENDING_CONFIRMATION)
-  confirmed_at        DateTime?
+  id                       String           @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  job_id                   String           @db.Uuid
+  worker_user_id           String           @db.Uuid
+  application_id           String           @db.Uuid
+  agreed_price_poisha      BigInt
+  agreed_starts_at         DateTime?
+  agreed_ends_at           DateTime?
+  status                   AssignmentStatus @default(PENDING_CONFIRMATION)
+  confirmed_at             DateTime?
   confirmation_deadline_at DateTime?
-  submitted_at        DateTime?
-  completion_due_at   DateTime?
-  cancelled_at        DateTime?
-  cancel_reason       String?
-  created_at          DateTime         @default(now())
-  updated_at          DateTime         @updatedAt
-  job                 Job              @relation(fields: [job_id], references: [id], onDelete: Restrict)
-  worker              User             @relation(fields: [worker_user_id], references: [id], onDelete: Restrict)
-  application         Application      @relation(fields: [application_id], references: [id], onDelete: Restrict)
-  contracts           Contract[]
-  work_sessions       WorkSession[]
-  payments            Payment[]
-  reviews             Review[]
-  disputes            Dispute[]
+  submitted_at             DateTime?
+  completion_due_at        DateTime?
+  cancelled_at             DateTime?
+  cancel_reason            String?
+  created_at               DateTime         @default(now())
+  updated_at               DateTime         @updatedAt
+  job                      Job              @relation(fields: [job_id], references: [id], onDelete: Restrict)
+  worker                   User             @relation(fields: [worker_user_id], references: [id], onDelete: Restrict)
+  application              Application      @relation(fields: [application_id], references: [id], onDelete: Restrict)
+  contracts                Contract[]
+  work_sessions            WorkSession[]
+  payments                 Payment[]
+  reviews                  Review[]
+  disputes                 Dispute[]
 
   @@unique([job_id, worker_user_id])
   @@index([worker_user_id, status])
