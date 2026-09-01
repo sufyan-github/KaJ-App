@@ -11,6 +11,8 @@ class JobSummary {
     this.endsAt,
     this.budgetMinPoisha,
     this.budgetMaxPoisha,
+    this.matchScore,
+    this.matchReasons = const [],
   });
 
   factory JobSummary.fromJson(Map<String, dynamic> json) {
@@ -31,6 +33,12 @@ class JobSummary {
       endsAt: DateTime.tryParse(json['ends_at'] as String? ?? ''),
       budgetMinPoisha: json['budget_min_poisha']?.toString(),
       budgetMaxPoisha: json['budget_max_poisha']?.toString(),
+      matchScore: (json['matchScore'] as num?)?.toInt(),
+      matchReasons:
+          (json['matchReasons'] as List?)?.whereType<String>().toList(
+            growable: false,
+          ) ??
+          const [],
       skills: rawSkills is List
           ? rawSkills
                 .whereType<Map>()
@@ -50,10 +58,51 @@ class JobSummary {
   final DateTime? endsAt;
   final String id;
   final String locationName;
+  final List<String> matchReasons;
+  final int? matchScore;
   final List<String> skills;
   final DateTime? startsAt;
   final String status;
   final String title;
+}
+
+class SuggestedWorker {
+  const SuggestedWorker({
+    required this.id,
+    required this.displayName,
+    required this.ratingAverage,
+    required this.experienceYears,
+    required this.matchScore,
+    required this.matchReasons,
+    required this.skills,
+  });
+
+  factory SuggestedWorker.fromJson(Map<String, dynamic> json) =>
+      SuggestedWorker(
+        id: json['id'] as String,
+        displayName: json['displayName'] as String? ?? 'কর্মী',
+        ratingAverage: json['ratingAverage']?.toString() ?? '0',
+        experienceYears: (json['experienceYears'] as num?)?.toInt() ?? 0,
+        matchScore: (json['matchScore'] as num?)?.toInt() ?? 0,
+        matchReasons:
+            (json['matchReasons'] as List?)?.whereType<String>().toList() ??
+            const [],
+        skills:
+            (json['skills'] as List?)
+                ?.whereType<Map>()
+                .map((item) => item['nameBn'] as String? ?? '')
+                .where((item) => item.isNotEmpty)
+                .toList() ??
+            const [],
+      );
+
+  final String displayName;
+  final int experienceYears;
+  final String id;
+  final List<String> matchReasons;
+  final int matchScore;
+  final String ratingAverage;
+  final List<String> skills;
 }
 
 class WorkerSlot {

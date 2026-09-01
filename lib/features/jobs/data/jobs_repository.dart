@@ -10,7 +10,10 @@ class JobsRepository {
 
   Future<List<JobSummary>> getJobs() async {
     try {
-      final response = await _dio.get<Map<String, dynamic>>('/jobs');
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/jobs',
+        queryParameters: const {'scope': 'for-me'},
+      );
       return _items(response.data).map(JobSummary.fromJson).toList();
     } on Object catch (error) {
       throw ErrorMapper.from(error);
@@ -68,6 +71,17 @@ class JobsRepository {
         '/jobs/$jobId/applications',
       );
       return _items(response.data).map(JobApplicationSummary.fromJson).toList();
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
+  Future<List<SuggestedWorker>> getSuggestedWorkers(String jobId) async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/jobs/$jobId/suggested-workers',
+      );
+      return _items(response.data).map(SuggestedWorker.fromJson).toList();
     } on Object catch (error) {
       throw ErrorMapper.from(error);
     }

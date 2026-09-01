@@ -10,6 +10,7 @@ import '../../features/auth/presentation/screens/phone_entry_screen.dart';
 import '../../features/bootstrap/presentation/screens/splash_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/jobs/presentation/screens/jobs_screens.dart';
+import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/onboarding/domain/onboarding_state.dart';
 import '../../features/onboarding/presentation/controllers/onboarding_controller.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screens.dart';
@@ -36,6 +37,7 @@ abstract final class AppRoutes {
   static const createJob = '/jobs/create';
   static const workers = '/workers';
   static const assignments = '/assignments';
+  static const notifications = '/notifications';
   static const workerBookingPath = '/workers/:id/book';
 
   static String workerBooking(String id) => '/workers/$id/book';
@@ -152,6 +154,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.assignments,
         builder: (context, state) => const AssignmentsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationsScreen(),
       ),
       GoRoute(
         path: AppRoutes.workerBookingPath,

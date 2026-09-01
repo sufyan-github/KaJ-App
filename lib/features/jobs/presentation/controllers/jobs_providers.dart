@@ -21,6 +21,12 @@ final jobApplicationsProvider =
       (ref, jobId) => ref.watch(jobsRepositoryProvider).getApplications(jobId),
     );
 
+final suggestedWorkersProvider =
+    FutureProvider.family<List<SuggestedWorker>, String>(
+      (ref, jobId) =>
+          ref.watch(jobsRepositoryProvider).getSuggestedWorkers(jobId),
+    );
+
 final assignmentsProvider = FutureProvider<List<AssignmentSummary>>(
   (ref) => ref.watch(jobsRepositoryProvider).getAssignments(),
 );

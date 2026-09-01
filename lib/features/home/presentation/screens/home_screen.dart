@@ -115,6 +115,12 @@ class HomeScreen extends ConsumerWidget {
                         subtitle: 'সেবা ও দক্ষতা দেখুন',
                         onTap: () => context.push(AppRoutes.categories),
                       ),
+                      _DashboardTile(
+                        icon: Icons.notifications_outlined,
+                        title: 'নোটিফিকেশন',
+                        subtitle: 'আবেদন ও বুকিং আপডেট দেখুন',
+                        onTap: () => context.push(AppRoutes.notifications),
+                      ),
                       if (isWorker) ...[
                         _DashboardTile(
                           icon: Icons.person_search_outlined,

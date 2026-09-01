@@ -94,6 +94,45 @@ class JobFeedScreen extends ConsumerWidget {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: KSpacing.sm),
+                  Text(
+                    'ম্যাচ করা কর্মী',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: KSpacing.xs),
+                  sheetRef
+                      .watch(suggestedWorkersProvider(job.id))
+                      .when(
+                        loading: () => const LinearProgressIndicator(),
+                        error: (_, _) => const Text('পরামর্শ লোড করা যায়নি।'),
+                        data: (workers) => workers.isEmpty
+                            ? const Text(
+                                'এখনো কোনো উপযুক্ত কর্মী পাওয়া যায়নি।',
+                              )
+                            : SizedBox(
+                                height: 92,
+                                child: ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: workers.take(8).length,
+                                  separatorBuilder: (_, _) =>
+                                      const SizedBox(width: KSpacing.sm),
+                                  itemBuilder: (context, index) {
+                                    final worker = workers[index];
+                                    return ActionChip(
+                                      avatar: CircleAvatar(
+                                        child: Text('${worker.matchScore}%'),
+                                      ),
+                                      label: Text(
+                                        '${worker.displayName}\n${worker.skills.take(2).join(', ')}',
+                                      ),
+                                      onPressed: () => context.push(
+                                        AppRoutes.workerBooking(worker.id),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                      ),
+                  const SizedBox(height: KSpacing.md),
                   applications.when(
                     loading: () => const Padding(
                       padding: EdgeInsets.all(KSpacing.xl),
@@ -266,7 +305,18 @@ class _JobCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.work_outline, color: KColors.primary),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Icon(Icons.work_outline, color: KColors.primary),
+              if (job.matchScore case final score?)
+                Chip(
+                  visualDensity: VisualDensity.compact,
+                  avatar: const Icon(Icons.auto_awesome, size: 16),
+                  label: Text('$score%'),
+                ),
+            ],
+          ),
           const SizedBox(height: KSpacing.sm),
           Text(
             job.title,
@@ -283,6 +333,16 @@ class _JobCard extends StatelessWidget {
           ),
           const SizedBox(height: KSpacing.xs),
           Text(job.description, maxLines: 3, overflow: TextOverflow.ellipsis),
+          if (job.matchReasons.isNotEmpty)
+            Text(
+              _matchReasonBn(job.matchReasons.first),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: KColors.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           const Spacer(),
           if (job.startsAt != null)
             Text(
@@ -894,6 +954,17 @@ String? _taka(String? poisha) {
   final value = int.tryParse(poisha ?? '');
   return value == null ? null : (value ~/ 100).toString();
 }
+
+String _matchReasonBn(String reason) => switch (reason) {
+  'Skills match' => 'আপনার দক্ষতার সঙ্গে মেলে',
+  'Nearby service area' => 'আপনার কাছাকাছি কাজ',
+  'Available for this time' => 'আপনার খালি সময়ের সঙ্গে মেলে',
+  'Rate fits the budget' => 'পারিশ্রমিক আপনার রেটের সঙ্গে মেলে',
+  'Relevant experience' => 'আপনার অভিজ্ঞতার সঙ্গে মেলে',
+  'Strong worker rating' => 'রেটিং অনুযায়ী ভালো মিল',
+  'Reliable work history' => 'নির্ভরযোগ্যতার সঙ্গে মেলে',
+  _ => reason,
+};
 
 String _statusBn(String status) => switch (status) {
   'PENDING_CONFIRMATION' => 'নিশ্চিতকরণের অপেক্ষায়',
