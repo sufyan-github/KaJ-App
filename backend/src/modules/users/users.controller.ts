@@ -1,4 +1,12 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
@@ -20,5 +28,29 @@ export class UsersController {
     @Body() body: ActivateRoleDto,
   ) {
     return this.users.activateRole(claims.sub, body.role);
+  }
+
+  @Get("favorites")
+  @Policy(Policies.authenticated())
+  favorites(@CurrentUser() claims: AccessTokenClaims) {
+    return this.users.favorites(claims.sub);
+  }
+
+  @Post("favorites/:workerId")
+  @Policy(Policies.authenticated())
+  saveFavorite(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("workerId", new ParseUUIDPipe()) workerId: string,
+  ) {
+    return this.users.saveFavorite(claims.sub, workerId);
+  }
+
+  @Delete("favorites/:workerId")
+  @Policy(Policies.authenticated())
+  removeFavorite(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("workerId", new ParseUUIDPipe()) workerId: string,
+  ) {
+    return this.users.removeFavorite(claims.sub, workerId);
   }
 }

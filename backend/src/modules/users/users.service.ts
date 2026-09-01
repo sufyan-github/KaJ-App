@@ -159,6 +159,51 @@ export class UsersService {
     };
   }
 
+  async favorites(userId: string) {
+    const rows = await this.prisma.favorite.findMany({
+      where: { user_id: userId },
+      include: { target: { include: { profile: true, worker_profile: true } } },
+      orderBy: { created_at: "desc" },
+    });
+    return {
+      items: rows.map((row) => ({
+        userId: row.target_user_id,
+        displayName: row.target.profile?.display_name || "কর্মী",
+        ratingAverage: row.target.worker_profile?.rating_avg.toString() ?? "0",
+        savedAt: row.created_at.toISOString(),
+      })),
+    };
+  }
+
+  async saveFavorite(userId: string, workerId: string) {
+    if (userId === workerId)
+      throw new BadRequestException("Cannot save yourself.");
+    const worker = await this.prisma.user.findFirst({
+      where: {
+        id: workerId,
+        worker_profile: { isNot: null },
+        deleted_at: null,
+      },
+      select: { id: true },
+    });
+    if (!worker) throw new NotFoundException();
+    await this.prisma.favorite.upsert({
+      where: {
+        user_id_target_user_id: { user_id: userId, target_user_id: workerId },
+      },
+      update: {},
+      create: { user_id: userId, target_user_id: workerId },
+    });
+    return { saved: true, workerId };
+  }
+
+  async removeFavorite(userId: string, workerId: string) {
+    await this.prisma.favorite.deleteMany({
+      where: { user_id: userId, target_user_id: workerId },
+    });
+    return { saved: false, workerId };
+  }
+
   private async loadWorkerSkills(userId: string) {
     const rows = await this.prisma.userSkill.findMany({
       where: { user_id: userId },

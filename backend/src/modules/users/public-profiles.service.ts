@@ -35,6 +35,10 @@ const workerPublicSelect = {
     where: { is_active: true },
     select: { start_time: true },
   },
+  badges: {
+    where: { revoked_at: null },
+    select: { badge: { select: { slug: true, name_bn: true, icon: true } } },
+  },
 } satisfies Prisma.UserSelect;
 
 type PublicWorkerRecord = Prisma.UserGetPayload<{
@@ -104,33 +108,41 @@ export class PublicProfilesService {
           })
         ).downloadUrl
       : null;
-    return createPublicProfileProjection({
-      id: user.id,
-      displayName: user.profile.display_name,
-      photoUrl,
-      area: user.profile.primary_location
-        ? {
-            nameEn: user.profile.primary_location.name_en,
-            nameBn: user.profile.primary_location.name_bn,
-          }
-        : null,
-      latitude: user.profile.lat?.toNumber() ?? null,
-      longitude: user.profile.lng?.toNumber() ?? null,
-      trustLevel: user.profile.trust_level,
-      ratingAverage: user.worker_profile.rating_avg.toString(),
-      ratingCount: user.worker_profile.rating_count,
-      completedJobsCount: user.worker_profile.completed_jobs_count,
-      skills: user.skills.map((item) => ({
-        id: item.skill.id,
-        nameEn: item.skill.name_en,
-        nameBn: item.skill.name_bn,
-        level: item.level,
-        isVerified: item.is_verified,
+    return {
+      ...createPublicProfileProjection({
+        id: user.id,
+        displayName: user.profile.display_name,
+        photoUrl,
+        area: user.profile.primary_location
+          ? {
+              nameEn: user.profile.primary_location.name_en,
+              nameBn: user.profile.primary_location.name_bn,
+            }
+          : null,
+        latitude: user.profile.lat?.toNumber() ?? null,
+        longitude: user.profile.lng?.toNumber() ?? null,
+        trustLevel: user.profile.trust_level,
+        ratingAverage: user.worker_profile.rating_avg.toString(),
+        ratingCount: user.worker_profile.rating_count,
+        completedJobsCount: user.worker_profile.completed_jobs_count,
+        skills: user.skills.map((item) => ({
+          id: item.skill.id,
+          nameEn: item.skill.name_en,
+          nameBn: item.skill.name_bn,
+          level: item.level,
+          isVerified: item.is_verified,
+        })),
+        availabilityStartMinutes: user.availability_rules.map(
+          (rule) =>
+            rule.start_time.getUTCHours() * 60 +
+            rule.start_time.getUTCMinutes(),
+        ),
+      }),
+      badges: (user.badges ?? []).map(({ badge }) => ({
+        slug: badge.slug,
+        nameBn: badge.name_bn,
+        icon: badge.icon,
       })),
-      availabilityStartMinutes: user.availability_rules.map(
-        (rule) =>
-          rule.start_time.getUTCHours() * 60 + rule.start_time.getUTCMinutes(),
-      ),
-    });
+    };
   }
 }

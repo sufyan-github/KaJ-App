@@ -192,6 +192,38 @@ const configSettings = [
   ["assignment.settings", { confirmWindowMinutes: 120, autoConfirmHours: 48 }],
 ] as const;
 
+const badges = [
+  ["verified", "Verified", "যাচাইকৃত", "verified", { trust: true }],
+  [
+    "new-worker",
+    "New worker",
+    "নতুন কর্মী",
+    "new_releases",
+    { completedMax: 2 },
+  ],
+  [
+    "reliable",
+    "Reliable",
+    "নির্ভরযোগ্য",
+    "handshake",
+    { completedMin: 5, completionRateBpsMin: 9000 },
+  ],
+  [
+    "top-rated",
+    "Top rated",
+    "সেরা রেটিং",
+    "star",
+    { ratingCountMin: 10, ratingAverageMin: 4.8 },
+  ],
+  [
+    "experienced",
+    "Experienced",
+    "অভিজ্ঞ",
+    "workspace_premium",
+    { completedMin: 25 },
+  ],
+] as const;
+
 async function seed() {
   const categoryIds = new Map<string, string>();
   for (const [sort_order, category] of categories.entries()) {
@@ -282,6 +314,14 @@ async function seed() {
       where: { key },
       update: { value_json },
       create: { key, value_json },
+    });
+  }
+
+  for (const [slug, name_en, name_bn, icon, rule_json] of badges) {
+    await prisma.badge.upsert({
+      where: { slug },
+      update: { name_en, name_bn, icon, rule_json },
+      create: { slug, name_en, name_bn, icon, rule_json },
     });
   }
 }

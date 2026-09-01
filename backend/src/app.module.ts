@@ -33,6 +33,7 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { CatalogModule } from "./modules/catalog/catalog.module";
 import { JobsModule } from "./modules/jobs/jobs.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
+import { ReviewsModule } from "./modules/reviews/reviews.module";
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { NotificationsModule } from "./modules/notifications/notifications.modul
     HealthModule,
     JobsModule,
     NotificationsModule,
+    ReviewsModule,
     UsersModule,
     UploadsModule,
   ],
