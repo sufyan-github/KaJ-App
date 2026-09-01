@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-09-01
 **Current phase:** Phase 2 — identity, taxonomy, and profiles
-**Current task:** Phase 2 exit gate — D10 public projection and timed onboarding evidence
+**Current task:** Phase 2 exit gate — timed human onboarding evidence
 **Product-code gate:** Owner overrode the sequencing gate on 2026-08-18; Phase 0 remains unreviewed
 
 ## Status legend
@@ -58,8 +58,8 @@
 | P2-USR-03 | IMPLEMENTED | Atomic worker skill replacement, 15-skill cap, duplicate/unknown checks, bilingual output, and optional bounded rates; full backend gates green. Completion record: `docs/completed/P2-USR-03.md`. |
 | P2-USR-04 | IMPLEMENTED | Exact D4 calculator, fixed Dhaka time arithmetic, exceptions, buffered conflicts, recurrence rule, atomic persistence API, and 100% calculator branch coverage. Completion record: `docs/completed/P2-USR-04.md`. |
 | P2-USR-05 | IMPLEMENTED | Private signed uploads, byte-level verification, EXIF-free photo variants, sensitive documents, and owner-scoped signed reads; full backend gates green. Completion record: `docs/completed/P2-USR-05.md`. |
-| P2-UI-06 | IMPLEMENTED | Bangla-first persisted onboarding, role/location/skills/rates/availability flows, all required Phase 2 destinations, 34 tests, and all flavor builds. Timed human evidence and server-backed D10 public projection remain exit-gate work. Record: `../Kaaj/docs/completed/P2-UI-06.md`. |
-| Phase 1 exit gate | PLANNED     | Clean clone, real login, auth tests, envelopes, CI, Swagger.                                                                                                                                     |
+| P2-UI-06 | IMPLEMENTED | Bangla-first persisted onboarding, role/location/skills/rates/availability flows, all required Phase 2 destinations, server-backed D10 preview, 35 tests, and all flavor builds. Timed human evidence remains exit-gate work. Record: `../Kaaj/docs/completed/P2-UI-06.md`. |
+| Phase 2 exit gate | BLOCKED | Engineering checks are green, including D10 public masking (`docs/completed/P2-D10-PROJECTION.md`). A human must complete a timed Bangla onboarding run in ≤90 seconds. |
 
 ### Accepted storage direction
 
@@ -78,7 +78,7 @@ production handling of personal data.
 
 | Phase   | Status  | Task IDs / exit result                                              |
 | ------- | ------- | ------------------------------------------------------------------- |
-| Phase 2 | PLANNED | P2-TAX-01, P2-USR-02..05, P2-UI-06; identity/taxonomy/profile gate. |
+| Phase 2 | IN PROGRESS | All engineering tasks implemented; timed human onboarding evidence remains. |
 | Phase 3 | PLANNED | P3-JOB-01..03, P3-APP-04..05, P3-UI-06; transaction-spine gate.     |
 | Phase 4 | PLANNED | P4-MATCH-01..02, P4-NOTIF-03, P4-UI-04; explainable matching gate.  |
 | Phase 5 | PLANNED | P5-ASSIGN-01..04, P5-UI-05; H4 completion-journey gate.             |
