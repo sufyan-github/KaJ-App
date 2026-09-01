@@ -57,7 +57,7 @@
 | P2-USR-02 | IMPLEMENTED | Profile updates, idempotent dual-role activation, lazy role profiles, PHONE trust initialization, home routing payload, and actionable role-only 403; full backend gates green. Completion record: `docs/completed/P2-USR-02.md`. |
 | P2-USR-03 | IMPLEMENTED | Atomic worker skill replacement, 15-skill cap, duplicate/unknown checks, bilingual output, and optional bounded rates; full backend gates green. Completion record: `docs/completed/P2-USR-03.md`. |
 | P2-USR-04 | IMPLEMENTED | Exact D4 calculator, fixed Dhaka time arithmetic, exceptions, buffered conflicts, recurrence rule, atomic persistence API, and 100% calculator branch coverage. Completion record: `docs/completed/P2-USR-04.md`. |
-| P2-USR-05 | IN PROGRESS | Signed uploads, content verification, EXIF removal, variants, and private document reads. |
+| P2-USR-05 | BLOCKED | Image processing requires `sharp@0.34.3`, but the runtime only exposes pnpm 11.19.0 while the repository enforces pnpm 10.34.5.x; repeated installation attempts failed with `ERR_PNPM_UNSUPPORTED_ENGINE`. See `docs/P2-USR-05-BLOCKER.md`. |
 | Phase 1 exit gate | PLANNED     | Clean clone, real login, auth tests, envelopes, CI, Swagger.                                                                                                                                     |
 
 ### Accepted storage direction
