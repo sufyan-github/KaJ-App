@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-09-01
 **Current phase:** Phase 2 — identity, taxonomy, and profiles
-**Current task:** P2-USR-04 — availability engine
+**Current task:** P2-USR-05 — uploads and photos
 **Product-code gate:** Owner overrode the sequencing gate on 2026-08-18; Phase 0 remains unreviewed
 
 ## Status legend
@@ -56,7 +56,8 @@
 | P2-TAX-01 | IMPLEMENTED | Public bilingual catalog endpoints, tree integrity, Redis caching/invalidation, administrator mutations, typed Flutter contracts, and persistent Hive cache; full backend and Flutter gates green. Completion record: `docs/completed/P2-TAX-01.md`. |
 | P2-USR-02 | IMPLEMENTED | Profile updates, idempotent dual-role activation, lazy role profiles, PHONE trust initialization, home routing payload, and actionable role-only 403; full backend gates green. Completion record: `docs/completed/P2-USR-02.md`. |
 | P2-USR-03 | IMPLEMENTED | Atomic worker skill replacement, 15-skill cap, duplicate/unknown checks, bilingual output, and optional bounded rates; full backend gates green. Completion record: `docs/completed/P2-USR-03.md`. |
-| P2-USR-04 | IN PROGRESS | Pure D4 availability calculator and persistence API. |
+| P2-USR-04 | IMPLEMENTED | Exact D4 calculator, fixed Dhaka time arithmetic, exceptions, buffered conflicts, recurrence rule, atomic persistence API, and 100% calculator branch coverage. Completion record: `docs/completed/P2-USR-04.md`. |
+| P2-USR-05 | IN PROGRESS | Signed uploads, content verification, EXIF removal, variants, and private document reads. |
 | Phase 1 exit gate | PLANNED     | Clean clone, real login, auth tests, envelopes, CI, Swagger.                                                                                                                                     |
 
 ### Accepted storage direction
