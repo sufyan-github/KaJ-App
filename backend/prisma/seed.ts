@@ -189,6 +189,7 @@ const configSettings = [
       strikeWindowDays: 60,
     },
   ],
+  ["assignment.settings", { confirmWindowMinutes: 120, autoConfirmHours: 48 }],
 ] as const;
 
 async function seed() {

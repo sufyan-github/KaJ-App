@@ -18,6 +18,7 @@ import { AccessTokenClaims } from "../auth/auth-token.service";
 import {
   AcceptApplicationDto,
   ApplyToJobDto,
+  CancelAssignmentDto,
   CreateBookingRequestDto,
   CreateJobDto,
   JobFeedQueryDto,
@@ -135,5 +136,64 @@ export class JobsController {
     @Param("id", new ParseUUIDPipe()) id: string,
   ) {
     return this.jobs.confirmAssignment(claims.sub, id);
+  }
+
+  @Post("assignments/:id/decline")
+  @Roles(RoleMode.WORKER)
+  @Policy(Policies.authenticated())
+  decline(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+  ) {
+    return this.jobs.declineAssignment(claims.sub, id);
+  }
+
+  @Get("assignments/:id")
+  @Policy(Policies.authenticated())
+  assignment(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+  ) {
+    return this.jobs.getAssignment(claims.sub, id);
+  }
+
+  @Post("assignments/:id/submit")
+  @Roles(RoleMode.WORKER)
+  @Policy(Policies.authenticated())
+  submit(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+  ) {
+    return this.jobs.submitWork(claims.sub, id);
+  }
+
+  @Post("assignments/:id/complete")
+  @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
+  @Policy(Policies.authenticated())
+  complete(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+  ) {
+    return this.jobs.completeWork(claims.sub, id);
+  }
+
+  @Post("assignments/:id/cancel-preview")
+  @Policy(Policies.authenticated())
+  cancelPreview(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @Body() body: CancelAssignmentDto,
+  ) {
+    return this.jobs.cancelPreview(claims.sub, id, body);
+  }
+
+  @Post("assignments/:id/cancel")
+  @Policy(Policies.authenticated())
+  cancel(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @Body() body: CancelAssignmentDto,
+  ) {
+    return this.jobs.cancelAssignment(claims.sub, id, body);
   }
 }

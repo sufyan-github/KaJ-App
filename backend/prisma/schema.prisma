@@ -651,6 +651,9 @@ model Assignment {
   agreed_ends_at      DateTime?
   status              AssignmentStatus @default(PENDING_CONFIRMATION)
   confirmed_at        DateTime?
+  confirmation_deadline_at DateTime?
+  submitted_at        DateTime?
+  completion_due_at   DateTime?
   cancelled_at        DateTime?
   cancel_reason       String?
   created_at          DateTime         @default(now())
@@ -658,7 +661,7 @@ model Assignment {
   job                 Job              @relation(fields: [job_id], references: [id], onDelete: Restrict)
   worker              User             @relation(fields: [worker_user_id], references: [id], onDelete: Restrict)
   application         Application      @relation(fields: [application_id], references: [id], onDelete: Restrict)
-  contract            Contract?
+  contracts           Contract[]
   work_sessions       WorkSession[]
   payments            Payment[]
   reviews             Review[]
@@ -667,12 +670,15 @@ model Assignment {
   @@unique([job_id, worker_user_id])
   @@index([worker_user_id, status])
   @@index([application_id])
+  @@index([confirmation_deadline_at, status])
+  @@index([completion_due_at, status])
   @@map("assignments")
 }
 
 model Contract {
   id                       String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  assignment_id            String     @unique @db.Uuid
+  assignment_id            String     @db.Uuid
+  version                  Int        @default(1)
   snapshot_json            Json
   platform_fee_poisha      BigInt
   worker_earning_poisha    BigInt
@@ -680,6 +686,8 @@ model Contract {
   created_at               DateTime   @default(now())
   assignment               Assignment @relation(fields: [assignment_id], references: [id], onDelete: Restrict)
 
+  @@unique([assignment_id, version])
+  @@index([assignment_id, created_at(sort: Desc)])
   @@map("contracts")
 }
 

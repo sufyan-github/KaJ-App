@@ -9,6 +9,7 @@ import { PrismaService } from "../../infra/prisma/prisma.service";
 import {
   AvailabilityRuleInput,
   calculateAvailability,
+  DHAKA_OFFSET_MINUTES,
   TimeWindow,
 } from "./availability.calculator";
 import {
@@ -229,15 +230,14 @@ export class AvailabilityService {
 }
 
 function withUtcTime(day: Date, time: Date): Date {
-  return new Date(
-    Date.UTC(
-      day.getUTCFullYear(),
-      day.getUTCMonth(),
-      day.getUTCDate(),
-      time.getUTCHours(),
-      time.getUTCMinutes(),
-    ),
+  const localWallClock = Date.UTC(
+    day.getUTCFullYear(),
+    day.getUTCMonth(),
+    day.getUTCDate(),
+    time.getUTCHours(),
+    time.getUTCMinutes(),
   );
+  return new Date(localWallClock - DHAKA_OFFSET_MINUTES * 60_000);
 }
 
 function subtractWindows(

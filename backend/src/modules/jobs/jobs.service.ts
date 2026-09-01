@@ -2,8 +2,10 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
+  Optional,
 } from "@nestjs/common";
 import {
   ApplicationStatus,
@@ -13,20 +15,29 @@ import {
   JobType,
   PaymentModel,
   Prisma,
+  UserStatus,
   type Job,
 } from "@prisma/client";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
+import { CLOCK, type Clock } from "../../common/time/clock";
 import { AvailabilityService } from "../availability/availability.service";
 import { MatchingService } from "../matching/matching.service";
 import { NotificationsService } from "../notifications/notifications.service";
 import {
   AcceptApplicationDto,
   ApplyToJobDto,
+  CancelAssignmentDto,
   CreateBookingRequestDto,
   CreateJobDto,
   JobFeedQueryDto,
 } from "./dto/jobs.dto";
+import {
+  calculateCancellation,
+  defaultCancellationPolicy,
+  type CancellationActor,
+  type CancellationPolicy,
+} from "./cancellation/cancellation.calculator";
 import { JobStateMachine } from "./state-machine/job-state.machine";
 
 const jobInclude = {
@@ -48,7 +59,12 @@ export class JobsService {
     private readonly availability: AvailabilityService,
     private readonly matching?: MatchingService,
     private readonly notifications?: NotificationsService,
+    @Optional() @Inject(CLOCK) private readonly clock?: Clock,
   ) {}
+
+  private now() {
+    return this.clock?.now() ?? new Date();
+  }
 
   async create(posterUserId: string, input: CreateJobDto) {
     const window = parseWindow(input.startsAt, input.endsAt);
@@ -255,12 +271,13 @@ export class JobsService {
   }
 
   async listAssignments(userId: string) {
+    await this.reconcileDueAssignments(userId);
     const assignments = await this.prisma.assignment.findMany({
       where: {
         OR: [{ worker_user_id: userId }, { job: { poster_user_id: userId } }],
       },
       include: {
-        job: { select: { title: true, poster_user_id: true } },
+        job: { select: { title: true, poster_user_id: true, status: true } },
       },
       orderBy: { created_at: "desc" },
       take: 100,
@@ -269,10 +286,272 @@ export class JobsService {
       items: assignments.map((assignment) => ({
         ...serializeAssignment(assignment),
         title: assignment.job.title,
+        jobStatus: assignment.job.status,
+        confirmationDeadlineAt:
+          assignment.confirmation_deadline_at?.toISOString() ?? null,
+        submittedAt: assignment.submitted_at?.toISOString() ?? null,
+        completionDueAt: assignment.completion_due_at?.toISOString() ?? null,
         isWorker: assignment.worker_user_id === userId,
         isPoster: assignment.job.poster_user_id === userId,
       })),
     };
+  }
+
+  async getAssignment(userId: string, assignmentId: string) {
+    await this.reconcileDueAssignments(userId);
+    const assignment = await this.prisma.assignment.findFirst({
+      where: {
+        id: assignmentId,
+        OR: [{ worker_user_id: userId }, { job: { poster_user_id: userId } }],
+      },
+      include: {
+        job: {
+          include: {
+            status_history: { orderBy: { created_at: "asc" } },
+            location: { select: { name_bn: true, name_en: true } },
+          },
+        },
+        contracts: { orderBy: { version: "desc" } },
+      },
+    });
+    if (!assignment) throw new NotFoundException();
+    return {
+      ...serializeAssignment(assignment),
+      title: assignment.job.title,
+      description: assignment.job.description,
+      locationName: assignment.job.location.name_bn,
+      jobStatus: assignment.job.status,
+      isWorker: assignment.worker_user_id === userId,
+      isPoster: assignment.job.poster_user_id === userId,
+      confirmationDeadlineAt:
+        assignment.confirmation_deadline_at?.toISOString() ?? null,
+      submittedAt: assignment.submitted_at?.toISOString() ?? null,
+      completionDueAt: assignment.completion_due_at?.toISOString() ?? null,
+      contractVersion: assignment.contracts[0]?.version ?? null,
+      timeline: assignment.job.status_history.map((item) => ({
+        status: item.to_status,
+        at: item.created_at.toISOString(),
+        reason: item.reason,
+      })),
+    };
+  }
+
+  async submitWork(workerUserId: string, assignmentId: string) {
+    const assignment = await this.participantAssignment(
+      workerUserId,
+      assignmentId,
+    );
+    if (assignment.worker_user_id !== workerUserId)
+      throw new NotFoundException();
+    if (assignment.status !== AssignmentStatus.CONFIRMED) {
+      throw new ConflictException("Only confirmed work can be submitted.");
+    }
+    const settings = await this.assignmentSettings();
+    const now = this.now();
+    const updated = await this.prisma.$transaction(async (transaction) => {
+      let job = await transaction.job.findUniqueOrThrow({
+        where: { id: assignment.job_id },
+      });
+      job = await this.advanceForTime(transaction, job, assignment, now);
+      if (job.status !== JobStatus.IN_PROGRESS) {
+        throw new ConflictException(
+          "Work cannot be submitted before it starts.",
+        );
+      }
+      const submitted = await this.states.transitionInTransaction(
+        transaction,
+        job,
+        JobStatus.SUBMITTED,
+        { type: JobActorType.WORKER, userId: workerUserId },
+      );
+      await this.states.transitionInTransaction(
+        transaction,
+        submitted,
+        JobStatus.CUSTOMER_REVIEW,
+        { type: JobActorType.SYSTEM },
+      );
+      return transaction.assignment.update({
+        where: { id: assignmentId },
+        data: {
+          submitted_at: now,
+          completion_due_at: new Date(
+            now.getTime() + settings.autoConfirmHours * 3_600_000,
+          ),
+        },
+      });
+    });
+    await this.notifications?.create({
+      userId: assignment.job.poster_user_id,
+      type: "WORK_SUBMITTED",
+      title: "Work submitted",
+      body: `Please review ${assignment.job.title}`,
+      payload: { route: "/assignments", assignmentId },
+      dedupeKey: `assignment:${assignmentId}:submitted`,
+    });
+    return serializeAssignment(updated);
+  }
+
+  async completeWork(posterUserId: string, assignmentId: string) {
+    const assignment = await this.participantAssignment(
+      posterUserId,
+      assignmentId,
+    );
+    if (assignment.job.poster_user_id !== posterUserId)
+      throw new NotFoundException();
+    return this.finishAssignment(
+      assignmentId,
+      JobActorType.POSTER,
+      posterUserId,
+    );
+  }
+
+  async cancelPreview(
+    userId: string,
+    assignmentId: string,
+    input: CancelAssignmentDto,
+  ) {
+    const assignment = await this.participantAssignment(userId, assignmentId);
+    const actor = this.cancellationActor(userId, assignment);
+    const policy = await this.cancellationPolicy();
+    return calculateCancellation({
+      actor,
+      now: this.now(),
+      startsAt: assignment.agreed_starts_at ?? this.now(),
+      agreedPricePoisha: assignment.agreed_price_poisha,
+      reasonCode: input.reasonCode,
+      policy,
+    });
+  }
+
+  async cancelAssignment(
+    userId: string,
+    assignmentId: string,
+    input: CancelAssignmentDto,
+  ) {
+    if (input.confirmed !== true) {
+      throw new BadRequestException("Preview and confirm cancellation first.");
+    }
+    const assignment = await this.participantAssignment(userId, assignmentId);
+    if (
+      assignment.status === AssignmentStatus.CANCELLED ||
+      assignment.status === AssignmentStatus.COMPLETED
+    ) {
+      throw new ConflictException("Assignment can no longer be cancelled.");
+    }
+    const actor = this.cancellationActor(userId, assignment);
+    const preview = await this.cancelPreview(userId, assignmentId, input);
+    const to =
+      actor === "customer"
+        ? JobStatus.CANCELLED_BY_CUSTOMER
+        : JobStatus.CANCELLED_BY_WORKER;
+    const actorType =
+      actor === "customer" ? JobActorType.POSTER : JobActorType.WORKER;
+    const strikeCutoff = new Date(
+      this.now().getTime() -
+        (await this.cancellationPolicy()).strikeWindowDays * 86_400_000,
+    );
+    const previousStrikes = preview.addsStrike
+      ? await this.prisma.auditLog.count({
+          where: {
+            actor_user_id: userId,
+            action: "CANCELLATION_STRIKE",
+            created_at: { gte: strikeCutoff },
+          },
+        })
+      : 0;
+    await this.prisma.$transaction(async (transaction) => {
+      const job = await transaction.job.findUniqueOrThrow({
+        where: { id: assignment.job_id },
+      });
+      await this.states.transitionInTransaction(
+        transaction,
+        job,
+        to,
+        { type: actorType, userId },
+        input.reasonCode,
+      );
+      await transaction.assignment.update({
+        where: { id: assignmentId },
+        data: {
+          status: AssignmentStatus.CANCELLED,
+          cancelled_at: this.now(),
+          cancel_reason: `${input.reasonCode}${input.note ? `: ${input.note.trim()}` : ""}`,
+        },
+      });
+      if (
+        assignment.status === AssignmentStatus.CONFIRMED &&
+        job.workers_filled > 0
+      ) {
+        await transaction.job.update({
+          where: { id: job.id },
+          data: { workers_filled: { decrement: 1 } },
+        });
+      }
+      if (actor === "customer") {
+        await transaction.customerProfile.updateMany({
+          where: { user_id: userId },
+          data: { cancellation_count: { increment: 1 } },
+        });
+      } else if (preview.reliabilityDelta) {
+        const profile = await transaction.workerProfile.findUnique({
+          where: { user_id: userId },
+        });
+        if (profile) {
+          await transaction.workerProfile.update({
+            where: { user_id: userId },
+            data: {
+              reliability_score: Math.max(
+                0,
+                Number(profile.reliability_score) +
+                  preview.reliabilityDelta / 100,
+              ),
+              cancellation_rate_bps: { increment: 100 },
+            },
+          });
+        }
+      }
+      await transaction.auditLog.create({
+        data: {
+          actor_user_id: userId,
+          action: preview.addsStrike
+            ? "CANCELLATION_STRIKE"
+            : "ASSIGNMENT_CANCELLED",
+          entity: "Assignment",
+          entity_id: assignmentId,
+          after_json: { ...preview, reasonCode: input.reasonCode },
+        },
+      });
+      if (preview.needsAdminReview) {
+        await transaction.report.create({
+          data: {
+            reporter_user_id: userId,
+            target_type: "ASSIGNMENT_CANCELLATION",
+            target_id: assignmentId,
+            reason_code: input.reasonCode,
+            description: input.note,
+          },
+        });
+      }
+      if (preview.addsStrike && previousStrikes + 1 >= 3) {
+        await transaction.user.update({
+          where: { id: userId },
+          data: { status: UserStatus.SUSPENDED },
+        });
+      }
+    });
+    const otherUserId =
+      actor === "customer"
+        ? assignment.worker_user_id
+        : assignment.job.poster_user_id;
+    await this.notifications?.create({
+      userId: otherUserId,
+      type: "ASSIGNMENT_CANCELLED",
+      title: "Assignment cancelled",
+      body: `${assignment.job.title} was cancelled`,
+      payload: { route: "/assignments", assignmentId },
+      dedupeKey: `assignment:${assignmentId}:cancelled`,
+    });
+    return { id: assignmentId, status: AssignmentStatus.CANCELLED, preview };
   }
 
   async acceptApplication(
@@ -280,6 +559,7 @@ export class JobsService {
     applicationId: string,
     input: AcceptApplicationDto,
   ) {
+    const settings = await this.assignmentSettings();
     const application = await this.prisma.application.findUnique({
       where: { id: applicationId },
       include: { job: true },
@@ -336,6 +616,9 @@ export class JobsService {
             agreed_price_poisha: price,
             agreed_starts_at: application.proposed_starts_at,
             agreed_ends_at: application.proposed_ends_at,
+            confirmation_deadline_at: new Date(
+              this.now().getTime() + settings.confirmWindowMinutes * 60_000,
+            ),
           },
         });
         await createContractSnapshot(transaction, {
@@ -372,6 +655,7 @@ export class JobsService {
     workerUserId: string,
     input: CreateBookingRequestDto,
   ) {
+    const settings = await this.assignmentSettings();
     if (posterUserId === workerUserId) {
       throw new BadRequestException("You cannot book yourself.");
     }
@@ -442,6 +726,9 @@ export class JobsService {
           agreed_price_poisha: price,
           agreed_starts_at: window.startsAt,
           agreed_ends_at: window.endsAt,
+          confirmation_deadline_at: new Date(
+            this.now().getTime() + settings.confirmWindowMinutes * 60_000,
+          ),
         },
       });
       await createContractSnapshot(transaction, {
@@ -482,6 +769,16 @@ export class JobsService {
       throw new ConflictException(
         "Assignment is no longer awaiting confirmation.",
       );
+    }
+    if (
+      assignment.confirmation_deadline_at &&
+      this.now() > assignment.confirmation_deadline_at
+    ) {
+      await this.expirePendingAssignment(
+        assignment,
+        "Confirmation window expired",
+      );
+      throw new ConflictException("The confirmation window has expired.");
     }
     if (!assignment.agreed_starts_at || !assignment.agreed_ends_at) {
       throw new BadRequestException("Assignment has no agreed slot.");
@@ -530,7 +827,7 @@ export class JobsService {
           },
           data: {
             status: AssignmentStatus.CONFIRMED,
-            confirmed_at: new Date(),
+            confirmed_at: this.now(),
           },
         });
         if (confirmed.count !== 1) {
@@ -553,6 +850,14 @@ export class JobsService {
           JobStatus.CONFIRMED,
           { type: JobActorType.WORKER, userId: workerUserId },
         );
+        await createContractSnapshot(transaction, {
+          assignmentId: result.id,
+          job,
+          workerUserId,
+          agreedPricePoisha: result.agreed_price_poisha,
+          agreedStartsAt: result.agreed_starts_at!,
+          agreedEndsAt: result.agreed_ends_at!,
+        });
         await transaction.job.update({
           where: { id: assignment.job_id },
           data: {
@@ -579,6 +884,251 @@ export class JobsService {
         });
     }
     return serializeAssignment(updated);
+  }
+
+  async declineAssignment(workerUserId: string, assignmentId: string) {
+    const assignment = await this.prisma.assignment.findUnique({
+      where: { id: assignmentId },
+    });
+    if (!assignment || assignment.worker_user_id !== workerUserId) {
+      throw new NotFoundException();
+    }
+    if (assignment.status !== AssignmentStatus.PENDING_CONFIRMATION) {
+      throw new ConflictException(
+        "Assignment is no longer awaiting confirmation.",
+      );
+    }
+    await this.expirePendingAssignment(assignment, "Worker declined");
+    return { id: assignmentId, status: AssignmentStatus.DECLINED };
+  }
+
+  private async expirePendingAssignment(
+    assignment: { id: string; job_id: string; application_id: string },
+    reason: string,
+  ) {
+    const result = await this.prisma.$transaction(async (transaction) => {
+      const changed = await transaction.assignment.updateMany({
+        where: {
+          id: assignment.id,
+          status: AssignmentStatus.PENDING_CONFIRMATION,
+        },
+        data: { status: AssignmentStatus.DECLINED, cancel_reason: reason },
+      });
+      if (changed.count !== 1) return null;
+      await transaction.application.update({
+        where: { id: assignment.application_id },
+        data: { status: ApplicationStatus.EXPIRED },
+      });
+      const job = await transaction.job.findUniqueOrThrow({
+        where: { id: assignment.job_id },
+      });
+      if (job.status === JobStatus.CONFIRMATION_PENDING) {
+        await this.states.transitionInTransaction(
+          transaction,
+          job,
+          JobStatus.APPLICATIONS_OPEN,
+          {
+            type:
+              reason === "Worker declined"
+                ? JobActorType.WORKER
+                : JobActorType.SYSTEM,
+          },
+          reason,
+        );
+      }
+      return job;
+    });
+    if (result) {
+      await this.notifications?.create({
+        userId: result.poster_user_id,
+        type: "ASSIGNMENT_DECLINED",
+        title: "Worker did not confirm",
+        body: `${result.title} is open for applications again`,
+        payload: { route: "/jobs", jobId: result.id },
+        dedupeKey: `assignment:${assignment.id}:declined`,
+      });
+    }
+  }
+
+  async reconcileDueAssignments(userId?: string) {
+    const now = this.now();
+    const participantWhere = userId
+      ? {
+          OR: [{ worker_user_id: userId }, { job: { poster_user_id: userId } }],
+        }
+      : {};
+    const pending = await this.prisma.assignment.findMany({
+      where: {
+        status: AssignmentStatus.PENDING_CONFIRMATION,
+        confirmation_deadline_at: { lte: now },
+        ...participantWhere,
+      },
+      select: { id: true, job_id: true, application_id: true },
+    });
+    for (const item of pending) {
+      await this.expirePendingAssignment(item, "Confirmation window expired");
+    }
+
+    const active = await this.prisma.assignment.findMany({
+      where: {
+        status: AssignmentStatus.CONFIRMED,
+        ...participantWhere,
+      },
+      include: { job: true },
+    });
+    for (const item of active) {
+      if (
+        item.completion_due_at &&
+        item.completion_due_at <= now &&
+        item.job.status === JobStatus.CUSTOMER_REVIEW
+      ) {
+        const dispute = await this.prisma.dispute.findFirst({
+          where: { assignment_id: item.id, status: { not: "CLOSED" } },
+          select: { id: true },
+        });
+        if (!dispute) await this.finishAssignment(item.id, JobActorType.SYSTEM);
+      } else {
+        await this.prisma.$transaction(async (transaction) => {
+          const job = await transaction.job.findUniqueOrThrow({
+            where: { id: item.job_id },
+          });
+          await this.advanceForTime(transaction, job, item, now);
+        });
+        if (
+          item.submitted_at &&
+          item.job.status === JobStatus.CUSTOMER_REVIEW
+        ) {
+          const elapsedHours =
+            (now.getTime() - item.submitted_at.getTime()) / 3_600_000;
+          for (const hour of [24, 44]) {
+            if (elapsedHours >= hour) {
+              await this.notifications?.create({
+                userId: item.job.poster_user_id,
+                type: "WORK_REVIEW_REMINDER",
+                title: "Work is waiting for review",
+                body: `Please review ${item.job.title}`,
+                payload: { route: "/assignments", assignmentId: item.id },
+                dedupeKey: `assignment:${item.id}:review:${hour}h`,
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private async advanceForTime(
+    transaction: Prisma.TransactionClient,
+    initialJob: Job,
+    assignment: { agreed_starts_at: Date | null },
+    now: Date,
+  ) {
+    if (!assignment.agreed_starts_at) return initialJob;
+    let job = initialJob;
+    if (
+      job.status === JobStatus.CONFIRMED &&
+      now.getTime() >= assignment.agreed_starts_at.getTime() - 24 * 3_600_000
+    ) {
+      job = await this.states.transitionInTransaction(
+        transaction,
+        job,
+        JobStatus.UPCOMING,
+        { type: JobActorType.SYSTEM },
+      );
+    }
+    if (
+      job.status === JobStatus.UPCOMING &&
+      now >= assignment.agreed_starts_at
+    ) {
+      job = await this.states.transitionInTransaction(
+        transaction,
+        job,
+        JobStatus.IN_PROGRESS,
+        { type: JobActorType.SYSTEM },
+      );
+    }
+    return job;
+  }
+
+  private async finishAssignment(
+    assignmentId: string,
+    actorType: JobActorType,
+    actorUserId?: string,
+  ) {
+    const result = await this.prisma.$transaction(async (transaction) => {
+      const assignment = await transaction.assignment.findUniqueOrThrow({
+        where: { id: assignmentId },
+      });
+      const job = await transaction.job.findUniqueOrThrow({
+        where: { id: assignment.job_id },
+      });
+      if (job.status !== JobStatus.CUSTOMER_REVIEW) {
+        throw new ConflictException("Work is not awaiting completion review.");
+      }
+      const completed = await this.states.transitionInTransaction(
+        transaction,
+        job,
+        JobStatus.COMPLETED,
+        { type: actorType, userId: actorUserId },
+      );
+      await this.states.transitionInTransaction(
+        transaction,
+        completed,
+        JobStatus.PAYMENT_RELEASED,
+        { type: JobActorType.SYSTEM },
+        "Payments disabled; completion recorded",
+      );
+      await transaction.job.update({
+        where: { id: job.id },
+        data: { completed_at: this.now() },
+      });
+      return transaction.assignment.update({
+        where: { id: assignmentId },
+        data: { status: AssignmentStatus.COMPLETED },
+      });
+    });
+    return serializeAssignment(result);
+  }
+
+  private participantAssignment(userId: string, assignmentId: string) {
+    return this.prisma.assignment.findFirstOrThrow({
+      where: {
+        id: assignmentId,
+        OR: [{ worker_user_id: userId }, { job: { poster_user_id: userId } }],
+      },
+      include: { job: true },
+    });
+  }
+
+  private cancellationActor(
+    userId: string,
+    assignment: { worker_user_id: string; job: { poster_user_id: string } },
+  ): CancellationActor {
+    if (assignment.job.poster_user_id === userId) return "customer";
+    if (assignment.worker_user_id === userId) return "worker";
+    throw new NotFoundException();
+  }
+
+  private async assignmentSettings() {
+    const setting = await this.prisma.configSetting.findUnique({
+      where: { key: "assignment.settings" },
+    });
+    const value = asRecord(setting?.value_json);
+    return {
+      confirmWindowMinutes: integerValue(value?.confirmWindowMinutes) ?? 120,
+      autoConfirmHours: integerValue(value?.autoConfirmHours) ?? 48,
+    };
+  }
+
+  private async cancellationPolicy(): Promise<CancellationPolicy> {
+    const setting = await this.prisma.configSetting.findUnique({
+      where: { key: "cancellation.policy" },
+    });
+    const value = setting?.value_json;
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      return defaultCancellationPolicy;
+    }
+    return value as unknown as CancellationPolicy;
   }
 
   private async ownedJob(posterUserId: string, jobId: string) {
@@ -664,19 +1214,26 @@ async function createContractSnapshot(
     agreedEndsAt: Date;
   },
 ) {
-  const [feeSetting, cancellationSetting, identities] = await Promise.all([
-    transaction.configSetting.findUnique({ where: { key: "platform.fees" } }),
-    transaction.configSetting.findUnique({
-      where: { key: "cancellation.policy" },
-    }),
-    transaction.user.findMany({
-      where: { id: { in: [input.job.poster_user_id, input.workerUserId] } },
-      select: {
-        id: true,
-        profile: { select: { display_name: true, trust_level: true } },
-      },
-    }),
-  ]);
+  const [feeSetting, cancellationSetting, identities, latestContract] =
+    await Promise.all([
+      transaction.configSetting.findUnique({ where: { key: "platform.fees" } }),
+      transaction.configSetting.findUnique({
+        where: { key: "cancellation.policy" },
+      }),
+      transaction.user.findMany({
+        where: { id: { in: [input.job.poster_user_id, input.workerUserId] } },
+        select: {
+          id: true,
+          profile: { select: { display_name: true, trust_level: true } },
+        },
+      }),
+      transaction.contract.findFirst({
+        where: { assignment_id: input.assignmentId },
+        orderBy: { version: "desc" },
+        select: { version: true },
+      }),
+    ]);
+  const version = (latestContract?.version ?? 0) + 1;
   const feeConfig = asRecord(feeSetting?.value_json);
   const feeBps = integerValue(feeConfig?.feeBps) ?? 800;
   const platformFee =
@@ -692,7 +1249,7 @@ async function createContractSnapshot(
     };
   };
   const snapshot: Prisma.JsonObject = {
-    version: 1,
+    version,
     job: {
       id: input.job.id,
       title: input.job.title,
@@ -724,6 +1281,7 @@ async function createContractSnapshot(
   return transaction.contract.create({
     data: {
       assignment_id: input.assignmentId,
+      version,
       snapshot_json: snapshot,
       platform_fee_poisha: platformFee,
       worker_earning_poisha: input.agreedPricePoisha - platformFee,

@@ -9,6 +9,7 @@ import {
   IsOptional,
   IsString,
   IsIn,
+  IsBoolean,
   IsUUID,
   Matches,
   Max,
@@ -172,4 +173,20 @@ export class CreateBookingRequestDto {
 
   @Matches(MONEY_PATTERN)
   offeredPricePoisha!: string;
+}
+
+export class CancelAssignmentDto {
+  @IsString()
+  @MinLength(2)
+  @MaxLength(80)
+  reasonCode!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  note?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  confirmed?: boolean;
 }

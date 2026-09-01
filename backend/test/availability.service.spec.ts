@@ -100,8 +100,8 @@ describe("AvailabilityService", () => {
     ]);
     assignmentFindMany.mockResolvedValue([
       {
-        agreed_starts_at: new Date("2026-09-02T12:00:00Z"),
-        agreed_ends_at: new Date("2026-09-02T14:00:00Z"),
+        agreed_starts_at: new Date("2026-09-02T06:00:00Z"),
+        agreed_ends_at: new Date("2026-09-02T08:00:00Z"),
       },
     ]);
 
@@ -113,12 +113,12 @@ describe("AvailabilityService", () => {
 
     expect(result.slots).toEqual([
       {
-        startsAt: "2026-09-02T08:00:00.000Z",
-        endsAt: "2026-09-02T12:00:00.000Z",
+        startsAt: "2026-09-02T02:00:00.000Z",
+        endsAt: "2026-09-02T06:00:00.000Z",
       },
       {
-        startsAt: "2026-09-02T14:00:00.000Z",
-        endsAt: "2026-09-02T17:00:00.000Z",
+        startsAt: "2026-09-02T08:00:00.000Z",
+        endsAt: "2026-09-02T11:00:00.000Z",
       },
     ]);
   });
