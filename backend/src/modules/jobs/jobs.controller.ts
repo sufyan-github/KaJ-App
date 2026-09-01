@@ -48,8 +48,11 @@ export class JobsController {
 
   @Get("jobs")
   @Policy(Policies.authenticated())
-  feed(@Query() query: JobFeedQueryDto) {
-    return this.jobs.feed(query);
+  feed(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Query() query: JobFeedQueryDto,
+  ) {
+    return this.jobs.feed(claims.sub, query);
   }
 
   @Get("jobs/mine")
@@ -63,6 +66,16 @@ export class JobsController {
   @Policy(Policies.authenticated())
   get(@Param("id", new ParseUUIDPipe()) id: string) {
     return this.jobs.get(id);
+  }
+
+  @Get("jobs/:id/suggested-workers")
+  @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
+  @Policy(Policies.authenticated())
+  suggestedWorkers(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+  ) {
+    return this.jobs.suggestedWorkers(claims.sub, id);
   }
 
   @Post("jobs/:id/applications")

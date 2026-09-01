@@ -8,6 +8,7 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  IsIn,
   IsUUID,
   Matches,
   Max,
@@ -106,6 +107,10 @@ export class CreateJobDto {
 }
 
 export class JobFeedQueryDto {
+  @IsOptional()
+  @IsIn(["all", "for-me"])
+  scope?: "all" | "for-me";
+
   @IsOptional()
   @IsUUID()
   categoryId?: string;

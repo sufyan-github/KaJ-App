@@ -18,6 +18,8 @@ import {
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { AvailabilityService } from "../availability/availability.service";
+import { MatchingService } from "../matching/matching.service";
+import { NotificationsService } from "../notifications/notifications.service";
 import {
   AcceptApplicationDto,
   ApplyToJobDto,
@@ -44,6 +46,8 @@ export class JobsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly availability: AvailabilityService,
+    private readonly matching?: MatchingService,
+    private readonly notifications?: NotificationsService,
   ) {}
 
   async create(posterUserId: string, input: CreateJobDto) {
@@ -125,7 +129,7 @@ export class JobsService {
     return serializeJob(updated);
   }
 
-  async feed(query: JobFeedQueryDto) {
+  async feed(userId: string, query: JobFeedQueryDto) {
     const jobs = await this.prisma.job.findMany({
       where: {
         status: JobStatus.APPLICATIONS_OPEN,
@@ -137,7 +141,42 @@ export class JobsService {
       orderBy: [{ is_featured: "desc" }, { published_at: "desc" }],
       take: 50,
     });
+    if (query.scope === "for-me" && this.matching) {
+      const ranked = await this.matching.scoreJobsForWorker(userId, jobs);
+      return {
+        items: ranked.map(({ job, match }) => ({
+          ...serializeJob(job),
+          matchScore: match.score,
+          matchReasons: match.reasons,
+          matchComponents: match.components,
+        })),
+      };
+    }
     return { items: jobs.map(serializeJob) };
+  }
+
+  async suggestedWorkers(posterUserId: string, jobId: string) {
+    const job = await this.prisma.job.findFirst({
+      where: { id: jobId, poster_user_id: posterUserId, deleted_at: null },
+      include: { skills: true },
+    });
+    if (!job) throw new NotFoundException();
+    if (!this.matching) return { items: [] };
+    const ranked = await this.matching.suggestedWorkers(job);
+    return {
+      items: ranked.map(({ worker, match }) => ({
+        id: worker.id,
+        displayName: worker.profile?.display_name ?? "Worker",
+        ratingAverage: worker.worker_profile?.rating_avg.toString() ?? "0",
+        experienceYears: worker.worker_profile?.experience_years ?? 0,
+        skills: worker.skills.map((item) => ({
+          nameEn: item.skill.name_en,
+          nameBn: item.skill.name_bn,
+        })),
+        matchScore: match.score,
+        matchReasons: match.reasons,
+      })),
+    };
   }
 
   async mine(posterUserId: string) {
@@ -194,6 +233,14 @@ export class JobsService {
         data: { applications_count: { increment: 1 } },
       });
       return created;
+    });
+    await this.notifications?.create({
+      userId: job.poster_user_id,
+      type: "JOB_APPLICATION_RECEIVED",
+      title: "New application",
+      body: `A worker applied to ${job.title}`,
+      payload: { route: "/jobs", jobId: job.id },
+      dedupeKey: `application:${application.id}`,
     });
     return serializeApplication(application);
   }
@@ -309,6 +356,14 @@ export class JobsService {
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
     );
+    await this.notifications?.create({
+      userId: application.worker_user_id,
+      type: "APPLICATION_ACCEPTED",
+      title: "Application accepted",
+      body: `You were selected for ${application.job.title}`,
+      payload: { route: "/assignments", assignmentId: assignment.id },
+      dedupeKey: `assignment:${assignment.id}:accepted`,
+    });
     return serializeAssignment(assignment);
   }
 
@@ -405,6 +460,14 @@ export class JobsService {
       );
       return assignment;
     });
+    await this.notifications?.create({
+      userId: workerUserId,
+      type: "BOOKING_REQUESTED",
+      title: "New booking request",
+      body: `You received a booking request for ${input.title.trim()}`,
+      payload: { route: "/assignments", assignmentId: assignment.id },
+      dedupeKey: `assignment:${assignment.id}:booking`,
+    });
     return serializeAssignment(assignment);
   }
 
@@ -500,6 +563,21 @@ export class JobsService {
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
     );
+    if (this.notifications) {
+      const confirmedJob = await this.prisma.job.findUnique({
+        where: { id: assignment.job_id },
+        select: { poster_user_id: true, title: true },
+      });
+      if (confirmedJob)
+        await this.notifications.create({
+          userId: confirmedJob.poster_user_id,
+          type: "ASSIGNMENT_CONFIRMED",
+          title: "Booking confirmed",
+          body: `The worker confirmed ${confirmedJob.title}`,
+          payload: { route: "/assignments", assignmentId: assignment.id },
+          dedupeKey: `assignment:${assignment.id}:confirmed`,
+        });
+    }
     return serializeAssignment(updated);
   }
 
