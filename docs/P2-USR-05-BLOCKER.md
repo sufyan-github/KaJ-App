@@ -1,7 +1,7 @@
 # P2-USR-05 Blocker — Required Image Processor Installation
 
 **Recorded:** 2026-09-01
-**Status:** BLOCKED
+**Status:** RESOLVED on 2026-09-01
 
 P2-USR-05 requires decoding uploaded images by their bytes, removing all metadata (including EXIF
 GPS), and producing three verified variants. The backend currently has no image decoder or processor.
@@ -26,3 +26,8 @@ explicitly), then install `sharp@0.34.3` for `@kaj/backend`. After that, impleme
 with storage metadata/read/write primitives, upload verification, EXIF-safe variants, and private
 signed document downloads.
 
+## Resolution
+
+pnpm 10.34.5 was bootstrapped outside the repository. The stale Windows-backed dependency tree was
+recreated against a Linux-local store, Sharp 0.34.3 was installed, and P2-USR-05 passed its complete
+backend verification gate. The repository engine policy was preserved.

@@ -1,6 +1,7 @@
 import {
   DeleteObjectCommand,
   GetObjectCommand,
+  HeadObjectCommand,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
@@ -15,6 +16,8 @@ import {
   SignedDownload,
   SignedUpload,
   StoragePort,
+  StoredObjectMetadata,
+  WriteObjectInput,
 } from "./storage.port";
 
 @Injectable()
@@ -87,6 +90,39 @@ export class S3StorageAdapter implements StoragePort {
     validateObjectKey(key);
     await this.client.send(
       new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
+    );
+  }
+
+  async getObjectMetadata(key: string): Promise<StoredObjectMetadata> {
+    validateObjectKey(key);
+    const result = await this.client.send(
+      new HeadObjectCommand({ Bucket: this.bucket, Key: key }),
+    );
+    return {
+      contentType: result.ContentType ?? null,
+      sizeBytes: result.ContentLength ?? 0,
+    };
+  }
+
+  async readObject(key: string): Promise<Uint8Array> {
+    validateObjectKey(key);
+    const result = await this.client.send(
+      new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+    );
+    if (!result.Body) throw new Error("Storage object has no body");
+    return result.Body.transformToByteArray();
+  }
+
+  async writeObject(input: WriteObjectInput): Promise<void> {
+    validateObjectKey(input.key);
+    await this.client.send(
+      new PutObjectCommand({
+        Body: input.body,
+        Bucket: this.bucket,
+        ContentLength: input.body.byteLength,
+        ContentType: input.contentType,
+        Key: input.key,
+      }),
     );
   }
 }

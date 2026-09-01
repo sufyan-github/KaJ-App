@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-09-01
 **Current phase:** Phase 2 — identity, taxonomy, and profiles
-**Current task:** P2-USR-05 — uploads and photos
+**Current task:** P2-UI-06 — Phase 2 Flutter screens
 **Product-code gate:** Owner overrode the sequencing gate on 2026-08-18; Phase 0 remains unreviewed
 
 ## Status legend
@@ -57,7 +57,8 @@
 | P2-USR-02 | IMPLEMENTED | Profile updates, idempotent dual-role activation, lazy role profiles, PHONE trust initialization, home routing payload, and actionable role-only 403; full backend gates green. Completion record: `docs/completed/P2-USR-02.md`. |
 | P2-USR-03 | IMPLEMENTED | Atomic worker skill replacement, 15-skill cap, duplicate/unknown checks, bilingual output, and optional bounded rates; full backend gates green. Completion record: `docs/completed/P2-USR-03.md`. |
 | P2-USR-04 | IMPLEMENTED | Exact D4 calculator, fixed Dhaka time arithmetic, exceptions, buffered conflicts, recurrence rule, atomic persistence API, and 100% calculator branch coverage. Completion record: `docs/completed/P2-USR-04.md`. |
-| P2-USR-05 | BLOCKED | Image processing requires `sharp@0.34.3`, but the runtime only exposes pnpm 11.19.0 while the repository enforces pnpm 10.34.5.x; repeated installation attempts failed with `ERR_PNPM_UNSUPPORTED_ENGINE`. See `docs/P2-USR-05-BLOCKER.md`. |
+| P2-USR-05 | IMPLEMENTED | Private signed uploads, byte-level verification, EXIF-free photo variants, sensitive documents, and owner-scoped signed reads; full backend gates green. Completion record: `docs/completed/P2-USR-05.md`. |
+| P2-UI-06 | IN PROGRESS | Phase 2 profile, role, location, skills, availability, taxonomy, public-profile, settings, and safety screens. |
 | Phase 1 exit gate | PLANNED     | Clean clone, real login, auth tests, envelopes, CI, Swagger.                                                                                                                                     |
 
 ### Accepted storage direction
