@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../catalog/presentation/controllers/catalog_providers.dart';
-import '../../../onboarding/presentation/controllers/onboarding_controller.dart';
+import '../controllers/public_profile_provider.dart';
 
 class CategoriesBrowseScreen extends ConsumerWidget {
   const CategoriesBrowseScreen({super.key});
@@ -52,42 +52,72 @@ class PublicWorkerProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profile = ref.watch(onboardingControllerProvider);
+    final profile = ref.watch(myPublicWorkerProfileProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('কর্মীর পাবলিক প্রোফাইল')),
-      body: ListView(
-        padding: const EdgeInsets.all(KSpacing.lg),
-        children: [
-          const CircleAvatar(radius: 44, child: Icon(Icons.person, size: 48)),
-          const SizedBox(height: KSpacing.md),
-          Text(
-            profile.displayName.isEmpty
-                ? 'কাজ ব্যবহারকারী'
-                : profile.displayName,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleLarge,
+      body: profile.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, _) => Center(
+          child: FilledButton(
+            onPressed: () => ref.invalidate(myPublicWorkerProfileProvider),
+            child: const Text('আবার চেষ্টা করুন'),
           ),
-          const SizedBox(height: KSpacing.sm),
-          Text(
-            '${profile.skillIds.length}টি দক্ষতা যোগ করা হয়েছে',
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: KSpacing.md),
-          const Card(
-            child: ListTile(
-              leading: Icon(Icons.verified_user_outlined),
-              title: Text('ফোন যাচাই করা হয়েছে'),
-              subtitle: Text('শুধু যাচাই করা তথ্যই এখানে দেখানো হয়।'),
+        ),
+        data: (value) => ListView(
+          padding: const EdgeInsets.all(KSpacing.lg),
+          children: [
+            CircleAvatar(
+              radius: 44,
+              foregroundImage: value.photoUrl == null
+                  ? null
+                  : NetworkImage(value.photoUrl!),
+              child: const Icon(Icons.person, size: 48),
             ),
-          ),
-          const Card(
-            child: ListTile(
-              leading: Icon(Icons.lock_outline),
-              title: Text('ব্যক্তিগত তথ্য সুরক্ষিত'),
-              subtitle: Text('ফোন নম্বর, সঠিক ঠিকানা ও নথি প্রকাশ করা হয় না।'),
+            const SizedBox(height: KSpacing.md),
+            Text(
+              value.displayName,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-          ),
-        ],
+            if (value.areaNameBn != null)
+              Text(value.areaNameBn!, textAlign: TextAlign.center),
+            const SizedBox(height: KSpacing.sm),
+            Text(
+              '${value.completedJobsCount}টি কাজ · রেটিং ${value.ratingAverage} (${value.ratingCount})',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: KSpacing.md),
+            Wrap(
+              spacing: KSpacing.sm,
+              children: value.skills
+                  .map(
+                    (skill) => Chip(
+                      avatar: skill.isVerified
+                          ? const Icon(Icons.verified, size: 16)
+                          : null,
+                      label: Text(skill.nameBn),
+                    ),
+                  )
+                  .toList(growable: false),
+            ),
+            const Card(
+              child: ListTile(
+                leading: Icon(Icons.verified_user_outlined),
+                title: Text('ফোন যাচাই করা হয়েছে'),
+                subtitle: Text('শুধু যাচাই করা তথ্যই এখানে দেখানো হয়।'),
+              ),
+            ),
+            const Card(
+              child: ListTile(
+                leading: Icon(Icons.lock_outline),
+                title: Text('ব্যক্তিগত তথ্য সুরক্ষিত'),
+                subtitle: Text(
+                  'ফোন নম্বর, সঠিক ঠিকানা ও নথি প্রকাশ করা হয় না।',
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

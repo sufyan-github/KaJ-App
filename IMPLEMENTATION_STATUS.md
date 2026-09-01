@@ -54,8 +54,8 @@ It also consumes the backend's actual `{ data, meta }` success envelope and `{ e
 ## Completed sequential milestones
 
 P1-UI-08 completes the authentication entry budget. P2-UI-06 implements every Phase 2 screen and
-connects onboarding mutations to the sibling backend. A timed human onboarding run and the backend
-D10 public-profile projection remain Phase 2 exit-gate evidence rather than being inferred from tests.
+connects onboarding mutations and the D10 public-profile projection to the sibling backend. A timed
+human onboarding run remains Phase 2 exit-gate evidence rather than being inferred from tests.
 
 ## Phase 2 delivery
 
@@ -65,7 +65,7 @@ new-user onboarding is Bangla-first, backend-connected, and resumes its exact sa
 ## Verification evidence
 
 - `flutter analyze --fatal-infos`: clean on Flutter 3.47.2 / Dart 3.13.2
-- `flutter test`: 34 passing tests
+- `flutter test`: 35 passing tests
 - `flutter build apk --debug --flavor dev`: successful
 - `flutter build apk --debug --flavor staging`: successful
 - `flutter build apk --release --flavor prod`: successful, 58.2 MB
