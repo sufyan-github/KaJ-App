@@ -37,10 +37,12 @@ abstract final class AppRoutes {
   static const createJob = '/jobs/create';
   static const workers = '/workers';
   static const assignments = '/assignments';
+  static const assignmentDetailPath = '/assignments/:id';
   static const notifications = '/notifications';
   static const workerBookingPath = '/workers/:id/book';
 
   static String workerBooking(String id) => '/workers/$id/book';
+  static String assignmentDetail(String id) => '/assignments/$id';
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -154,6 +156,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.assignments,
         builder: (context, state) => const AssignmentsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.assignmentDetailPath,
+        builder: (context, state) =>
+            AssignmentDetailScreen(assignmentId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: AppRoutes.notifications,

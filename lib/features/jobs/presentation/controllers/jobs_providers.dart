@@ -31,6 +31,11 @@ final assignmentsProvider = FutureProvider<List<AssignmentSummary>>(
   (ref) => ref.watch(jobsRepositoryProvider).getAssignments(),
 );
 
+final assignmentDetailProvider =
+    FutureProvider.family<AssignmentDetail, String>(
+      (ref, id) => ref.watch(jobsRepositoryProvider).getAssignment(id),
+    );
+
 final workerSlotsProvider = FutureProvider.family<List<WorkerSlot>, String>(
   (ref, workerId) => ref.watch(jobsRepositoryProvider).getWorkerSlots(workerId),
 );

@@ -799,6 +799,8 @@ class AssignmentsScreen extends ConsumerWidget {
                   final item = items[index];
                   return Card(
                     child: ListTile(
+                      onTap: () =>
+                          context.push(AppRoutes.assignmentDetail(item.id)),
                       leading: Icon(
                         item.status == 'CONFIRMED'
                             ? Icons.event_available
@@ -812,33 +814,194 @@ class AssignmentsScreen extends ConsumerWidget {
                       isThreeLine: true,
                       trailing:
                           item.isWorker && item.status == 'PENDING_CONFIRMATION'
-                          ? FilledButton(
-                              onPressed: () async {
-                                try {
-                                  await ref
-                                      .read(jobsRepositoryProvider)
-                                      .confirmAssignment(item.id);
-                                  ref.invalidate(assignmentsProvider);
-                                  ref.invalidate(workerSlotsProvider);
-                                } on Object {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('স্লটটি আর খালি নেই।'),
-                                      ),
-                                    );
-                                  }
-                                }
-                              },
-                              child: const Text('নিশ্চিত'),
-                            )
-                          : null,
+                          ? const Icon(Icons.chevron_right)
+                          : const Icon(Icons.chevron_right),
                     ),
                   );
                 },
               ),
       ),
     );
+  }
+}
+
+class AssignmentDetailScreen extends ConsumerWidget {
+  const AssignmentDetailScreen({required this.assignmentId, super.key});
+  final String assignmentId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final detail = ref.watch(assignmentDetailProvider(assignmentId));
+    return Scaffold(
+      appBar: AppBar(title: const Text('কাজের বিস্তারিত ও অগ্রগতি')),
+      body: detail.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, _) => _Retry(
+          label: 'কাজের বিস্তারিত লোড করা যায়নি।',
+          onRetry: () => ref.invalidate(assignmentDetailProvider(assignmentId)),
+        ),
+        data: (item) => _AssignmentDetailBody(
+          detail: item,
+          onChanged: () {
+            ref
+              ..invalidate(assignmentDetailProvider(assignmentId))
+              ..invalidate(assignmentsProvider);
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _AssignmentDetailBody extends ConsumerWidget {
+  const _AssignmentDetailBody({required this.detail, required this.onChanged});
+  final AssignmentDetail detail;
+  final VoidCallback onChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final item = detail.summary;
+    return ListView(
+      padding: const EdgeInsets.all(KSpacing.lg),
+      children: [
+        Text(item.title, style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: KSpacing.xs),
+        Text(
+          '${detail.locationName} · ${_statusBn(item.jobStatus ?? item.status)}',
+        ),
+        const SizedBox(height: KSpacing.md),
+        Text(detail.description),
+        if (item.startsAt != null) ...[
+          const SizedBox(height: KSpacing.md),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.event_available),
+              title: Text(_dateTime(item.startsAt!)),
+              subtitle: Text(
+                'শেষ ${item.endsAt == null ? '' : _time(item.endsAt!)} · চুক্তি v${detail.contractVersion ?? '-'}',
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(height: KSpacing.lg),
+        Text('কাজের অগ্রগতি', style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: KSpacing.sm),
+        ...detail.timeline.map(
+          (step) => ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const CircleAvatar(
+              radius: 14,
+              backgroundColor: KColors.primary,
+              child: Icon(Icons.check, size: 16, color: Colors.white),
+            ),
+            title: Text(_statusBn(step.status)),
+            subtitle: Text(_dateTime(step.at)),
+          ),
+        ),
+        const SizedBox(height: KSpacing.lg),
+        if (item.isWorker && item.status == 'PENDING_CONFIRMATION') ...[
+          KPrimaryButton(
+            label: 'কাজটি নিশ্চিত করুন',
+            onPressed: () => _run(
+              context,
+              () => ref.read(jobsRepositoryProvider).confirmAssignment(item.id),
+            ),
+          ),
+          const SizedBox(height: KSpacing.sm),
+          OutlinedButton(
+            onPressed: () => _run(
+              context,
+              () => ref.read(jobsRepositoryProvider).declineAssignment(item.id),
+            ),
+            child: const Text('অনুরোধটি গ্রহণ করব না'),
+          ),
+        ],
+        if (item.isWorker && item.jobStatus == 'IN_PROGRESS')
+          KPrimaryButton(
+            label: 'কাজ শেষ—গ্রাহকের কাছে পাঠান',
+            onPressed: () => _run(
+              context,
+              () => ref.read(jobsRepositoryProvider).submitWork(item.id),
+            ),
+          ),
+        if (item.isPoster && item.jobStatus == 'CUSTOMER_REVIEW')
+          KPrimaryButton(
+            label: 'কাজ সম্পন্ন নিশ্চিত করুন',
+            onPressed: () => _run(
+              context,
+              () => ref.read(jobsRepositoryProvider).completeWork(item.id),
+            ),
+          ),
+        if (!{'CANCELLED', 'COMPLETED'}.contains(item.status)) ...[
+          const SizedBox(height: KSpacing.sm),
+          TextButton.icon(
+            onPressed: () => _cancel(context, ref),
+            icon: const Icon(Icons.cancel_outlined),
+            label: const Text('কাজটি বাতিল করুন'),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Future<void> _run(
+    BuildContext context,
+    Future<void> Function() action,
+  ) async {
+    try {
+      await action();
+      onChanged();
+    } on Object {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('কাজটি এখন করা যাচ্ছে না। অবস্থা ও সময় যাচাই করুন।'),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _cancel(BuildContext context, WidgetRef ref) async {
+    const reasonCode = 'CHANGE_OF_PLAN';
+    try {
+      final preview = await ref
+          .read(jobsRepositoryProvider)
+          .cancellationPreview(id: detail.summary.id, reasonCode: reasonCode);
+      if (!context.mounted) return;
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('বাতিলের আগে ফলাফল দেখুন'),
+          content: Text(
+            '${preview.summaryBn}\n\nফেরত: ৳${_taka(preview.refundPoisha)} · ফি: ৳${_taka(preview.feePoisha)}',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('ফিরুন'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('বাতিল নিশ্চিত করুন'),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+      await ref
+          .read(jobsRepositoryProvider)
+          .cancelAssignment(id: detail.summary.id, reasonCode: reasonCode);
+      onChanged();
+    } on Object {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('বাতিলের হিসাব বা অনুরোধ সম্পন্ন হয়নি।'),
+          ),
+        );
+      }
+    }
   }
 }
 
@@ -967,12 +1130,29 @@ String _matchReasonBn(String reason) => switch (reason) {
 };
 
 String _statusBn(String status) => switch (status) {
+  'DRAFT' => 'খসড়া',
+  'PUBLISHED' => 'প্রকাশিত',
+  'APPLICATIONS_OPEN' => 'আবেদন চলছে',
+  'WORKER_SELECTED' => 'কর্মী নির্বাচিত',
+  'CONFIRMATION_PENDING' => 'কর্মীর নিশ্চিতকরণের অপেক্ষায়',
   'PENDING_CONFIRMATION' => 'নিশ্চিতকরণের অপেক্ষায়',
   'PENDING' => 'অপেক্ষায়',
   'ACCEPTED' => 'গৃহীত',
   'REJECTED' => 'প্রত্যাখ্যাত',
   'WITHDRAWN' => 'প্রত্যাহার করা হয়েছে',
   'CONFIRMED' => 'নিশ্চিত হয়েছে',
+  'UPCOMING' => 'শিগগির শুরু হবে',
+  'CHECKED_IN' => 'কর্মী উপস্থিত',
+  'IN_PROGRESS' => 'কাজ চলছে',
+  'SUBMITTED' => 'কাজ জমা হয়েছে',
+  'CUSTOMER_REVIEW' => 'গ্রাহকের পর্যালোচনায়',
+  'PAYMENT_RELEASED' => 'কাজ সম্পন্ন ও হিসাব চূড়ান্ত',
+  'REVIEWED' => 'পর্যালোচনা সম্পন্ন',
+  'EXPIRED' => 'সময় শেষ',
+  'CANCELLED_BY_CUSTOMER' => 'গ্রাহক বাতিল করেছেন',
+  'CANCELLED_BY_WORKER' => 'কর্মী বাতিল করেছেন',
+  'DISPUTED' => 'বিরোধ পর্যালোচনায়',
+  'SUSPENDED' => 'স্থগিত',
   'DECLINED' => 'বাতিল হয়েছে',
   'CANCELLED' => 'বাতিল হয়েছে',
   'COMPLETED' => 'সম্পন্ন',

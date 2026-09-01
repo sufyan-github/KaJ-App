@@ -167,6 +167,68 @@ class JobsRepository {
     }
   }
 
+  Future<void> declineAssignment(String id) async {
+    try {
+      await _dio.post<Map<String, dynamic>>('/assignments/$id/decline');
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
+  Future<AssignmentDetail> getAssignment(String id) async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>('/assignments/$id');
+      return AssignmentDetail.fromJson(_data(response.data));
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
+  Future<void> submitWork(String id) async {
+    try {
+      await _dio.post<Map<String, dynamic>>('/assignments/$id/submit');
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
+  Future<void> completeWork(String id) async {
+    try {
+      await _dio.post<Map<String, dynamic>>('/assignments/$id/complete');
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
+  Future<CancellationPreview> cancellationPreview({
+    required String id,
+    required String reasonCode,
+  }) async {
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/assignments/$id/cancel-preview',
+        data: {'reasonCode': reasonCode},
+      );
+      return CancellationPreview.fromJson(_data(response.data));
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
+  Future<void> cancelAssignment({
+    required String id,
+    required String reasonCode,
+  }) async {
+    try {
+      await _dio.post<Map<String, dynamic>>(
+        '/assignments/$id/cancel',
+        data: {'reasonCode': reasonCode, 'confirmed': true},
+      );
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
   Map<String, dynamic> _data(Map<String, dynamic>? envelope) {
     final data = envelope?['data'];
     if (data is Map) return Map<String, dynamic>.from(data);

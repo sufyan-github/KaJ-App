@@ -126,6 +126,10 @@ class AssignmentSummary {
     required this.isPoster,
     this.startsAt,
     this.endsAt,
+    this.jobStatus,
+    this.confirmationDeadlineAt,
+    this.submittedAt,
+    this.completionDueAt,
   });
 
   factory AssignmentSummary.fromJson(Map<String, dynamic> json) =>
@@ -137,15 +141,87 @@ class AssignmentSummary {
         isPoster: json['isPoster'] == true,
         startsAt: DateTime.tryParse(json['agreedStartsAt'] as String? ?? ''),
         endsAt: DateTime.tryParse(json['agreedEndsAt'] as String? ?? ''),
+        jobStatus: json['jobStatus'] as String?,
+        confirmationDeadlineAt: DateTime.tryParse(
+          json['confirmationDeadlineAt'] as String? ?? '',
+        ),
+        submittedAt: DateTime.tryParse(json['submittedAt'] as String? ?? ''),
+        completionDueAt: DateTime.tryParse(
+          json['completionDueAt'] as String? ?? '',
+        ),
       );
 
   final DateTime? endsAt;
+  final DateTime? completionDueAt;
+  final DateTime? confirmationDeadlineAt;
   final String id;
   final bool isPoster;
   final bool isWorker;
+  final String? jobStatus;
   final DateTime? startsAt;
   final String status;
+  final DateTime? submittedAt;
   final String title;
+}
+
+class AssignmentTimelineItem {
+  const AssignmentTimelineItem({required this.status, required this.at});
+  factory AssignmentTimelineItem.fromJson(Map<String, dynamic> json) =>
+      AssignmentTimelineItem(
+        status: json['status'] as String? ?? '',
+        at: DateTime.tryParse(json['at'] as String? ?? '') ?? DateTime.now(),
+      );
+  final DateTime at;
+  final String status;
+}
+
+class AssignmentDetail {
+  const AssignmentDetail({
+    required this.summary,
+    required this.description,
+    required this.locationName,
+    required this.timeline,
+    this.contractVersion,
+  });
+
+  factory AssignmentDetail.fromJson(Map<String, dynamic> json) =>
+      AssignmentDetail(
+        summary: AssignmentSummary.fromJson(json),
+        description: json['description'] as String? ?? '',
+        locationName: json['locationName'] as String? ?? '',
+        contractVersion: (json['contractVersion'] as num?)?.toInt(),
+        timeline:
+            (json['timeline'] as List?)
+                ?.whereType<Map>()
+                .map((item) => AssignmentTimelineItem.fromJson(Map.from(item)))
+                .toList(growable: false) ??
+            const [],
+      );
+  final int? contractVersion;
+  final String description;
+  final String locationName;
+  final AssignmentSummary summary;
+  final List<AssignmentTimelineItem> timeline;
+}
+
+class CancellationPreview {
+  const CancellationPreview({
+    required this.summaryBn,
+    required this.feePoisha,
+    required this.refundPoisha,
+    required this.needsAdminReview,
+  });
+  factory CancellationPreview.fromJson(Map<String, dynamic> json) =>
+      CancellationPreview(
+        summaryBn: json['summaryBn'] as String? ?? '',
+        feePoisha: json['feePoisha']?.toString() ?? '0',
+        refundPoisha: json['refundPoisha']?.toString() ?? '0',
+        needsAdminReview: json['needsAdminReview'] == true,
+      );
+  final String feePoisha;
+  final bool needsAdminReview;
+  final String refundPoisha;
+  final String summaryBn;
 }
 
 class JobApplicationSummary {
