@@ -276,6 +276,8 @@ model User {
   saved_searches              SavedSearch[]
   favorites                   Favorite[]                @relation("FavoriteOwner")
   favorited_by                Favorite[]                @relation("FavoriteTarget")
+  users_blocked               UserBlock[]               @relation("Blocker")
+  blocked_by                  UserBlock[]               @relation("BlockedUser")
   updated_config_settings     ConfigSetting[]
   audit_logs                  AuditLog[]
 
@@ -830,7 +832,10 @@ model Review {
 model Conversation {
   id           String                    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   job_id       String?                   @db.Uuid
+  scope_key    String                    @unique
   created_at   DateTime                  @default(now())
+  updated_at   DateTime                  @updatedAt
+  deleted_at   DateTime?
   job          Job?                      @relation(fields: [job_id], references: [id], onDelete: SetNull)
   participants ConversationParticipant[]
   messages     Message[]
@@ -859,6 +864,8 @@ model Message {
   type            MessageType
   body            String?
   attachment_key  String?
+  client_nonce    String?      @unique @db.Uuid
+  safety_warning  Boolean      @default(false)
   created_at      DateTime     @default(now())
   deleted_at      DateTime?
   conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
@@ -867,6 +874,18 @@ model Message {
   @@index([conversation_id, created_at(sort: Desc)])
   @@index([sender_user_id])
   @@map("messages")
+}
+
+model UserBlock {
+  blocker_user_id String   @db.Uuid
+  blocked_user_id String   @db.Uuid
+  created_at      DateTime @default(now())
+  blocker         User     @relation("Blocker", fields: [blocker_user_id], references: [id], onDelete: Cascade)
+  blocked         User     @relation("BlockedUser", fields: [blocked_user_id], references: [id], onDelete: Cascade)
+
+  @@id([blocker_user_id, blocked_user_id])
+  @@index([blocked_user_id])
+  @@map("user_blocks")
 }
 
 model Notification {

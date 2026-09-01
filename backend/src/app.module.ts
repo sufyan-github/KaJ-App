@@ -34,6 +34,7 @@ import { CatalogModule } from "./modules/catalog/catalog.module";
 import { JobsModule } from "./modules/jobs/jobs.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { ReviewsModule } from "./modules/reviews/reviews.module";
+import { ChatModule } from "./modules/chat/chat.module";
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { ReviewsModule } from "./modules/reviews/reviews.module";
     JobsModule,
     NotificationsModule,
     ReviewsModule,
+    ChatModule,
     UsersModule,
     UploadsModule,
   ],

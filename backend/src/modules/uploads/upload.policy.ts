@@ -1,4 +1,8 @@
-export const UPLOAD_KINDS = ["PROFILE_PHOTO", "VERIFICATION_DOCUMENT"] as const;
+export const UPLOAD_KINDS = [
+  "PROFILE_PHOTO",
+  "VERIFICATION_DOCUMENT",
+  "CHAT_IMAGE",
+] as const;
 export type UploadKind = (typeof UPLOAD_KINDS)[number];
 
 export interface UploadPolicy {
@@ -17,6 +21,11 @@ const POLICIES: Record<UploadKind, UploadPolicy> = {
     allowedMimeTypes: ["image/jpeg", "image/png", "application/pdf"],
     maxSizeBytes: 15 * 1024 * 1024,
     sensitive: true,
+  },
+  CHAT_IMAGE: {
+    allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
+    maxSizeBytes: 5 * 1024 * 1024,
+    sensitive: false,
   },
 };
 

@@ -24,6 +24,7 @@ import { CLOCK, type Clock } from "../../common/time/clock";
 import { AvailabilityService } from "../availability/availability.service";
 import { MatchingService } from "../matching/matching.service";
 import { NotificationsService } from "../notifications/notifications.service";
+import { ChatService } from "../chat/chat.service";
 import {
   AcceptApplicationDto,
   ApplyToJobDto,
@@ -60,6 +61,7 @@ export class JobsService {
     private readonly matching?: MatchingService,
     private readonly notifications?: NotificationsService,
     @Optional() @Inject(CLOCK) private readonly clock?: Clock,
+    @Optional() private readonly chat?: ChatService,
   ) {}
 
   private now() {
@@ -258,6 +260,11 @@ export class JobsService {
       payload: { route: "/jobs", jobId: job.id },
       dedupeKey: `application:${application.id}`,
     });
+    await this.chat?.systemMessageForJob(
+      jobId,
+      workerUserId,
+      "কর্মী কাজটিতে আবেদন করেছেন। নিরাপত্তার জন্য আলোচনা ও পেমেন্ট KAAJ-এ রাখুন।",
+    );
     return serializeApplication(application);
   }
 
@@ -293,6 +300,7 @@ export class JobsService {
         completionDueAt: assignment.completion_due_at?.toISOString() ?? null,
         isWorker: assignment.worker_user_id === userId,
         isPoster: assignment.job.poster_user_id === userId,
+        posterUserId: assignment.job.poster_user_id,
       })),
     };
   }
@@ -323,6 +331,7 @@ export class JobsService {
       jobStatus: assignment.job.status,
       isWorker: assignment.worker_user_id === userId,
       isPoster: assignment.job.poster_user_id === userId,
+      posterUserId: assignment.job.poster_user_id,
       confirmationDeadlineAt:
         assignment.confirmation_deadline_at?.toISOString() ?? null,
       submittedAt: assignment.submitted_at?.toISOString() ?? null,
@@ -883,6 +892,11 @@ export class JobsService {
           dedupeKey: `assignment:${assignment.id}:confirmed`,
         });
     }
+    await this.chat?.systemMessageForJob(
+      assignment.job_id,
+      workerUserId,
+      "কাজটি নিশ্চিত হয়েছে। এখন দুই পক্ষ এখানে নিরাপদে কথা বলতে পারবেন।",
+    );
     return serializeAssignment(updated);
   }
 
