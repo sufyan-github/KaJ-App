@@ -8,11 +8,13 @@ class PublicWorkerProfile {
     required this.completedJobsCount,
     required this.skills,
     required this.availability,
+    this.badges = const [],
     this.photoUrl,
     this.areaNameBn,
   });
 
   final List<String> availability;
+  final List<PublicWorkerBadge> badges;
   final String? areaNameBn;
   final int completedJobsCount;
   final String displayName;
@@ -22,6 +24,12 @@ class PublicWorkerProfile {
   final int ratingCount;
   final List<PublicWorkerSkill> skills;
   final String trustLevel;
+}
+
+class PublicWorkerBadge {
+  const PublicWorkerBadge({required this.slug, required this.nameBn});
+  final String slug;
+  final String nameBn;
 }
 
 class PublicWorkerSkill {

@@ -39,6 +39,8 @@ abstract final class AppRoutes {
   static const assignments = '/assignments';
   static const assignmentDetailPath = '/assignments/:id';
   static const notifications = '/notifications';
+  static const reviews = '/reviews';
+  static const favorites = '/favorites';
   static const workerBookingPath = '/workers/:id/book';
 
   static String workerBooking(String id) => '/workers/$id/book';
@@ -165,6 +167,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.notifications,
         builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.reviews,
+        builder: (context, state) => const ReceivedReviewsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.favorites,
+        builder: (context, state) => const FavoriteWorkersScreen(),
       ),
       GoRoute(
         path: AppRoutes.workerBookingPath,

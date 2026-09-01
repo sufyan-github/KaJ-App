@@ -62,6 +62,7 @@ class PublicProfileRepository {
     final area = json['area'];
     final skills = json['skills'];
     final availability = json['availability'];
+    final badges = json['badges'];
     return PublicWorkerProfile(
       id: _string(json, 'id'),
       displayName: _string(json, 'displayName'),
@@ -87,6 +88,18 @@ class PublicProfileRepository {
           : const [],
       availability: availability is List
           ? availability.whereType<String>().toList(growable: false)
+          : const [],
+      badges: badges is List
+          ? badges
+                .whereType<Map>()
+                .map(
+                  (item) => PublicWorkerBadge(
+                    slug: item['slug'] as String? ?? '',
+                    nameBn: item['nameBn'] as String? ?? '',
+                  ),
+                )
+                .where((item) => item.slug.isNotEmpty)
+                .toList(growable: false)
           : const [],
     );
   }

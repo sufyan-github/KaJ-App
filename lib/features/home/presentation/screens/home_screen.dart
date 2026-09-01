@@ -98,6 +98,13 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       if (!isWorker)
                         _DashboardTile(
+                          icon: Icons.favorite_border,
+                          title: 'পছন্দের কর্মী',
+                          subtitle: 'সংরক্ষিত কর্মী আবার বুক করুন',
+                          onTap: () => context.push(AppRoutes.favorites),
+                        ),
+                      if (!isWorker)
+                        _DashboardTile(
                           icon: Icons.assignment_outlined,
                           title: 'আমার পোস্ট',
                           subtitle: 'আবেদন দেখুন ও কর্মী বাছুন',
@@ -120,6 +127,12 @@ class HomeScreen extends ConsumerWidget {
                         title: 'নোটিফিকেশন',
                         subtitle: 'আবেদন ও বুকিং আপডেট দেখুন',
                         onTap: () => context.push(AppRoutes.notifications),
+                      ),
+                      _DashboardTile(
+                        icon: Icons.reviews_outlined,
+                        title: 'রিভিউ',
+                        subtitle: 'আপনার পাওয়া মতামত দেখুন',
+                        onTap: () => context.push(AppRoutes.reviews),
                       ),
                       if (isWorker) ...[
                         _DashboardTile(

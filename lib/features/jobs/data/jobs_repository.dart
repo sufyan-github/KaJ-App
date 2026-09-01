@@ -200,6 +200,71 @@ class JobsRepository {
     }
   }
 
+  Future<AssignmentReviewState> getAssignmentReviews(String id) async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/assignments/$id/reviews',
+      );
+      return AssignmentReviewState.fromJson(_data(response.data));
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
+  Future<void> submitReview({
+    required String assignmentId,
+    required int rating,
+    required String comment,
+  }) async {
+    try {
+      await _dio.post<Map<String, dynamic>>(
+        '/assignments/$assignmentId/reviews',
+        data: {
+          'rating': rating,
+          'punctuality': rating,
+          'quality': rating,
+          'communication': rating,
+          'reliability': rating,
+          if (comment.trim().isNotEmpty) 'comment': comment.trim(),
+        },
+      );
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
+  Future<List<AssignmentReview>> getReceivedReviews() async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/reviews/received',
+      );
+      return _items(response.data).map(AssignmentReview.fromJson).toList();
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
+  Future<List<FavoriteWorker>> getFavorites() async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>('/me/favorites');
+      return _items(response.data).map(FavoriteWorker.fromJson).toList();
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
+  Future<void> setFavorite(String workerId, {required bool saved}) async {
+    try {
+      if (saved) {
+        await _dio.post<Map<String, dynamic>>('/me/favorites/$workerId');
+      } else {
+        await _dio.delete<Map<String, dynamic>>('/me/favorites/$workerId');
+      }
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
   Future<CancellationPreview> cancellationPreview({
     required String id,
     required String reasonCode,

@@ -659,8 +659,24 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
   Widget build(BuildContext context) {
     final profile = ref.watch(publicWorkerProfileProvider(widget.workerId));
     final slots = ref.watch(workerSlotsProvider(widget.workerId));
+    final favorites = ref.watch(favoriteWorkersProvider);
+    final isFavorite =
+        favorites.value?.any((item) => item.userId == widget.workerId) ?? false;
     return Scaffold(
-      appBar: AppBar(title: const Text('সময় বেছে বুক করুন')),
+      appBar: AppBar(
+        title: const Text('সময় বেছে বুক করুন'),
+        actions: [
+          IconButton(
+            tooltip: isFavorite ? 'পছন্দ থেকে সরান' : 'পছন্দে রাখুন',
+            onPressed: favorites.isLoading
+                ? null
+                : () => _toggleFavorite(isFavorite),
+            icon: Icon(
+              isFavorite ? Icons.favorite_rounded : Icons.favorite_border,
+            ),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(KSpacing.lg),
         children: [
@@ -677,7 +693,11 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
               ),
               title: Text(worker.displayName),
               subtitle: Text(
-                worker.skills.map((item) => item.nameBn).join(', '),
+                [
+                  worker.skills.map((item) => item.nameBn).join(', '),
+                  if (worker.badges.isNotEmpty)
+                    worker.badges.map((item) => item.nameBn).join(' · '),
+                ].where((item) => item.isNotEmpty).join('\n'),
               ),
             ),
           ),
@@ -773,6 +793,21 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
       if (mounted) setState(() => _saving = false);
     }
   }
+
+  Future<void> _toggleFavorite(bool currentlySaved) async {
+    try {
+      await ref
+          .read(jobsRepositoryProvider)
+          .setFavorite(widget.workerId, saved: !currentlySaved);
+      ref.invalidate(favoriteWorkersProvider);
+    } on Object {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('পছন্দের তালিকা বদলানো যায়নি।')),
+        );
+      }
+    }
+  }
 }
 
 class AssignmentsScreen extends ConsumerWidget {
@@ -861,6 +896,9 @@ class _AssignmentDetailBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final item = detail.summary;
+    final reviews = item.status == 'COMPLETED'
+        ? ref.watch(assignmentReviewsProvider(item.id))
+        : null;
     return ListView(
       padding: const EdgeInsets.all(KSpacing.lg),
       children: [
@@ -932,6 +970,30 @@ class _AssignmentDetailBody extends ConsumerWidget {
               () => ref.read(jobsRepositoryProvider).completeWork(item.id),
             ),
           ),
+        if (reviews != null) ...[
+          const SizedBox(height: KSpacing.lg),
+          Text('রিভিউ', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: KSpacing.sm),
+          reviews.when(
+            loading: () => const LinearProgressIndicator(),
+            error: (_, _) => const Text('রিভিউ তথ্য লোড করা যায়নি।'),
+            data: (state) => _ReviewPanel(
+              state: state,
+              onReview: state.canReview
+                  ? () => _leaveReview(context, ref, item.id)
+                  : null,
+            ),
+          ),
+          if (item.isPoster && item.workerUserId != null) ...[
+            const SizedBox(height: KSpacing.sm),
+            OutlinedButton.icon(
+              onPressed: () =>
+                  context.push(AppRoutes.workerBooking(item.workerUserId!)),
+              icon: const Icon(Icons.replay_rounded),
+              label: const Text('এই কর্মীকে আবার বুক করুন'),
+            ),
+          ],
+        ],
         if (!{'CANCELLED', 'COMPLETED'}.contains(item.status)) ...[
           const SizedBox(height: KSpacing.sm),
           TextButton.icon(
@@ -942,6 +1004,43 @@ class _AssignmentDetailBody extends ConsumerWidget {
         ],
       ],
     );
+  }
+
+  Future<void> _leaveReview(
+    BuildContext context,
+    WidgetRef ref,
+    String assignmentId,
+  ) async {
+    final result = await showDialog<({int rating, String comment})>(
+      context: context,
+      builder: (context) => const _ReviewDialog(),
+    );
+    if (result == null) return;
+    try {
+      await ref
+          .read(jobsRepositoryProvider)
+          .submitReview(
+            assignmentId: assignmentId,
+            rating: result.rating,
+            comment: result.comment,
+          );
+      ref
+        ..invalidate(assignmentReviewsProvider(assignmentId))
+        ..invalidate(receivedReviewsProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('রিভিউ জমা হয়েছে। উভয় পক্ষ দিলে প্রকাশ হবে।'),
+          ),
+        );
+      }
+    } on Object {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('রিভিউ জমা দেওয়া যায়নি।')),
+        );
+      }
+    }
   }
 
   Future<void> _run(
@@ -1002,6 +1101,194 @@ class _AssignmentDetailBody extends ConsumerWidget {
         );
       }
     }
+  }
+}
+
+class _ReviewPanel extends StatelessWidget {
+  const _ReviewPanel({required this.state, this.onReview});
+  final AssignmentReviewState state;
+  final VoidCallback? onReview;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    child: Padding(
+      padding: const EdgeInsets.all(KSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (state.myReview != null)
+            Text('আপনার রেটিং: ${_stars(state.myReview!.rating)}'),
+          if (!state.revealed && state.myReview != null)
+            const Padding(
+              padding: EdgeInsets.only(top: KSpacing.sm),
+              child: Text(
+                'অন্য পক্ষ রিভিউ দিলে, অথবা ৭ দিন শেষে, রিভিউ দেখা যাবে।',
+              ),
+            ),
+          if (state.receivedReview case final review?) ...[
+            Text('${review.reviewerName}: ${_stars(review.rating)}'),
+            if (review.comment?.isNotEmpty == true)
+              Padding(
+                padding: const EdgeInsets.only(top: KSpacing.xs),
+                child: Text(review.comment!),
+              ),
+          ],
+          if (onReview != null) ...[
+            const SizedBox(height: KSpacing.md),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: onReview,
+                icon: const Icon(Icons.star_outline),
+                label: const Text('রিভিউ দিন'),
+              ),
+            ),
+          ],
+        ],
+      ),
+    ),
+  );
+}
+
+class _ReviewDialog extends StatefulWidget {
+  const _ReviewDialog();
+
+  @override
+  State<_ReviewDialog> createState() => _ReviewDialogState();
+}
+
+class _ReviewDialogState extends State<_ReviewDialog> {
+  int rating = 5;
+  final comment = TextEditingController();
+
+  @override
+  void dispose() {
+    comment.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('অভিজ্ঞতা কেমন ছিল?'),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            5,
+            (index) => IconButton(
+              onPressed: () => setState(() => rating = index + 1),
+              icon: Icon(
+                index < rating ? Icons.star_rounded : Icons.star_border_rounded,
+                color: Colors.amber.shade700,
+              ),
+            ),
+          ),
+        ),
+        TextField(
+          controller: comment,
+          maxLength: 1000,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            labelText: 'মন্তব্য (ঐচ্ছিক)',
+            hintText: 'সময়, কাজের মান ও যোগাযোগ সম্পর্কে লিখুন',
+          ),
+        ),
+      ],
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: const Text('ফিরুন'),
+      ),
+      FilledButton(
+        onPressed: () =>
+            Navigator.pop(context, (rating: rating, comment: comment.text)),
+        child: const Text('জমা দিন'),
+      ),
+    ],
+  );
+}
+
+String _stars(int rating) =>
+    '${List.filled(rating, '★').join()}${List.filled(5 - rating, '☆').join()}';
+
+class ReceivedReviewsScreen extends ConsumerWidget {
+  const ReceivedReviewsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reviews = ref.watch(receivedReviewsProvider);
+    return Scaffold(
+      appBar: AppBar(title: const Text('আমার পাওয়া রিভিউ')),
+      body: reviews.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, _) => _Retry(
+          label: 'রিভিউ লোড করা যায়নি।',
+          onRetry: () => ref.invalidate(receivedReviewsProvider),
+        ),
+        data: (items) => items.isEmpty
+            ? const Center(child: Text('এখনো প্রকাশিত কোনো রিভিউ নেই।'))
+            : ListView.separated(
+                padding: const EdgeInsets.all(KSpacing.md),
+                itemCount: items.length,
+                separatorBuilder: (_, _) => const SizedBox(height: KSpacing.sm),
+                itemBuilder: (context, index) {
+                  final review = items[index];
+                  return Card(
+                    child: ListTile(
+                      leading: const CircleAvatar(child: Icon(Icons.person)),
+                      title: Text(
+                        '${review.reviewerName} · ${_stars(review.rating)}',
+                      ),
+                      subtitle: review.comment?.isNotEmpty == true
+                          ? Text(review.comment!)
+                          : const Text('কোনো মন্তব্য দেওয়া হয়নি।'),
+                    ),
+                  );
+                },
+              ),
+      ),
+    );
+  }
+}
+
+class FavoriteWorkersScreen extends ConsumerWidget {
+  const FavoriteWorkersScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favorites = ref.watch(favoriteWorkersProvider);
+    return Scaffold(
+      appBar: AppBar(title: const Text('পছন্দের কর্মী')),
+      body: favorites.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, _) => _Retry(
+          label: 'পছন্দের তালিকা লোড করা যায়নি।',
+          onRetry: () => ref.invalidate(favoriteWorkersProvider),
+        ),
+        data: (items) => items.isEmpty
+            ? const Center(child: Text('এখনো কোনো কর্মী পছন্দে রাখা হয়নি।'))
+            : ListView.builder(
+                padding: const EdgeInsets.all(KSpacing.md),
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  final worker = items[index];
+                  return Card(
+                    child: ListTile(
+                      leading: const CircleAvatar(child: Icon(Icons.person)),
+                      title: Text(worker.displayName),
+                      subtitle: Text('★ ${worker.ratingAverage}'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () =>
+                          context.push(AppRoutes.workerBooking(worker.userId)),
+                    ),
+                  );
+                },
+              ),
+      ),
+    );
   }
 }
 

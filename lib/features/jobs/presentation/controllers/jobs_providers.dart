@@ -36,6 +36,19 @@ final assignmentDetailProvider =
       (ref, id) => ref.watch(jobsRepositoryProvider).getAssignment(id),
     );
 
+final assignmentReviewsProvider =
+    FutureProvider.family<AssignmentReviewState, String>(
+      (ref, id) => ref.watch(jobsRepositoryProvider).getAssignmentReviews(id),
+    );
+
+final receivedReviewsProvider = FutureProvider<List<AssignmentReview>>(
+  (ref) => ref.watch(jobsRepositoryProvider).getReceivedReviews(),
+);
+
+final favoriteWorkersProvider = FutureProvider<List<FavoriteWorker>>(
+  (ref) => ref.watch(jobsRepositoryProvider).getFavorites(),
+);
+
 final workerSlotsProvider = FutureProvider.family<List<WorkerSlot>, String>(
   (ref, workerId) => ref.watch(jobsRepositoryProvider).getWorkerSlots(workerId),
 );

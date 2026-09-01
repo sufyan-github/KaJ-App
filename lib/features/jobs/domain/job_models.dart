@@ -130,6 +130,7 @@ class AssignmentSummary {
     this.confirmationDeadlineAt,
     this.submittedAt,
     this.completionDueAt,
+    this.workerUserId,
   });
 
   factory AssignmentSummary.fromJson(Map<String, dynamic> json) =>
@@ -149,6 +150,7 @@ class AssignmentSummary {
         completionDueAt: DateTime.tryParse(
           json['completionDueAt'] as String? ?? '',
         ),
+        workerUserId: json['workerUserId'] as String?,
       );
 
   final DateTime? endsAt;
@@ -162,6 +164,83 @@ class AssignmentSummary {
   final String status;
   final DateTime? submittedAt;
   final String title;
+  final String? workerUserId;
+}
+
+class AssignmentReview {
+  const AssignmentReview({
+    required this.id,
+    required this.reviewerName,
+    required this.rating,
+    required this.createdAt,
+    this.comment,
+  });
+
+  factory AssignmentReview.fromJson(Map<String, dynamic> json) =>
+      AssignmentReview(
+        id: json['id'] as String,
+        reviewerName: json['reviewerName'] as String? ?? 'KAAJ ব্যবহারকারী',
+        rating: (json['rating'] as num?)?.toInt() ?? 0,
+        comment: json['comment'] as String?,
+        createdAt:
+            DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+            DateTime.now(),
+      );
+
+  final String id;
+  final String reviewerName;
+  final int rating;
+  final String? comment;
+  final DateTime createdAt;
+}
+
+class AssignmentReviewState {
+  const AssignmentReviewState({
+    required this.canReview,
+    required this.revealed,
+    required this.windowEndsAt,
+    this.myReview,
+    this.receivedReview,
+  });
+
+  factory AssignmentReviewState.fromJson(Map<String, dynamic> json) =>
+      AssignmentReviewState(
+        canReview: json['canReview'] == true,
+        revealed: json['revealed'] == true,
+        windowEndsAt:
+            DateTime.tryParse(json['windowEndsAt'] as String? ?? '') ??
+            DateTime.now(),
+        myReview: json['myReview'] is Map
+            ? AssignmentReview.fromJson(Map.from(json['myReview'] as Map))
+            : null,
+        receivedReview: json['receivedReview'] is Map
+            ? AssignmentReview.fromJson(Map.from(json['receivedReview'] as Map))
+            : null,
+      );
+
+  final bool canReview;
+  final bool revealed;
+  final DateTime windowEndsAt;
+  final AssignmentReview? myReview;
+  final AssignmentReview? receivedReview;
+}
+
+class FavoriteWorker {
+  const FavoriteWorker({
+    required this.userId,
+    required this.displayName,
+    required this.ratingAverage,
+  });
+
+  factory FavoriteWorker.fromJson(Map<String, dynamic> json) => FavoriteWorker(
+    userId: json['userId'] as String,
+    displayName: json['displayName'] as String? ?? 'কর্মী',
+    ratingAverage: json['ratingAverage']?.toString() ?? '0',
+  );
+
+  final String userId;
+  final String displayName;
+  final String ratingAverage;
 }
 
 class AssignmentTimelineItem {

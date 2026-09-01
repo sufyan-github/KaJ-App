@@ -220,6 +220,21 @@ class PublicWorkerProfileScreen extends ConsumerWidget {
               '${value.completedJobsCount}টি কাজ · রেটিং ${value.ratingAverage} (${value.ratingCount})',
               textAlign: TextAlign.center,
             ),
+            if (value.badges.isNotEmpty) ...[
+              const SizedBox(height: KSpacing.sm),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: KSpacing.sm,
+                children: value.badges
+                    .map(
+                      (badge) => Chip(
+                        avatar: const Icon(Icons.workspace_premium, size: 16),
+                        label: Text(badge.nameBn),
+                      ),
+                    )
+                    .toList(growable: false),
+              ),
+            ],
             const SizedBox(height: KSpacing.md),
             Wrap(
               spacing: KSpacing.sm,
