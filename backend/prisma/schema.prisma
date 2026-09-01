@@ -290,6 +290,8 @@ model User {
   admin_credential            AdminCredential?
   admin_login_challenges      AdminLoginChallenge[]
   admin_sessions              AdminSession[]
+  config_revisions            ConfigRevision[]
+  notification_campaigns      NotificationCampaign[]
 
   @@index([status, deleted_at])
   @@map("users")
@@ -488,6 +490,12 @@ model Category {
   requires_manual_approval Boolean    @default(false)
   min_age                  Int        @default(18)
   requires_certificate     Boolean    @default(false)
+  requires_identity        Boolean    @default(false)
+  requires_poster_identity Boolean    @default(false)
+  requires_references      Int        @default(0)
+  requires_licence         Boolean    @default(false)
+  safety_notice            String?
+  unsafe_for_students      Boolean    @default(false)
   created_at               DateTime   @default(now())
   updated_at               DateTime   @updatedAt
   parent                   Category?  @relation("CategoryTree", fields: [parent_id], references: [id], onDelete: Restrict)
@@ -1154,6 +1162,41 @@ model ConfigSetting {
 
   @@index([updated_by])
   @@map("config_settings")
+}
+
+model ConfigRevision {
+  id          String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  key         String
+  before_json Json
+  after_json  Json
+  reason      String
+  changed_by  String   @db.Uuid
+  created_at  DateTime @default(now())
+  actor       User     @relation(fields: [changed_by], references: [id], onDelete: Restrict)
+
+  @@index([key, created_at(sort: Desc)])
+  @@index([changed_by])
+  @@map("config_revisions")
+}
+
+model NotificationCampaign {
+  id                  String    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  name                String
+  segment_json        Json
+  title               String
+  body                String
+  throttle_per_minute Int       @default(100)
+  dry_run_count       Int
+  sent_count          Int       @default(0)
+  status              String    @default("DRAFT")
+  created_by          String    @db.Uuid
+  created_at          DateTime  @default(now())
+  sent_at             DateTime?
+  actor               User      @relation(fields: [created_by], references: [id], onDelete: Restrict)
+
+  @@index([status, created_at(sort: Desc)])
+  @@index([created_by])
+  @@map("notification_campaigns")
 }
 
 model AuditLog {

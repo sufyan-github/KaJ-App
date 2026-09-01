@@ -36,6 +36,7 @@ import { NotificationsModule } from "./modules/notifications/notifications.modul
 import { ReviewsModule } from "./modules/reviews/reviews.module";
 import { ChatModule } from "./modules/chat/chat.module";
 import { AdminAuthModule } from "./modules/admin-auth/admin-auth.module";
+import { AdminOpsModule } from "./modules/admin-ops/admin-ops.module";
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { AdminAuthModule } from "./modules/admin-auth/admin-auth.module";
     }),
     AuthModule,
     AdminAuthModule,
+    AdminOpsModule,
     AvailabilityModule,
     CatalogModule,
     HealthModule,

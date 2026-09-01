@@ -2,23 +2,10 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
+import { OperationsConsole } from "./components/operations-console";
+
 type Admin = { email: string; role: string; userId: string };
 type Stage = "checking" | "login" | "totp" | "dashboard";
-
-const modules = [
-  ["Dashboard", "Live marketplace health", "ready"],
-  ["Users", "Search, support and moderation", "next"],
-  ["Jobs", "Inspect lifecycle and rescue stuck work", "next"],
-  ["Applications", "Review and unstick applications", "next"],
-  ["Verification", "Document review queue", "next"],
-  ["Categories", "Skills and safety policies", "next"],
-  ["Locations", "Launch areas without deployment", "next"],
-  ["Configuration", "Versioned operational settings", "next"],
-  ["Feature flags", "Controlled percentage rollouts", "next"],
-  ["Disputes", "Evidence and resolution", "next"],
-  ["Notifications", "Targeted, throttled campaigns", "next"],
-  ["Analytics", "Marketplace health metrics", "planned"],
-] as const;
 
 function readError(body: unknown): string {
   if (body && typeof body === "object" && "error" in body) {
@@ -196,86 +183,7 @@ export default function AdminPage() {
     );
   }
 
-  return (
-    <main className="ops-shell">
-      <aside>
-        <div className="brand-row">
-          <div className="brand-mark small">ক</div>
-          <div>
-            <strong>KAAJ</strong>
-            <span>OPERATIONS</span>
-          </div>
-        </div>
-        <nav>
-          {modules.map(([name], index) => (
-            <button
-              className={index === 0 ? "active" : ""}
-              key={name}
-              disabled={index !== 0}
-            >
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              {name}
-            </button>
-          ))}
-        </nav>
-        <div className="account">
-          <div className="avatar">{admin?.email[0]?.toUpperCase()}</div>
-          <div>
-            <strong>{admin?.email}</strong>
-            <span>{admin?.role}</span>
-          </div>
-          <button onClick={logout} disabled={busy} aria-label="Sign out">
-            ↗
-          </button>
-        </div>
-      </aside>
-      <section className="workspace">
-        <header>
-          <div>
-            <p className="eyebrow">MVP OPERATIONS</p>
-            <h1>Good evening.</h1>
-            <p>Here’s the operational surface for KAAJ.</p>
-          </div>
-          <div className="session-pill">
-            <span /> Secure session · 30 min
-          </div>
-        </header>
-        <div className="notice">
-          <strong>Admin foundation is live.</strong>
-          <span>
-            Email/password, TOTP, role control and immutable audit events are
-            active.
-          </span>
-        </div>
-        <div className="section-title">
-          <div>
-            <h2>Operations modules</h2>
-            <p>Risk-first tools for support and marketplace safety.</p>
-          </div>
-          <span>1 of 12 active</span>
-        </div>
-        <div className="module-grid">
-          {modules.map(([name, description, state], index) => (
-            <article className={state === "ready" ? "ready" : ""} key={name}>
-              <div className="module-top">
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <em>
-                  {state === "ready"
-                    ? "AVAILABLE"
-                    : state === "next"
-                      ? "NEXT BUILD"
-                      : "PLANNED"}
-                </em>
-              </div>
-              <h3>{name}</h3>
-              <p>{description}</p>
-              <button disabled={state !== "ready"}>
-                {state === "ready" ? "Open module →" : "Coming next"}
-              </button>
-            </article>
-          ))}
-        </div>
-      </section>
-    </main>
-  );
+  return admin ? (
+    <OperationsConsole admin={admin} busy={busy} logout={logout} />
+  ) : null;
 }

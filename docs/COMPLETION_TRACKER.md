@@ -76,15 +76,15 @@ production handling of personal data.
 
 ## Phases 2–8 — cash-first MVP
 
-| Phase   | Status      | Task IDs / exit result                                                      |
-| ------- | ----------- | --------------------------------------------------------------------------- |
-| Phase 2 | IN PROGRESS | All engineering tasks implemented; timed human onboarding evidence remains. |
-| Phase 3 | PLANNED     | P3-JOB-01..03, P3-APP-04..05, P3-UI-06; transaction-spine gate.             |
-| Phase 4 | PLANNED     | P4-MATCH-01..02, P4-NOTIF-03, P4-UI-04; explainable matching gate.          |
-| Phase 5 | PLANNED     | P5-ASSIGN-01..04, P5-UI-05; H4 completion-journey gate.                     |
-| Phase 6 | PLANNED     | P6-REV-01..02, P6-UI-03; two-sided reputation gate.                         |
-| Phase 7 | PLANNED     | P7-CHAT-01..02, P7-UI-03; secure real-time chat gate.                       |
-| Phase 8 | IN PROGRESS | P8-ADMIN-01 complete; P8-ADMIN-02 operational modules remain.               |
+| Phase   | Status               | Task IDs / exit result                                                      |
+| ------- | -------------------- | --------------------------------------------------------------------------- |
+| Phase 2 | IN PROGRESS          | All engineering tasks implemented; timed human onboarding evidence remains. |
+| Phase 3 | PLANNED              | P3-JOB-01..03, P3-APP-04..05, P3-UI-06; transaction-spine gate.             |
+| Phase 4 | PLANNED              | P4-MATCH-01..02, P4-NOTIF-03, P4-UI-04; explainable matching gate.          |
+| Phase 5 | PLANNED              | P5-ASSIGN-01..04, P5-UI-05; H4 completion-journey gate.                     |
+| Phase 6 | PLANNED              | P6-REV-01..02, P6-UI-03; two-sided reputation gate.                         |
+| Phase 7 | PLANNED              | P7-CHAT-01..02, P7-UI-03; secure real-time chat gate.                       |
+| Phase 8 | ENGINEERING COMPLETE | P8-ADMIN-01..02 delivered; external pilot gates remain.                     |
 
 ## Phases 9–14 — gated expansion and release
 
