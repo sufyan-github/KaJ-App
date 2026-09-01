@@ -4,15 +4,18 @@ import { randomUUID } from "node:crypto";
 
 import { Controller, Get, INestApplication } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
+import { RoleMode } from "@prisma/client";
 import request from "supertest";
 
 import { configureApp } from "../src/app.bootstrap";
 import { AppModule } from "../src/app.module";
+import { Roles } from "../src/common/decorators/roles.decorator";
 import {
   AbilityFactory,
   PolicyResourceContext,
 } from "../src/common/policy/ability.factory";
 import { Policies } from "../src/common/policy/policy.types";
+import { Policy } from "../src/common/policy/policy.decorator";
 import {
   AUTH_REPOSITORY,
   AuthRepository,
@@ -153,6 +156,16 @@ class MissingPolicyController {
   }
 }
 
+@Controller("authorization-test")
+class WorkerOnlyController {
+  @Get("worker-only")
+  @Roles(RoleMode.WORKER)
+  @Policy(Policies.authenticated())
+  getWorkerOnly(): { available: true } {
+    return { available: true };
+  }
+}
+
 describe("authorization endpoint matrix", () => {
   let app: INestApplication;
   const sessions = new Map<string, AuthSession["user"]>();
@@ -197,7 +210,7 @@ describe("authorization endpoint matrix", () => {
     };
 
     const moduleRef = await Test.createTestingModule({
-      controllers: [MissingPolicyController],
+      controllers: [MissingPolicyController, WorkerOnlyController],
       imports: [AppModule],
     })
       .overrideProvider(AUTH_REPOSITORY)
@@ -208,7 +221,7 @@ describe("authorization endpoint matrix", () => {
 
     app = moduleRef.createNestApplication({ logger: false });
     configureApp(app);
-    await app.init();
+    await app.listen(0, "127.0.0.1");
   });
 
   afterAll(async () => {
@@ -266,6 +279,19 @@ describe("authorization endpoint matrix", () => {
       .set("Authorization", "Bearer owner")
       .expect(403);
     expect(response.body.error.code).toBe("AUTH_POLICY_REQUIRED");
+  });
+
+  it("returns an actionable 403 when the worker role is required", async () => {
+    const response = await request(app.getHttpServer())
+      .get("/api/v1/authorization-test/worker-only")
+      .set("Authorization", "Bearer owner")
+      .expect(403);
+
+    expect(response.body.error).toMatchObject({
+      action: { target: "WORKER", type: "activate_role" },
+      code: "ROLE_REQUIRED",
+      messageKey: "error.auth.role_required",
+    });
   });
 
   it("keeps explicitly public health available anonymously", async () => {

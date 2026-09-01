@@ -1,8 +1,8 @@
 # KAJ Completion Tracker
 
-**Last updated:** 2026-08-23
-**Current phase:** Phase 1 — foundation (started by explicit owner direction)
-**Current task:** P1-UI-08 — S01–S04 authentication/onboarding entry
+**Last updated:** 2026-09-01
+**Current phase:** Phase 2 — identity, taxonomy, and profiles
+**Current task:** P2-USR-04 — availability engine
 **Product-code gate:** Owner overrode the sequencing gate on 2026-08-18; Phase 0 remains unreviewed
 
 ## Status legend
@@ -48,6 +48,15 @@
 | P1-UI-07          | IMPLEMENTED | Flutter core, English l10n owner override, shared UI states, network/token/offline/analytics/permission foundation, 18 tests, and all flavor builds; sibling `../Kaaj` commit `7a08d07`, record `../Kaaj/docs/completed/P1-UI-07.md`. |
 | P1-UI-08          | PLANNED     | S01–S04 within the six-screen onboarding budget.                                                                                                                                                 |
 | P1-QA-09          | PLANNED     | GitHub Actions gates.                                                                                                                                                                            |
+
+## Phase 2 — identity, taxonomy, and profiles
+
+| Task      | Status  | Notes |
+| --------- | ------- | ----- |
+| P2-TAX-01 | IMPLEMENTED | Public bilingual catalog endpoints, tree integrity, Redis caching/invalidation, administrator mutations, typed Flutter contracts, and persistent Hive cache; full backend and Flutter gates green. Completion record: `docs/completed/P2-TAX-01.md`. |
+| P2-USR-02 | IMPLEMENTED | Profile updates, idempotent dual-role activation, lazy role profiles, PHONE trust initialization, home routing payload, and actionable role-only 403; full backend gates green. Completion record: `docs/completed/P2-USR-02.md`. |
+| P2-USR-03 | IMPLEMENTED | Atomic worker skill replacement, 15-skill cap, duplicate/unknown checks, bilingual output, and optional bounded rates; full backend gates green. Completion record: `docs/completed/P2-USR-03.md`. |
+| P2-USR-04 | IN PROGRESS | Pure D4 availability calculator and persistence API. |
 | Phase 1 exit gate | PLANNED     | Clean clone, real login, auth tests, envelopes, CI, Swagger.                                                                                                                                     |
 
 ### Accepted storage direction

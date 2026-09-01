@@ -3,7 +3,7 @@ import { Reflector } from "@nestjs/core";
 import { RoleMode } from "@prisma/client";
 
 import { ROLES_METADATA_KEY } from "../decorators/roles.decorator";
-import { authorizationDeniedError } from "../errors/authorization.errors";
+import { roleRequiredError } from "../errors/authorization.errors";
 import { AuthenticatedRequest } from "./jwt.guard";
 
 @Injectable()
@@ -22,7 +22,7 @@ export class RolesGuard implements CanActivate {
       !request.auth ||
       !required.some((role) => request.auth?.roles.includes(role))
     ) {
-      throw authorizationDeniedError();
+      throw roleRequiredError(required[0]!);
     }
     return true;
   }

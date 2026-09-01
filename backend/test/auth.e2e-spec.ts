@@ -252,7 +252,7 @@ describe("phone OTP authentication", () => {
 
     app = moduleRef.createNestApplication({ logger: false });
     configureApp(app);
-    await app.init();
+    await app.listen(0, "127.0.0.1");
   });
 
   afterAll(async () => {

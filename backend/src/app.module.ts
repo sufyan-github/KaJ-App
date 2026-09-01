@@ -26,7 +26,9 @@ import { validateEnvironment } from "./config/environment";
 import { createLoggerConfig } from "./config/logger.config";
 import { InfrastructureModule } from "./infra/infrastructure.module";
 import { HealthModule } from "./modules/health/health.module";
+import { UsersModule } from "./modules/users/users.module";
 import { AuthModule } from "./modules/auth/auth.module";
+import { CatalogModule } from "./modules/catalog/catalog.module";
 
 @Module({
   imports: [
@@ -44,7 +46,9 @@ import { AuthModule } from "./modules/auth/auth.module";
         createLoggerConfig(config.get<string>("NODE_ENV", "development")),
     }),
     AuthModule,
+    CatalogModule,
     HealthModule,
+    UsersModule,
   ],
   providers: [
     AbilityFactory,
