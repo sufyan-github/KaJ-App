@@ -1,4 +1,4 @@
-package app.kaaj.kaaj
+package app.kaaj.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 

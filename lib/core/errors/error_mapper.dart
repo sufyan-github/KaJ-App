@@ -32,10 +32,11 @@ abstract final class ErrorMapper {
 
     final status = error.response?.statusCode;
     final body = error.response?.data;
-    final descriptor = body is Map<String, dynamic>
-        ? body['error'] as Map<String, dynamic>?
-        : null;
-    final messageValue = descriptor?['message'];
+    final rawDescriptor = body is Map ? body['error'] : null;
+    final descriptor = rawDescriptor is Map
+        ? Map<String, Object?>.from(rawDescriptor)
+        : const <String, Object?>{};
+    final messageValue = descriptor['message'];
     final message = switch (messageValue) {
       final String value when value.trim().isNotEmpty => value,
       final Map value when value['en'] is String => value['en'] as String,
@@ -46,12 +47,16 @@ abstract final class ErrorMapper {
     return Failure(
       kind: _kindForStatus(status),
       message: message,
-      code: descriptor?['code'] as String?,
-      field: descriptor?['field'] as String?,
+      code: descriptor['code'] is String ? descriptor['code'] as String : null,
+      field: descriptor['field'] is String
+          ? descriptor['field'] as String
+          : null,
       requestId:
-          descriptor?['requestId'] as String? ??
+          (descriptor['requestId'] is String
+              ? descriptor['requestId'] as String
+              : null) ??
           error.response?.headers.value('x-request-id'),
-      retryable: descriptor?['retryable'] == true || (status ?? 0) >= 500,
+      retryable: descriptor['retryable'] == true || (status ?? 0) >= 500,
     );
   }
 

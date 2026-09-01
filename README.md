@@ -17,6 +17,7 @@ This repository contains the English-first mobile foundation and the backend-int
 - access token held in memory; rotating refresh token and device ID in secure storage
 - persistent connectivity banner, privacy-filtered analytics, and permission gateway
 - phone entry, OTP verification, session restoration, and logout
+- guarded authenticated routes, OTP expiry/resend handling, and coordinated token refresh
 - structured server error rendering with support request IDs
 - Android 8.0 minimum and cleartext/backup protection
 - analyzer, unit, policy, offline-state, and 200% text-scale widget tests
@@ -57,4 +58,4 @@ The source specification is Bangla-first. The project owner explicitly requested
 
 ## Maintenance note
 
-Flutter 3.44.8 currently reports that `sentry_flutter` applies the Kotlin Gradle Plugin and will need a future Built-in Kotlin-compatible release. All three flavor builds currently succeed; this is a forward-compatibility warning, not a failed gate.
+Flutter 3.47.2 currently reports that `sentry_flutter` applies the Kotlin Gradle Plugin and will need a future Built-in Kotlin-compatible release. All three flavor builds currently succeed; this is a forward-compatibility warning, not a failed gate.

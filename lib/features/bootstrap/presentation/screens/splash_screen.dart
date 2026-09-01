@@ -24,8 +24,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Future<void> _resolveSession() async {
     final restored = await ref
         .read(authControllerProvider.notifier)
-        .restoreSession()
-        .timeout(const Duration(seconds: 3), onTimeout: () => false);
+        .restoreSession();
     if (!mounted) return;
     context.go(restored ? AppRoutes.home : AppRoutes.phone);
   }

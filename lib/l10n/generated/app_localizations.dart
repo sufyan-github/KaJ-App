@@ -202,6 +202,18 @@ abstract class AppLocalizations {
   /// **'Send a new code'**
   String get resendCode;
 
+  /// No description provided for @resendInSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a new code in {seconds}s'**
+  String resendInSeconds(int seconds);
+
+  /// No description provided for @codeExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This verification code has expired. Send a new code.'**
+  String get codeExpired;
+
   /// No description provided for @welcomeTitle.
   ///
   /// In en, this message translates to:

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,20 +27,61 @@ class OtpVerifyScreen extends ConsumerStatefulWidget {
 class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
   final _formKey = GlobalKey<FormState>();
   final _codeController = TextEditingController();
+  Timer? _timer;
+  late OtpChallenge _challenge;
+  late DateTime _expiresAt;
+  int _resendSeconds = 30;
+
+  int get _remainingSeconds {
+    final seconds = _expiresAt.difference(DateTime.now()).inSeconds;
+    return seconds < 0 ? 0 : seconds;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _setChallenge(widget.challenge);
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      setState(() {
+        if (_resendSeconds > 0) _resendSeconds--;
+      });
+    });
+  }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _codeController.dispose();
     super.dispose();
+  }
+
+  void _setChallenge(OtpChallenge challenge) {
+    _challenge = challenge;
+    _expiresAt = DateTime.now().add(
+      Duration(seconds: challenge.expiresInSeconds),
+    );
+    _resendSeconds = 30;
   }
 
   Future<void> _verify() async {
     if (!_formKey.currentState!.validate()) return;
     final verified = await ref
         .read(authControllerProvider.notifier)
-        .verifyOtp(widget.challenge, _codeController.text.trim());
+        .verifyOtp(_challenge, _codeController.text.trim());
     if (!mounted || !verified) return;
     context.go(AppRoutes.home);
+  }
+
+  Future<void> _resend() async {
+    final challenge = await ref
+        .read(authControllerProvider.notifier)
+        .requestOtp(_challenge.phone);
+    if (!mounted || challenge == null) return;
+    setState(() {
+      _setChallenge(challenge);
+      _codeController.clear();
+    });
   }
 
   @override
@@ -77,7 +120,7 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
                     ),
                     const SizedBox(height: KSpacing.sm),
                     Text(
-                      l10n.otpSubtitle(_maskedPhone(widget.challenge.phone)),
+                      l10n.otpSubtitle(_maskedPhone(_challenge.phone)),
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: KColors.textSecondary,
                       ),
@@ -101,14 +144,18 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
                       ),
                       decoration: InputDecoration(
                         labelText: l10n.otpLabel,
-                        helperText: l10n.codeExpiresInMinutes(
-                          widget.challenge.expiresInSeconds ~/ 60,
-                        ),
+                        helperText: _remainingSeconds == 0
+                            ? l10n.codeExpired
+                            : l10n.codeExpiresInMinutes(
+                                (_remainingSeconds / 60).ceil(),
+                              ),
                       ),
-                      validator: (value) =>
-                          AuthValidators.isValidOtp(value ?? '')
-                          ? null
-                          : l10n.invalidOtp,
+                      validator: (value) {
+                        if (_remainingSeconds == 0) return l10n.codeExpired;
+                        return AuthValidators.isValidOtp(value ?? '')
+                            ? null
+                            : l10n.invalidOtp;
+                      },
                       onFieldSubmitted: (_) => _verify(),
                     ),
                     const SizedBox(height: KSpacing.md),
@@ -125,10 +172,14 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: TextButton(
-                        onPressed: isLoading
+                        onPressed: isLoading || _resendSeconds > 0
                             ? null
-                            : () => context.go(AppRoutes.phone),
-                        child: Text(l10n.resendCode),
+                            : _resend,
+                        child: Text(
+                          _resendSeconds > 0
+                              ? l10n.resendInSeconds(_resendSeconds)
+                              : l10n.resendCode,
+                        ),
                       ),
                     ),
                   ],

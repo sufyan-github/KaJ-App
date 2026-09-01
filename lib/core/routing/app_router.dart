@@ -1,7 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/domain/entities/otp_challenge.dart';
+import '../../features/auth/presentation/controllers/auth_controller.dart';
+import '../../features/auth/presentation/controllers/auth_providers.dart';
 import '../../features/auth/presentation/screens/otp_verify_screen.dart';
 import '../../features/auth/presentation/screens/phone_entry_screen.dart';
 import '../../features/bootstrap/presentation/screens/splash_screen.dart';
@@ -15,8 +18,15 @@ abstract final class AppRoutes {
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  final refresh = _RouterRefreshNotifier();
+  ref
+    ..listen<AuthState>(authControllerProvider, (_, _) => refresh.notify())
+    ..onDispose(refresh.dispose);
   return GoRouter(
     initialLocation: AppRoutes.splash,
+    refreshListenable: refresh,
+    redirect: (context, state) =>
+        authRedirect(ref.read(authControllerProvider), state.matchedLocation),
     routes: [
       GoRoute(
         path: AppRoutes.splash,
@@ -40,3 +50,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+String? authRedirect(AuthState auth, String location) {
+  final isSplash = location == AppRoutes.splash;
+  final isAuthRoute = location == AppRoutes.phone || location == AppRoutes.otp;
+
+  if (auth.status == AuthStatus.initial) {
+    return isSplash ? null : AppRoutes.splash;
+  }
+  if (auth.status == AuthStatus.unauthenticated) {
+    return location == AppRoutes.phone ? null : AppRoutes.phone;
+  }
+  if (auth.status == AuthStatus.authenticated) {
+    return isSplash || isAuthRoute ? AppRoutes.home : null;
+  }
+  if (isSplash && auth.status != AuthStatus.loading) {
+    return AppRoutes.phone;
+  }
+  return null;
+}
+
+class _RouterRefreshNotifier extends ChangeNotifier {
+  void notify() => notifyListeners();
+}

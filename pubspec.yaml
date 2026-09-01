@@ -41,7 +41,7 @@ dependencies:
   hive_ce_flutter: ^2.3.4
   connectivity_plus: ^7.3.1
   uuid: ^4.6.0
-  intl: 0.20.2
+  intl: ^0.20.3
   sentry_flutter: 9.27.0
   permission_handler: ^13.0.1
   path_provider: ^2.1.6

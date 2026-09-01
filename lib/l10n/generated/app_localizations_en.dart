@@ -69,6 +69,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resendCode => 'Send a new code';
 
   @override
+  String resendInSeconds(int seconds) {
+    return 'Send a new code in ${seconds}s';
+  }
+
+  @override
+  String get codeExpired =>
+      'This verification code has expired. Send a new code.';
+
+  @override
   String get welcomeTitle => 'Welcome to KAAJ';
 
   @override

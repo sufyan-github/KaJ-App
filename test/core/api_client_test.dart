@@ -37,6 +37,21 @@ void main() {
     expect(request.headers['Idempotency-Key'], isNotEmpty);
   });
 
+  test('adds an idempotency key to DELETE requests', () async {
+    final adapter = _RecordingAdapter(
+      (request, attempt) => _jsonResponse(204, const {}),
+    );
+    final client = ApiClient(
+      environment: environment,
+      tokenStore: _MemoryTokenStore(),
+      httpClientAdapter: adapter,
+    );
+
+    await client.dio.delete<void>('/jobs/job-1');
+
+    expect(adapter.requests.single.headers['Idempotency-Key'], isNotEmpty);
+  });
+
   test('rotates tokens and retries a protected request exactly once', () async {
     final tokenStore = _MemoryTokenStore(
       accessToken: 'expired-access',
@@ -80,6 +95,49 @@ void main() {
       adapter.requests.where((request) => request.path.endsWith('/me')),
       hasLength(2),
     );
+    expect(
+      adapter.requests.where(
+        (request) => request.path.endsWith('/auth/refresh'),
+      ),
+      hasLength(1),
+    );
+  });
+
+  test('concurrent 401 responses share one rotating-token refresh', () async {
+    final tokenStore = _MemoryTokenStore(
+      accessToken: 'expired-access',
+      refreshToken: 'valid-refresh',
+    );
+    final adapter = _RecordingAdapter((request, attempt) {
+      if (request.path.endsWith('/auth/refresh')) {
+        return _jsonResponse(200, {
+          'data': {
+            'accessToken': 'rotated-access',
+            'refreshToken': 'rotated-refresh',
+          },
+        });
+      }
+      if (request.headers['Authorization'] == 'Bearer expired-access') {
+        return _jsonResponse(401, {
+          'error': {'code': 'AUTH_EXPIRED'},
+        });
+      }
+      expect(request.headers['Authorization'], 'Bearer rotated-access');
+      return _jsonResponse(200, {
+        'data': {'accepted': true},
+      });
+    });
+    final client = ApiClient(
+      environment: environment,
+      tokenStore: tokenStore,
+      httpClientAdapter: adapter,
+    );
+
+    await Future.wait([
+      client.dio.get<Map<String, dynamic>>('/protected/one'),
+      client.dio.get<Map<String, dynamic>>('/protected/two'),
+    ]);
+
     expect(
       adapter.requests.where(
         (request) => request.path.endsWith('/auth/refresh'),
