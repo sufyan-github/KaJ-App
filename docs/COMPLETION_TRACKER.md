@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-09-01
 **Current phase:** Phase 2 — identity, taxonomy, and profiles
-**Current task:** P2-UI-06 — Phase 2 Flutter screens
+**Current task:** Phase 2 exit gate — D10 public projection and timed onboarding evidence
 **Product-code gate:** Owner overrode the sequencing gate on 2026-08-18; Phase 0 remains unreviewed
 
 ## Status legend
@@ -58,7 +58,7 @@
 | P2-USR-03 | IMPLEMENTED | Atomic worker skill replacement, 15-skill cap, duplicate/unknown checks, bilingual output, and optional bounded rates; full backend gates green. Completion record: `docs/completed/P2-USR-03.md`. |
 | P2-USR-04 | IMPLEMENTED | Exact D4 calculator, fixed Dhaka time arithmetic, exceptions, buffered conflicts, recurrence rule, atomic persistence API, and 100% calculator branch coverage. Completion record: `docs/completed/P2-USR-04.md`. |
 | P2-USR-05 | IMPLEMENTED | Private signed uploads, byte-level verification, EXIF-free photo variants, sensitive documents, and owner-scoped signed reads; full backend gates green. Completion record: `docs/completed/P2-USR-05.md`. |
-| P2-UI-06 | IN PROGRESS | Phase 2 profile, role, location, skills, availability, taxonomy, public-profile, settings, and safety screens. |
+| P2-UI-06 | IMPLEMENTED | Bangla-first persisted onboarding, role/location/skills/rates/availability flows, all required Phase 2 destinations, 34 tests, and all flavor builds. Timed human evidence and server-backed D10 public projection remain exit-gate work. Record: `../Kaaj/docs/completed/P2-UI-06.md`. |
 | Phase 1 exit gate | PLANNED     | Clean clone, real login, auth tests, envelopes, CI, Swagger.                                                                                                                                     |
 
 ### Accepted storage direction
