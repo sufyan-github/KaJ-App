@@ -148,6 +148,7 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
                         fontSize: 24,
                         letterSpacing: 12,
                         fontWeight: FontWeight.w600,
+                        color: KColors.textPrimary,
                       ),
                       decoration: InputDecoration(
                         labelText: l10n.otpLabel,
@@ -162,6 +163,13 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
                         return AuthValidators.isValidOtp(value ?? '')
                             ? null
                             : l10n.invalidOtp;
+                      },
+                      onChanged: (_) {
+                        if (state.failure != null) {
+                          ref
+                              .read(authControllerProvider.notifier)
+                              .clearError();
+                        }
                       },
                       onFieldSubmitted: (_) => _verify(),
                     ),

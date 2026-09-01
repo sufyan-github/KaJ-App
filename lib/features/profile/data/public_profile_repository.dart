@@ -27,6 +27,31 @@ class PublicProfileRepository {
     }
   }
 
+  Future<PublicWorkerProfile> getWorkerProfile(String userId) async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/users/$userId/public',
+      );
+      return _parse(_data(response.data));
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
+  Future<List<PublicWorkerProfile>> listWorkers() async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>('/users/workers');
+      final items = _data(response.data)['items'];
+      if (items is! List) throw const FormatException('Missing worker list');
+      return items
+          .whereType<Map>()
+          .map((item) => _parse(Map<String, dynamic>.from(item)))
+          .toList(growable: false);
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
   Map<String, dynamic> _data(Map<String, dynamic>? envelope) {
     final data = envelope?['data'];
     if (data is Map) return Map<String, dynamic>.from(data);

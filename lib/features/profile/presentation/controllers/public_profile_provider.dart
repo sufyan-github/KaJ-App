@@ -12,3 +12,13 @@ final myPublicWorkerProfileProvider = FutureProvider<PublicWorkerProfile>(
   (ref) =>
       ref.watch(publicProfileRepositoryProvider).getMyPublicWorkerProfile(),
 );
+
+final workerDirectoryProvider = FutureProvider<List<PublicWorkerProfile>>(
+  (ref) => ref.watch(publicProfileRepositoryProvider).listWorkers(),
+);
+
+final publicWorkerProfileProvider =
+    FutureProvider.family<PublicWorkerProfile, String>(
+      (ref, workerId) =>
+          ref.watch(publicProfileRepositoryProvider).getWorkerProfile(workerId),
+    );

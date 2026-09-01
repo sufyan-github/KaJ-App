@@ -25,7 +25,12 @@ class OnboardingController extends StateNotifier<OnboardingState> {
   Future<void> begin() => _save(state.copyWith(started: true, complete: false));
 
   Future<void> saveProfile(String displayName) async {
-    final next = state.copyWith(displayName: displayName.trim(), step: 1);
+    final next = state.copyWith(
+      displayName: displayName.trim(),
+      started: true,
+      complete: false,
+      step: 1,
+    );
     await _repository.updateProfile(next);
     await _save(next);
   }
@@ -52,9 +57,24 @@ class OnboardingController extends StateNotifier<OnboardingState> {
     await _save(state.copyWith(skillIds: skillIds, step: 4));
   }
 
-  Future<void> saveAvailability(List<int> days) async {
-    await _repository.updateAvailability(days);
-    await _save(state.copyWith(availableDays: days, step: 5));
+  Future<void> saveAvailability(
+    List<int> days, {
+    String startTime = '18:00',
+    String endTime = '22:00',
+  }) async {
+    await _repository.updateAvailability(
+      days,
+      startTime: startTime,
+      endTime: endTime,
+    );
+    await _save(
+      state.copyWith(
+        availableDays: days,
+        availableStartTime: startTime,
+        availableEndTime: endTime,
+        step: 5,
+      ),
+    );
   }
 
   Future<void> finish() =>

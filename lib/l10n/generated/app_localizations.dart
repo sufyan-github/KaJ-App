@@ -266,6 +266,66 @@ abstract class AppLocalizations {
   /// **'We could not complete that request. Please try again or contact support.'**
   String get unexpectedMessage;
 
+  /// No description provided for @validationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the information you entered and try again.'**
+  String get validationMessage;
+
+  /// No description provided for @unauthorizedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session is no longer valid. Sign in again.'**
+  String get unauthorizedMessage;
+
+  /// No description provided for @forbiddenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have permission to do that.'**
+  String get forbiddenMessage;
+
+  /// No description provided for @notFoundMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The requested information could not be found.'**
+  String get notFoundMessage;
+
+  /// No description provided for @conflictMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This information has changed. Refresh and try again.'**
+  String get conflictMessage;
+
+  /// No description provided for @rateLimitedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Wait a little and try again.'**
+  String get rateLimitedMessage;
+
+  /// No description provided for @otpIncorrectMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The verification code is incorrect.'**
+  String get otpIncorrectMessage;
+
+  /// No description provided for @otpAttemptsExceededMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many incorrect attempts. Send a new code.'**
+  String get otpAttemptsExceededMessage;
+
+  /// No description provided for @otpAlreadyUsedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This verification code has already been used. Send a new code.'**
+  String get otpAlreadyUsedMessage;
+
+  /// No description provided for @otpNotFoundMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This verification request was not found. Send a new code.'**
+  String get otpNotFoundMessage;
+
   /// No description provided for @invalidPhone.
   ///
   /// In en, this message translates to:

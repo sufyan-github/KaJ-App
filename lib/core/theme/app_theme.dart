@@ -43,35 +43,63 @@ ThemeData buildAppTheme() {
     scaffoldBackgroundColor: KColors.background,
     fontFamily: 'Roboto',
   );
+  final readableTextTheme = base.textTheme.apply(
+    bodyColor: KColors.textPrimary,
+    displayColor: KColors.textPrimary,
+  );
 
   return base.copyWith(
-    textTheme: base.textTheme.copyWith(
+    textTheme: readableTextTheme.copyWith(
       displayLarge: const TextStyle(
         fontSize: 32,
         height: 1.5,
         fontWeight: FontWeight.w700,
+        color: KColors.textPrimary,
       ),
       titleLarge: const TextStyle(
         fontSize: 22,
         height: 1.5,
         fontWeight: FontWeight.w600,
+        color: KColors.textPrimary,
       ),
       titleMedium: const TextStyle(
         fontSize: 18,
         height: 1.5,
         fontWeight: FontWeight.w600,
+        color: KColors.textPrimary,
       ),
-      bodyLarge: const TextStyle(fontSize: 16, height: 1.6),
-      bodyMedium: const TextStyle(fontSize: 14, height: 1.6),
+      bodyLarge: const TextStyle(
+        fontSize: 16,
+        height: 1.6,
+        color: KColors.textPrimary,
+      ),
+      bodyMedium: const TextStyle(
+        fontSize: 14,
+        height: 1.6,
+        color: KColors.textPrimary,
+      ),
       labelLarge: const TextStyle(
         fontSize: 13,
         height: 1.5,
         fontWeight: FontWeight.w600,
+        color: KColors.textPrimary,
       ),
+    ),
+    textSelectionTheme: const TextSelectionThemeData(
+      cursorColor: KColors.primary,
+      selectionColor: Color(0x332E9B74),
+      selectionHandleColor: KColors.primary,
     ),
     inputDecorationTheme: const InputDecorationTheme(
       filled: true,
       fillColor: Colors.white,
+      labelStyle: TextStyle(color: KColors.textSecondary),
+      floatingLabelStyle: TextStyle(color: KColors.primary),
+      hintStyle: TextStyle(color: KColors.textSecondary),
+      helperStyle: TextStyle(color: KColors.textSecondary),
+      errorStyle: TextStyle(color: KColors.danger),
+      prefixIconColor: KColors.textSecondary,
+      suffixIconColor: KColors.textSecondary,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
         borderSide: BorderSide(color: KColors.border),
@@ -79,6 +107,18 @@ ThemeData buildAppTheme() {
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
         borderSide: BorderSide(color: KColors.border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderSide: BorderSide(color: KColors.primary, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderSide: BorderSide(color: KColors.danger),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderSide: BorderSide(color: KColors.danger, width: 2),
       ),
       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     ),

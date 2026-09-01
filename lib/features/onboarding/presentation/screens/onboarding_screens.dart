@@ -358,6 +358,8 @@ class AvailabilitySetupScreen extends ConsumerStatefulWidget {
 class _AvailabilitySetupScreenState
     extends ConsumerState<AvailabilitySetupScreen> {
   late final Set<int> _days;
+  late TimeOfDay _startTime;
+  late TimeOfDay _endTime;
   bool _saving = false;
   static const _names = [
     'রবি',
@@ -373,7 +375,10 @@ class _AvailabilitySetupScreenState
   void initState() {
     super.initState();
     final saved = ref.read(onboardingControllerProvider).availableDays;
+    final state = ref.read(onboardingControllerProvider);
     _days = saved.isEmpty ? {5, 6} : saved.toSet();
+    _startTime = _parseTime(state.availableStartTime);
+    _endTime = _parseTime(state.availableEndTime);
   }
 
   Future<void> _submit() async {
@@ -381,7 +386,11 @@ class _AvailabilitySetupScreenState
     try {
       await ref
           .read(onboardingControllerProvider.notifier)
-          .saveAvailability(_days.toList()..sort());
+          .saveAvailability(
+            _days.toList()..sort(),
+            startTime: _apiTime(_startTime),
+            endTime: _apiTime(_endTime),
+          );
       if (mounted) {
         context.go(
           widget.isEditing ? AppRoutes.home : AppRoutes.onboardingTour,
@@ -399,7 +408,7 @@ class _AvailabilitySetupScreenState
     step: 5,
     title: 'কখন কাজ করতে পারবেন?',
     subtitle:
-        'নির্বাচিত দিনে সন্ধ্যা ৬টা–রাত ১০টা ধরা হবে। পরে বিস্তারিত বদলাতে পারবেন।',
+        'দিন ও সময় বেছে দিন। এই সময়গুলো গ্রাহকেরা বুকিংয়ের আগে দেখতে পারবেন।',
     child: Column(
       children: [
         Wrap(
@@ -413,6 +422,44 @@ class _AvailabilitySetupScreenState
                   setState(() => value ? _days.add(day) : _days.remove(day)),
             ),
           ),
+        ),
+        const SizedBox(height: KSpacing.md),
+        Row(
+          children: [
+            Expanded(
+              child: _TimePickerCard(
+                label: 'শুরুর সময়',
+                value: _startTime,
+                onTap: () => _pickTime(isStart: true),
+              ),
+            ),
+            const SizedBox(width: KSpacing.sm),
+            Expanded(
+              child: _TimePickerCard(
+                label: 'শেষের সময়',
+                value: _endTime,
+                onTap: () => _pickTime(isStart: false),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: KSpacing.sm),
+        Wrap(
+          spacing: KSpacing.sm,
+          children: [
+            ActionChip(
+              label: const Text('সকাল ৮টা–১২টা'),
+              onPressed: () => _setTimeRange(8, 12),
+            ),
+            ActionChip(
+              label: const Text('দুপুর ১২টা–৫টা'),
+              onPressed: () => _setTimeRange(12, 17),
+            ),
+            ActionChip(
+              label: const Text('সন্ধ্যা ৬টা–১০টা'),
+              onPressed: () => _setTimeRange(18, 22),
+            ),
+          ],
         ),
         const SizedBox(height: KSpacing.md),
         Row(
@@ -441,10 +488,95 @@ class _AvailabilitySetupScreenState
           ],
         ),
         const SizedBox(height: KSpacing.lg),
+        if (_minutes(_endTime) <= _minutes(_startTime)) ...[
+          const Text(
+            'শেষের সময় শুরুর সময়ের পরে হতে হবে।',
+            style: TextStyle(color: KColors.danger),
+          ),
+          const SizedBox(height: KSpacing.sm),
+        ],
         KPrimaryButton(
           label: 'সময় সংরক্ষণ করুন',
           isLoading: _saving,
-          onPressed: _days.isEmpty ? null : _submit,
+          onPressed: _days.isEmpty || _minutes(_endTime) <= _minutes(_startTime)
+              ? null
+              : _submit,
+        ),
+      ],
+    ),
+  );
+
+  Future<void> _pickTime({required bool isStart}) async {
+    final selected = await showTimePicker(
+      context: context,
+      initialTime: isStart ? _startTime : _endTime,
+    );
+    if (selected == null || !mounted) return;
+    setState(() {
+      if (isStart) {
+        _startTime = selected;
+      } else {
+        _endTime = selected;
+      }
+    });
+  }
+
+  void _setTimeRange(int startHour, int endHour) => setState(() {
+    _startTime = TimeOfDay(hour: startHour, minute: 0);
+    _endTime = TimeOfDay(hour: endHour, minute: 0);
+  });
+
+  static TimeOfDay _parseTime(String value) {
+    final parts = value.split(':');
+    return TimeOfDay(
+      hour: int.tryParse(parts.first) ?? 18,
+      minute: parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0,
+    );
+  }
+
+  static String _apiTime(TimeOfDay value) =>
+      '${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
+
+  static int _minutes(TimeOfDay value) => value.hour * 60 + value.minute;
+}
+
+class _TimePickerCard extends StatelessWidget {
+  const _TimePickerCard({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+  final TimeOfDay value;
+
+  @override
+  Widget build(BuildContext context) => OutlinedButton(
+    onPressed: onTap,
+    style: OutlinedButton.styleFrom(
+      padding: const EdgeInsets.all(KSpacing.md),
+      alignment: Alignment.centerLeft,
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: KColors.textSecondary),
+        ),
+        const SizedBox(height: KSpacing.xs),
+        Row(
+          children: [
+            const Icon(Icons.schedule_outlined),
+            const SizedBox(width: KSpacing.sm),
+            Text(
+              MaterialLocalizations.of(context).formatTimeOfDay(value),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ],
         ),
       ],
     ),

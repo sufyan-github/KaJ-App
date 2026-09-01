@@ -63,7 +63,9 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                     const SizedBox(height: KSpacing.xl),
                     Text(
                       l10n.phoneTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: KColors.textPrimary,
+                      ),
                     ),
                     const SizedBox(height: KSpacing.sm),
                     Text(
@@ -76,6 +78,8 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                     TextFormField(
                       controller: _phoneController,
                       enabled: !isLoading,
+                      style: const TextStyle(color: KColors.textPrimary),
+                      cursorColor: KColors.primary,
                       keyboardType: TextInputType.phone,
                       textInputAction: TextInputAction.done,
                       autofillHints: const [AutofillHints.telephoneNumber],
@@ -88,12 +92,25 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                       decoration: InputDecoration(
                         labelText: l10n.phoneLabel,
                         hintText: l10n.phoneHint,
+                        labelStyle: const TextStyle(
+                          color: KColors.textSecondary,
+                        ),
+                        hintStyle: const TextStyle(
+                          color: KColors.textSecondary,
+                        ),
                         prefixIcon: const Icon(Icons.phone_outlined),
                       ),
                       validator: (value) =>
                           AuthValidators.isValidPhone(value ?? '')
                           ? null
                           : l10n.invalidPhone,
+                      onChanged: (_) {
+                        if (state.failure != null) {
+                          ref
+                              .read(authControllerProvider.notifier)
+                              .clearError();
+                        }
+                      },
                       onFieldSubmitted: (_) => _submit(),
                     ),
                     const SizedBox(height: KSpacing.md),
@@ -103,8 +120,14 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                       value: _accepted,
                       onChanged: isLoading
                           ? null
-                          : (value) =>
-                                setState(() => _accepted = value ?? false),
+                          : (value) {
+                              if (state.failure != null) {
+                                ref
+                                    .read(authControllerProvider.notifier)
+                                    .clearError();
+                              }
+                              setState(() => _accepted = value ?? false);
+                            },
                       title: Text(l10n.phoneConsent),
                     ),
                     if (_submitted && !_accepted)

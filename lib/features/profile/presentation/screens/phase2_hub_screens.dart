@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../catalog/domain/entities/catalog_category.dart';
+import '../../../catalog/domain/entities/catalog_skill.dart';
 import '../../../catalog/presentation/controllers/catalog_providers.dart';
 import '../controllers/public_profile_provider.dart';
 
@@ -13,39 +15,171 @@ class CategoriesBrowseScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final categories = ref.watch(categoryTreeProvider);
+    final skills = ref.watch(catalogSkillsProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('কাজের ধরন')),
       body: categories.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => const Center(child: Text('তালিকা লোড করা যায়নি।')),
-        data: (items) => ListView.builder(
-          padding: const EdgeInsets.all(KSpacing.md),
-          itemCount: items.length,
-          itemBuilder: (context, index) {
-            final item = items[index];
-            return ExpansionTile(
-              leading: const Icon(Icons.work_outline, color: KColors.primary),
-              title: Text(item.nameBn),
-              subtitle: Text(item.nameEn),
-              children: item.children
-                  .map(
-                    (child) => ListTile(
-                      contentPadding: const EdgeInsets.only(
-                        left: 56,
-                        right: 16,
-                      ),
-                      title: Text(child.nameBn),
-                      subtitle: Text(child.nameEn),
-                    ),
-                  )
-                  .toList(growable: false),
-            );
-          },
+        data: (items) => skills.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, _) =>
+              const Center(child: Text('উপধরনের তালিকা লোড করা যায়নি।')),
+          data: (allSkills) =>
+              _CategoryGrid(categories: items, skills: allSkills),
         ),
       ),
     );
   }
 }
+
+class _CategoryGrid extends StatelessWidget {
+  const _CategoryGrid({required this.categories, required this.skills});
+
+  final List<CatalogCategory> categories;
+  final List<CatalogSkill> skills;
+
+  @override
+  Widget build(BuildContext context) => GridView.builder(
+    padding: const EdgeInsets.all(KSpacing.md),
+    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 2,
+      crossAxisSpacing: KSpacing.md,
+      mainAxisSpacing: KSpacing.md,
+      childAspectRatio: 1.12,
+    ),
+    itemCount: categories.length,
+    itemBuilder: (context, index) {
+      final category = categories[index];
+      final subtypes = skills
+          .where((skill) => skill.categoryId == category.id)
+          .toList(growable: false);
+      return Card(
+        margin: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => _showSubtypes(context, category, subtypes),
+          child: Padding(
+            padding: const EdgeInsets.all(KSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: KColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(
+                    _categoryIcon(category.icon),
+                    color: KColors.primary,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  category.nameBn,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: KSpacing.xs),
+                Text(
+                  '${subtypes.length}টি উপধরন',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: KColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+
+  void _showSubtypes(
+    BuildContext context,
+    CatalogCategory category,
+    List<CatalogSkill> subtypes,
+  ) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            KSpacing.lg,
+            0,
+            KSpacing.lg,
+            KSpacing.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                category.nameBn,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              Text(
+                'কাজের উপধরন বেছে নিন',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: KColors.textSecondary),
+              ),
+              const SizedBox(height: KSpacing.md),
+              if (subtypes.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: KSpacing.xl),
+                  child: Center(child: Text('এখনো কোনো উপধরন যোগ করা হয়নি।')),
+                )
+              else
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: KSpacing.sm,
+                    mainAxisSpacing: KSpacing.sm,
+                    childAspectRatio: 2.4,
+                  ),
+                  itemCount: subtypes.length,
+                  itemBuilder: (context, index) => Card(
+                    margin: EdgeInsets.zero,
+                    color: KColors.surfaceAlt,
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(KSpacing.sm),
+                        child: Text(
+                          subtypes[index].nameBn,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+IconData _categoryIcon(String? icon) => switch (icon) {
+  'home' => Icons.home_repair_service_outlined,
+  'tools' => Icons.handyman_outlined,
+  'care' => Icons.volunteer_activism_outlined,
+  'transport' => Icons.local_shipping_outlined,
+  'education' => Icons.school_outlined,
+  'computer' => Icons.computer_outlined,
+  'event' => Icons.celebration_outlined,
+  _ => Icons.work_outline,
+};
 
 class PublicWorkerProfileScreen extends ConsumerWidget {
   const PublicWorkerProfileScreen({super.key});

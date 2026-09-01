@@ -11,6 +11,8 @@ void main() {
       locationId: 'area-id',
       skillIds: ['skill-a', 'skill-b'],
       availableDays: [0, 2, 5],
+      availableStartTime: '09:30',
+      availableEndTime: '16:45',
     );
 
     final restored = OnboardingState.fromJson(draft.toJson());
@@ -23,5 +25,7 @@ void main() {
     expect(restored.locationId, 'area-id');
     expect(restored.skillIds, ['skill-a', 'skill-b']);
     expect(restored.availableDays, [0, 2, 5]);
+    expect(restored.availableStartTime, '09:30');
+    expect(restored.availableEndTime, '16:45');
   });
 }

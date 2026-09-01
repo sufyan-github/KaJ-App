@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,11 +25,13 @@ Future<void> bootstrap() async {
   }
 
   if (environment.sentryDsn.isEmpty) {
-    await runZonedGuarded(start, (error, stackTrace) {
+    PlatformDispatcher.instance.onError = (error, stackTrace) {
       FlutterError.reportError(
         FlutterErrorDetails(exception: error, stack: stackTrace),
       );
-    });
+      return true;
+    };
+    await start();
     return;
   }
 

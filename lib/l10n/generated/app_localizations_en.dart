@@ -107,6 +107,43 @@ class AppLocalizationsEn extends AppLocalizations {
       'We could not complete that request. Please try again or contact support.';
 
   @override
+  String get validationMessage =>
+      'Check the information you entered and try again.';
+
+  @override
+  String get unauthorizedMessage =>
+      'Your session is no longer valid. Sign in again.';
+
+  @override
+  String get forbiddenMessage => 'You do not have permission to do that.';
+
+  @override
+  String get notFoundMessage => 'The requested information could not be found.';
+
+  @override
+  String get conflictMessage =>
+      'This information has changed. Refresh and try again.';
+
+  @override
+  String get rateLimitedMessage =>
+      'Too many attempts. Wait a little and try again.';
+
+  @override
+  String get otpIncorrectMessage => 'The verification code is incorrect.';
+
+  @override
+  String get otpAttemptsExceededMessage =>
+      'Too many incorrect attempts. Send a new code.';
+
+  @override
+  String get otpAlreadyUsedMessage =>
+      'This verification code has already been used. Send a new code.';
+
+  @override
+  String get otpNotFoundMessage =>
+      'This verification request was not found. Send a new code.';
+
+  @override
   String get invalidPhone => 'Enter a valid Bangladeshi mobile number.';
 
   @override

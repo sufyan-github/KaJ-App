@@ -9,6 +9,7 @@ import '../../features/auth/presentation/screens/otp_verify_screen.dart';
 import '../../features/auth/presentation/screens/phone_entry_screen.dart';
 import '../../features/bootstrap/presentation/screens/splash_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/jobs/presentation/screens/jobs_screens.dart';
 import '../../features/onboarding/domain/onboarding_state.dart';
 import '../../features/onboarding/presentation/controllers/onboarding_controller.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screens.dart';
@@ -31,6 +32,13 @@ abstract final class AppRoutes {
   static const editAvailability = '/w/availability';
   static const settings = '/settings';
   static const helpSafety = '/help-safety';
+  static const jobs = '/jobs';
+  static const createJob = '/jobs/create';
+  static const workers = '/workers';
+  static const assignments = '/assignments';
+  static const workerBookingPath = '/workers/:id/book';
+
+  static String workerBooking(String id) => '/workers/$id/book';
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -61,10 +69,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.otp,
-        redirect: (context, state) =>
-            state.extra is OtpChallenge ? null : AppRoutes.phone,
-        builder: (context, state) =>
-            OtpVerifyScreen(challenge: state.extra! as OtpChallenge),
+        redirect: (context, state) {
+          final challenge = otpChallengeForRoute(
+            state.extra,
+            ref.read(authControllerProvider),
+          );
+          return challenge == null ? AppRoutes.phone : null;
+        },
+        builder: (context, state) {
+          final challenge = otpChallengeForRoute(
+            state.extra,
+            ref.read(authControllerProvider),
+          )!;
+          return OtpVerifyScreen(challenge: challenge);
+        },
       ),
       GoRoute(
         path: AppRoutes.home,
@@ -119,6 +137,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.helpSafety,
         builder: (context, state) => const HelpSafetyScreen(),
       ),
+      GoRoute(
+        path: AppRoutes.jobs,
+        builder: (context, state) => const JobFeedScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.createJob,
+        builder: (context, state) => const CreateJobScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.workers,
+        builder: (context, state) => const WorkerDirectoryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.assignments,
+        builder: (context, state) => const AssignmentsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.workerBookingPath,
+        builder: (context, state) =>
+            WorkerBookingScreen(workerId: state.pathParameters['id']!),
+      ),
     ],
   );
 });
@@ -138,6 +177,11 @@ String? authRedirect(
     return location == AppRoutes.phone ? null : AppRoutes.phone;
   }
   if (auth.status == AuthStatus.authenticated) {
+    if (auth.isNewUser && !onboarding.started) {
+      return location == AppRoutes.onboardingProfile
+          ? null
+          : AppRoutes.onboardingProfile;
+    }
     if (onboarding.started && !onboarding.complete) {
       final target = onboardingRouteForStep(onboarding);
       return location.startsWith('/onboarding/') ? null : target;
@@ -160,6 +204,9 @@ String onboardingRouteForStep(OnboardingState state) => switch (state.step) {
   4 => AppRoutes.onboardingAvailability,
   _ => AppRoutes.onboardingTour,
 };
+
+OtpChallenge? otpChallengeForRoute(Object? extra, AuthState auth) =>
+    extra is OtpChallenge ? extra : auth.challenge;
 
 class _RouterRefreshNotifier extends ChangeNotifier {
   void notify() => notifyListeners();

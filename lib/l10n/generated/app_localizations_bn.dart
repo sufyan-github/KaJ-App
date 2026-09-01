@@ -104,6 +104,42 @@ class AppLocalizationsBn extends AppLocalizations {
       'অনুরোধটি সম্পন্ন করা যায়নি। আবার চেষ্টা করুন বা সহায়তা নিন।';
 
   @override
+  String get validationMessage => 'দেওয়া তথ্য যাচাই করে আবার চেষ্টা করুন।';
+
+  @override
+  String get unauthorizedMessage =>
+      'আপনার সেশনের সময় শেষ হয়েছে। আবার সাইন ইন করুন।';
+
+  @override
+  String get forbiddenMessage => 'এই কাজটি করার অনুমতি আপনার নেই।';
+
+  @override
+  String get notFoundMessage => 'অনুরোধ করা তথ্যটি পাওয়া যায়নি।';
+
+  @override
+  String get conflictMessage =>
+      'তথ্যটি পরিবর্তিত হয়েছে। হালনাগাদ করে আবার চেষ্টা করুন।';
+
+  @override
+  String get rateLimitedMessage =>
+      'অনেকবার চেষ্টা করা হয়েছে। কিছুক্ষণ পরে আবার চেষ্টা করুন।';
+
+  @override
+  String get otpIncorrectMessage => 'যাচাই কোডটি সঠিক নয়।';
+
+  @override
+  String get otpAttemptsExceededMessage =>
+      'অনেকবার ভুল কোড দেওয়া হয়েছে। নতুন কোড নিন।';
+
+  @override
+  String get otpAlreadyUsedMessage =>
+      'এই যাচাই কোডটি আগে ব্যবহার করা হয়েছে। নতুন কোড নিন।';
+
+  @override
+  String get otpNotFoundMessage =>
+      'এই যাচাই অনুরোধটি পাওয়া যায়নি। নতুন কোড নিন।';
+
+  @override
   String get invalidPhone => 'সঠিক বাংলাদেশি মোবাইল নম্বর লিখুন।';
 
   @override

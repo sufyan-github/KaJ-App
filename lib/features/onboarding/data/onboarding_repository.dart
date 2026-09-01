@@ -56,7 +56,11 @@ class OnboardingRepository {
     );
   }
 
-  Future<void> updateAvailability(List<int> days) async {
+  Future<void> updateAvailability(
+    List<int> days, {
+    required String startTime,
+    required String endTime,
+  }) async {
     await _dio.put<Map<String, dynamic>>(
       '/profiles/me/availability',
       data: {
@@ -64,8 +68,8 @@ class OnboardingRepository {
             .map(
               (day) => {
                 'dayOfWeek': day,
-                'startTime': '18:00',
-                'endTime': '22:00',
+                'startTime': startTime,
+                'endTime': endTime,
               },
             )
             .toList(growable: false),

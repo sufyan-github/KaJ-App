@@ -1,0 +1,909 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/k_primary_button.dart';
+import '../../../../core/widgets/k_text_field.dart';
+import '../../../catalog/domain/entities/catalog_category.dart';
+import '../../../catalog/domain/entities/catalog_skill.dart';
+import '../../../catalog/presentation/controllers/catalog_providers.dart';
+import '../../../onboarding/domain/onboarding_state.dart';
+import '../../../onboarding/presentation/controllers/onboarding_controller.dart';
+import '../../../profile/domain/public_worker_profile.dart';
+import '../../../profile/presentation/controllers/public_profile_provider.dart';
+import '../../domain/job_models.dart';
+import '../controllers/jobs_providers.dart';
+
+class JobFeedScreen extends ConsumerWidget {
+  const JobFeedScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isWorker =
+        ref.watch(onboardingControllerProvider).role == KaajRole.worker;
+    final jobs = ref.watch(isWorker ? jobFeedProvider : myJobsProvider);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(isWorker ? 'কাজ খুঁজুন' : 'আমার পোস্ট করা কাজ'),
+      ),
+      floatingActionButton: isWorker
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () => context.push(AppRoutes.createJob),
+              icon: const Icon(Icons.post_add_rounded),
+              label: const Text('কাজ পোস্ট করুন'),
+            ),
+      body: jobs.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, _) => _Retry(
+          label: 'কাজের তালিকা লোড করা যায়নি।',
+          onRetry: () =>
+              ref.invalidate(isWorker ? jobFeedProvider : myJobsProvider),
+        ),
+        data: (items) => items.isEmpty
+            ? const Center(child: Text('এখনো কোনো কাজ প্রকাশিত হয়নি।'))
+            : GridView.builder(
+                padding: const EdgeInsets.all(KSpacing.md),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: KSpacing.md,
+                  mainAxisSpacing: KSpacing.md,
+                  childAspectRatio: .78,
+                ),
+                itemCount: items.length,
+                itemBuilder: (context, index) => _JobCard(
+                  job: items[index],
+                  actionLabel: isWorker ? 'আবেদন' : 'আবেদন দেখুন',
+                  onAction: isWorker
+                      ? () => _showApply(context, ref, items[index])
+                      : () => _showApplications(context, ref, items[index]),
+                ),
+              ),
+      ),
+    );
+  }
+
+  Future<void> _showApplications(
+    BuildContext context,
+    WidgetRef ref,
+    JobSummary job,
+  ) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => Consumer(
+        builder: (context, sheetRef, _) {
+          final applications = sheetRef.watch(jobApplicationsProvider(job.id));
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                KSpacing.lg,
+                0,
+                KSpacing.lg,
+                KSpacing.lg,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    job.title,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: KSpacing.sm),
+                  applications.when(
+                    loading: () => const Padding(
+                      padding: EdgeInsets.all(KSpacing.xl),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                    error: (_, _) => const Padding(
+                      padding: EdgeInsets.all(KSpacing.lg),
+                      child: Text('আবেদনের তালিকা লোড করা যায়নি।'),
+                    ),
+                    data: (items) => items.isEmpty
+                        ? const Padding(
+                            padding: EdgeInsets.all(KSpacing.lg),
+                            child: Text('এখনো কেউ আবেদন করেননি।'),
+                          )
+                        : Flexible(
+                            child: ListView.separated(
+                              shrinkWrap: true,
+                              itemCount: items.length,
+                              separatorBuilder: (_, _) => const Divider(),
+                              itemBuilder: (context, index) {
+                                final item = items[index];
+                                return ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: const CircleAvatar(
+                                    child: Icon(Icons.person_outline),
+                                  ),
+                                  title: Text(
+                                    'কর্মী ${item.workerUserId.substring(0, 8)}',
+                                  ),
+                                  subtitle: Text(
+                                    '${item.startsAt == null ? '' : _dateTime(item.startsAt!)}\n'
+                                    '${item.message?.isNotEmpty == true ? item.message : 'কোনো বার্তা নেই'}',
+                                  ),
+                                  isThreeLine: true,
+                                  trailing: item.status == 'PENDING'
+                                      ? FilledButton(
+                                          onPressed: () async {
+                                            try {
+                                              await sheetRef
+                                                  .read(jobsRepositoryProvider)
+                                                  .acceptApplication(item.id);
+                                              sheetRef.invalidate(
+                                                jobApplicationsProvider(job.id),
+                                              );
+                                              sheetRef.invalidate(
+                                                assignmentsProvider,
+                                              );
+                                            } on Object {
+                                              if (sheetContext.mounted) {
+                                                ScaffoldMessenger.of(
+                                                  sheetContext,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'আবেদনটি গ্রহণ করা যায়নি।',
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                            }
+                                          },
+                                          child: const Text('গ্রহণ'),
+                                        )
+                                      : Text(_statusBn(item.status)),
+                                );
+                              },
+                            ),
+                          ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _showApply(
+    BuildContext context,
+    WidgetRef ref,
+    JobSummary job,
+  ) async {
+    final amount = TextEditingController(
+      text: _taka(job.budgetMaxPoisha ?? job.budgetMinPoisha) ?? '',
+    );
+    final message = TextEditingController();
+    final start = job.startsAt ?? DateTime.now().add(const Duration(days: 1));
+    final end = job.endsAt ?? start.add(const Duration(hours: 1));
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('এই কাজে আবেদন করুন'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('সময়: ${_dateTime(start)} – ${_time(end)}'),
+              const SizedBox(height: KSpacing.md),
+              KTextField(
+                label: 'প্রস্তাবিত টাকা',
+                controller: amount,
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: KSpacing.sm),
+              KTextField(label: 'বার্তা (ঐচ্ছিক)', controller: message),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('ফিরুন'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final taka = int.tryParse(amount.text);
+              if (taka == null || taka <= 0) return;
+              try {
+                await ref
+                    .read(jobsRepositoryProvider)
+                    .apply(
+                      jobId: job.id,
+                      startsAt: start,
+                      endsAt: end,
+                      proposedPricePoisha: taka * 100,
+                      message: message.text,
+                    );
+                if (dialogContext.mounted) Navigator.pop(dialogContext);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('আবেদন পাঠানো হয়েছে।')),
+                  );
+                }
+              } on Object {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('আবেদন পাঠানো যায়নি। সময়টি যাচাই করুন।'),
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('আবেদন পাঠান'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _JobCard extends StatelessWidget {
+  const _JobCard({
+    required this.job,
+    required this.actionLabel,
+    required this.onAction,
+  });
+
+  final String actionLabel;
+  final JobSummary job;
+  final VoidCallback onAction;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    margin: EdgeInsets.zero,
+    clipBehavior: Clip.antiAlias,
+    child: Padding(
+      padding: const EdgeInsets.all(KSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.work_outline, color: KColors.primary),
+          const SizedBox(height: KSpacing.sm),
+          Text(
+            job.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: KSpacing.xs),
+          Text(
+            '${job.categoryName} · ${job.locationName}',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: KSpacing.xs),
+          Text(job.description, maxLines: 3, overflow: TextOverflow.ellipsis),
+          const Spacer(),
+          if (job.startsAt != null)
+            Text(
+              _dateTime(job.startsAt!),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          if (_taka(job.budgetMaxPoisha ?? job.budgetMinPoisha)
+              case final amount?)
+            Text(
+              '৳$amount',
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          const SizedBox(height: KSpacing.sm),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(onPressed: onAction, child: Text(actionLabel)),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class CreateJobScreen extends ConsumerStatefulWidget {
+  const CreateJobScreen({super.key});
+
+  @override
+  ConsumerState<CreateJobScreen> createState() => _CreateJobScreenState();
+}
+
+class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
+  final _form = GlobalKey<FormState>();
+  final _title = TextEditingController();
+  final _description = TextEditingController();
+  final _amount = TextEditingController();
+  String? _categoryId;
+  String? _skillId;
+  DateTime _date = DateTime.now().add(const Duration(days: 1));
+  TimeOfDay _start = const TimeOfDay(hour: 9, minute: 0);
+  TimeOfDay _end = const TimeOfDay(hour: 11, minute: 0);
+  bool _saving = false;
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _description.dispose();
+    _amount.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final categories =
+        ref.watch(categoryTreeProvider).value ?? const <CatalogCategory>[];
+    final allSkills =
+        ref.watch(catalogSkillsProvider).value ?? const <CatalogSkill>[];
+    final skills = allSkills
+        .where((item) => item.categoryId == _categoryId)
+        .toList();
+    return Scaffold(
+      appBar: AppBar(title: const Text('নতুন কাজ পোস্ট করুন')),
+      body: Form(
+        key: _form,
+        child: ListView(
+          padding: const EdgeInsets.all(KSpacing.lg),
+          children: [
+            KTextField(
+              label: 'কাজের শিরোনাম',
+              controller: _title,
+              validator: (value) => (value?.trim().length ?? 0) < 5
+                  ? 'কমপক্ষে ৫ অক্ষরের শিরোনাম লিখুন'
+                  : null,
+            ),
+            const SizedBox(height: KSpacing.md),
+            KTextField(
+              label: 'কাজের বিস্তারিত',
+              controller: _description,
+              validator: (value) => (value?.trim().length ?? 0) < 20
+                  ? 'কমপক্ষে ২০ অক্ষরে বিস্তারিত লিখুন'
+                  : null,
+            ),
+            const SizedBox(height: KSpacing.md),
+            DropdownButtonFormField<String>(
+              initialValue: _categoryId,
+              decoration: const InputDecoration(labelText: 'কাজের ধরন'),
+              items: categories
+                  .map(
+                    (item) => DropdownMenuItem(
+                      value: item.id,
+                      child: Text(item.nameBn),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (value) => setState(() {
+                _categoryId = value;
+                _skillId = null;
+              }),
+              validator: (value) => value == null ? 'কাজের ধরন বেছে নিন' : null,
+            ),
+            const SizedBox(height: KSpacing.md),
+            DropdownButtonFormField<String>(
+              initialValue: _skillId,
+              decoration: const InputDecoration(labelText: 'কাজের উপধরন'),
+              items: skills
+                  .map(
+                    (item) => DropdownMenuItem(
+                      value: item.id,
+                      child: Text(item.nameBn),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (value) => setState(() => _skillId = value),
+            ),
+            const SizedBox(height: KSpacing.md),
+            KTextField(
+              label: 'পারিশ্রমিক (টাকা)',
+              controller: _amount,
+              keyboardType: TextInputType.number,
+              validator: (value) => (int.tryParse(value ?? '') ?? 0) <= 0
+                  ? 'সঠিক টাকার পরিমাণ লিখুন'
+                  : null,
+            ),
+            const SizedBox(height: KSpacing.md),
+            _DateTimeRow(
+              date: _date,
+              start: _start,
+              end: _end,
+              onDate: () async {
+                final value = await showDatePicker(
+                  context: context,
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                  initialDate: _date,
+                );
+                if (value != null) setState(() => _date = value);
+              },
+              onStart: () => _pickTime(true),
+              onEnd: () => _pickTime(false),
+            ),
+            const SizedBox(height: KSpacing.xl),
+            KPrimaryButton(
+              label: 'প্রকাশ করুন',
+              isLoading: _saving,
+              onPressed: _save,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickTime(bool start) async {
+    final value = await showTimePicker(
+      context: context,
+      initialTime: start ? _start : _end,
+    );
+    if (value != null) setState(() => start ? _start = value : _end = value);
+  }
+
+  Future<void> _save() async {
+    if (!_form.currentState!.validate()) return;
+    final locationId = ref.read(onboardingControllerProvider).locationId;
+    if (locationId == null) return;
+    final startsAt = _combine(_date, _start);
+    final endsAt = _combine(_date, _end);
+    if (!endsAt.isAfter(startsAt)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('শেষ সময় শুরুর সময়ের পরে হতে হবে।')),
+      );
+      return;
+    }
+    setState(() => _saving = true);
+    try {
+      await ref.read(jobsRepositoryProvider).createAndPublishJob({
+        'title': _title.text.trim(),
+        'description': _description.text.trim(),
+        'categoryId': _categoryId,
+        'skillIds': _skillId == null ? <String>[] : [_skillId],
+        'jobType': 'ONE_TIME',
+        'paymentModel': 'FIXED',
+        'budgetMinPoisha': '${int.parse(_amount.text) * 100}',
+        'budgetMaxPoisha': '${int.parse(_amount.text) * 100}',
+        'locationId': locationId,
+        'startsAt': startsAt.toUtc().toIso8601String(),
+        'endsAt': endsAt.toUtc().toIso8601String(),
+      });
+      ref.invalidate(jobFeedProvider);
+      if (mounted) context.pop();
+    } on Object {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('কাজ প্রকাশ করা যায়নি। আবার চেষ্টা করুন।'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+}
+
+class WorkerDirectoryScreen extends ConsumerWidget {
+  const WorkerDirectoryScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final workers = ref.watch(workerDirectoryProvider);
+    return Scaffold(
+      appBar: AppBar(title: const Text('কর্মী ও সময় খুঁজুন')),
+      body: workers.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, _) => _Retry(
+          label: 'কর্মীর তালিকা লোড হয়নি।',
+          onRetry: () => ref.invalidate(workerDirectoryProvider),
+        ),
+        data: (items) => items.isEmpty
+            ? const Center(child: Text('এখনো কোনো কর্মী পাওয়া যায়নি।'))
+            : GridView.builder(
+                padding: const EdgeInsets.all(KSpacing.md),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: KSpacing.md,
+                  mainAxisSpacing: KSpacing.md,
+                  childAspectRatio: .82,
+                ),
+                itemCount: items.length,
+                itemBuilder: (context, index) => _WorkerCard(
+                  worker: items[index],
+                  onTap: () =>
+                      context.push(AppRoutes.workerBooking(items[index].id)),
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+class _WorkerCard extends StatelessWidget {
+  const _WorkerCard({required this.worker, required this.onTap});
+  final VoidCallback onTap;
+  final PublicWorkerProfile worker;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    margin: EdgeInsets.zero,
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(KSpacing.md),
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: 30,
+              foregroundImage: worker.photoUrl == null
+                  ? null
+                  : NetworkImage(worker.photoUrl!),
+              child: const Icon(Icons.person),
+            ),
+            const SizedBox(height: KSpacing.sm),
+            Text(
+              worker.displayName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            Text(
+              worker.areaNameBn ?? '',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: KSpacing.xs),
+            Text(
+              '★ ${worker.ratingAverage} · ${worker.completedJobsCount} কাজ',
+            ),
+            const Spacer(),
+            Text(
+              worker.skills.take(2).map((item) => item.nameBn).join(', '),
+              maxLines: 2,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: KSpacing.sm),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.schedule, size: 18),
+                SizedBox(width: 4),
+                Text('সময় ও বুকিং'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class WorkerBookingScreen extends ConsumerStatefulWidget {
+  const WorkerBookingScreen({required this.workerId, super.key});
+  final String workerId;
+
+  @override
+  ConsumerState<WorkerBookingScreen> createState() =>
+      _WorkerBookingScreenState();
+}
+
+class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
+  WorkerSlot? _selected;
+  bool _saving = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final profile = ref.watch(publicWorkerProfileProvider(widget.workerId));
+    final slots = ref.watch(workerSlotsProvider(widget.workerId));
+    return Scaffold(
+      appBar: AppBar(title: const Text('সময় বেছে বুক করুন')),
+      body: ListView(
+        padding: const EdgeInsets.all(KSpacing.lg),
+        children: [
+          profile.when(
+            loading: () => const LinearProgressIndicator(),
+            error: (_, _) => const Text('প্রোফাইল লোড হয়নি।'),
+            data: (worker) => ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: CircleAvatar(
+                foregroundImage: worker.photoUrl == null
+                    ? null
+                    : NetworkImage(worker.photoUrl!),
+                child: const Icon(Icons.person),
+              ),
+              title: Text(worker.displayName),
+              subtitle: Text(
+                worker.skills.map((item) => item.nameBn).join(', '),
+              ),
+            ),
+          ),
+          const SizedBox(height: KSpacing.md),
+          Text(
+            'আগামী ১৪ দিনের খালি সময়',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: KSpacing.sm),
+          slots.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (_, _) => const Text('সময়সূচি লোড করা যায়নি।'),
+            data: (items) => items.isEmpty
+                ? const Text('এই সময়ে কোনো খালি স্লট নেই।')
+                : Wrap(
+                    spacing: KSpacing.sm,
+                    runSpacing: KSpacing.sm,
+                    children: items
+                        .map(
+                          (slot) => ChoiceChip(
+                            selected: _selected == slot,
+                            onSelected: (_) => setState(() => _selected = slot),
+                            label: Text(
+                              '${_dateTime(slot.startsAt)}–${_time(slot.endsAt)}',
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+          ),
+          const SizedBox(height: KSpacing.xl),
+          KPrimaryButton(
+            label: 'এই সময় বুকিং অনুরোধ করুন',
+            isLoading: _saving,
+            onPressed: _selected == null ? null : _book,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _book() async {
+    final profile = ref
+        .read(publicWorkerProfileProvider(widget.workerId))
+        .value;
+    final onboarding = ref.read(onboardingControllerProvider);
+    final skill = profile?.skills.firstOrNull;
+    final allSkills =
+        ref.read(catalogSkillsProvider).value ?? const <CatalogSkill>[];
+    final catalogSkill = allSkills
+        .where((item) => item.id == skill?.id)
+        .firstOrNull;
+    if (_selected == null ||
+        onboarding.locationId == null ||
+        catalogSkill == null) {
+      return;
+    }
+    final amount = await _askAmount(context);
+    if (amount == null) return;
+    setState(() => _saving = true);
+    try {
+      await ref
+          .read(jobsRepositoryProvider)
+          .requestBooking(
+            workerId: widget.workerId,
+            title: '${skill?.nameBn ?? 'সেবা'} বুকিং',
+            description: 'KAAJ অ্যাপ থেকে নির্বাচিত সময়ে সেবার বুকিং অনুরোধ।',
+            categoryId: catalogSkill.categoryId,
+            skillId: catalogSkill.id,
+            locationId: onboarding.locationId!,
+            slot: _selected!,
+            offeredPricePoisha: amount * 100,
+          );
+      ref.invalidate(assignmentsProvider);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'বুকিং অনুরোধ পাঠানো হয়েছে। কর্মীর নিশ্চিতকরণের অপেক্ষায়।',
+            ),
+          ),
+        );
+      }
+    } on Object {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('এই স্লটটি আর খালি নেই বা অনুরোধ পাঠানো যায়নি।'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+}
+
+class AssignmentsScreen extends ConsumerWidget {
+  const AssignmentsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final assignments = ref.watch(assignmentsProvider);
+    return Scaffold(
+      appBar: AppBar(title: const Text('বুকিং ও কাজের অবস্থা')),
+      body: assignments.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, _) => _Retry(
+          label: 'বুকিং লোড করা যায়নি।',
+          onRetry: () => ref.invalidate(assignmentsProvider),
+        ),
+        data: (items) => items.isEmpty
+            ? const Center(child: Text('এখনো কোনো বুকিং বা নির্বাচিত কাজ নেই।'))
+            : ListView.separated(
+                padding: const EdgeInsets.all(KSpacing.md),
+                itemCount: items.length,
+                separatorBuilder: (_, _) => const SizedBox(height: KSpacing.sm),
+                itemBuilder: (context, index) {
+                  final item = items[index];
+                  return Card(
+                    child: ListTile(
+                      leading: Icon(
+                        item.status == 'CONFIRMED'
+                            ? Icons.event_available
+                            : Icons.pending_actions,
+                        color: KColors.primary,
+                      ),
+                      title: Text(item.title),
+                      subtitle: Text(
+                        '${item.startsAt == null ? '' : _dateTime(item.startsAt!)}\n${_statusBn(item.status)}',
+                      ),
+                      isThreeLine: true,
+                      trailing:
+                          item.isWorker && item.status == 'PENDING_CONFIRMATION'
+                          ? FilledButton(
+                              onPressed: () async {
+                                try {
+                                  await ref
+                                      .read(jobsRepositoryProvider)
+                                      .confirmAssignment(item.id);
+                                  ref.invalidate(assignmentsProvider);
+                                  ref.invalidate(workerSlotsProvider);
+                                } on Object {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('স্লটটি আর খালি নেই।'),
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                              child: const Text('নিশ্চিত'),
+                            )
+                          : null,
+                    ),
+                  );
+                },
+              ),
+      ),
+    );
+  }
+}
+
+class _DateTimeRow extends StatelessWidget {
+  const _DateTimeRow({
+    required this.date,
+    required this.start,
+    required this.end,
+    required this.onDate,
+    required this.onStart,
+    required this.onEnd,
+  });
+  final DateTime date;
+  final TimeOfDay end;
+  final VoidCallback onDate;
+  final VoidCallback onEnd;
+  final VoidCallback onStart;
+  final TimeOfDay start;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      ListTile(
+        leading: const Icon(Icons.calendar_today),
+        title: const Text('কাজের দিন'),
+        subtitle: Text('${date.day}/${date.month}/${date.year}'),
+        onTap: onDate,
+      ),
+      Row(
+        children: [
+          Expanded(
+            child: ListTile(
+              title: const Text('শুরু'),
+              subtitle: Text(start.format(context)),
+              onTap: onStart,
+            ),
+          ),
+          Expanded(
+            child: ListTile(
+              title: const Text('শেষ'),
+              subtitle: Text(end.format(context)),
+              onTap: onEnd,
+            ),
+          ),
+        ],
+      ),
+    ],
+  );
+}
+
+class _Retry extends StatelessWidget {
+  const _Retry({required this.label, required this.onRetry});
+  final String label;
+  final VoidCallback onRetry;
+  @override
+  Widget build(BuildContext context) => Center(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(label),
+        const SizedBox(height: KSpacing.sm),
+        FilledButton(onPressed: onRetry, child: const Text('আবার চেষ্টা করুন')),
+      ],
+    ),
+  );
+}
+
+Future<int?> _askAmount(BuildContext context) async {
+  final controller = TextEditingController();
+  final result = await showDialog<int>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('প্রস্তাবিত পারিশ্রমিক'),
+      content: KTextField(
+        label: 'টাকা',
+        controller: controller,
+        keyboardType: TextInputType.number,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('ফিরুন'),
+        ),
+        FilledButton(
+          onPressed: () {
+            final value = int.tryParse(controller.text);
+            if (value != null && value > 0) Navigator.pop(context, value);
+          },
+          child: const Text('অনুরোধ পাঠান'),
+        ),
+      ],
+    ),
+  );
+  controller.dispose();
+  return result;
+}
+
+DateTime _combine(DateTime date, TimeOfDay time) =>
+    DateTime(date.year, date.month, date.day, time.hour, time.minute);
+String _dateTime(DateTime value) {
+  final local = value.toLocal();
+  return '${local.day}/${local.month} ${_time(local)}';
+}
+
+String _time(DateTime value) {
+  final local = value.toLocal();
+  final hour = local.hour.toString().padLeft(2, '0');
+  final minute = local.minute.toString().padLeft(2, '0');
+  return '$hour:$minute';
+}
+
+String? _taka(String? poisha) {
+  final value = int.tryParse(poisha ?? '');
+  return value == null ? null : (value ~/ 100).toString();
+}
+
+String _statusBn(String status) => switch (status) {
+  'PENDING_CONFIRMATION' => 'নিশ্চিতকরণের অপেক্ষায়',
+  'PENDING' => 'অপেক্ষায়',
+  'ACCEPTED' => 'গৃহীত',
+  'REJECTED' => 'প্রত্যাখ্যাত',
+  'WITHDRAWN' => 'প্রত্যাহার করা হয়েছে',
+  'CONFIRMED' => 'নিশ্চিত হয়েছে',
+  'DECLINED' => 'বাতিল হয়েছে',
+  'CANCELLED' => 'বাতিল হয়েছে',
+  'COMPLETED' => 'সম্পন্ন',
+  _ => status,
+};

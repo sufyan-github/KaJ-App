@@ -49,7 +49,13 @@ void main() {
       await relaunched.saveWorkerSetup([
         '018f4f6f-13e8-7d9a-8c2b-6b6a9f62f802',
       ], hourlyRatePoisha: 50_000);
-      await relaunched.saveAvailability([0, 2, 5]);
+      await relaunched.saveAvailability(
+        [0, 2, 5],
+        startTime: '09:30',
+        endTime: '16:45',
+      );
+      expect(relaunched.state.availableStartTime, '09:30');
+      expect(relaunched.state.availableEndTime, '16:45');
       await relaunched.finish();
 
       expect(relaunched.state.complete, isTrue);
