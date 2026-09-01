@@ -15,7 +15,7 @@ void main() {
     sentryDsn: '',
   );
 
-  test('adds English locale and an idempotency key to mutations', () async {
+  test('adds Bangla locale and an idempotency key to mutations', () async {
     final adapter = _RecordingAdapter((request, attempt) {
       return _jsonResponse(200, {
         'data': {'accepted': true},
@@ -33,7 +33,7 @@ void main() {
     );
 
     final request = adapter.requests.single;
-    expect(request.headers['Accept-Language'], 'en');
+    expect(request.headers['Accept-Language'], 'bn');
     expect(request.headers['Idempotency-Key'], isNotEmpty);
   });
 
@@ -60,7 +60,7 @@ void main() {
     final adapter = _RecordingAdapter((request, attempt) {
       if (request.path.endsWith('/auth/refresh')) {
         expect(request.data, {'refreshToken': 'valid-refresh'});
-        expect(request.headers['Accept-Language'], 'en');
+        expect(request.headers['Accept-Language'], 'bn');
         expect(request.headers['Idempotency-Key'], isNotEmpty);
         return _jsonResponse(200, {
           'data': {

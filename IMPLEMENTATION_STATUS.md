@@ -5,7 +5,7 @@ Last verified: 1 September 2026
 ## Delivered
 
 - [x] Android Flutter project in the requested `Kaaj` directory
-- [x] English-authored, English-default localization setup
+- [x] Bangla-default localization with complete English/Bangla key parity
 - [x] Package identity `app.kaaj.mobile`
 - [x] `dev`, `staging`, and `prod` Android flavors
 - [x] Android 8.0 minimum, backup disabled, cleartext traffic disabled
@@ -15,7 +15,7 @@ Last verified: 1 September 2026
 - [x] Riverpod dependency/state composition
 - [x] go_router navigation foundation
 - [x] Dio API envelope handling
-- [x] `Accept-Language: en`
+- [x] `Accept-Language: bn`
 - [x] bearer access-token attachment
 - [x] rotating refresh-token recovery and single retry
 - [x] idempotency keys retained on state-changing requests
@@ -35,7 +35,10 @@ Last verified: 1 September 2026
 - [x] Sentry bootstrap with PII disabled when a DSN is supplied
 - [x] CI workflow for formatting, analysis, tests, and dev APK build
 - [x] unit, localization policy, controller, offline, and 200% text-scale widget tests
-- [x] verified `dev`, `staging`, and `prod` debug APK builds
+- [x] profile, role, location, skills/rate, availability, and tour onboarding
+- [x] persisted mid-flow recovery after app process recreation
+- [x] availability editor, skills editor, categories, public preview, settings, and safety screens
+- [x] verified `dev` and `staging` debug plus `prod` release APK builds
 
 ## Backend contract used
 
@@ -48,34 +51,23 @@ The client is aligned with the currently implemented NestJS routes:
 
 It also consumes the backend's actual `{ data, meta }` success envelope and `{ error }` failure envelope.
 
-## Completed sequential milestone
+## Completed sequential milestones
 
-P1-UI-08 completes the four-screen authentication entry budget and its acceptance tests. New-user onboarding remains the next backend-dependent milestone.
-
-## Later backend dependencies
-
-Phase 1 onboarding needs backend contracts that are not present in the current backend checkout:
-
-- runtime configuration and version gate
-- current user/profile read and update
-- profile photo upload
-- role selection
-- city, area, and mahalla catalog
-- skills and worker profile setup
-- availability rules
-
-Those screens should be connected when the endpoints exist. Production paths must not fabricate marketplace data or silently invent API fields.
+P1-UI-08 completes the authentication entry budget. P2-UI-06 implements every Phase 2 screen and
+connects onboarding mutations to the sibling backend. A timed human onboarding run and the backend
+D10 public-profile projection remain Phase 2 exit-gate evidence rather than being inferred from tests.
 
 ## Phase 2 delivery
 
-P2-TAX-01 is implemented and verified: typed category, skill, and Rajshahi location contracts connect to public sibling-backend catalog endpoints, and a schema-versioned one-hour Hive cache preserves catalog data across restarts. Backend administrator mutations invalidate Redis immediately.
+P2-TAX-01 and P2-UI-06 are implemented and verified. Catalog data remains persistent and data-driven;
+new-user onboarding is Bangla-first, backend-connected, and resumes its exact saved step after relaunch.
 
 ## Verification evidence
 
 - `flutter analyze --fatal-infos`: clean on Flutter 3.47.2 / Dart 3.13.2
-- `flutter test`: 26 passing tests
-- `flutter build apk --debug --flavor dev`: successful, 169,437,924 bytes
-- `flutter build apk --debug --flavor staging`: successful, 169,438,120 bytes
-- `flutter build apk --debug --flavor prod`: successful, 169,437,920 bytes
+- `flutter test`: 34 passing tests
+- `flutter build apk --debug --flavor dev`: successful
+- `flutter build apk --debug --flavor staging`: successful
+- `flutter build apk --release --flavor prod`: successful, 58.2 MB
 
 Flutter emitted a forward-compatibility warning that `sentry_flutter` still applies the Kotlin Gradle Plugin. It does not fail current Flutter 3.47.2 builds and should be rechecked during dependency upgrades. Android tooling also warned that the installed command-line tools understand SDK XML up to version 3 while a version 4 file is present; builds still succeed, but the host command-line tools should be updated.

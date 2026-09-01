@@ -7,10 +7,12 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'app.dart';
 import 'core/config/app_environment.dart';
+import 'features/onboarding/data/onboarding_repository.dart';
 
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
+  await Hive.openBox<dynamic>(onboardingBoxName);
   final environment = AppEnvironment.current();
 
   Future<void> start() async {

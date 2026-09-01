@@ -57,6 +57,42 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: KSpacing.xl),
+                  Wrap(
+                    spacing: KSpacing.sm,
+                    runSpacing: KSpacing.sm,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () => context.push(AppRoutes.categories),
+                        icon: const Icon(Icons.category_outlined),
+                        label: const Text('কাজের ধরন'),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () =>
+                            context.push(AppRoutes.publicWorkerProfile),
+                        icon: const Icon(Icons.person_search_outlined),
+                        label: const Text('পাবলিক প্রোফাইল'),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () => context.push(AppRoutes.settings),
+                        icon: const Icon(Icons.settings_outlined),
+                        label: const Text('সেটিংস'),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () =>
+                            context.push(AppRoutes.editWorkerSkills),
+                        icon: const Icon(Icons.handyman_outlined),
+                        label: const Text('দক্ষতা সম্পাদনা'),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () =>
+                            context.push(AppRoutes.editAvailability),
+                        icon: const Icon(Icons.calendar_month_outlined),
+                        label: const Text('সময় সম্পাদনা'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: KSpacing.lg),
                   KPrimaryButton(
                     label: l10n.signOut,
                     isLoading: state.status == AuthStatus.loading,

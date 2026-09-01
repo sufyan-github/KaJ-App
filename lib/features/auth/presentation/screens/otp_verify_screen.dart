@@ -10,6 +10,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_error_message.dart';
 import '../../../../core/widgets/k_primary_button.dart';
 import '../../../../l10n/generated/app_localizations.dart';
+import '../../../onboarding/presentation/controllers/onboarding_controller.dart';
 import '../../domain/entities/otp_challenge.dart';
 import '../../domain/usecases/auth_validators.dart';
 import '../controllers/auth_controller.dart';
@@ -70,6 +71,12 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
         .read(authControllerProvider.notifier)
         .verifyOtp(_challenge, _codeController.text.trim());
     if (!mounted || !verified) return;
+    if (ref.read(authControllerProvider).isNewUser) {
+      await ref.read(onboardingControllerProvider.notifier).begin();
+      if (!mounted) return;
+      context.go(AppRoutes.onboardingProfile);
+      return;
+    }
     context.go(AppRoutes.home);
   }
 

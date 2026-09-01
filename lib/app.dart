@@ -20,7 +20,7 @@ class KaajApp extends ConsumerWidget {
       debugShowCheckedModeBanner: environment.showDebugBanner,
       theme: buildAppTheme(),
       routerConfig: router,
-      locale: const Locale('en'),
+      locale: const Locale('bn'),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [
         AppLocalizations.delegate,

@@ -14,7 +14,7 @@ class ApiClient {
       baseUrl: environment.apiBaseUrl,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 20),
-      headers: const {'Accept': 'application/json', 'Accept-Language': 'en'},
+      headers: const {'Accept': 'application/json', 'Accept-Language': 'bn'},
     );
     dio = Dio(options);
     final refreshDio = Dio(options);
@@ -41,7 +41,7 @@ class _SessionInterceptor extends QueuedInterceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    options.headers['Accept-Language'] = 'en';
+    options.headers['Accept-Language'] = 'bn';
     final token = _tokenStore.accessToken;
     if (token != null && !options.path.endsWith('/auth/refresh')) {
       options.headers['Authorization'] = 'Bearer $token';
