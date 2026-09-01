@@ -131,6 +131,8 @@ class AssignmentSummary {
     this.submittedAt,
     this.completionDueAt,
     this.workerUserId,
+    this.posterUserId,
+    this.jobId,
   });
 
   factory AssignmentSummary.fromJson(Map<String, dynamic> json) =>
@@ -151,6 +153,8 @@ class AssignmentSummary {
           json['completionDueAt'] as String? ?? '',
         ),
         workerUserId: json['workerUserId'] as String?,
+        posterUserId: json['posterUserId'] as String?,
+        jobId: json['jobId'] as String?,
       );
 
   final DateTime? endsAt;
@@ -165,6 +169,8 @@ class AssignmentSummary {
   final DateTime? submittedAt;
   final String title;
   final String? workerUserId;
+  final String? posterUserId;
+  final String? jobId;
 }
 
 class AssignmentReview {

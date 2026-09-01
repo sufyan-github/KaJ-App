@@ -129,6 +129,12 @@ class HomeScreen extends ConsumerWidget {
                         onTap: () => context.push(AppRoutes.notifications),
                       ),
                       _DashboardTile(
+                        icon: Icons.forum_outlined,
+                        title: 'বার্তা',
+                        subtitle: 'কাজের আলোচনা নিরাপদে করুন',
+                        onTap: () => context.push(AppRoutes.conversations),
+                      ),
+                      _DashboardTile(
                         icon: Icons.reviews_outlined,
                         title: 'রিভিউ',
                         subtitle: 'আপনার পাওয়া মতামত দেখুন',

@@ -8,6 +8,7 @@ import '../../features/auth/presentation/controllers/auth_providers.dart';
 import '../../features/auth/presentation/screens/otp_verify_screen.dart';
 import '../../features/auth/presentation/screens/phone_entry_screen.dart';
 import '../../features/bootstrap/presentation/screens/splash_screen.dart';
+import '../../features/chat/presentation/screens/chat_screens.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/jobs/presentation/screens/jobs_screens.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
@@ -41,10 +42,25 @@ abstract final class AppRoutes {
   static const notifications = '/notifications';
   static const reviews = '/reviews';
   static const favorites = '/favorites';
+  static const conversations = '/conversations';
+  static const chatThreadPath = '/conversations/:id';
   static const workerBookingPath = '/workers/:id/book';
 
   static String workerBooking(String id) => '/workers/$id/book';
   static String assignmentDetail(String id) => '/assignments/$id';
+  static String chatThread(
+    String id, {
+    required String jobTitle,
+    required String otherName,
+    String? otherUserId,
+  }) {
+    final parameters = {'jobTitle': jobTitle, 'otherName': otherName};
+    if (otherUserId != null) parameters['otherUserId'] = otherUserId;
+    return Uri(
+      path: '/conversations/$id',
+      queryParameters: parameters,
+    ).toString();
+  }
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -175,6 +191,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.favorites,
         builder: (context, state) => const FavoriteWorkersScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.conversations,
+        builder: (context, state) => const ChatListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.chatThreadPath,
+        builder: (context, state) => ChatThreadScreen(
+          conversationId: state.pathParameters['id']!,
+          jobTitle: state.uri.queryParameters['jobTitle'] ?? 'কাজের আলোচনা',
+          otherName:
+              state.uri.queryParameters['otherName'] ?? 'KAAJ ব্যবহারকারী',
+          otherUserId: state.uri.queryParameters['otherUserId'],
+        ),
       ),
       GoRoute(
         path: AppRoutes.workerBookingPath,

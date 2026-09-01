@@ -13,6 +13,7 @@ Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   await Hive.openBox<dynamic>(onboardingBoxName);
+  await Hive.openBox<dynamic>('kaaj_chat');
   final environment = AppEnvironment.current();
 
   Future<void> start() async {

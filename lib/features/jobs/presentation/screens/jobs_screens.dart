@@ -9,6 +9,7 @@ import '../../../../core/widgets/k_text_field.dart';
 import '../../../catalog/domain/entities/catalog_category.dart';
 import '../../../catalog/domain/entities/catalog_skill.dart';
 import '../../../catalog/presentation/controllers/catalog_providers.dart';
+import '../../../chat/presentation/controllers/chat_providers.dart';
 import '../../../onboarding/domain/onboarding_state.dart';
 import '../../../onboarding/presentation/controllers/onboarding_controller.dart';
 import '../../../profile/domain/public_worker_profile.dart';
@@ -909,6 +910,16 @@ class _AssignmentDetailBody extends ConsumerWidget {
         ),
         const SizedBox(height: KSpacing.md),
         Text(detail.description),
+        if (item.jobId != null &&
+            item.workerUserId != null &&
+            item.posterUserId != null) ...[
+          const SizedBox(height: KSpacing.sm),
+          OutlinedButton.icon(
+            onPressed: () => _openChat(context, ref),
+            icon: const Icon(Icons.chat_bubble_outline),
+            label: const Text('কাজ নিয়ে বার্তা দিন'),
+          ),
+        ],
         if (item.startsAt != null) ...[
           const SizedBox(height: KSpacing.md),
           Card(
@@ -1038,6 +1049,34 @@ class _AssignmentDetailBody extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('রিভিউ জমা দেওয়া যায়নি।')),
+        );
+      }
+    }
+  }
+
+  Future<void> _openChat(BuildContext context, WidgetRef ref) async {
+    final item = detail.summary;
+    final otherUserId = item.isWorker ? item.posterUserId : item.workerUserId;
+    if (item.jobId == null || otherUserId == null) return;
+    try {
+      final id = await ref
+          .read(chatRepositoryProvider)
+          .openConversation(jobId: item.jobId!, participantUserId: otherUserId);
+      ref.invalidate(conversationsProvider);
+      if (context.mounted) {
+        await context.push(
+          AppRoutes.chatThread(
+            id,
+            jobTitle: item.title,
+            otherName: item.isWorker ? 'কাজের মালিক' : 'কর্মী',
+            otherUserId: otherUserId,
+          ),
+        );
+      }
+    } on Object {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('আলোচনা এখন খোলা যাচ্ছে না।')),
         );
       }
     }
