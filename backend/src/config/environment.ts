@@ -23,6 +23,7 @@ const environmentSchema = z
     OTP_FIXED_CODE: z
       .union([z.literal(""), z.string().regex(/^\d{6}$/)])
       .default(""),
+    OTP_HASH_SECRET: z.string().default(""),
     OTP_RESEND_COOLDOWN_SECONDS: z.coerce
       .number()
       .int()
@@ -54,6 +55,7 @@ const environmentSchema = z
     for (const key of [
       "JWT_ACCESS_SECRET",
       "JWT_REFRESH_SECRET",
+      "OTP_HASH_SECRET",
       "ADMIN_SESSION_SECRET",
       "ADMIN_TOTP_ENCRYPTION_KEY",
     ] as const) {

@@ -7,6 +7,7 @@ describe("environment validation", () => {
     expect(environment.NODE_ENV).toBe("development");
     expect(environment.PORT).toBe(3000);
     expect(environment.DEFAULT_TIMEZONE).toBe("Asia/Dhaka");
+    expect(environment.OTP_HASH_SECRET).toBe("");
   });
 
   it("requires long authentication secrets in production", () => {
@@ -25,6 +26,7 @@ describe("environment validation", () => {
       ADMIN_TOTP_ENCRYPTION_KEY: "d".repeat(32),
       JWT_ACCESS_SECRET: "a".repeat(32),
       JWT_REFRESH_SECRET: "b".repeat(32),
+      OTP_HASH_SECRET: "e".repeat(32),
       NODE_ENV: "production",
       SMS_PROVIDER: "disabled",
     });
@@ -45,6 +47,7 @@ describe("environment validation", () => {
         ADMIN_TOTP_ENCRYPTION_KEY: "d".repeat(32),
         JWT_ACCESS_SECRET: "a".repeat(32),
         JWT_REFRESH_SECRET: "b".repeat(32),
+        OTP_HASH_SECRET: "e".repeat(32),
         NODE_ENV: "production",
         OTP_FIXED_CODE: "123456",
         SMS_PROVIDER: "disabled",

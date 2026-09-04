@@ -37,6 +37,12 @@ const OTP_WINDOW_SECONDS = 3_600;
 const OTP_PHONE_LIMIT = 5;
 const OTP_IP_LIMIT = 20;
 
+function localRiskHashSecret(): string {
+  return createHash("sha256")
+    .update("kaj:otp-risk-hash:local-development-only")
+    .digest("hex");
+}
+
 export interface TokenPair {
   accessToken: string;
   refreshToken: string;
@@ -281,7 +287,8 @@ export class AuthService {
   }
 
   private riskHash(kind: string, value: string): string {
-    const secret = this.config.getOrThrow<string>("OTP_HASH_SECRET");
+    const secret =
+      this.config.get<string>("OTP_HASH_SECRET") || localRiskHashSecret();
     return createHmac("sha256", secret)
       .update(`${kind}:${value}`)
       .digest("hex");
