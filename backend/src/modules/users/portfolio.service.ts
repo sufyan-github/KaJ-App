@@ -9,6 +9,7 @@ import {
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { STORAGE_PORT, StoragePort } from "../../infra/storage/storage.port";
 import { CreatePortfolioItemDto } from "./dto/create-portfolio-item.dto";
+import { UpdatePortfolioItemDto } from "./dto/update-portfolio-item.dto";
 
 @Injectable()
 export class PortfolioService {
@@ -62,6 +63,61 @@ export class PortfolioService {
       include: { document: true, category: true },
     });
     return this.serialize(item);
+  }
+
+  async update(userId: string, id: string, input: UpdatePortfolioItemDto) {
+    if (input.caption === undefined && input.categoryId === undefined) {
+      throw new BadRequestException("A portfolio change is required.");
+    }
+    const [item, category] = await Promise.all([
+      this.prisma.portfolioItem.findFirst({
+        where: { id, user_id: userId },
+      }),
+      input.categoryId
+        ? this.prisma.category.findFirst({
+            where: { id: input.categoryId, is_active: true },
+          })
+        : null,
+    ]);
+    if (!item) throw new NotFoundException();
+    if (input.categoryId && !category) {
+      throw new BadRequestException("Portfolio category is unavailable.");
+    }
+    const updated = await this.prisma.portfolioItem.update({
+      where: { id },
+      data: {
+        ...(input.categoryId ? { category_id: input.categoryId } : {}),
+        ...(input.caption !== undefined
+          ? { caption: input.caption.trim() || null }
+          : {}),
+      },
+      include: { document: true, category: true },
+    });
+    return this.serialize(updated);
+  }
+
+  async reorder(userId: string, itemIds: string[]) {
+    const owned = await this.prisma.portfolioItem.findMany({
+      where: { user_id: userId },
+      select: { id: true },
+    });
+    if (
+      owned.length !== itemIds.length ||
+      owned.some((item) => !itemIds.includes(item.id))
+    ) {
+      throw new BadRequestException(
+        "The order must include every portfolio item exactly once.",
+      );
+    }
+    await this.prisma.$transaction(
+      itemIds.map((id, sortOrder) =>
+        this.prisma.portfolioItem.update({
+          where: { id },
+          data: { sort_order: sortOrder },
+        }),
+      ),
+    );
+    return { itemIds };
   }
 
   async remove(userId: string, id: string) {

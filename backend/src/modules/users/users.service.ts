@@ -95,6 +95,70 @@ export class UsersService {
     return { ...result, accessToken };
   }
 
+  async requestAccountDeletion(userId: string) {
+    const [activePostedJobs, activeAssignments, openDisputes] =
+      await Promise.all([
+        this.prisma.job.count({
+          where: {
+            poster_user_id: userId,
+            status: {
+              notIn: [
+                "COMPLETED",
+                "PAYMENT_RELEASED",
+                "REVIEWED",
+                "EXPIRED",
+                "CANCELLED_BY_CUSTOMER",
+                "CANCELLED_BY_WORKER",
+              ],
+            },
+          },
+        }),
+        this.prisma.assignment.count({
+          where: {
+            status: { in: ["PENDING_CONFIRMATION", "CONFIRMED"] },
+            OR: [
+              { worker_user_id: userId },
+              { job: { poster_user_id: userId } },
+            ],
+          },
+        }),
+        this.prisma.dispute.count({
+          where: {
+            status: { in: ["OPEN", "EVIDENCE", "UNDER_REVIEW"] },
+            OR: [
+              { assignment: { worker_user_id: userId } },
+              { job: { poster_user_id: userId } },
+            ],
+          },
+        }),
+      ]);
+    if (activePostedJobs > 0 || activeAssignments > 0 || openDisputes > 0) {
+      throw new BadRequestException(
+        "Resolve active work and disputes before deleting the account.",
+      );
+    }
+
+    const requestedAt = new Date();
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { status: "PENDING_DELETION", deleted_at: requestedAt },
+      }),
+      this.prisma.refreshToken.updateMany({
+        where: { user_id: userId, revoked_at: null },
+        data: { revoked_at: requestedAt },
+      }),
+      this.prisma.userDevice.updateMany({
+        where: { user_id: userId },
+        data: { fcm_token: null },
+      }),
+    ]);
+    return {
+      status: "PENDING_DELETION",
+      requestedAt: requestedAt.toISOString(),
+    };
+  }
+
   async updateProfile(userId: string, input: UpdateProfileDto) {
     const profile = await this.prisma.profile.upsert({
       where: { user_id: userId },

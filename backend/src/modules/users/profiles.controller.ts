@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   ParseUUIDPipe,
   Post,
   Put,
@@ -22,6 +23,8 @@ import { UpdateWorkerSkillsDto } from "./dto/update-worker-skills.dto";
 import { UsersService } from "./users.service";
 import { CreatePortfolioItemDto } from "./dto/create-portfolio-item.dto";
 import { PortfolioService } from "./portfolio.service";
+import { ReorderPortfolioItemsDto } from "./dto/reorder-portfolio-items.dto";
+import { UpdatePortfolioItemDto } from "./dto/update-portfolio-item.dto";
 
 @ApiTags("profiles")
 @Controller("profiles/me")
@@ -46,6 +49,27 @@ export class ProfilesController {
     @Body() body: CreatePortfolioItemDto,
   ) {
     return this.portfolio.create(claims.sub, body);
+  }
+
+  @Patch("portfolio/:id")
+  @Roles(RoleMode.WORKER)
+  @Policy(Policies.authenticated())
+  updatePortfolioItem(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @Body() body: UpdatePortfolioItemDto,
+  ) {
+    return this.portfolio.update(claims.sub, id, body);
+  }
+
+  @Put("portfolio/order")
+  @Roles(RoleMode.WORKER)
+  @Policy(Policies.authenticated())
+  reorderPortfolioItems(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Body() body: ReorderPortfolioItemsDto,
+  ) {
+    return this.portfolio.reorder(claims.sub, body.itemIds);
   }
 
   @Delete("portfolio/:id")

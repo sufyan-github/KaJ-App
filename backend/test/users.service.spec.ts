@@ -104,3 +104,63 @@ describe("UsersService role activation", () => {
     );
   });
 });
+
+describe("UsersService account deletion", () => {
+  const jobCount = jest.fn();
+  const assignmentCount = jest.fn();
+  const disputeCount = jest.fn();
+  const userUpdate = jest.fn();
+  const refreshUpdateMany = jest.fn();
+  const deviceUpdateMany = jest.fn();
+  const prisma = {
+    job: { count: jobCount },
+    assignment: { count: assignmentCount },
+    dispute: { count: disputeCount },
+    user: { update: userUpdate },
+    refreshToken: { updateMany: refreshUpdateMany },
+    userDevice: { updateMany: deviceUpdateMany },
+    $transaction: jest.fn((operations) => Promise.all(operations)),
+  } as unknown as PrismaService;
+  const service = new UsersService(prisma);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jobCount.mockResolvedValue(0);
+    assignmentCount.mockResolvedValue(0);
+    disputeCount.mockResolvedValue(0);
+    userUpdate.mockResolvedValue({});
+    refreshUpdateMany.mockResolvedValue({ count: 1 });
+    deviceUpdateMany.mockResolvedValue({ count: 1 });
+  });
+
+  it("blocks deletion while active work exists", async () => {
+    assignmentCount.mockResolvedValue(1);
+
+    await expect(service.requestAccountDeletion("user-id")).rejects.toThrow(
+      "Resolve active work",
+    );
+    expect(userUpdate).not.toHaveBeenCalled();
+  });
+
+  it("marks the account pending deletion and revokes access", async () => {
+    const result = await service.requestAccountDeletion("user-id");
+
+    expect(userUpdate).toHaveBeenCalledWith({
+      where: { id: "user-id" },
+      data: {
+        status: "PENDING_DELETION",
+        deleted_at: expect.any(Date),
+      },
+    });
+    expect(refreshUpdateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { user_id: "user-id", revoked_at: null },
+      }),
+    );
+    expect(deviceUpdateMany).toHaveBeenCalledWith({
+      where: { user_id: "user-id" },
+      data: { fcm_token: null },
+    });
+    expect(result.status).toBe("PENDING_DELETION");
+  });
+});

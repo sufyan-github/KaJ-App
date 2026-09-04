@@ -12,10 +12,19 @@ describe("PortfolioService", () => {
   const count = jest.fn();
   const create = jest.fn();
   const findMany = jest.fn();
+  const findItem = jest.fn();
+  const updateItem = jest.fn();
   const findDocument = jest.fn();
   const findCategory = jest.fn();
   const prisma = {
-    portfolioItem: { count, create, findMany },
+    $transaction: jest.fn((operations) => Promise.all(operations)),
+    portfolioItem: {
+      count,
+      create,
+      findMany,
+      findFirst: findItem,
+      update: updateItem,
+    },
     document: { findFirst: findDocument },
     category: { findFirst: findCategory },
   } as unknown as PrismaService;
@@ -30,6 +39,8 @@ describe("PortfolioService", () => {
     findDocument.mockResolvedValue({ id: "document-id" });
     findCategory.mockResolvedValue({ id: "category-id" });
     create.mockResolvedValue(item());
+    findItem.mockResolvedValue(item());
+    updateItem.mockResolvedValue(item());
   });
 
   it("accepts only an unused owner portfolio document and active category", async () => {
@@ -79,6 +90,51 @@ describe("PortfolioService", () => {
       id: "portfolio-id",
       caption: "নিরাপদ বৈদ্যুতিক কাজ",
     });
+  });
+
+  it("updates the caption and category only for an owned item", async () => {
+    await service.update(userId, "portfolio-id", {
+      categoryId: "category-id",
+      caption: "  নতুন ক্যাপশন  ",
+    });
+
+    expect(findItem).toHaveBeenCalledWith({
+      where: { id: "portfolio-id", user_id: userId },
+    });
+    expect(updateItem).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "portfolio-id" },
+        data: {
+          category_id: "category-id",
+          caption: "নতুন ক্যাপশন",
+        },
+      }),
+    );
+  });
+
+  it("reorders only when every owned item is present exactly once", async () => {
+    findMany.mockResolvedValue([{ id: "first" }, { id: "second" }]);
+    updateItem.mockResolvedValue({});
+
+    await service.reorder(userId, ["second", "first"]);
+
+    expect(updateItem).toHaveBeenNthCalledWith(1, {
+      where: { id: "second" },
+      data: { sort_order: 0 },
+    });
+    expect(updateItem).toHaveBeenNthCalledWith(2, {
+      where: { id: "first" },
+      data: { sort_order: 1 },
+    });
+  });
+
+  it("rejects a partial reorder", async () => {
+    findMany.mockResolvedValue([{ id: "first" }, { id: "second" }]);
+
+    await expect(service.reorder(userId, ["first"])).rejects.toThrow(
+      "every portfolio item",
+    );
+    expect(updateItem).not.toHaveBeenCalled();
   });
 });
 

@@ -30,6 +30,12 @@ export class UsersController {
     return this.users.activateRole(claims.sub, body.role, claims.deviceId);
   }
 
+  @Delete()
+  @Policy(Policies.authenticated())
+  requestAccountDeletion(@CurrentUser() claims: AccessTokenClaims) {
+    return this.users.requestAccountDeletion(claims.sub);
+  }
+
   @Get("favorites")
   @Policy(Policies.authenticated())
   favorites(@CurrentUser() claims: AccessTokenClaims) {
