@@ -37,8 +37,13 @@ export class AuthController {
 
   @Post("otp/verify")
   @Policy(Policies.public())
-  verifyOtp(@Body() body: VerifyOtpDto) {
-    return this.auth.verifyOtp(body.challengeId, body.code, body.deviceId);
+  verifyOtp(@Body() body: VerifyOtpDto, @Req() request: Request) {
+    return this.auth.verifyOtp(
+      body.challengeId,
+      body.code,
+      body.deviceId,
+      request.ip || request.socket.remoteAddress || "unknown",
+    );
   }
 
   @Post("refresh")

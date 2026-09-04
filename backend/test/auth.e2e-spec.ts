@@ -102,6 +102,7 @@ class InMemoryAuthRepository implements AuthRepository {
   private readonly devices = new Map<string, string>();
   private readonly refreshTokens = new Map<string, StoredRefreshToken>();
   private readonly users = new Map<string, AuthSession["user"]>();
+  readonly riskObservations: ConsumeChallengeInput["riskObservations"] = [];
 
   async createOtpChallenge(
     input: CreateOtpChallengeInput,
@@ -144,6 +145,7 @@ class InMemoryAuthRepository implements AuthRepository {
       return null;
     }
     challenge.consumedAt = input.now;
+    this.riskObservations.push(...input.riskObservations);
 
     let user = [...this.users.values()].find(
       (candidate) => candidate.phoneE164 === input.phoneE164,
@@ -220,6 +222,7 @@ class InMemoryAuthRepository implements AuthRepository {
     this.devices.clear();
     this.refreshTokens.clear();
     this.users.clear();
+    this.riskObservations.length = 0;
   }
 }
 
@@ -236,6 +239,8 @@ describe("phone OTP authentication", () => {
       "test-access-secret-that-is-at-least-32-characters";
     process.env.JWT_REFRESH_SECRET =
       "test-refresh-secret-that-is-at-least-32-characters";
+    process.env.OTP_HASH_SECRET =
+      "test-otp-hash-secret-that-is-at-least-32-characters";
     process.env.OTP_RESEND_COOLDOWN_SECONDS = "0";
 
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
@@ -269,6 +274,7 @@ describe("phone OTP authentication", () => {
   afterAll(async () => {
     delete process.env.JWT_ACCESS_SECRET;
     delete process.env.JWT_REFRESH_SECRET;
+    delete process.env.OTP_HASH_SECRET;
     delete process.env.OTP_RESEND_COOLDOWN_SECONDS;
     if (app) await app.close();
   });
@@ -326,6 +332,14 @@ describe("phone OTP authentication", () => {
       isNewUser: true,
     });
     expect(JSON.stringify(verified.body)).not.toContain(OTP_CODE);
+    expect(repository.riskObservations).toHaveLength(3);
+    expect(repository.riskObservations.map((item) => item.kind).sort()).toEqual(
+      ["DEVICE", "IP", "PHONE"],
+    );
+    expect(JSON.stringify(repository.riskObservations)).not.toContain(PHONE);
+    expect(JSON.stringify(repository.riskObservations)).not.toContain(
+      DEVICE_ID,
+    );
   });
 
   it("rejects non-Bangladesh phone numbers", async () => {

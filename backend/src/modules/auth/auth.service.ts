@@ -1,8 +1,9 @@
-import { createHash } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 
 import { Inject, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { compare, hash } from "bcryptjs";
+import { RiskIdentityKind } from "@prisma/client";
 
 import { CLOCK, Clock } from "../../common/time/clock";
 import { SMS_PORT, SmsPort } from "../../infra/sms/sms.port";
@@ -116,6 +117,7 @@ export class AuthService {
     challengeId: string,
     code: string,
     deviceId: string,
+    ipAddress = "unknown",
   ): Promise<TokenPair & { isNewUser: boolean }> {
     const challenge = await this.repository.findOtpChallenge(challengeId);
     if (!challenge) throw otpNotFoundError();
@@ -143,6 +145,24 @@ export class AuthService {
       now: this.clock.now(),
       phoneE164: challenge.phoneE164,
       refreshToken: refresh.record,
+      riskObservations: [
+        {
+          kind: RiskIdentityKind.DEVICE,
+          valueHash: this.riskHash("device", deviceId),
+        },
+        {
+          kind: RiskIdentityKind.PHONE,
+          valueHash: this.riskHash("phone", challenge.phoneE164),
+        },
+        ...(ipAddress === "unknown"
+          ? []
+          : [
+              {
+                kind: RiskIdentityKind.IP,
+                valueHash: this.riskHash("ip", ipAddress),
+              },
+            ]),
+      ],
     });
     if (!session) throw otpAlreadyUsedError();
     if (session.user.status !== "ACTIVE") {
@@ -258,6 +278,13 @@ export class AuthService {
 
   private rateLimitKey(value: string): string {
     return createHash("sha256").update(value).digest("hex");
+  }
+
+  private riskHash(kind: string, value: string): string {
+    const secret = this.config.getOrThrow<string>("OTP_HASH_SECRET");
+    return createHmac("sha256", secret)
+      .update(`${kind}:${value}`)
+      .digest("hex");
   }
 
   private async enforceRateLimit(

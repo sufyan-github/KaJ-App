@@ -254,6 +254,26 @@ enum ModerationLevel {
   BAN
 }
 
+enum RiskIdentityKind {
+  DEVICE
+  PHONE
+  IP
+}
+
+enum RiskReviewStatus {
+  OPEN
+  UNDER_REVIEW
+  CLEARED
+  ESCALATED
+}
+
+enum RiskSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
 enum AdminRole {
   ADMIN
   MODERATOR
@@ -320,6 +340,9 @@ model User {
   reports_received            Report[]                  @relation("ReportSubject")
   reports_reviewed            Report[]                  @relation("ReportReviewer")
   moderation_actions          ModerationAction[]        @relation("ModerationAdmin")
+  risk_identity_observations  RiskIdentityObservation[]
+  risk_items                  RiskReviewItem[]          @relation("RiskSubject")
+  risk_items_reviewed         RiskReviewItem[]          @relation("RiskReviewer")
   badges                      UserBadge[]
   saved_searches              SavedSearch[]
   favorites                   Favorite[]                @relation("FavoriteOwner")
@@ -1260,6 +1283,48 @@ model ModerationAction {
   @@index([report_id])
   @@index([review_due_at, reviewed_at])
   @@map("moderation_actions")
+}
+
+model RiskIdentityObservation {
+  id                String           @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id           String           @db.Uuid
+  kind              RiskIdentityKind
+  value_hash        String
+  first_observed_at DateTime         @default(now())
+  last_observed_at  DateTime         @default(now())
+  occurrences       Int              @default(1)
+  user              User             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, kind, value_hash])
+  @@index([kind, value_hash, last_observed_at])
+  @@index([user_id, last_observed_at(sort: Desc)])
+  @@map("risk_identity_observations")
+}
+
+model RiskReviewItem {
+  id                String           @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  subject_user_id   String           @db.Uuid
+  entity_type       String           @default("USER")
+  entity_id         String?          @db.Uuid
+  score             Int
+  severity          RiskSeverity
+  signals_json      Json
+  status            RiskReviewStatus @default(OPEN)
+  reviewer_user_id  String?          @db.Uuid
+  resolution        String?
+  window_started_at DateTime
+  window_ended_at   DateTime
+  last_detected_at  DateTime         @default(now())
+  reviewed_at       DateTime?
+  created_at        DateTime         @default(now())
+  updated_at        DateTime         @updatedAt
+  subject           User             @relation("RiskSubject", fields: [subject_user_id], references: [id], onDelete: Restrict)
+  reviewer          User?            @relation("RiskReviewer", fields: [reviewer_user_id], references: [id], onDelete: SetNull)
+
+  @@index([status, score(sort: Desc), created_at])
+  @@index([subject_user_id, status])
+  @@index([reviewer_user_id])
+  @@map("risk_review_items")
 }
 
 model Badge {

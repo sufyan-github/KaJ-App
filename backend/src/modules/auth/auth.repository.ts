@@ -1,4 +1,9 @@
-import { DevicePlatform, RoleMode, UserStatus } from "@prisma/client";
+import {
+  DevicePlatform,
+  RiskIdentityKind,
+  RoleMode,
+  UserStatus,
+} from "@prisma/client";
 
 export const AUTH_REPOSITORY = Symbol("AUTH_REPOSITORY");
 
@@ -50,6 +55,10 @@ export interface ConsumeChallengeInput {
   now: Date;
   phoneE164: string;
   refreshToken: NewRefreshToken;
+  riskObservations: Array<{
+    kind: RiskIdentityKind;
+    valueHash: string;
+  }>;
 }
 
 export interface RotateRefreshTokenInput {

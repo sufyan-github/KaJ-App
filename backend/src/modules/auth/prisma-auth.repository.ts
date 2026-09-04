@@ -138,6 +138,28 @@ export class PrismaAuthRepository implements AuthRepository {
           user_id: user.id,
         },
       });
+      for (const observation of input.riskObservations) {
+        await transaction.riskIdentityObservation.upsert({
+          where: {
+            user_id_kind_value_hash: {
+              user_id: user.id,
+              kind: observation.kind,
+              value_hash: observation.valueHash,
+            },
+          },
+          create: {
+            user_id: user.id,
+            kind: observation.kind,
+            value_hash: observation.valueHash,
+            first_observed_at: input.now,
+            last_observed_at: input.now,
+          },
+          update: {
+            last_observed_at: input.now,
+            occurrences: { increment: 1 },
+          },
+        });
+      }
 
       return { isNewUser: !existing, user: toAuthUser(user) };
     });

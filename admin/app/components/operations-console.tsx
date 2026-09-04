@@ -9,6 +9,7 @@ type ModuleKey =
   | "dashboard"
   | "users"
   | "reports"
+  | "risk"
   | "jobs"
   | "applications"
   | "verification"
@@ -25,6 +26,7 @@ const modules: Array<[ModuleKey, string, string]> = [
   ["dashboard", "Dashboard", "Live marketplace health"],
   ["users", "Users", "Support and moderation"],
   ["reports", "Safety reports", "Human review and progressive action"],
+  ["risk", "Risk review", "Deterministic signals, human decisions only"],
   ["jobs", "Jobs", "Lifecycle rescue"],
   ["applications", "Applications", "Unstick applications"],
   ["verification", "Verification", "Document review queue"],
@@ -108,6 +110,7 @@ function ModuleView({ active }: { active: ModuleKey }) {
   if (active === "dashboard") return <Dashboard />;
   if (active === "users") return <Users />;
   if (active === "reports") return <Reports />;
+  if (active === "risk") return <RiskReview />;
   if (active === "jobs") return <Jobs />;
   if (active === "applications") return <Applications />;
   if (active === "verification") return <Verification />;
@@ -403,6 +406,203 @@ type ReportItem = {
     reverificationRequired: boolean;
   } | null;
 };
+
+function RiskReview() {
+  const { data, loading, error, reload } = useData<{
+    items: RiskItem[];
+    total: number;
+    metrics: {
+      adjudicatedCount: number;
+      observedFalsePositiveRateBps: number | null;
+      observedPrecisionBps: number | null;
+    };
+  }>("risk/items?limit=100");
+  const [scan, setScan] = useState(false);
+  const [selected, setSelected] = useState<RiskItem | null>(null);
+  const metrics = data?.metrics;
+  return (
+    <State loading={loading} error={error}>
+      <div className="metric-grid">
+        <article>
+          <span>Queue items</span>
+          <strong>{data?.total ?? 0}</strong>
+        </article>
+        <article>
+          <span>Adjudicated</span>
+          <strong>{metrics?.adjudicatedCount ?? 0}</strong>
+        </article>
+        <article>
+          <span>Observed precision</span>
+          <strong>{formatBasisPoints(metrics?.observedPrecisionBps)}</strong>
+        </article>
+        <article>
+          <span>Observed false positives</span>
+          <strong>
+            {formatBasisPoints(metrics?.observedFalsePositiveRateBps)}
+          </strong>
+        </article>
+      </div>
+      <div className="notice compact">
+        <strong>Signals never change an account automatically.</strong>
+        <span>
+          Escalation sends the case to a separate human moderation decision.
+        </span>
+        <button onClick={() => setScan(true)}>Run reviewed scan</button>
+      </div>
+      <DataTable headers={["Account", "Risk", "Signals", "Status", "Actions"]}>
+        {(data?.items ?? []).map((item) => (
+          <tr key={item.id}>
+            <td>
+              <strong>{item.subject.name}</strong>
+              <small>{item.subject.id}</small>
+              <small>
+                Account: {humanize(item.subject.moderationLevel)} ·{" "}
+                {humanize(item.subject.status)}
+              </small>
+            </td>
+            <td>
+              <strong>{item.score}/100</strong>
+              <small>{humanize(item.severity)}</small>
+            </td>
+            <td>
+              {item.signals.map((signal, index) => (
+                <small key={`${item.id}-${signal.type}-${index}`}>
+                  {humanize(signal.type)} (+{signal.score})
+                </small>
+              ))}
+            </td>
+            <td>
+              <Badge value={item.status} />
+              <small>Last signal {formatDate(item.lastDetectedAt)}</small>
+            </td>
+            <td className="actions">
+              {item.status === "OPEN" && (
+                <button
+                  onClick={async () => {
+                    await adminApi(
+                      `risk/items/${item.id}/review`,
+                      json("POST", {}),
+                    );
+                    await reload();
+                  }}
+                >
+                  Start review
+                </button>
+              )}
+              {(item.status === "OPEN" || item.status === "UNDER_REVIEW") && (
+                <button onClick={() => setSelected(item)}>Decide</button>
+              )}
+            </td>
+          </tr>
+        ))}
+      </DataTable>
+      {scan && (
+        <ReasonDialog
+          title="Run deterministic risk scan"
+          confirmLabel="Run scan"
+          onClose={() => setScan(false)}
+          onConfirm={async (reason) => {
+            await adminApi("risk/scan", json("POST", { reason }));
+            setScan(false);
+            await reload();
+          }}
+        />
+      )}
+      {selected && (
+        <RiskDecisionDialog
+          item={selected}
+          onClose={() => setSelected(null)}
+          onDone={async () => {
+            setSelected(null);
+            await reload();
+          }}
+        />
+      )}
+    </State>
+  );
+}
+
+type RiskItem = {
+  id: string;
+  score: number;
+  severity: string;
+  signals: Array<{ type: string; score: number; evidence: unknown }>;
+  status: string;
+  lastDetectedAt: string;
+  subject: {
+    id: string;
+    name: string;
+    status: string;
+    moderationLevel: string;
+  };
+};
+
+function RiskDecisionDialog({
+  item,
+  onClose,
+  onDone,
+}: {
+  item: RiskItem;
+  onClose: () => void;
+  onDone: () => Promise<void>;
+}) {
+  const [status, setStatus] = useState("ESCALATED");
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState("");
+  return (
+    <Dialog
+      title={`Decide risk item for ${item.subject.name}`}
+      onClose={onClose}
+    >
+      <form
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await adminApi(
+              `risk/items/${item.id}/decision`,
+              json("POST", { status, reason }),
+            );
+            await onDone();
+          } catch (caught) {
+            setError((caught as Error).message);
+          }
+        }}
+      >
+        <label>
+          Human decision
+          <select
+            value={status}
+            onChange={(event) => setStatus(event.target.value)}
+          >
+            <option value="ESCALATED">Escalate for moderation review</option>
+            <option value="CLEARED">Clear as unsupported</option>
+          </select>
+        </label>
+        <p>
+          This decision records the risk outcome only. It will not warn,
+          restrict, suspend, or ban the account.
+        </p>
+        <label>
+          Required decision reason
+          <textarea
+            required
+            minLength={10}
+            value={reason}
+            onChange={(event) => setReason(event.target.value)}
+          />
+        </label>
+        {error && <p role="alert">{error}</p>}
+        <div className="dialog-actions">
+          <button type="button" onClick={onClose}>
+            Cancel
+          </button>
+          <button type="submit">Confirm risk decision</button>
+        </div>
+      </form>
+    </Dialog>
+  );
+}
 
 function ReportDecisionDialog({
   report,
@@ -1698,4 +1898,9 @@ function formatDate(value: string) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
+}
+function formatBasisPoints(value?: number | null) {
+  return value == null
+    ? "Not enough decisions"
+    : `${(value / 100).toFixed(1)}%`;
 }

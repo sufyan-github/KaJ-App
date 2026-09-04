@@ -91,7 +91,7 @@ production handling of personal data.
 | Phase    | Status            | Gate / task family                                                                                  |
 | -------- | ----------------- | --------------------------------------------------------------------------------------------------- |
 | Phase 9  | PARTIAL / BLOCKED | P9-PAY-01 provider-neutral money core delivered; provider, payout, UI, tax, and legal gates remain. |
-| Phase 10 | IN PROGRESS       | P10-TRUST-01..04 delivered; human-reviewed anti-fraud and mobile safety surfaces remain.            |
+| Phase 10 | IN PROGRESS       | P10-TRUST-01..05 delivered; mobile trust, attendance, dispute, and safety surfaces remain.          |
 | Phase 11 | PLANNED           | P11 recurrence, repeat hire, business profiles, shifts, workforce.                                  |
 | Phase 12 | BLOCKED           | P12 AI requires real data thresholds, evaluation, and approved flags.                               |
 | Phase 13 | PLANNED           | P13 canonical events, metrics, imbalance detection, admin analytics.                                |
@@ -114,7 +114,7 @@ production handling of personal data.
 | P10-TRUST-02 | IMPLEMENTED | Party-private disputes, evidence/timers, decisions, one appeal, second review, cash-safe/balanced ledger effects; `docs/completed/P10-TRUST-02.md`.   |
 | P10-TRUST-03 | IMPLEMENTED | Flagged foreground attendance, consent, geofence/time/accuracy rules, bounded offline sync, idempotency, overrides; `docs/completed/P10-TRUST-03.md`. |
 | P10-TRUST-04 | IMPLEMENTED | Normalized reports, privacy-safe blocks, audited one-step moderation ladder, re-verification, 48-hour reviews; `docs/completed/P10-TRUST-04.md`.      |
-| P10-TRUST-05 | PLANNED     | Human-reviewed anti-fraud risk scoring and queue.                                                                                                     |
+| P10-TRUST-05 | IMPLEMENTED | HMAC identity clusters, travel/spam/review/price rules, scored human queue, adjudication metrics; `docs/completed/P10-TRUST-05.md`.                   |
 | P10-UI-06    | PLANNED     | Trust, check-in, dispute, and safety guidance mobile surfaces.                                                                                        |
 
 ## Human and professional gates

@@ -177,6 +177,89 @@ test("safety report resolution enforces the next human moderation step", async (
     });
 });
 
+test("risk signals require a human decision and never request moderation", async ({
+  page,
+}) => {
+  let scanBody: Record<string, unknown> | null = null;
+  let decisionBody: Record<string, unknown> | null = null;
+  await fulfill(page, "risk/items?limit=100", {
+    total: 1,
+    metrics: {
+      adjudicatedCount: 4,
+      observedPrecisionBps: 7500,
+      observedFalsePositiveRateBps: 2500,
+    },
+    items: [
+      {
+        id: "risk-1",
+        score: 55,
+        severity: "MEDIUM",
+        signals: [{ type: "DUPLICATE_DEVICE", score: 55, evidence: {} }],
+        status: "UNDER_REVIEW",
+        lastDetectedAt: new Date().toISOString(),
+        subject: {
+          id: "user-1",
+          name: "Observed worker",
+          status: "ACTIVE",
+          moderationLevel: "NONE",
+        },
+      },
+    ],
+  });
+  await page.route("**/api/admin/ops/risk/scan", async (route) => {
+    scanBody = route.request().postDataJSON();
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(
+        envelope({ detectedAccounts: 1, automaticActions: 0 }),
+      ),
+    });
+  });
+  await page.route(
+    "**/api/admin/ops/risk/items/risk-1/decision",
+    async (route) => {
+      decisionBody = route.request().postDataJSON();
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(
+          envelope({
+            id: "risk-1",
+            status: "ESCALATED",
+            automaticModerationAction: null,
+          }),
+        ),
+      });
+    },
+  );
+  await page.goto("/");
+  await page.getByRole("button", { name: "Risk review" }).click();
+  await expect(page.getByText("75.0%")).toBeVisible();
+  await page.getByRole("button", { name: "Run reviewed scan" }).click();
+  await page
+    .getByLabel("Required operational reason")
+    .fill("Daily operations review of deterministic risk signals.");
+  await page.getByRole("button", { name: "Run scan" }).click();
+  await expect
+    .poll(() => scanBody)
+    .toMatchObject({
+      reason: "Daily operations review of deterministic risk signals.",
+    });
+  await page.getByRole("button", { name: "Decide" }).click();
+  await page
+    .getByLabel("Required decision reason")
+    .fill("Shared device evidence needs separate moderation review.");
+  await page.getByRole("button", { name: "Confirm risk decision" }).click();
+  await expect
+    .poll(() => decisionBody)
+    .toEqual({
+      status: "ESCALATED",
+      reason: "Shared device evidence needs separate moderation review.",
+    });
+  expect(decisionBody).not.toHaveProperty("action");
+});
+
 test("approve verification records an explicit decision reason", async ({
   page,
 }) => {

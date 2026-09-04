@@ -47,6 +47,7 @@ import { VerificationModule } from "./modules/verification/verification.module";
 import { DisputesModule } from "./modules/disputes/disputes.module";
 import { AttendanceModule } from "./modules/attendance/attendance.module";
 import { ModerationModule } from "./modules/moderation/moderation.module";
+import { RiskModule } from "./modules/risk/risk.module";
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { ModerationModule } from "./modules/moderation/moderation.module";
     DisputesModule,
     AttendanceModule,
     ModerationModule,
+    RiskModule,
     AvailabilityModule,
     CatalogModule,
     HealthModule,
