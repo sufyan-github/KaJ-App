@@ -18,6 +18,7 @@ import {
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { STORAGE_PORT, StoragePort } from "../../infra/storage/storage.port";
+import { CLOCK, Clock } from "../../common/time/clock";
 import {
   AdminActor,
   AdminRequestContext,
@@ -39,6 +40,11 @@ import {
   VerificationDecisionDto,
   VerificationQueryDto,
 } from "./dto/admin-ops.dto";
+import {
+  hasTrust,
+  highestTrust,
+  trustForVerification,
+} from "../verification/trust-level";
 
 const TERMINAL_JOB_STATUSES: JobStatus[] = [
   JobStatus.REVIEWED,
@@ -52,6 +58,7 @@ export class AdminOpsService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(STORAGE_PORT) private readonly storage: StoragePort,
+    @Inject(CLOCK) private readonly clock: Clock,
   ) {}
 
   async overview(actor: AdminActor, context: AdminRequestContext) {
@@ -525,10 +532,11 @@ export class AdminOpsService {
       orderBy: { created_at: "asc" },
       include: {
         user: {
-          include: {
-            profile: true,
-            documents: { where: { deleted_at: null } },
-          },
+          include: { profile: true },
+        },
+        documents: {
+          where: { purged_at: null, document: { deleted_at: null } },
+          include: { document: true },
         },
       },
     });
@@ -558,7 +566,7 @@ export class AdminOpsService {
           name: item.user.profile?.display_name ?? "Unknown",
           trustLevel: item.user.profile?.trust_level ?? TrustLevel.NONE,
         },
-        documents: item.user.documents.map((document) => ({
+        documents: item.documents.map(({ document }) => ({
           id: document.id,
           kind: document.kind,
           mime: document.mime,
@@ -574,7 +582,11 @@ export class AdminOpsService {
     context: AdminRequestContext,
   ) {
     const document = await this.prisma.document.findFirst({
-      where: { id, deleted_at: null },
+      where: {
+        id,
+        deleted_at: null,
+        verification_links: { some: { purged_at: null } },
+      },
     });
     if (!document) throw new NotFoundException();
     const signed = await this.storage.createDownloadUrl({
@@ -612,28 +624,83 @@ export class AdminOpsService {
       throw new ConflictException("Decision must approve or reject.");
     const request = await this.prisma.verificationRequest.findUnique({
       where: { id },
+      include: { user: { include: { profile: true } }, documents: true },
     });
     if (!request) throw new NotFoundException();
-    const trustLevel =
+    if (request.status !== VerificationStatus.PENDING)
+      throw new ConflictException(
+        "Only a pending verification can be decided.",
+      );
+    const candidateTrust =
       input.status === VerificationStatus.APPROVED
-        ? trustForKind(request.kind)
+        ? trustForVerification(request.kind)
         : null;
+    const currentTrust = request.user.profile?.trust_level ?? TrustLevel.NONE;
+    const trustLevel = candidateTrust
+      ? highestTrust(currentTrust, candidateTrust)
+      : currentTrust;
+    const decidedAt = this.clock.now();
+    const purgeAfter = new Date(decidedAt.getTime() + 90 * 24 * 60 * 60_000);
     await this.prisma.$transaction(async (transaction) => {
       await transaction.verificationRequest.update({
         where: { id },
         data: {
           status: input.status,
           reviewer_user_id: actor.userId,
-          reviewed_at: new Date(),
+          reviewed_at: decidedAt,
           rejection_reason:
             input.status === VerificationStatus.REJECTED ? input.reason : null,
         },
       });
-      if (trustLevel)
+      await transaction.verificationDocument.updateMany({
+        where: { verification_request_id: id },
+        data: { purge_after: purgeAfter },
+      });
+      if (candidateTrust)
         await transaction.profile.update({
           where: { user_id: request.user_id },
           data: { trust_level: trustLevel },
         });
+      if (candidateTrust && hasTrust(trustLevel, TrustLevel.IDENTITY)) {
+        const badgeSlugs = [
+          "verified",
+          ...(trustLevel === TrustLevel.BUSINESS ? ["business-verified"] : []),
+        ];
+        const badges = await transaction.badge.findMany({
+          where: { slug: { in: badgeSlugs } },
+        });
+        for (const badge of badges) {
+          await transaction.userBadge.upsert({
+            where: {
+              user_id_badge_id: {
+                user_id: request.user_id,
+                badge_id: badge.id,
+              },
+            },
+            create: { user_id: request.user_id, badge_id: badge.id },
+            update: { revoked_at: null, granted_at: decidedAt },
+          });
+        }
+      }
+      await transaction.notification.create({
+        data: {
+          user_id: request.user_id,
+          type: "VERIFICATION_DECIDED",
+          title_key:
+            input.status === VerificationStatus.APPROVED
+              ? "verification.approved.title"
+              : "verification.rejected.title",
+          body_key:
+            input.status === VerificationStatus.APPROVED
+              ? "verification.approved.body"
+              : "verification.rejected.body",
+          payload_json: {
+            requestId: id,
+            kind: request.kind,
+            status: input.status,
+          },
+        },
+      });
       await transaction.auditLog.create({
         data: this.auditData(
           actor,
@@ -641,7 +708,12 @@ export class AdminOpsService {
           "VERIFICATION",
           id,
           { status: request.status },
-          { status: input.status, trustLevel, reason: input.reason },
+          {
+            status: input.status,
+            trustLevel,
+            reason: input.reason,
+            documentPurgeAfter: purgeAfter.toISOString(),
+          },
           context,
         ),
       });
@@ -1379,13 +1451,6 @@ function diffKeys(
   return [...new Set([...Object.keys(previous), ...Object.keys(after)])].filter(
     (key) => JSON.stringify(previous[key]) !== JSON.stringify(after[key]),
   );
-}
-
-function trustForKind(kind: string): TrustLevel {
-  if (kind === "BUSINESS") return TrustLevel.BUSINESS;
-  if (kind === "SKILL") return TrustLevel.SKILL;
-  if (kind === "IDENTITY") return TrustLevel.IDENTITY;
-  return TrustLevel.PHONE;
 }
 
 function campaignWhere(

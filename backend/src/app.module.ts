@@ -38,6 +38,7 @@ import { ChatModule } from "./modules/chat/chat.module";
 import { AdminAuthModule } from "./modules/admin-auth/admin-auth.module";
 import { AdminOpsModule } from "./modules/admin-ops/admin-ops.module";
 import { PaymentsModule } from "./modules/payments/payments.module";
+import { VerificationModule } from "./modules/verification/verification.module";
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { PaymentsModule } from "./modules/payments/payments.module";
     AdminAuthModule,
     AdminOpsModule,
     PaymentsModule,
+    VerificationModule,
     AvailabilityModule,
     CatalogModule,
     HealthModule,

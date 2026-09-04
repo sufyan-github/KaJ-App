@@ -200,6 +200,13 @@ const configSettings = [
 const badges = [
   ["verified", "Verified", "যাচাইকৃত", "verified", { trust: true }],
   [
+    "business-verified",
+    "Business verified",
+    "ব্যবসা যাচাইকৃত",
+    "business",
+    { trustLevel: "BUSINESS" },
+  ],
+  [
     "new-worker",
     "New worker",
     "নতুন কর্মী",

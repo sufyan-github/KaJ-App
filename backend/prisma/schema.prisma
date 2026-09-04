@@ -1037,18 +1037,19 @@ model NotificationPreference {
 }
 
 model VerificationRequest {
-  id               String             @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  user_id          String             @db.Uuid
+  id               String                 @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id          String                 @db.Uuid
   kind             VerificationKind
-  status           VerificationStatus @default(NOT_SUBMITTED)
+  status           VerificationStatus     @default(NOT_SUBMITTED)
   documents_json   Json?
-  reviewer_user_id String?            @db.Uuid
+  reviewer_user_id String?                @db.Uuid
   reviewed_at      DateTime?
   rejection_reason String?
-  created_at       DateTime           @default(now())
-  updated_at       DateTime           @updatedAt
-  user             User               @relation("VerificationOwner", fields: [user_id], references: [id], onDelete: Cascade)
-  reviewer         User?              @relation("VerificationReviewer", fields: [reviewer_user_id], references: [id], onDelete: SetNull)
+  created_at       DateTime               @default(now())
+  updated_at       DateTime               @updatedAt
+  user             User                   @relation("VerificationOwner", fields: [user_id], references: [id], onDelete: Cascade)
+  reviewer         User?                  @relation("VerificationReviewer", fields: [reviewer_user_id], references: [id], onDelete: SetNull)
+  documents        VerificationDocument[]
 
   @@index([user_id, kind, status])
   @@index([status, created_at])
@@ -1056,19 +1057,34 @@ model VerificationRequest {
 }
 
 model Document {
-  id           String    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  user_id      String    @db.Uuid
-  kind         String
-  storage_key  String    @unique
-  mime         String
-  size_bytes   BigInt
-  is_sensitive Boolean   @default(true)
-  created_at   DateTime  @default(now())
-  deleted_at   DateTime?
-  user         User      @relation(fields: [user_id], references: [id], onDelete: Restrict)
+  id                 String                 @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id            String                 @db.Uuid
+  kind               String
+  storage_key        String                 @unique
+  mime               String
+  size_bytes         BigInt
+  is_sensitive       Boolean                @default(true)
+  created_at         DateTime               @default(now())
+  deleted_at         DateTime?
+  user               User                   @relation(fields: [user_id], references: [id], onDelete: Restrict)
+  verification_links VerificationDocument[]
 
   @@index([user_id, kind])
   @@map("documents")
+}
+
+model VerificationDocument {
+  verification_request_id String              @db.Uuid
+  document_id             String              @unique @db.Uuid
+  linked_at               DateTime            @default(now())
+  purge_after             DateTime?
+  purged_at               DateTime?
+  request                 VerificationRequest @relation(fields: [verification_request_id], references: [id], onDelete: Cascade)
+  document                Document            @relation(fields: [document_id], references: [id], onDelete: Restrict)
+
+  @@id([verification_request_id, document_id])
+  @@index([purge_after, purged_at])
+  @@map("verification_documents")
 }
 
 model Dispute {
