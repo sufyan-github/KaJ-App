@@ -3,6 +3,7 @@ class JobSummary {
     required this.id,
     required this.title,
     required this.description,
+    required this.categoryId,
     required this.categoryName,
     required this.locationName,
     required this.status,
@@ -13,6 +14,8 @@ class JobSummary {
     this.budgetMaxPoisha,
     this.matchScore,
     this.matchReasons = const [],
+    this.timeCompatibility,
+    this.availabilityCoverage,
   });
 
   factory JobSummary.fromJson(Map<String, dynamic> json) {
@@ -21,11 +24,17 @@ class JobSummary {
       return '';
     }
 
+    String nestedId(Object? value) {
+      if (value is Map) return value['id'] as String? ?? '';
+      return '';
+    }
+
     final rawSkills = json['skills'];
     return JobSummary(
       id: json['id'] as String,
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
+      categoryId: nestedId(json['category']),
       categoryName: nestedName(json['category']),
       locationName: nestedName(json['location']),
       status: json['status'] as String? ?? '',
@@ -34,6 +43,8 @@ class JobSummary {
       budgetMinPoisha: json['budget_min_poisha']?.toString(),
       budgetMaxPoisha: json['budget_max_poisha']?.toString(),
       matchScore: (json['matchScore'] as num?)?.toInt(),
+      timeCompatibility: json['timeCompatibility'] as String?,
+      availabilityCoverage: (json['availabilityCoverage'] as num?)?.toDouble(),
       matchReasons:
           (json['matchReasons'] as List?)?.whereType<String>().toList(
             growable: false,
@@ -53,6 +64,8 @@ class JobSummary {
 
   final String? budgetMaxPoisha;
   final String? budgetMinPoisha;
+  final double? availabilityCoverage;
+  final String categoryId;
   final String categoryName;
   final String description;
   final DateTime? endsAt;
@@ -63,7 +76,11 @@ class JobSummary {
   final List<String> skills;
   final DateTime? startsAt;
   final String status;
+  final String? timeCompatibility;
   final String title;
+
+  bool get isTimeAvailable => timeCompatibility == 'AVAILABLE';
+  bool get isTimeUnavailable => timeCompatibility == 'UNAVAILABLE';
 }
 
 class SuggestedWorker {

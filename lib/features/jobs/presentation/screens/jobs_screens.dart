@@ -17,23 +17,58 @@ import '../../../profile/presentation/controllers/public_profile_provider.dart';
 import '../../domain/job_models.dart';
 import '../controllers/jobs_providers.dart';
 
-class JobFeedScreen extends ConsumerWidget {
-  const JobFeedScreen({super.key});
+class JobFeedScreen extends ConsumerStatefulWidget {
+  const JobFeedScreen({
+    this.categoryId,
+    this.categoryName,
+    this.skillId,
+    this.skillName,
+    super.key,
+  });
+
+  final String? categoryId;
+  final String? categoryName;
+  final String? skillId;
+  final String? skillName;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<JobFeedScreen> createState() => _JobFeedScreenState();
+}
+
+class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
+  bool _availableOnly = false;
+
+  @override
+  Widget build(BuildContext context) {
     final isWorker =
         ref.watch(onboardingControllerProvider).role == KaajRole.worker;
-    final provider = isWorker ? jobFeedProvider : myJobsProvider;
-    final jobs = ref.watch(provider);
+    final browsingType = widget.categoryId != null || widget.skillId != null;
+    final showOpenJobs = isWorker || browsingType;
+    final filter = JobFeedFilter(
+      categoryId: widget.categoryId,
+      skillId: widget.skillId,
+      availableOnly: isWorker && _availableOnly,
+      forMe: isWorker,
+    );
+    final feed = jobFeedProvider(filter);
+    final jobs = showOpenJobs ? ref.watch(feed) : ref.watch(myJobsProvider);
     Future<void> refresh() async {
-      ref.invalidate(provider);
-      await ref.read(provider.future);
+      if (showOpenJobs) {
+        ref.invalidate(feed);
+        await ref.read(feed.future);
+      } else {
+        ref.invalidate(myJobsProvider);
+        await ref.read(myJobsProvider.future);
+      }
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isWorker ? 'কাজ খুঁজুন' : 'আমার পোস্ট করা কাজ'),
+        title: Text(
+          widget.skillName ??
+              widget.categoryName ??
+              (isWorker ? 'কাজ খুঁজুন' : 'আমার পোস্ট করা কাজ'),
+        ),
         actions: [
           IconButton(
             tooltip: 'কাজের তালিকা হালনাগাদ করুন',
@@ -42,49 +77,117 @@ class JobFeedScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: isWorker
+      floatingActionButton: isWorker || browsingType
           ? null
           : FloatingActionButton.extended(
               onPressed: () => context.push(AppRoutes.createJob),
               icon: const Icon(Icons.post_add_rounded),
               label: const Text('কাজ পোস্ট করুন'),
             ),
-      body: jobs.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => _Retry(
-          label: 'কাজের তালিকা লোড করা যায়নি।',
-          onRetry: () =>
-              ref.invalidate(isWorker ? jobFeedProvider : myJobsProvider),
-        ),
-        data: (items) => RefreshIndicator(
-          onRefresh: refresh,
-          child: items.isEmpty
-              ? ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: const [
-                    SizedBox(height: 280),
-                    Center(child: Text('এখনো কোনো কাজ প্রকাশিত হয়নি।')),
+      body: Column(
+        children: [
+          if (browsingType || isWorker)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                KSpacing.md,
+                KSpacing.sm,
+                KSpacing.md,
+                0,
+              ),
+              child: Row(
+                children: [
+                  if (browsingType)
+                    Expanded(
+                      child: Text(
+                        widget.skillName == null
+                            ? '${widget.categoryName} বিভাগের সব পোস্ট'
+                            : '${widget.categoryName} › ${widget.skillName}',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    )
+                  else
+                    const Spacer(),
+                  if (isWorker) ...[
+                    const SizedBox(width: KSpacing.sm),
+                    FilterChip(
+                      avatar: Icon(
+                        _availableOnly
+                            ? Icons.event_available
+                            : Icons.schedule_outlined,
+                        size: 18,
+                      ),
+                      label: Text(
+                        _availableOnly ? 'আমার সময়ে মেলে' : 'সব সময়',
+                      ),
+                      selected: _availableOnly,
+                      onSelected: (value) =>
+                          setState(() => _availableOnly = value),
+                    ),
                   ],
-                )
-              : GridView.builder(
-                  padding: const EdgeInsets.all(KSpacing.md),
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: KSpacing.md,
-                  mainAxisSpacing: KSpacing.md,
-                  childAspectRatio: .66,
-                ),
-                  itemCount: items.length,
-                  itemBuilder: (context, index) => _JobCard(
-                    job: items[index],
-                    actionLabel: isWorker ? 'আবেদন' : 'আবেদন দেখুন',
-                    onAction: isWorker
-                        ? () => _showApply(context, ref, items[index])
-                        : () => _showApplications(context, ref, items[index]),
-                  ),
-                ),
-        ),
+                ],
+              ),
+            ),
+          Expanded(
+            child: jobs.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, _) => _Retry(
+                label: 'কাজের তালিকা লোড করা যায়নি।',
+                onRetry: () => showOpenJobs
+                    ? ref.invalidate(feed)
+                    : ref.invalidate(myJobsProvider),
+              ),
+              data: (items) => RefreshIndicator(
+                onRefresh: refresh,
+                child: items.isEmpty
+                    ? ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          const SizedBox(height: 240),
+                          Center(
+                            child: Text(
+                              _availableOnly
+                                  ? 'এই ধরনে আপনার সময়ের সঙ্গে মেলা কাজ নেই।'
+                                  : 'এই ধরনে এখনো কোনো কাজ প্রকাশিত হয়নি।',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      )
+                    : GridView.builder(
+                        padding: const EdgeInsets.all(KSpacing.md),
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: KSpacing.md,
+                              mainAxisSpacing: KSpacing.md,
+                              childAspectRatio: .61,
+                            ),
+                        itemCount: items.length,
+                        itemBuilder: (context, index) => _JobCard(
+                          job: items[index],
+                          actionLabel: isWorker
+                              ? 'আবেদন'
+                              : browsingType
+                              ? null
+                              : 'আবেদন দেখুন',
+                          onAction: isWorker
+                              ? () => _showApply(context, ref, items[index])
+                              : browsingType
+                              ? null
+                              : () => _showApplications(
+                                  context,
+                                  ref,
+                                  items[index],
+                                ),
+                        ),
+                      ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -254,7 +357,63 @@ class JobFeedScreen extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('সময়: ${_dateTime(start)} – ${_time(end)}'),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'পোস্টের সময়: ${_dateTime(start)} – ${_time(end)}',
+                ),
+              ),
+              if (job.isTimeAvailable)
+                const ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.event_available, color: KColors.success),
+                  title: Text('এই সময়টি আপনার ডিফল্ট সময়ের সঙ্গে মেলে'),
+                ),
+              if (job.isTimeUnavailable) ...[
+                const ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.event_busy, color: KColors.warning),
+                  title: Text('এই সময়টি আপনার ডিফল্ট সময়ের বাইরে'),
+                  subtitle: Text(
+                    'আবেদন করার আগে চাইলে পোস্টের সময়টি আপনার কাজের সময়ে যোগ করুন।',
+                  ),
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      try {
+                        await ref
+                            .read(onboardingRepositoryProvider)
+                            .addAvailabilityWindow(start, end);
+                        ref.invalidate(jobFeedProvider);
+                        if (dialogContext.mounted) Navigator.pop(dialogContext);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'পোস্টের সময়টি আপনার ডিফল্ট কাজের সময়ে যোগ হয়েছে। এখন আবেদন করতে পারবেন।',
+                              ),
+                            ),
+                          );
+                        }
+                      } on Object {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('কাজের সময় আপডেট করা যায়নি।'),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    icon: const Icon(Icons.playlist_add),
+                    label: const Text('এই পোস্টের সময় যোগ করুন'),
+                  ),
+                ),
+              ],
               const SizedBox(height: KSpacing.md),
               KTextField(
                 label: 'প্রস্তাবিত টাকা',
@@ -272,35 +431,39 @@ class JobFeedScreen extends ConsumerWidget {
             child: const Text('ফিরুন'),
           ),
           FilledButton(
-            onPressed: () async {
-              final taka = int.tryParse(amount.text);
-              if (taka == null || taka <= 0) return;
-              try {
-                await ref
-                    .read(jobsRepositoryProvider)
-                    .apply(
-                      jobId: job.id,
-                      startsAt: start,
-                      endsAt: end,
-                      proposedPricePoisha: taka * 100,
-                      message: message.text,
-                    );
-                if (dialogContext.mounted) Navigator.pop(dialogContext);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('আবেদন পাঠানো হয়েছে।')),
-                  );
-                }
-              } on Object {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('আবেদন পাঠানো যায়নি। সময়টি যাচাই করুন।'),
-                    ),
-                  );
-                }
-              }
-            },
+            onPressed: job.isTimeUnavailable
+                ? null
+                : () async {
+                    final taka = int.tryParse(amount.text);
+                    if (taka == null || taka <= 0) return;
+                    try {
+                      await ref
+                          .read(jobsRepositoryProvider)
+                          .apply(
+                            jobId: job.id,
+                            startsAt: start,
+                            endsAt: end,
+                            proposedPricePoisha: taka * 100,
+                            message: message.text,
+                          );
+                      if (dialogContext.mounted) Navigator.pop(dialogContext);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('আবেদন পাঠানো হয়েছে।')),
+                        );
+                      }
+                    } on Object {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'আবেদন পাঠানো যায়নি। সময়টি যাচাই করুন।',
+                            ),
+                          ),
+                        );
+                      }
+                    }
+                  },
             child: const Text('আবেদন পাঠান'),
           ),
         ],
@@ -316,9 +479,9 @@ class _JobCard extends StatelessWidget {
     required this.onAction,
   });
 
-  final String actionLabel;
+  final String? actionLabel;
   final JobSummary job;
-  final VoidCallback onAction;
+  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -370,8 +533,26 @@ class _JobCard extends StatelessWidget {
           const Spacer(),
           if (job.startsAt != null)
             Text(
-              _dateTime(job.startsAt!),
+              'পোস্টের সময়: ${_dateTime(job.startsAt!)}',
               style: Theme.of(context).textTheme.bodySmall,
+            ),
+          if (job.isTimeAvailable)
+            const Text(
+              '✓ আপনার সময়ে মেলে',
+              style: TextStyle(
+                color: KColors.success,
+                fontWeight: FontWeight.w600,
+              ),
+            )
+          else if (job.isTimeUnavailable)
+            const Text(
+              'সময় যোগ করলে আবেদন করা যাবে',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: KColors.warning,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           if (_taka(job.budgetMaxPoisha ?? job.budgetMinPoisha)
               case final amount?)
@@ -379,11 +560,16 @@ class _JobCard extends StatelessWidget {
               '৳$amount',
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
-          const SizedBox(height: KSpacing.sm),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(onPressed: onAction, child: Text(actionLabel)),
-          ),
+          if (actionLabel != null) ...[
+            const SizedBox(height: KSpacing.sm),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: onAction,
+                child: Text(actionLabel!),
+              ),
+            ),
+          ],
         ],
       ),
     ),

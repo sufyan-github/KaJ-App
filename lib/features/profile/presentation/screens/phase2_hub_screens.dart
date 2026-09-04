@@ -107,7 +107,7 @@ class _CategoryGrid extends StatelessWidget {
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
-      builder: (context) => SafeArea(
+      builder: (sheetContext) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
             KSpacing.lg,
@@ -121,13 +121,30 @@ class _CategoryGrid extends StatelessWidget {
             children: [
               Text(
                 category.nameBn,
-                style: Theme.of(context).textTheme.titleLarge,
+                style: Theme.of(sheetContext).textTheme.titleLarge,
               ),
               Text(
                 'কাজের উপধরন বেছে নিন',
                 style: Theme.of(
-                  context,
+                  sheetContext,
                 ).textTheme.bodyLarge?.copyWith(color: KColors.textSecondary),
+              ),
+              const SizedBox(height: KSpacing.md),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () {
+                    Navigator.pop(sheetContext);
+                    context.push(
+                      AppRoutes.jobsForType(
+                        categoryId: category.id,
+                        categoryName: category.nameBn,
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.manage_search),
+                  label: Text('${category.nameBn}-এর সব কাজ দেখুন'),
+                ),
               ),
               const SizedBox(height: KSpacing.md),
               if (subtypes.isEmpty)
@@ -146,21 +163,38 @@ class _CategoryGrid extends StatelessWidget {
                     childAspectRatio: 2.4,
                   ),
                   itemCount: subtypes.length,
-                  itemBuilder: (context, index) => Card(
-                    margin: EdgeInsets.zero,
-                    color: KColors.surfaceAlt,
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(KSpacing.sm),
-                        child: Text(
-                          subtypes[index].nameBn,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                  itemBuilder: (itemContext, index) {
+                    final subtype = subtypes[index];
+                    return Card(
+                      margin: EdgeInsets.zero,
+                      color: KColors.surfaceAlt,
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.pop(sheetContext);
+                          context.push(
+                            AppRoutes.jobsForType(
+                              categoryId: category.id,
+                              categoryName: category.nameBn,
+                              skillId: subtype.id,
+                              skillName: subtype.nameBn,
+                            ),
+                          );
+                        },
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(KSpacing.sm),
+                            child: Text(
+                              subtype.nameBn,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
             ],
           ),

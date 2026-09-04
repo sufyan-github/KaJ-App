@@ -3,6 +3,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 
 import '../../../auth/presentation/controllers/auth_providers.dart';
 import '../../data/onboarding_repository.dart';
+import '../../domain/availability_schedule.dart';
 import '../../domain/onboarding_state.dart';
 
 final onboardingRepositoryProvider = Provider<OnboardingRepository>((ref) {
@@ -62,17 +63,27 @@ class OnboardingController extends StateNotifier<OnboardingState> {
     List<int> days, {
     String startTime = '18:00',
     String endTime = '22:00',
-  }) async {
-    await _repository.updateAvailability(
-      days,
-      startTime: startTime,
-      endTime: endTime,
-    );
+  }) => saveAvailabilityRules(
+    days
+        .map(
+          (day) => AvailabilityRule(
+            dayOfWeek: day,
+            startTime: startTime,
+            endTime: endTime,
+          ),
+        )
+        .toList(growable: false),
+  );
+
+  Future<void> saveAvailabilityRules(List<AvailabilityRule> rules) async {
+    await _repository.replaceAvailability(rules);
+    final first = rules.isEmpty ? null : rules.first;
+    final days = rules.map((rule) => rule.dayOfWeek).toSet().toList()..sort();
     await _save(
       state.copyWith(
         availableDays: days,
-        availableStartTime: startTime,
-        availableEndTime: endTime,
+        availableStartTime: first?.startTime ?? state.availableStartTime,
+        availableEndTime: first?.endTime ?? state.availableEndTime,
         step: 5,
       ),
     );

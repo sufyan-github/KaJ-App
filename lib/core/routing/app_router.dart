@@ -60,6 +60,20 @@ abstract final class AppRoutes {
   static const portfolio = '/w/profile/portfolio';
 
   static String workerBooking(String id) => '/workers/$id/book';
+  static String jobsForType({
+    required String categoryId,
+    required String categoryName,
+    String? skillId,
+    String? skillName,
+  }) => Uri(
+    path: jobs,
+    queryParameters: {
+      'categoryId': categoryId,
+      'categoryName': categoryName,
+      'skillId': ?skillId,
+      'skillName': ?skillName,
+    },
+  ).toString();
   static String assignmentDetail(String id) => '/assignments/$id';
   static String verificationCapture(String kind) =>
       '/verification/$kind/capture';
@@ -187,7 +201,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.jobs,
-        builder: (context, state) => const JobFeedScreen(),
+        builder: (context, state) => JobFeedScreen(
+          categoryId: state.uri.queryParameters['categoryId'],
+          categoryName: state.uri.queryParameters['categoryName'],
+          skillId: state.uri.queryParameters['skillId'],
+          skillName: state.uri.queryParameters['skillName'],
+        ),
       ),
       GoRoute(
         path: AppRoutes.createJob,

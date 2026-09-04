@@ -77,4 +77,20 @@ void main() {
       AppRoutes.home,
     );
   });
+
+  test('work type route preserves category and subtype filters', () {
+    final uri = Uri.parse(
+      AppRoutes.jobsForType(
+        categoryId: 'category-id',
+        categoryName: 'শিক্ষা',
+        skillId: 'skill-id',
+        skillName: 'পড়ানো',
+      ),
+    );
+
+    expect(uri.path, AppRoutes.jobs);
+    expect(uri.queryParameters['categoryId'], 'category-id');
+    expect(uri.queryParameters['skillId'], 'skill-id');
+    expect(uri.queryParameters['skillName'], 'পড়ানো');
+  });
 }

@@ -8,8 +8,40 @@ final jobsRepositoryProvider = Provider<JobsRepository>(
   (ref) => JobsRepository(ref.watch(dioProvider)),
 );
 
-final jobFeedProvider = FutureProvider<List<JobSummary>>(
-  (ref) => ref.watch(jobsRepositoryProvider).getJobs(),
+class JobFeedFilter {
+  const JobFeedFilter({
+    this.categoryId,
+    this.skillId,
+    this.availableOnly = false,
+    this.forMe = true,
+  });
+
+  final bool availableOnly;
+  final String? categoryId;
+  final bool forMe;
+  final String? skillId;
+
+  @override
+  bool operator ==(Object other) =>
+      other is JobFeedFilter &&
+      other.categoryId == categoryId &&
+      other.skillId == skillId &&
+      other.availableOnly == availableOnly &&
+      other.forMe == forMe;
+
+  @override
+  int get hashCode => Object.hash(categoryId, skillId, availableOnly, forMe);
+}
+
+final jobFeedProvider = FutureProvider.family<List<JobSummary>, JobFeedFilter>(
+  (ref, filter) => ref
+      .watch(jobsRepositoryProvider)
+      .getJobs(
+        categoryId: filter.categoryId,
+        skillId: filter.skillId,
+        availableOnly: filter.availableOnly,
+        forMe: filter.forMe,
+      ),
 );
 
 final myJobsProvider = FutureProvider<List<JobSummary>>(

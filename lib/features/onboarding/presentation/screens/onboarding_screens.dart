@@ -8,6 +8,8 @@ import '../../../../core/widgets/k_primary_button.dart';
 import '../../../catalog/domain/entities/catalog_skill.dart';
 import '../../../catalog/domain/entities/service_location.dart';
 import '../../../catalog/presentation/controllers/catalog_providers.dart';
+import '../../../jobs/presentation/controllers/jobs_providers.dart';
+import '../../domain/availability_schedule.dart';
 import '../../domain/onboarding_state.dart';
 import '../controllers/onboarding_controller.dart';
 
@@ -357,9 +359,13 @@ class AvailabilitySetupScreen extends ConsumerStatefulWidget {
 
 class _AvailabilitySetupScreenState
     extends ConsumerState<AvailabilitySetupScreen> {
-  late final Set<int> _days;
+  final Set<int> _days = {};
+  final List<AvailabilityRule> _rules = [];
   late TimeOfDay _startTime;
   late TimeOfDay _endTime;
+  bool _editorDirty = false;
+  bool _loading = false;
+  bool _loadFailed = false;
   bool _saving = false;
   static const _names = [
     'রবি',
@@ -376,25 +382,69 @@ class _AvailabilitySetupScreenState
     super.initState();
     final saved = ref.read(onboardingControllerProvider).availableDays;
     final state = ref.read(onboardingControllerProvider);
-    _days = saved.isEmpty ? {5, 6} : saved.toSet();
+    _days.addAll(saved.isEmpty ? {5, 6} : saved);
     _startTime = _parseTime(state.availableStartTime);
     _endTime = _parseTime(state.availableEndTime);
+    _rules.addAll(
+      _days.map(
+        (day) => AvailabilityRule(
+          dayOfWeek: day,
+          startTime: _apiTime(_startTime),
+          endTime: _apiTime(_endTime),
+        ),
+      ),
+    );
+    if (widget.isEditing) {
+      _loading = true;
+      Future<void>.microtask(_loadSavedAvailability);
+    }
+  }
+
+  Future<void> _loadSavedAvailability() async {
+    try {
+      final schedule = await ref
+          .read(onboardingRepositoryProvider)
+          .getAvailability();
+      if (!mounted) return;
+      setState(() {
+        _rules
+          ..clear()
+          ..addAll(schedule.rules);
+        _days
+          ..clear()
+          ..addAll(schedule.rules.map((rule) => rule.dayOfWeek));
+        if (schedule.rules.isNotEmpty) {
+          _startTime = _parseTime(schedule.rules.first.startTime);
+          _endTime = _parseTime(schedule.rules.first.endTime);
+        }
+        _loading = false;
+        _loadFailed = false;
+        _editorDirty = false;
+      });
+    } on Object {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _loadFailed = true;
+      });
+    }
   }
 
   Future<void> _submit() async {
+    if (_editorDirty) _replaceSelectedRules();
+    if (_rules.isEmpty) return;
     setState(() => _saving = true);
     try {
       await ref
           .read(onboardingControllerProvider.notifier)
-          .saveAvailability(
-            _days.toList()..sort(),
-            startTime: _apiTime(_startTime),
-            endTime: _apiTime(_endTime),
-          );
+          .saveAvailabilityRules(_rules);
+      ref.invalidate(jobFeedProvider);
       if (mounted) {
-        context.go(
-          widget.isEditing ? AppRoutes.home : AppRoutes.onboardingTour,
-        );
+        if (widget.isEditing) {
+          context.pop();
+        } else {
+          context.go(AppRoutes.onboardingTour);
+        }
       }
     } catch (_) {
       if (mounted) _showError(context);
@@ -406,104 +456,185 @@ class _AvailabilitySetupScreenState
   @override
   Widget build(BuildContext context) => _OnboardingScaffold(
     step: 5,
-    title: 'কখন কাজ করতে পারবেন?',
-    subtitle:
-        'দিন ও সময় বেছে দিন। এই সময়গুলো গ্রাহকেরা বুকিংয়ের আগে দেখতে পারবেন।',
-    child: Column(
-      children: [
-        Wrap(
-          spacing: KSpacing.sm,
-          children: List.generate(
-            7,
-            (day) => FilterChip(
-              label: Text(_names[day]),
-              selected: _days.contains(day),
-              onSelected: (value) =>
-                  setState(() => value ? _days.add(day) : _days.remove(day)),
-            ),
-          ),
-        ),
-        const SizedBox(height: KSpacing.md),
-        Row(
-          children: [
-            Expanded(
-              child: _TimePickerCard(
-                label: 'শুরুর সময়',
-                value: _startTime,
-                onTap: () => _pickTime(isStart: true),
-              ),
-            ),
-            const SizedBox(width: KSpacing.sm),
-            Expanded(
-              child: _TimePickerCard(
-                label: 'শেষের সময়',
-                value: _endTime,
-                onTap: () => _pickTime(isStart: false),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: KSpacing.sm),
-        Wrap(
-          spacing: KSpacing.sm,
-          children: [
-            ActionChip(
-              label: const Text('সকাল ৮টা–১২টা'),
-              onPressed: () => _setTimeRange(8, 12),
-            ),
-            ActionChip(
-              label: const Text('দুপুর ১২টা–৫টা'),
-              onPressed: () => _setTimeRange(12, 17),
-            ),
-            ActionChip(
-              label: const Text('সন্ধ্যা ৬টা–১০টা'),
-              onPressed: () => _setTimeRange(18, 22),
-            ),
-          ],
-        ),
-        const SizedBox(height: KSpacing.md),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () => setState(
-                  () => _days
-                    ..clear()
-                    ..addAll({0, 1, 2, 3, 4}),
+    title: widget.isEditing ? 'ডিফল্ট কাজের সময়' : 'কখন কাজ করতে পারবেন?',
+    subtitle: widget.isEditing
+        ? 'এটি আপনার অ্যাকাউন্টের সাধারণ সময়। পোস্ট করা প্রতিটি কাজের তারিখ ও সময় আলাদা থাকবে।'
+        : 'দিন ও সময় বেছে দিন। এই সময়গুলো গ্রাহকেরা বুকিংয়ের আগে দেখতে পারবেন।',
+    child: _loading
+        ? const Padding(
+            padding: EdgeInsets.all(KSpacing.xl),
+            child: Center(child: CircularProgressIndicator()),
+          )
+        : _loadFailed
+        ? Center(
+            child: Column(
+              children: [
+                const Text('সংরক্ষিত সময় লোড করা যায়নি।'),
+                const SizedBox(height: KSpacing.md),
+                FilledButton(
+                  onPressed: () {
+                    setState(() {
+                      _loading = true;
+                      _loadFailed = false;
+                    });
+                    _loadSavedAvailability();
+                  },
+                  child: const Text('আবার চেষ্টা করুন'),
                 ),
-                child: const Text('সপ্তাহের সন্ধ্যা'),
-              ),
+              ],
             ),
-            const SizedBox(width: KSpacing.sm),
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () => setState(
-                  () => _days
-                    ..clear()
-                    ..addAll({5, 6}),
+          )
+        : Column(
+            children: [
+              if (_rules.isNotEmpty) ...[
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'বর্তমানে সংরক্ষিত',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ),
-                child: const Text('সাপ্তাহিক ছুটি'),
+                const SizedBox(height: KSpacing.sm),
+                ..._rules.asMap().entries.map(
+                  (entry) => Card(
+                    margin: const EdgeInsets.only(bottom: KSpacing.xs),
+                    child: ListTile(
+                      dense: true,
+                      leading: const Icon(Icons.schedule_outlined),
+                      title: Text(
+                        '${_names[entry.value.dayOfWeek]} · ${_displayApiTime(context, entry.value.startTime)} – ${_displayApiTime(context, entry.value.endTime)}',
+                      ),
+                      trailing: IconButton(
+                        tooltip: 'এই সময় মুছুন',
+                        onPressed: () => setState(() {
+                          _rules.removeAt(entry.key);
+                          _days
+                            ..clear()
+                            ..addAll(_rules.map((rule) => rule.dayOfWeek));
+                        }),
+                        icon: const Icon(Icons.delete_outline),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: KSpacing.md),
+              ],
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'দিন ও সময় যোগ/বদল করুন',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: KSpacing.lg),
-        if (_minutes(_endTime) <= _minutes(_startTime)) ...[
-          const Text(
-            'শেষের সময় শুরুর সময়ের পরে হতে হবে।',
-            style: TextStyle(color: KColors.danger),
+              const SizedBox(height: KSpacing.sm),
+              Wrap(
+                spacing: KSpacing.sm,
+                children: List.generate(
+                  7,
+                  (day) => FilterChip(
+                    label: Text(_names[day]),
+                    selected: _days.contains(day),
+                    onSelected: (value) => setState(() {
+                      value ? _days.add(day) : _days.remove(day);
+                      _editorDirty = true;
+                    }),
+                  ),
+                ),
+              ),
+              const SizedBox(height: KSpacing.md),
+              Row(
+                children: [
+                  Expanded(
+                    child: _TimePickerCard(
+                      label: 'শুরুর সময়',
+                      value: _startTime,
+                      onTap: () => _pickTime(isStart: true),
+                    ),
+                  ),
+                  const SizedBox(width: KSpacing.sm),
+                  Expanded(
+                    child: _TimePickerCard(
+                      label: 'শেষের সময়',
+                      value: _endTime,
+                      onTap: () => _pickTime(isStart: false),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: KSpacing.sm),
+              Wrap(
+                spacing: KSpacing.sm,
+                children: [
+                  ActionChip(
+                    label: const Text('সকাল ৮টা–১২টা'),
+                    onPressed: () => _setTimeRange(8, 12),
+                  ),
+                  ActionChip(
+                    label: const Text('দুপুর ১২টা–৫টা'),
+                    onPressed: () => _setTimeRange(12, 17),
+                  ),
+                  ActionChip(
+                    label: const Text('সন্ধ্যা ৬টা–১০টা'),
+                    onPressed: () => _setTimeRange(18, 22),
+                  ),
+                ],
+              ),
+              const SizedBox(height: KSpacing.md),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => setState(() {
+                        _days
+                          ..clear()
+                          ..addAll({0, 1, 2, 3, 4});
+                        _editorDirty = true;
+                      }),
+                      child: const Text('রবি–বৃহস্পতি'),
+                    ),
+                  ),
+                  const SizedBox(width: KSpacing.sm),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => setState(() {
+                        _days
+                          ..clear()
+                          ..addAll({5, 6});
+                        _editorDirty = true;
+                      }),
+                      child: const Text('সাপ্তাহিক ছুটি'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: KSpacing.md),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed:
+                      _days.isEmpty ||
+                          _minutes(_endTime) <= _minutes(_startTime)
+                      ? null
+                      : _replaceSelectedRules,
+                  icon: const Icon(Icons.playlist_add),
+                  label: const Text('নির্বাচিত দিনের সময় যোগ/বদল করুন'),
+                ),
+              ),
+              const SizedBox(height: KSpacing.lg),
+              if (_minutes(_endTime) <= _minutes(_startTime)) ...[
+                const Text(
+                  'শেষের সময় শুরুর সময়ের পরে হতে হবে।',
+                  style: TextStyle(color: KColors.danger),
+                ),
+                const SizedBox(height: KSpacing.sm),
+              ],
+              KPrimaryButton(
+                label: 'সব সময় সংরক্ষণ করুন',
+                isLoading: _saving,
+                onPressed: _rules.isEmpty && !_editorDirty ? null : _submit,
+              ),
+            ],
           ),
-          const SizedBox(height: KSpacing.sm),
-        ],
-        KPrimaryButton(
-          label: 'সময় সংরক্ষণ করুন',
-          isLoading: _saving,
-          onPressed: _days.isEmpty || _minutes(_endTime) <= _minutes(_startTime)
-              ? null
-              : _submit,
-        ),
-      ],
-    ),
   );
 
   Future<void> _pickTime({required bool isStart}) async {
@@ -518,13 +649,38 @@ class _AvailabilitySetupScreenState
       } else {
         _endTime = selected;
       }
+      _editorDirty = true;
     });
   }
 
   void _setTimeRange(int startHour, int endHour) => setState(() {
     _startTime = TimeOfDay(hour: startHour, minute: 0);
     _endTime = TimeOfDay(hour: endHour, minute: 0);
+    _editorDirty = true;
   });
+
+  void _replaceSelectedRules() {
+    final selected = Set<int>.from(_days);
+    final startTime = _apiTime(_startTime);
+    final endTime = _apiTime(_endTime);
+    setState(() {
+      _rules.removeWhere((rule) => selected.contains(rule.dayOfWeek));
+      _rules.addAll(
+        selected.map(
+          (day) => AvailabilityRule(
+            dayOfWeek: day,
+            startTime: startTime,
+            endTime: endTime,
+          ),
+        ),
+      );
+      _rules.sort((left, right) => left.dayOfWeek.compareTo(right.dayOfWeek));
+      _editorDirty = false;
+    });
+  }
+
+  static String _displayApiTime(BuildContext context, String value) =>
+      _parseTime(value).format(context);
 
   static TimeOfDay _parseTime(String value) {
     final parts = value.split(':');

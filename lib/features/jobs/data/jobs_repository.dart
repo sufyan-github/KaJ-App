@@ -8,11 +8,21 @@ class JobsRepository {
 
   final Dio _dio;
 
-  Future<List<JobSummary>> getJobs() async {
+  Future<List<JobSummary>> getJobs({
+    String? categoryId,
+    String? skillId,
+    bool availableOnly = false,
+    bool forMe = true,
+  }) async {
     try {
       final response = await _dio.get<Map<String, dynamic>>(
         '/jobs',
-        queryParameters: const {'scope': 'for-me'},
+        queryParameters: {
+          'scope': forMe ? 'for-me' : 'all',
+          'categoryId': ?categoryId,
+          'skillId': ?skillId,
+          if (availableOnly) 'availableOnly': 'true',
+        },
       );
       return _items(response.data).map(JobSummary.fromJson).toList();
     } on Object catch (error) {
