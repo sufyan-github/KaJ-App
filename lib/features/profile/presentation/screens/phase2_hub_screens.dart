@@ -319,11 +319,12 @@ class SettingsScreen extends StatelessWidget {
           title: Text('ভাষা'),
           subtitle: Text('বাংলা'),
         ),
-        SwitchListTile(
-          value: true,
-          onChanged: (_) {},
-          secondary: const Icon(Icons.notifications_outlined),
+        ListTile(
+          leading: const Icon(Icons.notifications_outlined),
           title: const Text('নোটিফিকেশন'),
+          subtitle: const Text('অপঠিত আপডেট ও নোটিফিকেশন ইনবক্স দেখুন'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.push(AppRoutes.notifications),
         ),
         const ListTile(
           leading: Icon(Icons.privacy_tip_outlined),

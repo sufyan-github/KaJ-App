@@ -7,8 +7,14 @@ enum KPermissionStatus { granted, denied, permanentlyDenied, restricted }
 class PermissionGateway {
   const PermissionGateway();
 
+  Future<KPermissionStatus> status(KPermission permission) async =>
+      _mapStatus(await _platformPermission(permission).status);
+
   Future<KPermissionStatus> request(KPermission permission) async {
-    final status = await _platformPermission(permission).request();
+    return _mapStatus(await _platformPermission(permission).request());
+  }
+
+  KPermissionStatus _mapStatus(PermissionStatus status) {
     if (status.isGranted || status.isLimited) return KPermissionStatus.granted;
     if (status.isPermanentlyDenied) {
       return KPermissionStatus.permanentlyDenied;

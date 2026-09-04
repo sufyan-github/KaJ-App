@@ -8,6 +8,7 @@ import '../../../../core/widgets/k_primary_button.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../auth/presentation/controllers/auth_providers.dart';
+import '../../../notifications/presentation/controllers/notifications_providers.dart';
 import '../../../onboarding/domain/onboarding_state.dart';
 import '../../../onboarding/presentation/controllers/onboarding_controller.dart';
 
@@ -20,6 +21,9 @@ class HomeScreen extends ConsumerWidget {
     final state = ref.watch(authControllerProvider);
     final isWorker =
         ref.watch(onboardingControllerProvider).role == KaajRole.worker;
+    final unreadNotifications = ref
+        .watch(notificationsProvider)
+        .maybeWhen(data: (inbox) => inbox.unreadCount, orElse: () => 0);
     return Scaffold(
       appBar: AppBar(
         title: const Text('KAAJ'),
@@ -126,6 +130,7 @@ class HomeScreen extends ConsumerWidget {
                         icon: Icons.notifications_outlined,
                         title: 'নোটিফিকেশন',
                         subtitle: 'আবেদন ও বুকিং আপডেট দেখুন',
+                        badgeCount: unreadNotifications,
                         onTap: () => context.push(AppRoutes.notifications),
                       ),
                       _DashboardTile(
@@ -212,47 +217,76 @@ class _DashboardTile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.badgeCount = 0,
   });
 
+  final int badgeCount;
   final IconData icon;
   final VoidCallback onTap;
   final String subtitle;
   final String title;
 
   @override
-  Widget build(BuildContext context) => Card(
-    margin: EdgeInsets.zero,
-    clipBehavior: Clip.antiAlias,
-    child: InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(KSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: KColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: badgeCount > 0
+        ? '$title, ${_banglaNumber(badgeCount)}টি অপঠিত আপডেট'
+        : title,
+    child: Card(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(KSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: KColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(icon, color: KColors.primary),
+                  ),
+                  if (badgeCount > 0)
+                    Positioned(
+                      top: -7,
+                      right: -10,
+                      child: Badge(
+                        backgroundColor: KColors.danger,
+                        label: Text(
+                          badgeCount > 99 ? '৯৯+' : _banglaNumber(badgeCount),
+                        ),
+                      ),
+                    ),
+                ],
               ),
-              child: Icon(icon, color: KColors.primary),
-            ),
-            const Spacer(),
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: KSpacing.xs),
-            Text(
-              subtitle,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: KColors.textSecondary),
-            ),
-          ],
+              const Spacer(),
+              Text(title, style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: KSpacing.xs),
+              Text(
+                subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: KColors.textSecondary),
+              ),
+            ],
+          ),
         ),
       ),
     ),
   );
 }
+
+String _banglaNumber(int value) => value.toString().replaceAllMapped(
+  RegExp(r'\d'),
+  (match) => '০১২৩৪৫৬৭৮৯'[int.parse(match.group(0)!)],
+);

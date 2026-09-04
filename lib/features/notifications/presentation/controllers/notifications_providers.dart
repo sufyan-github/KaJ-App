@@ -8,6 +8,6 @@ final notificationsRepositoryProvider = Provider<NotificationsRepository>(
   (ref) => NotificationsRepository(ref.watch(dioProvider)),
 );
 
-final notificationsProvider = FutureProvider<List<AppNotification>>(
+final notificationsProvider = FutureProvider<NotificationInbox>(
   (ref) => ref.watch(notificationsRepositoryProvider).getNotifications(),
 );
