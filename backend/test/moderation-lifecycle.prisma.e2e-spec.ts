@@ -242,9 +242,21 @@ databaseDescribe("moderation lifecycle with PostgreSQL", () => {
       },
     });
     createdDocumentIds.push(document.id);
+    const selfie = await prisma.document.create({
+      data: {
+        user_id: subjectId,
+        kind: "VERIFICATION_DOCUMENT",
+        storage_key: `private/moderation-e2e/${subjectId}-selfie`,
+        mime: "image/webp",
+        size_bytes: 128,
+        is_sensitive: true,
+      },
+    });
+    createdDocumentIds.push(selfie.id);
     const request = await verification.submit(subjectId, {
       kind: VerificationKind.IDENTITY,
-      documentIds: [document.id],
+      nidDocumentId: document.id,
+      selfieDocumentId: selfie.id,
     });
     expect(request.status).toBe(VerificationStatus.PENDING);
     await adminOps.decideVerification(

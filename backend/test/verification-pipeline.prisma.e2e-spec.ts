@@ -60,6 +60,7 @@ databaseDescribe("verification pipeline with PostgreSQL", () => {
   let userId: string;
   let adminId: string;
   let linkedDocumentId: string;
+  let selfieDocumentId: string;
   let unusedDocumentId: string;
   let requestId: string;
 
@@ -89,6 +90,17 @@ databaseDescribe("verification pipeline with PostgreSQL", () => {
       },
     });
     linkedDocumentId = linked.id;
+    const selfie = await prisma.document.create({
+      data: {
+        user_id: userId,
+        kind: "VERIFICATION_DOCUMENT",
+        storage_key: `private/documents/${userId}/identity-selfie.jpg`,
+        mime: "image/jpeg",
+        size_bytes: 100n,
+        is_sensitive: true,
+      },
+    });
+    selfieDocumentId = selfie.id;
     const unused = await prisma.document.create({
       data: {
         user_id: userId,
@@ -121,12 +133,13 @@ databaseDescribe("verification pipeline with PostgreSQL", () => {
   it("submits only linked evidence and exposes only that evidence to admins", async () => {
     const submitted = await verification.submit(userId, {
       kind: VerificationKind.IDENTITY,
-      documentIds: [linkedDocumentId],
+      nidDocumentId: linkedDocumentId,
+      selfieDocumentId,
     });
     requestId = submitted.id;
     expect(submitted).toMatchObject({
       status: VerificationStatus.PENDING,
-      documentIds: [linkedDocumentId],
+      documentIds: [linkedDocumentId, selfieDocumentId],
     });
 
     const queue = await adminOps.verifications({ limit: 100 }, actor(), {
@@ -134,9 +147,10 @@ databaseDescribe("verification pipeline with PostgreSQL", () => {
       ua: "trust-e2e",
     });
     const item = queue.items.find((entry) => entry.id === requestId);
-    expect(item?.documents.map((document) => document.id)).toEqual([
-      linkedDocumentId,
-    ]);
+    expect(item?.documents.map((document) => document.id)).toEqual(
+      expect.arrayContaining([linkedDocumentId, selfieDocumentId]),
+    );
+    expect(item?.documents).toHaveLength(2);
     expect(item?.documents.map((document) => document.id)).not.toContain(
       unusedDocumentId,
     );

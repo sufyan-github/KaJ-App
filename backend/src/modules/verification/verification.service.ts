@@ -1,4 +1,10 @@
-import { Inject, Injectable, ConflictException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from "@nestjs/common";
 import {
   Prisma,
   TrustLevel,
@@ -25,8 +31,32 @@ export class VerificationService {
       throw new ConflictException(
         "Phone trust is established through OTP authentication.",
       );
-    const uniqueDocumentIds = [...new Set(input.documentIds)];
-    if (uniqueDocumentIds.length !== input.documentIds.length)
+    if (
+      input.kind === VerificationKind.IDENTITY &&
+      (!input.nidDocumentId ||
+        !input.selfieDocumentId ||
+        Boolean(input.documentIds?.length))
+    ) {
+      throw new BadRequestException(
+        "Identity verification requires separate NID and selfie documents.",
+      );
+    }
+    if (
+      input.kind !== VerificationKind.IDENTITY &&
+      (!input.documentIds?.length ||
+        Boolean(input.nidDocumentId) ||
+        Boolean(input.selfieDocumentId))
+    ) {
+      throw new BadRequestException(
+        "This verification type requires one to five evidence documents.",
+      );
+    }
+    const submittedDocumentIds =
+      input.kind === VerificationKind.IDENTITY
+        ? [input.nidDocumentId!, input.selfieDocumentId!]
+        : input.documentIds!;
+    const uniqueDocumentIds = [...new Set(submittedDocumentIds)];
+    if (uniqueDocumentIds.length !== submittedDocumentIds.length)
       throw new ConflictException("Each verification document must be unique.");
 
     const [profile, user] = await Promise.all([
@@ -92,7 +122,17 @@ export class VerificationService {
           user_id: userId,
           kind: input.kind,
           status: VerificationStatus.PENDING,
-          documents_json: { documentIds: uniqueDocumentIds },
+          documents_json: {
+            documentIds: uniqueDocumentIds,
+            ...(input.kind === VerificationKind.IDENTITY
+              ? {
+                  identityDocuments: {
+                    nidDocumentId: input.nidDocumentId,
+                    selfieDocumentId: input.selfieDocumentId,
+                  },
+                }
+              : {}),
+          },
           documents: {
             create: uniqueDocumentIds.map((documentId) => ({
               document_id: documentId,
@@ -126,6 +166,58 @@ export class VerificationService {
       return created;
     });
     return serializeRequest(request, uniqueDocumentIds);
+  }
+
+  async applicationEligibility(userId: string) {
+    const user = await this.prisma.user.findFirst({
+      where: { id: userId, deleted_at: null },
+      select: {
+        status: true,
+        reverification_required: true,
+        reverification_requested_at: true,
+        profile: { select: { trust_level: true } },
+        verification_requests: {
+          where: { kind: VerificationKind.IDENTITY },
+          orderBy: { created_at: "desc" },
+          take: 1,
+          select: { status: true, created_at: true },
+        },
+      },
+    });
+    if (!user) throw new NotFoundException();
+    const trustLevel = user.profile?.trust_level ?? TrustLevel.NONE;
+    const phoneVerified = hasTrust(trustLevel, TrustLevel.PHONE);
+    const identityVerified =
+      user.status === "ACTIVE" &&
+      !user.reverification_required &&
+      hasTrust(trustLevel, TrustLevel.IDENTITY);
+    const latestIdentity = user.verification_requests[0];
+    const latestStatus =
+      user.reverification_required &&
+      user.reverification_requested_at &&
+      latestIdentity &&
+      latestIdentity.created_at < user.reverification_requested_at
+        ? undefined
+        : latestIdentity?.status;
+    return {
+      canApply: identityVerified,
+      identityStatus: identityVerified
+        ? VerificationStatus.APPROVED
+        : (latestStatus ?? VerificationStatus.NOT_SUBMITTED),
+      requirements: {
+        phone: { required: true, verified: phoneVerified },
+        identityInformation: {
+          required: true,
+          verified: identityVerified,
+        },
+        nid: { required: true, verified: identityVerified },
+        selfie: { required: true, verified: identityVerified },
+      },
+      optional: {
+        experience: true,
+        expertise: true,
+      },
+    };
   }
 
   async mine(userId: string) {

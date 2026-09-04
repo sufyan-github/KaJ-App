@@ -27,4 +27,10 @@ export class VerificationController {
   mine(@CurrentUser() claims: AccessTokenClaims) {
     return this.verification.mine(claims.sub);
   }
+
+  @Get("application-eligibility")
+  @Policy(Policies.authenticated())
+  applicationEligibility(@CurrentUser() claims: AccessTokenClaims) {
+    return this.verification.applicationEligibility(claims.sub);
+  }
 }

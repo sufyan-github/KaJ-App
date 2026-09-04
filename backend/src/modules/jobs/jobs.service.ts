@@ -15,6 +15,7 @@ import {
   JobType,
   PaymentModel,
   Prisma,
+  TrustLevel,
   UserStatus,
   type Job,
 } from "@prisma/client";
@@ -42,6 +43,7 @@ import {
 import { JobStateMachine } from "./state-machine/job-state.machine";
 import { recurrenceRuleJson } from "./recurrence/recurrence";
 import { RecurrenceService } from "./recurrence/recurrence.service";
+import { hasTrust } from "../verification/trust-level";
 
 const jobInclude = {
   category: { select: { id: true, name_bn: true, name_en: true } },
@@ -290,14 +292,37 @@ export class JobsService {
   }
 
   async apply(workerUserId: string, jobId: string, input: ApplyToJobDto) {
-    const job = await this.prisma.job.findFirst({
-      where: {
-        id: jobId,
-        status: JobStatus.APPLICATIONS_OPEN,
-        deleted_at: null,
-      },
-    });
+    const [job, worker] = await Promise.all([
+      this.prisma.job.findFirst({
+        where: {
+          id: jobId,
+          status: JobStatus.APPLICATIONS_OPEN,
+          deleted_at: null,
+        },
+      }),
+      this.prisma.user.findFirst({
+        where: { id: workerUserId, deleted_at: null },
+        select: {
+          status: true,
+          reverification_required: true,
+          profile: { select: { trust_level: true } },
+        },
+      }),
+    ]);
     if (!job) throw new NotFoundException();
+    if (
+      !worker ||
+      worker.status !== UserStatus.ACTIVE ||
+      worker.reverification_required ||
+      !hasTrust(
+        worker.profile?.trust_level ?? TrustLevel.NONE,
+        TrustLevel.IDENTITY,
+      )
+    ) {
+      throw new ForbiddenException(
+        "Approved identity verification with NID and selfie is required before applying.",
+      );
+    }
     if (job.poster_user_id === workerUserId) {
       throw new ForbiddenException(
         "A job poster cannot apply to their own job.",

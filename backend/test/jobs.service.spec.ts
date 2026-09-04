@@ -1,5 +1,5 @@
-import { ConflictException } from "@nestjs/common";
-import { AssignmentStatus } from "@prisma/client";
+import { ConflictException, ForbiddenException } from "@nestjs/common";
+import { AssignmentStatus, TrustLevel, UserStatus } from "@prisma/client";
 
 import { PrismaService } from "../src/infra/prisma/prisma.service";
 import { AvailabilityService } from "../src/modules/availability/availability.service";
@@ -224,5 +224,62 @@ describe("JobsService filtered feed", () => {
       timeCompatibility: "AVAILABLE",
       availabilityCoverage: 1,
     });
+  });
+});
+
+describe("JobsService application identity gate", () => {
+  const job = {
+    id: "job-id",
+    poster_user_id: "poster-id",
+    title: "Test job",
+  };
+  const input = {
+    proposedPricePoisha: "10000",
+    proposedStartsAt: "2026-09-07T03:00:00.000Z",
+    proposedEndsAt: "2026-09-07T05:00:00.000Z",
+  };
+
+  it("blocks a worker whose NID and selfie identity check is not approved", async () => {
+    const availability = {
+      evaluate: jest.fn(),
+    } as unknown as AvailabilityService;
+    const prisma = {
+      job: { findFirst: jest.fn().mockResolvedValue(job) },
+      user: {
+        findFirst: jest.fn().mockResolvedValue({
+          status: UserStatus.ACTIVE,
+          reverification_required: false,
+          profile: { trust_level: TrustLevel.PHONE },
+        }),
+      },
+    } as unknown as PrismaService;
+    const service = new JobsService(prisma, availability);
+
+    await expect(
+      service.apply("worker-id", job.id, input),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(availability.evaluate).not.toHaveBeenCalled();
+  });
+
+  it("allows an identity-approved worker through to slot validation", async () => {
+    const availability = {
+      evaluate: jest.fn().mockResolvedValue({ isAvailable: false }),
+    } as unknown as AvailabilityService;
+    const prisma = {
+      job: { findFirst: jest.fn().mockResolvedValue(job) },
+      user: {
+        findFirst: jest.fn().mockResolvedValue({
+          status: UserStatus.ACTIVE,
+          reverification_required: false,
+          profile: { trust_level: TrustLevel.IDENTITY },
+        }),
+      },
+    } as unknown as PrismaService;
+    const service = new JobsService(prisma, availability);
+
+    await expect(
+      service.apply("worker-id", job.id, input),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(availability.evaluate).toHaveBeenCalledTimes(1);
   });
 });
