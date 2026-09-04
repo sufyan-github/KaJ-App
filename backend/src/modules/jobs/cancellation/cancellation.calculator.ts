@@ -26,6 +26,7 @@ export interface CancellationPreview {
   addsStrike: boolean;
   needsAdminReview: boolean;
   summaryBn: string;
+  summaryEn: string;
 }
 
 export const defaultCancellationPolicy: CancellationPolicy = {
@@ -107,6 +108,9 @@ export function calculateCancellation(input: {
     summaryBn: emergency
       ? "জরুরি কারণটি প্রশাসক যাচাই করবেন। এখন কোনো জরিমানা প্রয়োগ হবে না।"
       : summary(penaltyCode, refundPercent, feePercent),
+    summaryEn: emergency
+      ? "An administrator will review the emergency reason. No penalty is applied now."
+      : summaryEnglish(penaltyCode, refundPercent, feePercent),
   };
 }
 
@@ -139,4 +143,19 @@ function summary(code: string, refundPercent: number, feePercent: number) {
   if (delta) parts.push(`নির্ভরযোগ্যতা ${delta} পয়েন্ট কমবে`);
   if (code.includes("strike")) parts.push("একটি স্ট্রাইক যোগ হবে");
   return parts.join("। ");
+}
+
+function summaryEnglish(
+  code: string,
+  refundPercent: number,
+  feePercent: number,
+) {
+  const parts = [`Refund: ${refundPercent}%`];
+  if (feePercent) parts.push(`Cancellation fee: ${feePercent}%`);
+  if (code === "warning") parts.push("A warning will be added to the account");
+  const delta = reliability(code);
+  if (delta)
+    parts.push(`Reliability will decrease by ${Math.abs(delta)} points`);
+  if (code.includes("strike")) parts.push("A strike will be added");
+  return parts.join(". ");
 }

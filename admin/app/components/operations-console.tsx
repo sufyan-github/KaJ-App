@@ -1,10 +1,19 @@
 "use client";
-
 import { FormEvent, ReactNode, useCallback, useEffect, useState } from "react";
-
 import { adminApi, json } from "@/lib/admin-api";
-
-type Admin = { email: string; role: string; userId: string };
+import {
+  AdminLocale,
+  friendlyAdminError,
+  getActiveAdminLocale,
+  localizedEntityName,
+  setActiveAdminLocale,
+  tr,
+} from "@/lib/admin-i18n";
+type Admin = {
+  email: string;
+  role: string;
+  userId: string;
+};
 type ModuleKey =
   | "dashboard"
   | "users"
@@ -21,7 +30,6 @@ type ModuleKey =
   | "notifications"
   | "analytics"
   | "audit";
-
 const modules: Array<[ModuleKey, string, string]> = [
   ["dashboard", "Dashboard", "Live marketplace health"],
   ["users", "Users", "Support and moderation"],
@@ -39,25 +47,29 @@ const modules: Array<[ModuleKey, string, string]> = [
   ["analytics", "Analytics", "Marketplace health"],
   ["audit", "Audit trail", "Who changed what"],
 ];
-
 export function OperationsConsole({
   admin,
   busy,
   logout,
+  locale,
+  onLocaleChange,
 }: {
   admin: Admin;
   busy: boolean;
   logout: () => Promise<void>;
+  locale: AdminLocale;
+  onLocaleChange: (locale: AdminLocale) => void;
 }) {
+  setActiveAdminLocale(locale);
   const [active, setActive] = useState<ModuleKey>("dashboard");
   return (
     <main className="ops-shell">
       <aside>
         <div className="brand-row">
-          <div className="brand-mark small">ক</div>
+          <div className="brand-mark small">{tr("\u0995")}</div>
           <div>
-            <strong>KAAJ</strong>
-            <span>OPERATIONS</span>
+            <strong>{tr("KAAJ")}</strong>
+            <span>{tr("OPERATIONS")}</span>
           </div>
         </div>
         <nav>
@@ -68,7 +80,7 @@ export function OperationsConsole({
               onClick={() => setActive(key)}
             >
               <span>{String(index + 1).padStart(2, "0")}</span>
-              {name}
+              {tr(name)}
             </button>
           ))}
         </nav>
@@ -76,28 +88,47 @@ export function OperationsConsole({
           <div className="avatar">{admin.email[0]?.toUpperCase()}</div>
           <div>
             <strong>{admin.email}</strong>
-            <span>{admin.role}</span>
+            <span>{humanize(admin.role)}</span>
           </div>
-          <button onClick={logout} disabled={busy} aria-label="Sign out">
-            ↗
+          <button onClick={logout} disabled={busy} aria-label={tr("Sign out")}>
+            {tr("\u2197")}
           </button>
         </div>
       </aside>
       <section className="workspace">
         <header>
           <div>
-            <p className="eyebrow">MVP OPERATIONS</p>
-            <h1>{modules.find(([key]) => key === active)?.[1]}</h1>
-            <p>{modules.find(([key]) => key === active)?.[2]}</p>
+            <p className="eyebrow">{tr("MVP OPERATIONS")}</p>
+            <h1>{tr(modules.find(([key]) => key === active)?.[1] ?? "")}</h1>
+            <p>{tr(modules.find(([key]) => key === active)?.[2] ?? "")}</p>
           </div>
-          <div className="session-pill">
-            <span /> Secure session · 30 min
+          <div className="header-actions">
+            <div className="locale-switch" aria-label={tr("Language")}>
+              <button
+                className={locale === "en" ? "active" : ""}
+                onClick={() => onLocaleChange("en")}
+              >
+                EN
+              </button>
+              <button
+                className={locale === "bn" ? "active" : ""}
+                onClick={() => onLocaleChange("bn")}
+              >
+                বাংলা
+              </button>
+            </div>
+            <div className="session-pill">
+              <span />
+              {tr("Secure session \u00B7 30 min")}
+            </div>
           </div>
         </header>
         <div className="notice compact">
-          <strong>Every view and action is audited.</strong>
+          <strong>{tr("Every view and action is audited.")}</strong>
           <span>
-            High-risk changes require a reason and explicit confirmation.
+            {tr(
+              "High-risk changes require a reason and explicit confirmation.",
+            )}
           </span>
         </div>
         <ModuleView active={active} />
@@ -105,7 +136,6 @@ export function OperationsConsole({
     </main>
   );
 }
-
 function ModuleView({ active }: { active: ModuleKey }) {
   if (active === "dashboard") return <Dashboard />;
   if (active === "users") return <Users />;
@@ -123,7 +153,6 @@ function ModuleView({ active }: { active: ModuleKey }) {
   if (active === "analytics") return <Analytics />;
   return <AuditTrail />;
 }
-
 function useData<T>(path: string) {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState("");
@@ -134,7 +163,7 @@ function useData<T>(path: string) {
     try {
       setData(await adminApi<T>(path));
     } catch (caught) {
-      setError((caught as Error).message);
+      setError(friendlyAdminError(caught));
     } finally {
       setLoading(false);
     }
@@ -142,7 +171,6 @@ function useData<T>(path: string) {
   useEffect(() => void load(), [load]);
   return { data, error, loading, reload: load };
 }
-
 function State({
   loading,
   error,
@@ -152,7 +180,8 @@ function State({
   error: string;
   children: ReactNode;
 }) {
-  if (loading) return <div className="panel-state">Loading secure data…</div>;
+  if (loading)
+    return <div className="panel-state">{tr("Loading secure data\u2026")}</div>;
   if (error)
     return (
       <div className="panel-state error" role="alert">
@@ -161,7 +190,6 @@ function State({
     );
   return <>{children}</>;
 }
-
 function Dashboard() {
   const { data, loading, error } = useData<{
     counts: Record<string, number>;
@@ -183,8 +211,8 @@ function Dashboard() {
         ))}
       </div>
       <Section
-        title="Stuck jobs"
-        note="Non-terminal jobs unchanged for more than two hours"
+        title={tr("Stuck jobs")}
+        note={tr("Non-terminal jobs unchanged for more than two hours")}
       >
         <DataTable headers={["Job", "Status", "Last change"]}>
           {(data?.stuckJobs ?? []).map((job) => (
@@ -204,7 +232,6 @@ function Dashboard() {
     </State>
   );
 }
-
 function Users() {
   const { data, loading, error, reload } = useData<{
     items: UserItem[];
@@ -217,7 +244,7 @@ function Users() {
   } | null>(null);
   return (
     <State loading={loading} error={error}>
-      <Summary count={data?.total ?? 0} label="users" />
+      <Summary count={data?.total ?? 0} label={tr("users")} />
       <DataTable
         headers={["Person", "Roles", "Trust", "Moderation", "Actions"]}
       >
@@ -227,7 +254,7 @@ function Users() {
               <strong>{user.name}</strong>
               <small>{user.phone ?? user.email ?? user.id}</small>
             </td>
-            <td>{user.roles.join(", ")}</td>
+            <td>{user.roles.map(humanize).join(", ")}</td>
             <td>
               <Badge value={user.trustLevel} />
             </td>
@@ -235,7 +262,7 @@ function Users() {
               <Badge value={user.status} />
               <small>{humanize(user.moderationLevel ?? "NONE")}</small>
               {user.reverificationRequired && (
-                <small>Identity re-verification required</small>
+                <small>{tr("Identity re-verification required")}</small>
               )}
             </td>
             <td className="actions">
@@ -249,7 +276,7 @@ function Users() {
                 }
                 disabled={!nextModerationLevel(user.moderationLevel)}
               >
-                Next:{" "}
+                {tr("Next:")}{" "}
                 {humanize(nextModerationLevel(user.moderationLevel) ?? "final")}
               </button>
               <button
@@ -259,10 +286,10 @@ function Users() {
                   user.reverificationRequired
                 }
               >
-                Restore
+                {tr("Restore")}
               </button>
               <button onClick={() => setAction({ user, kind: "reset" })}>
-                Reset sessions
+                {tr("Reset sessions")}
               </button>
             </td>
           </tr>
@@ -307,7 +334,6 @@ function Users() {
     </State>
   );
 }
-
 type UserItem = {
   id: string;
   name: string;
@@ -320,7 +346,6 @@ type UserItem = {
   restrictionEndsAt?: string | null;
   reverificationRequired?: boolean;
 };
-
 function Reports() {
   const { data, loading, error, reload } = useData<{
     items: ReportItem[];
@@ -329,7 +354,7 @@ function Reports() {
   const [selected, setSelected] = useState<ReportItem | null>(null);
   return (
     <State loading={loading} error={error}>
-      <Summary count={data?.total ?? 0} label="safety reports" />
+      <Summary count={data?.total ?? 0} label={tr("safety reports")} />
       <DataTable
         headers={["Report", "People", "Status", "Evidence", "Actions"]}
       >
@@ -338,15 +363,19 @@ function Reports() {
             <td>
               <strong>{humanize(item.reasonCode)}</strong>
               <small>
-                {humanize(item.targetType)} · {formatDate(item.createdAt)}
+                {humanize(item.targetType)} {tr("\u00B7")}{" "}
+                {formatDate(item.createdAt)}
               </small>
             </td>
             <td>
-              <strong>{item.subject?.name ?? "No user subject"}</strong>
-              <small>Reported by {item.reporter.name}</small>
+              <strong>{item.subject?.name ?? tr("No user subject")}</strong>
+              <small>
+                {tr("Reported by")} {item.reporter.name}
+              </small>
               {item.subject && (
                 <small>
-                  Current level: {humanize(item.subject.moderationLevel)}
+                  {tr("Current level:")}{" "}
+                  {humanize(item.subject.moderationLevel)}
                 </small>
               )}
             </td>
@@ -365,11 +394,13 @@ function Reports() {
                     await reload();
                   }}
                 >
-                  Start review
+                  {tr("Start review")}
                 </button>
               )}
               {(item.status === "OPEN" || item.status === "UNDER_REVIEW") && (
-                <button onClick={() => setSelected(item)}>Decide</button>
+                <button onClick={() => setSelected(item)}>
+                  {tr("Decide")}
+                </button>
               )}
             </td>
           </tr>
@@ -388,7 +419,6 @@ function Reports() {
     </State>
   );
 }
-
 type ReportItem = {
   id: string;
   targetType: string;
@@ -397,7 +427,10 @@ type ReportItem = {
   description: string | null;
   status: string;
   createdAt: string;
-  reporter: { id: string; name: string };
+  reporter: {
+    id: string;
+    name: string;
+  };
   subject: {
     id: string;
     name: string;
@@ -406,7 +439,6 @@ type ReportItem = {
     reverificationRequired: boolean;
   } | null;
 };
-
 function RiskReview() {
   const { data, loading, error, reload } = useData<{
     items: RiskItem[];
@@ -424,30 +456,32 @@ function RiskReview() {
     <State loading={loading} error={error}>
       <div className="metric-grid">
         <article>
-          <span>Queue items</span>
+          <span>{tr("Queue items")}</span>
           <strong>{data?.total ?? 0}</strong>
         </article>
         <article>
-          <span>Adjudicated</span>
+          <span>{tr("Adjudicated")}</span>
           <strong>{metrics?.adjudicatedCount ?? 0}</strong>
         </article>
         <article>
-          <span>Observed precision</span>
+          <span>{tr("Observed precision")}</span>
           <strong>{formatBasisPoints(metrics?.observedPrecisionBps)}</strong>
         </article>
         <article>
-          <span>Observed false positives</span>
+          <span>{tr("Observed false positives")}</span>
           <strong>
             {formatBasisPoints(metrics?.observedFalsePositiveRateBps)}
           </strong>
         </article>
       </div>
       <div className="notice compact">
-        <strong>Signals never change an account automatically.</strong>
+        <strong>{tr("Signals never change an account automatically.")}</strong>
         <span>
-          Escalation sends the case to a separate human moderation decision.
+          {tr(
+            "Escalation sends the case to a separate human moderation decision.",
+          )}
         </span>
-        <button onClick={() => setScan(true)}>Run reviewed scan</button>
+        <button onClick={() => setScan(true)}>{tr("Run reviewed scan")}</button>
       </div>
       <DataTable headers={["Account", "Risk", "Signals", "Status", "Actions"]}>
         {(data?.items ?? []).map((item) => (
@@ -456,24 +490,32 @@ function RiskReview() {
               <strong>{item.subject.name}</strong>
               <small>{item.subject.id}</small>
               <small>
-                Account: {humanize(item.subject.moderationLevel)} ·{" "}
-                {humanize(item.subject.status)}
+                {tr("Account:")} {humanize(item.subject.moderationLevel)}{" "}
+                {tr("\u00B7")} {humanize(item.subject.status)}
               </small>
             </td>
             <td>
-              <strong>{item.score}/100</strong>
+              <strong>
+                {item.score}
+                {tr("/100")}
+              </strong>
               <small>{humanize(item.severity)}</small>
             </td>
             <td>
               {item.signals.map((signal, index) => (
                 <small key={`${item.id}-${signal.type}-${index}`}>
-                  {humanize(signal.type)} (+{signal.score})
+                  {humanize(signal.type)}
+                  {tr("(+")}
+                  {signal.score}
+                  {tr(")")}
                 </small>
               ))}
             </td>
             <td>
               <Badge value={item.status} />
-              <small>Last signal {formatDate(item.lastDetectedAt)}</small>
+              <small>
+                {tr("Last signal")} {formatDate(item.lastDetectedAt)}
+              </small>
             </td>
             <td className="actions">
               {item.status === "OPEN" && (
@@ -486,11 +528,13 @@ function RiskReview() {
                     await reload();
                   }}
                 >
-                  Start review
+                  {tr("Start review")}
                 </button>
               )}
               {(item.status === "OPEN" || item.status === "UNDER_REVIEW") && (
-                <button onClick={() => setSelected(item)}>Decide</button>
+                <button onClick={() => setSelected(item)}>
+                  {tr("Decide")}
+                </button>
               )}
             </td>
           </tr>
@@ -498,8 +542,8 @@ function RiskReview() {
       </DataTable>
       {scan && (
         <ReasonDialog
-          title="Run deterministic risk scan"
-          confirmLabel="Run scan"
+          title={tr("Run deterministic risk scan")}
+          confirmLabel={tr("Run scan")}
           onClose={() => setScan(false)}
           onConfirm={async (reason) => {
             await adminApi("risk/scan", json("POST", { reason }));
@@ -521,12 +565,15 @@ function RiskReview() {
     </State>
   );
 }
-
 type RiskItem = {
   id: string;
   score: number;
   severity: string;
-  signals: Array<{ type: string; score: number; evidence: unknown }>;
+  signals: Array<{
+    type: string;
+    score: number;
+    evidence: unknown;
+  }>;
   status: string;
   lastDetectedAt: string;
   subject: {
@@ -536,7 +583,6 @@ type RiskItem = {
     moderationLevel: string;
   };
 };
-
 function RiskDecisionDialog({
   item,
   onClose,
@@ -565,26 +611,29 @@ function RiskDecisionDialog({
             );
             await onDone();
           } catch (caught) {
-            setError((caught as Error).message);
+            setError(friendlyAdminError(caught));
           }
         }}
       >
         <label>
-          Human decision
+          {tr("Human decision")}
           <select
             value={status}
             onChange={(event) => setStatus(event.target.value)}
           >
-            <option value="ESCALATED">Escalate for moderation review</option>
-            <option value="CLEARED">Clear as unsupported</option>
+            <option value="ESCALATED">
+              {tr("Escalate for moderation review")}
+            </option>
+            <option value="CLEARED">{tr("Clear as unsupported")}</option>
           </select>
         </label>
         <p>
-          This decision records the risk outcome only. It will not warn,
-          restrict, suspend, or ban the account.
+          {tr(
+            "This decision records the risk outcome only. It will not warn, restrict, suspend, or ban the account.",
+          )}
         </p>
         <label>
-          Required decision reason
+          {tr("Required decision reason")}
           <textarea
             required
             minLength={10}
@@ -595,15 +644,14 @@ function RiskDecisionDialog({
         {error && <p role="alert">{error}</p>}
         <div className="dialog-actions">
           <button type="button" onClick={onClose}>
-            Cancel
+            {tr("Cancel")}
           </button>
-          <button type="submit">Confirm risk decision</button>
+          <button type="submit">{tr("Confirm risk decision")}</button>
         </div>
       </form>
     </Dialog>
   );
 }
-
 function ReportDecisionDialog({
   report,
   onClose,
@@ -622,7 +670,7 @@ function ReportDecisionDialog({
   const [requireReverification, setRequireReverification] = useState(false);
   const [error, setError] = useState("");
   return (
-    <Dialog title="Resolve safety report" onClose={onClose}>
+    <Dialog title={tr("Resolve safety report")} onClose={onClose}>
       <form
         onSubmit={async (event) => {
           event.preventDefault();
@@ -644,24 +692,24 @@ function ReportDecisionDialog({
             );
             await onDone();
           } catch (caught) {
-            setError((caught as Error).message);
+            setError(friendlyAdminError(caught));
           }
         }}
       >
         <label>
-          Decision
+          {tr("Decision")}
           <select
             value={status}
             onChange={(event) => setStatus(event.target.value)}
           >
-            <option value="ACTIONED">Action supported</option>
-            <option value="DISMISSED">Dismiss report</option>
+            <option value="ACTIONED">{tr("Action supported")}</option>
+            <option value="DISMISSED">{tr("Dismiss report")}</option>
           </select>
         </label>
         {status === "ACTIONED" && (
           <>
             <label>
-              Next moderation step
+              {tr("Next moderation step")}
               <select
                 value={action ?? ""}
                 onChange={(event) => setAction(event.target.value)}
@@ -671,7 +719,7 @@ function ReportDecisionDialog({
             </label>
             {(action === "RESTRICT" || action === "SUSPEND") && (
               <label>
-                Duration in days
+                {tr("Duration in days")}
                 <input
                   type="number"
                   min="1"
@@ -690,13 +738,13 @@ function ReportDecisionDialog({
                     setRequireReverification(event.target.checked)
                   }
                 />
-                Require identity re-verification
+                {tr("Require identity re-verification")}
               </label>
             )}
           </>
         )}
         <label>
-          Required decision reason
+          {tr("Required decision reason")}
           <textarea
             required
             minLength={10}
@@ -707,17 +755,16 @@ function ReportDecisionDialog({
         {error && <p role="alert">{error}</p>}
         <div className="dialog-actions">
           <button type="button" onClick={onClose}>
-            Cancel
+            {tr("Cancel")}
           </button>
           <button type="submit" disabled={status === "ACTIONED" && !action}>
-            Confirm decision
+            {tr("Confirm decision")}
           </button>
         </div>
       </form>
     </Dialog>
   );
 }
-
 function Jobs() {
   const { data, loading, error, reload } = useData<{
     items: JobItem[];
@@ -727,7 +774,7 @@ function Jobs() {
   const [target, setTarget] = useState("SUSPENDED");
   return (
     <State loading={loading} error={error}>
-      <Summary count={data?.total ?? 0} label="jobs" />
+      <Summary count={data?.total ?? 0} label={tr("jobs")} />
       <DataTable headers={["Job", "Poster", "Status", "Activity", "Actions"]}>
         {(data?.items ?? []).map((job) => (
           <tr key={job.id}>
@@ -740,8 +787,8 @@ function Jobs() {
               <Badge value={job.status} />
             </td>
             <td>
-              {job.applicationsCount} applications · {job.assignmentsCount}{" "}
-              assignments
+              {job.applicationsCount} {tr("applications")} {tr("\u00B7")}{" "}
+              {job.assignmentsCount} {tr("assignments")}
             </td>
             <td className="actions">
               <button
@@ -750,7 +797,7 @@ function Jobs() {
                   setSelected(job);
                 }}
               >
-                Force transition
+                {tr("Force transition")}
               </button>
               <button
                 onClick={async () => {
@@ -765,7 +812,7 @@ function Jobs() {
                   await reload();
                 }}
               >
-                {job.isFeatured ? "Unfeature" : "Feature"}
+                {tr(job.isFeatured ? "Unfeature" : "Feature")}
               </button>
             </td>
           </tr>
@@ -774,10 +821,10 @@ function Jobs() {
       {selected && (
         <ReasonDialog
           title={`Force transition: ${selected.title}`}
-          confirmLabel="Apply forced transition"
+          confirmLabel={tr("Apply forced transition")}
           extra={
             <label>
-              Target status
+              {tr("Target status")}
               <select
                 value={target}
                 onChange={(event) => setTarget(event.target.value)}
@@ -802,7 +849,6 @@ function Jobs() {
     </State>
   );
 }
-
 const JOB_STATUSES = [
   "PUBLISHED",
   "APPLICATIONS_OPEN",
@@ -823,18 +869,23 @@ type JobItem = {
   title: string;
   status: string;
   isFeatured: boolean;
-  poster: { name: string };
+  poster: {
+    name: string;
+  };
   applicationsCount: number;
   assignmentsCount: number;
 };
-
 function Applications() {
   const { data, loading, error, reload } = useData<{
     items: Array<{
       id: string;
       status: string;
-      job: { title: string };
-      worker: { name: string };
+      job: {
+        title: string;
+      };
+      worker: {
+        name: string;
+      };
     }>;
   }>("applications?limit=100");
   const [selected, setSelected] = useState<string | null>(null);
@@ -853,7 +904,7 @@ function Applications() {
                 className="table-button"
                 onClick={() => setSelected(item.id)}
               >
-                Unstick
+                {tr("Unstick")}
               </button>
             </td>
           </tr>
@@ -861,8 +912,8 @@ function Applications() {
       </DataTable>
       {selected && (
         <ReasonDialog
-          title="Return application to pending"
-          confirmLabel="Unstick application"
+          title={tr("Return application to pending")}
+          confirmLabel={tr("Unstick application")}
           onClose={() => setSelected(null)}
           onConfirm={async (reason) => {
             await adminApi(
@@ -877,7 +928,6 @@ function Applications() {
     </State>
   );
 }
-
 function Verification() {
   const { data, loading, error, reload } = useData<{
     items: VerificationItem[];
@@ -902,7 +952,7 @@ function Verification() {
               <strong>{item.user.name}</strong>
               <small>{item.user.trustLevel}</small>
             </td>
-            <td>{item.kind}</td>
+            <td>{humanize(item.kind)}</td>
             <td className="actions">
               {item.documents.map((document) => (
                 <button
@@ -913,20 +963,20 @@ function Verification() {
                     )
                   }
                 >
-                  View {humanize(document.kind)}
+                  {tr("View")} {humanize(document.kind)}
                 </button>
               ))}
-              {!item.documents.length && "None"}
+              {!item.documents.length && tr("None")}
             </td>
             <td>
               <Badge value={item.status} />
             </td>
             <td className="actions">
               <button onClick={() => setDecision({ item, status: "APPROVED" })}>
-                Approve
+                {tr("Approve")}
               </button>
               <button onClick={() => setDecision({ item, status: "REJECTED" })}>
-                Reject
+                {tr("Reject")}
               </button>
             </td>
           </tr>
@@ -949,23 +999,26 @@ function Verification() {
       )}
       {documentView && (
         <Dialog
-          title="Sensitive verification document"
+          title={tr("Sensitive verification document")}
           onClose={() => setDocumentView(null)}
         >
           <div className="document-viewer">
             {documentView.mime.startsWith("image/") ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={documentView.downloadUrl} alt="Verification evidence" />
+              <img
+                src={documentView.downloadUrl}
+                alt={tr("Verification evidence")}
+              />
             ) : (
               <iframe
                 src={documentView.downloadUrl}
-                title="Verification evidence"
+                title={tr("Verification evidence")}
               />
             )}
             <span>{documentView.watermark}</span>
           </div>
           <p className="muted">
-            This view is time-limited and recorded in the audit trail.
+            {tr("This view is time-limited and recorded in the audit trail.")}
           </p>
         </Dialog>
       )}
@@ -976,14 +1029,20 @@ type VerificationItem = {
   id: string;
   kind: string;
   status: string;
-  user: { name: string; trustLevel: string };
-  documents: Array<{ id: string; kind: string; mime: string }>;
+  user: {
+    name: string;
+    trustLevel: string;
+  };
+  documents: Array<{
+    id: string;
+    kind: string;
+    mime: string;
+  }>;
 };
-
 function Categories() {
-  const { data, loading, error, reload } = useData<{ items: CategoryItem[] }>(
-    "categories",
-  );
+  const { data, loading, error, reload } = useData<{
+    items: CategoryItem[];
+  }>("categories");
   async function toggle(item: CategoryItem, key: keyof CategoryItem) {
     const { id: _id, ...body } = item;
     await adminApi(
@@ -1000,42 +1059,48 @@ function Categories() {
         {(data?.items ?? []).map((item) => (
           <tr key={item.id}>
             <td>
-              <strong>{item.nameEn}</strong>
+              <strong>
+                {getActiveAdminLocale() === "bn" ? item.nameBn : item.nameEn}
+              </strong>
               <small>
-                {item.nameBn} · {item.slug}
+                {getActiveAdminLocale() === "bn" ? item.nameEn : item.nameBn}{" "}
+                {tr("\u00B7")} {item.slug}
               </small>
             </td>
-            <td>{item.minAge}+</td>
+            <td>
+              {item.minAge}
+              {tr("+")}
+            </td>
             <td className="toggle-list">
               <button
                 className={item.requiresManualApproval ? "on" : ""}
                 onClick={() => toggle(item, "requiresManualApproval")}
               >
-                Manual approval
+                {tr("Manual approval")}
               </button>
               <button
                 className={item.requiresIdentity ? "on" : ""}
                 onClick={() => toggle(item, "requiresIdentity")}
               >
-                Identity
+                {tr("Identity")}
               </button>
               <button
                 className={item.requiresCertificate ? "on" : ""}
                 onClick={() => toggle(item, "requiresCertificate")}
               >
-                Certificate
+                {tr("Certificate")}
               </button>
               <button
                 className={item.unsafeForStudents ? "on danger" : ""}
                 onClick={() => toggle(item, "unsafeForStudents")}
               >
-                Student restriction
+                {tr("Student restriction")}
               </button>
             </td>
             <td>
               <button
                 className={`switch ${item.isActive ? "on" : ""}`}
-                aria-label={`Toggle ${item.nameEn}`}
+                aria-label={`${tr("Toggle")} ${localizedEntityName(item.nameEn, item.nameBn)}`}
                 onClick={() => toggle(item, "isActive")}
               >
                 <span />
@@ -1066,40 +1131,44 @@ type CategoryItem = {
   safetyNotice?: string;
   unsafeForStudents: boolean;
 };
-
 function Locations() {
-  const { data, loading, error, reload } = useData<{ items: LocationItem[] }>(
-    "locations",
-  );
+  const { data, loading, error, reload } = useData<{
+    items: LocationItem[];
+  }>("locations");
   const [adding, setAdding] = useState(false);
   return (
     <State loading={loading} error={error}>
       <div className="toolbar">
-        <Summary count={data?.items.length ?? 0} label="locations" />
+        <Summary count={data?.items.length ?? 0} label={tr("locations")} />
         <button
           className="primary small-button"
           onClick={() => setAdding(true)}
         >
-          Add location
+          {tr("Add location")}
         </button>
       </div>
       <DataTable headers={["Location", "Type", "Coordinates", "Active"]}>
         {(data?.items ?? []).map((item) => (
           <tr key={item.id}>
             <td>
-              <strong>{item.nameEn}</strong>
-              <small>{item.nameBn}</small>
+              <strong>
+                {getActiveAdminLocale() === "bn" ? item.nameBn : item.nameEn}
+              </strong>
+              <small>
+                {getActiveAdminLocale() === "bn" ? item.nameEn : item.nameBn}
+              </small>
             </td>
             <td>
               <Badge value={item.type} />
             </td>
             <td>
-              {item.lat ?? "—"}, {item.lng ?? "—"}
+              {item.lat ?? "—"}
+              {tr(",")} {item.lng ?? "—"}
             </td>
             <td>
               <button
                 className={`switch ${item.isActive ? "on" : ""}`}
-                aria-label={`Toggle ${item.nameEn}`}
+                aria-label={`${tr("Toggle")} ${localizedEntityName(item.nameEn, item.nameBn)}`}
                 onClick={async () => {
                   const { id: _id, ...body } = item;
                   await adminApi(
@@ -1139,7 +1208,6 @@ type LocationItem = {
   radiusKm: string | null;
   isActive: boolean;
 };
-
 function LocationDialog({
   locations,
   onClose,
@@ -1152,7 +1220,7 @@ function LocationDialog({
   const [error, setError] = useState("");
   const [type, setType] = useState("CITY");
   return (
-    <Dialog title="Add service location" onClose={onClose}>
+    <Dialog title={tr("Add service location")} onClose={onClose}>
       <form
         onSubmit={async (event) => {
           event.preventDefault();
@@ -1170,27 +1238,27 @@ function LocationDialog({
             );
             await onSaved();
           } catch (caught) {
-            setError((caught as Error).message);
+            setError(friendlyAdminError(caught));
           }
         }}
       >
         <label>
-          Type
+          {tr("Type")}
           <select
             name="type"
             value={type}
             onChange={(event) => setType(event.target.value)}
           >
-            <option>CITY</option>
-            <option>THANA</option>
-            <option>AREA</option>
+            <option value="CITY">{humanize("CITY")}</option>
+            <option value="THANA">{humanize("THANA")}</option>
+            <option value="AREA">{humanize("AREA")}</option>
           </select>
         </label>
         {type !== "CITY" && (
           <label>
-            Parent location
+            {tr("Parent location")}
             <select name="parentId" required>
-              <option value="">Select a parent</option>
+              <option value="">{tr("Select a parent")}</option>
               {locations
                 .filter((location) =>
                   type === "THANA"
@@ -1206,20 +1274,19 @@ function LocationDialog({
           </label>
         )}
         <label>
-          English name
+          {tr("English name")}
           <input name="nameEn" required />
         </label>
         <label>
-          Bangla name
+          {tr("Bangla name")}
           <input name="nameBn" required />
         </label>
         {error && <p className="error">{error}</p>}
-        <button className="primary">Create location</button>
+        <button className="primary">{tr("Create location")}</button>
       </form>
     </Dialog>
   );
 }
-
 function Configuration() {
   const { data, loading, error, reload } = useData<{
     items: ConfigItem[];
@@ -1233,9 +1300,9 @@ function Configuration() {
   const [selectedKey, setSelectedKey] = useState("platform.fees");
   const selected = data?.items.find((item) => item.key === selectedKey);
   const [draft, setDraft] = useState("");
-  const [preview, setPreview] = useState<{ changedFields: string[] } | null>(
-    null,
-  );
+  const [preview, setPreview] = useState<{
+    changedFields: string[];
+  } | null>(null);
   const [message, setMessage] = useState("");
   useEffect(() => {
     if (selected) {
@@ -1276,7 +1343,7 @@ function Configuration() {
       <div className="config-layout">
         <section className="config-editor">
           <label>
-            Configuration key
+            {tr("Configuration key")}
             <select
               value={selectedKey}
               onChange={(event) => setSelectedKey(event.target.value)}
@@ -1287,7 +1354,7 @@ function Configuration() {
             </select>
           </label>
           <label>
-            JSON value
+            {tr("JSON value")}
             <textarea
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
@@ -1296,28 +1363,34 @@ function Configuration() {
             />
           </label>
           <div className="actions">
-            <button onClick={previewChange}>Preview diff</button>
+            <button onClick={previewChange}>{tr("Preview diff")}</button>
             {preview && (
               <button className="primary small-button" onClick={save}>
-                Confirm change
+                {tr("Confirm change")}
               </button>
             )}
           </div>
           {preview && (
             <div className="diff-box">
-              <strong>Changed fields</strong>
-              <span>{preview.changedFields.join(", ") || "No changes"}</span>
+              <strong>{tr("Changed fields")}</strong>
+              <span>
+                {preview.changedFields.join(", ") || tr("No changes")}
+              </span>
             </div>
           )}
           {message && <p className="success">{message}</p>}
         </section>
-        <Section title="Revision history" note="Every version can be reverted">
+        <Section
+          title={tr("Revision history")}
+          note={tr("Every version can be reverted")}
+        >
           {(data?.revisions ?? []).map((revision) => (
             <div className="revision" key={revision.id}>
               <div>
                 <strong>{revision.key}</strong>
                 <small>
-                  {revision.reason} · {formatDate(revision.created_at)}
+                  {revision.reason} {tr("\u00B7")}{" "}
+                  {formatDate(revision.created_at)}
                 </small>
               </div>
               <button
@@ -1332,7 +1405,7 @@ function Configuration() {
                   await reload();
                 }}
               >
-                Revert
+                {tr("Revert")}
               </button>
             </div>
           ))}
@@ -1341,11 +1414,18 @@ function Configuration() {
     </State>
   );
 }
-type ConfigItem = { key: string; value: unknown; updatedAt: string };
-
+type ConfigItem = {
+  key: string;
+  value: unknown;
+  updatedAt: string;
+};
 function Flags() {
   const { data, loading, error, reload } = useData<{
-    items: Array<{ key: string; isEnabled: boolean; rolloutPercent: number }>;
+    items: Array<{
+      key: string;
+      isEnabled: boolean;
+      rolloutPercent: number;
+    }>;
   }>("flags");
   return (
     <State loading={loading} error={error}>
@@ -1361,7 +1441,11 @@ function FlagRow({
   item,
   reload,
 }: {
-  item: { key: string; isEnabled: boolean; rolloutPercent: number };
+  item: {
+    key: string;
+    isEnabled: boolean;
+    rolloutPercent: number;
+  };
   reload: () => Promise<void>;
 }) {
   const [enabled, setEnabled] = useState(item.isEnabled);
@@ -1387,7 +1471,7 @@ function FlagRow({
           value={rollout}
           onChange={(event) => setRollout(Number(event.target.value))}
         />
-        %
+        {tr("%")}
       </td>
       <td>
         <button
@@ -1404,17 +1488,16 @@ function FlagRow({
             await reload();
           }}
         >
-          Save
+          {tr("Save")}
         </button>
       </td>
     </tr>
   );
 }
-
 function Disputes() {
-  const { data, loading, error, reload } = useData<{ items: DisputeItem[] }>(
-    "disputes?limit=100",
-  );
+  const { data, loading, error, reload } = useData<{
+    items: DisputeItem[];
+  }>("disputes?limit=100");
   const [selected, setSelected] = useState<DisputeItem | null>(null);
   return (
     <State loading={loading} error={error}>
@@ -1432,7 +1515,9 @@ function Disputes() {
             <td>{item.evidence.length}</td>
             <td>
               <Badge value={item.status} />
-              {item.sla?.resolutionOverdue && <small>Resolution overdue</small>}
+              {item.sla?.resolutionOverdue && (
+                <small>{tr("Resolution overdue")}</small>
+              )}
             </td>
             <td>
               {!item.firstResponseAt && (
@@ -1446,14 +1531,14 @@ function Disputes() {
                     await reload();
                   }}
                 >
-                  Start review
+                  {tr("Start review")}
                 </button>
               )}
               <button
                 className="table-button"
                 onClick={() => setSelected(item)}
               >
-                Resolve
+                {tr("Resolve")}
               </button>
             </td>
           </tr>
@@ -1479,9 +1564,15 @@ type DisputeItem = {
   status: string;
   evidence: unknown[];
   firstResponseAt?: string | null;
-  sla?: { resolutionOverdue: boolean };
-  job: { title: string };
-  payment?: { amountPoisha: string } | null;
+  sla?: {
+    resolutionOverdue: boolean;
+  };
+  job: {
+    title: string;
+  };
+  payment?: {
+    amountPoisha: string;
+  } | null;
 };
 function DisputeDialog({
   item,
@@ -1513,58 +1604,69 @@ function DisputeDialog({
             );
             await onSaved();
           } catch (caught) {
-            setError((caught as Error).message);
+            setError(friendlyAdminError(caught));
           }
         }}
       >
         <label>
-          Resolution
+          {tr("Resolution")}
           <textarea name="resolution" minLength={8} required />
         </label>
         <label>
-          Decision reason
+          {tr("Decision reason")}
           <textarea name="reason" minLength={8} required />
         </label>
         <label>
-          Decision
+          {tr("Decision")}
           <select name="decision" defaultValue="RELEASE_FULL">
-            <option>RELEASE_FULL</option>
-            <option>RELEASE_PARTIAL</option>
-            <option>REFUND_FULL</option>
-            <option>REFUND_PARTIAL</option>
-            <option>SPLIT</option>
+            <option value="RELEASE_FULL">{humanize("RELEASE_FULL")}</option>
+            <option value="RELEASE_PARTIAL">
+              {humanize("RELEASE_PARTIAL")}
+            </option>
+            <option value="REFUND_FULL">{humanize("REFUND_FULL")}</option>
+            <option value="REFUND_PARTIAL">{humanize("REFUND_PARTIAL")}</option>
+            <option value="SPLIT">{humanize("SPLIT")}</option>
           </select>
         </label>
         {item.payment?.amountPoisha && (
-          <p>Amount to allocate: {item.payment.amountPoisha} poisha</p>
+          <p>
+            {tr("Amount to allocate:")} {item.payment.amountPoisha}{" "}
+            {tr("poisha")}
+          </p>
         )}
         <label>
-          Cash refund to record (poisha)
+          {tr("Cash refund to record (poisha)")}
           <input name="refundPoisha" type="number" min="0" defaultValue="0" />
         </label>
         <label>
-          Release to worker (poisha)
+          {tr("Release to worker (poisha)")}
           <input name="releasePoisha" type="number" min="0" defaultValue="0" />
         </label>
         <label>
-          Final job status
+          {tr("Final job status")}
           <select name="jobStatus">
-            <option>COMPLETED</option>
-            <option>CANCELLED_BY_CUSTOMER</option>
-            <option>CANCELLED_BY_WORKER</option>
+            <option value="COMPLETED">{humanize("COMPLETED")}</option>
+            <option value="CANCELLED_BY_CUSTOMER">
+              {humanize("CANCELLED_BY_CUSTOMER")}
+            </option>
+            <option value="CANCELLED_BY_WORKER">
+              {humanize("CANCELLED_BY_WORKER")}
+            </option>
           </select>
         </label>
         {error && <p className="error">{error}</p>}
-        <button className="primary">Confirm resolution</button>
+        <button className="primary">{tr("Confirm resolution")}</button>
       </form>
     </Dialog>
   );
 }
-
 function Notifications() {
   const [result, setResult] = useState<{
     audienceCount: number;
-    preview: { title: string; body: string };
+    preview: {
+      title: string;
+      body: string;
+    };
   } | null>(null);
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
@@ -1582,7 +1684,7 @@ function Notifications() {
         await adminApi("notifications/campaign/dry-run", json("POST", payload)),
       );
     } catch (caught) {
-      setError((caught as Error).message);
+      setError(friendlyAdminError(caught));
     }
   }
   async function send() {
@@ -1591,7 +1693,7 @@ function Notifications() {
       await adminApi("notifications/campaign/send", json("POST", payload));
       setResult(null);
     } catch (caught) {
-      setError((caught as Error).message);
+      setError(friendlyAdminError(caught));
     } finally {
       setSending(false);
     }
@@ -1600,7 +1702,7 @@ function Notifications() {
     <div className="campaign-layout">
       <section className="config-editor">
         <label>
-          Campaign name
+          {tr("Campaign name")}
           <input
             value={payload.name}
             onChange={(event) =>
@@ -1609,7 +1711,7 @@ function Notifications() {
           />
         </label>
         <label>
-          Title
+          {tr("Title")}
           <input
             value={payload.title}
             onChange={(event) =>
@@ -1618,7 +1720,7 @@ function Notifications() {
           />
         </label>
         <label>
-          Message
+          {tr("Message")}
           <textarea
             value={payload.body}
             onChange={(event) =>
@@ -1627,7 +1729,7 @@ function Notifications() {
           />
         </label>
         <label>
-          Audience
+          {tr("Audience")}
           <select
             onChange={(event) =>
               setPayload({
@@ -1639,14 +1741,14 @@ function Notifications() {
               })
             }
           >
-            <option value="">All active users</option>
-            <option>WORKER</option>
-            <option>CUSTOMER</option>
-            <option>BUSINESS</option>
+            <option value="">{tr("All active users")}</option>
+            <option value="WORKER">{humanize("WORKER")}</option>
+            <option value="CUSTOMER">{humanize("CUSTOMER")}</option>
+            <option value="BUSINESS">{humanize("BUSINESS")}</option>
           </select>
         </label>
         <label>
-          Throttle per minute
+          {tr("Throttle per minute")}
           <input
             type="number"
             min="1"
@@ -1662,32 +1764,31 @@ function Notifications() {
         </label>
         {error && <p className="error">{error}</p>}
         <div className="actions">
-          <button onClick={dryRun}>Run dry-run</button>
+          <button onClick={dryRun}>{tr("Run dry-run")}</button>
           {result && (
             <button
               className="primary small-button"
               disabled={sending}
               onClick={send}
             >
-              Send campaign
+              {tr("Send campaign")}
             </button>
           )}
         </div>
       </section>
       <section className="phone-preview">
-        <span>PREVIEW</span>
+        <span>{tr("PREVIEW")}</span>
         <div>
           <strong>{result?.preview.title ?? payload.title}</strong>
           <p>{result?.preview.body ?? payload.body}</p>
         </div>
         {result && (
-          <em>{result.audienceCount} recipients match this segment</em>
+          <em>{tr(`${result.audienceCount} recipients match this segment`)}</em>
         )}
       </section>
     </div>
   );
 }
-
 function Analytics() {
   const { data, loading, error } =
     useData<Record<string, string | number>>("analytics");
@@ -1707,7 +1808,6 @@ function Analytics() {
     </State>
   );
 }
-
 function AuditTrail() {
   const { data, loading, error } = useData<{
     items: Array<{
@@ -1716,7 +1816,9 @@ function AuditTrail() {
       entity: string;
       entity_id: string | null;
       created_at: string;
-      actor: { email: string } | null;
+      actor: {
+        email: string;
+      } | null;
     }>;
   }>("audit-logs?limit=100");
   return (
@@ -1731,7 +1833,7 @@ function AuditTrail() {
               {item.entity}
               <small>{item.entity_id}</small>
             </td>
-            <td>{item.actor?.email ?? "System"}</td>
+            <td>{item.actor?.email ?? tr("System")}</td>
             <td>{formatDate(item.created_at)}</td>
           </tr>
         ))}
@@ -1739,7 +1841,6 @@ function AuditTrail() {
     </State>
   );
 }
-
 function ReasonDialog({
   title,
   confirmLabel,
@@ -1767,25 +1868,24 @@ function ReasonDialog({
           try {
             await onConfirm(reason);
           } catch (caught) {
-            setError((caught as Error).message);
+            setError(friendlyAdminError(caught));
             setBusy(false);
           }
         }}
       >
         {extra}
         <label>
-          Required operational reason
+          {tr("Required operational reason")}
           <textarea name="reason" minLength={8} required autoFocus />
         </label>
         {error && <p className="error">{error}</p>}
         <button className="primary" disabled={busy}>
-          {busy ? "Applying…" : confirmLabel}
+          {tr(busy ? "Applying…" : confirmLabel)}
         </button>
       </form>
     </Dialog>
   );
 }
-
 function Dialog({
   title,
   onClose,
@@ -1801,12 +1901,12 @@ function Dialog({
         className="dialog"
         role="dialog"
         aria-modal="true"
-        aria-label={title}
+        aria-label={tr(title)}
       >
         <div className="dialog-head">
-          <h2>{title}</h2>
-          <button onClick={onClose} aria-label="Close dialog">
-            ×
+          <h2>{tr(title)}</h2>
+          <button onClick={onClose} aria-label={tr("Close dialog")}>
+            {tr("\u00D7")}
           </button>
         </div>
         {children}
@@ -1814,7 +1914,6 @@ function Dialog({
     </div>
   );
 }
-
 function Section({
   title,
   note,
@@ -1828,20 +1927,21 @@ function Section({
     <section className="data-section">
       <div className="section-title">
         <div>
-          <h2>{title}</h2>
-          <p>{note}</p>
+          <h2>{tr(title)}</h2>
+          <p>{tr(note)}</p>
         </div>
       </div>
       {children}
     </section>
   );
 }
-
 function Summary({ count, label }: { count: number; label: string }) {
   return (
     <div className="summary">
       <strong>{count}</strong>
-      <span>{label} in this operational view</span>
+      <span>
+        {tr(label)} {tr("in this operational view")}
+      </span>
     </div>
   );
 }
@@ -1858,7 +1958,7 @@ function DataTable({
         <thead>
           <tr>
             {headers.map((header) => (
-              <th key={header}>{header}</th>
+              <th key={header}>{tr(header)}</th>
             ))}
           </tr>
         </thead>
@@ -1875,11 +1975,13 @@ function Badge({ value }: { value: string }) {
   );
 }
 function humanize(value: string) {
-  return value
-    .replaceAll("_", " ")
-    .replace(/([a-z])([A-Z])/gu, "$1 $2")
-    .toLowerCase()
-    .replace(/^./u, (letter) => letter.toUpperCase());
+  return tr(
+    value
+      .replaceAll("_", " ")
+      .replace(/([a-z])([A-Z])/gu, "$1 $2")
+      .toLowerCase()
+      .replace(/^./u, (letter) => letter.toUpperCase()),
+  );
 }
 function nextModerationLevel(value?: string | null) {
   return (
@@ -1894,13 +1996,16 @@ function nextModerationLevel(value?: string | null) {
   );
 }
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en-BD", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
+  return new Intl.DateTimeFormat(
+    getActiveAdminLocale() === "bn" ? "bn-BD" : "en-BD",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    },
+  ).format(new Date(value));
 }
 function formatBasisPoints(value?: number | null) {
   return value == null
-    ? "Not enough decisions"
+    ? tr("Not enough decisions")
     : `${(value / 100).toFixed(1)}%`;
 }

@@ -37,7 +37,11 @@ const workerPublicSelect = {
   },
   badges: {
     where: { revoked_at: null },
-    select: { badge: { select: { slug: true, name_bn: true, icon: true } } },
+    select: {
+      badge: {
+        select: { slug: true, name_en: true, name_bn: true, icon: true },
+      },
+    },
   },
 } satisfies Prisma.UserSelect;
 
@@ -140,6 +144,7 @@ export class PublicProfilesService {
       }),
       badges: (user.badges ?? []).map(({ badge }) => ({
         slug: badge.slug,
+        nameEn: badge.name_en,
         nameBn: badge.name_bn,
         icon: badge.icon,
       })),

@@ -333,6 +333,44 @@ nav button:disabled {
 .workspace .eyebrow {
   color: var(--green);
 }
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.locale-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  box-shadow: 0 4px 18px rgba(27, 42, 35, 0.05);
+}
+.locale-switch button {
+  min-width: 42px;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--muted);
+  background: transparent;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.locale-switch button.active {
+  color: #fff;
+  background: var(--green);
+}
+.auth-locale {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 3;
+}
 .session-pill {
   background: #fff;
   border: 1px solid var(--line);
@@ -484,7 +522,15 @@ nav button:disabled {
     padding: 0;
   }
   nav {
-    display: none;
+    display: flex;
+    gap: 6px;
+    margin-top: 14px;
+    padding-bottom: 4px;
+    overflow-x: auto;
+  }
+  nav button {
+    flex: 0 0 auto;
+    white-space: nowrap;
   }
   .account {
     position: absolute;
@@ -500,9 +546,13 @@ nav button:disabled {
   .workspace header {
     display: block;
   }
+  .header-actions {
+    justify-content: flex-start;
+    margin-top: 18px;
+  }
   .session-pill {
     display: inline-block;
-    margin-top: 20px;
+    margin-top: 0;
   }
   .notice {
     align-items: flex-start;

@@ -5,7 +5,7 @@ import { PrismaService } from "../src/infra/prisma/prisma.service";
 import { NotificationsService } from "../src/modules/notifications/notifications.service";
 
 describe("NotificationsService", () => {
-  it("returns Bangla copy, unread count, and an exact destination for legacy rows", async () => {
+  it("returns bilingual copy, unread count, and an exact destination for legacy rows", async () => {
     const prisma = {
       notification: {
         findMany: jest.fn().mockResolvedValue([
@@ -41,11 +41,15 @@ describe("NotificationsService", () => {
       body: "আপনার পরিচয় যাচাইয়ের অনুরোধ পর্যালোচনার জন্য জমা হয়েছে।",
       titleBn: "যাচাইয়ের অনুরোধ জমা হয়েছে",
       bodyBn: "আপনার পরিচয় যাচাইয়ের অনুরোধ পর্যালোচনার জন্য জমা হয়েছে।",
+      titleEn: "Verification submitted",
+      bodyEn: "Your identity verification request was submitted for review.",
       deepLink: "/verification",
     });
     expect(result.items[1]).toMatchObject({
       titleBn: "আবেদন গ্রহণ করা হয়েছে",
       bodyBn: "গণিত পড়ানো কাজের জন্য আপনাকে নির্বাচিত করা হয়েছে।",
+      titleEn: "Application accepted",
+      bodyEn: "You were selected for গণিত পড়ানো.",
       deepLink: "/assignments/assignment-1",
     });
   });

@@ -63,5 +63,6 @@ describe("cancellation calculator", () => {
     expect(result.addsStrike).toBe(false);
     expect(result.reliabilityDelta).toBe(0);
     expect(result.summaryBn).toContain("প্রশাসক যাচাই করবেন");
+    expect(result.summaryEn).toContain("administrator will review");
   });
 });

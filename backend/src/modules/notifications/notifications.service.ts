@@ -129,6 +129,8 @@ function serializeNotification(item: {
   const payload = asPayload(item.payload_json);
   const titleBn = titleFor(item.type, item.title_key);
   const bodyBn = bodyFor(item.type, item.body_key);
+  const titleEn = titleEnglishFor(item.type, item.title_key);
+  const bodyEn = bodyEnglishFor(item.type, item.body_key);
   const deepLink = deepLinkFor(item.type, payload);
   return {
     id: item.id,
@@ -137,11 +139,93 @@ function serializeNotification(item: {
     body: bodyBn,
     titleBn,
     bodyBn,
+    titleEn,
+    bodyEn,
     deepLink,
     payload,
     readAt: item.read_at?.toISOString() ?? null,
     createdAt: item.created_at.toISOString(),
   };
+}
+
+function titleEnglishFor(type: string, value: string): string {
+  const titles: Record<string, string> = {
+    APPLICATION_ACCEPTED: "Application accepted",
+    ASSIGNMENT_CANCELLED: "Job cancelled",
+    ASSIGNMENT_CONFIRMED: "Booking confirmed",
+    ASSIGNMENT_DECLINED: "Worker declined the job",
+    BOOKING_REQUESTED: "New booking request",
+    CHAT_MESSAGE: "New message",
+    DISPUTE_OPENED: "Dispute opened",
+    JOB_APPLICATION_RECEIVED: "New application",
+    REVIEW_RECEIVED: "New review",
+    VERIFICATION_SUBMITTED: "Verification submitted",
+    WORKER_CHECKED_IN: "Worker checked in",
+    WORK_REVIEW_REMINDER: "Job awaiting review",
+    WORK_SUBMITTED: "Work submitted",
+  };
+  if (titles[type]) return titles[type];
+  if (/^[\x00-\x7F]+$/.test(value) && !value.includes(".")) return value;
+  return "KAAJ update";
+}
+
+function bodyEnglishFor(type: string, value: string): string {
+  if (value === "verification.submitted.body") {
+    return "Your identity verification request was submitted for review.";
+  }
+  if (value === "dispute.opened.body") {
+    return "Your dispute was submitted. Updates will appear here.";
+  }
+  if (/^[\x00-\x7F]+$/.test(value) && !value.includes(".")) return value;
+
+  const dynamicBangla: Array<[RegExp, (detail: string) => string]> = [
+    [
+      /^You were selected for (.+?)[.]?$/,
+      (detail) => `You were selected for ${detail}.`,
+    ],
+    [
+      /^(.+) কাজটিতে একজন কর্মী আবেদন করেছেন। আবেদন দেখুন।$/,
+      (detail) => `A worker applied to ${detail}. Review the application.`,
+    ],
+    [
+      /^(.+) কাজটি পর্যালোচনা করে নিশ্চিত করুন।$/,
+      (detail) => `Please review and confirm ${detail}.`,
+    ],
+    [
+      /^কর্মী (.+) কাজটি নিশ্চিত করেছেন।$/,
+      (detail) => `The worker confirmed ${detail}.`,
+    ],
+    [
+      /^(.+) কাজের জন্য আপনাকে নির্বাচিত করা হয়েছে।$/,
+      (detail) => `You were selected for ${detail}.`,
+    ],
+    [
+      /^(.+) কাজের নতুন বুকিং অনুরোধ এসেছে।$/,
+      (detail) => `You received a booking request for ${detail}.`,
+    ],
+    [/^(.+) কাজটি বাতিল হয়েছে।$/, (detail) => `${detail} was cancelled.`],
+    [
+      /^(.+) কাজটি আবার আবেদনের জন্য খোলা হয়েছে।$/,
+      (detail) => `${detail} is open for applications again.`,
+    ],
+    [
+      /^কর্মী (.+) কাজের স্থানে পৌঁছে চেক-ইন করেছেন।$/,
+      (detail) => `The worker checked in for ${detail}.`,
+    ],
+  ];
+  for (const [pattern, render] of dynamicBangla) {
+    const match = pattern.exec(value);
+    if (match?.[1]) return render(match[1]);
+  }
+
+  const bodies: Record<string, string> = {
+    CHAT_MESSAGE: "You received a new message in a job conversation.",
+    DISPUTE_OPENED: "Your dispute was submitted. Updates will appear here.",
+    REVIEW_RECEIVED: "You received a new review.",
+    VERIFICATION_SUBMITTED:
+      "Your identity verification request was submitted for review.",
+  };
+  return bodies[type] ?? "There is a new update about your work.";
 }
 
 function asPayload(value: Prisma.JsonValue): Record<string, unknown> {
