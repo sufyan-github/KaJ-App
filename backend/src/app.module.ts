@@ -40,6 +40,7 @@ import { AdminOpsModule } from "./modules/admin-ops/admin-ops.module";
 import { PaymentsModule } from "./modules/payments/payments.module";
 import { VerificationModule } from "./modules/verification/verification.module";
 import { DisputesModule } from "./modules/disputes/disputes.module";
+import { AttendanceModule } from "./modules/attendance/attendance.module";
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { DisputesModule } from "./modules/disputes/disputes.module";
     PaymentsModule,
     VerificationModule,
     DisputesModule,
+    AttendanceModule,
     AvailabilityModule,
     CatalogModule,
     HealthModule,

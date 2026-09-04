@@ -302,6 +302,7 @@ model User {
   dispute_appeals_opened      DisputeAppeal[]           @relation("DisputeAppealOpener")
   dispute_appeals_assigned    DisputeAppeal[]           @relation("DisputeAppealAssignee")
   dispute_appeals_resolved    DisputeAppeal[]           @relation("DisputeAppealResolver")
+  overridden_work_sessions    WorkSession[]             @relation("WorkSessionOverrideActor")
   reports                     Report[]
   moderation_actions          ModerationAction[]
   badges                      UserBadge[]
@@ -811,20 +812,36 @@ model AvailabilityException {
 }
 
 model WorkSession {
-  id                String            @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  assignment_id     String            @db.Uuid
-  checkin_at        DateTime?
-  checkin_lat       Decimal?          @db.Decimal(9, 6)
-  checkin_lng       Decimal?          @db.Decimal(9, 6)
-  checkin_photo_key String?
-  checkout_at       DateTime?
-  checkout_lat      Decimal?          @db.Decimal(9, 6)
-  checkout_lng      Decimal?          @db.Decimal(9, 6)
-  minutes_worked    Int?
-  verified_by       WorkVerification?
-  assignment        Assignment        @relation(fields: [assignment_id], references: [id], onDelete: Cascade)
+  id                       String            @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  assignment_id            String            @unique @db.Uuid
+  checkin_at               DateTime?
+  checkin_captured_at      DateTime?
+  checkin_received_at      DateTime?
+  checkin_lat              Decimal?          @db.Decimal(9, 6)
+  checkin_lng              Decimal?          @db.Decimal(9, 6)
+  checkin_accuracy_m       Decimal?          @db.Decimal(8, 2)
+  checkin_distance_m       Int?
+  checkin_photo_key        String?
+  checkin_consent_version  String?
+  checkin_mock_location    Boolean           @default(false)
+  checkout_at              DateTime?
+  checkout_captured_at     DateTime?
+  checkout_received_at     DateTime?
+  checkout_lat             Decimal?          @db.Decimal(9, 6)
+  checkout_lng             Decimal?          @db.Decimal(9, 6)
+  checkout_accuracy_m      Decimal?          @db.Decimal(8, 2)
+  checkout_distance_m      Int?
+  checkout_notes           String?
+  minutes_worked           Int?
+  verified_by              WorkVerification?
+  override_reason          String?
+  overridden_by_user_id    String?           @db.Uuid
+  overridden_by_actor_type JobActorType?
+  overridden_at            DateTime?
+  assignment               Assignment        @relation(fields: [assignment_id], references: [id], onDelete: Cascade)
+  overridden_by            User?             @relation("WorkSessionOverrideActor", fields: [overridden_by_user_id], references: [id], onDelete: SetNull)
 
-  @@index([assignment_id])
+  @@index([overridden_by_user_id])
   @@map("work_sessions")
 }
 

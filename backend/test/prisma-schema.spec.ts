@@ -109,5 +109,6 @@ describe("Prisma D2 foundation", () => {
     expect(seed).toContain('"platform.fees"');
     expect(seed).toContain('"matching.weights"');
     expect(seed).toContain('"cancellation.policy"');
+    expect(seed).toContain('"attendance.settings"');
   });
 });

@@ -358,6 +358,17 @@ export class JobsService {
     const settings = await this.assignmentSettings();
     const now = this.now();
     const updated = await this.prisma.$transaction(async (transaction) => {
+      const checkinFlag = await transaction.featureFlag.findUnique({
+        where: { key: "checkin_enabled" },
+      });
+      if (
+        checkinFlag?.is_enabled === true &&
+        checkinFlag.rollout_percent === 100
+      ) {
+        throw new ConflictException(
+          "Check-in is enabled. Complete work through the check-out endpoint.",
+        );
+      }
       let job = await transaction.job.findUniqueOrThrow({
         where: { id: assignment.job_id },
       });

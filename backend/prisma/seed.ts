@@ -195,6 +195,17 @@ const configSettings = [
     },
   ],
   ["assignment.settings", { confirmWindowMinutes: 120, autoConfirmHours: 48 }],
+  [
+    "attendance.settings",
+    {
+      geofenceRadiusM: 300,
+      checkinWindowMinutes: 60,
+      maxAccuracyM: 100,
+      maxOfflineSyncMinutes: 15,
+      maxClockSkewSeconds: 120,
+      consentVersion: "location-checkin-v1",
+    },
+  ],
 ] as const;
 
 const badges = [
