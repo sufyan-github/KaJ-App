@@ -20,6 +20,30 @@ class TrustSafetyRepository {
         return _items(response.data).map(VerificationRequest.fromJson).toList();
       });
 
+  Future<ApplicationEligibility> applicationEligibility() async =>
+      _guard(() async {
+        final response = await _dio.get<Map<String, dynamic>>(
+          '/verification-requests/application-eligibility',
+        );
+        return ApplicationEligibility.fromJson(_data(response.data));
+      });
+
+  Future<void> submitIdentityVerification({
+    required Uint8List nid,
+    required Uint8List selfie,
+  }) async => _guard(() async {
+    final nidDocumentId = await uploadImage('VERIFICATION_DOCUMENT', nid);
+    final selfieDocumentId = await uploadImage('VERIFICATION_DOCUMENT', selfie);
+    await _dio.post<Map<String, dynamic>>(
+      '/verification-requests',
+      data: {
+        'kind': 'IDENTITY',
+        'nidDocumentId': nidDocumentId,
+        'selfieDocumentId': selfieDocumentId,
+      },
+    );
+  });
+
   Future<void> submitVerification(String kind, List<Uint8List> images) async =>
       _guard(() async {
         final ids = <String>[];

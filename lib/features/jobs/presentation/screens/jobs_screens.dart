@@ -14,6 +14,8 @@ import '../../../onboarding/domain/onboarding_state.dart';
 import '../../../onboarding/presentation/controllers/onboarding_controller.dart';
 import '../../../profile/domain/public_worker_profile.dart';
 import '../../../profile/presentation/controllers/public_profile_provider.dart';
+import '../../../trust_safety/domain/trust_models.dart';
+import '../../../trust_safety/presentation/trust_safety_providers.dart';
 import '../../domain/job_models.dart';
 import '../controllers/jobs_providers.dart';
 
@@ -343,6 +345,32 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
     WidgetRef ref,
     JobSummary job,
   ) async {
+    late final ApplicationEligibility eligibility;
+    try {
+      eligibility = await ref.read(applicationEligibilityProvider.future);
+    } on Object {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'আবেদনের যোগ্যতা যাচাই করা যায়নি। আবার চেষ্টা করুন।',
+            ),
+          ),
+        );
+      }
+      return;
+    }
+    if (!context.mounted) return;
+    if (!eligibility.canApply) {
+      final startVerification = await _showApplicationRequirements(
+        context,
+        eligibility,
+      );
+      if (startVerification == true && context.mounted) {
+        await context.push(AppRoutes.verificationCapture('IDENTITY'));
+      }
+      return;
+    }
     final amount = TextEditingController(
       text: _taka(job.budgetMaxPoisha ?? job.budgetMinPoisha) ?? '',
     );
@@ -470,6 +498,108 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
       ),
     );
   }
+
+  Future<bool?> _showApplicationRequirements(
+    BuildContext context,
+    ApplicationEligibility eligibility,
+  ) => showDialog<bool>(
+    context: context,
+    builder: (dialogContext) {
+      final pending = eligibility.identityStatus == 'PENDING';
+      final rejected = eligibility.identityStatus == 'REJECTED';
+      return AlertDialog(
+        title: const Text('আবেদনের আগে পরিচয় যাচাই করুন'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                pending
+                    ? 'আপনার NID ও সেলফি পর্যালোচনাধীন। অনুমোদন হলে আবেদন করতে পারবেন।'
+                    : rejected
+                    ? 'আগের যাচাই অনুমোদিত হয়নি। পরিষ্কার NID ও নতুন সেলফি দিয়ে আবার জমা দিন।'
+                    : 'নিরাপদে কাজ পেতে নিচের আবশ্যিক তথ্য যাচাই সম্পন্ন করুন।',
+              ),
+              const SizedBox(height: KSpacing.md),
+              _EligibilityRow(
+                label: 'ফোন নম্বর',
+                verified: eligibility.phoneVerified,
+              ),
+              _EligibilityRow(
+                label: 'পরিচয় তথ্য',
+                verified: eligibility.identityInformationVerified,
+              ),
+              _EligibilityRow(
+                label: 'জাতীয় পরিচয়পত্র (NID)',
+                verified: eligibility.nidVerified,
+              ),
+              _EligibilityRow(
+                label: 'সেলফি',
+                verified: eligibility.selfieVerified,
+              ),
+              const Divider(height: KSpacing.lg),
+              const _EligibilityRow(label: 'অভিজ্ঞতা', optional: true),
+              const _EligibilityRow(
+                label: 'দক্ষতা / বিশেষজ্ঞতা',
+                optional: true,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('পরে'),
+          ),
+          if (!pending)
+            FilledButton.icon(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              icon: const Icon(Icons.verified_user_outlined),
+              label: Text(rejected ? 'আবার যাচাই করুন' : 'যাচাই শুরু করুন'),
+            ),
+        ],
+      );
+    },
+  );
+}
+
+class _EligibilityRow extends StatelessWidget {
+  const _EligibilityRow({
+    required this.label,
+    this.verified = false,
+    this.optional = false,
+  });
+
+  final String label;
+  final bool verified;
+  final bool optional;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    dense: true,
+    contentPadding: EdgeInsets.zero,
+    leading: Icon(
+      optional
+          ? Icons.add_circle_outline
+          : verified
+          ? Icons.check_circle
+          : Icons.radio_button_unchecked,
+      color: optional
+          ? KColors.primary
+          : verified
+          ? KColors.success
+          : KColors.warning,
+    ),
+    title: Text(label),
+    trailing: Text(
+      optional
+          ? 'ঐচ্ছিক'
+          : verified
+          ? 'সম্পন্ন'
+          : 'আবশ্যিক',
+    ),
+  );
 }
 
 class _JobCard extends StatelessWidget {

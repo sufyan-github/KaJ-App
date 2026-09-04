@@ -42,7 +42,7 @@ class VerificationCenterScreen extends ConsumerWidget {
               ),
               _VerificationStep(
                 title: 'পরিচয়',
-                subtitle: 'জাতীয় পরিচয়পত্র ও সেলফি',
+                subtitle: 'আবেদনের জন্য আবশ্যিক · NID ও সেলফি',
                 icon: Icons.badge_outlined,
                 status: _latest(items, 'IDENTITY')?.status,
                 rejection: _latest(items, 'IDENTITY')?.rejectionReason,
@@ -51,7 +51,7 @@ class VerificationCenterScreen extends ConsumerWidget {
               ),
               _VerificationStep(
                 title: 'দক্ষতা',
-                subtitle: 'সনদ, লাইসেন্স বা কাজের প্রমাণ',
+                subtitle: 'ঐচ্ছিক · সনদ, লাইসেন্স বা কাজের প্রমাণ',
                 icon: Icons.workspace_premium_outlined,
                 status: _latest(items, 'SKILL')?.status,
                 rejection: _latest(items, 'SKILL')?.rejectionReason,
@@ -114,7 +114,7 @@ class _TrustHeader extends StatelessWidget {
                   ).textTheme.titleLarge?.copyWith(color: Colors.white),
                 ),
                 const Text(
-                  'ফোন → পরিচয় → দক্ষতা → ব্যবসা',
+                  'পরিচয় আবশ্যিক · দক্ষতা ও অভিজ্ঞতা ঐচ্ছিক',
                   style: TextStyle(color: Colors.white),
                 ),
               ],
@@ -204,8 +204,15 @@ class VerificationCaptureScreen extends ConsumerStatefulWidget {
 class _VerificationCaptureScreenState
     extends ConsumerState<VerificationCaptureScreen> {
   final List<Uint8List> _images = [];
+  Uint8List? _nidImage;
+  Uint8List? _selfieImage;
   bool _consent = false;
   bool _loading = false;
+
+  bool get _isIdentity => widget.kind == 'IDENTITY';
+  bool get _hasRequiredImages => _isIdentity
+      ? _nidImage != null && _selfieImage != null
+      : _images.isNotEmpty;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -214,59 +221,80 @@ class _VerificationCaptureScreenState
       padding: const EdgeInsets.all(KSpacing.lg),
       children: [
         Text(
-          'নথি পরিষ্কারভাবে তুলুন',
+          _isIdentity ? 'NID ও সেলফি দিন' : 'নথি পরিষ্কারভাবে তুলুন',
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: KSpacing.sm),
-        const Text(
-          'চার কোণা ফ্রেমে রাখুন, আলো বা ঝাপসা যেন না থাকে। নাম ও নম্বর পড়া যেতে হবে। সর্বোচ্চ ৫টি ছবি দিন।',
+        Text(
+          _isIdentity
+              ? 'আবেদন করার আগে পরিচয় যাচাই আবশ্যিক। NID-এর সামনের দিক পরিষ্কারভাবে তুলুন এবং নিজের একটি সরাসরি সেলফি দিন।'
+              : 'চার কোণা ফ্রেমে রাখুন, আলো বা ঝাপসা যেন না থাকে। সর্বোচ্চ ৫টি ছবি দিন।',
         ),
         const SizedBox(height: KSpacing.md),
-        Wrap(
-          spacing: KSpacing.sm,
-          runSpacing: KSpacing.sm,
-          children: [
-            ..._images.asMap().entries.map(
-              (entry) => Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.memory(
-                      entry.value,
-                      width: 96,
-                      height: 96,
-                      fit: BoxFit.cover,
+        if (_isIdentity) ...[
+          _IdentityCaptureCard(
+            title: 'NID-এর সামনের দিক',
+            subtitle: 'চার কোণা ও সব লেখা স্পষ্ট রাখুন',
+            image: _nidImage,
+            icon: Icons.badge_outlined,
+            onCapture: () => _pickIdentity(selfie: false),
+            onRemove: () => setState(() => _nidImage = null),
+          ),
+          const SizedBox(height: KSpacing.sm),
+          _IdentityCaptureCard(
+            title: 'আপনার সেলফি',
+            subtitle: 'মুখ স্পষ্ট রেখে সরাসরি ক্যামেরার দিকে তাকান',
+            image: _selfieImage,
+            icon: Icons.face_retouching_natural,
+            onCapture: () => _pickIdentity(selfie: true),
+            onRemove: () => setState(() => _selfieImage = null),
+          ),
+        ] else
+          Wrap(
+            spacing: KSpacing.sm,
+            runSpacing: KSpacing.sm,
+            children: [
+              ..._images.asMap().entries.map(
+                (entry) => Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.memory(
+                        entry.value,
+                        width: 96,
+                        height: 96,
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                  ),
-                  Positioned(
-                    right: 0,
-                    child: IconButton.filled(
-                      visualDensity: VisualDensity.compact,
-                      onPressed: () =>
-                          setState(() => _images.removeAt(entry.key)),
-                      icon: const Icon(Icons.close, size: 18),
+                    Positioned(
+                      right: 0,
+                      child: IconButton.filled(
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () =>
+                            setState(() => _images.removeAt(entry.key)),
+                        icon: const Icon(Icons.close, size: 18),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            if (_images.length < 5)
-              SizedBox(
-                width: 96,
-                height: 96,
-                child: OutlinedButton(
-                  onPressed: _pick,
-                  child: const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.add_a_photo_outlined),
-                      Text('ছবি নিন'),
-                    ],
-                  ),
+                  ],
                 ),
               ),
-          ],
-        ),
+              if (_images.length < 5)
+                SizedBox(
+                  width: 96,
+                  height: 96,
+                  child: OutlinedButton(
+                    onPressed: _pick,
+                    child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add_a_photo_outlined),
+                        Text('ছবি নিন'),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
         const SizedBox(height: KSpacing.md),
         CheckboxListTile(
           value: _consent,
@@ -281,36 +309,60 @@ class _VerificationCaptureScreenState
         KPrimaryButton(
           label: 'নিরাপদে জমা দিন',
           isLoading: _loading,
-          onPressed: _images.isEmpty || !_consent ? null : _submit,
+          onPressed: !_hasRequiredImages || !_consent ? null : _submit,
         ),
       ],
     ),
   );
 
   Future<void> _pick() async {
+    final bytes = await _capture(CameraDevice.rear);
+    if (bytes != null && mounted) setState(() => _images.add(bytes));
+  }
+
+  Future<void> _pickIdentity({required bool selfie}) async {
+    final bytes = await _capture(
+      selfie ? CameraDevice.front : CameraDevice.rear,
+    );
+    if (bytes == null || !mounted) return;
+    setState(() {
+      if (selfie) {
+        _selfieImage = bytes;
+      } else {
+        _nidImage = bytes;
+      }
+    });
+  }
+
+  Future<Uint8List?> _capture(CameraDevice camera) async {
     final status = await const PermissionGateway().request(KPermission.camera);
     if (status != KPermissionStatus.granted) {
       if (mounted) _snack('ক্যামেরা অনুমতি না দিলে নথির ছবি তোলা যাবে না।');
-      return;
+      return null;
     }
     final image = await ImagePicker().pickImage(
       source: ImageSource.camera,
+      preferredCameraDevice: camera,
       imageQuality: 92,
       maxWidth: 2400,
     );
-    if (image != null) {
-      final bytes = await image.readAsBytes();
-      if (mounted) setState(() => _images.add(bytes));
-    }
+    return image?.readAsBytes();
   }
 
   Future<void> _submit() async {
     setState(() => _loading = true);
     try {
-      await ref
-          .read(trustSafetyRepositoryProvider)
-          .submitVerification(widget.kind, _images);
+      final repository = ref.read(trustSafetyRepositoryProvider);
+      if (_isIdentity) {
+        await repository.submitIdentityVerification(
+          nid: _nidImage!,
+          selfie: _selfieImage!,
+        );
+      } else {
+        await repository.submitVerification(widget.kind, _images);
+      }
       ref.invalidate(verificationRequestsProvider);
+      ref.invalidate(applicationEligibilityProvider);
       if (mounted) {
         _snack('যাচাই অনুরোধ জমা হয়েছে। ফল নোটিফিকেশনে জানানো হবে।');
         context.pop();
@@ -325,6 +377,75 @@ class _VerificationCaptureScreenState
   void _snack(String message) => ScaffoldMessenger.of(
     context,
   ).showSnackBar(SnackBar(content: Text(message)));
+}
+
+class _IdentityCaptureCard extends StatelessWidget {
+  const _IdentityCaptureCard({
+    required this.title,
+    required this.subtitle,
+    required this.image,
+    required this.icon,
+    required this.onCapture,
+    required this.onRemove,
+  });
+
+  final String title;
+  final String subtitle;
+  final Uint8List? image;
+  final IconData icon;
+  final VoidCallback onCapture;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    margin: EdgeInsets.zero,
+    child: Padding(
+      padding: const EdgeInsets.all(KSpacing.md),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: SizedBox(
+              width: 76,
+              height: 76,
+              child: image == null
+                  ? ColoredBox(
+                      color: KColors.surfaceAlt,
+                      child: Icon(icon, color: KColors.primary, size: 34),
+                    )
+                  : Image.memory(image!, fit: BoxFit.cover),
+            ),
+          ),
+          const SizedBox(width: KSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: KSpacing.xs),
+                Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+                const SizedBox(height: KSpacing.sm),
+                OutlinedButton.icon(
+                  onPressed: onCapture,
+                  icon: Icon(
+                    image == null ? Icons.camera_alt_outlined : Icons.refresh,
+                    size: 18,
+                  ),
+                  label: Text(image == null ? 'ছবি তুলুন' : 'আবার তুলুন'),
+                ),
+              ],
+            ),
+          ),
+          if (image != null)
+            IconButton(
+              tooltip: 'ছবি সরান',
+              onPressed: onRemove,
+              icon: const Icon(Icons.close),
+            ),
+        ],
+      ),
+    ),
+  );
 }
 
 String _kindLabel(String kind) => switch (kind) {

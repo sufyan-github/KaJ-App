@@ -25,6 +25,43 @@ class VerificationRequest {
   final String? rejectionReason;
 }
 
+class ApplicationEligibility {
+  const ApplicationEligibility({
+    required this.canApply,
+    required this.identityStatus,
+    required this.phoneVerified,
+    required this.identityInformationVerified,
+    required this.nidVerified,
+    required this.selfieVerified,
+  });
+
+  factory ApplicationEligibility.fromJson(Map<String, dynamic> json) {
+    final requirements = Map<String, dynamic>.from(
+      json['requirements'] as Map? ?? const {},
+    );
+    bool verified(String key) {
+      final item = requirements[key];
+      return item is Map && item['verified'] == true;
+    }
+
+    return ApplicationEligibility(
+      canApply: json['canApply'] == true,
+      identityStatus: json['identityStatus'] as String? ?? 'NOT_SUBMITTED',
+      phoneVerified: verified('phone'),
+      identityInformationVerified: verified('identityInformation'),
+      nidVerified: verified('nid'),
+      selfieVerified: verified('selfie'),
+    );
+  }
+
+  final bool canApply;
+  final String identityStatus;
+  final bool phoneVerified;
+  final bool identityInformationVerified;
+  final bool nidVerified;
+  final bool selfieVerified;
+}
+
 class AttendanceState {
   const AttendanceState({
     required this.geofenceRadiusM,

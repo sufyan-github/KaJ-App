@@ -264,7 +264,6 @@ class _WorkerSkillsScreenState extends ConsumerState<WorkerSkillsScreen> {
   }
 
   Future<void> _submit() async {
-    if (_selected.isEmpty) return;
     setState(() => _saving = true);
     try {
       final taka = int.tryParse(_rate.text.trim());
@@ -291,8 +290,9 @@ class _WorkerSkillsScreenState extends ConsumerState<WorkerSkillsScreen> {
     final skills = ref.watch(_skillsProvider);
     return _OnboardingScaffold(
       step: 4,
-      title: 'আপনার দক্ষতা যোগ করুন',
-      subtitle: 'সর্বোচ্চ ৮টি দক্ষতা বেছে নিন। পারিশ্রমিক এখন না দিলেও হবে।',
+      title: 'আপনার দক্ষতা যোগ করুন (ঐচ্ছিক)',
+      subtitle:
+          'চাইলে সর্বোচ্চ ৮টি দক্ষতা বেছে নিন। দক্ষতা ও পারিশ্রমিক পরে যোগ বা পরিবর্তন করা যাবে।',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -319,9 +319,9 @@ class _WorkerSkillsScreenState extends ConsumerState<WorkerSkillsScreen> {
           ),
           const SizedBox(height: KSpacing.lg),
           KPrimaryButton(
-            label: 'দক্ষতা সংরক্ষণ করুন',
+            label: _selected.isEmpty ? 'এখন বাদ দিন' : 'দক্ষতা সংরক্ষণ করুন',
             isLoading: _saving,
-            onPressed: _selected.isEmpty ? null : _submit,
+            onPressed: _submit,
           ),
         ],
       ),

@@ -17,6 +17,7 @@ void main() {
       );
 
       final verification = await repository.verificationRequests();
+      final eligibility = await repository.applicationEligibility();
       final attendance = await repository.attendance('assignment-1');
       final disputes = await repository.disputes();
       final blocked = await repository.blockedUsers();
@@ -24,6 +25,10 @@ void main() {
 
       expect(verification.single.kind, 'IDENTITY');
       expect(verification.single.rejectionReason, 'ছবি ঝাপসা');
+      expect(eligibility.canApply, isFalse);
+      expect(eligibility.phoneVerified, isTrue);
+      expect(eligibility.nidVerified, isFalse);
+      expect(eligibility.selfieVerified, isFalse);
       expect(attendance.geofenceRadiusM, 300);
       expect(attendance.checkinDistanceM, 42);
       expect(disputes.single.status, 'EVIDENCE');
@@ -88,6 +93,17 @@ class _TrustAdapter implements HttpClientAdapter {
             'createdAt': '2026-09-01T00:00:00.000Z',
           },
         ],
+      },
+      '/verification-requests/application-eligibility' => {
+        'canApply': false,
+        'identityStatus': 'PENDING',
+        'requirements': {
+          'phone': {'required': true, 'verified': true},
+          'identityInformation': {'required': true, 'verified': false},
+          'nid': {'required': true, 'verified': false},
+          'selfie': {'required': true, 'verified': false},
+        },
+        'optional': {'experience': true, 'expertise': true},
       },
       '/disputes' => {
         'items': [

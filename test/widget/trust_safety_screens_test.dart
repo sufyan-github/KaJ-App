@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kaaj/core/theme/app_theme.dart';
+import 'package:kaaj/core/widgets/k_primary_button.dart';
 import 'package:kaaj/features/trust_safety/domain/trust_models.dart';
 import 'package:kaaj/features/trust_safety/presentation/attendance_screen.dart';
 import 'package:kaaj/features/trust_safety/presentation/safety_screens.dart';
 import 'package:kaaj/features/trust_safety/presentation/trust_safety_providers.dart';
+import 'package:kaaj/features/trust_safety/presentation/verification_screens.dart';
 
 void main() {
   testWidgets('report form remains usable at 200% text on a narrow phone', (
@@ -83,6 +85,31 @@ void main() {
       find.widgetWithText(ElevatedButton, 'লোকেশন নিয়ে চেক-ইন করুন'),
     );
     expect(enabled.onPressed, isNotNull);
+  });
+
+  testWidgets('identity verification requires separate NID and selfie images', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(360, 760));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: buildAppTheme(),
+          home: const VerificationCaptureScreen(kind: 'IDENTITY'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('NID-এর সামনের দিক'), findsOneWidget);
+    expect(find.text('আপনার সেলফি'), findsOneWidget);
+    expect(find.text('ছবি তুলুন'), findsNWidgets(2));
+    await tester.drag(find.byType(ListView), const Offset(0, -500));
+    await tester.pumpAndSettle();
+    final submit = tester.widget<KPrimaryButton>(find.byType(KPrimaryButton));
+    expect(submit.onPressed, isNull);
+    expect(tester.takeException(), isNull);
   });
 }
 

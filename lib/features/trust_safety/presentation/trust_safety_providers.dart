@@ -14,6 +14,9 @@ final locationGatewayProvider = Provider<LocationGateway>(
 final verificationRequestsProvider = FutureProvider<List<VerificationRequest>>(
   (ref) => ref.watch(trustSafetyRepositoryProvider).verificationRequests(),
 );
+final applicationEligibilityProvider = FutureProvider<ApplicationEligibility>(
+  (ref) => ref.watch(trustSafetyRepositoryProvider).applicationEligibility(),
+);
 final attendanceProvider = FutureProvider.family<AttendanceState, String>(
   (ref, id) => ref.watch(trustSafetyRepositoryProvider).attendance(id),
 );
