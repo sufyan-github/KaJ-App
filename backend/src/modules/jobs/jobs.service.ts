@@ -182,23 +182,68 @@ export class JobsService {
         deleted_at: null,
         category_id: query.categoryId,
         location_id: query.locationId,
+        skills: query.skillId
+          ? { some: { skill_id: query.skillId } }
+          : undefined,
       },
       include: jobInclude,
       orderBy: [{ is_featured: "desc" }, { published_at: "desc" }],
       take: 50,
     });
+    const availabilityByJob = new Map<
+      string,
+      { timeCompatibility: string; availabilityCoverage: number | null }
+    >();
+    if (query.scope === "for-me") {
+      await Promise.all(
+        jobs.map(async (job) => {
+          if (!job.starts_at || !job.ends_at) {
+            availabilityByJob.set(job.id, {
+              timeCompatibility: "NOT_SCHEDULED",
+              availabilityCoverage: null,
+            });
+            return;
+          }
+          const result = await this.availability.evaluate(
+            userId,
+            { startsAt: job.starts_at, endsAt: job.ends_at },
+            1,
+          );
+          availabilityByJob.set(job.id, {
+            timeCompatibility: result.isAvailable ? "AVAILABLE" : "UNAVAILABLE",
+            availabilityCoverage: result.coverage,
+          });
+        }),
+      );
+    }
+    const visibleJobs =
+      query.availableOnly === "true"
+        ? jobs.filter(
+            (job) =>
+              availabilityByJob.get(job.id)?.timeCompatibility === "AVAILABLE",
+          )
+        : jobs;
     if (query.scope === "for-me" && this.matching) {
-      const ranked = await this.matching.scoreJobsForWorker(userId, jobs);
+      const ranked = await this.matching.scoreJobsForWorker(
+        userId,
+        visibleJobs,
+      );
       return {
         items: ranked.map(({ job, match }) => ({
           ...serializeJob(job),
+          ...availabilityByJob.get(job.id),
           matchScore: match.score,
           matchReasons: match.reasons,
           matchComponents: match.components,
         })),
       };
     }
-    return { items: jobs.map(serializeJob) };
+    return {
+      items: visibleJobs.map((job) => ({
+        ...serializeJob(job),
+        ...availabilityByJob.get(job.id),
+      })),
+    };
   }
 
   async suggestedWorkers(posterUserId: string, jobId: string) {

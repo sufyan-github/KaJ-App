@@ -171,7 +171,15 @@ export class JobFeedQueryDto {
 
   @IsOptional()
   @IsUUID()
+  skillId?: string;
+
+  @IsOptional()
+  @IsUUID()
   locationId?: string;
+
+  @IsOptional()
+  @IsIn(["true", "false"])
+  availableOnly?: "true" | "false";
 }
 
 export class ApplyToJobDto {

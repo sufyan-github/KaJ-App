@@ -174,3 +174,55 @@ describe("JobsService confirmation deadline", () => {
     expect(availability.evaluate).not.toHaveBeenCalled();
   });
 });
+
+describe("JobsService filtered feed", () => {
+  it("filters by subtype and keeps only jobs matching the worker's time", async () => {
+    const availableJob = {
+      id: "available-job",
+      poster_user_id: "poster-1",
+      starts_at: new Date("2026-09-07T03:00:00Z"),
+      ends_at: new Date("2026-09-07T05:00:00Z"),
+      skills: [],
+    };
+    const unavailableJob = {
+      id: "unavailable-job",
+      poster_user_id: "poster-2",
+      starts_at: new Date("2026-09-07T12:00:00Z"),
+      ends_at: new Date("2026-09-07T14:00:00Z"),
+      skills: [],
+    };
+    const findMany = jest
+      .fn()
+      .mockResolvedValue([availableJob, unavailableJob]);
+    const prisma = { job: { findMany } } as unknown as PrismaService;
+    const availability = {
+      evaluate: jest
+        .fn()
+        .mockResolvedValueOnce({ isAvailable: true, coverage: 1 })
+        .mockResolvedValueOnce({ isAvailable: false, coverage: 0 }),
+    } as unknown as AvailabilityService;
+    const service = new JobsService(prisma, availability);
+
+    const result = await service.feed("worker-id", {
+      scope: "for-me",
+      skillId: "01991fab-bd51-72a2-84bb-bd2ee9681301",
+      availableOnly: "true",
+    });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          skills: {
+            some: { skill_id: "01991fab-bd51-72a2-84bb-bd2ee9681301" },
+          },
+        }),
+      }),
+    );
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]).toMatchObject({
+      id: "available-job",
+      timeCompatibility: "AVAILABLE",
+      availabilityCoverage: 1,
+    });
+  });
+});
