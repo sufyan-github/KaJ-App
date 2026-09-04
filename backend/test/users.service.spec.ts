@@ -1,6 +1,7 @@
 import { RoleMode } from "@prisma/client";
 
 import { PrismaService } from "../src/infra/prisma/prisma.service";
+import { AuthTokenService } from "../src/modules/auth/auth-token.service";
 import { UsersService } from "../src/modules/users/users.service";
 
 describe("UsersService role activation", () => {
@@ -62,5 +63,44 @@ describe("UsersService role activation", () => {
       }),
     );
     expect(customerUpsert).toHaveBeenCalled();
+  });
+
+  it("issues a fresh access token containing a newly activated role", async () => {
+    const createAccessToken = jest.fn().mockResolvedValue("fresh-access-token");
+    const prismaWithUser = {
+      ...prisma,
+      user: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: "user-id",
+          phone_e164: "+8801700000301",
+          status: "ACTIVE",
+          role_modes: [RoleMode.CUSTOMER, RoleMode.WORKER],
+          active_role: RoleMode.WORKER,
+          is_admin: false,
+        }),
+      },
+    } as unknown as PrismaService;
+    const tokens = { createAccessToken } as unknown as AuthTokenService;
+    const serviceWithTokens = new UsersService(prismaWithUser, tokens);
+
+    const result = await serviceWithTokens.activateRole(
+      "user-id",
+      RoleMode.WORKER,
+      "device-id",
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        activeRole: RoleMode.WORKER,
+        accessToken: "fresh-access-token",
+      }),
+    );
+    expect(createAccessToken).toHaveBeenCalledWith(
+      expect.objectContaining({
+        roles: [RoleMode.CUSTOMER, RoleMode.WORKER],
+        activeRole: RoleMode.WORKER,
+      }),
+      "device-id",
+    );
   });
 });

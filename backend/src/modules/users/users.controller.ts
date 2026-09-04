@@ -27,7 +27,7 @@ export class UsersController {
     @CurrentUser() claims: AccessTokenClaims,
     @Body() body: ActivateRoleDto,
   ) {
-    return this.users.activateRole(claims.sub, body.role);
+    return this.users.activateRole(claims.sub, body.role, claims.deviceId);
   }
 
   @Get("favorites")

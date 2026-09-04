@@ -6,8 +6,10 @@ import { PublicProfilesService } from "./public-profiles.service";
 import { UsersController } from "./users.controller";
 import { UsersService } from "./users.service";
 import { PortfolioService } from "./portfolio.service";
+import { AuthModule } from "../auth/auth.module";
 
 @Module({
+  imports: [AuthModule],
   controllers: [ProfilesController, PublicProfilesController, UsersController],
   providers: [PortfolioService, PublicProfilesService, UsersService],
 })

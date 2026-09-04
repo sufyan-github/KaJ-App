@@ -11,13 +11,17 @@ import { UpdateProfileDto } from "./dto/update-profile.dto";
 import { UpdateWorkerProfileDto } from "./dto/update-worker-profile.dto";
 import { WorkerSkillInputDto } from "./dto/update-worker-skills.dto";
 import { validateWorkerSkillIds } from "./worker-skills.rules";
+import { AuthTokenService } from "../auth/auth-token.service";
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly tokens?: AuthTokenService,
+  ) {}
 
-  async activateRole(userId: string, role: RoleMode) {
-    return this.prisma.$transaction(async (transaction) => {
+  async activateRole(userId: string, role: RoleMode, deviceId?: string) {
+    const result = await this.prisma.$transaction(async (transaction) => {
       const current = await transaction.user.findUnique({
         where: { id: userId },
         select: {
@@ -64,6 +68,31 @@ export class UsersService {
         onboardingRequired: !(current.profile?.display_name ?? "").trim(),
       };
     });
+    if (!this.tokens || !deviceId) return result;
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        phone_e164: true,
+        status: true,
+        role_modes: true,
+        active_role: true,
+        is_admin: true,
+      },
+    });
+    if (!user?.phone_e164) throw new NotFoundException();
+    const accessToken = await this.tokens.createAccessToken(
+      {
+        id: user.id,
+        phoneE164: user.phone_e164,
+        status: user.status,
+        roles: user.role_modes,
+        activeRole: user.active_role,
+        isAdmin: user.is_admin,
+      },
+      deviceId,
+    );
+    return { ...result, accessToken };
   }
 
   async updateProfile(userId: string, input: UpdateProfileDto) {

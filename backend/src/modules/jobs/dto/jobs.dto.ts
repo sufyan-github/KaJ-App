@@ -95,7 +95,7 @@ export class CreateJobDto {
 
   @IsArray()
   @ArrayMaxSize(20)
-  @IsUUID("4", { each: true })
+  @IsUUID(undefined, { each: true })
   skillIds!: string[];
 
   @IsEnum(JobType)

@@ -4,5 +4,5 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["./seed.ts"]
+  "include": ["./*.ts"]
 }
