@@ -31,7 +31,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test("suspend user requires a reason and submits the audited action", async ({
+test("progressive moderation requires a reason and submits only the next step", async ({
   page,
 }) => {
   let requestBody: Record<string, unknown> | null = null;
@@ -46,28 +46,35 @@ test("suspend user requires a reason and submits the audited action", async ({
         roles: ["WORKER"],
         trustLevel: "PHONE",
         status: "ACTIVE",
+        moderationLevel: "NONE",
+        reverificationRequired: false,
       },
     ],
   });
-  await page.route("**/api/admin/ops/users/user-1/status", async (route) => {
-    requestBody = route.request().postDataJSON();
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify(envelope({ id: "user-1", status: "SUSPENDED" })),
-    });
-  });
+  await page.route(
+    "**/api/admin/ops/users/user-1/moderation",
+    async (route) => {
+      requestBody = route.request().postDataJSON();
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(
+          envelope({ id: "user-1", moderationLevel: "WARN" }),
+        ),
+      });
+    },
+  );
   await page.goto("/");
   await page.getByRole("button", { name: "Users" }).click();
-  await page.getByRole("button", { name: "Suspend" }).click();
+  await page.getByRole("button", { name: "Next: Warn" }).click();
   await page
     .getByLabel("Required operational reason")
     .fill("Repeated marketplace safety violation.");
-  await page.getByRole("button", { name: "Confirm Suspended" }).click();
+  await page.getByRole("button", { name: "Confirm Warn" }).click();
   await expect
     .poll(() => requestBody)
     .toMatchObject({
-      status: "SUSPENDED",
+      action: "WARN",
       reason: "Repeated marketplace safety violation.",
     });
 });
@@ -114,6 +121,60 @@ test("force-transition a stuck job requires target and reason", async ({
   await expect
     .poll(() => requestBody)
     .toMatchObject({ toStatus: "APPLICATIONS_OPEN" });
+});
+
+test("safety report resolution enforces the next human moderation step", async ({
+  page,
+}) => {
+  let requestBody: Record<string, unknown> | null = null;
+  await fulfill(page, "reports?limit=100", {
+    total: 1,
+    items: [
+      {
+        id: "report-1",
+        targetType: "USER",
+        targetId: "user-1",
+        reasonCode: "HARASSMENT",
+        description: "Repeated abusive messages in a job conversation.",
+        status: "UNDER_REVIEW",
+        createdAt: new Date().toISOString(),
+        reporter: { id: "reporter-1", name: "Reporter" },
+        subject: {
+          id: "user-1",
+          name: "Reported worker",
+          status: "ACTIVE",
+          moderationLevel: "NONE",
+          reverificationRequired: false,
+        },
+      },
+    ],
+  });
+  await page.route(
+    "**/api/admin/ops/reports/report-1/decision",
+    async (route) => {
+      requestBody = route.request().postDataJSON();
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(
+          envelope({ id: "user-1", moderationLevel: "WARN" }),
+        ),
+      });
+    },
+  );
+  await page.goto("/");
+  await page.getByRole("button", { name: "Safety reports" }).click();
+  await page.getByRole("button", { name: "Decide" }).click();
+  await page
+    .getByLabel("Required decision reason")
+    .fill("Evidence supports a formal first warning.");
+  await page.getByRole("button", { name: "Confirm decision" }).click();
+  await expect
+    .poll(() => requestBody)
+    .toMatchObject({
+      status: "ACTIONED",
+      action: "WARN",
+    });
 });
 
 test("approve verification records an explicit decision reason", async ({

@@ -16,6 +16,11 @@ import {
 import { RequestContextStorage } from "./common/context/request-context.storage";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { JwtGuard } from "./common/guards/jwt.guard";
+import { AccountModerationGuard } from "./common/guards/account-moderation.guard";
+import {
+  ACCOUNT_MODERATION_READER,
+  PrismaAccountModerationReader,
+} from "./common/guards/account-moderation.reader";
 import { RolesGuard } from "./common/guards/roles.guard";
 import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
 import { ResponseInterceptor } from "./common/interceptors/response.interceptor";
@@ -41,6 +46,7 @@ import { PaymentsModule } from "./modules/payments/payments.module";
 import { VerificationModule } from "./modules/verification/verification.module";
 import { DisputesModule } from "./modules/disputes/disputes.module";
 import { AttendanceModule } from "./modules/attendance/attendance.module";
+import { ModerationModule } from "./modules/moderation/moderation.module";
 
 @Module({
   imports: [
@@ -64,6 +70,7 @@ import { AttendanceModule } from "./modules/attendance/attendance.module";
     VerificationModule,
     DisputesModule,
     AttendanceModule,
+    ModerationModule,
     AvailabilityModule,
     CatalogModule,
     HealthModule,
@@ -78,9 +85,15 @@ import { AttendanceModule } from "./modules/attendance/attendance.module";
     AbilityFactory,
     RequestContextMiddleware,
     RequestContextStorage,
+    PrismaAccountModerationReader,
+    {
+      provide: ACCOUNT_MODERATION_READER,
+      useExisting: PrismaAccountModerationReader,
+    },
     { provide: REQUEST_ID_GENERATOR, useClass: CryptoRequestIdGenerator },
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
     { provide: APP_GUARD, useClass: JwtGuard },
+    { provide: APP_GUARD, useClass: AccountModerationGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_GUARD, useClass: PolicyGuard },
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },

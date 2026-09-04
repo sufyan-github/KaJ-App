@@ -246,6 +246,14 @@ enum ReportStatus {
   DISMISSED
 }
 
+enum ModerationLevel {
+  NONE
+  WARN
+  RESTRICT
+  SUSPEND
+  BAN
+}
+
 enum AdminRole {
   ADMIN
   MODERATOR
@@ -254,21 +262,26 @@ enum AdminRole {
 }
 
 model User {
-  id             String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  phone_e164     String?    @unique
-  email          String?    @unique
-  password_hash  String?
-  status         UserStatus @default(ACTIVE)
-  role_modes     RoleMode[] @default([CUSTOMER])
-  active_role    RoleMode   @default(CUSTOMER)
-  is_admin       Boolean    @default(false)
-  default_locale String     @default("bn")
-  timezone       String     @default("Asia/Dhaka")
-  fee_tier       String?
-  last_active_at DateTime?
-  created_at     DateTime   @default(now())
-  updated_at     DateTime   @updatedAt
-  deleted_at     DateTime?
+  id                          String          @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  phone_e164                  String?         @unique
+  email                       String?         @unique
+  password_hash               String?
+  status                      UserStatus      @default(ACTIVE)
+  role_modes                  RoleMode[]      @default([CUSTOMER])
+  active_role                 RoleMode        @default(CUSTOMER)
+  is_admin                    Boolean         @default(false)
+  default_locale              String          @default("bn")
+  timezone                    String          @default("Asia/Dhaka")
+  fee_tier                    String?
+  last_active_at              DateTime?
+  created_at                  DateTime        @default(now())
+  updated_at                  DateTime        @updatedAt
+  deleted_at                  DateTime?
+  moderation_level            ModerationLevel @default(NONE)
+  restriction_ends_at         DateTime?
+  reverification_required     Boolean         @default(false)
+  reverification_requested_at DateTime?
+  moderation_reason           String?
 
   devices                     UserDevice[]
   refresh_tokens              RefreshToken[]
@@ -303,8 +316,10 @@ model User {
   dispute_appeals_assigned    DisputeAppeal[]           @relation("DisputeAppealAssignee")
   dispute_appeals_resolved    DisputeAppeal[]           @relation("DisputeAppealResolver")
   overridden_work_sessions    WorkSession[]             @relation("WorkSessionOverrideActor")
-  reports                     Report[]
-  moderation_actions          ModerationAction[]
+  reports_filed               Report[]                  @relation("ReportReporter")
+  reports_received            Report[]                  @relation("ReportSubject")
+  reports_reviewed            Report[]                  @relation("ReportReviewer")
+  moderation_actions          ModerationAction[]        @relation("ModerationAdmin")
   badges                      UserBadge[]
   saved_searches              SavedSearch[]
   favorites                   Favorite[]                @relation("FavoriteOwner")
@@ -1197,35 +1212,53 @@ model DisputeAppeal {
 }
 
 model Report {
-  id               String       @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  reporter_user_id String       @db.Uuid
-  target_type      String
-  target_id        String       @db.Uuid
-  reason_code      String
-  description      String?
-  status           ReportStatus @default(OPEN)
-  created_at       DateTime     @default(now())
-  updated_at       DateTime     @updatedAt
-  reporter         User         @relation(fields: [reporter_user_id], references: [id], onDelete: Restrict)
+  id                 String             @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  reporter_user_id   String             @db.Uuid
+  subject_user_id    String?            @db.Uuid
+  target_type        String
+  target_id          String             @db.Uuid
+  reason_code        String
+  description        String?
+  status             ReportStatus       @default(OPEN)
+  reviewer_user_id   String?            @db.Uuid
+  resolution         String?
+  reviewed_at        DateTime?
+  created_at         DateTime           @default(now())
+  updated_at         DateTime           @updatedAt
+  reporter           User               @relation("ReportReporter", fields: [reporter_user_id], references: [id], onDelete: Restrict)
+  subject            User?              @relation("ReportSubject", fields: [subject_user_id], references: [id], onDelete: SetNull)
+  reviewer           User?              @relation("ReportReviewer", fields: [reviewer_user_id], references: [id], onDelete: SetNull)
+  moderation_actions ModerationAction[]
 
   @@index([target_type, target_id])
   @@index([status, created_at])
+  @@index([subject_user_id, status, created_at])
+  @@index([reviewer_user_id])
   @@map("reports")
 }
 
 model ModerationAction {
-  id            String    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  admin_user_id String    @db.Uuid
-  target_type   String
-  target_id     String    @db.Uuid
-  action        String
-  reason        String
-  expires_at    DateTime?
-  created_at    DateTime  @default(now())
-  admin         User      @relation(fields: [admin_user_id], references: [id], onDelete: Restrict)
+  id                      String           @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  admin_user_id           String           @db.Uuid
+  report_id               String?          @db.Uuid
+  target_type             String
+  target_id               String           @db.Uuid
+  action                  String
+  previous_level          ModerationLevel?
+  level                   ModerationLevel?
+  reason                  String
+  expires_at              DateTime?
+  requires_reverification Boolean          @default(false)
+  review_due_at           DateTime?
+  reviewed_at             DateTime?
+  created_at              DateTime         @default(now())
+  admin                   User             @relation("ModerationAdmin", fields: [admin_user_id], references: [id], onDelete: Restrict)
+  report                  Report?          @relation(fields: [report_id], references: [id], onDelete: SetNull)
 
   @@index([target_type, target_id, created_at(sort: Desc)])
   @@index([admin_user_id])
+  @@index([report_id])
+  @@index([review_due_at, reviewed_at])
   @@map("moderation_actions")
 }
 

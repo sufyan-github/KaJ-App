@@ -9,6 +9,7 @@ import request from "supertest";
 
 import { configureApp } from "../src/app.bootstrap";
 import { AppModule } from "../src/app.module";
+import { ACCOUNT_MODERATION_READER } from "../src/common/guards/account-moderation.reader";
 import { Roles } from "../src/common/decorators/roles.decorator";
 import {
   AbilityFactory,
@@ -215,6 +216,16 @@ describe("authorization endpoint matrix", () => {
     })
       .overrideProvider(AUTH_REPOSITORY)
       .useValue(repository)
+      .overrideProvider(ACCOUNT_MODERATION_READER)
+      .useValue({
+        findAccount: async () => ({
+          deleted_at: null,
+          moderation_level: "NONE",
+          restriction_ends_at: null,
+          reverification_required: false,
+          status: "ACTIVE",
+        }),
+      })
       .overrideProvider(AuthTokenService)
       .useValue(tokenService)
       .compile();

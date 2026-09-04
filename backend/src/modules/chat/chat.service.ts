@@ -289,6 +289,11 @@ export class ChatService {
   async block(userId: string, blockedUserId: string) {
     if (userId === blockedUserId)
       throw new BadRequestException("Cannot block yourself.");
+    const target = await this.prisma.user.findFirst({
+      where: { id: blockedUserId, deleted_at: null },
+      select: { id: true },
+    });
+    if (!target) throw new NotFoundException();
     await this.prisma.userBlock.upsert({
       where: {
         blocker_user_id_blocked_user_id: {
@@ -310,10 +315,14 @@ export class ChatService {
   }
 
   async report(userId: string, conversationId: string, description: string) {
-    await this.assertParticipant(userId, conversationId);
+    const conversation = await this.assertParticipant(userId, conversationId);
+    const subjectUserId = conversation.participants.find(
+      (item) => item.user_id !== userId,
+    )?.user_id;
     const report = await this.prisma.report.create({
       data: {
         reporter_user_id: userId,
+        subject_user_id: subjectUserId,
         target_type: "CONVERSATION",
         target_id: conversationId,
         reason_code: "CHAT_SAFETY",

@@ -8,6 +8,7 @@ import request from "supertest";
 
 import { configureApp } from "../src/app.bootstrap";
 import { AppModule } from "../src/app.module";
+import { ACCOUNT_MODERATION_READER } from "../src/common/guards/account-moderation.reader";
 import { CLOCK, Clock } from "../src/common/time/clock";
 import { SMS_PORT, SmsOtp, SmsPort } from "../src/infra/sms/sms.port";
 import {
@@ -240,6 +241,16 @@ describe("phone OTP authentication", () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(CLOCK)
       .useValue(clock)
+      .overrideProvider(ACCOUNT_MODERATION_READER)
+      .useValue({
+        findAccount: async () => ({
+          deleted_at: null,
+          moderation_level: "NONE",
+          restriction_ends_at: null,
+          reverification_required: false,
+          status: "ACTIVE",
+        }),
+      })
       .overrideProvider(AUTH_REPOSITORY)
       .useValue(repository)
       .overrideProvider(AUTH_RATE_LIMITER)

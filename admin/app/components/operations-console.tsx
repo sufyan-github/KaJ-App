@@ -8,6 +8,7 @@ type Admin = { email: string; role: string; userId: string };
 type ModuleKey =
   | "dashboard"
   | "users"
+  | "reports"
   | "jobs"
   | "applications"
   | "verification"
@@ -23,6 +24,7 @@ type ModuleKey =
 const modules: Array<[ModuleKey, string, string]> = [
   ["dashboard", "Dashboard", "Live marketplace health"],
   ["users", "Users", "Support and moderation"],
+  ["reports", "Safety reports", "Human review and progressive action"],
   ["jobs", "Jobs", "Lifecycle rescue"],
   ["applications", "Applications", "Unstick applications"],
   ["verification", "Verification", "Document review queue"],
@@ -105,6 +107,7 @@ export function OperationsConsole({
 function ModuleView({ active }: { active: ModuleKey }) {
   if (active === "dashboard") return <Dashboard />;
   if (active === "users") return <Users />;
+  if (active === "reports") return <Reports />;
   if (active === "jobs") return <Jobs />;
   if (active === "applications") return <Applications />;
   if (active === "verification") return <Verification />;
@@ -206,13 +209,15 @@ function Users() {
   }>("users?limit=100");
   const [action, setAction] = useState<{
     user: UserItem;
-    status?: string;
-    kind: "status" | "reset";
+    level?: string;
+    kind: "moderate" | "restore" | "reset";
   } | null>(null);
   return (
     <State loading={loading} error={error}>
       <Summary count={data?.total ?? 0} label="users" />
-      <DataTable headers={["Person", "Roles", "Trust", "Status", "Actions"]}>
+      <DataTable
+        headers={["Person", "Roles", "Trust", "Moderation", "Actions"]}
+      >
         {(data?.items ?? []).map((user) => (
           <tr key={user.id}>
             <td>
@@ -225,25 +230,30 @@ function Users() {
             </td>
             <td>
               <Badge value={user.status} />
+              <small>{humanize(user.moderationLevel ?? "NONE")}</small>
+              {user.reverificationRequired && (
+                <small>Identity re-verification required</small>
+              )}
             </td>
             <td className="actions">
               <button
                 onClick={() =>
-                  setAction({ user, status: "SUSPENDED", kind: "status" })
+                  setAction({
+                    user,
+                    level: nextModerationLevel(user.moderationLevel),
+                    kind: "moderate",
+                  })
                 }
+                disabled={!nextModerationLevel(user.moderationLevel)}
               >
-                Suspend
+                Next:{" "}
+                {humanize(nextModerationLevel(user.moderationLevel) ?? "final")}
               </button>
               <button
-                onClick={() =>
-                  setAction({ user, status: "BANNED", kind: "status" })
-                }
-              >
-                Ban
-              </button>
-              <button
-                onClick={() =>
-                  setAction({ user, status: "ACTIVE", kind: "status" })
+                onClick={() => setAction({ user, kind: "restore" })}
+                disabled={
+                  (user.moderationLevel ?? "NONE") === "NONE" ||
+                  user.reverificationRequired
                 }
               >
                 Restore
@@ -260,23 +270,31 @@ function Users() {
           title={
             action.kind === "reset"
               ? "Reset all sessions"
-              : `${humanize(action.status!)} user`
+              : action.kind === "restore"
+                ? "Restore user"
+                : `${humanize(action.level!)} moderation step`
           }
           confirmLabel={
             action.kind === "reset"
               ? "Reset sessions"
-              : `Confirm ${humanize(action.status!)}`
+              : action.kind === "restore"
+                ? "Confirm restore"
+                : `Confirm ${humanize(action.level!)}`
           }
           onClose={() => setAction(null)}
           onConfirm={async (reason) => {
             const path =
               action.kind === "reset"
                 ? `users/${action.user.id}/reset-sessions`
-                : `users/${action.user.id}/status`;
+                : action.kind === "restore"
+                  ? `users/${action.user.id}/moderation/restore`
+                  : `users/${action.user.id}/moderation`;
             const body =
               action.kind === "reset"
                 ? { reason }
-                : { reason, status: action.status };
+                : action.kind === "restore"
+                  ? { reason }
+                  : { reason, action: action.level };
             await adminApi(path, json("POST", body));
             setAction(null);
             await reload();
@@ -295,7 +313,210 @@ type UserItem = {
   roles: string[];
   trustLevel: string;
   status: string;
+  moderationLevel?: string;
+  restrictionEndsAt?: string | null;
+  reverificationRequired?: boolean;
 };
+
+function Reports() {
+  const { data, loading, error, reload } = useData<{
+    items: ReportItem[];
+    total: number;
+  }>("reports?limit=100");
+  const [selected, setSelected] = useState<ReportItem | null>(null);
+  return (
+    <State loading={loading} error={error}>
+      <Summary count={data?.total ?? 0} label="safety reports" />
+      <DataTable
+        headers={["Report", "People", "Status", "Evidence", "Actions"]}
+      >
+        {(data?.items ?? []).map((item) => (
+          <tr key={item.id}>
+            <td>
+              <strong>{humanize(item.reasonCode)}</strong>
+              <small>
+                {humanize(item.targetType)} · {formatDate(item.createdAt)}
+              </small>
+            </td>
+            <td>
+              <strong>{item.subject?.name ?? "No user subject"}</strong>
+              <small>Reported by {item.reporter.name}</small>
+              {item.subject && (
+                <small>
+                  Current level: {humanize(item.subject.moderationLevel)}
+                </small>
+              )}
+            </td>
+            <td>
+              <Badge value={item.status} />
+            </td>
+            <td>{item.description}</td>
+            <td className="actions">
+              {item.status === "OPEN" && (
+                <button
+                  onClick={async () => {
+                    await adminApi(
+                      `reports/${item.id}/review`,
+                      json("POST", {}),
+                    );
+                    await reload();
+                  }}
+                >
+                  Start review
+                </button>
+              )}
+              {(item.status === "OPEN" || item.status === "UNDER_REVIEW") && (
+                <button onClick={() => setSelected(item)}>Decide</button>
+              )}
+            </td>
+          </tr>
+        ))}
+      </DataTable>
+      {selected && (
+        <ReportDecisionDialog
+          report={selected}
+          onClose={() => setSelected(null)}
+          onDone={async () => {
+            setSelected(null);
+            await reload();
+          }}
+        />
+      )}
+    </State>
+  );
+}
+
+type ReportItem = {
+  id: string;
+  targetType: string;
+  targetId: string;
+  reasonCode: string;
+  description: string | null;
+  status: string;
+  createdAt: string;
+  reporter: { id: string; name: string };
+  subject: {
+    id: string;
+    name: string;
+    status: string;
+    moderationLevel: string;
+    reverificationRequired: boolean;
+  } | null;
+};
+
+function ReportDecisionDialog({
+  report,
+  onClose,
+  onDone,
+}: {
+  report: ReportItem;
+  onClose: () => void;
+  onDone: () => Promise<void>;
+}) {
+  const [status, setStatus] = useState("ACTIONED");
+  const [action, setAction] = useState(
+    nextModerationLevel(report.subject?.moderationLevel),
+  );
+  const [reason, setReason] = useState("");
+  const [durationDays, setDurationDays] = useState("7");
+  const [requireReverification, setRequireReverification] = useState(false);
+  const [error, setError] = useState("");
+  return (
+    <Dialog title="Resolve safety report" onClose={onClose}>
+      <form
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await adminApi(
+              `reports/${report.id}/decision`,
+              json("POST", {
+                status,
+                reason,
+                ...(status === "ACTIONED"
+                  ? {
+                      action,
+                      durationDays: Number(durationDays),
+                      requireReverification,
+                    }
+                  : {}),
+              }),
+            );
+            await onDone();
+          } catch (caught) {
+            setError((caught as Error).message);
+          }
+        }}
+      >
+        <label>
+          Decision
+          <select
+            value={status}
+            onChange={(event) => setStatus(event.target.value)}
+          >
+            <option value="ACTIONED">Action supported</option>
+            <option value="DISMISSED">Dismiss report</option>
+          </select>
+        </label>
+        {status === "ACTIONED" && (
+          <>
+            <label>
+              Next moderation step
+              <select
+                value={action ?? ""}
+                onChange={(event) => setAction(event.target.value)}
+              >
+                {action && <option value={action}>{humanize(action)}</option>}
+              </select>
+            </label>
+            {(action === "RESTRICT" || action === "SUSPEND") && (
+              <label>
+                Duration in days
+                <input
+                  type="number"
+                  min="1"
+                  max="90"
+                  value={durationDays}
+                  onChange={(event) => setDurationDays(event.target.value)}
+                />
+              </label>
+            )}
+            {action === "RESTRICT" && (
+              <label>
+                <input
+                  type="checkbox"
+                  checked={requireReverification}
+                  onChange={(event) =>
+                    setRequireReverification(event.target.checked)
+                  }
+                />
+                Require identity re-verification
+              </label>
+            )}
+          </>
+        )}
+        <label>
+          Required decision reason
+          <textarea
+            required
+            minLength={10}
+            value={reason}
+            onChange={(event) => setReason(event.target.value)}
+          />
+        </label>
+        {error && <p role="alert">{error}</p>}
+        <div className="dialog-actions">
+          <button type="button" onClick={onClose}>
+            Cancel
+          </button>
+          <button type="submit" disabled={status === "ACTIONED" && !action}>
+            Confirm decision
+          </button>
+        </div>
+      </form>
+    </Dialog>
+  );
+}
 
 function Jobs() {
   const { data, loading, error, reload } = useData<{
@@ -1459,6 +1680,18 @@ function humanize(value: string) {
     .replace(/([a-z])([A-Z])/gu, "$1 $2")
     .toLowerCase()
     .replace(/^./u, (letter) => letter.toUpperCase());
+}
+function nextModerationLevel(value?: string | null) {
+  return (
+    (
+      {
+        NONE: "WARN",
+        WARN: "RESTRICT",
+        RESTRICT: "SUSPEND",
+        SUSPEND: "BAN",
+      } as Record<string, string>
+    )[value ?? "NONE"] ?? null
+  );
 }
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en-BD", {

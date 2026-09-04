@@ -29,17 +29,33 @@ export class VerificationService {
     if (uniqueDocumentIds.length !== input.documentIds.length)
       throw new ConflictException("Each verification document must be unique.");
 
-    const profile = await this.prisma.profile.findUnique({
-      where: { user_id: userId },
-      select: { trust_level: true },
-    });
+    const [profile, user] = await Promise.all([
+      this.prisma.profile.findUnique({
+        where: { user_id: userId },
+        select: { trust_level: true },
+      }),
+      this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { reverification_required: true },
+      }),
+    ]);
     const currentTrust = profile?.trust_level ?? TrustLevel.NONE;
     const required = prerequisiteFor(input.kind);
     if (!hasTrust(currentTrust, required))
       throw new ConflictException(
         `${required} verification is required before ${input.kind}.`,
       );
-    if (hasTrust(currentTrust, trustForVerification(input.kind)))
+    if (
+      user?.reverification_required &&
+      input.kind !== VerificationKind.IDENTITY
+    )
+      throw new ConflictException(
+        "Identity verification is required to restore marketplace access.",
+      );
+    if (
+      !user?.reverification_required &&
+      hasTrust(currentTrust, trustForVerification(input.kind))
+    )
       throw new ConflictException(
         `${input.kind} verification is already active.`,
       );

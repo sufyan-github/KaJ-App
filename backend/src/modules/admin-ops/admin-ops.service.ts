@@ -17,6 +17,7 @@ import {
   Prisma,
   TrustLevel,
   UserStatus,
+  VerificationKind,
   VerificationStatus,
 } from "@prisma/client";
 
@@ -187,6 +188,9 @@ export class AdminOpsService {
         status: user.status,
         roles: user.role_modes,
         trustLevel: user.profile?.trust_level ?? TrustLevel.NONE,
+        moderationLevel: user.moderation_level,
+        restrictionEndsAt: user.restriction_ends_at,
+        reverificationRequired: user.reverification_required,
         adminRole: user.admin_credential?.role ?? null,
         createdAt: user.created_at,
       })),
@@ -203,11 +207,29 @@ export class AdminOpsService {
       throw new ConflictException("Admins cannot moderate their own account.");
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException();
-    const now = new Date();
+    if (input.status !== UserStatus.ACTIVE) {
+      throw new ConflictException(
+        "Use the progressive moderation endpoint for warnings, restrictions, suspensions, and bans.",
+      );
+    }
+    if (user.reverification_required) {
+      throw new ConflictException(
+        "Required identity re-verification must be approved before restoration.",
+      );
+    }
+    if (user.status === UserStatus.ACTIVE && user.moderation_level === "NONE") {
+      throw new ConflictException("The account is already active.");
+    }
+    const now = this.clock.now();
     await this.prisma.$transaction([
       this.prisma.user.update({
         where: { id },
-        data: { status: input.status },
+        data: {
+          status: UserStatus.ACTIVE,
+          moderation_level: "NONE",
+          restriction_ends_at: null,
+          moderation_reason: null,
+        },
       }),
       this.prisma.refreshToken.updateMany({
         where: { user_id: id, revoked_at: null },
@@ -222,8 +244,11 @@ export class AdminOpsService {
           admin_user_id: actor.userId,
           target_type: "USER",
           target_id: id,
-          action: input.status,
+          action: "RESTORE",
+          previous_level: user.moderation_level,
+          level: "NONE",
           reason: input.reason,
+          review_due_at: new Date(now.getTime() + 48 * 3_600_000),
         },
       }),
       this.auditCreate(
@@ -232,11 +257,15 @@ export class AdminOpsService {
         "USER",
         id,
         { status: user.status },
-        { status: input.status, reason: input.reason },
+        {
+          status: UserStatus.ACTIVE,
+          moderationLevel: "NONE",
+          reason: input.reason,
+        },
         context,
       ),
     ]);
-    return { id, status: input.status };
+    return { id, status: UserStatus.ACTIVE, moderationLevel: "NONE" };
   }
 
   async resetUserSessions(
@@ -669,6 +698,19 @@ export class AdminOpsService {
           where: { user_id: request.user_id },
           data: { trust_level: trustLevel },
         });
+      if (
+        candidateTrust &&
+        request.kind === VerificationKind.IDENTITY &&
+        request.user.reverification_required
+      ) {
+        await transaction.user.update({
+          where: { id: request.user_id },
+          data: {
+            reverification_required: false,
+            reverification_requested_at: null,
+          },
+        });
+      }
       if (candidateTrust && hasTrust(trustLevel, TrustLevel.IDENTITY)) {
         const badgeSlugs = [
           "verified",
