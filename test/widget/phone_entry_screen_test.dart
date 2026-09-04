@@ -49,6 +49,9 @@ class _FakeAuthRepository implements AuthRepository {
   Future<void> logout() async {}
 
   @override
+  Future<void> logoutAll() async {}
+
+  @override
   Future<OtpChallenge> requestOtp(String phone) async => OtpChallenge(
     id: '5c24b335-3c2a-4f6f-a37a-237d6f5644d0',
     phone: phone,

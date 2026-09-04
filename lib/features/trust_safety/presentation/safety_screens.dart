@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -5,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/errors/failure.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/k_primary_button.dart';
+import '../../catalog/domain/entities/catalog_category.dart';
 import '../../catalog/presentation/controllers/catalog_providers.dart';
 import '../domain/trust_models.dart';
 import 'trust_safety_providers.dart';
@@ -195,132 +199,462 @@ class BlockedUsersScreen extends ConsumerWidget {
   }
 }
 
-class PortfolioScreen extends ConsumerWidget {
+class PortfolioScreen extends ConsumerStatefulWidget {
   const PortfolioScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PortfolioScreen> createState() => _PortfolioScreenState();
+}
+
+class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
+  static const _maxItems = 20;
+  static const _maxSourceBytes = 5 * 1024 * 1024;
+
+  final Set<String> _busyIds = <String>{};
+  _PortfolioDraft? _pendingDraft;
+  CancelToken? _uploadCancelToken;
+  double _uploadProgress = 0;
+  bool _uploading = false;
+  bool _reordering = false;
+
+  @override
+  Widget build(BuildContext context) {
     final portfolio = ref.watch(portfolioProvider);
+    final itemCount = portfolio.valueOrNull?.length ?? 0;
     return Scaffold(
       appBar: AppBar(title: const Text('কাজের পোর্টফোলিও')),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _add(context, ref),
-        icon: const Icon(Icons.add_a_photo_outlined),
-        label: const Text('কাজ যোগ করুন'),
+        onPressed: _uploading || itemCount >= _maxItems
+            ? null
+            : () => _startAdd(itemCount),
+        icon: _uploading
+            ? const SizedBox.square(
+                dimension: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.add_a_photo_outlined),
+        label: Text(
+          itemCount >= _maxItems
+              ? 'সীমা পূর্ণ'
+              : _uploading
+              ? 'আপলোড হচ্ছে'
+              : 'কাজ যোগ করুন',
+        ),
       ),
       body: portfolio.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: FilledButton(
-            onPressed: () => ref.invalidate(portfolioProvider),
-            child: Text(_message(error)),
-          ),
+        loading: () => const _PortfolioLoading(),
+        error: (error, _) => ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(KSpacing.xl),
+          children: [
+            const SizedBox(height: KSpacing.xxl),
+            const Icon(
+              Icons.cloud_off_outlined,
+              size: 52,
+              color: KColors.textSecondary,
+            ),
+            const SizedBox(height: KSpacing.md),
+            Text(
+              'পোর্টফোলিও লোড করা যায়নি',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: KSpacing.sm),
+            Text(_portfolioMessage(error), textAlign: TextAlign.center),
+            const SizedBox(height: KSpacing.lg),
+            FilledButton.icon(
+              onPressed: () => ref.invalidate(portfolioProvider),
+              icon: const Icon(Icons.refresh),
+              label: const Text('আবার চেষ্টা করুন'),
+            ),
+          ],
         ),
-        data: (items) => items.isEmpty
-            ? const _EmptyPortfolio()
-            : RefreshIndicator(
-                onRefresh: () => ref.refresh(portfolioProvider.future),
-                child: GridView.builder(
-                  padding: const EdgeInsets.all(KSpacing.md),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: KSpacing.sm,
-                    mainAxisSpacing: KSpacing.sm,
-                    childAspectRatio: .72,
-                  ),
-                  itemCount: items.length,
-                  itemBuilder: (context, index) => _PortfolioCard(
-                    item: items[index],
-                    onDelete: () => _delete(context, ref, items[index].id),
+        data: (items) => RefreshIndicator(
+          onRefresh: () => ref.refresh(portfolioProvider.future),
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(
+                  KSpacing.md,
+                  KSpacing.md,
+                  KSpacing.md,
+                  0,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: _PortfolioSummary(
+                    itemCount: items.length,
+                    canReorder: items.length > 1,
+                    reordering: _reordering,
+                    onReorder: () => _showReorder(items),
                   ),
                 ),
               ),
-      ),
-    );
-  }
-
-  Future<void> _add(BuildContext context, WidgetRef ref) async {
-    final categories = await ref.read(categoryTreeProvider.future);
-    if (!context.mounted || categories.isEmpty) return;
-    final image = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 90,
-      maxWidth: 2200,
-    );
-    if (image == null || !context.mounted) return;
-    final caption = TextEditingController();
-    var categoryId = categories.first.id;
-    final accepted = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => Padding(
-          padding: EdgeInsets.fromLTRB(
-            KSpacing.lg,
-            0,
-            KSpacing.lg,
-            MediaQuery.viewInsetsOf(context).bottom + KSpacing.lg,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('কাজের তথ্য', style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: KSpacing.md),
-              DropdownButtonFormField<String>(
-                initialValue: categoryId,
-                isExpanded: true,
-                decoration: const InputDecoration(labelText: 'কাজের ধরন'),
-                items: categories
-                    .map(
-                      (item) => DropdownMenuItem(
-                        value: item.id,
-                        child: Text(item.nameBn),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (value) =>
-                    setModalState(() => categoryId = value ?? categoryId),
-              ),
-              const SizedBox(height: KSpacing.md),
-              TextField(
-                controller: caption,
-                maxLength: 300,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'ক্যাপশন (ঐচ্ছিক)',
-                  hintText: 'কাজটি সম্পর্কে সংক্ষেপে লিখুন',
+              if (_pendingDraft != null)
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(
+                    KSpacing.md,
+                    KSpacing.md,
+                    KSpacing.md,
+                    0,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: _PendingUploadCard(
+                      draft: _pendingDraft!,
+                      progress: _uploadProgress,
+                      uploading: _uploading,
+                      onCancel: _cancelOrDiscardUpload,
+                      onRetry: _uploading ? null : _uploadPending,
+                    ),
+                  ),
                 ),
-              ),
-              KPrimaryButton(
-                label: 'নিরাপদে আপলোড করুন',
-                onPressed: () => Navigator.pop(context, true),
-              ),
+              if (items.isEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: _EmptyPortfolio(onAdd: () => _startAdd(items.length)),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(
+                    KSpacing.md,
+                    KSpacing.md,
+                    KSpacing.md,
+                    112,
+                  ),
+                  sliver: SliverGrid.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: MediaQuery.sizeOf(context).width >= 680
+                          ? 3
+                          : 2,
+                      crossAxisSpacing: KSpacing.sm,
+                      mainAxisSpacing: KSpacing.sm,
+                      mainAxisExtent: _cardHeight(context),
+                    ),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) => _PortfolioCard(
+                      item: items[index],
+                      busy: _busyIds.contains(items[index].id),
+                      onOpen: () => _showPreview(items[index]),
+                      onEdit: () => _edit(items[index]),
+                      onDelete: () => _delete(items[index].id),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
       ),
     );
-    if (accepted != true || !context.mounted) return;
+  }
+
+  double _cardHeight(BuildContext context) {
+    final scale = MediaQuery.textScalerOf(context).scale(16) / 16;
+    return 286 + ((scale - 1).clamp(0, 1) * 82);
+  }
+
+  Future<void> _startAdd(int itemCount) async {
+    if (itemCount >= _maxItems) {
+      _snack('সর্বোচ্চ ২০টি কাজের নমুনা রাখা যায়।');
+      return;
+    }
+    try {
+      final source = await _chooseImageSource();
+      if (source == null || !mounted) return;
+      final picked = await ImagePicker().pickImage(
+        source: source,
+        imageQuality: 92,
+        maxWidth: 2400,
+      );
+      if (picked == null || !mounted) return;
+      final bytes = await picked.readAsBytes();
+      if (!_isSupportedImage(bytes)) {
+        _snack('শুধু JPEG বা PNG ছবি যোগ করা যাবে।');
+        return;
+      }
+      if (bytes.length > _maxSourceBytes) {
+        _snack('ছবিটি ৫ MB-এর বেশি। ছোট একটি ছবি বেছে নিন।');
+        return;
+      }
+      final categories = await ref.read(categoryTreeProvider.future);
+      if (!mounted) return;
+      if (categories.isEmpty) {
+        _snack('কাজের ধরন পাওয়া যায়নি। আবার চেষ্টা করুন।');
+        return;
+      }
+      final details = await showModalBottomSheet<_PortfolioDetails>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (_) =>
+            _PortfolioDetailsSheet(categories: categories, previewBytes: bytes),
+      );
+      if (details == null || !mounted) return;
+      setState(() {
+        _pendingDraft = _PortfolioDraft(
+          bytes: bytes,
+          categoryId: details.categoryId,
+          categoryName: details.categoryName,
+          caption: details.caption,
+        );
+      });
+      await _uploadPending();
+    } on Object catch (error) {
+      if (mounted) _snack(_portfolioMessage(error));
+    }
+  }
+
+  Future<ImageSource?> _chooseImageSource() =>
+      showModalBottomSheet<ImageSource>(
+        context: context,
+        showDragHandle: true,
+        builder: (context) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              KSpacing.md,
+              0,
+              KSpacing.md,
+              KSpacing.md,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'ছবি যোগ করুন',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: KSpacing.md),
+                ListTile(
+                  leading: const Icon(Icons.photo_camera_outlined),
+                  title: const Text('ক্যামেরা দিয়ে তুলুন'),
+                  subtitle: const Text('এখনই কাজের একটি পরিষ্কার ছবি তুলুন'),
+                  onTap: () => Navigator.pop(context, ImageSource.camera),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_library_outlined),
+                  title: const Text('গ্যালারি থেকে নিন'),
+                  subtitle: const Text('আগে তোলা JPEG বা PNG ছবি বেছে নিন'),
+                  onTap: () => Navigator.pop(context, ImageSource.gallery),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+  Future<void> _uploadPending() async {
+    final draft = _pendingDraft;
+    if (draft == null || _uploading) return;
+    final cancelToken = CancelToken();
+    setState(() {
+      _uploading = true;
+      _uploadProgress = 0;
+      _uploadCancelToken = cancelToken;
+    });
     try {
       await ref
           .read(trustSafetyRepositoryProvider)
           .addPortfolioItem(
-            image: await image.readAsBytes(),
-            categoryId: categoryId,
-            caption: caption.text,
+            image: draft.bytes,
+            categoryId: draft.categoryId,
+            caption: draft.caption,
+            cancelToken: cancelToken,
+            onProgress: (value) {
+              if (mounted) setState(() => _uploadProgress = value);
+            },
           );
+      if (!mounted) return;
+      setState(() => _pendingDraft = null);
       ref.invalidate(portfolioProvider);
+      _snack('কাজের নমুনা পোর্টফোলিওতে যোগ হয়েছে।');
     } on Object catch (error) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(_message(error))));
+      if (mounted) {
+        _snack(
+          cancelToken.isCancelled
+              ? 'আপলোড বাতিল হয়েছে। চাইলে আবার চেষ্টা করুন।'
+              : _portfolioMessage(error),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _uploading = false;
+          _uploadCancelToken = null;
+        });
       }
     }
   }
 
-  Future<void> _delete(BuildContext context, WidgetRef ref, String id) async {
+  void _cancelOrDiscardUpload() {
+    if (_uploading) {
+      _uploadCancelToken?.cancel('Cancelled by user');
+      return;
+    }
+    setState(() {
+      _pendingDraft = null;
+      _uploadProgress = 0;
+    });
+  }
+
+  Future<void> _edit(PortfolioItem item) async {
+    if (_busyIds.contains(item.id)) return;
+    try {
+      final categories = await ref.read(categoryTreeProvider.future);
+      if (!mounted || categories.isEmpty) return;
+      final details = await showModalBottomSheet<_PortfolioDetails>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (_) => _PortfolioDetailsSheet(
+          categories: categories,
+          initialCategoryId: item.categoryId,
+          initialCaption: item.caption,
+          submitLabel: 'পরিবর্তন সংরক্ষণ করুন',
+        ),
+      );
+      if (details == null || !mounted) return;
+      setState(() => _busyIds.add(item.id));
+      await ref
+          .read(trustSafetyRepositoryProvider)
+          .updatePortfolioItem(
+            id: item.id,
+            categoryId: details.categoryId,
+            caption: details.caption,
+          );
+      ref.invalidate(portfolioProvider);
+      _snack('পোর্টফোলিওর তথ্য আপডেট হয়েছে।');
+    } on Object catch (error) {
+      if (mounted) _snack(_portfolioMessage(error));
+    } finally {
+      if (mounted) setState(() => _busyIds.remove(item.id));
+    }
+  }
+
+  Future<void> _showReorder(List<PortfolioItem> items) async {
+    if (_reordering) return;
+    final order = [...items];
+    final accepted = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) => SafeArea(
+          child: SizedBox(
+            height: MediaQuery.sizeOf(context).height * .76,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                KSpacing.md,
+                0,
+                KSpacing.md,
+                KSpacing.md,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'কাজের নমুনার ক্রম',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: KSpacing.xs),
+                  const Text('ড্র্যাগ করে গুরুত্বপূর্ণ কাজ উপরে রাখুন।'),
+                  const SizedBox(height: KSpacing.md),
+                  Expanded(
+                    child: ReorderableListView.builder(
+                      itemCount: order.length,
+                      onReorderItem: (oldIndex, newIndex) {
+                        setSheetState(() {
+                          final moved = order.removeAt(oldIndex);
+                          order.insert(newIndex, moved);
+                        });
+                      },
+                      itemBuilder: (context, index) {
+                        final item = order[index];
+                        return Card(
+                          key: ValueKey(item.id),
+                          child: ListTile(
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                item.imageUrl,
+                                width: 52,
+                                height: 52,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => const SizedBox(
+                                  width: 52,
+                                  height: 52,
+                                  child: Icon(
+                                    Icons.image_not_supported_outlined,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            title: Text(item.categoryName),
+                            subtitle: Text(
+                              item.caption?.isNotEmpty == true
+                                  ? item.caption!
+                                  : 'ক্যাপশন নেই',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  tooltip: 'উপরে নিন',
+                                  onPressed: index == 0
+                                      ? null
+                                      : () => setSheetState(() {
+                                          final moved = order.removeAt(index);
+                                          order.insert(index - 1, moved);
+                                        }),
+                                  icon: const Icon(Icons.arrow_upward),
+                                ),
+                                IconButton(
+                                  tooltip: 'নিচে নিন',
+                                  onPressed: index == order.length - 1
+                                      ? null
+                                      : () => setSheetState(() {
+                                          final moved = order.removeAt(index);
+                                          order.insert(index + 1, moved);
+                                        }),
+                                  icon: const Icon(Icons.arrow_downward),
+                                ),
+                                const Icon(Icons.drag_handle),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: KSpacing.md),
+                  KPrimaryButton(
+                    label: 'ক্রম সংরক্ষণ করুন',
+                    onPressed: () => Navigator.pop(context, true),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    if (accepted != true || !mounted) return;
+    setState(() => _reordering = true);
+    try {
+      await ref
+          .read(trustSafetyRepositoryProvider)
+          .reorderPortfolioItems(order.map((item) => item.id).toList());
+      ref.invalidate(portfolioProvider);
+      _snack('পোর্টফোলিওর ক্রম সংরক্ষণ হয়েছে।');
+    } on Object catch (error) {
+      if (mounted) _snack(_portfolioMessage(error));
+    } finally {
+      if (mounted) setState(() => _reordering = false);
+    }
+  }
+
+  Future<void> _delete(String id) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -338,40 +672,238 @@ class PortfolioScreen extends ConsumerWidget {
         ],
       ),
     );
-    if (confirmed != true) return;
+    if (confirmed != true || !mounted) return;
+    setState(() => _busyIds.add(id));
     try {
       await ref.read(trustSafetyRepositoryProvider).deletePortfolioItem(id);
       ref.invalidate(portfolioProvider);
+      _snack('কাজের নমুনাটি মুছে ফেলা হয়েছে।');
     } on Object catch (error) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(_message(error))));
-      }
+      if (mounted) _snack(_portfolioMessage(error));
+    } finally {
+      if (mounted) setState(() => _busyIds.remove(id));
     }
+  }
+
+  void _showPreview(PortfolioItem item) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => Dialog.fullscreen(
+        child: Scaffold(
+          appBar: AppBar(title: Text(item.categoryName)),
+          body: Column(
+            children: [
+              Expanded(
+                child: InteractiveViewer(
+                  child: Center(
+                    child: Image.network(
+                      item.imageUrl,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, _, _) => const Padding(
+                        padding: EdgeInsets.all(KSpacing.xl),
+                        child: Text('ছবিটি এখন দেখানো যাচ্ছে না।'),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (item.caption?.isNotEmpty == true)
+                Padding(
+                  padding: const EdgeInsets.all(KSpacing.lg),
+                  child: Text(item.caption!),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _snack(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 }
 
 class _EmptyPortfolio extends StatelessWidget {
-  const _EmptyPortfolio();
+  const _EmptyPortfolio({required this.onAdd});
+
+  final VoidCallback onAdd;
+
   @override
-  Widget build(BuildContext context) => const Center(
+  Widget build(BuildContext context) => Center(
     child: Padding(
-      padding: EdgeInsets.all(KSpacing.xl),
+      padding: const EdgeInsets.fromLTRB(
+        KSpacing.xl,
+        KSpacing.xxl,
+        KSpacing.xl,
+        120,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.photo_library_outlined, size: 56, color: KColors.primary),
-          SizedBox(height: KSpacing.md),
-          Text(
-            'আপনার কাজ দেখান — বেশি কাজ পান',
+          const Icon(
+            Icons.photo_library_outlined,
+            size: 56,
+            color: KColors.primary,
+          ),
+          const SizedBox(height: KSpacing.md),
+          const Text(
+            'আপনার কাজ দেখান — বেশি কাজ পাবেন',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
           ),
-          SizedBox(height: KSpacing.sm),
-          Text(
+          const SizedBox(height: KSpacing.sm),
+          const Text(
             'ছবি, ক্যাপশন ও কাজের ধরনসহ সর্বোচ্চ ২০টি নমুনা যোগ করুন।',
             textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: KSpacing.lg),
+          OutlinedButton.icon(
+            onPressed: onAdd,
+            icon: const Icon(Icons.add_photo_alternate_outlined),
+            label: const Text('প্রথম কাজটি যোগ করুন'),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _PortfolioSummary extends StatelessWidget {
+  const _PortfolioSummary({
+    required this.itemCount,
+    required this.canReorder,
+    required this.reordering,
+    required this.onReorder,
+  });
+
+  final int itemCount;
+  final bool canReorder;
+  final bool reordering;
+  final VoidCallback onReorder;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    margin: EdgeInsets.zero,
+    child: Padding(
+      padding: const EdgeInsets.all(KSpacing.md),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: KColors.primary.withValues(alpha: .1),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(
+              Icons.collections_outlined,
+              color: KColors.primary,
+            ),
+          ),
+          const SizedBox(width: KSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${_banglaNumber(itemCount)} / ২০টি কাজের নমুনা',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: KSpacing.xs),
+                const Text(
+                  'পরিষ্কার ছবি ও সংক্ষিপ্ত বর্ণনা বেশি আস্থা তৈরি করে।',
+                ),
+              ],
+            ),
+          ),
+          if (canReorder)
+            IconButton(
+              onPressed: reordering ? null : onReorder,
+              tooltip: 'ক্রম বদলান',
+              icon: reordering
+                  ? const SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.reorder),
+            ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _PendingUploadCard extends StatelessWidget {
+  const _PendingUploadCard({
+    required this.draft,
+    required this.progress,
+    required this.uploading,
+    required this.onCancel,
+    required this.onRetry,
+  });
+
+  final _PortfolioDraft draft;
+  final double progress;
+  final bool uploading;
+  final VoidCallback onCancel;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    margin: EdgeInsets.zero,
+    child: Padding(
+      padding: const EdgeInsets.all(KSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.memory(
+                  draft.bytes,
+                  width: 64,
+                  height: 64,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(width: KSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      uploading ? 'নিরাপদে আপলোড হচ্ছে' : 'আপলোড সম্পন্ন হয়নি',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    Text(draft.categoryName),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: KSpacing.md),
+          LinearProgressIndicator(value: uploading ? progress : 0),
+          const SizedBox(height: KSpacing.sm),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: onCancel,
+                child: Text(uploading ? 'বাতিল করুন' : 'বাদ দিন'),
+              ),
+              if (!uploading) ...[
+                const SizedBox(width: KSpacing.sm),
+                FilledButton.icon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('আবার চেষ্টা করুন'),
+                ),
+              ],
+            ],
           ),
         ],
       ),
@@ -380,49 +912,108 @@ class _EmptyPortfolio extends StatelessWidget {
 }
 
 class _PortfolioCard extends StatelessWidget {
-  const _PortfolioCard({required this.item, required this.onDelete});
+  const _PortfolioCard({
+    required this.item,
+    required this.busy,
+    required this.onOpen,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
   final PortfolioItem item;
+  final bool busy;
+  final VoidCallback onOpen;
+  final VoidCallback onEdit;
   final VoidCallback onDelete;
+
   @override
   Widget build(BuildContext context) => Card(
     clipBehavior: Clip.antiAlias,
     margin: EdgeInsets.zero,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Image.network(
-            item.imageUrl,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) =>
-                const Center(child: Icon(Icons.broken_image_outlined)),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            KSpacing.sm,
-            KSpacing.sm,
-            0,
-            KSpacing.xs,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  item.categoryName,
-                  style: Theme.of(context).textTheme.labelLarge,
+    child: InkWell(
+      onTap: busy ? null : onOpen,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.network(
+                  item.imageUrl,
+                  semanticLabel: '${item.categoryName} কাজের ছবি',
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, progress) => progress == null
+                      ? child
+                      : const Center(child: CircularProgressIndicator()),
+                  errorBuilder: (_, _, _) => const Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.broken_image_outlined),
+                        SizedBox(height: KSpacing.xs),
+                        Text('ছবি লোড হয়নি'),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              IconButton(
-                onPressed: onDelete,
-                tooltip: 'মুছুন',
-                icon: const Icon(Icons.delete_outline),
-              ),
-            ],
+                if (busy)
+                  const ColoredBox(
+                    color: Color(0x66000000),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+              ],
+            ),
           ),
-        ),
-        if (item.caption != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              KSpacing.sm,
+              KSpacing.sm,
+              0,
+              KSpacing.xs,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    item.categoryName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                ),
+                PopupMenuButton<_PortfolioAction>(
+                  enabled: !busy,
+                  tooltip: 'কাজের নমুনার অপশন',
+                  onSelected: (action) => switch (action) {
+                    _PortfolioAction.edit => onEdit(),
+                    _PortfolioAction.delete => onDelete(),
+                  },
+                  itemBuilder: (_) => const [
+                    PopupMenuItem(
+                      value: _PortfolioAction.edit,
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Icon(Icons.edit_outlined),
+                        title: Text('তথ্য সম্পাদনা'),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: _PortfolioAction.delete,
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Icon(
+                          Icons.delete_outline,
+                          color: KColors.danger,
+                        ),
+                        title: Text('মুছুন'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(
               KSpacing.sm,
@@ -431,15 +1022,232 @@ class _PortfolioCard extends StatelessWidget {
               KSpacing.sm,
             ),
             child: Text(
-              item.caption!,
+              item.caption?.isNotEmpty == true
+                  ? item.caption!
+                  : 'ক্যাপশন যোগ করা হয়নি',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: item.caption?.isNotEmpty == true
+                    ? KColors.textSecondary
+                    : KColors.textSecondary.withValues(alpha: .75),
+              ),
             ),
           ),
-      ],
+        ],
+      ),
     ),
   );
 }
+
+class _PortfolioDetailsSheet extends StatefulWidget {
+  const _PortfolioDetailsSheet({
+    required this.categories,
+    this.previewBytes,
+    this.initialCategoryId,
+    this.initialCaption,
+    this.submitLabel = 'নিরাপদে আপলোড করুন',
+  });
+
+  final List<CatalogCategory> categories;
+  final Uint8List? previewBytes;
+  final String? initialCategoryId;
+  final String? initialCaption;
+  final String submitLabel;
+
+  @override
+  State<_PortfolioDetailsSheet> createState() => _PortfolioDetailsSheetState();
+}
+
+class _PortfolioDetailsSheetState extends State<_PortfolioDetailsSheet> {
+  late final TextEditingController _caption;
+  late String _categoryId;
+
+  @override
+  void initState() {
+    super.initState();
+    _caption = TextEditingController(text: widget.initialCaption);
+    final ids = widget.categories.map((item) => item.id);
+    _categoryId = ids.contains(widget.initialCategoryId)
+        ? widget.initialCategoryId!
+        : widget.categories.first.id;
+  }
+
+  @override
+  void dispose() {
+    _caption.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => SafeArea(
+    child: SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(
+        KSpacing.lg,
+        0,
+        KSpacing.lg,
+        MediaQuery.viewInsetsOf(context).bottom + KSpacing.lg,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('কাজের তথ্য', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: KSpacing.sm),
+          const Text(
+            'কাজের ধরন ও সংক্ষিপ্ত বর্ণনা গ্রাহককে সিদ্ধান্ত নিতে সাহায্য করে।',
+          ),
+          if (widget.previewBytes != null) ...[
+            const SizedBox(height: KSpacing.md),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Image.memory(
+                widget.previewBytes!,
+                height: 180,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ],
+          const SizedBox(height: KSpacing.md),
+          DropdownButtonFormField<String>(
+            initialValue: _categoryId,
+            isExpanded: true,
+            decoration: const InputDecoration(labelText: 'কাজের ধরন'),
+            items: widget.categories
+                .map<DropdownMenuItem<String>>(
+                  (item) => DropdownMenuItem(
+                    value: item.id,
+                    child: Text(item.nameBn),
+                  ),
+                )
+                .toList(growable: false),
+            onChanged: (value) => setState(() => _categoryId = value!),
+          ),
+          const SizedBox(height: KSpacing.md),
+          TextField(
+            controller: _caption,
+            maxLength: 300,
+            maxLines: 3,
+            decoration: const InputDecoration(
+              labelText: 'ক্যাপশন (ঐচ্ছিক)',
+              hintText: 'কী কাজ করেছেন ও ফলাফল কী হয়েছে লিখুন',
+            ),
+          ),
+          KPrimaryButton(
+            label: widget.submitLabel,
+            onPressed: () {
+              final category = widget.categories.firstWhere(
+                (item) => item.id == _categoryId,
+              );
+              Navigator.pop(
+                context,
+                _PortfolioDetails(
+                  categoryId: _categoryId,
+                  categoryName: category.nameBn,
+                  caption: _caption.text.trim(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _PortfolioDetails {
+  const _PortfolioDetails({
+    required this.categoryId,
+    required this.categoryName,
+    required this.caption,
+  });
+
+  final String categoryId;
+  final String categoryName;
+  final String caption;
+}
+
+class _PortfolioDraft {
+  const _PortfolioDraft({
+    required this.bytes,
+    required this.categoryId,
+    required this.categoryName,
+    required this.caption,
+  });
+
+  final Uint8List bytes;
+  final String categoryId;
+  final String categoryName;
+  final String caption;
+}
+
+enum _PortfolioAction { edit, delete }
+
+class _PortfolioLoading extends StatelessWidget {
+  const _PortfolioLoading();
+
+  @override
+  Widget build(BuildContext context) => ListView(
+    physics: const AlwaysScrollableScrollPhysics(),
+    padding: const EdgeInsets.all(KSpacing.md),
+    children: const [
+      Card(
+        child: SizedBox(
+          height: 88,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
+    ],
+  );
+}
+
+bool _isSupportedImage(Uint8List bytes) {
+  final jpeg =
+      bytes.length >= 3 &&
+      bytes[0] == 0xff &&
+      bytes[1] == 0xd8 &&
+      bytes[2] == 0xff;
+  final png =
+      bytes.length >= 8 &&
+      bytes[0] == 0x89 &&
+      bytes[1] == 0x50 &&
+      bytes[2] == 0x4e &&
+      bytes[3] == 0x47 &&
+      bytes[4] == 0x0d &&
+      bytes[5] == 0x0a &&
+      bytes[6] == 0x1a &&
+      bytes[7] == 0x0a;
+  return jpeg || png;
+}
+
+String _portfolioMessage(Object error) {
+  if (error is Failure) {
+    final lower = error.message.toLowerCase();
+    if (lower.contains('20 item') || lower.contains('at most 20')) {
+      return 'সর্বোচ্চ ২০টি কাজের নমুনা রাখা যায়।';
+    }
+    if (lower.contains('network') || lower.contains('connection')) {
+      return 'ইন্টারনেট সংযোগ পাওয়া যায়নি। সংযোগ ঠিক করে আবার চেষ্টা করুন।';
+    }
+    if (lower.contains('category')) {
+      return 'কাজের ধরনটি আর ব্যবহারযোগ্য নয়। অন্য ধরন বেছে নিন।';
+    }
+  }
+  return 'কাজটি সম্পন্ন হয়নি। আবার চেষ্টা করুন।';
+}
+
+String _banglaNumber(int value) => value
+    .toString()
+    .replaceAll('0', '০')
+    .replaceAll('1', '১')
+    .replaceAll('2', '২')
+    .replaceAll('3', '৩')
+    .replaceAll('4', '৪')
+    .replaceAll('5', '৫')
+    .replaceAll('6', '৬')
+    .replaceAll('7', '৭')
+    .replaceAll('8', '৮')
+    .replaceAll('9', '৯');
 
 String _message(Object error) =>
     error is Failure ? error.message : 'কাজটি সম্পন্ন হয়নি। আবার চেষ্টা করুন।';

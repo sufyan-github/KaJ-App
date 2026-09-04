@@ -57,6 +57,9 @@ class _FakeAuthRepository implements AuthRepository {
   Future<void> logout() async {}
 
   @override
+  Future<void> logoutAll() async {}
+
+  @override
   Future<OtpChallenge> requestOtp(String phone) async {
     requestCount++;
     return OtpChallenge(

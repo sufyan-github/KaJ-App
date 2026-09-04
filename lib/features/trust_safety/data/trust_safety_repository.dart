@@ -56,12 +56,18 @@ class TrustSafetyRepository {
         );
       });
 
-  Future<String> uploadImage(String kind, Uint8List source) async {
+  Future<String> uploadImage(
+    String kind,
+    Uint8List source, {
+    void Function(double progress)? onProgress,
+    CancelToken? cancelToken,
+  }) async {
+    final portfolio = kind == 'PORTFOLIO_IMAGE';
     final bytes = await FlutterImageCompress.compressWithList(
       source,
-      minWidth: 1800,
-      minHeight: 1800,
-      quality: 82,
+      minWidth: portfolio ? 1600 : 1800,
+      minHeight: portfolio ? 1600 : 1800,
+      quality: portfolio ? 85 : 82,
       format: CompressFormat.jpeg,
     );
     final signedResponse = await _dio.post<Map<String, dynamic>>(
@@ -77,6 +83,10 @@ class TrustSafetyRepository {
           signed['requiredHeaders'] as Map? ?? const {},
         )..['content-length'] = bytes.length,
       ),
+      cancelToken: cancelToken,
+      onSendProgress: (sent, total) {
+        if (total > 0) onProgress?.call(sent / total);
+      },
     );
     final complete = await _dio.post<Map<String, dynamic>>(
       '/uploads/complete',
@@ -221,13 +231,20 @@ class TrustSafetyRepository {
     return _items(response.data).map(PortfolioItem.fromJson).toList();
   });
 
-  Future<void> addPortfolioItem({
+  Future<PortfolioItem> addPortfolioItem({
     required Uint8List image,
     required String categoryId,
     String? caption,
+    void Function(double progress)? onProgress,
+    CancelToken? cancelToken,
   }) async => _guard(() async {
-    final documentId = await uploadImage('PORTFOLIO_IMAGE', image);
-    await _dio.post<Map<String, dynamic>>(
+    final documentId = await uploadImage(
+      'PORTFOLIO_IMAGE',
+      image,
+      onProgress: onProgress,
+      cancelToken: cancelToken,
+    );
+    final response = await _dio.post<Map<String, dynamic>>(
       '/profiles/me/portfolio',
       data: {
         'documentId': documentId,
@@ -235,7 +252,28 @@ class TrustSafetyRepository {
         if (caption?.trim().isNotEmpty ?? false) 'caption': caption!.trim(),
       },
     );
+    return PortfolioItem.fromJson(_data(response.data));
   });
+
+  Future<PortfolioItem> updatePortfolioItem({
+    required String id,
+    required String categoryId,
+    String? caption,
+  }) async => _guard(() async {
+    final response = await _dio.patch<Map<String, dynamic>>(
+      '/profiles/me/portfolio/$id',
+      data: {'categoryId': categoryId, 'caption': caption?.trim() ?? ''},
+    );
+    return PortfolioItem.fromJson(_data(response.data));
+  });
+
+  Future<void> reorderPortfolioItems(List<String> itemIds) async =>
+      _guard(() async {
+        await _dio.put<Map<String, dynamic>>(
+          '/profiles/me/portfolio/order',
+          data: {'itemIds': itemIds},
+        );
+      });
 
   Future<void> deletePortfolioItem(String id) async => _guard(() async {
     await _dio.delete<Map<String, dynamic>>('/profiles/me/portfolio/$id');

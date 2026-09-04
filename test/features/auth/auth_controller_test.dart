@@ -40,6 +40,16 @@ void main() {
     expect(repository.logoutCalled, isTrue);
     expect(controller.state.status, AuthStatus.unauthenticated);
   });
+
+  test('logout all clears the authenticated state', () async {
+    repository.hasSession = true;
+    await controller.restoreSession();
+
+    await controller.logoutAll();
+
+    expect(repository.logoutCalled, isTrue);
+    expect(controller.state.status, AuthStatus.unauthenticated);
+  });
 }
 
 class _FakeAuthRepository implements AuthRepository {
@@ -48,6 +58,12 @@ class _FakeAuthRepository implements AuthRepository {
 
   @override
   Future<void> logout() async {
+    logoutCalled = true;
+    hasSession = false;
+  }
+
+  @override
+  Future<void> logoutAll() async {
     logoutCalled = true;
     hasSession = false;
   }

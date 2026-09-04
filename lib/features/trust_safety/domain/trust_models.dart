@@ -211,6 +211,8 @@ class PortfolioItem {
     required this.imageUrl,
     required this.categoryId,
     required this.categoryName,
+    required this.sortOrder,
+    required this.createdAt,
     this.caption,
   });
 
@@ -224,6 +226,10 @@ class PortfolioItem {
       caption: json['caption'] as String?,
       categoryId: category['id'] as String? ?? '',
       categoryName: category['nameBn'] as String? ?? 'কাজ',
+      sortOrder: (json['sortOrder'] as num?)?.toInt() ?? 0,
+      createdAt:
+          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+          DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
     );
   }
 
@@ -232,4 +238,6 @@ class PortfolioItem {
   final String? caption;
   final String categoryId;
   final String categoryName;
+  final int sortOrder;
+  final DateTime createdAt;
 }

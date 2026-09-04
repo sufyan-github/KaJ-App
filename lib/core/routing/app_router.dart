@@ -16,6 +16,7 @@ import '../../features/onboarding/domain/onboarding_state.dart';
 import '../../features/onboarding/presentation/controllers/onboarding_controller.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screens.dart';
 import '../../features/profile/presentation/screens/phase2_hub_screens.dart';
+import '../../features/settings/presentation/settings_screens.dart';
 import '../../features/trust_safety/presentation/attendance_screen.dart';
 import '../../features/trust_safety/presentation/dispute_screens.dart';
 import '../../features/trust_safety/presentation/safety_screens.dart';
@@ -37,6 +38,9 @@ abstract final class AppRoutes {
   static const editWorkerSkills = '/w/profile/skills';
   static const editAvailability = '/w/availability';
   static const settings = '/settings';
+  static const notificationSettings = '/settings/notifications';
+  static const privacySettings = '/settings/privacy';
+  static const accountSettings = '/settings/account';
   static const helpSafety = '/help-safety';
   static const jobs = '/jobs';
   static const createJob = '/jobs/create';
@@ -194,6 +198,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.settings,
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.notificationSettings,
+        builder: (context, state) => const NotificationPreferencesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.privacySettings,
+        builder: (context, state) => const PrivacySettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.accountSettings,
+        builder: (context, state) => const DataAccountScreen(),
       ),
       GoRoute(
         path: AppRoutes.helpSafety,

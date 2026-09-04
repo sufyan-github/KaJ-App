@@ -75,4 +75,16 @@ class AuthRepositoryImpl implements AuthRepository {
       await _tokens.clearSession();
     }
   }
+
+  @override
+  Future<void> logoutAll() async {
+    final refreshToken = await _tokens.readRefreshToken();
+    try {
+      if (refreshToken != null) await _remote.logoutAll(refreshToken);
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    } finally {
+      await _tokens.clearSession();
+    }
+  }
 }

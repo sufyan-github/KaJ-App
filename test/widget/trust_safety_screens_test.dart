@@ -42,8 +42,50 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('আপনার কাজ দেখান — বেশি কাজ পান'), findsOneWidget);
+    expect(find.text('আপনার কাজ দেখান — বেশি কাজ পাবেন'), findsOneWidget);
+    expect(find.text('০ / ২০টি কাজের নমুনা'), findsOneWidget);
+    expect(find.text('প্রথম কাজটি যোগ করুন'), findsOneWidget);
     expect(find.text('কাজ যোগ করুন'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('portfolio grid remains usable at 200% text', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(360, 760));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          portfolioProvider.overrideWith(
+            (ref) async => [
+              PortfolioItem(
+                id: 'portfolio-1',
+                imageUrl: 'https://example.invalid/work.jpg',
+                categoryId: 'category-1',
+                categoryName: 'বৈদ্যুতিক কাজ',
+                caption: 'সিলিং ফ্যান নিরাপদে মেরামত করেছি',
+                sortOrder: 0,
+                createdAt: DateTime.utc(2026, 9, 5),
+              ),
+            ],
+          ),
+        ],
+        child: MaterialApp(
+          theme: buildAppTheme(),
+          home: const MediaQuery(
+            data: MediaQueryData(
+              size: Size(360, 760),
+              textScaler: TextScaler.linear(2),
+            ),
+            child: PortfolioScreen(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('১ / ২০টি কাজের নমুনা'), findsOneWidget);
+    expect(find.text('বৈদ্যুতিক কাজ'), findsOneWidget);
+    expect(find.byTooltip('কাজের নমুনার অপশন'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

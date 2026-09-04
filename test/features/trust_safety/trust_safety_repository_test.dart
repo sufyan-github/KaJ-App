@@ -34,6 +34,7 @@ void main() {
       expect(disputes.single.status, 'EVIDENCE');
       expect(blocked.single.displayName, 'রহিম');
       expect(portfolio.single.categoryName, 'বৈদ্যুতিক');
+      expect(portfolio.single.sortOrder, 0);
     },
   );
 
@@ -67,6 +68,35 @@ void main() {
       expect(
         request.data,
         containsPair('capturedAt', capturedAt.toIso8601String()),
+      );
+    },
+  );
+
+  test(
+    'updates portfolio details and sends the complete display order',
+    () async {
+      final adapter = _TrustAdapter();
+      final repository = TrustSafetyRepository(
+        Dio(BaseOptions(baseUrl: 'https://kaaj.test/api/v1'))
+          ..httpClientAdapter = adapter,
+      );
+
+      final updated = await repository.updatePortfolioItem(
+        id: 'portfolio-1',
+        categoryId: 'category-2',
+        caption: '  নতুন কাজ  ',
+      );
+      await repository.reorderPortfolioItems(['portfolio-2', 'portfolio-1']);
+
+      expect(updated.caption, 'নতুন কাজ');
+      final update = adapter.requests.first;
+      expect(update.method, 'PATCH');
+      expect(update.data, containsPair('caption', 'নতুন কাজ'));
+      final reorder = adapter.requests.last;
+      expect(reorder.path, '/profiles/me/portfolio/order');
+      expect(
+        reorder.data,
+        containsPair('itemIds', ['portfolio-2', 'portfolio-1']),
       );
     },
   );
@@ -127,12 +157,22 @@ class _TrustAdapter implements HttpClientAdapter {
           },
         ],
       },
+      '/profiles/me/portfolio/portfolio-1' => {
+        'id': 'portfolio-1',
+        'imageUrl': 'https://storage.test/image',
+        'caption': 'নতুন কাজ',
+        'sortOrder': 0,
+        'createdAt': '2026-09-01T00:00:00.000Z',
+        'category': {'id': 'category-2', 'nameBn': 'মেরামত'},
+      },
       '/profiles/me/portfolio' => {
         'items': [
           {
             'id': 'portfolio-1',
             'imageUrl': 'https://storage.test/image',
             'caption': 'ফ্যান মেরামত',
+            'sortOrder': 0,
+            'createdAt': '2026-09-01T00:00:00.000Z',
             'category': {'id': 'category-1', 'nameBn': 'বৈদ্যুতিক'},
           },
         ],

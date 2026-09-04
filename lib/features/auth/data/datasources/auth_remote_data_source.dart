@@ -37,6 +37,13 @@ class AuthRemoteDataSource {
     await _dio.post<void>('/auth/logout', data: {'refreshToken': refreshToken});
   }
 
+  Future<void> logoutAll(String refreshToken) async {
+    await _dio.post<void>(
+      '/auth/logout-all',
+      data: {'refreshToken': refreshToken},
+    );
+  }
+
   Map<String, dynamic> _unwrap(Map<String, dynamic>? envelope) {
     final data = envelope?['data'];
     if (data is Map<String, dynamic>) return data;
