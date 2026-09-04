@@ -1011,8 +1011,23 @@ function Disputes() {
             <td>{item.evidence.length}</td>
             <td>
               <Badge value={item.status} />
+              {item.sla?.resolutionOverdue && <small>Resolution overdue</small>}
             </td>
             <td>
+              {!item.firstResponseAt && (
+                <button
+                  className="table-button"
+                  onClick={async () => {
+                    await adminApi(
+                      `disputes/${item.id}/review`,
+                      json("POST", {}),
+                    );
+                    await reload();
+                  }}
+                >
+                  Start review
+                </button>
+              )}
               <button
                 className="table-button"
                 onClick={() => setSelected(item)}
@@ -1042,7 +1057,10 @@ type DisputeItem = {
   description: string;
   status: string;
   evidence: unknown[];
+  firstResponseAt?: string | null;
+  sla?: { resolutionOverdue: boolean };
   job: { title: string };
+  payment?: { amountPoisha: string } | null;
 };
 function DisputeDialog({
   item,
@@ -1066,7 +1084,9 @@ function DisputeDialog({
               json("POST", {
                 resolution: form.get("resolution"),
                 reason: form.get("reason"),
+                decision: form.get("decision"),
                 refundPoisha: Number(form.get("refundPoisha")),
+                releasePoisha: Number(form.get("releasePoisha")),
                 jobStatus: form.get("jobStatus"),
               }),
             );
@@ -1085,8 +1105,25 @@ function DisputeDialog({
           <textarea name="reason" minLength={8} required />
         </label>
         <label>
+          Decision
+          <select name="decision" defaultValue="RELEASE_FULL">
+            <option>RELEASE_FULL</option>
+            <option>RELEASE_PARTIAL</option>
+            <option>REFUND_FULL</option>
+            <option>REFUND_PARTIAL</option>
+            <option>SPLIT</option>
+          </select>
+        </label>
+        {item.payment?.amountPoisha && (
+          <p>Amount to allocate: {item.payment.amountPoisha} poisha</p>
+        )}
+        <label>
           Cash refund to record (poisha)
           <input name="refundPoisha" type="number" min="0" defaultValue="0" />
+        </label>
+        <label>
+          Release to worker (poisha)
+          <input name="releasePoisha" type="number" min="0" defaultValue="0" />
         </label>
         <label>
           Final job status

@@ -354,6 +354,17 @@ export class AdminOpsController {
     return this.ops.resolveDispute(id, body, actor, this.context(request));
   }
 
+  @Post("disputes/:id/review")
+  @Policy(Policies.public())
+  @AdminRoles(AdminRole.ADMIN, AdminRole.MODERATOR, AdminRole.SUPPORT)
+  reviewDispute(
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @CurrentAdmin() actor: AdminActor,
+    @Req() request: Request,
+  ) {
+    return this.ops.startDisputeReview(id, actor, this.context(request));
+  }
+
   @Post("notifications/campaign/dry-run")
   @Policy(Policies.public())
   @AdminRoles(AdminRole.ADMIN, AdminRole.SUPPORT)

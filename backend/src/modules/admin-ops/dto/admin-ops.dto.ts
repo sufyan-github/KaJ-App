@@ -16,6 +16,7 @@ import {
 } from "class-validator";
 import {
   ApplicationStatus,
+  DisputeDecision,
   JobStatus,
   LocationType,
   UserStatus,
@@ -207,6 +208,9 @@ export class FlagChangeDto extends ReasonDto {
 }
 
 export class DisputeResolutionDto extends ReasonDto {
+  @IsEnum(DisputeDecision)
+  decision!: DisputeDecision;
+
   @IsString()
   @MinLength(8)
   resolution!: string;
@@ -215,6 +219,11 @@ export class DisputeResolutionDto extends ReasonDto {
   @IsInt()
   @Min(0)
   refundPoisha = 0;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  releasePoisha = 0;
 
   @IsOptional()
   @IsEnum(JobStatus)

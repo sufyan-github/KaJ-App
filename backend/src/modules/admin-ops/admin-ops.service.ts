@@ -7,9 +7,13 @@ import {
 import {
   AdminRole,
   ApplicationStatus,
+  DisputeAppealStatus,
+  DisputeDecision,
   DisputeStatus,
   JobActorType,
   JobStatus,
+  PaymentMethod,
+  PaymentStatus,
   Prisma,
   TrustLevel,
   UserStatus,
@@ -45,6 +49,9 @@ import {
   highestTrust,
   trustForVerification,
 } from "../verification/trust-level";
+import { LedgerService } from "../payments/ledger.service";
+import { planDisputeAllocation } from "../disputes/dispute-ledger";
+import { randomUUID } from "node:crypto";
 
 const TERMINAL_JOB_STATUSES: JobStatus[] = [
   JobStatus.REVIEWED,
@@ -59,6 +66,7 @@ export class AdminOpsService {
     private readonly prisma: PrismaService,
     @Inject(STORAGE_PORT) private readonly storage: StoragePort,
     @Inject(CLOCK) private readonly clock: Clock,
+    private readonly ledger: LedgerService,
   ) {}
 
   async overview(actor: AdminActor, context: AdminRequestContext) {
@@ -1045,9 +1053,26 @@ export class AdminOpsService {
       take: query.limit,
       orderBy: { created_at: "asc" },
       include: {
-        job: { select: { id: true, title: true, status: true } },
+        job: {
+          include: {
+            poster: { include: { profile: true, customer_profile: true } },
+            status_history: { orderBy: { created_at: "asc" } },
+            conversations: {
+              include: { messages: { orderBy: { created_at: "asc" } } },
+            },
+          },
+        },
+        assignment: {
+          include: {
+            worker: { include: { profile: true, worker_profile: true } },
+            contracts: { orderBy: { version: "desc" }, take: 1 },
+            work_sessions: true,
+            payments: true,
+          },
+        },
         opened_by: { include: { profile: true } },
         evidence: { orderBy: { created_at: "asc" } },
+        appeal: true,
       },
     });
     await this.audit(
@@ -1061,9 +1086,105 @@ export class AdminOpsService {
     );
     return {
       items: items.map((item) => ({
-        ...item,
+        id: item.id,
+        reason_code: item.reason_code,
+        description: item.description,
+        status: item.status,
+        decision: item.decision,
         refund_poisha: item.refund_poisha?.toString() ?? null,
+        release_poisha: item.release_poisha?.toString() ?? null,
+        evidenceDueAt: item.evidence_due_at,
+        resolutionDueAt: item.resolution_due_at,
+        firstResponseAt: item.first_response_at,
+        createdAt: item.created_at,
+        sla: {
+          firstResponseOverdue:
+            !item.first_response_at &&
+            this.clock.now().getTime() >
+              item.created_at.getTime() + 24 * 60 * 60_000,
+          resolutionOverdue:
+            !item.resolved_at && this.clock.now() > item.resolution_due_at,
+        },
+        job: {
+          id: item.job.id,
+          title: item.job.title,
+          status: item.job.status,
+          history: item.job.status_history,
+        },
+        parties: {
+          poster: {
+            id: item.job.poster_user_id,
+            name: item.job.poster.profile?.display_name ?? "Unknown",
+            rating:
+              item.job.poster.customer_profile?.rating_avg?.toString() ?? "0",
+          },
+          worker: {
+            id: item.assignment.worker_user_id,
+            name: item.assignment.worker.profile?.display_name ?? "Unknown",
+            rating:
+              item.assignment.worker.worker_profile?.rating_avg?.toString() ??
+              "0",
+          },
+        },
+        contract: item.assignment.contracts[0]?.snapshot_json ?? null,
+        workSessions: item.assignment.work_sessions,
+        evidence: item.evidence,
+        chat: item.job.conversations.flatMap(
+          (conversation) => conversation.messages,
+        ),
+        payment: item.assignment.payments[0]
+          ? {
+              id: item.assignment.payments[0].id,
+              method: item.assignment.payments[0].method,
+              status: item.assignment.payments[0].status,
+              amountPoisha:
+                item.assignment.payments[0].amount_poisha.toString(),
+              frozenAt: item.assignment.payments[0].frozen_at,
+            }
+          : null,
+        appeal: item.appeal,
       })),
+    };
+  }
+
+  async startDisputeReview(
+    id: string,
+    actor: AdminActor,
+    context: AdminRequestContext,
+  ) {
+    const dispute = await this.prisma.dispute.findUnique({ where: { id } });
+    if (!dispute) throw new NotFoundException();
+    if (
+      dispute.status === DisputeStatus.RESOLVED ||
+      dispute.status === DisputeStatus.CLOSED
+    )
+      throw new ConflictException("Dispute is already resolved.");
+    const now = this.clock.now();
+    const updated = await this.prisma.$transaction(async (transaction) => {
+      const item = await transaction.dispute.update({
+        where: { id },
+        data: {
+          status: DisputeStatus.UNDER_REVIEW,
+          first_response_at: dispute.first_response_at ?? now,
+        },
+      });
+      await transaction.auditLog.create({
+        data: this.auditData(
+          actor,
+          "ADMIN_DISPUTE_REVIEW_STARTED",
+          "DISPUTE",
+          id,
+          { status: dispute.status },
+          { status: item.status, firstResponseAt: item.first_response_at },
+          context,
+        ),
+      });
+      return item;
+    });
+    return {
+      id,
+      status: updated.status,
+      firstResponseAt: updated.first_response_at,
     };
   }
 
@@ -1075,15 +1196,57 @@ export class AdminOpsService {
   ) {
     const dispute = await this.prisma.dispute.findUnique({
       where: { id },
-      include: { job: true },
+      include: {
+        job: true,
+        assignment: { include: { payments: true } },
+        appeal: true,
+      },
     });
     if (!dispute) throw new NotFoundException();
-    if (
-      dispute.status === DisputeStatus.RESOLVED ||
-      dispute.status === DisputeStatus.CLOSED
-    )
+    const pendingAppeal =
+      dispute.appeal?.status === DisputeAppealStatus.PENDING
+        ? dispute.appeal
+        : null;
+    if (dispute.status === DisputeStatus.CLOSED)
       throw new ConflictException("Dispute is already resolved.");
+    if (dispute.status === DisputeStatus.RESOLVED && !pendingAppeal)
+      throw new ConflictException("Dispute is already resolved.");
+    if (pendingAppeal) {
+      if (dispute.resolved_by === actor.userId)
+        throw new ConflictException(
+          "An appeal requires a second administrator.",
+        );
+    }
     const targetStatus = input.jobStatus ?? JobStatus.COMPLETED;
+    const payment = dispute.assignment.payments[0];
+    let allocation;
+    try {
+      allocation = planDisputeAllocation({
+        decision: input.decision,
+        refundPoisha: BigInt(input.refundPoisha),
+        releasePoisha: BigInt(input.releasePoisha),
+        payment: payment
+          ? {
+              amountPoisha: payment.amount_poisha,
+              feePoisha: payment.fee_poisha,
+              method: payment.method,
+              payerUserId: payment.payer_user_id,
+              status: payment.status,
+              workerUserId: dispute.assignment.worker_user_id,
+            }
+          : {
+              amountPoisha: dispute.assignment.agreed_price_poisha,
+              feePoisha: 0n,
+              method: PaymentMethod.CASH_ON_COMPLETION,
+              payerUserId: dispute.job.poster_user_id,
+              status: PaymentStatus.PENDING,
+              workerUserId: dispute.assignment.worker_user_id,
+            },
+      });
+    } catch (error) {
+      throw new ConflictException((error as Error).message);
+    }
+    const now = this.clock.now();
     await this.prisma.$transaction(async (transaction) => {
       await transaction.dispute.update({
         where: { id },
@@ -1091,10 +1254,40 @@ export class AdminOpsService {
           status: DisputeStatus.RESOLVED,
           resolution: input.resolution,
           resolved_by: actor.userId,
-          resolved_at: new Date(),
-          refund_poisha: BigInt(input.refundPoisha),
+          resolved_at: now,
+          first_response_at: dispute.first_response_at ?? now,
+          decision: input.decision,
+          refund_poisha: allocation.refundPoisha,
+          release_poisha: allocation.releasePoisha,
         },
       });
+      if (pendingAppeal)
+        await transaction.disputeAppeal.update({
+          where: { id: pendingAppeal.id },
+          data: {
+            status: DisputeAppealStatus.RESOLVED,
+            resolved_by: actor.userId,
+            resolution: input.resolution,
+            resolved_at: now,
+          },
+        });
+      if (payment) {
+        if (allocation.digital)
+          await this.ledger.append(
+            randomUUID(),
+            payment.id,
+            allocation.entries,
+            transaction,
+          );
+        await transaction.payment.update({
+          where: { id: payment.id },
+          data: {
+            status: allocation.status,
+            frozen_at: null,
+            freeze_reason: null,
+          },
+        });
+      }
       if (dispute.job.status === JobStatus.DISPUTED) {
         await transaction.job.update({
           where: { id: dispute.job_id },
@@ -1111,6 +1304,18 @@ export class AdminOpsService {
           },
         });
       }
+      await transaction.notification.createMany({
+        data: [
+          dispute.job.poster_user_id,
+          dispute.assignment.worker_user_id,
+        ].map((userId) => ({
+          user_id: userId,
+          type: "DISPUTE_RESOLVED",
+          title_key: "dispute.resolved.title",
+          body_key: "dispute.resolved.body",
+          payload_json: { disputeId: id, decision: input.decision },
+        })),
+      });
       await transaction.auditLog.create({
         data: this.auditData(
           actor,
@@ -1120,8 +1325,11 @@ export class AdminOpsService {
           { status: dispute.status },
           {
             status: DisputeStatus.RESOLVED,
+            decision: input.decision,
             resolution: input.resolution,
-            refundPoisha: input.refundPoisha,
+            refundPoisha: allocation.refundPoisha.toString(),
+            releasePoisha: allocation.releasePoisha.toString(),
+            ledgerPosted: allocation.digital,
             jobStatus: targetStatus,
             reason: input.reason,
           },
@@ -1132,7 +1340,10 @@ export class AdminOpsService {
     return {
       id,
       status: DisputeStatus.RESOLVED,
-      refundPoisha: input.refundPoisha,
+      decision: input.decision,
+      refundPoisha: allocation.refundPoisha.toString(),
+      releasePoisha: allocation.releasePoisha.toString(),
+      ledgerPosted: allocation.digital,
       jobStatus: targetStatus,
     };
   }

@@ -39,6 +39,7 @@ import { AdminAuthModule } from "./modules/admin-auth/admin-auth.module";
 import { AdminOpsModule } from "./modules/admin-ops/admin-ops.module";
 import { PaymentsModule } from "./modules/payments/payments.module";
 import { VerificationModule } from "./modules/verification/verification.module";
+import { DisputesModule } from "./modules/disputes/disputes.module";
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { VerificationModule } from "./modules/verification/verification.module";
     AdminOpsModule,
     PaymentsModule,
     VerificationModule,
+    DisputesModule,
     AvailabilityModule,
     CatalogModule,
     HealthModule,

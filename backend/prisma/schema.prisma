@@ -225,6 +225,20 @@ enum DisputeStatus {
   CLOSED
 }
 
+enum DisputeDecision {
+  RELEASE_FULL
+  RELEASE_PARTIAL
+  REFUND_FULL
+  REFUND_PARTIAL
+  SPLIT
+}
+
+enum DisputeAppealStatus {
+  PENDING
+  RESOLVED
+  REJECTED
+}
+
 enum ReportStatus {
   OPEN
   UNDER_REVIEW
@@ -285,6 +299,9 @@ model User {
   disputes_opened             Dispute[]                 @relation("DisputeOpener")
   disputes_resolved           Dispute[]                 @relation("DisputeResolver")
   dispute_evidence            DisputeEvidence[]
+  dispute_appeals_opened      DisputeAppeal[]           @relation("DisputeAppealOpener")
+  dispute_appeals_assigned    DisputeAppeal[]           @relation("DisputeAppealAssignee")
+  dispute_appeals_resolved    DisputeAppeal[]           @relation("DisputeAppealResolver")
   reports                     Report[]
   moderation_actions          ModerationAction[]
   badges                      UserBadge[]
@@ -825,6 +842,8 @@ model Payment {
   status                PaymentStatus @default(NONE)
   method                PaymentMethod @default(CASH_ON_COMPLETION)
   provider_ref          String?
+  frozen_at             DateTime?
+  freeze_reason         String?
   idempotency_key       String
   created_at            DateTime      @default(now())
   updated_at            DateTime      @updatedAt
@@ -1068,6 +1087,7 @@ model Document {
   deleted_at         DateTime?
   user               User                   @relation(fields: [user_id], references: [id], onDelete: Restrict)
   verification_links VerificationDocument[]
+  dispute_evidence   DisputeEvidence[]
 
   @@index([user_id, kind])
   @@map("documents")
@@ -1099,6 +1119,11 @@ model Dispute {
   resolved_by       String?           @db.Uuid
   resolved_at       DateTime?
   refund_poisha     BigInt?
+  release_poisha    BigInt?
+  decision          DisputeDecision?
+  evidence_due_at   DateTime
+  first_response_at DateTime?
+  resolution_due_at DateTime
   created_at        DateTime          @default(now())
   updated_at        DateTime          @updatedAt
   job               Job               @relation(fields: [job_id], references: [id], onDelete: Restrict)
@@ -1106,27 +1131,52 @@ model Dispute {
   opened_by         User              @relation("DisputeOpener", fields: [opened_by_user_id], references: [id], onDelete: Restrict)
   resolver          User?             @relation("DisputeResolver", fields: [resolved_by], references: [id], onDelete: SetNull)
   evidence          DisputeEvidence[]
+  appeal            DisputeAppeal?
 
+  @@unique([assignment_id])
   @@index([job_id, status])
-  @@index([assignment_id])
   @@index([opened_by_user_id])
   @@map("disputes")
 }
 
 model DisputeEvidence {
-  id          String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  dispute_id  String   @db.Uuid
-  user_id     String   @db.Uuid
+  id          String    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  dispute_id  String    @db.Uuid
+  user_id     String    @db.Uuid
   kind        String
   storage_key String?
+  document_id String?   @db.Uuid
   text        String?
-  created_at  DateTime @default(now())
-  dispute     Dispute  @relation(fields: [dispute_id], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [user_id], references: [id], onDelete: Restrict)
+  created_at  DateTime  @default(now())
+  dispute     Dispute   @relation(fields: [dispute_id], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [user_id], references: [id], onDelete: Restrict)
+  document    Document? @relation(fields: [document_id], references: [id], onDelete: Restrict)
 
   @@index([dispute_id, created_at])
   @@index([user_id])
+  @@index([document_id])
   @@map("dispute_evidence")
+}
+
+model DisputeAppeal {
+  id                String              @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  dispute_id        String              @unique @db.Uuid
+  opened_by_user_id String              @db.Uuid
+  reason            String
+  status            DisputeAppealStatus @default(PENDING)
+  assigned_admin_id String?             @db.Uuid
+  resolved_by       String?             @db.Uuid
+  resolution        String?
+  created_at        DateTime            @default(now())
+  resolved_at       DateTime?
+  dispute           Dispute             @relation(fields: [dispute_id], references: [id], onDelete: Cascade)
+  opened_by         User                @relation("DisputeAppealOpener", fields: [opened_by_user_id], references: [id], onDelete: Restrict)
+  assigned_admin    User?               @relation("DisputeAppealAssignee", fields: [assigned_admin_id], references: [id], onDelete: SetNull)
+  resolver          User?               @relation("DisputeAppealResolver", fields: [resolved_by], references: [id], onDelete: SetNull)
+
+  @@index([status, created_at])
+  @@index([assigned_admin_id])
+  @@map("dispute_appeals")
 }
 
 model Report {

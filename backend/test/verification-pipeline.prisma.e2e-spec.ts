@@ -14,6 +14,7 @@ import { StoragePort } from "../src/infra/storage/storage.port";
 import { AdminOpsService } from "../src/modules/admin-ops/admin-ops.service";
 import { AdminActor } from "../src/modules/admin-auth/admin-auth.types";
 import { VerificationService } from "../src/modules/verification/verification.service";
+import { LedgerService } from "../src/modules/payments/ledger.service";
 
 const databaseDescribe =
   process.env.TRUST_DATABASE_E2E === "1" ? describe : describe.skip;
@@ -54,6 +55,7 @@ databaseDescribe("verification pipeline with PostgreSQL", () => {
     prisma as unknown as PrismaService,
     storage,
     clock,
+    new LedgerService(prisma as unknown as PrismaService),
   );
   let userId: string;
   let adminId: string;
