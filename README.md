@@ -31,6 +31,18 @@ flutter pub get
 flutter run --flavor dev --dart-define=API_BASE_URL=https://your-dev-api.example/api/v1
 ```
 
+For a physical Android phone connected by USB to the local backend and MinIO,
+use the helper below. It forwards both the API port and the signed-upload port;
+forwarding only the API port makes NID, selfie, chat-photo, and evidence uploads
+fail after the signing step.
+
+```bash
+./tool/run_connected_android.sh <android-device-id>
+```
+
+The local defaults are API port `3100` and MinIO port `9000`. Override them with
+`KAAJ_API_PORT` and `KAAJ_STORAGE_PORT` when needed.
+
 The API URL must use HTTPS because Android cleartext traffic is disabled. Default flavor endpoints follow the specification:
 
 - dev: `https://api-dev.kaaj.app/api/v1`
