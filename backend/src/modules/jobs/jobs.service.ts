@@ -40,6 +40,8 @@ import {
   type CancellationPolicy,
 } from "./cancellation/cancellation.calculator";
 import { JobStateMachine } from "./state-machine/job-state.machine";
+import { recurrenceRuleJson } from "./recurrence/recurrence";
+import { RecurrenceService } from "./recurrence/recurrence.service";
 
 const jobInclude = {
   category: { select: { id: true, name_bn: true, name_en: true } },
@@ -62,6 +64,7 @@ export class JobsService {
     private readonly notifications?: NotificationsService,
     @Optional() @Inject(CLOCK) private readonly clock?: Clock,
     @Optional() private readonly chat?: ChatService,
+    @Optional() private readonly recurrence?: RecurrenceService,
   ) {}
 
   private now() {
@@ -69,6 +72,17 @@ export class JobsService {
   }
 
   async create(posterUserId: string, input: CreateJobDto) {
+    if (input.jobType === JobType.RECURRING && !input.recurrenceRule) {
+      throw new BadRequestException(
+        "Recurring jobs require a recurrence rule.",
+      );
+    }
+    if (input.jobType !== JobType.RECURRING && input.recurrenceRule) {
+      throw new BadRequestException(
+        "Only recurring jobs can have a recurrence rule.",
+      );
+    }
+    if (input.recurrenceRule) await this.recurrence?.assertEnabled();
     const window = parseWindow(input.startsAt, input.endsAt);
     const job = await this.prisma.$transaction(async (transaction) => {
       const created = await transaction.job.create({
@@ -87,6 +101,9 @@ export class JobsService {
           starts_at: window?.startsAt,
           ends_at: window?.endsAt,
           workers_required: input.workersRequired ?? 1,
+          recurrence_rule: input.recurrenceRule
+            ? recurrenceRuleJson(input.recurrenceRule)
+            : undefined,
           skills: {
             create: [...new Set(input.skillIds)].map((skillId) => ({
               skill_id: skillId,
@@ -119,6 +136,14 @@ export class JobsService {
       throw new ConflictException("Only draft jobs can be published.");
     }
     validatePublishable(job);
+    if (job.job_type === JobType.RECURRING) {
+      if (!job.recurrence_rule) {
+        throw new BadRequestException(
+          "Recurring jobs require a recurrence rule.",
+        );
+      }
+      await this.recurrence?.assertEnabled();
+    }
     const updated = await this.prisma.$transaction(async (transaction) => {
       const published = await this.states.transitionInTransaction(
         transaction,
@@ -144,6 +169,9 @@ export class JobsService {
         include: jobInclude,
       });
     });
+    if (job.job_type === JobType.RECURRING) {
+      await this.recurrence?.generate(jobId);
+    }
     return serializeJob(updated);
   }
 

@@ -144,6 +144,21 @@ enum AssignmentStatus {
   COMPLETED
 }
 
+enum JobOccurrenceStatus {
+  SCHEDULED
+  ASSIGNED
+  CONFIRMED
+  UPCOMING
+  CHECKED_IN
+  IN_PROGRESS
+  SUBMITTED
+  CUSTOMER_REVIEW
+  COMPLETED
+  CANCELLED_BY_CUSTOMER
+  CANCELLED_BY_WORKER
+  DECLINED
+}
+
 enum JobActorType {
   POSTER
   WORKER
@@ -701,6 +716,7 @@ model Job {
   reviews                 Review[]
   conversations           Conversation[]
   disputes                Dispute[]
+  occurrences             JobOccurrence[]
 
   @@index([status, published_at(sort: Desc)])
   @@index([category_id, status])
@@ -733,6 +749,28 @@ model JobSchedule {
 
   @@index([job_id])
   @@map("job_schedules")
+}
+
+model JobOccurrence {
+  id                     String              @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  job_id                 String              @db.Uuid
+  sequence_no            Int
+  scheduled_date         DateTime            @db.Date
+  starts_at              DateTime
+  ends_at                DateTime
+  status                 JobOccurrenceStatus @default(SCHEDULED)
+  assigned_assignment_id String?             @db.Uuid
+  cancel_reason          String?
+  created_at             DateTime            @default(now())
+  updated_at             DateTime            @updatedAt
+  job                    Job                 @relation(fields: [job_id], references: [id], onDelete: Cascade)
+  assigned_assignment    Assignment?         @relation(fields: [assigned_assignment_id], references: [id], onDelete: SetNull)
+
+  @@unique([job_id, sequence_no])
+  @@unique([job_id, starts_at])
+  @@index([starts_at, status])
+  @@index([assigned_assignment_id, starts_at])
+  @@map("job_occurrences")
 }
 
 model JobStatusHistory {
@@ -801,6 +839,7 @@ model Assignment {
   payments                 Payment[]
   reviews                  Review[]
   disputes                 Dispute[]
+  occurrences              JobOccurrence[]
 
   @@unique([job_id, worker_user_id])
   @@index([worker_user_id, status])

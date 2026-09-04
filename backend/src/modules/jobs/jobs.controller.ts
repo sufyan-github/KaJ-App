@@ -5,6 +5,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
 } from "@nestjs/common";
 import { RoleMode } from "@prisma/client";
@@ -19,16 +20,22 @@ import {
   AcceptApplicationDto,
   ApplyToJobDto,
   CancelAssignmentDto,
+  CancelOccurrenceDto,
   CreateBookingRequestDto,
   CreateJobDto,
   JobFeedQueryDto,
+  UpdateJobSeriesDto,
 } from "./dto/jobs.dto";
 import { JobsService } from "./jobs.service";
+import { RecurrenceService } from "./recurrence/recurrence.service";
 
 @ApiTags("jobs")
 @Controller()
 export class JobsController {
-  constructor(private readonly jobs: JobsService) {}
+  constructor(
+    private readonly jobs: JobsService,
+    private readonly recurrence: RecurrenceService,
+  ) {}
 
   @Post("jobs")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
@@ -67,6 +74,50 @@ export class JobsController {
   @Policy(Policies.authenticated())
   get(@Param("id", new ParseUUIDPipe()) id: string) {
     return this.jobs.get(id);
+  }
+
+  @Get("jobs/:id/occurrences")
+  @Policy(Policies.authenticated())
+  occurrences(@Param("id", new ParseUUIDPipe()) id: string) {
+    return this.recurrence.list(id);
+  }
+
+  @Get("occurrences/mine")
+  @Policy(Policies.authenticated())
+  myOccurrences(@CurrentUser() claims: AccessTokenClaims) {
+    return this.recurrence.mine(claims.sub);
+  }
+
+  @Put("jobs/:id/series")
+  @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
+  @Policy(Policies.authenticated())
+  updateSeries(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @Body() body: UpdateJobSeriesDto,
+  ) {
+    return this.recurrence.updateSeries(claims.sub, id, body);
+  }
+
+  @Post("occurrences/:id/cancel")
+  @Policy(Policies.authenticated())
+  cancelOccurrence(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @Body() body: CancelOccurrenceDto,
+  ) {
+    return this.recurrence.cancel(claims.sub, id, body);
+  }
+
+  @Post("occurrences/:id/assignments/:assignmentId")
+  @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
+  @Policy(Policies.authenticated())
+  assignOccurrence(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @Param("assignmentId", new ParseUUIDPipe()) assignmentId: string,
+  ) {
+    return this.recurrence.assign(claims.sub, id, assignmentId);
   }
 
   @Get("jobs/:id/suggested-workers")

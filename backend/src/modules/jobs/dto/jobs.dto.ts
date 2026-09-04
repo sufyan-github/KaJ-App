@@ -40,6 +40,41 @@ export class JobScheduleDto {
   endTime!: string;
 }
 
+export class RecurrenceRuleDto {
+  @IsIn(["DAILY", "WEEKLY"])
+  frequency!: "DAILY" | "WEEKLY";
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(7)
+  @IsInt({ each: true })
+  @Min(0, { each: true })
+  @Max(6, { each: true })
+  daysOfWeek?: number[];
+
+  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  startDate!: string;
+
+  @Matches(TIME_PATTERN)
+  startTime!: string;
+
+  @Matches(TIME_PATTERN)
+  endTime!: string;
+
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  until?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(365)
+  count?: number;
+
+  @IsIn(["Asia/Dhaka"])
+  timezone!: "Asia/Dhaka";
+}
+
 export class CreateJobDto {
   @IsString()
   @MinLength(3)
@@ -105,6 +140,24 @@ export class CreateJobDto {
   @ValidateNested({ each: true })
   @Type(() => JobScheduleDto)
   schedules?: JobScheduleDto[];
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => RecurrenceRuleDto)
+  recurrenceRule?: RecurrenceRuleDto;
+}
+
+export class UpdateJobSeriesDto {
+  @ValidateNested()
+  @Type(() => RecurrenceRuleDto)
+  recurrenceRule!: RecurrenceRuleDto;
+}
+
+export class CancelOccurrenceDto {
+  @IsString()
+  @MinLength(2)
+  @MaxLength(500)
+  reason!: string;
 }
 
 export class JobFeedQueryDto {
