@@ -147,9 +147,9 @@ export class DisputesService {
         this.notifications.create({
           userId: recipient,
           type: "DISPUTE_OPENED",
-          title: "dispute.opened.title",
-          body: "dispute.opened.body",
-          payload: { disputeId: dispute.id, route: "/disputes" },
+          title: "বিরোধের অনুরোধ খোলা হয়েছে",
+          body: "বিরোধের তথ্য জমা হয়েছে। পরবর্তী আপডেট এখানে জানানো হবে।",
+          payload: { disputeId: dispute.id, route: `/disputes/${dispute.id}` },
           dedupeKey: `dispute:${dispute.id}:opened`,
         }),
       ),

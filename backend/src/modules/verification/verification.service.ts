@@ -158,9 +158,14 @@ export class VerificationService {
         data: {
           user_id: userId,
           type: "VERIFICATION_SUBMITTED",
-          title_key: "verification.submitted.title",
-          body_key: "verification.submitted.body",
-          payload_json: { requestId: created.id, kind: input.kind },
+          title_key: "যাচাইয়ের অনুরোধ জমা হয়েছে",
+          body_key:
+            "আপনার পরিচয় যাচাইয়ের অনুরোধ পর্যালোচনার জন্য জমা হয়েছে।",
+          payload_json: {
+            requestId: created.id,
+            kind: input.kind,
+            route: "/verification",
+          },
         },
       });
       return created;

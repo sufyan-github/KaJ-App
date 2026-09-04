@@ -353,8 +353,8 @@ export class JobsService {
     await this.notifications?.create({
       userId: job.poster_user_id,
       type: "JOB_APPLICATION_RECEIVED",
-      title: "New application",
-      body: `A worker applied to ${job.title}`,
+      title: "নতুন আবেদন",
+      body: `${job.title} কাজটিতে একজন কর্মী আবেদন করেছেন। আবেদন দেখুন।`,
       payload: { route: "/jobs", jobId: job.id },
       dedupeKey: `application:${application.id}`,
     });
@@ -501,8 +501,8 @@ export class JobsService {
     await this.notifications?.create({
       userId: assignment.job.poster_user_id,
       type: "WORK_SUBMITTED",
-      title: "Work submitted",
-      body: `Please review ${assignment.job.title}`,
+      title: "কাজ জমা হয়েছে",
+      body: `${assignment.job.title} কাজটি পর্যালোচনা করে নিশ্চিত করুন।`,
       payload: { route: "/assignments", assignmentId },
       dedupeKey: `assignment:${assignmentId}:submitted`,
     });
@@ -664,8 +664,8 @@ export class JobsService {
     await this.notifications?.create({
       userId: otherUserId,
       type: "ASSIGNMENT_CANCELLED",
-      title: "Assignment cancelled",
-      body: `${assignment.job.title} was cancelled`,
+      title: "কাজ বাতিল হয়েছে",
+      body: `${assignment.job.title} কাজটি বাতিল হয়েছে। বিস্তারিত দেখুন।`,
       payload: { route: "/assignments", assignmentId },
       dedupeKey: `assignment:${assignmentId}:cancelled`,
     });
@@ -760,8 +760,8 @@ export class JobsService {
     await this.notifications?.create({
       userId: application.worker_user_id,
       type: "APPLICATION_ACCEPTED",
-      title: "Application accepted",
-      body: `You were selected for ${application.job.title}`,
+      title: "আবেদন গ্রহণ করা হয়েছে",
+      body: `${application.job.title} কাজের জন্য আপনাকে নির্বাচিত করা হয়েছে। বুকিং নিশ্চিত করুন।`,
       payload: { route: "/assignments", assignmentId: assignment.id },
       dedupeKey: `assignment:${assignment.id}:accepted`,
     });
@@ -868,8 +868,8 @@ export class JobsService {
     await this.notifications?.create({
       userId: workerUserId,
       type: "BOOKING_REQUESTED",
-      title: "New booking request",
-      body: `You received a booking request for ${input.title.trim()}`,
+      title: "নতুন বুকিং অনুরোধ",
+      body: `${input.title.trim()} কাজের নতুন বুকিং অনুরোধ এসেছে। সময় দেখে নিশ্চিত করুন।`,
       payload: { route: "/assignments", assignmentId: assignment.id },
       dedupeKey: `assignment:${assignment.id}:booking`,
     });
@@ -995,8 +995,8 @@ export class JobsService {
         await this.notifications.create({
           userId: confirmedJob.poster_user_id,
           type: "ASSIGNMENT_CONFIRMED",
-          title: "Booking confirmed",
-          body: `The worker confirmed ${confirmedJob.title}`,
+          title: "বুকিং নিশ্চিত হয়েছে",
+          body: `কর্মী ${confirmedJob.title} কাজটি নিশ্চিত করেছেন।`,
           payload: { route: "/assignments", assignmentId: assignment.id },
           dedupeKey: `assignment:${assignment.id}:confirmed`,
         });
@@ -1065,8 +1065,8 @@ export class JobsService {
       await this.notifications?.create({
         userId: result.poster_user_id,
         type: "ASSIGNMENT_DECLINED",
-        title: "Worker did not confirm",
-        body: `${result.title} is open for applications again`,
+        title: "কর্মী কাজটি নিশ্চিত করেননি",
+        body: `${result.title} কাজটি আবার আবেদনের জন্য খোলা হয়েছে।`,
         payload: { route: "/jobs", jobId: result.id },
         dedupeKey: `assignment:${assignment.id}:declined`,
       });
@@ -1128,8 +1128,8 @@ export class JobsService {
               await this.notifications?.create({
                 userId: item.job.poster_user_id,
                 type: "WORK_REVIEW_REMINDER",
-                title: "Work is waiting for review",
-                body: `Please review ${item.job.title}`,
+                title: "কাজটি পর্যালোচনার অপেক্ষায়",
+                body: `${item.job.title} কাজটি পর্যালোচনা করে নিশ্চিত করুন।`,
                 payload: { route: "/assignments", assignmentId: item.id },
                 dedupeKey: `assignment:${item.id}:review:${hour}h`,
               });

@@ -94,7 +94,7 @@ export class ReviewsService {
       body: result.revealed
         ? "দুজনের রিভিউ এখন দেখা যাচ্ছে।"
         : "রিভিউ জমা হয়েছে। আপনার রিভিউ দেওয়ার পর এটি দেখা যাবে।",
-      payload: { assignmentId },
+      payload: { assignmentId, route: "/reviews" },
       dedupeKey: `review:${result.review.id}`,
     });
     return { submitted: true, revealed: result.revealed };

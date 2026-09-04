@@ -194,8 +194,8 @@ export class AttendanceService {
       await this.notifications.create({
         userId: assignment.job.poster_user_id,
         type: "WORKER_CHECKED_IN",
-        title: "Worker checked in",
-        body: `The worker arrived for ${assignment.job.title}`,
+        title: "কর্মী চেক-ইন করেছেন",
+        body: `কর্মী ${assignment.job.title} কাজের স্থানে পৌঁছে চেক-ইন করেছেন।`,
         payload: { route: "/assignments", assignmentId },
         dedupeKey: `assignment:${assignmentId}:checked-in`,
       });
@@ -312,8 +312,8 @@ export class AttendanceService {
       await this.notifications.create({
         userId: assignment.job.poster_user_id,
         type: "WORK_SUBMITTED",
-        title: "Work submitted",
-        body: `Please review ${assignment.job.title}`,
+        title: "কাজ জমা হয়েছে",
+        body: `${assignment.job.title} কাজটি পর্যালোচনা করে নিশ্চিত করুন।`,
         payload: { route: "/assignments", assignmentId },
         dedupeKey: `assignment:${assignmentId}:submitted`,
       });

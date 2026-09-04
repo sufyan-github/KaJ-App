@@ -36,6 +36,12 @@ export class NotificationsController {
     return this.notifications.markRead(claims.sub, id);
   }
 
+  @Post("read-all")
+  @Policy(Policies.authenticated())
+  markAllRead(@CurrentUser() claims: AccessTokenClaims) {
+    return this.notifications.markAllRead(claims.sub);
+  }
+
   @Get("preferences")
   @Policy(Policies.authenticated())
   preferences(@CurrentUser() claims: AccessTokenClaims) {
