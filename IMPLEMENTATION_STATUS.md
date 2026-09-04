@@ -1,6 +1,6 @@
 # KAAJ Mobile Implementation Status
 
-Last verified: 1 September 2026
+Last verified: 5 September 2026
 
 ## Delivered
 
@@ -39,6 +39,13 @@ Last verified: 1 September 2026
 - [x] persisted mid-flow recovery after app process recreation
 - [x] availability editor, skills editor, categories, public preview, settings, and safety screens
 - [x] verified `dev` and `staging` debug plus `prod` release APK builds
+- [x] verification ladder with private document capture, consent, status, rejection reason, and resubmission
+- [x] foreground-only check-in/check-out with explicit consent, accuracy guard, server verdict, and poster override
+- [x] dispute opening, evidence deadline, text/photo evidence, decision, and independent appeal UI
+- [x] structured safety reports, chat/assignment report entry points, blocks list, and unblock action
+- [x] expanded Bangla safety guidance and national emergency-service direction
+- [x] worker portfolio grid with secure upload, category, caption, 20-item server limit, and deletion
+- [x] native Android one-shot location bridge without background tracking
 
 ## Backend contract used
 
@@ -48,6 +55,12 @@ The client is aligned with the currently implemented NestJS routes:
 - `POST /api/v1/auth/otp/verify`
 - `POST /api/v1/auth/refresh`
 - `POST /api/v1/auth/logout`
+- `GET/POST /api/v1/verification-requests[/mine]`
+- `GET /api/v1/assignments/:id/attendance`
+- `POST /api/v1/assignments/:id/checkin|checkout|checkin-override`
+- `GET/POST /api/v1/disputes` and evidence/appeal routes
+- `POST /api/v1/reports`, `GET /api/v1/me/blocks`, and user block routes
+- `GET/POST/DELETE /api/v1/profiles/me/portfolio[/:id]`
 
 It also consumes the backend's actual `{ data, meta }` success envelope and `{ error }` failure envelope.
 
@@ -56,6 +69,8 @@ It also consumes the backend's actual `{ data, meta }` success envelope and `{ e
 P1-UI-08 completes the authentication entry budget. P2-UI-06 implements every Phase 2 screen and
 connects onboarding mutations and the D10 public-profile projection to the sibling backend. A timed
 human onboarding run remains Phase 2 exit-gate evidence rather than being inferred from tests.
+P10-UI-06 implements S21, S26, S27, S52 and the safety guidance surfaces against live backend
+contracts. The missing portfolio persistence contract was added to the sibling backend and migrated.
 
 ## Phase 2 delivery
 
@@ -65,7 +80,7 @@ new-user onboarding is Bangla-first, backend-connected, and resumes its exact sa
 ## Verification evidence
 
 - `flutter analyze --fatal-infos`: clean on Flutter 3.47.2 / Dart 3.13.2
-- `flutter test`: 35 passing tests
+- `flutter test`: 43 passing tests
 - `flutter build apk --debug --flavor dev`: successful
 - `flutter build apk --debug --flavor staging`: successful
 - `flutter build apk --release --flavor prod`: successful, 58.2 MB

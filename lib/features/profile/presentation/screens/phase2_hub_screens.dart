@@ -301,6 +301,21 @@ class SettingsScreen extends StatelessWidget {
           title: const Text('সহায়তা ও নিরাপত্তা'),
           onTap: () => context.push(AppRoutes.helpSafety),
         ),
+        ListTile(
+          leading: const Icon(Icons.verified_user_outlined),
+          title: const Text('পরিচয় ও দক্ষতা যাচাই'),
+          onTap: () => context.push(AppRoutes.verification),
+        ),
+        ListTile(
+          leading: const Icon(Icons.person_off_outlined),
+          title: const Text('ব্লক করা ব্যবহারকারী'),
+          onTap: () => context.push(AppRoutes.blockedUsers),
+        ),
+        ListTile(
+          leading: const Icon(Icons.gavel_outlined),
+          title: const Text('বিরোধ ও সিদ্ধান্ত'),
+          onTap: () => context.push(AppRoutes.disputes),
+        ),
         const Divider(),
         ListTile(
           leading: const Icon(Icons.delete_outline, color: KColors.danger),
@@ -337,23 +352,67 @@ class HelpSafetyScreen extends StatelessWidget {
     appBar: AppBar(title: const Text('সহায়তা ও নিরাপত্তা')),
     body: ListView(
       padding: const EdgeInsets.all(KSpacing.md),
-      children: const [
-        ListTile(
+      children: [
+        const Card(
+          color: KColors.surfaceAlt,
+          child: ListTile(
+            leading: Icon(Icons.emergency_outlined, color: KColors.danger),
+            title: Text('তাৎক্ষণিক বিপদে ৯৯৯'),
+            subtitle: Text(
+              'KAAJ জরুরি সেবা নয়। নিরাপদ স্থানে যান এবং জাতীয় জরুরি সেবায় কল করুন।',
+            ),
+          ),
+        ),
+        const ListTile(
           leading: Icon(Icons.shield_outlined),
           title: Text('ব্যক্তিগত তথ্য শেয়ার করবেন না'),
           subtitle: Text('চ্যাটে জাতীয় পরিচয়পত্র, পিন বা ওটিপি দেবেন না।'),
         ),
-        ListTile(
+        const ListTile(
           leading: Icon(Icons.payments_outlined),
           title: Text('কাজ ও পারিশ্রমিক আগে নিশ্চিত করুন'),
           subtitle: Text('কাজের পরিধি, সময় ও টাকার পরিমাণ লিখিত রাখুন।'),
         ),
-        ListTile(
+        const ListTile(
           leading: Icon(Icons.report_outlined),
           title: Text('সমস্যা হলে রিপোর্ট করুন'),
           subtitle: Text(
             'জরুরি বিপদে স্থানীয় জরুরি সেবার সঙ্গে যোগাযোগ করুন।',
           ),
+        ),
+        const Divider(),
+        ExpansionTile(
+          leading: const Icon(Icons.home_work_outlined),
+          title: const Text('বাসা বা ব্যক্তিগত স্থানে কাজ'),
+          children: const [
+            ListTile(
+              title: Text(
+                'আগে পরিচয় যাচাই দেখুন, বিশ্বস্ত কাউকে সময়-ঠিকানা জানান এবং প্রথম সাক্ষাতে একা না থাকুন।',
+              ),
+            ),
+          ],
+        ),
+        ExpansionTile(
+          leading: const Icon(Icons.payments_outlined),
+          title: const Text('টাকা ও প্রতারণা থেকে সুরক্ষা'),
+          children: const [
+            ListTile(
+              title: Text(
+                'OTP, PIN বা আগাম ব্যক্তিগত ট্রান্সফার দেবেন না। চুক্তি ও বার্তা KAAJ-এর ভেতরে রাখুন।',
+              ),
+            ),
+          ],
+        ),
+        ExpansionTile(
+          leading: const Icon(Icons.engineering_outlined),
+          title: const Text('শারীরিক কাজের নিরাপত্তা'),
+          children: const [
+            ListTile(
+              title: Text(
+                'প্রয়োজনীয় সরঞ্জাম ব্যবহার করুন। কাজের পরিবেশ অনিরাপদ হলে কাজ থামিয়ে রিপোর্ট করুন।',
+              ),
+            ),
+          ],
         ),
       ],
     ),

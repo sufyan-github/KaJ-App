@@ -140,6 +140,18 @@ class HomeScreen extends ConsumerWidget {
                         subtitle: 'আপনার পাওয়া মতামত দেখুন',
                         onTap: () => context.push(AppRoutes.reviews),
                       ),
+                      _DashboardTile(
+                        icon: Icons.verified_user_outlined,
+                        title: 'যাচাইকরণ',
+                        subtitle: 'পরিচয় ও দক্ষতা যাচাই করুন',
+                        onTap: () => context.push(AppRoutes.verification),
+                      ),
+                      _DashboardTile(
+                        icon: Icons.gavel_outlined,
+                        title: 'বিরোধ',
+                        subtitle: 'প্রমাণ ও সিদ্ধান্ত অনুসরণ করুন',
+                        onTap: () => context.push(AppRoutes.disputes),
+                      ),
                       if (isWorker) ...[
                         _DashboardTile(
                           icon: Icons.person_search_outlined,
@@ -159,6 +171,12 @@ class HomeScreen extends ConsumerWidget {
                           title: 'কাজের সময়',
                           subtitle: 'দিন ও খালি সময় ঠিক করুন',
                           onTap: () => context.push(AppRoutes.editAvailability),
+                        ),
+                        _DashboardTile(
+                          icon: Icons.photo_library_outlined,
+                          title: 'পোর্টফোলিও',
+                          subtitle: 'আপনার কাজের নমুনা দেখান',
+                          onTap: () => context.push(AppRoutes.portfolio),
                         ),
                       ],
                       _DashboardTile(

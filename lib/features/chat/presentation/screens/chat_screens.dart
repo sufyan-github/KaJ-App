@@ -308,21 +308,23 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
 
   Future<void> _menu(String action) async {
     if (action == 'block' && widget.otherUserId != null) {
-      await ref.read(chatRepositoryProvider).blockUser(widget.otherUserId!);
-      if (mounted) context.pop();
+      try {
+        await ref.read(chatRepositoryProvider).blockUser(widget.otherUserId!);
+        if (mounted) context.pop();
+      } on Object {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('ব্লক করা যায়নি। আবার চেষ্টা করুন।')),
+          );
+        }
+      }
       return;
     }
     if (action == 'report') {
-      await ref
-          .read(chatRepositoryProvider)
-          .reportConversation(
-            widget.conversationId,
-            'ব্যবহারকারী এই আলোচনায় অনিরাপদ বা অনুপযুক্ত বার্তা পাঠিয়েছেন।',
-          );
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('রিপোর্ট পাঠানো হয়েছে।')));
+        await context.push(
+          AppRoutes.report('CONVERSATION', widget.conversationId),
+        );
       }
     }
   }

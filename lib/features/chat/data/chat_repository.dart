@@ -128,16 +128,6 @@ class ChatRepository {
     await _dio.post<Map<String, dynamic>>('/users/$userId/block');
   }
 
-  Future<void> reportConversation(
-    String conversationId,
-    String description,
-  ) async {
-    await _dio.post<Map<String, dynamic>>(
-      '/conversations/$conversationId/report',
-      data: {'description': description},
-    );
-  }
-
   List<PendingChatMessage> pending(String conversationId) {
     final raw = _queue.get('pending:$conversationId');
     if (raw is! List) return const [];

@@ -932,6 +932,25 @@ class _AssignmentDetailBody extends ConsumerWidget {
             ),
           ),
         ],
+        if (item.status == 'CONFIRMED' ||
+            {
+              'UPCOMING',
+              'CHECKED_IN',
+              'IN_PROGRESS',
+            }.contains(item.jobStatus)) ...[
+          const SizedBox(height: KSpacing.sm),
+          OutlinedButton.icon(
+            onPressed: () => context.push(
+              AppRoutes.attendance(
+                item.id,
+                title: item.title,
+                isPoster: item.isPoster,
+              ),
+            ),
+            icon: const Icon(Icons.location_on_outlined),
+            label: Text(item.isWorker ? 'চেক-ইন / চেক-আউট' : 'উপস্থিতি দেখুন'),
+          ),
+        ],
         const SizedBox(height: KSpacing.lg),
         Text('কাজের অগ্রগতি', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: KSpacing.sm),
@@ -1013,6 +1032,25 @@ class _AssignmentDetailBody extends ConsumerWidget {
             label: const Text('কাজটি বাতিল করুন'),
           ),
         ],
+        if ({
+          'SUBMITTED',
+          'CUSTOMER_REVIEW',
+          'COMPLETED',
+        }.contains(item.jobStatus)) ...[
+          const SizedBox(height: KSpacing.sm),
+          OutlinedButton.icon(
+            onPressed: () => context.push(AppRoutes.openDispute(item.id)),
+            icon: const Icon(Icons.gavel_outlined),
+            label: const Text('বিরোধ খুলুন'),
+          ),
+        ],
+        const SizedBox(height: KSpacing.sm),
+        TextButton.icon(
+          onPressed: () =>
+              context.push(AppRoutes.report('ASSIGNMENT', item.id)),
+          icon: const Icon(Icons.report_outlined, color: KColors.danger),
+          label: const Text('নিরাপত্তা সমস্যা রিপোর্ট করুন'),
+        ),
       ],
     );
   }

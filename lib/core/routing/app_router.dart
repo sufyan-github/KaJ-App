@@ -16,6 +16,10 @@ import '../../features/onboarding/domain/onboarding_state.dart';
 import '../../features/onboarding/presentation/controllers/onboarding_controller.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screens.dart';
 import '../../features/profile/presentation/screens/phase2_hub_screens.dart';
+import '../../features/trust_safety/presentation/attendance_screen.dart';
+import '../../features/trust_safety/presentation/dispute_screens.dart';
+import '../../features/trust_safety/presentation/safety_screens.dart';
+import '../../features/trust_safety/presentation/verification_screens.dart';
 
 abstract final class AppRoutes {
   static const splash = '/';
@@ -45,9 +49,31 @@ abstract final class AppRoutes {
   static const conversations = '/conversations';
   static const chatThreadPath = '/conversations/:id';
   static const workerBookingPath = '/workers/:id/book';
+  static const verification = '/verification';
+  static const verificationCapturePath = '/verification/:kind/capture';
+  static const attendancePath = '/assignments/:id/attendance';
+  static const disputes = '/disputes';
+  static const disputePath = '/disputes/:id';
+  static const openDisputePath = '/assignments/:id/dispute';
+  static const blockedUsers = '/settings/blocked';
+  static const reportPath = '/report/:type/:id';
+  static const portfolio = '/w/profile/portfolio';
 
   static String workerBooking(String id) => '/workers/$id/book';
   static String assignmentDetail(String id) => '/assignments/$id';
+  static String verificationCapture(String kind) =>
+      '/verification/$kind/capture';
+  static String attendance(
+    String id, {
+    required String title,
+    required bool isPoster,
+  }) => Uri(
+    path: '/assignments/$id/attendance',
+    queryParameters: {'title': title, 'poster': '$isPoster'},
+  ).toString();
+  static String openDispute(String id) => '/assignments/$id/dispute';
+  static String dispute(String id) => '/disputes/$id';
+  static String report(String type, String id) => '/report/$type/$id';
   static String chatThread(
     String id, {
     required String jobTitle,
@@ -210,6 +236,52 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.workerBookingPath,
         builder: (context, state) =>
             WorkerBookingScreen(workerId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.verification,
+        builder: (context, state) => const VerificationCenterScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.verificationCapturePath,
+        builder: (context, state) =>
+            VerificationCaptureScreen(kind: state.pathParameters['kind']!),
+      ),
+      GoRoute(
+        path: AppRoutes.attendancePath,
+        builder: (context, state) => AttendanceScreen(
+          assignmentId: state.pathParameters['id']!,
+          title: state.uri.queryParameters['title'] ?? 'কাজের উপস্থিতি',
+          isPoster: state.uri.queryParameters['poster'] == 'true',
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.disputes,
+        builder: (context, state) => const DisputesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.disputePath,
+        builder: (context, state) =>
+            DisputeDetailScreen(disputeId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.openDisputePath,
+        builder: (context, state) =>
+            OpenDisputeScreen(assignmentId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.blockedUsers,
+        builder: (context, state) => const BlockedUsersScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.reportPath,
+        builder: (context, state) => ReportScreen(
+          targetType: state.pathParameters['type']!,
+          targetId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.portfolio,
+        builder: (context, state) => const PortfolioScreen(),
       ),
     ],
   );
