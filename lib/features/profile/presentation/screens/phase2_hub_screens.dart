@@ -20,17 +20,73 @@ class CategoriesBrowseScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('কাজের ধরন')),
       body: categories.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => const Center(child: Text('তালিকা লোড করা যায়নি।')),
+        error: (_, _) => _CatalogState(
+          icon: Icons.cloud_off_outlined,
+          message: 'কাজের ধরন লোড করা যায়নি।',
+          onRetry: () => ref.invalidate(categoryTreeProvider),
+        ),
         data: (items) => skills.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) =>
-              const Center(child: Text('উপধরনের তালিকা লোড করা যায়নি।')),
-          data: (allSkills) =>
-              _CategoryGrid(categories: items, skills: allSkills),
+          error: (_, _) => _CatalogState(
+            icon: Icons.cloud_off_outlined,
+            message: 'কাজের উপধরন লোড করা যায়নি।',
+            onRetry: () => ref.invalidate(catalogSkillsProvider),
+          ),
+          data: (allSkills) => items.isEmpty
+              ? _CatalogState(
+                  icon: Icons.category_outlined,
+                  message: 'এখনো কোনো কাজের ধরন যোগ করা হয়নি।',
+                  onRetry: () {
+                    ref.invalidate(categoryTreeProvider);
+                    ref.invalidate(catalogSkillsProvider);
+                  },
+                )
+              : _CategoryGrid(categories: items, skills: allSkills),
         ),
       ),
     );
   }
+}
+
+class _CatalogState extends StatelessWidget {
+  const _CatalogState({
+    required this.icon,
+    required this.message,
+    required this.onRetry,
+  });
+
+  final IconData icon;
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: Padding(
+      padding: const EdgeInsets.all(KSpacing.xl),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: KColors.primary.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: KColors.primary, size: 32),
+          ),
+          const SizedBox(height: KSpacing.md),
+          Text(message, textAlign: TextAlign.center),
+          const SizedBox(height: KSpacing.md),
+          FilledButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh),
+            label: const Text('আবার চেষ্টা করুন'),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _CategoryGrid extends StatelessWidget {
@@ -40,60 +96,76 @@ class _CategoryGrid extends StatelessWidget {
   final List<CatalogSkill> skills;
 
   @override
-  Widget build(BuildContext context) => GridView.builder(
-    padding: const EdgeInsets.all(KSpacing.md),
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 2,
-      crossAxisSpacing: KSpacing.md,
-      mainAxisSpacing: KSpacing.md,
-      childAspectRatio: 1.12,
-    ),
-    itemCount: categories.length,
-    itemBuilder: (context, index) {
-      final category = categories[index];
-      final subtypes = skills
-          .where((skill) => skill.categoryId == category.id)
-          .toList(growable: false);
-      return Card(
-        margin: EdgeInsets.zero,
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => _showSubtypes(context, category, subtypes),
-          child: Padding(
-            padding: const EdgeInsets.all(KSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: KColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(
-                    _categoryIcon(category.icon),
-                    color: KColors.primary,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  category.nameBn,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: KSpacing.xs),
-                Text(
-                  '${subtypes.length}টি উপধরন',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: KColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final textScale = (MediaQuery.textScalerOf(context).scale(16) / 16).clamp(
+        1,
+        2,
+      );
+      final columns = textScale >= 1.5 && constraints.maxWidth < 680
+          ? 1
+          : constraints.maxWidth >= 680
+          ? 3
+          : 2;
+      return GridView.builder(
+        padding: const EdgeInsets.all(KSpacing.md),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: columns,
+          crossAxisSpacing: KSpacing.md,
+          mainAxisSpacing: KSpacing.md,
+          mainAxisExtent: 174 + ((textScale - 1) * (columns == 1 ? 90 : 180)),
         ),
+        itemCount: categories.length,
+        itemBuilder: (context, index) {
+          final category = categories[index];
+          final subtypes = skills
+              .where((skill) => skill.categoryId == category.id)
+              .toList(growable: false);
+          return Card(
+            margin: EdgeInsets.zero,
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: () => _showSubtypes(context, category, subtypes),
+              child: Padding(
+                padding: const EdgeInsets.all(KSpacing.md),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: KColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Icon(
+                        _categoryIcon(category.icon),
+                        color: KColors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: KSpacing.md),
+                    Text(
+                      category.nameBn,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: KSpacing.xs),
+                    Text(
+                      '${_banglaDigits(subtypes.length)}টি উপধরন',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: KColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       );
     },
   );
@@ -156,11 +228,16 @@ class _CategoryGrid extends StatelessWidget {
                 GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: KSpacing.sm,
                     mainAxisSpacing: KSpacing.sm,
-                    childAspectRatio: 2.4,
+                    mainAxisExtent:
+                        72 +
+                        (((MediaQuery.textScalerOf(sheetContext).scale(16) / 16)
+                                    .clamp(1, 2) -
+                                1) *
+                            40),
                   ),
                   itemCount: subtypes.length,
                   itemBuilder: (itemContext, index) {
@@ -214,6 +291,11 @@ IconData _categoryIcon(String? icon) => switch (icon) {
   'event' => Icons.celebration_outlined,
   _ => Icons.work_outline,
 };
+
+String _banglaDigits(int value) => value.toString().replaceAllMapped(
+  RegExp(r'\d'),
+  (match) => '০১২৩৪৫৬৭৮৯'[int.parse(match.group(0)!)],
+);
 
 class PublicWorkerProfileScreen extends ConsumerWidget {
   const PublicWorkerProfileScreen({super.key});

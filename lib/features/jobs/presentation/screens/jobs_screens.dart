@@ -160,13 +160,12 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                     : GridView.builder(
                         padding: const EdgeInsets.all(KSpacing.md),
                         physics: const AlwaysScrollableScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: KSpacing.md,
-                              mainAxisSpacing: KSpacing.md,
-                              childAspectRatio: .61,
-                            ),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: _responsiveGridColumns(context),
+                          crossAxisSpacing: KSpacing.md,
+                          mainAxisSpacing: KSpacing.md,
+                          mainAxisExtent: _jobGridCardHeight(context),
+                        ),
                         itemCount: items.length,
                         itemBuilder: (context, index) => _JobCard(
                           job: items[index],
@@ -620,23 +619,35 @@ class _JobCard extends StatelessWidget {
     child: Padding(
       padding: const EdgeInsets.all(KSpacing.md),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.work_outline, color: KColors.primary),
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: KColors.primary.withValues(alpha: .1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.work_outline, color: KColors.primary),
+              ),
               if (job.matchScore case final score? when score > 0)
-                Chip(
-                  visualDensity: VisualDensity.compact,
-                  avatar: const Icon(Icons.auto_awesome, size: 16),
-                  label: Text('$score%'),
+                Padding(
+                  padding: const EdgeInsets.only(left: KSpacing.xs),
+                  child: Chip(
+                    visualDensity: VisualDensity.compact,
+                    avatar: const Icon(Icons.auto_awesome, size: 16),
+                    label: Text('$score%'),
+                  ),
                 ),
             ],
           ),
           const SizedBox(height: KSpacing.sm),
           Text(
             job.title,
+            textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.titleMedium,
@@ -644,15 +655,22 @@ class _JobCard extends StatelessWidget {
           const SizedBox(height: KSpacing.xs),
           Text(
             '${job.categoryName} · ${job.locationName}',
+            textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: KSpacing.xs),
-          Text(job.description, maxLines: 3, overflow: TextOverflow.ellipsis),
+          Text(
+            job.description,
+            textAlign: TextAlign.center,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
           if (job.matchReasons.isNotEmpty)
             Text(
               _matchReasonBn(job.matchReasons.first),
+              textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -664,11 +682,13 @@ class _JobCard extends StatelessWidget {
           if (job.startsAt != null)
             Text(
               'পোস্টের সময়: ${_dateTime(job.startsAt!)}',
+              textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           if (job.isTimeAvailable)
             const Text(
               '✓ আপনার সময়ে মেলে',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 color: KColors.success,
                 fontWeight: FontWeight.w600,
@@ -677,6 +697,7 @@ class _JobCard extends StatelessWidget {
           else if (job.isTimeUnavailable)
             const Text(
               'সময় যোগ করলে আবেদন করা যাবে',
+              textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -688,6 +709,7 @@ class _JobCard extends StatelessWidget {
               case final amount?)
             Text(
               '৳$amount',
+              textAlign: TextAlign.center,
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
           if (actionLabel != null) ...[
@@ -903,11 +925,11 @@ class WorkerDirectoryScreen extends ConsumerWidget {
             ? const Center(child: Text('এখনো কোনো কর্মী পাওয়া যায়নি।'))
             : GridView.builder(
                 padding: const EdgeInsets.all(KSpacing.md),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: _responsiveGridColumns(context),
                   crossAxisSpacing: KSpacing.md,
                   mainAxisSpacing: KSpacing.md,
-                  childAspectRatio: .82,
+                  mainAxisExtent: _workerGridCardHeight(context),
                 ),
                 itemCount: items.length,
                 itemBuilder: (context, index) => _WorkerCard(
@@ -946,18 +968,21 @@ class _WorkerCard extends StatelessWidget {
             const SizedBox(height: KSpacing.sm),
             Text(
               worker.displayName,
+              textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             Text(
               worker.areaNameBn ?? '',
+              textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: KSpacing.xs),
             Text(
               '★ ${worker.ratingAverage} · ${worker.completedJobsCount} কাজ',
+              textAlign: TextAlign.center,
             ),
             const Spacer(),
             Text(
@@ -967,8 +992,9 @@ class _WorkerCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: KSpacing.sm),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            const Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Icon(Icons.schedule, size: 18),
                 SizedBox(width: 4),
@@ -1770,6 +1796,26 @@ class _Retry extends StatelessWidget {
       ],
     ),
   );
+}
+
+int _responsiveGridColumns(BuildContext context) {
+  final width = MediaQuery.sizeOf(context).width;
+  final textScale = MediaQuery.textScalerOf(context).scale(16) / 16;
+  if (width < 400) return 1;
+  if (width < 680 && textScale >= 1.5) return 1;
+  return width >= 680 ? 3 : 2;
+}
+
+double _jobGridCardHeight(BuildContext context) {
+  final scale = (MediaQuery.textScalerOf(context).scale(16) / 16).clamp(1, 2);
+  final accessible = _responsiveGridColumns(context) == 1;
+  return 424 + ((scale - 1) * (accessible ? 356 : 160));
+}
+
+double _workerGridCardHeight(BuildContext context) {
+  final scale = (MediaQuery.textScalerOf(context).scale(16) / 16).clamp(1, 2);
+  final accessible = _responsiveGridColumns(context) == 1;
+  return 300 + ((scale - 1) * (accessible ? 200 : 96));
 }
 
 Future<int?> _askAmount(BuildContext context) async {

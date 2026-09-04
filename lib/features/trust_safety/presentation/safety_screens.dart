@@ -933,7 +933,7 @@ class _PortfolioCard extends StatelessWidget {
     child: InkWell(
       onTap: busy ? null : onOpen,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
             child: Stack(
@@ -965,51 +965,52 @@ class _PortfolioCard extends StatelessWidget {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              KSpacing.sm,
-              KSpacing.sm,
-              0,
-              KSpacing.xs,
-            ),
-            child: Row(
+          SizedBox(
+            height: 52,
+            child: Stack(
+              alignment: Alignment.center,
               children: [
-                Expanded(
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 44),
                   child: Text(
                     item.categoryName,
+                    textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.labelLarge,
                   ),
                 ),
-                PopupMenuButton<_PortfolioAction>(
-                  enabled: !busy,
-                  tooltip: 'কাজের নমুনার অপশন',
-                  onSelected: (action) => switch (action) {
-                    _PortfolioAction.edit => onEdit(),
-                    _PortfolioAction.delete => onDelete(),
-                  },
-                  itemBuilder: (_) => const [
-                    PopupMenuItem(
-                      value: _PortfolioAction.edit,
-                      child: ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: Icon(Icons.edit_outlined),
-                        title: Text('তথ্য সম্পাদনা'),
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: _PortfolioAction.delete,
-                      child: ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: Icon(
-                          Icons.delete_outline,
-                          color: KColors.danger,
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: PopupMenuButton<_PortfolioAction>(
+                    enabled: !busy,
+                    tooltip: 'কাজের নমুনার অপশন',
+                    onSelected: (action) => switch (action) {
+                      _PortfolioAction.edit => onEdit(),
+                      _PortfolioAction.delete => onDelete(),
+                    },
+                    itemBuilder: (_) => const [
+                      PopupMenuItem(
+                        value: _PortfolioAction.edit,
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(Icons.edit_outlined),
+                          title: Text('তথ্য সম্পাদনা'),
                         ),
-                        title: Text('মুছুন'),
                       ),
-                    ),
-                  ],
+                      PopupMenuItem(
+                        value: _PortfolioAction.delete,
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(
+                            Icons.delete_outline,
+                            color: KColors.danger,
+                          ),
+                          title: Text('মুছুন'),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -1025,6 +1026,7 @@ class _PortfolioCard extends StatelessWidget {
               item.caption?.isNotEmpty == true
                   ? item.caption!
                   : 'ক্যাপশন যোগ করা হয়নি',
+              textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(

@@ -85,6 +85,16 @@ void main() {
 
     expect(find.text('১ / ২০টি কাজের নমুনা'), findsOneWidget);
     expect(find.text('বৈদ্যুতিক কাজ'), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.text('বৈদ্যুতিক কাজ')).textAlign,
+      TextAlign.center,
+    );
+    expect(
+      tester
+          .widget<Text>(find.text('সিলিং ফ্যান নিরাপদে মেরামত করেছি'))
+          .textAlign,
+      TextAlign.center,
+    );
     expect(find.byTooltip('কাজের নমুনার অপশন'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
