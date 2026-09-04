@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Put } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Put,
+} from "@nestjs/common";
 import { RoleMode } from "@prisma/client";
 import { ApiTags } from "@nestjs/swagger";
 
@@ -11,11 +20,43 @@ import { UpdateProfileDto } from "./dto/update-profile.dto";
 import { UpdateWorkerProfileDto } from "./dto/update-worker-profile.dto";
 import { UpdateWorkerSkillsDto } from "./dto/update-worker-skills.dto";
 import { UsersService } from "./users.service";
+import { CreatePortfolioItemDto } from "./dto/create-portfolio-item.dto";
+import { PortfolioService } from "./portfolio.service";
 
 @ApiTags("profiles")
 @Controller("profiles/me")
 export class ProfilesController {
-  constructor(private readonly users: UsersService) {}
+  constructor(
+    private readonly users: UsersService,
+    private readonly portfolio: PortfolioService,
+  ) {}
+
+  @Get("portfolio")
+  @Roles(RoleMode.WORKER)
+  @Policy(Policies.authenticated())
+  portfolioItems(@CurrentUser() claims: AccessTokenClaims) {
+    return this.portfolio.list(claims.sub);
+  }
+
+  @Post("portfolio")
+  @Roles(RoleMode.WORKER)
+  @Policy(Policies.authenticated())
+  addPortfolioItem(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Body() body: CreatePortfolioItemDto,
+  ) {
+    return this.portfolio.create(claims.sub, body);
+  }
+
+  @Delete("portfolio/:id")
+  @Roles(RoleMode.WORKER)
+  @Policy(Policies.authenticated())
+  deletePortfolioItem(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+  ) {
+    return this.portfolio.remove(claims.sub, id);
+  }
 
   @Put()
   @Policy(Policies.authenticated())

@@ -5,9 +5,10 @@ import { PublicProfilesController } from "./public-profiles.controller";
 import { PublicProfilesService } from "./public-profiles.service";
 import { UsersController } from "./users.controller";
 import { UsersService } from "./users.service";
+import { PortfolioService } from "./portfolio.service";
 
 @Module({
   controllers: [ProfilesController, PublicProfilesController, UsersController],
-  providers: [PublicProfilesService, UsersService],
+  providers: [PortfolioService, PublicProfilesService, UsersService],
 })
 export class UsersModule {}

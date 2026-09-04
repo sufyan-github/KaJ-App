@@ -3,6 +3,7 @@ export const UPLOAD_KINDS = [
   "VERIFICATION_DOCUMENT",
   "DISPUTE_EVIDENCE",
   "CHECKIN_PHOTO",
+  "PORTFOLIO_IMAGE",
   "CHAT_IMAGE",
 ] as const;
 export type UploadKind = (typeof UPLOAD_KINDS)[number];
@@ -33,6 +34,11 @@ const POLICIES: Record<UploadKind, UploadPolicy> = {
     allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
     maxSizeBytes: 10 * 1024 * 1024,
     sensitive: true,
+  },
+  PORTFOLIO_IMAGE: {
+    allowedMimeTypes: ["image/jpeg", "image/png"],
+    maxSizeBytes: 5 * 1024 * 1024,
+    sensitive: false,
   },
   CHAT_IMAGE: {
     allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],

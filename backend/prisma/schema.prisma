@@ -329,6 +329,7 @@ model User {
   verification_requests       VerificationRequest[]     @relation("VerificationOwner")
   verification_reviews        VerificationRequest[]     @relation("VerificationReviewer")
   documents                   Document[]
+  portfolio_items             PortfolioItem[]
   disputes_opened             Dispute[]                 @relation("DisputeOpener")
   disputes_resolved           Dispute[]                 @relation("DisputeResolver")
   dispute_evidence            DisputeEvidence[]
@@ -545,30 +546,31 @@ model BusinessProfile {
 }
 
 model Category {
-  id                       String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  parent_id                String?    @db.Uuid
-  slug                     String     @unique
+  id                       String          @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  parent_id                String?         @db.Uuid
+  slug                     String          @unique
   name_en                  String
   name_bn                  String
   icon                     String?
-  sort_order               Int        @default(0)
-  is_active                Boolean    @default(true)
-  requires_manual_approval Boolean    @default(false)
-  min_age                  Int        @default(18)
-  requires_certificate     Boolean    @default(false)
-  requires_identity        Boolean    @default(false)
-  requires_poster_identity Boolean    @default(false)
-  requires_references      Int        @default(0)
-  requires_licence         Boolean    @default(false)
+  sort_order               Int             @default(0)
+  is_active                Boolean         @default(true)
+  requires_manual_approval Boolean         @default(false)
+  min_age                  Int             @default(18)
+  requires_certificate     Boolean         @default(false)
+  requires_identity        Boolean         @default(false)
+  requires_poster_identity Boolean         @default(false)
+  requires_references      Int             @default(0)
+  requires_licence         Boolean         @default(false)
   safety_notice            String?
-  unsafe_for_students      Boolean    @default(false)
-  created_at               DateTime   @default(now())
-  updated_at               DateTime   @updatedAt
-  parent                   Category?  @relation("CategoryTree", fields: [parent_id], references: [id], onDelete: Restrict)
-  children                 Category[] @relation("CategoryTree")
+  unsafe_for_students      Boolean         @default(false)
+  created_at               DateTime        @default(now())
+  updated_at               DateTime        @updatedAt
+  parent                   Category?       @relation("CategoryTree", fields: [parent_id], references: [id], onDelete: Restrict)
+  children                 Category[]      @relation("CategoryTree")
   skills                   Skill[]
-  primary_jobs             Job[]      @relation("JobCategory")
-  subcategory_jobs         Job[]      @relation("JobSubcategory")
+  primary_jobs             Job[]           @relation("JobCategory")
+  subcategory_jobs         Job[]           @relation("JobSubcategory")
+  portfolio_items          PortfolioItem[]
 
   @@index([parent_id, sort_order])
   @@index([is_active, sort_order])
@@ -1143,9 +1145,28 @@ model Document {
   user               User                   @relation(fields: [user_id], references: [id], onDelete: Restrict)
   verification_links VerificationDocument[]
   dispute_evidence   DisputeEvidence[]
+  portfolio_item     PortfolioItem?
 
   @@index([user_id, kind])
   @@map("documents")
+}
+
+model PortfolioItem {
+  id          String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id     String   @db.Uuid
+  document_id String   @unique @db.Uuid
+  category_id String   @db.Uuid
+  caption     String?
+  sort_order  Int      @default(0)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  document    Document @relation(fields: [document_id], references: [id], onDelete: Restrict)
+  category    Category @relation(fields: [category_id], references: [id], onDelete: Restrict)
+
+  @@index([user_id, sort_order, created_at])
+  @@index([category_id])
+  @@map("portfolio_items")
 }
 
 model VerificationDocument {
