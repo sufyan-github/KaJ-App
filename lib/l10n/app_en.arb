@@ -24,7 +24,7 @@
   "@resendInSeconds": {"placeholders": {"seconds": {"type": "int"}}},
   "codeExpired": "This verification code has expired. Send a new code.",
   "welcomeTitle": "Welcome to KAAJ",
-  "welcomeBody": "Your secure account is ready. Profile and marketplace features will appear as their backend services become available.",
+  "welcomeBody": "Your secure account is ready. Find nearby work and trusted people.",
   "signOut": "Sign out",
   "tryAgain": "Try again",
   "requestReference": "Reference: {requestId}",

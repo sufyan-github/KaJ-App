@@ -12,4 +12,6 @@ class CatalogSkill {
   final String nameBn;
   final String nameEn;
   final String slug;
+
+  String nameFor(String languageCode) => languageCode == 'en' ? nameEn : nameBn;
 }

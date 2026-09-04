@@ -8,6 +8,9 @@ class JobSummary {
     required this.locationName,
     required this.status,
     required this.skills,
+    this.categoryNameEn,
+    this.locationNameEn,
+    this.skillsEn = const [],
     this.startsAt,
     this.endsAt,
     this.budgetMinPoisha,
@@ -19,8 +22,8 @@ class JobSummary {
   });
 
   factory JobSummary.fromJson(Map<String, dynamic> json) {
-    String nestedName(Object? value) {
-      if (value is Map) return value['name_bn'] as String? ?? '';
+    String nestedName(Object? value, String key) {
+      if (value is Map) return value[key] as String? ?? '';
       return '';
     }
 
@@ -35,8 +38,10 @@ class JobSummary {
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
       categoryId: nestedId(json['category']),
-      categoryName: nestedName(json['category']),
-      locationName: nestedName(json['location']),
+      categoryName: nestedName(json['category'], 'name_bn'),
+      categoryNameEn: nestedName(json['category'], 'name_en'),
+      locationName: nestedName(json['location'], 'name_bn'),
+      locationNameEn: nestedName(json['location'], 'name_en'),
       status: json['status'] as String? ?? '',
       startsAt: DateTime.tryParse(json['starts_at'] as String? ?? ''),
       endsAt: DateTime.tryParse(json['ends_at'] as String? ?? ''),
@@ -59,6 +64,15 @@ class JobSummary {
                 .where((name) => name.isNotEmpty)
                 .toList(growable: false)
           : const [],
+      skillsEn: rawSkills is List
+          ? rawSkills
+                .whereType<Map>()
+                .map((item) => item['skill'])
+                .whereType<Map>()
+                .map((skill) => skill['name_en'] as String? ?? '')
+                .where((name) => name.isNotEmpty)
+                .toList(growable: false)
+          : const [],
     );
   }
 
@@ -67,13 +81,16 @@ class JobSummary {
   final double? availabilityCoverage;
   final String categoryId;
   final String categoryName;
+  final String? categoryNameEn;
   final String description;
   final DateTime? endsAt;
   final String id;
   final String locationName;
+  final String? locationNameEn;
   final List<String> matchReasons;
   final int? matchScore;
   final List<String> skills;
+  final List<String> skillsEn;
   final DateTime? startsAt;
   final String status;
   final String? timeCompatibility;
@@ -81,6 +98,21 @@ class JobSummary {
 
   bool get isTimeAvailable => timeCompatibility == 'AVAILABLE';
   bool get isTimeUnavailable => timeCompatibility == 'UNAVAILABLE';
+
+  String categoryNameFor(String languageCode) => languageCode == 'en'
+      ? categoryNameEn?.isNotEmpty == true
+            ? categoryNameEn!
+            : categoryName
+      : categoryName;
+
+  String locationNameFor(String languageCode) => languageCode == 'en'
+      ? locationNameEn?.isNotEmpty == true
+            ? locationNameEn!
+            : locationName
+      : locationName;
+
+  List<String> skillsFor(String languageCode) =>
+      languageCode == 'en' && skillsEn.isNotEmpty ? skillsEn : skills;
 }
 
 class SuggestedWorker {
@@ -92,6 +124,7 @@ class SuggestedWorker {
     required this.matchScore,
     required this.matchReasons,
     required this.skills,
+    this.skillsEn = const [],
   });
 
   factory SuggestedWorker.fromJson(Map<String, dynamic> json) =>
@@ -111,6 +144,13 @@ class SuggestedWorker {
                 .where((item) => item.isNotEmpty)
                 .toList() ??
             const [],
+        skillsEn:
+            (json['skills'] as List?)
+                ?.whereType<Map>()
+                .map((item) => item['nameEn'] as String? ?? '')
+                .where((item) => item.isNotEmpty)
+                .toList() ??
+            const [],
       );
 
   final String displayName;
@@ -120,6 +160,10 @@ class SuggestedWorker {
   final int matchScore;
   final String ratingAverage;
   final List<String> skills;
+  final List<String> skillsEn;
+
+  List<String> skillsFor(String languageCode) =>
+      languageCode == 'en' && skillsEn.isNotEmpty ? skillsEn : skills;
 }
 
 class WorkerSlot {
@@ -309,6 +353,7 @@ class AssignmentDetail {
 class CancellationPreview {
   const CancellationPreview({
     required this.summaryBn,
+    required this.summaryEn,
     required this.feePoisha,
     required this.refundPoisha,
     required this.needsAdminReview,
@@ -316,6 +361,7 @@ class CancellationPreview {
   factory CancellationPreview.fromJson(Map<String, dynamic> json) =>
       CancellationPreview(
         summaryBn: json['summaryBn'] as String? ?? '',
+        summaryEn: json['summaryEn'] as String? ?? '',
         feePoisha: json['feePoisha']?.toString() ?? '0',
         refundPoisha: json['refundPoisha']?.toString() ?? '0',
         needsAdminReview: json['needsAdminReview'] == true,
@@ -324,6 +370,10 @@ class CancellationPreview {
   final bool needsAdminReview;
   final String refundPoisha;
   final String summaryBn;
+  final String summaryEn;
+
+  String summaryFor(String languageCode) =>
+      languageCode == 'en' && summaryEn.isNotEmpty ? summaryEn : summaryBn;
 }
 
 class JobApplicationSummary {

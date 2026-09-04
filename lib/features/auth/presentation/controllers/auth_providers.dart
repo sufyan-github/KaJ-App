@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../../../bootstrap.dart';
+import '../../../../core/localization/locale_controller.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/session_token_store.dart';
 import '../../data/datasources/auth_remote_data_source.dart';
@@ -19,9 +20,11 @@ final sessionTokenStoreProvider = Provider<SessionTokenStore>(
 );
 
 final dioProvider = Provider<Dio>((ref) {
+  final locale = ref.watch(localeControllerProvider);
   return ApiClient(
     environment: ref.watch(appEnvironmentProvider),
     tokenStore: ref.watch(sessionTokenStoreProvider),
+    localeCode: locale.languageCode,
   ).dio;
 });
 

@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/failure.dart';
+import '../../../core/localization/kaaj_localizations.dart';
 import '../../../core/permissions/permission_gateway.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/k_localized_text.dart';
 import '../../../core/widgets/k_primary_button.dart';
 import '../domain/trust_models.dart';
 import 'trust_safety_providers.dart';
@@ -33,7 +35,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(attendanceProvider(widget.assignmentId));
     return Scaffold(
-      appBar: AppBar(title: const Text('উপস্থিতি ও কাজের সময়')),
+      appBar: AppBar(title: const KLocalizedText('উপস্থিতি ও কাজের সময়')),
       body: state.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
@@ -42,12 +44,12 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(_message(error), textAlign: TextAlign.center),
+                KLocalizedText(_message(error), textAlign: TextAlign.center),
                 const SizedBox(height: KSpacing.md),
                 FilledButton(
                   onPressed: () =>
                       ref.invalidate(attendanceProvider(widget.assignmentId)),
-                  child: const Text('আবার চেষ্টা করুন'),
+                  child: const KLocalizedText('আবার চেষ্টা করুন'),
                 ),
               ],
             ),
@@ -77,7 +79,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                 Icon(Icons.privacy_tip_outlined, color: KColors.primary),
                 SizedBox(width: KSpacing.sm),
                 Expanded(
-                  child: Text(
+                  child: KLocalizedText(
                     'লোকেশন শুধু এই চেক-ইন বা চেক-আউটের মুহূর্তে নেওয়া হবে। KAAJ ব্যাকগ্রাউন্ডে আপনার অবস্থান অনুসরণ করে না।',
                   ),
                 ),
@@ -92,7 +94,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
               : (value) => setState(() => _consent = value ?? false),
           controlAffinity: ListTileControlAffinity.leading,
           contentPadding: EdgeInsets.zero,
-          title: const Text('এই একবার লোকেশন ব্যবহারে আমি সম্মতি দিচ্ছি।'),
+          title: const KLocalizedText(
+            'এই একবার লোকেশন ব্যবহারে আমি সম্মতি দিচ্ছি।',
+          ),
         ),
         if (!checkedIn)
           KPrimaryButton(
@@ -115,8 +119,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
             color: KColors.success.withValues(alpha: .08),
             child: ListTile(
               leading: const Icon(Icons.task_alt, color: KColors.success),
-              title: const Text('উপস্থিতি সম্পন্ন'),
-              subtitle: Text(
+              title: const KLocalizedText('উপস্থিতি সম্পন্ন'),
+              subtitle: KLocalizedText(
                 'সার্ভার নির্ধারিত কাজের সময়: ${state.minutesWorked ?? 0} মিনিট',
               ),
             ),
@@ -125,10 +129,12 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
         OutlinedButton.icon(
           onPressed: widget.isPoster && !checkedIn ? _override : null,
           icon: const Icon(Icons.fact_check_outlined),
-          label: const Text('লোকেশন ব্যর্থ হলে উপস্থিতি নিশ্চিত করুন'),
+          label: const KLocalizedText(
+            'লোকেশন ব্যর্থ হলে উপস্থিতি নিশ্চিত করুন',
+          ),
         ),
         const SizedBox(height: KSpacing.sm),
-        Text(
+        KLocalizedText(
           'ইন্টারনেট ছাড়া উপস্থিতি জমা হয় না। দূরত্ব ও সময় সার্ভার যাচাই করে; ফোনের দেখানো সময় চূড়ান্ত নয়।',
           style: Theme.of(
             context,
@@ -143,19 +149,22 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('চেক-আউট নিশ্চিত করবেন?'),
+        title: const KLocalizedText('চেক-আউট নিশ্চিত করবেন?'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            const KLocalizedText(
               'জমা দেওয়ার পর এটি বদলানো যাবে না। গ্রাহক কাজটি পর্যালোচনা করবেন।',
             ),
             const SizedBox(height: KSpacing.md),
             TextField(
               controller: notes,
               maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'সমাপ্তির নোট (ঐচ্ছিক)',
+              decoration: InputDecoration(
+                labelText: KaajLocalizations.text(
+                  context,
+                  'সমাপ্তির নোট (ঐচ্ছিক)',
+                ),
               ),
             ),
           ],
@@ -163,11 +172,11 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('ফিরে যান'),
+            child: const KLocalizedText('ফিরে যান'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('চেক-আউট'),
+            child: const KLocalizedText('চেক-আউট'),
           ),
         ],
       ),
@@ -231,24 +240,30 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     final accepted = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('কর্মীর উপস্থিতি নিশ্চিত করুন'),
+        title: const KLocalizedText('কর্মীর উপস্থিতি নিশ্চিত করুন'),
         content: TextField(
           controller: controller,
           minLines: 2,
           maxLines: 4,
-          decoration: const InputDecoration(
-            labelText: 'কারণ (কমপক্ষে ১০ অক্ষর)',
-            hintText: 'যেমন: লোকেশন সিগন্যাল না থাকলেও কর্মী উপস্থিত ছিলেন',
+          decoration: InputDecoration(
+            labelText: KaajLocalizations.text(
+              context,
+              'কারণ (কমপক্ষে ১০ অক্ষর)',
+            ),
+            hintText: KaajLocalizations.text(
+              context,
+              'যেমন: লোকেশন সিগন্যাল না থাকলেও কর্মী উপস্থিত ছিলেন',
+            ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('বাতিল'),
+            child: const KLocalizedText('বাতিল'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('নিশ্চিত করুন'),
+            child: const KLocalizedText('নিশ্চিত করুন'),
           ),
         ],
       ),
@@ -265,8 +280,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     }
   }
 
-  void _snack(String text) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  void _snack(String text) => ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(SnackBar(content: KLocalizedText(text)));
 }
 
 class _StatusCard extends StatelessWidget {
@@ -302,7 +318,7 @@ class _StatusCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  KLocalizedText(
                     done
                         ? 'কাজের সময় রেকর্ড হয়েছে'
                         : active
@@ -310,7 +326,7 @@ class _StatusCard extends StatelessWidget {
                         : 'চেক-ইন বাকি',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  Text(
+                  KLocalizedText(
                     'অনুমোদিত দূরত্ব ${state.geofenceRadiusM} মিটার${state.checkinDistanceM == null ? '' : ' · চেক-ইন ${state.checkinDistanceM} মিটার দূরে'}',
                   ),
                 ],
@@ -352,7 +368,7 @@ class _ElapsedTimerState extends State<_ElapsedTimer> {
     final duration = DateTime.now().difference(widget.startedAt.toLocal());
     return Semantics(
       liveRegion: true,
-      child: Text(
+      child: KLocalizedText(
         'চলমান সময় ${duration.inHours} ঘণ্টা ${duration.inMinutes.remainder(60)} মিনিট',
         textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.titleMedium,

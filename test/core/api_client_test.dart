@@ -37,6 +37,24 @@ void main() {
     expect(request.headers['Idempotency-Key'], isNotEmpty);
   });
 
+  test('sends the selected English locale to every API request', () async {
+    final adapter = _RecordingAdapter((request, attempt) {
+      return _jsonResponse(200, {
+        'data': {'accepted': true},
+      });
+    });
+    final client = ApiClient(
+      environment: environment,
+      tokenStore: _MemoryTokenStore(),
+      localeCode: 'en',
+      httpClientAdapter: adapter,
+    );
+
+    await client.dio.get<Map<String, dynamic>>('/jobs');
+
+    expect(adapter.requests.single.headers['Accept-Language'], 'en');
+  });
+
   test('adds an idempotency key to DELETE requests', () async {
     final adapter = _RecordingAdapter(
       (request, attempt) => _jsonResponse(204, const {}),

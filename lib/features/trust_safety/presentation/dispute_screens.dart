@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/errors/failure.dart';
+import '../../../core/localization/kaaj_localizations.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/k_localized_text.dart';
 import '../../../core/widgets/k_primary_button.dart';
 import '../domain/trust_models.dart';
 import 'trust_safety_providers.dart';
@@ -28,7 +30,7 @@ class DisputesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final disputes = ref.watch(disputesProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('আমার বিরোধসমূহ')),
+      appBar: AppBar(title: const KLocalizedText('আমার বিরোধসমূহ')),
       body: disputes.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => _Retry(
@@ -39,7 +41,7 @@ class DisputesScreen extends ConsumerWidget {
             ? const Center(
                 child: Padding(
                   padding: EdgeInsets.all(KSpacing.lg),
-                  child: Text(
+                  child: KLocalizedText(
                     'কোনো বিরোধ নেই। সমস্যা হলে কাজের বিস্তারিত পৃষ্ঠা থেকে বিরোধ খুলতে পারবেন।',
                     textAlign: TextAlign.center,
                   ),
@@ -61,8 +63,10 @@ class DisputesScreen extends ConsumerWidget {
                           Icons.gavel_outlined,
                           color: KColors.primary,
                         ),
-                        title: Text(item.jobTitle ?? 'কাজের বিরোধ'),
-                        subtitle: Text(
+                        title: item.jobTitle == null
+                            ? const KLocalizedText('কাজের বিরোধ')
+                            : Text(item.jobTitle!),
+                        subtitle: KLocalizedText(
                           '${disputeReasons[item.reasonCode] ?? item.reasonCode}\n${_status(item.status)}',
                         ),
                         isThreeLine: true,
@@ -96,7 +100,7 @@ class _OpenDisputeScreenState extends ConsumerState<OpenDisputeScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('বিরোধ খুলুন')),
+    appBar: AppBar(title: const KLocalizedText('বিরোধ খুলুন')),
     body: ListView(
       padding: const EdgeInsets.all(KSpacing.lg),
       children: [
@@ -104,7 +108,7 @@ class _OpenDisputeScreenState extends ConsumerState<OpenDisputeScreen> {
           color: KColors.surfaceAlt,
           child: Padding(
             padding: EdgeInsets.all(KSpacing.md),
-            child: Text(
+            child: KLocalizedText(
               'বিরোধ খোলার সঙ্গে সঙ্গে সংশ্লিষ্ট পেমেন্ট স্থগিত হবে। উভয় পক্ষ প্রমাণ দেওয়ার জন্য ৪৮ ঘণ্টা পাবেন; সিদ্ধান্ত সাধারণত ৫ কর্মদিবসের মধ্যে জানানো হবে।',
             ),
           ),
@@ -113,12 +117,14 @@ class _OpenDisputeScreenState extends ConsumerState<OpenDisputeScreen> {
         DropdownButtonFormField<String>(
           initialValue: _reason,
           isExpanded: true,
-          decoration: const InputDecoration(labelText: 'সমস্যার ধরন'),
+          decoration: InputDecoration(
+            labelText: KaajLocalizations.text(context, 'সমস্যার ধরন'),
+          ),
           items: disputeReasons.entries
               .map(
                 (entry) => DropdownMenuItem(
                   value: entry.key,
-                  child: Text(entry.value),
+                  child: KLocalizedText(entry.value),
                 ),
               )
               .toList(),
@@ -130,13 +136,19 @@ class _OpenDisputeScreenState extends ConsumerState<OpenDisputeScreen> {
           minLines: 5,
           maxLines: 10,
           maxLength: 2000,
-          decoration: const InputDecoration(
-            labelText: 'কি ঘটেছে? (কমপক্ষে ২০ অক্ষর)',
-            hintText: 'তারিখ, সময় এবং আপনি কী সমাধান চান তা লিখুন',
+          decoration: InputDecoration(
+            labelText: KaajLocalizations.text(
+              context,
+              'কি ঘটেছে? (কমপক্ষে ২০ অক্ষর)',
+            ),
+            hintText: KaajLocalizations.text(
+              context,
+              'তারিখ, সময় এবং আপনি কী সমাধান চান তা লিখুন',
+            ),
             alignLabelWithHint: true,
           ),
         ),
-        const Text(
+        const KLocalizedText(
           'চুক্তি, KAAJ চ্যাট ও উপস্থিতির রেকর্ড স্বয়ংক্রিয়ভাবে প্রমাণে যুক্ত হবে।',
         ),
         const SizedBox(height: KSpacing.lg),
@@ -168,8 +180,9 @@ class _OpenDisputeScreenState extends ConsumerState<OpenDisputeScreen> {
     }
   }
 
-  void _snack(String text) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  void _snack(String text) => ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(SnackBar(content: KLocalizedText(text)));
 }
 
 class DisputeDetailScreen extends ConsumerWidget {
@@ -179,7 +192,7 @@ class DisputeDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dispute = ref.watch(disputeProvider(disputeId));
     return Scaffold(
-      appBar: AppBar(title: const Text('বিরোধের অগ্রগতি')),
+      appBar: AppBar(title: const KLocalizedText('বিরোধের অগ্রগতি')),
       body: dispute.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => _Retry(
@@ -191,25 +204,33 @@ class DisputeDetailScreen extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.all(KSpacing.lg),
             children: [
-              Text(
-                item.jobTitle ?? 'কাজের বিরোধ',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
+              item.jobTitle == null
+                  ? KLocalizedText(
+                      'কাজের বিরোধ',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    )
+                  : Text(
+                      item.jobTitle!,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
               const SizedBox(height: KSpacing.sm),
               Chip(
                 avatar: const Icon(Icons.gavel, size: 18),
-                label: Text(_status(item.status)),
+                label: KLocalizedText(_status(item.status)),
               ),
               const SizedBox(height: KSpacing.md),
               _DeadlineCard(item: item),
               const SizedBox(height: KSpacing.md),
-              Text(
+              KLocalizedText(
                 'আপনার বিবরণ',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               Text(item.description),
               const SizedBox(height: KSpacing.lg),
-              Text('প্রমাণ', style: Theme.of(context).textTheme.titleLarge),
+              KLocalizedText(
+                'প্রমাণ',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: KSpacing.sm),
               ...item.evidence.map(
                 (evidence) => Card(
@@ -219,10 +240,10 @@ class DisputeDetailScreen extends ConsumerWidget {
                           ? Icons.attachment
                           : Icons.description_outlined,
                     ),
-                    title: Text(_evidenceLabel(evidence.kind)),
+                    title: KLocalizedText(_evidenceLabel(evidence.kind)),
                     subtitle: evidence.text == null
                         ? null
-                        : Text(
+                        : KLocalizedText(
                             evidence.text!,
                             maxLines: 4,
                             overflow: TextOverflow.ellipsis,
@@ -235,17 +256,17 @@ class DisputeDetailScreen extends ConsumerWidget {
                 OutlinedButton.icon(
                   onPressed: () => _addText(context, ref),
                   icon: const Icon(Icons.note_add_outlined),
-                  label: const Text('লিখিত প্রমাণ যোগ করুন'),
+                  label: const KLocalizedText('লিখিত প্রমাণ যোগ করুন'),
                 ),
                 OutlinedButton.icon(
                   onPressed: () => _addPhoto(context, ref),
                   icon: const Icon(Icons.add_photo_alternate_outlined),
-                  label: const Text('ছবির প্রমাণ যোগ করুন'),
+                  label: const KLocalizedText('ছবির প্রমাণ যোগ করুন'),
                 ),
               ],
               if (item.decision != null) ...[
                 const SizedBox(height: KSpacing.lg),
-                Text(
+                KLocalizedText(
                   'সিদ্ধান্ত ও কারণ',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
@@ -265,14 +286,14 @@ class DisputeDetailScreen extends ConsumerWidget {
                 OutlinedButton.icon(
                   onPressed: () => _appeal(context, ref),
                   icon: const Icon(Icons.replay_outlined),
-                  label: const Text('৭২ ঘণ্টার মধ্যে আপিল করুন'),
+                  label: const KLocalizedText('৭২ ঘণ্টার মধ্যে আপিল করুন'),
                 ),
               if (item.appealStatus != null)
                 Card(
                   child: ListTile(
                     leading: const Icon(Icons.balance_outlined),
-                    title: const Text('স্বতন্ত্র আপিল পর্যালোচনা'),
-                    subtitle: Text(_status(item.appealStatus!)),
+                    title: const KLocalizedText('স্বতন্ত্র আপিল পর্যালোচনা'),
+                    subtitle: KLocalizedText(_status(item.appealStatus!)),
                   ),
                 ),
             ],
@@ -287,23 +308,26 @@ class DisputeDetailScreen extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('লিখিত প্রমাণ'),
+        title: const KLocalizedText('লিখিত প্রমাণ'),
         content: TextField(
           controller: controller,
           minLines: 4,
           maxLines: 8,
-          decoration: const InputDecoration(
-            hintText: 'কি প্রমাণ করে এবং কখন ঘটেছে লিখুন',
+          decoration: InputDecoration(
+            hintText: KaajLocalizations.text(
+              context,
+              'কি প্রমাণ করে এবং কখন ঘটেছে লিখুন',
+            ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('বাতিল'),
+            child: const KLocalizedText('বাতিল'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('যোগ করুন'),
+            child: const KLocalizedText('যোগ করুন'),
           ),
         ],
       ),
@@ -341,23 +365,26 @@ class DisputeDetailScreen extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('আপিলের কারণ'),
+        title: const KLocalizedText('আপিলের কারণ'),
         content: TextField(
           controller: controller,
           minLines: 4,
           maxLines: 8,
-          decoration: const InputDecoration(
-            hintText: 'সিদ্ধান্তে কী বাদ পড়েছে? কমপক্ষে ২০ অক্ষর',
+          decoration: InputDecoration(
+            hintText: KaajLocalizations.text(
+              context,
+              'সিদ্ধান্তে কী বাদ পড়েছে? কমপক্ষে ২০ অক্ষর',
+            ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('বাতিল'),
+            child: const KLocalizedText('বাতিল'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('আপিল করুন'),
+            child: const KLocalizedText('আপিল করুন'),
           ),
         ],
       ),
@@ -388,8 +415,9 @@ class DisputeDetailScreen extends ConsumerWidget {
     }
   }
 
-  void _snack(BuildContext context, String text) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  void _snack(BuildContext context, String text) => ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(SnackBar(content: KLocalizedText(text)));
 }
 
 class _DeadlineCard extends StatelessWidget {
@@ -408,12 +436,12 @@ class _DeadlineCard extends StatelessWidget {
       color: KColors.warning.withValues(alpha: .08),
       child: ListTile(
         leading: const Icon(Icons.timer_outlined, color: KColors.warning),
-        title: Text(
+        title: KLocalizedText(
           item.status == 'EVIDENCE'
               ? 'প্রমাণ জমার সময়'
               : 'সিদ্ধান্তের লক্ষ্য সময়',
         ),
-        subtitle: Text(text),
+        subtitle: KLocalizedText(text),
       ),
     );
   }
@@ -430,11 +458,11 @@ class _Retry extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(_message(error), textAlign: TextAlign.center),
+          KLocalizedText(_message(error), textAlign: TextAlign.center),
           const SizedBox(height: KSpacing.md),
           FilledButton(
             onPressed: onRetry,
-            child: const Text('আবার চেষ্টা করুন'),
+            child: const KLocalizedText('আবার চেষ্টা করুন'),
           ),
         ],
       ),

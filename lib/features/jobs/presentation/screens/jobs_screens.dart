@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/localization/kaaj_localizations.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/k_localized_text.dart';
 import '../../../../core/widgets/k_primary_button.dart';
 import '../../../../core/widgets/k_text_field.dart';
 import '../../../catalog/domain/entities/catalog_category.dart';
@@ -66,14 +68,17 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: KLocalizedText(
           widget.skillName ??
               widget.categoryName ??
               (isWorker ? 'কাজ খুঁজুন' : 'আমার পোস্ট করা কাজ'),
         ),
         actions: [
           IconButton(
-            tooltip: 'কাজের তালিকা হালনাগাদ করুন',
+            tooltip: KaajLocalizations.text(
+              context,
+              'কাজের তালিকা হালনাগাদ করুন',
+            ),
             onPressed: refresh,
             icon: const Icon(Icons.refresh_rounded),
           ),
@@ -84,7 +89,7 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
           : FloatingActionButton.extended(
               onPressed: () => context.push(AppRoutes.createJob),
               icon: const Icon(Icons.post_add_rounded),
-              label: const Text('কাজ পোস্ট করুন'),
+              label: const KLocalizedText('কাজ পোস্ট করুন'),
             ),
       body: Column(
         children: [
@@ -100,7 +105,7 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                 children: [
                   if (browsingType)
                     Expanded(
-                      child: Text(
+                      child: KLocalizedText(
                         widget.skillName == null
                             ? '${widget.categoryName} বিভাগের সব পোস্ট'
                             : '${widget.categoryName} › ${widget.skillName}',
@@ -120,7 +125,7 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                             : Icons.schedule_outlined,
                         size: 18,
                       ),
-                      label: Text(
+                      label: KLocalizedText(
                         _availableOnly ? 'আমার সময়ে মেলে' : 'সব সময়',
                       ),
                       selected: _availableOnly,
@@ -148,7 +153,7 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                         children: [
                           const SizedBox(height: 240),
                           Center(
-                            child: Text(
+                            child: KLocalizedText(
                               _availableOnly
                                   ? 'এই ধরনে আপনার সময়ের সঙ্গে মেলা কাজ নেই।'
                                   : 'এই ধরনে এখনো কোনো কাজ প্রকাশিত হয়নি।',
@@ -222,7 +227,7 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: KSpacing.sm),
-                  Text(
+                  KLocalizedText(
                     'ম্যাচ করা কর্মী',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
@@ -231,9 +236,10 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                       .watch(suggestedWorkersProvider(job.id))
                       .when(
                         loading: () => const LinearProgressIndicator(),
-                        error: (_, _) => const Text('পরামর্শ লোড করা যায়নি।'),
+                        error: (_, _) =>
+                            const KLocalizedText('পরামর্শ লোড করা যায়নি।'),
                         data: (workers) => workers.isEmpty
-                            ? const Text(
+                            ? const KLocalizedText(
                                 'এখনো কোনো উপযুক্ত কর্মী পাওয়া যায়নি।',
                               )
                             : SizedBox(
@@ -247,7 +253,9 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                                     final worker = workers[index];
                                     return ActionChip(
                                       avatar: CircleAvatar(
-                                        child: Text('${worker.matchScore}%'),
+                                        child: KLocalizedText(
+                                          '${worker.matchScore}%',
+                                        ),
                                       ),
                                       label: Text(
                                         '${worker.displayName}\n${worker.skills.take(2).join(', ')}',
@@ -268,12 +276,12 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                     ),
                     error: (_, _) => const Padding(
                       padding: EdgeInsets.all(KSpacing.lg),
-                      child: Text('আবেদনের তালিকা লোড করা যায়নি।'),
+                      child: KLocalizedText('আবেদনের তালিকা লোড করা যায়নি।'),
                     ),
                     data: (items) => items.isEmpty
                         ? const Padding(
                             padding: EdgeInsets.all(KSpacing.lg),
-                            child: Text('এখনো কেউ আবেদন করেননি।'),
+                            child: KLocalizedText('এখনো কেউ আবেদন করেননি।'),
                           )
                         : Flexible(
                             child: ListView.separated(
@@ -287,12 +295,12 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                                   leading: const CircleAvatar(
                                     child: Icon(Icons.person_outline),
                                   ),
-                                  title: Text(
+                                  title: KLocalizedText(
                                     'কর্মী ${item.workerUserId.substring(0, 8)}',
                                   ),
                                   subtitle: Text(
                                     '${item.startsAt == null ? '' : _dateTime(item.startsAt!)}\n'
-                                    '${item.message?.isNotEmpty == true ? item.message : 'কোনো বার্তা নেই'}',
+                                    '${item.message?.isNotEmpty == true ? item.message : KaajLocalizations.text(context, 'কোনো বার্তা নেই')}',
                                   ),
                                   isThreeLine: true,
                                   trailing: item.status == 'PENDING'
@@ -314,7 +322,7 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                                                   sheetContext,
                                                 ).showSnackBar(
                                                   const SnackBar(
-                                                    content: Text(
+                                                    content: KLocalizedText(
                                                       'আবেদনটি গ্রহণ করা যায়নি।',
                                                     ),
                                                   ),
@@ -322,9 +330,9 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                                               }
                                             }
                                           },
-                                          child: const Text('গ্রহণ'),
+                                          child: const KLocalizedText('গ্রহণ'),
                                         )
-                                      : Text(_statusBn(item.status)),
+                                      : KLocalizedText(_statusBn(item.status)),
                                 );
                               },
                             ),
@@ -351,7 +359,7 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
+            content: KLocalizedText(
               'আবেদনের যোগ্যতা যাচাই করা যায়নি। আবার চেষ্টা করুন।',
             ),
           ),
@@ -379,15 +387,15 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
     await showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('এই কাজে আবেদন করুন'),
+        title: const KLocalizedText('এই কাজে আবেদন করুন'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
-                  'পোস্টের সময়: ${_dateTime(start)} – ${_time(end)}',
+                child: KLocalizedText(
+                  'কাজের সময়: ${_dateTime(start)} – ${_time(end)}',
                 ),
               ),
               if (job.isTimeAvailable)
@@ -395,15 +403,17 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                   leading: Icon(Icons.event_available, color: KColors.success),
-                  title: Text('এই সময়টি আপনার ডিফল্ট সময়ের সঙ্গে মেলে'),
+                  title: KLocalizedText(
+                    'এই সময়টি আপনার ডিফল্ট সময়ের সঙ্গে মেলে',
+                  ),
                 ),
               if (job.isTimeUnavailable) ...[
                 const ListTile(
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                   leading: Icon(Icons.event_busy, color: KColors.warning),
-                  title: Text('এই সময়টি আপনার ডিফল্ট সময়ের বাইরে'),
-                  subtitle: Text(
+                  title: KLocalizedText('এই সময়টি আপনার ডিফল্ট সময়ের বাইরে'),
+                  subtitle: KLocalizedText(
                     'আবেদন করার আগে চাইলে পোস্টের সময়টি আপনার কাজের সময়ে যোগ করুন।',
                   ),
                 ),
@@ -420,7 +430,7 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text(
+                              content: KLocalizedText(
                                 'পোস্টের সময়টি আপনার ডিফল্ট কাজের সময়ে যোগ হয়েছে। এখন আবেদন করতে পারবেন।',
                               ),
                             ),
@@ -430,14 +440,16 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('কাজের সময় আপডেট করা যায়নি।'),
+                              content: KLocalizedText(
+                                'কাজের সময় আপডেট করা যায়নি।',
+                              ),
                             ),
                           );
                         }
                       }
                     },
                     icon: const Icon(Icons.playlist_add),
-                    label: const Text('এই পোস্টের সময় যোগ করুন'),
+                    label: const KLocalizedText('এই পোস্টের সময় যোগ করুন'),
                   ),
                 ),
               ],
@@ -455,7 +467,7 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('ফিরুন'),
+            child: const KLocalizedText('ফিরুন'),
           ),
           FilledButton(
             onPressed: job.isTimeUnavailable
@@ -476,14 +488,16 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                       if (dialogContext.mounted) Navigator.pop(dialogContext);
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('আবেদন পাঠানো হয়েছে।')),
+                          const SnackBar(
+                            content: KLocalizedText('আবেদন পাঠানো হয়েছে।'),
+                          ),
                         );
                       }
                     } on Object {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text(
+                            content: KLocalizedText(
                               'আবেদন পাঠানো যায়নি। সময়টি যাচাই করুন।',
                             ),
                           ),
@@ -491,7 +505,7 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                       }
                     }
                   },
-            child: const Text('আবেদন পাঠান'),
+            child: const KLocalizedText('আবেদন পাঠান'),
           ),
         ],
       ),
@@ -507,13 +521,13 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
       final pending = eligibility.identityStatus == 'PENDING';
       final rejected = eligibility.identityStatus == 'REJECTED';
       return AlertDialog(
-        title: const Text('আবেদনের আগে পরিচয় যাচাই করুন'),
+        title: const KLocalizedText('আবেদনের আগে পরিচয় যাচাই করুন'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              KLocalizedText(
                 pending
                     ? 'আপনার NID ও সেলফি পর্যালোচনাধীন। অনুমোদন হলে আবেদন করতে পারবেন।'
                     : rejected
@@ -549,13 +563,15 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('পরে'),
+            child: const KLocalizedText('পরে'),
           ),
           if (!pending)
             FilledButton.icon(
               onPressed: () => Navigator.pop(dialogContext, true),
               icon: const Icon(Icons.verified_user_outlined),
-              label: Text(rejected ? 'আবার যাচাই করুন' : 'যাচাই শুরু করুন'),
+              label: KLocalizedText(
+                rejected ? 'আবার যাচাই করুন' : 'যাচাই শুরু করুন',
+              ),
             ),
         ],
       );
@@ -590,8 +606,8 @@ class _EligibilityRow extends StatelessWidget {
           ? KColors.success
           : KColors.warning,
     ),
-    title: Text(label),
-    trailing: Text(
+    title: KLocalizedText(label),
+    trailing: KLocalizedText(
       optional
           ? 'ঐচ্ছিক'
           : verified
@@ -639,7 +655,7 @@ class _JobCard extends StatelessWidget {
                   child: Chip(
                     visualDensity: VisualDensity.compact,
                     avatar: const Icon(Icons.auto_awesome, size: 16),
-                    label: Text('$score%'),
+                    label: KLocalizedText('$score%'),
                   ),
                 ),
             ],
@@ -653,8 +669,8 @@ class _JobCard extends StatelessWidget {
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: KSpacing.xs),
-          Text(
-            '${job.categoryName} · ${job.locationName}',
+          KLocalizedText(
+            '${job.categoryNameFor(Localizations.localeOf(context).languageCode)} · ${job.locationNameFor(Localizations.localeOf(context).languageCode)}',
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -668,7 +684,7 @@ class _JobCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           if (job.matchReasons.isNotEmpty)
-            Text(
+            KLocalizedText(
               _matchReasonBn(job.matchReasons.first),
               textAlign: TextAlign.center,
               maxLines: 1,
@@ -680,13 +696,13 @@ class _JobCard extends StatelessWidget {
             ),
           const Spacer(),
           if (job.startsAt != null)
-            Text(
-              'পোস্টের সময়: ${_dateTime(job.startsAt!)}',
+            KLocalizedText(
+              'কাজের সময়: ${_dateTime(job.startsAt!)}',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           if (job.isTimeAvailable)
-            const Text(
+            const KLocalizedText(
               '✓ আপনার সময়ে মেলে',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -695,7 +711,7 @@ class _JobCard extends StatelessWidget {
               ),
             )
           else if (job.isTimeUnavailable)
-            const Text(
+            const KLocalizedText(
               'সময় যোগ করলে আবেদন করা যাবে',
               textAlign: TextAlign.center,
               maxLines: 1,
@@ -707,7 +723,7 @@ class _JobCard extends StatelessWidget {
             ),
           if (_taka(job.budgetMaxPoisha ?? job.budgetMinPoisha)
               case final amount?)
-            Text(
+            KLocalizedText(
               '৳$amount',
               textAlign: TextAlign.center,
               style: const TextStyle(fontWeight: FontWeight.w700),
@@ -718,7 +734,7 @@ class _JobCard extends StatelessWidget {
               width: double.infinity,
               child: FilledButton(
                 onPressed: onAction,
-                child: Text(actionLabel!),
+                child: KLocalizedText(actionLabel!),
               ),
             ),
           ],
@@ -765,7 +781,7 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
         .where((item) => item.categoryId == _categoryId)
         .toList();
     return Scaffold(
-      appBar: AppBar(title: const Text('নতুন কাজ পোস্ট করুন')),
+      appBar: AppBar(title: const KLocalizedText('নতুন কাজ পোস্ট করুন')),
       body: Form(
         key: _form,
         child: ListView(
@@ -789,12 +805,18 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
             const SizedBox(height: KSpacing.md),
             DropdownButtonFormField<String>(
               initialValue: _categoryId,
-              decoration: const InputDecoration(labelText: 'কাজের ধরন'),
+              decoration: InputDecoration(
+                labelText: KaajLocalizations.text(context, 'কাজের ধরন'),
+              ),
               items: categories
                   .map(
                     (item) => DropdownMenuItem(
                       value: item.id,
-                      child: Text(item.nameBn),
+                      child: KLocalizedText(
+                        item.nameFor(
+                          Localizations.localeOf(context).languageCode,
+                        ),
+                      ),
                     ),
                   )
                   .toList(),
@@ -807,12 +829,18 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
             const SizedBox(height: KSpacing.md),
             DropdownButtonFormField<String>(
               initialValue: _skillId,
-              decoration: const InputDecoration(labelText: 'কাজের উপধরন'),
+              decoration: InputDecoration(
+                labelText: KaajLocalizations.text(context, 'কাজের উপধরন'),
+              ),
               items: skills
                   .map(
                     (item) => DropdownMenuItem(
                       value: item.id,
-                      child: Text(item.nameBn),
+                      child: KLocalizedText(
+                        item.nameFor(
+                          Localizations.localeOf(context).languageCode,
+                        ),
+                      ),
                     ),
                   )
                   .toList(),
@@ -872,7 +900,9 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
     final endsAt = _combine(_date, _end);
     if (!endsAt.isAfter(startsAt)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('শেষ সময় শুরুর সময়ের পরে হতে হবে।')),
+        const SnackBar(
+          content: KLocalizedText('শেষ সময় শুরুর সময়ের পরে হতে হবে।'),
+        ),
       );
       return;
     }
@@ -897,7 +927,7 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('কাজ প্রকাশ করা যায়নি। আবার চেষ্টা করুন।'),
+            content: KLocalizedText('কাজ প্রকাশ করা যায়নি। আবার চেষ্টা করুন।'),
           ),
         );
       }
@@ -914,7 +944,7 @@ class WorkerDirectoryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final workers = ref.watch(workerDirectoryProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('কর্মী ও সময় খুঁজুন')),
+      appBar: AppBar(title: const KLocalizedText('কর্মী ও সময় খুঁজুন')),
       body: workers.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => _Retry(
@@ -922,7 +952,9 @@ class WorkerDirectoryScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(workerDirectoryProvider),
         ),
         data: (items) => items.isEmpty
-            ? const Center(child: Text('এখনো কোনো কর্মী পাওয়া যায়নি।'))
+            ? const Center(
+                child: KLocalizedText('এখনো কোনো কর্মী পাওয়া যায়নি।'),
+              )
             : GridView.builder(
                 padding: const EdgeInsets.all(KSpacing.md),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -973,20 +1005,30 @@ class _WorkerCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            Text(
-              worker.areaNameBn ?? '',
+            KLocalizedText(
+              worker.areaNameFor(
+                    Localizations.localeOf(context).languageCode,
+                  ) ??
+                  '',
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: KSpacing.xs),
-            Text(
+            KLocalizedText(
               '★ ${worker.ratingAverage} · ${worker.completedJobsCount} কাজ',
               textAlign: TextAlign.center,
             ),
             const Spacer(),
-            Text(
-              worker.skills.take(2).map((item) => item.nameBn).join(', '),
+            KLocalizedText(
+              worker.skills
+                  .take(2)
+                  .map(
+                    (item) => item.nameFor(
+                      Localizations.localeOf(context).languageCode,
+                    ),
+                  )
+                  .join(', '),
               maxLines: 2,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
@@ -998,7 +1040,7 @@ class _WorkerCard extends StatelessWidget {
               children: [
                 Icon(Icons.schedule, size: 18),
                 SizedBox(width: 4),
-                Text('সময় ও বুকিং'),
+                KLocalizedText('সময় ও বুকিং'),
               ],
             ),
           ],
@@ -1030,10 +1072,13 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
         favorites.value?.any((item) => item.userId == widget.workerId) ?? false;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('সময় বেছে বুক করুন'),
+        title: const KLocalizedText('সময় বেছে বুক করুন'),
         actions: [
           IconButton(
-            tooltip: isFavorite ? 'পছন্দ থেকে সরান' : 'পছন্দে রাখুন',
+            tooltip: KaajLocalizations.text(
+              context,
+              isFavorite ? 'পছন্দ থেকে সরান' : 'পছন্দে রাখুন',
+            ),
             onPressed: favorites.isLoading
                 ? null
                 : () => _toggleFavorite(isFavorite),
@@ -1048,7 +1093,7 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
         children: [
           profile.when(
             loading: () => const LinearProgressIndicator(),
-            error: (_, _) => const Text('প্রোফাইল লোড হয়নি।'),
+            error: (_, _) => const KLocalizedText('প্রোফাইল লোড হয়নি।'),
             data: (worker) => ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(
@@ -1058,26 +1103,38 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
                 child: const Icon(Icons.person),
               ),
               title: Text(worker.displayName),
-              subtitle: Text(
+              subtitle: KLocalizedText(
                 [
-                  worker.skills.map((item) => item.nameBn).join(', '),
+                  worker.skills
+                      .map(
+                        (item) => item.nameFor(
+                          Localizations.localeOf(context).languageCode,
+                        ),
+                      )
+                      .join(', '),
                   if (worker.badges.isNotEmpty)
-                    worker.badges.map((item) => item.nameBn).join(' · '),
+                    worker.badges
+                        .map(
+                          (item) => item.nameFor(
+                            Localizations.localeOf(context).languageCode,
+                          ),
+                        )
+                        .join(' · '),
                 ].where((item) => item.isNotEmpty).join('\n'),
               ),
             ),
           ),
           const SizedBox(height: KSpacing.md),
-          Text(
+          KLocalizedText(
             'আগামী ১৪ দিনের খালি সময়',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: KSpacing.sm),
           slots.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, _) => const Text('সময়সূচি লোড করা যায়নি।'),
+            error: (_, _) => const KLocalizedText('সময়সূচি লোড করা যায়নি।'),
             data: (items) => items.isEmpty
-                ? const Text('এই সময়ে কোনো খালি স্লট নেই।')
+                ? const KLocalizedText('এই সময়ে কোনো খালি স্লট নেই।')
                 : Wrap(
                     spacing: KSpacing.sm,
                     runSpacing: KSpacing.sm,
@@ -1086,7 +1143,7 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
                           (slot) => ChoiceChip(
                             selected: _selected == slot,
                             onSelected: (_) => setState(() => _selected = slot),
-                            label: Text(
+                            label: KLocalizedText(
                               '${_dateTime(slot.startsAt)}–${_time(slot.endsAt)}',
                             ),
                           ),
@@ -1123,14 +1180,22 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
     }
     final amount = await _askAmount(context);
     if (amount == null) return;
+    if (!mounted) return;
+    final languageCode = Localizations.localeOf(context).languageCode;
+    final bookingTitle =
+        '${skill?.nameFor(languageCode) ?? KaajLocalizations.text(context, 'সেবা')} ${KaajLocalizations.text(context, 'বুকিং')}';
+    final bookingDescription = KaajLocalizations.text(
+      context,
+      'KAAJ অ্যাপ থেকে নির্বাচিত সময়ে সেবার বুকিং অনুরোধ।',
+    );
     setState(() => _saving = true);
     try {
       await ref
           .read(jobsRepositoryProvider)
           .requestBooking(
             workerId: widget.workerId,
-            title: '${skill?.nameBn ?? 'সেবা'} বুকিং',
-            description: 'KAAJ অ্যাপ থেকে নির্বাচিত সময়ে সেবার বুকিং অনুরোধ।',
+            title: bookingTitle,
+            description: bookingDescription,
             categoryId: catalogSkill.categoryId,
             skillId: catalogSkill.id,
             locationId: onboarding.locationId!,
@@ -1141,7 +1206,7 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
+            content: KLocalizedText(
               'বুকিং অনুরোধ পাঠানো হয়েছে। কর্মীর নিশ্চিতকরণের অপেক্ষায়।',
             ),
           ),
@@ -1151,7 +1216,9 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('এই স্লটটি আর খালি নেই বা অনুরোধ পাঠানো যায়নি।'),
+            content: KLocalizedText(
+              'এই স্লটটি আর খালি নেই বা অনুরোধ পাঠানো যায়নি।',
+            ),
           ),
         );
       }
@@ -1169,7 +1236,9 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
     } on Object {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('পছন্দের তালিকা বদলানো যায়নি।')),
+          const SnackBar(
+            content: KLocalizedText('পছন্দের তালিকা বদলানো যায়নি।'),
+          ),
         );
       }
     }
@@ -1183,7 +1252,7 @@ class AssignmentsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final assignments = ref.watch(assignmentsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('বুকিং ও কাজের অবস্থা')),
+      appBar: AppBar(title: const KLocalizedText('বুকিং ও কাজের অবস্থা')),
       body: assignments.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => _Retry(
@@ -1191,7 +1260,9 @@ class AssignmentsScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(assignmentsProvider),
         ),
         data: (items) => items.isEmpty
-            ? const Center(child: Text('এখনো কোনো বুকিং বা নির্বাচিত কাজ নেই।'))
+            ? const Center(
+                child: KLocalizedText('এখনো কোনো বুকিং বা নির্বাচিত কাজ নেই।'),
+              )
             : ListView.separated(
                 padding: const EdgeInsets.all(KSpacing.md),
                 itemCount: items.length,
@@ -1209,7 +1280,7 @@ class AssignmentsScreen extends ConsumerWidget {
                         color: KColors.primary,
                       ),
                       title: Text(item.title),
-                      subtitle: Text(
+                      subtitle: KLocalizedText(
                         '${item.startsAt == null ? '' : _dateTime(item.startsAt!)}\n${_statusBn(item.status)}',
                       ),
                       isThreeLine: true,
@@ -1234,7 +1305,7 @@ class AssignmentDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detail = ref.watch(assignmentDetailProvider(assignmentId));
     return Scaffold(
-      appBar: AppBar(title: const Text('কাজের বিস্তারিত ও অগ্রগতি')),
+      appBar: AppBar(title: const KLocalizedText('কাজের বিস্তারিত ও অগ্রগতি')),
       body: detail.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => _Retry(
@@ -1270,7 +1341,7 @@ class _AssignmentDetailBody extends ConsumerWidget {
       children: [
         Text(item.title, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: KSpacing.xs),
-        Text(
+        KLocalizedText(
           '${detail.locationName} · ${_statusBn(item.jobStatus ?? item.status)}',
         ),
         const SizedBox(height: KSpacing.md),
@@ -1282,7 +1353,7 @@ class _AssignmentDetailBody extends ConsumerWidget {
           OutlinedButton.icon(
             onPressed: () => _openChat(context, ref),
             icon: const Icon(Icons.chat_bubble_outline),
-            label: const Text('কাজ নিয়ে বার্তা দিন'),
+            label: const KLocalizedText('কাজ নিয়ে বার্তা দিন'),
           ),
         ],
         if (item.startsAt != null) ...[
@@ -1290,8 +1361,8 @@ class _AssignmentDetailBody extends ConsumerWidget {
           Card(
             child: ListTile(
               leading: const Icon(Icons.event_available),
-              title: Text(_dateTime(item.startsAt!)),
-              subtitle: Text(
+              title: KLocalizedText(_dateTime(item.startsAt!)),
+              subtitle: KLocalizedText(
                 'শেষ ${item.endsAt == null ? '' : _time(item.endsAt!)} · চুক্তি v${detail.contractVersion ?? '-'}',
               ),
             ),
@@ -1313,11 +1384,16 @@ class _AssignmentDetailBody extends ConsumerWidget {
               ),
             ),
             icon: const Icon(Icons.location_on_outlined),
-            label: Text(item.isWorker ? 'চেক-ইন / চেক-আউট' : 'উপস্থিতি দেখুন'),
+            label: KLocalizedText(
+              item.isWorker ? 'চেক-ইন / চেক-আউট' : 'উপস্থিতি দেখুন',
+            ),
           ),
         ],
         const SizedBox(height: KSpacing.lg),
-        Text('কাজের অগ্রগতি', style: Theme.of(context).textTheme.titleLarge),
+        KLocalizedText(
+          'কাজের অগ্রগতি',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
         const SizedBox(height: KSpacing.sm),
         ...detail.timeline.map(
           (step) => ListTile(
@@ -1327,8 +1403,8 @@ class _AssignmentDetailBody extends ConsumerWidget {
               backgroundColor: KColors.primary,
               child: Icon(Icons.check, size: 16, color: Colors.white),
             ),
-            title: Text(_statusBn(step.status)),
-            subtitle: Text(_dateTime(step.at)),
+            title: KLocalizedText(_statusBn(step.status)),
+            subtitle: KLocalizedText(_dateTime(step.at)),
           ),
         ),
         const SizedBox(height: KSpacing.lg),
@@ -1346,7 +1422,7 @@ class _AssignmentDetailBody extends ConsumerWidget {
               context,
               () => ref.read(jobsRepositoryProvider).declineAssignment(item.id),
             ),
-            child: const Text('অনুরোধটি গ্রহণ করব না'),
+            child: const KLocalizedText('অনুরোধটি গ্রহণ করব না'),
           ),
         ],
         if (item.isWorker && item.jobStatus == 'IN_PROGRESS')
@@ -1367,11 +1443,14 @@ class _AssignmentDetailBody extends ConsumerWidget {
           ),
         if (reviews != null) ...[
           const SizedBox(height: KSpacing.lg),
-          Text('রিভিউ', style: Theme.of(context).textTheme.titleLarge),
+          KLocalizedText(
+            'রিভিউ',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: KSpacing.sm),
           reviews.when(
             loading: () => const LinearProgressIndicator(),
-            error: (_, _) => const Text('রিভিউ তথ্য লোড করা যায়নি।'),
+            error: (_, _) => const KLocalizedText('রিভিউ তথ্য লোড করা যায়নি।'),
             data: (state) => _ReviewPanel(
               state: state,
               onReview: state.canReview
@@ -1385,7 +1464,7 @@ class _AssignmentDetailBody extends ConsumerWidget {
               onPressed: () =>
                   context.push(AppRoutes.workerBooking(item.workerUserId!)),
               icon: const Icon(Icons.replay_rounded),
-              label: const Text('এই কর্মীকে আবার বুক করুন'),
+              label: const KLocalizedText('এই কর্মীকে আবার বুক করুন'),
             ),
           ],
         ],
@@ -1394,7 +1473,7 @@ class _AssignmentDetailBody extends ConsumerWidget {
           TextButton.icon(
             onPressed: () => _cancel(context, ref),
             icon: const Icon(Icons.cancel_outlined),
-            label: const Text('কাজটি বাতিল করুন'),
+            label: const KLocalizedText('কাজটি বাতিল করুন'),
           ),
         ],
         if ({
@@ -1406,7 +1485,7 @@ class _AssignmentDetailBody extends ConsumerWidget {
           OutlinedButton.icon(
             onPressed: () => context.push(AppRoutes.openDispute(item.id)),
             icon: const Icon(Icons.gavel_outlined),
-            label: const Text('বিরোধ খুলুন'),
+            label: const KLocalizedText('বিরোধ খুলুন'),
           ),
         ],
         const SizedBox(height: KSpacing.sm),
@@ -1414,7 +1493,7 @@ class _AssignmentDetailBody extends ConsumerWidget {
           onPressed: () =>
               context.push(AppRoutes.report('ASSIGNMENT', item.id)),
           icon: const Icon(Icons.report_outlined, color: KColors.danger),
-          label: const Text('নিরাপত্তা সমস্যা রিপোর্ট করুন'),
+          label: const KLocalizedText('নিরাপত্তা সমস্যা রিপোর্ট করুন'),
         ),
       ],
     );
@@ -1444,14 +1523,16 @@ class _AssignmentDetailBody extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('রিভিউ জমা হয়েছে। উভয় পক্ষ দিলে প্রকাশ হবে।'),
+            content: KLocalizedText(
+              'রিভিউ জমা হয়েছে। উভয় পক্ষ দিলে প্রকাশ হবে।',
+            ),
           ),
         );
       }
     } on Object {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('রিভিউ জমা দেওয়া যায়নি।')),
+          const SnackBar(content: KLocalizedText('রিভিউ জমা দেওয়া যায়নি।')),
         );
       }
     }
@@ -1479,7 +1560,7 @@ class _AssignmentDetailBody extends ConsumerWidget {
     } on Object {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('আলোচনা এখন খোলা যাচ্ছে না।')),
+          const SnackBar(content: KLocalizedText('আলোচনা এখন খোলা যাচ্ছে না।')),
         );
       }
     }
@@ -1496,7 +1577,9 @@ class _AssignmentDetailBody extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('কাজটি এখন করা যাচ্ছে না। অবস্থা ও সময় যাচাই করুন।'),
+            content: KLocalizedText(
+              'কাজটি এখন করা যাচ্ছে না। অবস্থা ও সময় যাচাই করুন।',
+            ),
           ),
         );
       }
@@ -1513,18 +1596,18 @@ class _AssignmentDetailBody extends ConsumerWidget {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('বাতিলের আগে ফলাফল দেখুন'),
-          content: Text(
-            '${preview.summaryBn}\n\nফেরত: ৳${_taka(preview.refundPoisha)} · ফি: ৳${_taka(preview.feePoisha)}',
+          title: const KLocalizedText('বাতিলের আগে ফলাফল দেখুন'),
+          content: KLocalizedText(
+            '${preview.summaryFor(Localizations.localeOf(context).languageCode)}\n\n${KaajLocalizations.text(context, 'ফেরত')}: ৳${_taka(preview.refundPoisha)} · ${KaajLocalizations.text(context, 'ফি')}: ৳${_taka(preview.feePoisha)}',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('ফিরুন'),
+              child: const KLocalizedText('ফিরুন'),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('বাতিল নিশ্চিত করুন'),
+              child: const KLocalizedText('বাতিল নিশ্চিত করুন'),
             ),
           ],
         ),
@@ -1538,7 +1621,7 @@ class _AssignmentDetailBody extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('বাতিলের হিসাব বা অনুরোধ সম্পন্ন হয়নি।'),
+            content: KLocalizedText('বাতিলের হিসাব বা অনুরোধ সম্পন্ন হয়নি।'),
           ),
         );
       }
@@ -1559,11 +1642,11 @@ class _ReviewPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (state.myReview != null)
-            Text('আপনার রেটিং: ${_stars(state.myReview!.rating)}'),
+            KLocalizedText('আপনার রেটিং: ${_stars(state.myReview!.rating)}'),
           if (!state.revealed && state.myReview != null)
             const Padding(
               padding: EdgeInsets.only(top: KSpacing.sm),
-              child: Text(
+              child: KLocalizedText(
                 'অন্য পক্ষ রিভিউ দিলে, অথবা ৭ দিন শেষে, রিভিউ দেখা যাবে।',
               ),
             ),
@@ -1582,7 +1665,7 @@ class _ReviewPanel extends StatelessWidget {
               child: FilledButton.icon(
                 onPressed: onReview,
                 icon: const Icon(Icons.star_outline),
-                label: const Text('রিভিউ দিন'),
+                label: const KLocalizedText('রিভিউ দিন'),
               ),
             ),
           ],
@@ -1611,7 +1694,7 @@ class _ReviewDialogState extends State<_ReviewDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text('অভিজ্ঞতা কেমন ছিল?'),
+    title: const KLocalizedText('অভিজ্ঞতা কেমন ছিল?'),
     content: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -1632,9 +1715,12 @@ class _ReviewDialogState extends State<_ReviewDialog> {
           controller: comment,
           maxLength: 1000,
           maxLines: 3,
-          decoration: const InputDecoration(
-            labelText: 'মন্তব্য (ঐচ্ছিক)',
-            hintText: 'সময়, কাজের মান ও যোগাযোগ সম্পর্কে লিখুন',
+          decoration: InputDecoration(
+            labelText: KaajLocalizations.text(context, 'মন্তব্য (ঐচ্ছিক)'),
+            hintText: KaajLocalizations.text(
+              context,
+              'সময়, কাজের মান ও যোগাযোগ সম্পর্কে লিখুন',
+            ),
           ),
         ),
       ],
@@ -1642,12 +1728,12 @@ class _ReviewDialogState extends State<_ReviewDialog> {
     actions: [
       TextButton(
         onPressed: () => Navigator.pop(context),
-        child: const Text('ফিরুন'),
+        child: const KLocalizedText('ফিরুন'),
       ),
       FilledButton(
         onPressed: () =>
             Navigator.pop(context, (rating: rating, comment: comment.text)),
-        child: const Text('জমা দিন'),
+        child: const KLocalizedText('জমা দিন'),
       ),
     ],
   );
@@ -1663,7 +1749,7 @@ class ReceivedReviewsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final reviews = ref.watch(receivedReviewsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('আমার পাওয়া রিভিউ')),
+      appBar: AppBar(title: const KLocalizedText('আমার পাওয়া রিভিউ')),
       body: reviews.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => _Retry(
@@ -1671,7 +1757,9 @@ class ReceivedReviewsScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(receivedReviewsProvider),
         ),
         data: (items) => items.isEmpty
-            ? const Center(child: Text('এখনো প্রকাশিত কোনো রিভিউ নেই।'))
+            ? const Center(
+                child: KLocalizedText('এখনো প্রকাশিত কোনো রিভিউ নেই।'),
+              )
             : ListView.separated(
                 padding: const EdgeInsets.all(KSpacing.md),
                 itemCount: items.length,
@@ -1686,7 +1774,7 @@ class ReceivedReviewsScreen extends ConsumerWidget {
                       ),
                       subtitle: review.comment?.isNotEmpty == true
                           ? Text(review.comment!)
-                          : const Text('কোনো মন্তব্য দেওয়া হয়নি।'),
+                          : const KLocalizedText('কোনো মন্তব্য দেওয়া হয়নি।'),
                     ),
                   );
                 },
@@ -1703,7 +1791,7 @@ class FavoriteWorkersScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final favorites = ref.watch(favoriteWorkersProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('পছন্দের কর্মী')),
+      appBar: AppBar(title: const KLocalizedText('পছন্দের কর্মী')),
       body: favorites.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => _Retry(
@@ -1711,7 +1799,9 @@ class FavoriteWorkersScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(favoriteWorkersProvider),
         ),
         data: (items) => items.isEmpty
-            ? const Center(child: Text('এখনো কোনো কর্মী পছন্দে রাখা হয়নি।'))
+            ? const Center(
+                child: KLocalizedText('এখনো কোনো কর্মী পছন্দে রাখা হয়নি।'),
+              )
             : ListView.builder(
                 padding: const EdgeInsets.all(KSpacing.md),
                 itemCount: items.length,
@@ -1721,7 +1811,7 @@ class FavoriteWorkersScreen extends ConsumerWidget {
                     child: ListTile(
                       leading: const CircleAvatar(child: Icon(Icons.person)),
                       title: Text(worker.displayName),
-                      subtitle: Text('★ ${worker.ratingAverage}'),
+                      subtitle: KLocalizedText('★ ${worker.ratingAverage}'),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () =>
                           context.push(AppRoutes.workerBooking(worker.userId)),
@@ -1755,23 +1845,23 @@ class _DateTimeRow extends StatelessWidget {
     children: [
       ListTile(
         leading: const Icon(Icons.calendar_today),
-        title: const Text('কাজের দিন'),
-        subtitle: Text('${date.day}/${date.month}/${date.year}'),
+        title: const KLocalizedText('কাজের দিন'),
+        subtitle: KLocalizedText('${date.day}/${date.month}/${date.year}'),
         onTap: onDate,
       ),
       Row(
         children: [
           Expanded(
             child: ListTile(
-              title: const Text('শুরু'),
-              subtitle: Text(start.format(context)),
+              title: const KLocalizedText('শুরু'),
+              subtitle: KLocalizedText(start.format(context)),
               onTap: onStart,
             ),
           ),
           Expanded(
             child: ListTile(
-              title: const Text('শেষ'),
-              subtitle: Text(end.format(context)),
+              title: const KLocalizedText('শেষ'),
+              subtitle: KLocalizedText(end.format(context)),
               onTap: onEnd,
             ),
           ),
@@ -1790,9 +1880,12 @@ class _Retry extends StatelessWidget {
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(label),
+        KLocalizedText(label),
         const SizedBox(height: KSpacing.sm),
-        FilledButton(onPressed: onRetry, child: const Text('আবার চেষ্টা করুন')),
+        FilledButton(
+          onPressed: onRetry,
+          child: const KLocalizedText('আবার চেষ্টা করুন'),
+        ),
       ],
     ),
   );
@@ -1823,7 +1916,7 @@ Future<int?> _askAmount(BuildContext context) async {
   final result = await showDialog<int>(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('প্রস্তাবিত পারিশ্রমিক'),
+      title: const KLocalizedText('প্রস্তাবিত পারিশ্রমিক'),
       content: KTextField(
         label: 'টাকা',
         controller: controller,
@@ -1832,14 +1925,14 @@ Future<int?> _askAmount(BuildContext context) async {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('ফিরুন'),
+          child: const KLocalizedText('ফিরুন'),
         ),
         FilledButton(
           onPressed: () {
             final value = int.tryParse(controller.text);
             if (value != null && value > 0) Navigator.pop(context, value);
           },
-          child: const Text('অনুরোধ পাঠান'),
+          child: const KLocalizedText('অনুরোধ পাঠান'),
         ),
       ],
     ),

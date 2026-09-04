@@ -18,4 +18,6 @@ class CatalogCategory {
   final String? parentId;
   final int sortOrder;
   final String slug;
+
+  String nameFor(String languageCode) => languageCode == 'en' ? nameEn : nameBn;
 }

@@ -68,6 +68,7 @@ class PublicProfileRepository {
       displayName: _string(json, 'displayName'),
       photoUrl: json['photoUrl'] as String?,
       areaNameBn: area is Map ? area['nameBn'] as String? : null,
+      areaNameEn: area is Map ? area['nameEn'] as String? : null,
       trustLevel: _string(json, 'trustLevel'),
       ratingAverage: _string(json, 'ratingAverage'),
       ratingCount: json['ratingCount'] as int? ?? 0,
@@ -80,6 +81,7 @@ class PublicProfileRepository {
                   return PublicWorkerSkill(
                     id: _string(value, 'id'),
                     nameBn: _string(value, 'nameBn'),
+                    nameEn: value['nameEn'] as String?,
                     level: _string(value, 'level'),
                     isVerified: value['isVerified'] == true,
                   );
@@ -96,6 +98,7 @@ class PublicProfileRepository {
                   (item) => PublicWorkerBadge(
                     slug: item['slug'] as String? ?? '',
                     nameBn: item['nameBn'] as String? ?? '',
+                    nameEn: item['nameEn'] as String?,
                   ),
                 )
                 .where((item) => item.slug.isNotEmpty)

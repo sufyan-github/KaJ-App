@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import 'k_localized_text.dart';
 import 'k_primary_button.dart';
 
 class KEmptyState extends StatelessWidget {
@@ -28,13 +29,13 @@ class KEmptyState extends StatelessWidget {
         children: [
           Icon(icon, size: 56, color: KColors.textSecondary),
           const SizedBox(height: KSpacing.md),
-          Text(
+          KLocalizedText(
             title,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: KSpacing.sm),
-          Text(
+          KLocalizedText(
             message,
             textAlign: TextAlign.center,
             style: Theme.of(

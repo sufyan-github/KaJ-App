@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kaaj/core/theme/app_theme.dart';
@@ -36,6 +37,9 @@ void main() {
         overrides: [portfolioProvider.overrideWith((ref) async => const [])],
         child: MaterialApp(
           theme: buildAppTheme(),
+          locale: const Locale('bn'),
+          supportedLocales: const [Locale('bn'), Locale('en')],
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
           home: const PortfolioScreen(),
         ),
       ),
@@ -71,6 +75,9 @@ void main() {
         ],
         child: MaterialApp(
           theme: buildAppTheme(),
+          locale: const Locale('bn'),
+          supportedLocales: const [Locale('bn'), Locale('en')],
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
           home: const MediaQuery(
             data: MediaQueryData(
               size: Size(360, 760),
@@ -117,6 +124,9 @@ void main() {
         ],
         child: MaterialApp(
           theme: buildAppTheme(),
+          locale: const Locale('bn'),
+          supportedLocales: const [Locale('bn'), Locale('en')],
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
           home: const AttendanceScreen(
             assignmentId: 'assignment-1',
             title: 'বাড়ির বৈদ্যুতিক কাজ',
@@ -148,6 +158,9 @@ void main() {
       ProviderScope(
         child: MaterialApp(
           theme: buildAppTheme(),
+          locale: const Locale('bn'),
+          supportedLocales: const [Locale('bn'), Locale('en')],
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
           home: const VerificationCaptureScreen(kind: 'IDENTITY'),
         ),
       ),
@@ -172,6 +185,9 @@ Future<void> _phone(WidgetTester tester, Widget home) async {
     ProviderScope(
       child: MaterialApp(
         theme: buildAppTheme(),
+        locale: const Locale('bn'),
+        supportedLocales: const [Locale('bn'), Locale('en')],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         home: MediaQuery(
           data: const MediaQueryData(
             size: Size(360, 760),

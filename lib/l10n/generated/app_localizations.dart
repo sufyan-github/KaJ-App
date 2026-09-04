@@ -227,7 +227,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeBody.
   ///
   /// In en, this message translates to:
-  /// **'Your secure account is ready. Profile and marketplace features will appear as their backend services become available.'**
+  /// **'Your secure account is ready. Find nearby work and trusted people.'**
   String get welcomeBody;
 
   /// No description provided for @signOut.

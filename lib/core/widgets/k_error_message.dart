@@ -32,7 +32,7 @@ class KErrorMessage extends StatelessWidget {
                 const SizedBox(width: KSpacing.sm),
                 Expanded(
                   child: Text(
-                    _localizedMessage(l10n),
+                    localizedFailureMessage(l10n, failure),
                     style: const TextStyle(
                       color: KColors.danger,
                       fontWeight: FontWeight.w500,
@@ -53,25 +53,26 @@ class KErrorMessage extends StatelessWidget {
       ),
     );
   }
-
-  String _localizedMessage(AppLocalizations l10n) => switch (failure.code) {
-    'AUTH_INVALID_PHONE' => l10n.invalidPhone,
-    'OTP_INVALID' => l10n.otpIncorrectMessage,
-    'OTP_EXPIRED' => l10n.codeExpired,
-    'OTP_RATE_LIMITED' => l10n.rateLimitedMessage,
-    'OTP_ATTEMPTS_EXCEEDED' => l10n.otpAttemptsExceededMessage,
-    'OTP_ALREADY_USED' => l10n.otpAlreadyUsedMessage,
-    'OTP_CHALLENGE_NOT_FOUND' => l10n.otpNotFoundMessage,
-    _ => switch (failure.kind) {
-      FailureKind.network => l10n.offlineMessage,
-      FailureKind.timeout => l10n.timeoutMessage,
-      FailureKind.unauthorized => l10n.unauthorizedMessage,
-      FailureKind.forbidden => l10n.forbiddenMessage,
-      FailureKind.validation => l10n.validationMessage,
-      FailureKind.notFound => l10n.notFoundMessage,
-      FailureKind.conflict => l10n.conflictMessage,
-      FailureKind.rateLimited => l10n.rateLimitedMessage,
-      FailureKind.server || FailureKind.unknown => l10n.unexpectedMessage,
-    },
-  };
 }
+
+String localizedFailureMessage(AppLocalizations l10n, Failure failure) =>
+    switch (failure.code) {
+      'AUTH_INVALID_PHONE' => l10n.invalidPhone,
+      'OTP_INVALID' => l10n.otpIncorrectMessage,
+      'OTP_EXPIRED' => l10n.codeExpired,
+      'OTP_RATE_LIMITED' => l10n.rateLimitedMessage,
+      'OTP_ATTEMPTS_EXCEEDED' => l10n.otpAttemptsExceededMessage,
+      'OTP_ALREADY_USED' => l10n.otpAlreadyUsedMessage,
+      'OTP_CHALLENGE_NOT_FOUND' => l10n.otpNotFoundMessage,
+      _ => switch (failure.kind) {
+        FailureKind.network => l10n.offlineMessage,
+        FailureKind.timeout => l10n.timeoutMessage,
+        FailureKind.unauthorized => l10n.unauthorizedMessage,
+        FailureKind.forbidden => l10n.forbiddenMessage,
+        FailureKind.validation => l10n.validationMessage,
+        FailureKind.notFound => l10n.notFoundMessage,
+        FailureKind.conflict => l10n.conflictMessage,
+        FailureKind.rateLimited => l10n.rateLimitedMessage,
+        FailureKind.server || FailureKind.unknown => l10n.unexpectedMessage,
+      },
+    };

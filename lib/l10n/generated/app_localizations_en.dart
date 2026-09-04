@@ -82,7 +82,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get welcomeBody =>
-      'Your secure account is ready. Profile and marketplace features will appear as their backend services become available.';
+      'Your secure account is ready. Find nearby work and trusted people.';
 
   @override
   String get signOut => 'Sign out';

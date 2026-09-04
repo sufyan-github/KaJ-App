@@ -8,13 +8,14 @@ class ApiClient {
   ApiClient({
     required AppEnvironment environment,
     required SessionTokenStore tokenStore,
+    this.localeCode = 'bn',
     HttpClientAdapter? httpClientAdapter,
   }) {
     final options = BaseOptions(
       baseUrl: environment.apiBaseUrl,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 20),
-      headers: const {'Accept': 'application/json', 'Accept-Language': 'bn'},
+      headers: {'Accept': 'application/json', 'Accept-Language': localeCode},
     );
     dio = Dio(options);
     final refreshDio = Dio(options);
@@ -22,26 +23,35 @@ class ApiClient {
       dio.httpClientAdapter = httpClientAdapter;
       refreshDio.httpClientAdapter = httpClientAdapter;
     }
-    dio.interceptors.add(_SessionInterceptor(dio, refreshDio, tokenStore));
+    dio.interceptors.add(
+      _SessionInterceptor(dio, refreshDio, tokenStore, localeCode),
+    );
   }
 
+  final String localeCode;
   late final Dio dio;
 }
 
 class _SessionInterceptor extends QueuedInterceptor {
-  _SessionInterceptor(this._client, this._refreshClient, this._tokenStore);
+  _SessionInterceptor(
+    this._client,
+    this._refreshClient,
+    this._tokenStore,
+    this._localeCode,
+  );
 
   static const _retriedKey = 'kaaj.auth.retried';
   static const _idempotencyHeader = 'Idempotency-Key';
 
   final Dio _client;
   final Dio _refreshClient;
+  final String _localeCode;
   final SessionTokenStore _tokenStore;
   Future<String?>? _refreshInFlight;
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    options.headers['Accept-Language'] = 'bn';
+    options.headers['Accept-Language'] = _localeCode;
     final token = _tokenStore.accessToken;
     if (token != null && !options.path.endsWith('/auth/refresh')) {
       options.headers['Authorization'] = 'Bearer $token';

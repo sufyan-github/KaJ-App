@@ -6,9 +6,11 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/errors/failure.dart';
+import '../../../core/localization/kaaj_localizations.dart';
 import '../../../core/permissions/permission_gateway.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/k_localized_text.dart';
 import '../../../core/widgets/k_primary_button.dart';
 import '../domain/trust_models.dart';
 import 'trust_safety_providers.dart';
@@ -20,7 +22,7 @@ class VerificationCenterScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final requests = ref.watch(verificationRequestsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('যাচাইকরণ কেন্দ্র')),
+      appBar: AppBar(title: const KLocalizedText('যাচাইকরণ কেন্দ্র')),
       body: requests.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => _LoadError(
@@ -72,7 +74,7 @@ class VerificationCenterScreen extends ConsumerWidget {
                 color: KColors.surfaceAlt,
                 child: Padding(
                   padding: EdgeInsets.all(KSpacing.md),
-                  child: Text(
+                  child: KLocalizedText(
                     'নথি শুধু যাচাইয়ের জন্য ব্যবহৃত হয়। অনুমোদন বা প্রত্যাখ্যানের পরে সংরক্ষণ নীতি অনুযায়ী এটি মুছে ফেলা হয়।',
                   ),
                 ),
@@ -107,13 +109,13 @@ class _TrustHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                KLocalizedText(
                   'বিশ্বাস ধাপে ধাপে তৈরি হয়',
                   style: Theme.of(
                     context,
                   ).textTheme.titleLarge?.copyWith(color: Colors.white),
                 ),
-                const Text(
+                const KLocalizedText(
                   'পরিচয় আবশ্যিক · দক্ষতা ও অভিজ্ঞতা ঐচ্ছিক',
                   style: TextStyle(color: Colors.white),
                 ),
@@ -161,8 +163,8 @@ class _VerificationStep extends StatelessWidget {
                 color: approved ? KColors.success : KColors.primary,
               ),
             ),
-            title: Text(title),
-            subtitle: Text('$subtitle\n${_statusLabel(status)}'),
+            title: KLocalizedText(title),
+            subtitle: KLocalizedText('$subtitle\n${_statusLabel(status)}'),
             isThreeLine: true,
             trailing: pending
                 ? const Icon(Icons.hourglass_top, color: KColors.warning)
@@ -175,7 +177,7 @@ class _VerificationStep extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(KSpacing.md),
               color: KColors.danger.withValues(alpha: .06),
-              child: Text(
+              child: KLocalizedText(
                 'কেন প্রত্যাখ্যাত: $rejection\nনথি পরিষ্কার করে আবার জমা দিন।',
               ),
             ),
@@ -216,16 +218,16 @@ class _VerificationCaptureScreenState
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text('${_kindLabel(widget.kind)} যাচাই')),
+    appBar: AppBar(title: KLocalizedText('${_kindLabel(widget.kind)} যাচাই')),
     body: ListView(
       padding: const EdgeInsets.all(KSpacing.lg),
       children: [
-        Text(
+        KLocalizedText(
           _isIdentity ? 'NID ও সেলফি দিন' : 'নথি পরিষ্কারভাবে তুলুন',
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: KSpacing.sm),
-        Text(
+        KLocalizedText(
           _isIdentity
               ? 'আবেদন করার আগে পরিচয় যাচাই আবশ্যিক। NID-এর সামনের দিক পরিষ্কারভাবে তুলুন এবং নিজের একটি সরাসরি সেলফি দিন।'
               : 'চার কোণা ফ্রেমে রাখুন, আলো বা ঝাপসা যেন না থাকে। সর্বোচ্চ ৫টি ছবি দিন।',
@@ -288,7 +290,7 @@ class _VerificationCaptureScreenState
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.add_a_photo_outlined),
-                        Text('ছবি নিন'),
+                        KLocalizedText('ছবি নিন'),
                       ],
                     ),
                   ),
@@ -301,7 +303,7 @@ class _VerificationCaptureScreenState
           onChanged: (value) => setState(() => _consent = value ?? false),
           controlAffinity: ListTileControlAffinity.leading,
           contentPadding: EdgeInsets.zero,
-          title: const Text(
+          title: const KLocalizedText(
             'আমি যাচাইয়ের জন্য এই নথি ব্যবহারে সম্মতি দিচ্ছি।',
           ),
         ),
@@ -376,7 +378,7 @@ class _VerificationCaptureScreenState
 
   void _snack(String message) => ScaffoldMessenger.of(
     context,
-  ).showSnackBar(SnackBar(content: Text(message)));
+  ).showSnackBar(SnackBar(content: KLocalizedText(message)));
 }
 
 class _IdentityCaptureCard extends StatelessWidget {
@@ -421,9 +423,15 @@ class _IdentityCaptureCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: Theme.of(context).textTheme.titleSmall),
+                KLocalizedText(
+                  title,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
                 const SizedBox(height: KSpacing.xs),
-                Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+                KLocalizedText(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
                 const SizedBox(height: KSpacing.sm),
                 OutlinedButton.icon(
                   onPressed: onCapture,
@@ -431,14 +439,16 @@ class _IdentityCaptureCard extends StatelessWidget {
                     image == null ? Icons.camera_alt_outlined : Icons.refresh,
                     size: 18,
                   ),
-                  label: Text(image == null ? 'ছবি তুলুন' : 'আবার তুলুন'),
+                  label: KLocalizedText(
+                    image == null ? 'ছবি তুলুন' : 'আবার তুলুন',
+                  ),
                 ),
               ],
             ),
           ),
           if (image != null)
             IconButton(
-              tooltip: 'ছবি সরান',
+              tooltip: KaajLocalizations.text(context, 'ছবি সরান'),
               onPressed: onRemove,
               icon: const Icon(Icons.close),
             ),
@@ -471,9 +481,12 @@ class _LoadError extends StatelessWidget {
         children: [
           const Icon(Icons.cloud_off_outlined, size: 44),
           const SizedBox(height: KSpacing.sm),
-          Text(_message(error), textAlign: TextAlign.center),
+          KLocalizedText(_message(error), textAlign: TextAlign.center),
           const SizedBox(height: KSpacing.md),
-          FilledButton(onPressed: retry, child: const Text('আবার চেষ্টা করুন')),
+          FilledButton(
+            onPressed: retry,
+            child: const KLocalizedText('আবার চেষ্টা করুন'),
+          ),
         ],
       ),
     ),

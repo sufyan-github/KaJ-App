@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -52,7 +53,7 @@ void main() {
     expect(find.text('নতুন বার্তা'), findsOneWidget);
     expect(find.text('আজ'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(FilterChip, 'আবেদন'));
+    await tester.tap(find.widgetWithText(FilterChip, 'আবেদনসমূহ'));
     await tester.pumpAndSettle();
 
     expect(find.text('নতুন আবেদন'), findsOneWidget);
@@ -186,7 +187,13 @@ Widget _app(
   );
   return ProviderScope(
     overrides: [notificationsRepositoryProvider.overrideWithValue(repository)],
-    child: MaterialApp.router(theme: buildAppTheme(), routerConfig: router),
+    child: MaterialApp.router(
+      theme: buildAppTheme(),
+      locale: const Locale('bn'),
+      supportedLocales: const [Locale('bn'), Locale('en')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      routerConfig: router,
+    ),
   );
 }
 

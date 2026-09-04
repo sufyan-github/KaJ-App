@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import 'k_localized_text.dart';
 
 class KOfflineBanner extends StatelessWidget {
   const KOfflineBanner({required this.message, super.key});
@@ -25,7 +26,7 @@ class KOfflineBanner extends StatelessWidget {
                 const Icon(Icons.cloud_off_outlined, color: Colors.white),
                 const SizedBox(width: KSpacing.sm),
                 Expanded(
-                  child: Text(
+                  child: KLocalizedText(
                     message,
                     style: const TextStyle(
                       color: Colors.white,

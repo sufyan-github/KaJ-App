@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/errors/failure.dart';
+import '../../../core/localization/kaaj_localizations.dart';
+import '../../../core/localization/locale_controller.dart';
 import '../../../core/permissions/permission_gateway.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/k_localized_text.dart';
 import '../../auth/presentation/controllers/auth_controller.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
 import '../../onboarding/domain/onboarding_state.dart';
@@ -28,8 +31,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final role =
         ref.watch(onboardingControllerProvider).role ?? KaajRole.customer;
     final auth = ref.watch(authControllerProvider);
+    final locale = ref.watch(localeControllerProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('সেটিংস')),
+      appBar: AppBar(title: const KLocalizedText('সেটিংস')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           KSpacing.md,
@@ -63,7 +67,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         const Icon(Icons.swap_horiz_outlined),
                         const SizedBox(width: KSpacing.md),
                         Expanded(
-                          child: Text(
+                          child: KLocalizedText(
                             'বর্তমান কাজের মোড',
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
@@ -81,12 +85,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ButtonSegment(
                           value: KaajRole.customer,
                           icon: Icon(Icons.work_outline),
-                          label: Text('কাজ দেব'),
+                          label: KLocalizedText('কাজ দেব'),
                         ),
                         ButtonSegment(
                           value: KaajRole.worker,
                           icon: Icon(Icons.handyman_outlined),
-                          label: Text('কাজ করব'),
+                          label: KLocalizedText('কাজ করব'),
                         ),
                       ],
                       selected: {role},
@@ -95,7 +99,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           : (selection) => _switchRole(selection.first),
                     ),
                     const SizedBox(height: KSpacing.xs),
-                    const Text(
+                    const KLocalizedText(
                       'মোড বদলালে হোমের কাজ ও সুবিধা সঙ্গে সঙ্গে বদলে যাবে।',
                       style: TextStyle(color: KColors.textSecondary),
                     ),
@@ -118,7 +122,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               _SettingsTile(
                 icon: Icons.language_outlined,
                 title: 'ভাষা',
-                subtitle: 'বাংলা — বর্তমান ভাষা',
+                subtitle: locale.languageCode == 'en'
+                    ? 'English — current language'
+                    : 'বাংলা — বর্তমান ভাষা',
                 onTap: _showLanguage,
               ),
               _SettingsTile(
@@ -198,8 +204,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
               const ListTile(
                 leading: Icon(Icons.info_outline),
-                title: Text('অ্যাপ সংস্করণ'),
-                subtitle: Text('1.0.0 (ডেভেলপমেন্ট)'),
+                title: KLocalizedText('অ্যাপ সংস্করণ'),
+                subtitle: KLocalizedText('1.0.0 (ডেভেলপমেন্ট)'),
               ),
             ],
           ),
@@ -209,7 +215,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ? null
                 : _confirmLogout,
             icon: const Icon(Icons.logout),
-            label: const Text('এই ডিভাইস থেকে সাইন আউট'),
+            label: const KLocalizedText('এই ডিভাইস থেকে সাইন আউট'),
           ),
         ],
       ),
@@ -235,16 +241,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('সাইন আউট করবেন?'),
-        content: const Text('এই ফোনে আবার OTP দিয়ে প্রবেশ করতে হবে।'),
+        title: const KLocalizedText('সাইন আউট করবেন?'),
+        content: const KLocalizedText(
+          'এই ফোনে আবার OTP দিয়ে প্রবেশ করতে হবে।',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('থাকুন'),
+            child: const KLocalizedText('থাকুন'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('সাইন আউট'),
+            child: const KLocalizedText('সাইন আউট'),
           ),
         ],
       ),
@@ -258,39 +266,69 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
-      builder: (context) => const SafeArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            KSpacing.md,
-            0,
-            KSpacing.md,
-            KSpacing.lg,
+      builder: (sheetContext) {
+        final selected = ref.read(localeControllerProvider).languageCode;
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              KSpacing.md,
+              0,
+              KSpacing.md,
+              KSpacing.lg,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const KLocalizedText(
+                  'অ্যাপের ভাষা',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: KSpacing.md),
+                ListTile(
+                  selected: selected == 'bn',
+                  leading: Icon(
+                    selected == 'bn'
+                        ? Icons.check_circle
+                        : Icons.language_outlined,
+                    color: selected == 'bn' ? KColors.primary : null,
+                  ),
+                  title: const KLocalizedText('বাংলা'),
+                  subtitle: KLocalizedText(
+                    selected == 'bn' ? 'বর্তমান ভাষা' : 'বাংলায় বদলান',
+                  ),
+                  onTap: () => _selectLanguage(sheetContext, 'bn'),
+                ),
+                ListTile(
+                  selected: selected == 'en',
+                  leading: Icon(
+                    selected == 'en'
+                        ? Icons.check_circle
+                        : Icons.language_outlined,
+                    color: selected == 'en' ? KColors.primary : null,
+                  ),
+                  title: const KLocalizedText('English'),
+                  subtitle: KLocalizedText(
+                    selected == 'en' ? 'Current language' : 'ইংরেজিতে বদলান',
+                  ),
+                  onTap: () => _selectLanguage(sheetContext, 'en'),
+                ),
+              ],
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'অ্যাপের ভাষা',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-              ),
-              SizedBox(height: KSpacing.md),
-              ListTile(
-                leading: Icon(Icons.check_circle, color: KColors.primary),
-                title: Text('বাংলা'),
-                subtitle: Text('বর্তমান ও সম্পূর্ণ সমর্থিত ভাষা'),
-              ),
-              ListTile(
-                enabled: false,
-                leading: Icon(Icons.language),
-                title: Text('English'),
-                subtitle: Text('সম্পূর্ণ অনুবাদ প্রস্তুত হলে চালু হবে'),
-              ),
-            ],
-          ),
-        ),
-      ),
+        );
+      },
     );
+  }
+
+  Future<void> _selectLanguage(
+    BuildContext sheetContext,
+    String languageCode,
+  ) async {
+    await ref
+        .read(localeControllerProvider.notifier)
+        .setLocale(Locale(languageCode));
+    if (sheetContext.mounted) Navigator.pop(sheetContext);
   }
 
   void _showInfo(String title, String body) {
@@ -309,9 +347,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: Theme.of(context).textTheme.titleLarge),
+              KLocalizedText(
+                title,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: KSpacing.md),
-              Text(body),
+              KLocalizedText(body),
             ],
           ),
         ),
@@ -321,7 +362,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void _snack(String message) => ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(message)));
+    ..showSnackBar(SnackBar(content: KLocalizedText(message)));
 }
 
 class NotificationPreferencesScreen extends ConsumerStatefulWidget {
@@ -374,7 +415,7 @@ class _NotificationPreferencesScreenState
   Widget build(BuildContext context) {
     final preferences = ref.watch(notificationPreferencesProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('নোটিফিকেশন পছন্দ')),
+      appBar: AppBar(title: const KLocalizedText('নোটিফিকেশন পছন্দ')),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(notificationPreferencesProvider.future),
         child: preferences.when(
@@ -386,13 +427,16 @@ class _NotificationPreferencesScreenState
               const SizedBox(height: KSpacing.xxl),
               const Icon(Icons.cloud_off_outlined, size: 48),
               const SizedBox(height: KSpacing.md),
-              Text(_settingsMessage(error), textAlign: TextAlign.center),
+              KLocalizedText(
+                _settingsMessage(error),
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: KSpacing.md),
               FilledButton.icon(
                 onPressed: () =>
                     ref.invalidate(notificationPreferencesProvider),
                 icon: const Icon(Icons.refresh),
-                label: const Text('আবার চেষ্টা করুন'),
+                label: const KLocalizedText('আবার চেষ্টা করুন'),
               ),
             ],
           ),
@@ -432,13 +476,13 @@ class _NotificationPreferencesScreenState
                     Icons.notifications_off_outlined,
                     color: KColors.warning,
                   ),
-                  title: const Text('ফোনের নোটিফিকেশন বন্ধ আছে'),
-                  subtitle: const Text(
+                  title: const KLocalizedText('ফোনের নোটিফিকেশন বন্ধ আছে'),
+                  subtitle: const KLocalizedText(
                     'ইনবক্স থাকবে, তবে ফোনের বাইরে নতুন আপডেট দেখবেন না।',
                   ),
                   trailing: TextButton(
                     onPressed: widget.permissionGateway.openSettings,
-                    child: const Text('সেটিংস'),
+                    child: const KLocalizedText('সেটিংস'),
                   ),
                 ),
               ),
@@ -455,7 +499,7 @@ class _NotificationPreferencesScreenState
                 Icon(Icons.info_outline, color: KColors.primary),
                 SizedBox(width: KSpacing.md),
                 Expanded(
-                  child: Text(
+                  child: KLocalizedText(
                     'আবেদন গ্রহণ, কাজ নিশ্চিত, পেমেন্ট ও বিরোধের জরুরি আপডেট নিরাপত্তার জন্য সব সময় ইনবক্সে থাকবে।',
                   ),
                 ),
@@ -464,7 +508,10 @@ class _NotificationPreferencesScreenState
           ),
         ),
         const SizedBox(height: KSpacing.md),
-        Text('ইনবক্স আপডেট', style: Theme.of(context).textTheme.titleMedium),
+        KLocalizedText(
+          'ইনবক্স আপডেট',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: KSpacing.sm),
         Card(
           margin: EdgeInsets.zero,
@@ -473,8 +520,8 @@ class _NotificationPreferencesScreenState
                 .map(
                   (group) => SwitchListTile(
                     secondary: Icon(group.icon),
-                    title: Text(group.title),
-                    subtitle: Text(group.subtitle),
+                    title: KLocalizedText(group.title),
+                    subtitle: KLocalizedText(group.subtitle),
                     value: _groupValue(group, saved),
                     onChanged: _busyGroups.contains(group.id)
                         ? null
@@ -489,8 +536,8 @@ class _NotificationPreferencesScreenState
           margin: EdgeInsets.zero,
           child: const ListTile(
             leading: Icon(Icons.sms_outlined),
-            title: Text('Push ও SMS'),
-            subtitle: Text(
+            title: KLocalizedText('Push ও SMS'),
+            subtitle: KLocalizedText(
               'Firebase ও SMS সেবা সংযুক্ত হলে এই চ্যানেলগুলোর আলাদা নিয়ন্ত্রণ চালু হবে।',
             ),
           ),
@@ -499,7 +546,7 @@ class _NotificationPreferencesScreenState
         OutlinedButton.icon(
           onPressed: () => context.push(AppRoutes.notifications),
           icon: const Icon(Icons.notifications_outlined),
-          label: const Text('নোটিফিকেশন ইনবক্স দেখুন'),
+          label: const KLocalizedText('নোটিফিকেশন ইনবক্স দেখুন'),
         ),
       ],
     );
@@ -546,7 +593,7 @@ class _NotificationPreferencesScreenState
 
   void _snack(String message) => ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(message)));
+    ..showSnackBar(SnackBar(content: KLocalizedText(message)));
 }
 
 class PrivacySettingsScreen extends StatefulWidget {
@@ -596,7 +643,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen>
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('গোপনীয়তা ও অনুমতি')),
+    appBar: AppBar(title: const KLocalizedText('গোপনীয়তা ও অনুমতি')),
     body: ListView(
       padding: const EdgeInsets.all(KSpacing.md),
       children: [
@@ -614,7 +661,10 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen>
               'ফোন নম্বর, সঠিক ঠিকানা, জন্মতারিখ, NID, সেলফি ও যাচাইয়ের নথি কখনো পাবলিক প্রোফাইলে দেখানো হয় না।',
         ),
         const SizedBox(height: KSpacing.lg),
-        Text('ফোনের অনুমতি', style: Theme.of(context).textTheme.titleMedium),
+        KLocalizedText(
+          'ফোনের অনুমতি',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: KSpacing.sm),
         FutureBuilder<Map<KPermission, KPermissionStatus>>(
           future: _statuses,
@@ -634,8 +684,8 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen>
                     .map(
                       (permission) => ListTile(
                         leading: Icon(_permissionIcon(permission)),
-                        title: Text(_permissionName(permission)),
-                        subtitle: Text(_permissionReason(permission)),
+                        title: KLocalizedText(_permissionName(permission)),
+                        subtitle: KLocalizedText(_permissionReason(permission)),
                         trailing: _PermissionStatusChip(
                           status: snapshot.data![permission]!,
                         ),
@@ -650,7 +700,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen>
         OutlinedButton.icon(
           onPressed: widget.permissionGateway.openSettings,
           icon: const Icon(Icons.settings_outlined),
-          label: const Text('ফোনের অনুমতি সেটিংস খুলুন'),
+          label: const KLocalizedText('ফোনের অনুমতি সেটিংস খুলুন'),
         ),
         const SizedBox(height: KSpacing.lg),
         const _InfoCard(
@@ -678,7 +728,7 @@ class _DataAccountScreenState extends ConsumerState<DataAccountScreen> {
   Widget build(BuildContext context) {
     final account = ref.watch(accountSummaryProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('তথ্য ও অ্যাকাউন্ট')),
+      appBar: AppBar(title: const KLocalizedText('তথ্য ও অ্যাকাউন্ট')),
       body: ListView(
         padding: const EdgeInsets.all(KSpacing.md),
         children: [
@@ -692,8 +742,8 @@ class _DataAccountScreenState extends ConsumerState<DataAccountScreen> {
             error: (error, _) => Card(
               child: ListTile(
                 leading: const Icon(Icons.error_outline),
-                title: const Text('অ্যাকাউন্ট তথ্য লোড হয়নি'),
-                subtitle: Text(_settingsMessage(error)),
+                title: const KLocalizedText('অ্যাকাউন্ট তথ্য লোড হয়নি'),
+                subtitle: KLocalizedText(_settingsMessage(error)),
                 trailing: IconButton(
                   onPressed: () => ref.invalidate(accountSummaryProvider),
                   icon: const Icon(Icons.refresh),
@@ -703,21 +753,24 @@ class _DataAccountScreenState extends ConsumerState<DataAccountScreen> {
             data: (value) => Card(
               child: ListTile(
                 leading: const CircleAvatar(child: Icon(Icons.person_outline)),
-                title: const Text('যাচাই করা ফোন'),
-                subtitle: Text(value.maskedPhone),
+                title: const KLocalizedText('যাচাই করা ফোন'),
+                subtitle: KLocalizedText(value.maskedPhone),
                 trailing: const Icon(Icons.verified, color: KColors.success),
               ),
             ),
           ),
           const SizedBox(height: KSpacing.lg),
-          Text('সেশন ও ডিভাইস', style: Theme.of(context).textTheme.titleMedium),
+          KLocalizedText(
+            'সেশন ও ডিভাইস',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: KSpacing.sm),
           Card(
             margin: EdgeInsets.zero,
             child: ListTile(
               leading: const Icon(Icons.phonelink_lock_outlined),
-              title: const Text('সব ডিভাইস থেকে সাইন আউট'),
-              subtitle: const Text(
+              title: const KLocalizedText('সব ডিভাইস থেকে সাইন আউট'),
+              subtitle: const KLocalizedText(
                 'হারানো বা অপরিচিত ডিভাইসের প্রবেশ বন্ধ করুন',
               ),
               trailing: _busy
@@ -730,7 +783,7 @@ class _DataAccountScreenState extends ConsumerState<DataAccountScreen> {
             ),
           ),
           const SizedBox(height: KSpacing.lg),
-          Text(
+          KLocalizedText(
             'অ্যাকাউন্ট মুছে ফেলা',
             style: Theme.of(context).textTheme.titleMedium,
           ),
@@ -743,11 +796,11 @@ class _DataAccountScreenState extends ConsumerState<DataAccountScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
+                  const KLocalizedText(
                     'অ্যাকাউন্ট মুছলে প্রোফাইল আর দেখা যাবে না এবং সব ডিভাইস সাইন আউট হবে। রিভিউ পরিচয়বিহীনভাবে এবং আইনগত আর্থিক রেকর্ড নির্ধারিত সময় রাখা হতে পারে।',
                   ),
                   const SizedBox(height: KSpacing.sm),
-                  const Text(
+                  const KLocalizedText(
                     'চলমান কাজ বা খোলা বিরোধ থাকলে অনুরোধ গ্রহণ করা হবে না।',
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
@@ -758,7 +811,7 @@ class _DataAccountScreenState extends ConsumerState<DataAccountScreen> {
                       foregroundColor: KColors.danger,
                     ),
                     icon: const Icon(Icons.delete_forever_outlined),
-                    label: const Text('অ্যাকাউন্ট মুছে ফেলুন'),
+                    label: const KLocalizedText('অ্যাকাউন্ট মুছে ফেলুন'),
                   ),
                 ],
               ),
@@ -773,16 +826,18 @@ class _DataAccountScreenState extends ConsumerState<DataAccountScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('সব ডিভাইস থেকে সাইন আউট?'),
-        content: const Text('সব ফোনে আবার OTP দিয়ে প্রবেশ করতে হবে।'),
+        title: const KLocalizedText('সব ডিভাইস থেকে সাইন আউট?'),
+        content: const KLocalizedText(
+          'সব ফোনে আবার OTP দিয়ে প্রবেশ করতে হবে।',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('বাতিল'),
+            child: const KLocalizedText('বাতিল'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('সাইন আউট'),
+            child: const KLocalizedText('সাইন আউট'),
           ),
         ],
       ),
@@ -817,7 +872,7 @@ class _DataAccountScreenState extends ConsumerState<DataAccountScreen> {
 
   void _snack(String message) => ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(message)));
+    ..showSnackBar(SnackBar(content: KLocalizedText(message)));
 }
 
 class _SettingsSection extends StatelessWidget {
@@ -832,7 +887,10 @@ class _SettingsSection extends StatelessWidget {
     children: [
       Padding(
         padding: const EdgeInsets.only(left: KSpacing.xs, bottom: KSpacing.sm),
-        child: Text(title, style: Theme.of(context).textTheme.titleSmall),
+        child: KLocalizedText(
+          title,
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
       ),
       Card(
         margin: EdgeInsets.zero,
@@ -859,8 +917,8 @@ class _SettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListTile(
     leading: Icon(icon),
-    title: Text(title),
-    subtitle: subtitle == null ? null : Text(subtitle!),
+    title: KLocalizedText(title),
+    subtitle: subtitle == null ? null : KLocalizedText(subtitle!),
     trailing: const Icon(Icons.chevron_right),
     onTap: onTap,
   );
@@ -891,9 +949,12 @@ class _InfoCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: Theme.of(context).textTheme.titleSmall),
+                KLocalizedText(
+                  title,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
                 const SizedBox(height: KSpacing.xs),
-                Text(body),
+                KLocalizedText(body),
               ],
             ),
           ),
@@ -912,7 +973,10 @@ class _PermissionStatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final granted = status == KPermissionStatus.granted;
     return Semantics(
-      label: granted ? 'অনুমতি দেওয়া আছে' : 'অনুমতি বন্ধ',
+      label: KaajLocalizations.text(
+        context,
+        granted ? 'অনুমতি দেওয়া আছে' : 'অনুমতি বন্ধ',
+      ),
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: KSpacing.sm,
@@ -924,7 +988,7 @@ class _PermissionStatusChip extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(99),
         ),
-        child: Text(granted ? 'চালু' : 'বন্ধ'),
+        child: KLocalizedText(granted ? 'চালু' : 'বন্ধ'),
       ),
     );
   }
@@ -947,36 +1011,43 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
-    title: const Text('অ্যাকাউন্ট মুছে ফেলবেন?'),
-    content: Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('এটি ফিরিয়ে নেওয়া কঠিন। নিশ্চিত করতে নিচে “মুছুন” লিখুন।'),
-        const SizedBox(height: KSpacing.md),
-        TextField(
-          controller: _controller,
-          autofocus: true,
-          decoration: const InputDecoration(labelText: 'মুছুন'),
-          onChanged: (_) => setState(() {}),
+  Widget build(BuildContext context) {
+    final confirmationWord = KaajLocalizations.text(context, 'মুছুন');
+    return AlertDialog(
+      title: const KLocalizedText('অ্যাকাউন্ট মুছে ফেলবেন?'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          KLocalizedText(
+            KaajLocalizations.isEnglish(context)
+                ? 'This is difficult to undo. Type “Delete” below to confirm.'
+                : 'এটি ফিরিয়ে নেওয়া কঠিন। নিশ্চিত করতে নিচে “মুছুন” লিখুন।',
+          ),
+          const SizedBox(height: KSpacing.md),
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            decoration: InputDecoration(labelText: confirmationWord),
+            onChanged: (_) => setState(() {}),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const KLocalizedText('বাতিল'),
+        ),
+        FilledButton(
+          onPressed: _controller.text.trim() == confirmationWord
+              ? () => Navigator.pop(context, true)
+              : null,
+          style: FilledButton.styleFrom(backgroundColor: KColors.danger),
+          child: const KLocalizedText('স্থায়ীভাবে মুছুন'),
         ),
       ],
-    ),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.pop(context, false),
-        child: const Text('বাতিল'),
-      ),
-      FilledButton(
-        onPressed: _controller.text.trim() == 'মুছুন'
-            ? () => Navigator.pop(context, true)
-            : null,
-        style: FilledButton.styleFrom(backgroundColor: KColors.danger),
-        child: const Text('স্থায়ীভাবে মুছুন'),
-      ),
-    ],
-  );
+    );
+  }
 }
 
 class _PreferenceGroup {

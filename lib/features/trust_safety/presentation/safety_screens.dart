@@ -6,7 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/errors/failure.dart';
+import '../../../core/localization/kaaj_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/k_localized_text.dart';
 import '../../../core/widgets/k_primary_button.dart';
 import '../../catalog/domain/entities/catalog_category.dart';
 import '../../catalog/presentation/controllers/catalog_providers.dart';
@@ -50,7 +52,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('নিরাপত্তা রিপোর্ট')),
+    appBar: AppBar(title: const KLocalizedText('নিরাপত্তা রিপোর্ট')),
     body: ListView(
       padding: const EdgeInsets.all(KSpacing.lg),
       children: [
@@ -58,8 +60,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
           color: KColors.surfaceAlt,
           child: ListTile(
             leading: Icon(Icons.shield_outlined, color: KColors.primary),
-            title: Text('রিপোর্ট গোপন রাখা হয়'),
-            subtitle: Text(
+            title: KLocalizedText('রিপোর্ট গোপন রাখা হয়'),
+            subtitle: KLocalizedText(
               'যাকে রিপোর্ট করছেন তিনি আপনার পরিচয় বা বিবরণ দেখতে পাবেন না। জরুরি বিপদে ৯৯৯-এ কল করুন।',
             ),
           ),
@@ -68,9 +70,16 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
         DropdownButtonFormField<String>(
           initialValue: _reason,
           isExpanded: true,
-          decoration: const InputDecoration(labelText: 'রিপোর্টের কারণ'),
+          decoration: InputDecoration(
+            labelText: KaajLocalizations.text(context, 'রিপোর্টের কারণ'),
+          ),
           items: reportReasons.entries
-              .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
+              .map(
+                (e) => DropdownMenuItem(
+                  value: e.key,
+                  child: KLocalizedText(e.value),
+                ),
+              )
               .toList(),
           onChanged: (value) => setState(() => _reason = value ?? _reason),
         ),
@@ -80,9 +89,15 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
           minLines: 5,
           maxLines: 10,
           maxLength: 1000,
-          decoration: const InputDecoration(
-            labelText: 'কি ঘটেছে? (কমপক্ষে ১০ অক্ষর)',
-            hintText: 'ঘটনার সময় ও গুরুত্বপূর্ণ তথ্য লিখুন',
+          decoration: InputDecoration(
+            labelText: KaajLocalizations.text(
+              context,
+              'কি ঘটেছে? (কমপক্ষে ১০ অক্ষর)',
+            ),
+            hintText: KaajLocalizations.text(
+              context,
+              'ঘটনার সময় ও গুরুত্বপূর্ণ তথ্য লিখুন',
+            ),
             alignLabelWithHint: true,
           ),
         ),
@@ -120,14 +135,14 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
               color: KColors.success,
               size: 44,
             ),
-            title: const Text('রিপোর্ট পাওয়া গেছে'),
-            content: const Text(
+            title: const KLocalizedText('রিপোর্ট পাওয়া গেছে'),
+            content: const KLocalizedText(
               'নিরাপত্তা দল এটি পর্যালোচনা করবে। প্রয়োজন হলে নোটিফিকেশনে আপডেট পাবেন।',
             ),
             actions: [
               FilledButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('ঠিক আছে'),
+                child: const KLocalizedText('ঠিক আছে'),
               ),
             ],
           ),
@@ -141,8 +156,9 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     }
   }
 
-  void _snack(String text) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  void _snack(String text) => ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(SnackBar(content: KLocalizedText(text)));
 }
 
 class BlockedUsersScreen extends ConsumerWidget {
@@ -151,17 +167,17 @@ class BlockedUsersScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final users = ref.watch(blockedUsersProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('ব্লক করা ব্যবহারকারী')),
+      appBar: AppBar(title: const KLocalizedText('ব্লক করা ব্যবহারকারী')),
       body: users.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
           child: FilledButton(
             onPressed: () => ref.invalidate(blockedUsersProvider),
-            child: Text(_message(error)),
+            child: KLocalizedText(_message(error)),
           ),
         ),
         data: (items) => items.isEmpty
-            ? const Center(child: Text('আপনি কাউকে ব্লক করেননি।'))
+            ? const Center(child: KLocalizedText('আপনি কাউকে ব্লক করেননি।'))
             : ListView.separated(
                 padding: const EdgeInsets.all(KSpacing.md),
                 itemCount: items.length,
@@ -173,7 +189,9 @@ class BlockedUsersScreen extends ConsumerWidget {
                       child: Icon(Icons.person_off_outlined),
                     ),
                     title: Text(user.displayName),
-                    subtitle: const Text('বার্তা ও নতুন যোগাযোগ বন্ধ আছে'),
+                    subtitle: const KLocalizedText(
+                      'বার্তা ও নতুন যোগাযোগ বন্ধ আছে',
+                    ),
                     trailing: TextButton(
                       onPressed: () async {
                         try {
@@ -184,12 +202,14 @@ class BlockedUsersScreen extends ConsumerWidget {
                         } on Object catch (error) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(_message(error))),
+                              SnackBar(
+                                content: KLocalizedText(_message(error)),
+                              ),
                             );
                           }
                         }
                       },
-                      child: const Text('আনব্লক'),
+                      child: const KLocalizedText('আনব্লক'),
                     ),
                   );
                 },
@@ -222,7 +242,7 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
     final portfolio = ref.watch(portfolioProvider);
     final itemCount = portfolio.valueOrNull?.length ?? 0;
     return Scaffold(
-      appBar: AppBar(title: const Text('কাজের পোর্টফোলিও')),
+      appBar: AppBar(title: const KLocalizedText('কাজের পোর্টফোলিও')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _uploading || itemCount >= _maxItems
             ? null
@@ -233,7 +253,7 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
             : const Icon(Icons.add_a_photo_outlined),
-        label: Text(
+        label: KLocalizedText(
           itemCount >= _maxItems
               ? 'সীমা পূর্ণ'
               : _uploading
@@ -254,18 +274,21 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
               color: KColors.textSecondary,
             ),
             const SizedBox(height: KSpacing.md),
-            Text(
+            KLocalizedText(
               'পোর্টফোলিও লোড করা যায়নি',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: KSpacing.sm),
-            Text(_portfolioMessage(error), textAlign: TextAlign.center),
+            KLocalizedText(
+              _portfolioMessage(error),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: KSpacing.lg),
             FilledButton.icon(
               onPressed: () => ref.invalidate(portfolioProvider),
               icon: const Icon(Icons.refresh),
-              label: const Text('আবার চেষ্টা করুন'),
+              label: const KLocalizedText('আবার চেষ্টা করুন'),
             ),
           ],
         ),
@@ -419,21 +442,25 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
+                KLocalizedText(
                   'ছবি যোগ করুন',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: KSpacing.md),
                 ListTile(
                   leading: const Icon(Icons.photo_camera_outlined),
-                  title: const Text('ক্যামেরা দিয়ে তুলুন'),
-                  subtitle: const Text('এখনই কাজের একটি পরিষ্কার ছবি তুলুন'),
+                  title: const KLocalizedText('ক্যামেরা দিয়ে তুলুন'),
+                  subtitle: const KLocalizedText(
+                    'এখনই কাজের একটি পরিষ্কার ছবি তুলুন',
+                  ),
                   onTap: () => Navigator.pop(context, ImageSource.camera),
                 ),
                 ListTile(
                   leading: const Icon(Icons.photo_library_outlined),
-                  title: const Text('গ্যালারি থেকে নিন'),
-                  subtitle: const Text('আগে তোলা JPEG বা PNG ছবি বেছে নিন'),
+                  title: const KLocalizedText('গ্যালারি থেকে নিন'),
+                  subtitle: const KLocalizedText(
+                    'আগে তোলা JPEG বা PNG ছবি বেছে নিন',
+                  ),
                   onTap: () => Navigator.pop(context, ImageSource.gallery),
                 ),
               ],
@@ -551,12 +578,14 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
+                  KLocalizedText(
                     'কাজের নমুনার ক্রম',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: KSpacing.xs),
-                  const Text('ড্র্যাগ করে গুরুত্বপূর্ণ কাজ উপরে রাখুন।'),
+                  const KLocalizedText(
+                    'ড্র্যাগ করে গুরুত্বপূর্ণ কাজ উপরে রাখুন।',
+                  ),
                   const SizedBox(height: KSpacing.md),
                   Expanded(
                     child: ReorderableListView.builder(
@@ -588,19 +617,26 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
                                 ),
                               ),
                             ),
-                            title: Text(item.categoryName),
-                            subtitle: Text(
-                              item.caption?.isNotEmpty == true
-                                  ? item.caption!
-                                  : 'ক্যাপশন নেই',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                            title: KLocalizedText(item.categoryName),
+                            subtitle: item.caption?.isNotEmpty == true
+                                ? Text(
+                                    item.caption!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  )
+                                : const KLocalizedText(
+                                    'ক্যাপশন নেই',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  tooltip: 'উপরে নিন',
+                                  tooltip: KaajLocalizations.text(
+                                    context,
+                                    'উপরে নিন',
+                                  ),
                                   onPressed: index == 0
                                       ? null
                                       : () => setSheetState(() {
@@ -610,7 +646,10 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
                                   icon: const Icon(Icons.arrow_upward),
                                 ),
                                 IconButton(
-                                  tooltip: 'নিচে নিন',
+                                  tooltip: KaajLocalizations.text(
+                                    context,
+                                    'নিচে নিন',
+                                  ),
                                   onPressed: index == order.length - 1
                                       ? null
                                       : () => setSheetState(() {
@@ -658,16 +697,16 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('এই কাজের ছবি মুছবেন?'),
-        content: const Text('ছবিটি স্থায়ীভাবে মুছে যাবে।'),
+        title: const KLocalizedText('এই কাজের ছবি মুছবেন?'),
+        content: const KLocalizedText('ছবিটি স্থায়ীভাবে মুছে যাবে।'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('বাতিল'),
+            child: const KLocalizedText('বাতিল'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('মুছুন'),
+            child: const KLocalizedText('মুছুন'),
           ),
         ],
       ),
@@ -690,7 +729,7 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
       context: context,
       builder: (context) => Dialog.fullscreen(
         child: Scaffold(
-          appBar: AppBar(title: Text(item.categoryName)),
+          appBar: AppBar(title: KLocalizedText(item.categoryName)),
           body: Column(
             children: [
               Expanded(
@@ -701,7 +740,7 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
                       fit: BoxFit.contain,
                       errorBuilder: (_, _, _) => const Padding(
                         padding: EdgeInsets.all(KSpacing.xl),
-                        child: Text('ছবিটি এখন দেখানো যাচ্ছে না।'),
+                        child: KLocalizedText('ছবিটি এখন দেখানো যাচ্ছে না।'),
                       ),
                     ),
                   ),
@@ -722,7 +761,7 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
   void _snack(String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+      ..showSnackBar(SnackBar(content: KLocalizedText(message)));
   }
 }
 
@@ -749,13 +788,13 @@ class _EmptyPortfolio extends StatelessWidget {
             color: KColors.primary,
           ),
           const SizedBox(height: KSpacing.md),
-          const Text(
+          const KLocalizedText(
             'আপনার কাজ দেখান — বেশি কাজ পাবেন',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: KSpacing.sm),
-          const Text(
+          const KLocalizedText(
             'ছবি, ক্যাপশন ও কাজের ধরনসহ সর্বোচ্চ ২০টি নমুনা যোগ করুন।',
             textAlign: TextAlign.center,
           ),
@@ -763,7 +802,7 @@ class _EmptyPortfolio extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: onAdd,
             icon: const Icon(Icons.add_photo_alternate_outlined),
-            label: const Text('প্রথম কাজটি যোগ করুন'),
+            label: const KLocalizedText('প্রথম কাজটি যোগ করুন'),
           ),
         ],
       ),
@@ -808,12 +847,12 @@ class _PortfolioSummary extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                KLocalizedText(
                   '${_banglaNumber(itemCount)} / ২০টি কাজের নমুনা',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: KSpacing.xs),
-                const Text(
+                const KLocalizedText(
                   'পরিষ্কার ছবি ও সংক্ষিপ্ত বর্ণনা বেশি আস্থা তৈরি করে।',
                 ),
               ],
@@ -822,7 +861,7 @@ class _PortfolioSummary extends StatelessWidget {
           if (canReorder)
             IconButton(
               onPressed: reordering ? null : onReorder,
-              tooltip: 'ক্রম বদলান',
+              tooltip: KaajLocalizations.text(context, 'ক্রম বদলান'),
               icon: reordering
                   ? const SizedBox.square(
                       dimension: 20,
@@ -875,11 +914,11 @@ class _PendingUploadCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    KLocalizedText(
                       uploading ? 'নিরাপদে আপলোড হচ্ছে' : 'আপলোড সম্পন্ন হয়নি',
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
-                    Text(draft.categoryName),
+                    KLocalizedText(draft.categoryName),
                   ],
                 ),
               ),
@@ -893,14 +932,14 @@ class _PendingUploadCard extends StatelessWidget {
             children: [
               TextButton(
                 onPressed: onCancel,
-                child: Text(uploading ? 'বাতিল করুন' : 'বাদ দিন'),
+                child: KLocalizedText(uploading ? 'বাতিল করুন' : 'বাদ দিন'),
               ),
               if (!uploading) ...[
                 const SizedBox(width: KSpacing.sm),
                 FilledButton.icon(
                   onPressed: onRetry,
                   icon: const Icon(Icons.refresh),
-                  label: const Text('আবার চেষ্টা করুন'),
+                  label: const KLocalizedText('আবার চেষ্টা করুন'),
                 ),
               ],
             ],
@@ -941,7 +980,10 @@ class _PortfolioCard extends StatelessWidget {
               children: [
                 Image.network(
                   item.imageUrl,
-                  semanticLabel: '${item.categoryName} কাজের ছবি',
+                  semanticLabel: KaajLocalizations.text(
+                    context,
+                    '${item.categoryName} কাজের ছবি',
+                  ),
                   fit: BoxFit.cover,
                   loadingBuilder: (context, child, progress) => progress == null
                       ? child
@@ -952,7 +994,7 @@ class _PortfolioCard extends StatelessWidget {
                       children: [
                         Icon(Icons.broken_image_outlined),
                         SizedBox(height: KSpacing.xs),
-                        Text('ছবি লোড হয়নি'),
+                        KLocalizedText('ছবি লোড হয়নি'),
                       ],
                     ),
                   ),
@@ -972,7 +1014,7 @@ class _PortfolioCard extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 44),
-                  child: Text(
+                  child: KLocalizedText(
                     item.categoryName,
                     textAlign: TextAlign.center,
                     maxLines: 1,
@@ -984,7 +1026,10 @@ class _PortfolioCard extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: PopupMenuButton<_PortfolioAction>(
                     enabled: !busy,
-                    tooltip: 'কাজের নমুনার অপশন',
+                    tooltip: KaajLocalizations.text(
+                      context,
+                      'কাজের নমুনার অপশন',
+                    ),
                     onSelected: (action) => switch (action) {
                       _PortfolioAction.edit => onEdit(),
                       _PortfolioAction.delete => onDelete(),
@@ -995,7 +1040,7 @@ class _PortfolioCard extends StatelessWidget {
                         child: ListTile(
                           contentPadding: EdgeInsets.zero,
                           leading: Icon(Icons.edit_outlined),
-                          title: Text('তথ্য সম্পাদনা'),
+                          title: KLocalizedText('তথ্য সম্পাদনা'),
                         ),
                       ),
                       PopupMenuItem(
@@ -1006,7 +1051,7 @@ class _PortfolioCard extends StatelessWidget {
                             Icons.delete_outline,
                             color: KColors.danger,
                           ),
-                          title: Text('মুছুন'),
+                          title: KLocalizedText('মুছুন'),
                         ),
                       ),
                     ],
@@ -1022,19 +1067,25 @@ class _PortfolioCard extends StatelessWidget {
               KSpacing.sm,
               KSpacing.sm,
             ),
-            child: Text(
-              item.caption?.isNotEmpty == true
-                  ? item.caption!
-                  : 'ক্যাপশন যোগ করা হয়নি',
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: item.caption?.isNotEmpty == true
-                    ? KColors.textSecondary
-                    : KColors.textSecondary.withValues(alpha: .75),
-              ),
-            ),
+            child: item.caption?.isNotEmpty == true
+                ? Text(
+                    item.caption!,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: KColors.textSecondary,
+                    ),
+                  )
+                : KLocalizedText(
+                    'ক্যাপশন যোগ করা হয়নি',
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: KColors.textSecondary.withValues(alpha: .75),
+                    ),
+                  ),
           ),
         ],
       ),
@@ -1094,9 +1145,12 @@ class _PortfolioDetailsSheetState extends State<_PortfolioDetailsSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('কাজের তথ্য', style: Theme.of(context).textTheme.titleLarge),
+          KLocalizedText(
+            'কাজের তথ্য',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: KSpacing.sm),
-          const Text(
+          const KLocalizedText(
             'কাজের ধরন ও সংক্ষিপ্ত বর্ণনা গ্রাহককে সিদ্ধান্ত নিতে সাহায্য করে।',
           ),
           if (widget.previewBytes != null) ...[
@@ -1114,12 +1168,18 @@ class _PortfolioDetailsSheetState extends State<_PortfolioDetailsSheet> {
           DropdownButtonFormField<String>(
             initialValue: _categoryId,
             isExpanded: true,
-            decoration: const InputDecoration(labelText: 'কাজের ধরন'),
+            decoration: InputDecoration(
+              labelText: KaajLocalizations.text(context, 'কাজের ধরন'),
+            ),
             items: widget.categories
                 .map<DropdownMenuItem<String>>(
                   (item) => DropdownMenuItem(
                     value: item.id,
-                    child: Text(item.nameBn),
+                    child: KLocalizedText(
+                      item.nameFor(
+                        Localizations.localeOf(context).languageCode,
+                      ),
+                    ),
                   ),
                 )
                 .toList(growable: false),
@@ -1130,9 +1190,12 @@ class _PortfolioDetailsSheetState extends State<_PortfolioDetailsSheet> {
             controller: _caption,
             maxLength: 300,
             maxLines: 3,
-            decoration: const InputDecoration(
-              labelText: 'ক্যাপশন (ঐচ্ছিক)',
-              hintText: 'কী কাজ করেছেন ও ফলাফল কী হয়েছে লিখুন',
+            decoration: InputDecoration(
+              labelText: KaajLocalizations.text(context, 'ক্যাপশন (ঐচ্ছিক)'),
+              hintText: KaajLocalizations.text(
+                context,
+                'কী কাজ করেছেন ও ফলাফল কী হয়েছে লিখুন',
+              ),
             ),
           ),
           KPrimaryButton(
@@ -1145,7 +1208,9 @@ class _PortfolioDetailsSheetState extends State<_PortfolioDetailsSheet> {
                 context,
                 _PortfolioDetails(
                   categoryId: _categoryId,
-                  categoryName: category.nameBn,
+                  categoryName: category.nameFor(
+                    Localizations.localeOf(context).languageCode,
+                  ),
                   caption: _caption.text.trim(),
                 ),
               );

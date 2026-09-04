@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/localization/kaaj_localizations.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/k_primary_button.dart';
+import '../../../../core/widgets/k_localized_text.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../auth/presentation/controllers/auth_providers.dart';
@@ -19,15 +20,36 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final state = ref.watch(authControllerProvider);
-    final isWorker =
-        ref.watch(onboardingControllerProvider).role == KaajRole.worker;
+    final onboarding = ref.watch(onboardingControllerProvider);
+    final isWorker = onboarding.role == KaajRole.worker;
     final unreadNotifications = ref
         .watch(notificationsProvider)
         .maybeWhen(data: (inbox) => inbox.unreadCount, orElse: () => 0);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('KAAJ'),
+        title: const KLocalizedText('KAAJ'),
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            tooltip: KaajLocalizations.text(context, 'নোটিফিকেশন'),
+            onPressed: () => context.push(AppRoutes.notifications),
+            icon: Badge(
+              isLabelVisible: unreadNotifications > 0,
+              label: KLocalizedText(
+                unreadNotifications > 99
+                    ? '৯৯+'
+                    : _banglaNumber(unreadNotifications),
+              ),
+              child: const Icon(Icons.notifications_outlined),
+            ),
+          ),
+          IconButton(
+            tooltip: KaajLocalizations.text(context, 'সেটিংস'),
+            onPressed: () => context.push(AppRoutes.settings),
+            icon: const Icon(Icons.settings_outlined),
+          ),
+          const SizedBox(width: KSpacing.xs),
+        ],
       ),
       body: SafeArea(
         child: Center(
@@ -38,36 +60,47 @@ class HomeScreen extends ConsumerWidget {
               child: Column(
                 children: [
                   Container(
-                    width: 88,
-                    height: 88,
+                    width: 72,
+                    height: 72,
                     decoration: BoxDecoration(
                       color: KColors.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.verified_user_outlined,
-                      size: 48,
+                      size: 38,
                       color: KColors.primary,
                     ),
                   ),
                   const SizedBox(height: KSpacing.lg),
-                  Text(
-                    l10n.welcomeTitle,
+                  KLocalizedText(
+                    onboarding.displayName.trim().isEmpty
+                        ? l10n.welcomeTitle
+                        : KaajLocalizations.isEnglish(context)
+                        ? 'Welcome, ${onboarding.displayName.trim()}'
+                        : 'স্বাগতম, ${onboarding.displayName.trim()}',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: KSpacing.sm),
-                  Text(
+                  KLocalizedText(
                     l10n.welcomeBody,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: KColors.textSecondary,
                     ),
                   ),
+                  const SizedBox(height: KSpacing.lg),
+                  _LocalDiscoveryCard(
+                    isWorker: isWorker,
+                    onTap: () => context.push(
+                      isWorker ? AppRoutes.jobs : AppRoutes.workers,
+                    ),
+                  ),
                   const SizedBox(height: KSpacing.xl),
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: Text(
+                    child: KLocalizedText(
                       'দ্রুত কাজ',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
@@ -212,13 +245,22 @@ class HomeScreen extends ConsumerWidget {
                     },
                   ),
                   const SizedBox(height: KSpacing.lg),
-                  KPrimaryButton(
-                    label: l10n.signOut,
-                    isLoading: state.status == AuthStatus.loading,
-                    onPressed: () async {
-                      await ref.read(authControllerProvider.notifier).logout();
-                      if (context.mounted) context.go(AppRoutes.phone);
-                    },
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.logout),
+                      label: KLocalizedText(l10n.signOut),
+                      onPressed: state.status == AuthStatus.loading
+                          ? null
+                          : () async {
+                              await ref
+                                  .read(authControllerProvider.notifier)
+                                  .logout();
+                              if (context.mounted) {
+                                context.go(AppRoutes.phone);
+                              }
+                            },
+                    ),
                   ),
                 ],
               ),
@@ -228,6 +270,62 @@ class HomeScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _LocalDiscoveryCard extends StatelessWidget {
+  const _LocalDiscoveryCard({required this.isWorker, required this.onTap});
+
+  final bool isWorker;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    margin: EdgeInsets.zero,
+    color: KColors.primary.withValues(alpha: 0.08),
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(KSpacing.lg),
+        child: Row(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(Icons.near_me_outlined, color: KColors.primary),
+            ),
+            const SizedBox(width: KSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  KLocalizedText(
+                    isWorker ? 'আপনার এলাকার কাজ' : 'আপনার এলাকার কর্মী',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: KSpacing.xs),
+                  KLocalizedText(
+                    isWorker
+                        ? 'দক্ষতা ও খালি সময় মিলিয়ে কাছের কাজ দেখুন'
+                        : 'দক্ষতা, যাচাই ও খালি সময় দেখে কর্মী বাছুন',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: KColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: KSpacing.sm),
+            const Icon(Icons.arrow_forward, color: KColors.primary),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class _DashboardTile extends StatelessWidget {
@@ -246,71 +344,75 @@ class _DashboardTile extends StatelessWidget {
   final String title;
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    button: true,
-    label: badgeCount > 0
-        ? '$title, ${_banglaNumber(badgeCount)}টি অপঠিত আপডেট'
-        : title,
-    child: Card(
-      margin: EdgeInsets.zero,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(KSpacing.sm),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: KColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
+  Widget build(BuildContext context) {
+    final localizedTitle = KaajLocalizations.text(context, title);
+    final unreadLabel = KaajLocalizations.isEnglish(context)
+        ? '$badgeCount unread updates'
+        : '${_banglaNumber(badgeCount)}টি অপঠিত আপডেট';
+    return Semantics(
+      button: true,
+      label: badgeCount > 0 ? '$localizedTitle, $unreadLabel' : localizedTitle,
+      child: Card(
+        margin: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(KSpacing.sm),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: KColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(icon, color: KColors.primary),
                     ),
-                    child: Icon(icon, color: KColors.primary),
-                  ),
-                  if (badgeCount > 0)
-                    Positioned(
-                      top: -7,
-                      right: -10,
-                      child: Badge(
-                        backgroundColor: KColors.danger,
-                        label: Text(
-                          badgeCount > 99 ? '৯৯+' : _banglaNumber(badgeCount),
+                    if (badgeCount > 0)
+                      Positioned(
+                        top: -7,
+                        right: -10,
+                        child: Badge(
+                          backgroundColor: KColors.danger,
+                          label: KLocalizedText(
+                            badgeCount > 99 ? '৯৯+' : _banglaNumber(badgeCount),
+                          ),
                         ),
                       ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: KSpacing.md),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: KSpacing.xs),
-              Text(
-                subtitle,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: KColors.textSecondary),
-              ),
-            ],
+                  ],
+                ),
+                const SizedBox(height: KSpacing.md),
+                KLocalizedText(
+                  title,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: KSpacing.xs),
+                KLocalizedText(
+                  subtitle,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: KColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 String _banglaNumber(int value) => value.toString().replaceAllMapped(

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../localization/kaaj_localizations.dart';
+import 'k_localized_text.dart';
+
 class KPrimaryButton extends StatelessWidget {
   const KPrimaryButton({
     required this.label,
@@ -16,7 +19,7 @@ class KPrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: label,
+      label: KaajLocalizations.text(context, label),
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         child: Row(
@@ -30,7 +33,7 @@ class KPrimaryButton extends StatelessWidget {
               ),
               const SizedBox(width: 10),
             ],
-            Flexible(child: Text(label)),
+            Flexible(child: KLocalizedText(label)),
           ],
         ),
       ),

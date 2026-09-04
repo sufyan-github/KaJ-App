@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../localization/kaaj_localizations.dart';
+
 class KTextField extends StatelessWidget {
   const KTextField({
     required this.label,
@@ -26,9 +28,10 @@ class KTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizedLabel = KaajLocalizations.text(context, label);
     return Semantics(
       textField: true,
-      label: label,
+      label: localizedLabel,
       child: TextFormField(
         controller: controller,
         enabled: enabled,
@@ -36,10 +39,16 @@ class KTextField extends StatelessWidget {
         onChanged: onChanged,
         validator: validator,
         decoration: InputDecoration(
-          labelText: label,
-          hintText: hintText,
-          helperText: helperText,
-          errorText: errorText,
+          labelText: localizedLabel,
+          hintText: hintText == null
+              ? null
+              : KaajLocalizations.text(context, hintText!),
+          helperText: helperText == null
+              ? null
+              : KaajLocalizations.text(context, helperText!),
+          errorText: errorText == null
+              ? null
+              : KaajLocalizations.text(context, errorText!),
         ),
       ),
     );

@@ -20,4 +20,6 @@ class ServiceLocation {
   final String? parentId;
   final double? radiusKm;
   final ServiceLocationType type;
+
+  String nameFor(String languageCode) => languageCode == 'en' ? nameEn : nameBn;
 }

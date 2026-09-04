@@ -8,6 +8,8 @@ class AppNotification {
     required this.isRead,
     required this.payload,
     this.route,
+    this.titleEn,
+    this.bodyEn,
   });
 
   factory AppNotification.fromJson(Map<String, dynamic> json) {
@@ -24,6 +26,8 @@ class AppNotification {
           _text(json['bodyBn']) ??
           _text(json['body']) ??
           'আপনার কাজের একটি নতুন আপডেট এসেছে।',
+      titleEn: _text(json['titleEn']),
+      bodyEn: _text(json['bodyEn']),
       createdAt:
           DateTime.tryParse(json['createdAt'] as String? ?? '') ??
           DateTime.now(),
@@ -37,13 +41,21 @@ class AppNotification {
   }
 
   final String body;
+  final String? bodyEn;
   final DateTime createdAt;
   final String id;
   final bool isRead;
   final Map<String, dynamic> payload;
   final String? route;
   final String title;
+  final String? titleEn;
   final String type;
+
+  String titleFor(String languageCode) =>
+      languageCode == 'en' && titleEn != null ? titleEn! : title;
+
+  String bodyFor(String languageCode) =>
+      languageCode == 'en' && bodyEn != null ? bodyEn! : body;
 
   NotificationGroup get group => switch (type) {
     'JOB_MATCH' ||

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kaaj/core/localization/locale_controller.dart';
 import 'package:kaaj/core/permissions/permission_gateway.dart';
 import 'package:kaaj/core/theme/app_theme.dart';
 import 'package:kaaj/features/auth/domain/repositories/auth_repository.dart';
@@ -16,6 +18,53 @@ import 'package:kaaj/features/settings/presentation/settings_screens.dart';
 import 'package:mocktail/mocktail.dart';
 
 void main() {
+  testWidgets('language switch updates the complete visible settings UI', (
+    tester,
+  ) async {
+    final onboarding = _MockOnboardingRepository();
+    final auth = _MockAuthRepository();
+    when(
+      onboarding.restore,
+    ).thenReturn(const OnboardingState(role: KaajRole.worker, complete: true));
+
+    await tester.binding.setSurfaceSize(const Size(360, 760));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          onboardingControllerProvider.overrideWith(
+            (ref) => OnboardingController(onboarding),
+          ),
+          authControllerProvider.overrideWith((ref) => AuthController(auth)),
+        ],
+        child: Consumer(
+          builder: (context, ref, _) => MaterialApp(
+            theme: buildAppTheme(),
+            locale: ref.watch(localeControllerProvider),
+            supportedLocales: const [Locale('bn'), Locale('en')],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            home: const SettingsScreen(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('সেটিংস'), findsOneWidget);
+    await tester.tap(find.text('ভাষা'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('ইংরেজি'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Settings'), findsOneWidget);
+    expect(find.text('Account'), findsOneWidget);
+    expect(find.text('Current role'), findsOneWidget);
+    expect(find.text('Language'), findsOneWidget);
+    expect(find.text('সেটিংস'), findsNothing);
+    expect(find.text('ভাষা'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('settings groups real account, preference and privacy actions', (
     tester,
   ) async {
@@ -167,6 +216,9 @@ Future<void> _pump(
       overrides: overrides,
       child: MaterialApp(
         theme: buildAppTheme(),
+        locale: const Locale('bn'),
+        supportedLocales: const [Locale('bn'), Locale('en')],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         home: MediaQuery(
           data: MediaQueryData(
             size: const Size(360, 760),

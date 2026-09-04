@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/localization/kaaj_localizations.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/k_localized_text.dart';
 import '../../../../core/widgets/k_primary_button.dart';
 import '../../../catalog/domain/entities/catalog_skill.dart';
 import '../../../catalog/domain/entities/service_location.dart';
@@ -66,7 +68,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           TextFormField(
             controller: _name,
             textInputAction: TextInputAction.done,
-            decoration: const InputDecoration(labelText: 'আপনার নাম'),
+            decoration: InputDecoration(
+              labelText: KaajLocalizations.text(context, 'আপনার নাম'),
+            ),
             validator: (value) => (value?.trim().length ?? 0) < 2
                 ? 'কমপক্ষে ২ অক্ষরের নাম লিখুন'
                 : null,
@@ -170,8 +174,8 @@ class _LocationSelectionScreenState
       child: Column(
         children: [
           TextField(
-            decoration: const InputDecoration(
-              labelText: 'এলাকা খুঁজুন',
+            decoration: InputDecoration(
+              labelText: KaajLocalizations.text(context, 'এলাকা খুঁজুন'),
               prefixIcon: Icon(Icons.search),
             ),
             onChanged: (value) => setState(() => _query = value.trim()),
@@ -182,18 +186,19 @@ class _LocationSelectionScreenState
               context: context,
               builder: (context) => const Padding(
                 padding: EdgeInsets.all(KSpacing.lg),
-                child: Text(
+                child: KLocalizedText(
                   'আপনার অনুমতি পেলে শুধু কাছের কাজ দেখাতে বর্তমান অবস্থান ব্যবহার করব। সঠিক ঠিকানা প্রকাশ করা হবে না।',
                 ),
               ),
             ),
             icon: const Icon(Icons.my_location),
-            label: const Text('আমার বর্তমান অবস্থান ব্যবহার করুন'),
+            label: const KLocalizedText('আমার বর্তমান অবস্থান ব্যবহার করুন'),
           ),
           const SizedBox(height: KSpacing.md),
           locations.when(
             loading: () => const CircularProgressIndicator(),
-            error: (_, _) => const Text('এলাকার তালিকা লোড করা যায়নি।'),
+            error: (_, _) =>
+                const KLocalizedText('এলাকার তালিকা লোড করা যায়নি।'),
             data: (items) {
               final filtered = items
                   .where(
@@ -212,8 +217,11 @@ class _LocationSelectionScreenState
                       .map(
                         (item) => RadioListTile<String>(
                           value: item.id,
-                          title: Text(item.nameBn),
-                          subtitle: Text(item.nameEn),
+                          title: KLocalizedText(
+                            item.nameFor(
+                              Localizations.localeOf(context).languageCode,
+                            ),
+                          ),
                         ),
                       )
                       .toList(growable: false),
@@ -298,7 +306,8 @@ class _WorkerSkillsScreenState extends ConsumerState<WorkerSkillsScreen> {
         children: [
           skills.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, _) => const Text('দক্ষতার তালিকা লোড করা যায়নি।'),
+            error: (_, _) =>
+                const KLocalizedText('দক্ষতার তালিকা লোড করা যায়নি।'),
             data: (items) => Wrap(
               spacing: KSpacing.sm,
               runSpacing: KSpacing.sm,
@@ -307,14 +316,17 @@ class _WorkerSkillsScreenState extends ConsumerState<WorkerSkillsScreen> {
           ),
           if (_selected.length >= 8) ...[
             const SizedBox(height: KSpacing.sm),
-            const Text('আপনি সর্বোচ্চ ৮টি দক্ষতা বেছে নিয়েছেন।'),
+            const KLocalizedText('আপনি সর্বোচ্চ ৮টি দক্ষতা বেছে নিয়েছেন।'),
           ],
           const SizedBox(height: KSpacing.lg),
           TextField(
             controller: _rate,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'ঘণ্টাপ্রতি পারিশ্রমিক (টাকা, ঐচ্ছিক)',
+            decoration: InputDecoration(
+              labelText: KaajLocalizations.text(
+                context,
+                'ঘণ্টাপ্রতি পারিশ্রমিক (টাকা, ঐচ্ছিক)',
+              ),
             ),
           ),
           const SizedBox(height: KSpacing.lg),
@@ -331,7 +343,9 @@ class _WorkerSkillsScreenState extends ConsumerState<WorkerSkillsScreen> {
   Widget _skillChip(CatalogSkill skill) {
     final selected = _selected.contains(skill.id);
     return FilterChip(
-      label: Text(skill.nameBn),
+      label: KLocalizedText(
+        skill.nameFor(Localizations.localeOf(context).languageCode),
+      ),
       selected: selected,
       onSelected: (value) {
         if (value && _selected.length >= 8) return;
@@ -456,6 +470,7 @@ class _AvailabilitySetupScreenState
   @override
   Widget build(BuildContext context) => _OnboardingScaffold(
     step: 5,
+    standaloneTitle: widget.isEditing ? 'ডিফল্ট কাজের সময়' : null,
     title: widget.isEditing ? 'ডিফল্ট কাজের সময়' : 'কখন কাজ করতে পারবেন?',
     subtitle: widget.isEditing
         ? 'এটি আপনার অ্যাকাউন্টের সাধারণ সময়। পোস্ট করা প্রতিটি কাজের তারিখ ও সময় আলাদা থাকবে।'
@@ -469,7 +484,7 @@ class _AvailabilitySetupScreenState
         ? Center(
             child: Column(
               children: [
-                const Text('সংরক্ষিত সময় লোড করা যায়নি।'),
+                const KLocalizedText('সংরক্ষিত সময় লোড করা যায়নি।'),
                 const SizedBox(height: KSpacing.md),
                 FilledButton(
                   onPressed: () {
@@ -479,7 +494,7 @@ class _AvailabilitySetupScreenState
                     });
                     _loadSavedAvailability();
                   },
-                  child: const Text('আবার চেষ্টা করুন'),
+                  child: const KLocalizedText('আবার চেষ্টা করুন'),
                 ),
               ],
             ),
@@ -489,7 +504,7 @@ class _AvailabilitySetupScreenState
               if (_rules.isNotEmpty) ...[
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(
+                  child: KLocalizedText(
                     'বর্তমানে সংরক্ষিত',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
@@ -502,10 +517,13 @@ class _AvailabilitySetupScreenState
                       dense: true,
                       leading: const Icon(Icons.schedule_outlined),
                       title: Text(
-                        '${_names[entry.value.dayOfWeek]} · ${_displayApiTime(context, entry.value.startTime)} – ${_displayApiTime(context, entry.value.endTime)}',
+                        '${KaajLocalizations.text(context, _names[entry.value.dayOfWeek])} · ${_displayApiTime(context, entry.value.startTime)} – ${_displayApiTime(context, entry.value.endTime)}',
                       ),
                       trailing: IconButton(
-                        tooltip: 'এই সময় মুছুন',
+                        tooltip: KaajLocalizations.text(
+                          context,
+                          'এই সময় মুছুন',
+                        ),
                         onPressed: () => setState(() {
                           _rules.removeAt(entry.key);
                           _days
@@ -521,7 +539,7 @@ class _AvailabilitySetupScreenState
               ],
               Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
+                child: KLocalizedText(
                   'দিন ও সময় যোগ/বদল করুন',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
@@ -532,7 +550,7 @@ class _AvailabilitySetupScreenState
                 children: List.generate(
                   7,
                   (day) => FilterChip(
-                    label: Text(_names[day]),
+                    label: KLocalizedText(_names[day]),
                     selected: _days.contains(day),
                     onSelected: (value) => setState(() {
                       value ? _days.add(day) : _days.remove(day);
@@ -566,15 +584,15 @@ class _AvailabilitySetupScreenState
                 spacing: KSpacing.sm,
                 children: [
                   ActionChip(
-                    label: const Text('সকাল ৮টা–১২টা'),
+                    label: const KLocalizedText('সকাল ৮টা–১২টা'),
                     onPressed: () => _setTimeRange(8, 12),
                   ),
                   ActionChip(
-                    label: const Text('দুপুর ১২টা–৫টা'),
+                    label: const KLocalizedText('দুপুর ১২টা–৫টা'),
                     onPressed: () => _setTimeRange(12, 17),
                   ),
                   ActionChip(
-                    label: const Text('সন্ধ্যা ৬টা–১০টা'),
+                    label: const KLocalizedText('সন্ধ্যা ৬টা–১০টা'),
                     onPressed: () => _setTimeRange(18, 22),
                   ),
                 ],
@@ -590,7 +608,7 @@ class _AvailabilitySetupScreenState
                           ..addAll({0, 1, 2, 3, 4});
                         _editorDirty = true;
                       }),
-                      child: const Text('রবি–বৃহস্পতি'),
+                      child: const KLocalizedText('রবি–বৃহস্পতি'),
                     ),
                   ),
                   const SizedBox(width: KSpacing.sm),
@@ -602,7 +620,7 @@ class _AvailabilitySetupScreenState
                           ..addAll({5, 6});
                         _editorDirty = true;
                       }),
-                      child: const Text('সাপ্তাহিক ছুটি'),
+                      child: const KLocalizedText('সাপ্তাহিক ছুটি'),
                     ),
                   ),
                 ],
@@ -617,12 +635,14 @@ class _AvailabilitySetupScreenState
                       ? null
                       : _replaceSelectedRules,
                   icon: const Icon(Icons.playlist_add),
-                  label: const Text('নির্বাচিত দিনের সময় যোগ/বদল করুন'),
+                  label: const KLocalizedText(
+                    'নির্বাচিত দিনের সময় যোগ/বদল করুন',
+                  ),
                 ),
               ),
               const SizedBox(height: KSpacing.lg),
               if (_minutes(_endTime) <= _minutes(_startTime)) ...[
-                const Text(
+                const KLocalizedText(
                   'শেষের সময় শুরুর সময়ের পরে হতে হবে।',
                   style: TextStyle(color: KColors.danger),
                 ),
@@ -717,7 +737,7 @@ class _TimePickerCard extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        KLocalizedText(
           label,
           style: Theme.of(
             context,
@@ -728,7 +748,7 @@ class _TimePickerCard extends StatelessWidget {
           children: [
             const Icon(Icons.schedule_outlined),
             const SizedBox(width: KSpacing.sm),
-            Text(
+            KLocalizedText(
               MaterialLocalizations.of(context).formatTimeOfDay(value),
               style: Theme.of(context).textTheme.titleMedium,
             ),
@@ -789,7 +809,7 @@ class _OnboardingTourScreenState extends ConsumerState<OnboardingTourScreen> {
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: _finish,
-                child: const Text('এড়িয়ে যান'),
+                child: const KLocalizedText('এড়িয়ে যান'),
               ),
             ),
             Expanded(
@@ -804,12 +824,15 @@ class _OnboardingTourScreenState extends ConsumerState<OnboardingTourScreen> {
                     children: [
                       Icon(cards[index].$1, size: 88, color: KColors.primary),
                       const SizedBox(height: KSpacing.lg),
-                      Text(
+                      KLocalizedText(
                         cards[index].$2,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: KSpacing.sm),
-                      Text(cards[index].$3, textAlign: TextAlign.center),
+                      KLocalizedText(
+                        cards[index].$3,
+                        textAlign: TextAlign.center,
+                      ),
                     ],
                   ),
                 ),
@@ -840,16 +863,18 @@ class _OnboardingScaffold extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.child,
+    this.standaloneTitle,
   });
 
   final Widget child;
   final int step;
   final String subtitle;
+  final String? standaloneTitle;
   final String title;
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text('ধাপ $step / ৫')),
+    appBar: AppBar(title: KLocalizedText(standaloneTitle ?? 'ধাপ $step / ৫')),
     body: SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(KSpacing.lg),
@@ -859,11 +884,16 @@ class _OnboardingScaffold extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                LinearProgressIndicator(value: step / 5),
-                const SizedBox(height: KSpacing.lg),
-                Text(title, style: Theme.of(context).textTheme.titleLarge),
+                if (standaloneTitle == null) ...[
+                  LinearProgressIndicator(value: step / 5),
+                  const SizedBox(height: KSpacing.lg),
+                ],
+                KLocalizedText(
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
                 const SizedBox(height: KSpacing.sm),
-                Text(subtitle),
+                KLocalizedText(subtitle),
                 const SizedBox(height: KSpacing.lg),
                 child,
               ],
@@ -902,8 +932,11 @@ class _ChoiceCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: Theme.of(context).textTheme.titleMedium),
-                  Text(body),
+                  KLocalizedText(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  KLocalizedText(body),
                 ],
               ),
             ),
@@ -917,6 +950,8 @@ class _ChoiceCard extends StatelessWidget {
 
 void _showError(BuildContext context) {
   ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text('সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।')),
+    const SnackBar(
+      content: KLocalizedText('সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।'),
+    ),
   );
 }

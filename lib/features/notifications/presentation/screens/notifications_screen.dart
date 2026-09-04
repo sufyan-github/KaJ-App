@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/error_mapper.dart';
 import '../../../../core/errors/failure.dart';
+import '../../../../core/localization/kaaj_localizations.dart';
 import '../../../../core/permissions/permission_gateway.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_empty_state.dart';
 import '../../../../core/widgets/k_error_state.dart';
+import '../../../../core/widgets/k_localized_text.dart';
 import '../../domain/app_notification.dart';
 import '../controllers/notifications_providers.dart';
 
@@ -63,12 +65,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('নোটিফিকেশন'),
+        title: const KLocalizedText('নোটিফিকেশন'),
         actions: [
           if (hasUnread)
             IconButton(
               onPressed: _markingAll ? null : _markAllRead,
-              tooltip: 'সব পড়েছি',
+              tooltip: KaajLocalizations.text(context, 'সব পড়েছি'),
               icon: _markingAll
                   ? const SizedBox.square(
                       dimension: 20,
@@ -144,7 +146,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                   (group) => Padding(
                     padding: const EdgeInsets.only(right: KSpacing.sm),
                     child: FilterChip(
-                      label: Text(_groupLabel(group)),
+                      label: KLocalizedText(_groupLabel(group)),
                       selected: _selectedGroup == group,
                       selectedColor: Color.alphaBlend(
                         KColors.primary.withValues(alpha: 0.12),
@@ -196,7 +198,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                 bottom: KSpacing.sm,
                 left: KSpacing.xs,
               ),
-              child: Text(
+              child: KLocalizedText(
                 _dayLabel(day),
                 style: Theme.of(
                   context,
@@ -217,10 +219,14 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
   Widget _notificationCard(AppNotification item) {
     final isUpdating = _updatingIds.contains(item.id);
     final relativeTime = _relativeTime(item.createdAt.toLocal());
+    final languageCode = Localizations.localeOf(context).languageCode;
+    final title = item.titleFor(languageCode);
+    final body = item.bodyFor(languageCode);
+    final localizedRelativeTime = KaajLocalizations.text(context, relativeTime);
     return Semantics(
       button: true,
       label:
-          '${item.title}, ${item.body}, $relativeTime${item.isRead ? '' : ', নতুন'}',
+          '$title, $body, $localizedRelativeTime${item.isRead ? '' : ', ${KaajLocalizations.text(context, 'নতুন')}'}',
       child: Card(
         margin: EdgeInsets.zero,
         elevation: item.isRead ? 0 : 1,
@@ -257,7 +263,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                         children: [
                           Expanded(
                             child: Text(
-                              item.title,
+                              title,
                               style: Theme.of(context).textTheme.titleMedium
                                   ?.copyWith(
                                     fontSize: 16,
@@ -294,7 +300,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                       ),
                       const SizedBox(height: KSpacing.xs),
                       Text(
-                        item.body,
+                        body,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -311,7 +317,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
                           ),
                           const SizedBox(width: KSpacing.xs),
                           Expanded(
-                            child: Text(
+                            child: KLocalizedText(
                               relativeTime,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -346,7 +352,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text(
+              content: KLocalizedText(
                 'পঠিত হিসেবে সংরক্ষণ করা যায়নি। পরে আবার চেষ্টা হবে।',
               ),
             ),
@@ -361,7 +367,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
 
     if (item.route == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('এই আপডেটের আলাদা বিস্তারিত পৃষ্ঠা নেই।')),
+        const SnackBar(
+          content: KLocalizedText('এই আপডেটের আলাদা বিস্তারিত পৃষ্ঠা নেই।'),
+        ),
       );
       return;
     }
@@ -371,7 +379,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('আপডেটটির বিস্তারিত এখন খোলা যাচ্ছে না।'),
+            content: KLocalizedText('আপডেটটির বিস্তারিত এখন খোলা যাচ্ছে না।'),
           ),
         );
       }
@@ -387,7 +395,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('সব নোটিফিকেশন পঠিত করা যায়নি। আবার চেষ্টা করুন।'),
+            content: KLocalizedText(
+              'সব নোটিফিকেশন পঠিত করা যায়নি। আবার চেষ্টা করুন।',
+            ),
           ),
         );
       }
@@ -434,14 +444,14 @@ class _PermissionBanner extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              KLocalizedText(
                 'ফোনের নোটিফিকেশন বন্ধ আছে',
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontSize: 16),
               ),
               const SizedBox(height: KSpacing.xs),
-              Text(
+              KLocalizedText(
                 'নতুন আবেদন, বুকিং বা বার্তার খবর পেতে ফোনের সেটিংসে অনুমতি দিন। ইনবক্স ব্যবহার করা যাবে।',
                 style: Theme.of(
                   context,
@@ -451,7 +461,7 @@ class _PermissionBanner extends StatelessWidget {
               TextButton.icon(
                 onPressed: onOpenSettings,
                 icon: const Icon(Icons.settings_outlined, size: 18),
-                label: const Text('সেটিংসে যান'),
+                label: const KLocalizedText('সেটিংসে যান'),
               ),
             ],
           ),
@@ -478,7 +488,7 @@ class _InboxSummary extends StatelessWidget {
         const Icon(Icons.notifications_active_outlined, color: KColors.primary),
         const SizedBox(width: KSpacing.md),
         Expanded(
-          child: Text(
+          child: KLocalizedText(
             unreadCount == 0
                 ? 'সব আপডেট পড়া হয়েছে'
                 : '${_banglaNumber(unreadCount)}টি অপঠিত আপডেট আছে',
@@ -519,7 +529,7 @@ class _LoadingList extends StatelessWidget {
       SizedBox(height: 220),
       Center(child: CircularProgressIndicator()),
       SizedBox(height: KSpacing.md),
-      Center(child: Text('নোটিফিকেশন লোড হচ্ছে…')),
+      Center(child: KLocalizedText('নোটিফিকেশন লোড হচ্ছে…')),
     ],
   );
 }
@@ -527,7 +537,7 @@ class _LoadingList extends StatelessWidget {
 String _groupLabel(NotificationGroup group) => switch (group) {
   NotificationGroup.all => 'সব',
   NotificationGroup.work => 'কাজ',
-  NotificationGroup.application => 'আবেদন',
+  NotificationGroup.application => 'আবেদনসমূহ',
   NotificationGroup.payment => 'পেমেন্ট',
   NotificationGroup.message => 'বার্তা',
   NotificationGroup.other => 'অন্যান্য',
