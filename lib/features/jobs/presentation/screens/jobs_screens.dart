@@ -24,10 +24,23 @@ class JobFeedScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isWorker =
         ref.watch(onboardingControllerProvider).role == KaajRole.worker;
-    final jobs = ref.watch(isWorker ? jobFeedProvider : myJobsProvider);
+    final provider = isWorker ? jobFeedProvider : myJobsProvider;
+    final jobs = ref.watch(provider);
+    Future<void> refresh() async {
+      ref.invalidate(provider);
+      await ref.read(provider.future);
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(isWorker ? 'কাজ খুঁজুন' : 'আমার পোস্ট করা কাজ'),
+        actions: [
+          IconButton(
+            tooltip: 'কাজের তালিকা হালনাগাদ করুন',
+            onPressed: refresh,
+            icon: const Icon(Icons.refresh_rounded),
+          ),
+        ],
       ),
       floatingActionButton: isWorker
           ? null
@@ -43,25 +56,35 @@ class JobFeedScreen extends ConsumerWidget {
           onRetry: () =>
               ref.invalidate(isWorker ? jobFeedProvider : myJobsProvider),
         ),
-        data: (items) => items.isEmpty
-            ? const Center(child: Text('এখনো কোনো কাজ প্রকাশিত হয়নি।'))
-            : GridView.builder(
-                padding: const EdgeInsets.all(KSpacing.md),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        data: (items) => RefreshIndicator(
+          onRefresh: refresh,
+          child: items.isEmpty
+              ? ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: const [
+                    SizedBox(height: 280),
+                    Center(child: Text('এখনো কোনো কাজ প্রকাশিত হয়নি।')),
+                  ],
+                )
+              : GridView.builder(
+                  padding: const EdgeInsets.all(KSpacing.md),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   crossAxisSpacing: KSpacing.md,
                   mainAxisSpacing: KSpacing.md,
-                  childAspectRatio: .78,
+                  childAspectRatio: .66,
                 ),
-                itemCount: items.length,
-                itemBuilder: (context, index) => _JobCard(
-                  job: items[index],
-                  actionLabel: isWorker ? 'আবেদন' : 'আবেদন দেখুন',
-                  onAction: isWorker
-                      ? () => _showApply(context, ref, items[index])
-                      : () => _showApplications(context, ref, items[index]),
+                  itemCount: items.length,
+                  itemBuilder: (context, index) => _JobCard(
+                    job: items[index],
+                    actionLabel: isWorker ? 'আবেদন' : 'আবেদন দেখুন',
+                    onAction: isWorker
+                        ? () => _showApply(context, ref, items[index])
+                        : () => _showApplications(context, ref, items[index]),
+                  ),
                 ),
-              ),
+        ),
       ),
     );
   }
@@ -310,7 +333,7 @@ class _JobCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Icon(Icons.work_outline, color: KColors.primary),
-              if (job.matchScore case final score?)
+              if (job.matchScore case final score? when score > 0)
                 Chip(
                   visualDensity: VisualDensity.compact,
                   avatar: const Icon(Icons.auto_awesome, size: 16),

@@ -3,8 +3,10 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:kaaj/core/storage/session_token_store.dart';
 import 'package:kaaj/features/onboarding/data/onboarding_repository.dart';
 import 'package:kaaj/features/onboarding/domain/onboarding_state.dart';
 import 'package:kaaj/features/onboarding/presentation/controllers/onboarding_controller.dart';
@@ -32,7 +34,8 @@ void main() {
       final adapter = _SuccessAdapter();
       final dio = Dio(BaseOptions(baseUrl: 'https://kaaj.test/api/v1'))
         ..httpClientAdapter = adapter;
-      final repository = OnboardingRepository(dio, box);
+      final tokens = SessionTokenStore(const FlutterSecureStorage());
+      final repository = OnboardingRepository(dio, box, tokens);
       final firstRun = OnboardingController(repository);
 
       await firstRun.begin();
@@ -45,6 +48,7 @@ void main() {
       expect(relaunched.state.step, 3);
       expect(relaunched.state.displayName, 'রহিম');
       expect(relaunched.state.role, KaajRole.worker);
+      expect(tokens.accessToken, 'worker-access-token');
 
       await relaunched.saveWorkerSetup([
         '018f4f6f-13e8-7d9a-8c2b-6b6a9f62f802',
@@ -86,7 +90,7 @@ class _SuccessAdapter implements HttpClientAdapter {
     paths.add(options.path);
     return ResponseBody.fromString(
       jsonEncode({
-        'data': {'accepted': true},
+        'data': {'accepted': true, 'accessToken': 'worker-access-token'},
       }),
       200,
       headers: {

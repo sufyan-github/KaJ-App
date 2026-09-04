@@ -9,6 +9,7 @@ final onboardingRepositoryProvider = Provider<OnboardingRepository>((ref) {
   return OnboardingRepository(
     ref.watch(dioProvider),
     Hive.box<dynamic>(onboardingBoxName),
+    ref.watch(sessionTokenStoreProvider),
   );
 });
 

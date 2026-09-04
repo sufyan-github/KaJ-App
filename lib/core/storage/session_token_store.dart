@@ -12,6 +12,10 @@ class SessionTokenStore {
 
   String? get accessToken => _accessToken;
 
+  void saveAccessToken(String accessToken) {
+    _accessToken = accessToken;
+  }
+
   Future<String?> readRefreshToken() => _storage.read(key: _refreshTokenKey);
 
   Future<void> saveTokens({

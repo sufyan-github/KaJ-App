@@ -1,15 +1,17 @@
 import 'package:dio/dio.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
+import '../../../core/storage/session_token_store.dart';
 import '../domain/onboarding_state.dart';
 
 const onboardingBoxName = 'kaaj_onboarding_v1';
 
 class OnboardingRepository {
-  const OnboardingRepository(this._dio, this._box);
+  const OnboardingRepository(this._dio, this._box, [this._tokens]);
 
   final Dio _dio;
   final Box<dynamic> _box;
+  final SessionTokenStore? _tokens;
 
   OnboardingState restore() {
     final value = _box.get('draft');
@@ -32,10 +34,15 @@ class OnboardingRepository {
   }
 
   Future<void> activateRole(KaajRole role) async {
-    await _dio.post<Map<String, dynamic>>(
+    final response = await _dio.post<Map<String, dynamic>>(
       '/me/roles/activate',
       data: {'role': role.name.toUpperCase()},
     );
+    final body = response.data;
+    final data = body?['data'];
+    if (data is Map && data['accessToken'] is String) {
+      _tokens?.saveAccessToken(data['accessToken'] as String);
+    }
   }
 
   Future<void> updateWorkerSkills(
