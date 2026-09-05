@@ -13,6 +13,15 @@ if (releasePropertiesFile.exists()) {
     FileInputStream(releasePropertiesFile).use(releaseProperties::load)
 }
 
+fun releaseSecret(name: String): String {
+    releaseProperties.getProperty(name)?.takeIf(String::isNotBlank)?.let {
+        return it
+    }
+    val passwordFile = releaseProperties.getProperty("${name}File")
+        ?: error("Missing $name or ${name}File in android/key.properties")
+    return rootProject.file(passwordFile).readText().trim()
+}
+
 android {
     namespace = "app.kaaj.mobile"
     compileSdk = 37
@@ -61,9 +70,9 @@ android {
         if (releasePropertiesFile.exists()) {
             create("release") {
                 keyAlias = releaseProperties.getProperty("keyAlias")
-                keyPassword = releaseProperties.getProperty("keyPassword")
+                keyPassword = releaseSecret("keyPassword")
                 storeFile = file(releaseProperties.getProperty("storeFile"))
-                storePassword = releaseProperties.getProperty("storePassword")
+                storePassword = releaseSecret("storePassword")
             }
         }
     }
