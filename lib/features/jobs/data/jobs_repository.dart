@@ -210,6 +210,16 @@ class JobsRepository {
     }
   }
 
+  Future<void> markCashPaid(String id) async {
+    try {
+      await _dio.post<Map<String, dynamic>>(
+        '/assignments/$id/payment/cash-paid',
+      );
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
   Future<AssignmentReviewState> getAssignmentReviews(String id) async {
     try {
       final response = await _dio.get<Map<String, dynamic>>(

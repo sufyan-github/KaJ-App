@@ -2,7 +2,7 @@
 
 ## Outcome
 
-The existing KAAJ product was retained and improved in place. The Flutter app now has a persistent Bangla/English preference, localized system UI and API requests, clearer local-job entry points, corrected availability and scheduled-job language, improved mobile/accessibility semantics, and verified phone/OTP input visibility. The NestJS API now returns bilingual notification and cancellation copy, and the existing Next.js operations console has a persistent Bangla/English switch and responsive navigation.
+The existing KAAJ product was retained and improved in place. The Flutter app now has a persistent Bangla/English preference, localized system UI and API requests, clearer local-job entry points, corrected availability and scheduled-job language, improved mobile/accessibility semantics, and verified phone/OTP input visibility. The NestJS API now returns bilingual notification and cancellation copy, and the existing Next.js operations console has a persistent Bangla/English switch and responsive navigation. An additive Version 1 commercial layer now provides provider-neutral Robi/Airtel operator hints, configurable subscriptions, guarded entitlements, and zero-commission offline cash-payment records without claiming that online billing, wallets, or withdrawals exist.
 
 This pass closes the application defects that were safe to address without changing the marketplace's core behavior. It does not claim that external providers, deployment infrastructure, or every destructive production action have been certified.
 
@@ -17,12 +17,14 @@ This pass closes the application defects that were safe to address without chang
 - OTP authentication; worker/client role switching; onboarding for profile, role, location, skills and availability.
 - Category/subtype discovery, local job feed, time matching, job creation, application, applicant review, worker matching, bookings, assignments and reviews.
 - Realtime chat, images, blocking/reporting, notifications, verification, attendance, disputes, portfolio, privacy and account controls.
+- Subscription status/history, supported-operator state, plan selection, cash job-payment history, and assignment-level cash confirmation.
 
 ### Backend and operations
 
 - NestJS/Prisma API with PostgreSQL, Redis and S3-compatible uploads.
 - Validation, authorization/RBAC, idempotency, job state rules, verification, notifications, chat safety, moderation, geofence, cancellation and dispute logic.
 - Next.js operations console for catalog, users, jobs, verification, disputes, risk and operational actions.
+- Provider-neutral operator/subscription schema and adapter port, configurable entitlement guards, separate subscription/job-payment ledgers, and audited subscription/payment administration.
 
 ## What was broken or incomplete
 
@@ -36,6 +38,7 @@ This pass closes the application defects that were safe to address without chang
 - Scheduled work was described as a posting time in the application flow.
 - Notification payloads and cancellation previews lacked complete English system copy.
 - Phone/OTP and form-value visibility needed real-device verification.
+- The app had no safe subscription/operator model or explicit Version 1 cash-payment completion record; the older money core could still show a platform fee while digital payments were disabled.
 
 ### Important usability gaps
 
@@ -43,6 +46,7 @@ This pass closes the application defects that were safe to address without chang
 - Notification and Settings shortcuts did not communicate state clearly enough to assistive technology.
 - Admin mobile navigation disappeared at narrow widths.
 - Generic generated translations produced weak labels in a few high-value flows; these required reviewed, context-specific language.
+- The admin console could create but not edit commercial plans and initially overflowed horizontally at a real narrow viewport.
 
 ## Improvements implemented
 
@@ -59,6 +63,9 @@ This pass closes the application defects that were safe to address without chang
 - Localized button and dashboard semantics, unread counts, notification times and permission statuses.
 - Enabled responsive, horizontally accessible admin navigation instead of hiding it on mobile.
 - Added network-failure handling around admin session/auth actions and localized admin labels, dates, errors, statuses, entities and dialogs.
+- Added operator-neutral subscription status/request/history, explicit pending operator verification, admin plan creation/editing and pricing, access rules, manual external-payment confirmation, and a rollout guard that remains disabled by default.
+- Added a cash-on-completion record with zero platform fee, poster-only idempotent confirmation, worker notification, dispute status, audit history, and separate user/admin payment history.
+- Added clear “coming soon” states for online payment, mobile banking, wallets, and withdrawals; no fake provider callback or balance movement is present.
 
 ## Numbered journey health
 
@@ -70,23 +77,26 @@ This pass closes the application defects that were safe to address without chang
 6. **Notifications — healthy.** Bilingual system title/body, unread state, groups, relative times, empty/error/permission states and destinations are implemented. Original job titles can remain Bangla inside an English notification because that is authored content.
 7. **Default availability — healthy.** Existing weekday slots load, delete controls are labeled, days and presets are localized, invalid ranges are blocked, and save/update actions are explicit.
 8. **Settings/profile/portfolio/safety — healthy.** Role, profile, portfolio, notification preferences, permissions, verification, blocked users, account, support and dispute routes are grouped and responsive.
-9. **Admin operations — build-verified.** Persistent Bangla/English UI, responsive navigation and localized operational copy compile in the production Next.js build. Authenticated browser E2E was outside this device-focused pass.
+9. **Admin operations — healthy in local authenticated testing.** Persistent Bangla/English UI, responsive navigation, subscription plan dialog, access rules, subscriber controls and cash-payment oversight pass browser verification without console errors.
+10. **Subscription and cash payments — healthy for Version 1.** The phone shows inactive/pending operator state without blocking pilot access, plan-empty and coming-soon states, and separate cash-payment history. A live PostgreSQL/Redis test proves zero commission, one payment row, one audit record and the `PAYMENT_RECORDED` job transition.
 
 ## Production review
 
-| Area | Status | Evidence / remaining condition |
-| --- | --- | --- |
-| Authentication/session | Ready in code and local integration | Rotating refresh, protected routes, OTP live pass; production SMS credentials/rate limits must be configured. |
-| Authorization/roles | Ready in tested API rules | RBAC/policy, moderation and role-mode tests pass. |
-| Form/API validation | Ready for current scope | Client validators and Nest DTO/service tests pass; visible field/error states checked. |
-| Loading/empty/error/offline | Ready for current scope | Shared states and representative notification/catalog/settings tests pass. |
-| Localization | Ready for system UI | Persistent Bangla/English, locale API header and static-copy policy. Authored marketplace content intentionally remains in its submitted language. |
-| Verification/uploads | Ready in code | Separate NID/selfie selection and upload/service tests pass; production object-store policies and retention require deployment review. |
-| Notifications | Ready in code/local data | Bilingual inbox and backend payloads tested; real push/SMS delivery depends on providers. |
-| Accessibility/mobile | Improved and regression-tested | 320 dp/200% text tests, contrast test and connected-phone semantic tree checks pass. |
-| Security/observability | Strong baseline, operational review required | Secure tokens, redaction, validation, moderation and Sentry hooks exist; secrets, TLS, backups, alerts and an external security review remain deployment work. |
-| Performance/data efficiency | Acceptable baseline | Cached catalogs/chat and paginated APIs exist; production load tests and slow-query monitoring remain necessary. |
-| Admin console | Production build passes | Authenticated browser E2E and operator permission matrix should be run in staging. |
+| Area                         | Status                                       | Evidence / remaining condition                                                                                                                                                     |
+| ---------------------------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Authentication/session       | Ready in code and local integration          | Rotating refresh, protected routes, OTP live pass; production SMS credentials/rate limits must be configured.                                                                      |
+| Authorization/roles          | Ready in tested API rules                    | RBAC/policy, moderation and role-mode tests pass.                                                                                                                                  |
+| Form/API validation          | Ready for current scope                      | Client validators and Nest DTO/service tests pass; visible field/error states checked.                                                                                             |
+| Loading/empty/error/offline  | Ready for current scope                      | Shared states and representative notification/catalog/settings tests pass.                                                                                                         |
+| Localization                 | Ready for system UI                          | Persistent Bangla/English, locale API header and static-copy policy. Authored marketplace content intentionally remains in its submitted language.                                 |
+| Verification/uploads         | Ready in code                                | Separate NID/selfie selection and upload/service tests pass; production object-store policies and retention require deployment review.                                             |
+| Notifications                | Ready in code/local data                     | Bilingual inbox and backend payloads tested; real push/SMS delivery depends on providers.                                                                                          |
+| Accessibility/mobile         | Improved and regression-tested               | 320 dp/200% text tests, contrast test and connected-phone semantic tree checks pass.                                                                                               |
+| Security/observability       | Strong baseline, operational review required | Secure tokens, redaction, validation, moderation and Sentry hooks exist; secrets, TLS, backups, alerts and an external security review remain deployment work.                     |
+| Performance/data efficiency  | Acceptable baseline                          | Cached catalogs/chat and paginated APIs exist; production load tests and slow-query monitoring remain necessary.                                                                   |
+| Admin console                | Production build passes                      | Authenticated browser E2E and operator permission matrix should be run in staging.                                                                                                 |
+| Subscription/operator access | Ready for disabled pilot display             | Prefixes remain unverified hints and entitlement enforcement stays off; commercial plans, provider contracts, signed callbacks and staged rollback are required before activation. |
+| Offline job payment          | Ready for Version 1 cash recording           | Poster-only, zero-fee and audited; KAAJ does not receive or hold the cash. Representative dispute/support journeys still require staging operations rehearsal.                     |
 
 ## Prioritized remaining features
 
@@ -96,6 +106,7 @@ This pass closes the application defects that were safe to address without chang
 - Complete production secrets/TLS, database backups and restore drill, monitoring/alerting, privacy/terms/support contacts and store signing/release configuration.
 - Run staging smoke tests with worker, client and moderator accounts, including upload, verification, notification delivery, hire/close/cancel/dispute and account-deletion retention behavior.
 - Perform an external security/privacy review and confirm NID/selfie access, encryption, deletion and operator audit policies.
+- Approve subscription price/duration/refund policy and tax treatment, sign operator/provider agreements, implement signed billing callbacks and reconciliation, and complete a staged rollback before enabling subscription enforcement.
 
 ### Important for launch or early release
 
@@ -106,6 +117,7 @@ This pass closes the application defects that were safe to address without chang
 - Add offline read caches/queued retry for a small set of safe actions and production performance dashboards.
 - Add data export and a clearly staffed human-support/escalation path.
 - Upgrade Android/Kotlin Gradle plugin integration before Flutter removes legacy plugin application support.
+- Add dual-control approval and an external payment-evidence reference for manual subscription activation, plus scheduled expiry/reconciliation instead of relying only on read-time expiry updates.
 
 ### Future
 
@@ -113,16 +125,18 @@ This pass closes the application defects that were safe to address without chang
 - Recurring rosters, multi-worker shifts and multi-manager employer accounts.
 - Optional translation assistance for user-authored content with clear source-language labeling and consent.
 - Advanced marketplace analytics, experimentation and recommendation tooling after enough production data exists.
+- Additional operator adapters, contracted mobile banking/card payments, wallet, payout, and withdrawal only after legal, provider, tax, ledger and reconciliation gates are complete.
 
 ## Verification performed
 
 - `flutter analyze` — pass, no issues.
-- `flutter test --concurrency=1` — 79 tests pass after the final copy/test expectation update.
+- `flutter test` — 83 tests pass.
 - Android `assembleDevDebug` — pass; APK produced at `build/app/outputs/flutter-apk/app-dev-debug.apk`.
-- Connected Motorola Android phone — OTP login, language persistence, Bangla and English home, category/subtype, scheduled job/time match, application dialog/input, notifications, Settings and availability checked visually and through the Android accessibility tree.
-- Backend Jest — 41 suites / 218 tests pass; 7 suites / 32 tests are intentionally skipped by their existing environment conditions.
-- Admin TypeScript — pass.
-- Admin Next.js optimized production build — pass.
+- Connected Motorola Android 16 phone — OTP login, language persistence after process restart, Bangla and English home, subscription status/operator/no-plan state, cash-payment history, category/subtype, scheduled job/time match, application dialog/input, notifications, Settings and availability checked visually and through the Android accessibility tree.
+- Backend Jest — 42 suites / 227 tests pass; seven database-dependent suites / 33 tests remain intentionally skipped by their existing environment conditions.
+- Live PostgreSQL/Redis money test — 3/3 pass, including offline cash idempotency, zero fee, audit and job transition.
+- Admin TypeScript and optimized production build — pass.
+- Authenticated admin browser — English/Bangla subscription and job-payment pages, plan dialog, narrow viewport and console checked; no console error or page overflow remains.
 
 The Flutter test runner prints a non-fatal Linux GTK development-package warning on this host; Android build/run and tests complete. No Linux desktop build is part of the product target.
 
@@ -131,7 +145,7 @@ The Flutter test runner prints a non-fatal Linux GTK development-package warning
 - Screenshots document representative end-to-end states, not every screen and permutation.
 - No real SMS, push, payment, production S3, app-store signing, production TLS or deployed monitoring provider was available in this local environment.
 - No destructive account deletion, irreversible moderation action or duplicate live job application was submitted during visual QA.
-- Admin production compilation was verified; authenticated browser automation was not performed because this pass used the connected mobile device and no staging operator session was supplied.
+- Authenticated admin automation used the local development administrator and local data; a separate production-like staging permission matrix is still required.
 - Passing automated tests and a device smoke journey reduce regression risk but do not replace staging, load, accessibility-specialist or penetration testing.
 
 ## Screenshot evidence

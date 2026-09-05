@@ -328,6 +328,7 @@ class AssignmentDetail {
     required this.locationName,
     required this.timeline,
     this.contractVersion,
+    this.payment,
   });
 
   factory AssignmentDetail.fromJson(Map<String, dynamic> json) =>
@@ -336,6 +337,11 @@ class AssignmentDetail {
         description: json['description'] as String? ?? '',
         locationName: json['locationName'] as String? ?? '',
         contractVersion: (json['contractVersion'] as num?)?.toInt(),
+        payment: json['payment'] is Map
+            ? AssignmentPayment.fromJson(
+                Map<String, dynamic>.from(json['payment'] as Map),
+              )
+            : null,
         timeline:
             (json['timeline'] as List?)
                 ?.whereType<Map>()
@@ -346,8 +352,39 @@ class AssignmentDetail {
   final int? contractVersion;
   final String description;
   final String locationName;
+  final AssignmentPayment? payment;
   final AssignmentSummary summary;
   final List<AssignmentTimelineItem> timeline;
+}
+
+class AssignmentPayment {
+  const AssignmentPayment({
+    required this.id,
+    required this.agreedPoisha,
+    required this.method,
+    required this.status,
+    this.cashRecordedAt,
+    this.disputedAt,
+  });
+
+  factory AssignmentPayment.fromJson(Map<String, dynamic> json) =>
+      AssignmentPayment(
+        id: json['id'] as String? ?? '',
+        agreedPoisha: json['agreedPoisha']?.toString() ?? '0',
+        method: json['method'] as String? ?? 'CASH_ON_COMPLETION',
+        status: json['status'] as String? ?? 'PENDING',
+        cashRecordedAt: DateTime.tryParse(
+          json['cashRecordedAt'] as String? ?? '',
+        ),
+        disputedAt: DateTime.tryParse(json['disputedAt'] as String? ?? ''),
+      );
+
+  final String agreedPoisha;
+  final DateTime? cashRecordedAt;
+  final DateTime? disputedAt;
+  final String id;
+  final String method;
+  final String status;
 }
 
 class CancellationPreview {

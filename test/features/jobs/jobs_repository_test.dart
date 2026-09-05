@@ -23,10 +23,22 @@ void main() {
     expect(jobs.single.categoryId, 'category-id');
     expect(jobs.single.isTimeAvailable, isTrue);
   });
+
+  test('records cash payment through the assignment-scoped endpoint', () async {
+    final adapter = _JobsAdapter();
+    final repository = JobsRepository(Dio()..httpClientAdapter = adapter);
+
+    await repository.markCashPaid('assignment-id');
+
+    expect(adapter.method, 'POST');
+    expect(adapter.path, '/assignments/assignment-id/payment/cash-paid');
+  });
 }
 
 class _JobsAdapter implements HttpClientAdapter {
   Map<String, dynamic> query = {};
+  String? method;
+  String? path;
 
   @override
   Future<ResponseBody> fetch(
@@ -35,6 +47,8 @@ class _JobsAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) async {
     query = Map<String, dynamic>.from(options.queryParameters);
+    method = options.method;
+    path = options.path;
     return ResponseBody.fromString(
       jsonEncode({
         'data': {

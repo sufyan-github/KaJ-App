@@ -1407,6 +1407,18 @@ class _AssignmentDetailBody extends ConsumerWidget {
             subtitle: KLocalizedText(_dateTime(step.at)),
           ),
         ),
+        if (detail.payment != null || item.status == 'COMPLETED') ...[
+          const SizedBox(height: KSpacing.lg),
+          _CashPaymentPanel(
+            payment: detail.payment,
+            isPoster: item.isPoster,
+            canRecord:
+                item.isPoster &&
+                item.jobStatus == 'COMPLETED' &&
+                detail.payment?.status != 'CASH_RECORDED',
+            onRecord: () => _recordCashPayment(context, ref),
+          ),
+        ],
         const SizedBox(height: KSpacing.lg),
         if (item.isWorker && item.status == 'PENDING_CONFIRMATION') ...[
           KPrimaryButton(
@@ -1480,6 +1492,7 @@ class _AssignmentDetailBody extends ConsumerWidget {
           'SUBMITTED',
           'CUSTOMER_REVIEW',
           'COMPLETED',
+          'PAYMENT_RECORDED',
         }.contains(item.jobStatus)) ...[
           const SizedBox(height: KSpacing.sm),
           OutlinedButton.icon(
@@ -1533,6 +1546,46 @@ class _AssignmentDetailBody extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: KLocalizedText('রিভিউ জমা দেওয়া যায়নি।')),
+        );
+      }
+    }
+  }
+
+  Future<void> _recordCashPayment(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const KLocalizedText('নগদ পেমেন্ট হয়েছে?'),
+        content: const KLocalizedText(
+          'কর্মীকে সরাসরি পুরো টাকা দেওয়ার পর নিশ্চিত করুন। KAAJ টাকা গ্রহণ করবে না এবং কোনো কমিশন কাটবে না।',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const KLocalizedText('ফিরুন'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const KLocalizedText('পেমেন্ট হয়েছে'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    try {
+      await ref.read(jobsRepositoryProvider).markCashPaid(detail.summary.id);
+      onChanged();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: KLocalizedText('নগদ পেমেন্ট রেকর্ড হয়েছে।')),
+        );
+      }
+    } on Object {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: KLocalizedText('পেমেন্ট এখন রেকর্ড করা যায়নি।'),
+          ),
         );
       }
     }
@@ -1626,6 +1679,93 @@ class _AssignmentDetailBody extends ConsumerWidget {
         );
       }
     }
+  }
+}
+
+class _CashPaymentPanel extends StatelessWidget {
+  const _CashPaymentPanel({
+    required this.payment,
+    required this.isPoster,
+    required this.canRecord,
+    required this.onRecord,
+  });
+
+  final bool canRecord;
+  final bool isPoster;
+  final VoidCallback onRecord;
+  final AssignmentPayment? payment;
+
+  @override
+  Widget build(BuildContext context) {
+    final status = payment?.status ?? 'PENDING';
+    final paid = status == 'CASH_RECORDED';
+    final disputed = status == 'DISPUTED';
+    final color = paid
+        ? KColors.success
+        : disputed
+        ? KColors.danger
+        : KColors.warning;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(KSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: color.withValues(alpha: .12),
+                  child: Icon(Icons.payments_outlined, color: color),
+                ),
+                const SizedBox(width: KSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      KLocalizedText(
+                        isPoster ? 'কর্মীকে পেমেন্ট' : 'কাজের পেমেন্ট',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      KLocalizedText(
+                        paid
+                            ? 'নগদ পেমেন্ট হয়েছে'
+                            : disputed
+                            ? 'পেমেন্ট নিয়ে বিরোধ চলছে'
+                            : 'নগদ পেমেন্ট অপেক্ষমাণ',
+                        style: TextStyle(color: color),
+                      ),
+                    ],
+                  ),
+                ),
+                if (payment != null)
+                  Text(
+                    '৳${_taka(payment!.agreedPoisha)}',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+              ],
+            ),
+            const SizedBox(height: KSpacing.sm),
+            const KLocalizedText(
+              'টাকা সরাসরি নগদে লেনদেন হবে। KAAJ শুধু উভয় পক্ষের কাজের রেকর্ড সংরক্ষণ করে।',
+              style: TextStyle(color: KColors.textSecondary),
+            ),
+            if (canRecord) ...[
+              const SizedBox(height: KSpacing.md),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: onRecord,
+                  icon: const Icon(Icons.check_circle_outline),
+                  label: const KLocalizedText(
+                    'পেমেন্ট হয়েছে বলে চিহ্নিত করুন',
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -1989,6 +2129,7 @@ String _statusBn(String status) => switch (status) {
   'SUBMITTED' => 'কাজ জমা হয়েছে',
   'CUSTOMER_REVIEW' => 'গ্রাহকের পর্যালোচনায়',
   'PAYMENT_RELEASED' => 'কাজ সম্পন্ন ও হিসাব চূড়ান্ত',
+  'PAYMENT_RECORDED' => 'নগদ পেমেন্ট রেকর্ড হয়েছে',
   'REVIEWED' => 'পর্যালোচনা সম্পন্ন',
   'EXPIRED' => 'সময় শেষ',
   'CANCELLED_BY_CUSTOMER' => 'গ্রাহক বাতিল করেছেন',

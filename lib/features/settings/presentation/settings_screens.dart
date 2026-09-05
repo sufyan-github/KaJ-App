@@ -137,6 +137,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: KSpacing.lg),
           _SettingsSection(
+            title: 'সাবস্ক্রিপশন ও পেমেন্ট',
+            children: [
+              _SettingsTile(
+                icon: Icons.workspace_premium_outlined,
+                title: 'সাবস্ক্রিপশন',
+                subtitle: 'প্ল্যান, অপারেটর যাচাই ও সুবিধার অবস্থা দেখুন',
+                onTap: () => context.push(AppRoutes.subscription),
+              ),
+              _SettingsTile(
+                icon: Icons.receipt_long_outlined,
+                title: 'কাজের পেমেন্ট ইতিহাস',
+                subtitle: 'নগদ পেমেন্টের অপেক্ষমাণ ও সম্পন্ন রেকর্ড দেখুন',
+                onTap: () => context.push(AppRoutes.jobPayments),
+              ),
+            ],
+          ),
+          const SizedBox(height: KSpacing.lg),
+          _SettingsSection(
             title: 'গোপনীয়তা ও নিরাপত্তা',
             children: [
               _SettingsTile(

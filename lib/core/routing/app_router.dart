@@ -7,6 +7,7 @@ import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/controllers/auth_providers.dart';
 import '../../features/auth/presentation/screens/otp_verify_screen.dart';
 import '../../features/auth/presentation/screens/phone_entry_screen.dart';
+import '../../features/billing/presentation/billing_screens.dart';
 import '../../features/bootstrap/presentation/screens/splash_screen.dart';
 import '../../features/chat/presentation/screens/chat_screens.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
@@ -41,6 +42,8 @@ abstract final class AppRoutes {
   static const notificationSettings = '/settings/notifications';
   static const privacySettings = '/settings/privacy';
   static const accountSettings = '/settings/account';
+  static const subscription = '/settings/subscription';
+  static const jobPayments = '/settings/job-payments';
   static const helpSafety = '/help-safety';
   static const jobs = '/jobs';
   static const createJob = '/jobs/create';
@@ -210,6 +213,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.accountSettings,
         builder: (context, state) => const DataAccountScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.subscription,
+        builder: (context, state) => const SubscriptionScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.jobPayments,
+        builder: (context, state) => const JobPaymentHistoryScreen(),
       ),
       GoRoute(
         path: AppRoutes.helpSafety,

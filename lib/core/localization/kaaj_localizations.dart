@@ -65,6 +65,11 @@ abstract final class KaajLocalizations {
       'যাচাই': ' verification',
       'ফেরত:': 'Refund:',
       'ফি:': 'Fee:',
+      'মেয়াদ শেষ:': 'Expires:',
+      'সাবস্ক্রিপশন পেমেন্ট:': 'Subscription payment:',
+      'তৈরি হয়েছে:': 'Created:',
+      'পেমেন্ট রেকর্ড:': 'Payment recorded:',
+      ' দিনের জন্য': ' days',
       'মিনিট': 'minutes',
       'জানুয়ারি': 'January',
       'ফেব্রুয়ারি': 'February',
@@ -112,11 +117,16 @@ abstract final class KaajLocalizations {
       ' দিন আগে',
       ' ঘণ্টা আগে',
       ' মিনিট আগে',
+      ' দিনের জন্য',
     ];
     return prefixes.any(value.startsWith) ||
         fragments.any(value.contains) ||
         value.startsWith('ফেরত:') ||
-        value.startsWith('ফি:');
+        value.startsWith('ফি:') ||
+        value.startsWith('মেয়াদ শেষ:') ||
+        value.startsWith('সাবস্ক্রিপশন পেমেন্ট:') ||
+        value.startsWith('তৈরি হয়েছে:') ||
+        value.startsWith('পেমেন্ট রেকর্ড:');
   }
 
   static String _latinDigits(String value) => value.replaceAllMapped(
@@ -272,4 +282,71 @@ const _reviewedEnglish = <String, String>{
   'বার্তা (ঐচ্ছিক)': 'Message (optional)',
   'সনাক্তকরণ': 'Verification',
   'সব সময়': 'All times',
+  'সাবস্ক্রিপশন ও পেমেন্ট': 'Subscription and payments',
+  'সাবস্ক্রিপশন': 'Subscription',
+  'প্ল্যান, অপারেটর যাচাই ও সুবিধার অবস্থা দেখুন':
+      'View plans, operator verification and access status',
+  'কাজের পেমেন্ট ইতিহাস': 'Job payment history',
+  'নগদ পেমেন্টের অপেক্ষমাণ ও সম্পন্ন রেকর্ড দেখুন':
+      'View pending and completed cash payment records',
+  'বর্তমান সাবস্ক্রিপশন': 'Current subscription',
+  'সক্রিয়': 'Active',
+  'নিষ্ক্রিয়': 'Inactive',
+  'অপেক্ষমাণ': 'Pending',
+  'পরিশোধিত': 'Paid',
+  'মেয়াদ শেষ': 'Expired',
+  'ব্যর্থ': 'Failed',
+  'সাবস্ক্রিপশন এখন পরীক্ষামূলক পর্যায়ে আছে। বর্তমান কাজের সুবিধাগুলো বন্ধ করা হয়নি।':
+      'Subscriptions are in pilot mode. Your current marketplace access remains available.',
+  'অপারেটর সংযোগ': 'Operator connection',
+  'সমর্থিত অপারেটর পাওয়া যায়নি': 'No supported operator detected',
+  'অপারেটর যাচাই সম্পন্ন': 'Operator verified',
+  'অপারেটর যাচাই অপেক্ষমাণ': 'Operator verification pending',
+  'প্ল্যানসমূহ': 'Plans',
+  'মূল্য, মেয়াদ ও সুবিধা দেখে আপনার জন্য উপযুক্ত প্ল্যান বাছুন।':
+      'Compare price, duration and benefits to choose a plan.',
+  'এখন কোনো প্ল্যান চালু নেই': 'No plans are active yet',
+  'অ্যাডমিন প্ল্যান ও অপারেটর বিলিং প্রস্তুত করলে এখানে দেখা যাবে।':
+      'Plans will appear here after admin configuration and operator billing readiness.',
+  'প্ল্যানের অনুরোধ পাঠান': 'Request this plan',
+  'সাবস্ক্রিপশন বাতিল করুন': 'Cancel subscription',
+  'সাবস্ক্রিপশন অনুরোধ পাঠাবেন?': 'Send subscription request?',
+  'এই সংস্করণ কোনো টাকা কাটবে না। অপারেটর যাচাই ও অ্যাডমিন অনুমোদনের পর প্ল্যান সক্রিয় হবে।':
+      'This version will not charge you. The plan activates only after operator verification and admin approval.',
+  'অনুরোধ পাঠান': 'Send request',
+  'সাবস্ক্রিপশন অনুরোধ অপেক্ষমাণ আছে।': 'Your subscription request is pending.',
+  'এই মুহূর্তে কোনো সমর্থিত অপারেটর নেই।':
+      'No supported operator is available right now.',
+  'মোবাইল অপারেটর বাছুন': 'Choose mobile operator',
+  'নম্বরের প্রিফিক্স শুধু সম্ভাব্য অপারেটর বোঝায়; এটি যাচাই নয়।':
+      'A number prefix is only an operator hint; it is not verification.',
+  'সাবস্ক্রিপশন বাতিল হয়েছে।': 'Subscription cancelled.',
+  'শিগগির আসছে': 'Coming soon',
+  'অনলাইন পেমেন্ট, মোবাইল ব্যাংকিং ও কর্মীর টাকা উত্তোলন এখনো চালু নয়।':
+      'Online payments, mobile banking and worker withdrawals are not enabled yet.',
+  'এই সংস্করণে কাজের টাকা সরাসরি নগদে দিন। কাজের মালিক “পেমেন্ট হয়েছে” নিশ্চিত করলে KAAJ শুধু রেকর্ড রাখে; KAAJ টাকা গ্রহণ বা কমিশন কাটে না।':
+      'In this version, pay for jobs directly in cash. KAAJ only records the owner’s confirmation; KAAJ does not collect money or charge commission.',
+  'এখনো কোনো পেমেন্ট রেকর্ড নেই': 'No payment records yet',
+  'কাজ সম্পন্ন হলে নগদ পেমেন্টের অবস্থা এখানে দেখা যাবে।':
+      'Cash payment status will appear here after work is completed.',
+  'নগদ পেমেন্ট হয়েছে': 'Cash payment recorded',
+  'বিরোধ চলছে': 'Disputed',
+  'পেমেন্ট অপেক্ষমাণ': 'Payment pending',
+  'কর্মীকে পেমেন্ট': 'Payment to worker',
+  'কাজের পেমেন্ট': 'Job payment',
+  'পেমেন্ট নিয়ে বিরোধ চলছে': 'Payment is disputed',
+  'নগদ পেমেন্ট অপেক্ষমাণ': 'Cash payment pending',
+  'টাকা সরাসরি নগদে লেনদেন হবে। KAAJ শুধু উভয় পক্ষের কাজের রেকর্ড সংরক্ষণ করে।':
+      'Cash is exchanged directly. KAAJ only keeps the work record for both parties.',
+  'পেমেন্ট হয়েছে বলে চিহ্নিত করুন': 'Mark payment done',
+  'নগদ পেমেন্ট হয়েছে?': 'Was the cash payment made?',
+  'কর্মীকে সরাসরি পুরো টাকা দেওয়ার পর নিশ্চিত করুন। KAAJ টাকা গ্রহণ করবে না এবং কোনো কমিশন কাটবে না।':
+      'Confirm only after paying the worker directly in full. KAAJ does not collect money or deduct commission.',
+  'পেমেন্ট হয়েছে': 'Payment done',
+  'নগদ পেমেন্ট রেকর্ড হয়েছে।': 'Cash payment recorded.',
+  'পেমেন্ট এখন রেকর্ড করা যায়নি।':
+      'The payment could not be recorded right now.',
+  'নগদ পেমেন্ট রেকর্ড হয়েছে': 'Cash payment recorded',
+  'অনুরোধটি সম্পন্ন করা যায়নি। আবার চেষ্টা করুন।':
+      'The request could not be completed. Please try again.',
 };
