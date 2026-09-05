@@ -27,7 +27,19 @@ class KErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.info_outline, size: 52, color: KColors.danger),
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: KColors.danger.withValues(alpha: .10),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.info_outline,
+                size: 30,
+                color: KColors.danger,
+              ),
+            ),
             const SizedBox(height: KSpacing.md),
             KLocalizedText(
               _displayMessage(context, failure),

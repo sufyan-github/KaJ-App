@@ -4,6 +4,49 @@
 // Reviewed overrides live in kaaj_localizations.dart.
 
 const generatedEnglishTranslations = <String, String>{
+  "কী কাজ করাতে চান?": "What work do you need done?",
+  "আপনার এলাকা": "Your area",
+  "কাজ অনুসন্ধান": "Search work",
+  "সেবা খুঁজুন": "Search services",
+  "আপনার জন্য": "For you",
+  "আপনার এলাকায়": "Near you",
+  "কাছাকাছি কাজ": "Jobs nearby",
+  "জনপ্রিয় সেবা": "Popular services",
+  "দক্ষতার সঙ্গে মেলা কাজ": "Jobs matching your skills",
+  "এলাকা, সময় ও দক্ষতা অনুযায়ী": "Matched by area, time and skills",
+  "আপনার সময়ে মেলা কাজ": "Jobs matching your availability",
+  "খালি সময়ের পোস্টগুলো আগে দেখুন": "See jobs fitting your free time first",
+  "পরিষ্কার": "Cleaning",
+  "মেরামত": "Repairs",
+  "পড়াশোনা": "Tutoring",
+  "পরিচয় যাচাই ও নিরাপদ কাজের রেকর্ড":
+      "Identity checks and protected work records",
+  "সব সুবিধা": "All features",
+  "সব দেখুন": "View all",
+  "এখনই কাজের সময়": "Ready for work now",
+  "দ্রুত পোস্ট": "Quick post",
+  "আপনার কাছের কাজ দেখুন": "See jobs near you",
+  "দক্ষতা ও খালি সময় মিলিয়ে দ্রুত আবেদন করুন":
+      "Match skills and availability, then apply quickly",
+  "কাছের যাচাইকৃত কর্মীরা আজই সাড়া দিতে পারবেন":
+      "Nearby verified workers can respond today",
+  "দ্রুত আবেদন করুন": "Apply quickly",
+  "আমার প্রোফাইল": "My profile",
+  "ব্যক্তিগত তথ্য": "Personal information",
+  "নাম, পরিচয় ও প্রোফাইলের তথ্য দেখুন":
+      "View your name, identity and profile information",
+  "কর্মী অ্যাকাউন্ট": "Worker account",
+  "গ্রাহক অ্যাকাউন্ট": "Client account",
+  "পাবলিক প্রোফাইল দেখুন": "View public profile",
+  "অ্যাকাউন্ট দেখুন": "View account",
+  "কাজটি কী?": "What is the job?",
+  "কোথায় এবং কখন?": "Where and when?",
+  "পারিশ্রমিক": "Pay",
+  "ধাপ ১ / ৩": "Step 1 / 3",
+  "প্রোফাইল": "Profile",
+  "এই কোড কারও সঙ্গে শেয়ার করবেন না":
+      "Never share this verification code with anyone",
+  "আপনার নম্বর নিরাপদ থাকবে": "Your number will stay secure",
   "1.0.0 (ডেভেলপমেন্ট)": "1.0.0 (Development)",
   "Firebase ও SMS সেবা সংযুক্ত হলে এই চ্যানেলগুলোর আলাদা নিয়ন্ত্রণ চালু হবে।":
       "When Firebase and SMS services are connected, these channels will have separate controls.",

@@ -11,7 +11,7 @@ class KOfflineBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: KColors.warning,
+      color: KColors.softSecondary,
       child: SafeArea(
         bottom: false,
         child: Semantics(
@@ -23,13 +23,13 @@ class KOfflineBanner extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.cloud_off_outlined, color: Colors.white),
+                const Icon(Icons.cloud_off_outlined, color: KColors.secondary),
                 const SizedBox(width: KSpacing.sm),
                 Expanded(
                   child: KLocalizedText(
                     message,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: KColors.textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

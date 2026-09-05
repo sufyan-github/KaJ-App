@@ -877,15 +877,26 @@ class _OnboardingScaffold extends StatelessWidget {
     appBar: AppBar(title: KLocalizedText(standaloneTitle ?? 'ধাপ $step / ৫')),
     body: SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(KSpacing.lg),
+        padding: const EdgeInsets.fromLTRB(
+          KSpacing.md,
+          KSpacing.sm,
+          KSpacing.md,
+          KSpacing.xl,
+        ),
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
+            constraints: const BoxConstraints(maxWidth: 480),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (standaloneTitle == null) ...[
-                  LinearProgressIndicator(value: step / 5),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(KRadius.pill),
+                    child: LinearProgressIndicator(
+                      value: step / 5,
+                      minHeight: 5,
+                    ),
+                  ),
                   const SizedBox(height: KSpacing.lg),
                 ],
                 KLocalizedText(
@@ -926,7 +937,15 @@ class _ChoiceCard extends StatelessWidget {
         padding: const EdgeInsets.all(KSpacing.lg),
         child: Row(
           children: [
-            Icon(icon, size: 40, color: KColors.primary),
+            Container(
+              width: 48,
+              height: 48,
+              decoration: const BoxDecoration(
+                color: KColors.surfaceAlt,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 24, color: KColors.primary),
+            ),
             const SizedBox(width: KSpacing.md),
             Expanded(
               child: Column(

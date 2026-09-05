@@ -33,7 +33,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: KColors.primary,
+      backgroundColor: KColors.background,
       body: SafeArea(
         child: Center(
           child: Semantics(
@@ -46,7 +46,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 const SizedBox.square(
                   dimension: 24,
                   child: CircularProgressIndicator(
-                    color: Colors.white,
+                    color: KColors.primary,
                     strokeWidth: 2.5,
                   ),
                 ),
@@ -67,15 +67,15 @@ class _BrandMark extends StatelessWidget {
     return Column(
       children: [
         Container(
-          width: 80,
-          height: 80,
+          width: 64,
+          height: 64,
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
+            color: KColors.surfaceAlt,
+            shape: BoxShape.circle,
           ),
           child: const Icon(
-            Icons.handshake_outlined,
-            size: 44,
+            Icons.handshake_rounded,
+            size: 34,
             color: KColors.primary,
           ),
         ),
@@ -83,15 +83,15 @@ class _BrandMark extends StatelessWidget {
         Text(
           AppLocalizations.of(context).appName,
           style: Theme.of(context).textTheme.displayLarge?.copyWith(
-            color: Colors.white,
-            letterSpacing: 3,
+            color: KColors.primary,
+            letterSpacing: 1.2,
           ),
         ),
         Text(
           AppLocalizations.of(context).appTagline,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: Colors.white.withValues(alpha: 0.86),
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(color: KColors.textSecondary),
         ),
       ],
     );

@@ -53,59 +53,76 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: const KLocalizedText('নিরাপত্তা রিপোর্ট')),
-    body: ListView(
-      padding: const EdgeInsets.all(KSpacing.lg),
+    body: Column(
       children: [
-        const Card(
-          color: KColors.surfaceAlt,
-          child: ListTile(
-            leading: Icon(Icons.shield_outlined, color: KColors.primary),
-            title: KLocalizedText('রিপোর্ট গোপন রাখা হয়'),
-            subtitle: KLocalizedText(
-              'যাকে রিপোর্ট করছেন তিনি আপনার পরিচয় বা বিবরণ দেখতে পাবেন না। জরুরি বিপদে ৯৯৯-এ কল করুন।',
-            ),
-          ),
-        ),
-        const SizedBox(height: KSpacing.md),
-        DropdownButtonFormField<String>(
-          initialValue: _reason,
-          isExpanded: true,
-          decoration: InputDecoration(
-            labelText: KaajLocalizations.text(context, 'রিপোর্টের কারণ'),
-          ),
-          items: reportReasons.entries
-              .map(
-                (e) => DropdownMenuItem(
-                  value: e.key,
-                  child: KLocalizedText(e.value),
+        Expanded(
+          child: ListView(
+            primary: true,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: const EdgeInsets.all(KSpacing.lg),
+            children: [
+              const Card(
+                color: KColors.surfaceAlt,
+                child: ListTile(
+                  leading: Icon(Icons.shield_outlined, color: KColors.primary),
+                  title: KLocalizedText('রিপোর্ট গোপন রাখা হয়'),
+                  subtitle: KLocalizedText(
+                    'যাকে রিপোর্ট করছেন তিনি আপনার পরিচয় বা বিবরণ দেখতে পাবেন না। জরুরি বিপদে ৯৯৯-এ কল করুন।',
+                  ),
                 ),
-              )
-              .toList(),
-          onChanged: (value) => setState(() => _reason = value ?? _reason),
-        ),
-        const SizedBox(height: KSpacing.md),
-        TextField(
-          controller: _description,
-          minLines: 5,
-          maxLines: 10,
-          maxLength: 1000,
-          decoration: InputDecoration(
-            labelText: KaajLocalizations.text(
-              context,
-              'কি ঘটেছে? (কমপক্ষে ১০ অক্ষর)',
-            ),
-            hintText: KaajLocalizations.text(
-              context,
-              'ঘটনার সময় ও গুরুত্বপূর্ণ তথ্য লিখুন',
-            ),
-            alignLabelWithHint: true,
+              ),
+              const SizedBox(height: KSpacing.md),
+              DropdownButtonFormField<String>(
+                initialValue: _reason,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: KaajLocalizations.text(context, 'রিপোর্টের কারণ'),
+                ),
+                items: reportReasons.entries
+                    .map(
+                      (e) => DropdownMenuItem(
+                        value: e.key,
+                        child: KLocalizedText(e.value),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) =>
+                    setState(() => _reason = value ?? _reason),
+              ),
+              const SizedBox(height: KSpacing.md),
+              TextField(
+                controller: _description,
+                minLines: 3,
+                maxLines: 8,
+                maxLength: 1000,
+                decoration: InputDecoration(
+                  labelText: KaajLocalizations.text(
+                    context,
+                    'কি ঘটেছে? (কমপক্ষে ১০ অক্ষর)',
+                  ),
+                  hintText: KaajLocalizations.text(
+                    context,
+                    'ঘটনার সময় ও গুরুত্বপূর্ণ তথ্য লিখুন',
+                  ),
+                  alignLabelWithHint: true,
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: KSpacing.md),
-        KPrimaryButton(
-          label: 'রিপোর্ট জমা দিন',
-          isLoading: _loading,
-          onPressed: _submit,
+        SafeArea(
+          top: false,
+          minimum: const EdgeInsets.fromLTRB(
+            KSpacing.lg,
+            KSpacing.sm,
+            KSpacing.lg,
+            KSpacing.md,
+          ),
+          child: KPrimaryButton(
+            label: 'রিপোর্ট জমা দিন',
+            isLoading: _loading,
+            onPressed: _submit,
+          ),
         ),
       ],
     ),

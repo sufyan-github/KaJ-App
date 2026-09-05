@@ -27,7 +27,15 @@ class KEmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 56, color: KColors.textSecondary),
+          Container(
+            width: 64,
+            height: 64,
+            decoration: const BoxDecoration(
+              color: KColors.surfaceAlt,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 30, color: KColors.primary),
+          ),
           const SizedBox(height: KSpacing.md),
           KLocalizedText(
             title,

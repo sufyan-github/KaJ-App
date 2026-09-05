@@ -3,10 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/localization/kaaj_localizations.dart';
+import '../../../../core/localization/locale_controller.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_error_message.dart';
 import '../../../../core/widgets/k_primary_button.dart';
+import '../../../../core/widgets/k_trust_banner.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../domain/usecases/auth_validators.dart';
 import '../controllers/auth_controller.dart';
@@ -48,10 +51,33 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
     final state = ref.watch(authControllerProvider);
     final isLoading = state.status == AuthStatus.loading;
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        actions: [
+          PopupMenuButton<String>(
+            tooltip: KaajLocalizations.text(context, 'অ্যাপের ভাষা'),
+            icon: const Icon(Icons.language_rounded),
+            onSelected: (value) => ref
+                .read(localeControllerProvider.notifier)
+                .setLocale(Locale(value)),
+            itemBuilder: (context) => const [
+              PopupMenuItem(value: 'bn', child: Text('বাংলা')),
+              PopupMenuItem(value: 'en', child: Text('English')),
+            ],
+          ),
+          const SizedBox(width: KSpacing.sm),
+        ],
+      ),
       body: SafeArea(
-        child: Center(
+        child: Align(
+          alignment: Alignment.topCenter,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(KSpacing.lg),
+            padding: const EdgeInsets.fromLTRB(
+              KSpacing.lg,
+              KSpacing.md,
+              KSpacing.lg,
+              KSpacing.xl,
+            ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 480),
               child: Form(
@@ -113,22 +139,31 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                       },
                       onFieldSubmitted: (_) => _submit(),
                     ),
+                    const SizedBox(height: KSpacing.sm),
+                    const KTrustBanner(
+                      message: 'আপনার নম্বর নিরাপদ থাকবে',
+                      icon: Icons.shield_outlined,
+                    ),
                     const SizedBox(height: KSpacing.md),
-                    CheckboxListTile(
-                      contentPadding: EdgeInsets.zero,
-                      controlAffinity: ListTileControlAffinity.leading,
-                      value: _accepted,
-                      onChanged: isLoading
-                          ? null
-                          : (value) {
-                              if (state.failure != null) {
-                                ref
-                                    .read(authControllerProvider.notifier)
-                                    .clearError();
-                              }
-                              setState(() => _accepted = value ?? false);
-                            },
-                      title: Text(l10n.phoneConsent),
+                    Card(
+                      child: CheckboxListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: KSpacing.sm,
+                        ),
+                        controlAffinity: ListTileControlAffinity.leading,
+                        value: _accepted,
+                        onChanged: isLoading
+                            ? null
+                            : (value) {
+                                if (state.failure != null) {
+                                  ref
+                                      .read(authControllerProvider.notifier)
+                                      .clearError();
+                                }
+                                setState(() => _accepted = value ?? false);
+                              },
+                        title: Text(l10n.phoneConsent),
+                      ),
                     ),
                     if (_submitted && !_accepted)
                       Padding(
@@ -142,6 +177,7 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                       KErrorMessage(failure: state.failure!),
                       const SizedBox(height: KSpacing.md),
                     ],
+                    const SizedBox(height: KSpacing.sm),
                     KPrimaryButton(
                       label: l10n.sendCode,
                       isLoading: isLoading,
@@ -166,13 +202,13 @@ class _CompactBrand extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 48,
-          height: 48,
+          width: 46,
+          height: 46,
           decoration: BoxDecoration(
-            color: KColors.primary,
-            borderRadius: BorderRadius.circular(14),
+            color: KColors.surfaceAlt,
+            shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.handshake_outlined, color: Colors.white),
+          child: const Icon(Icons.handshake_rounded, color: KColors.primary),
         ),
         const SizedBox(width: KSpacing.sm),
         Text(

@@ -781,15 +781,41 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
         .where((item) => item.categoryId == _categoryId)
         .toList();
     return Scaffold(
-      appBar: AppBar(title: const KLocalizedText('নতুন কাজ পোস্ট করুন')),
+      appBar: AppBar(
+        title: const KLocalizedText('নতুন কাজ পোস্ট করুন'),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: KSpacing.md),
+            child: Center(
+              child: KLocalizedText(
+                'ধাপ ১ / ৩',
+                style: TextStyle(color: KColors.textSecondary),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: Form(
         key: _form,
         child: ListView(
-          padding: const EdgeInsets.all(KSpacing.lg),
+          padding: const EdgeInsets.fromLTRB(
+            KSpacing.md,
+            KSpacing.sm,
+            KSpacing.md,
+            KSpacing.xl,
+          ),
           children: [
+            const LinearProgressIndicator(value: 1 / 3, minHeight: 5),
+            const SizedBox(height: KSpacing.md),
+            KLocalizedText(
+              'কাজটি কী?',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: KSpacing.sm),
             KTextField(
               label: 'কাজের শিরোনাম',
               controller: _title,
+              textInputAction: TextInputAction.next,
               validator: (value) => (value?.trim().length ?? 0) < 5
                   ? 'কমপক্ষে ৫ অক্ষরের শিরোনাম লিখুন'
                   : null,
@@ -798,6 +824,9 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
             KTextField(
               label: 'কাজের বিস্তারিত',
               controller: _description,
+              minLines: 3,
+              maxLines: 5,
+              textInputAction: TextInputAction.newline,
               validator: (value) => (value?.trim().length ?? 0) < 20
                   ? 'কমপক্ষে ২০ অক্ষরে বিস্তারিত লিখুন'
                   : null,
@@ -847,32 +876,45 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
               onChanged: (value) => setState(() => _skillId = value),
             ),
             const SizedBox(height: KSpacing.md),
+            KLocalizedText(
+              'কোথায় এবং কখন?',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: KSpacing.sm),
+            Card(
+              child: _DateTimeRow(
+                date: _date,
+                start: _start,
+                end: _end,
+                onDate: () async {
+                  final value = await showDatePicker(
+                    context: context,
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                    initialDate: _date,
+                  );
+                  if (value != null) setState(() => _date = value);
+                },
+                onStart: () => _pickTime(true),
+                onEnd: () => _pickTime(false),
+              ),
+            ),
+            const SizedBox(height: KSpacing.md),
+            KLocalizedText(
+              'পারিশ্রমিক',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: KSpacing.sm),
             KTextField(
               label: 'পারিশ্রমিক (টাকা)',
               controller: _amount,
               keyboardType: TextInputType.number,
+              prefixIcon: Icons.payments_outlined,
               validator: (value) => (int.tryParse(value ?? '') ?? 0) <= 0
                   ? 'সঠিক টাকার পরিমাণ লিখুন'
                   : null,
             ),
-            const SizedBox(height: KSpacing.md),
-            _DateTimeRow(
-              date: _date,
-              start: _start,
-              end: _end,
-              onDate: () async {
-                final value = await showDatePicker(
-                  context: context,
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(const Duration(days: 365)),
-                  initialDate: _date,
-                );
-                if (value != null) setState(() => _date = value);
-              },
-              onStart: () => _pickTime(true),
-              onEnd: () => _pickTime(false),
-            ),
-            const SizedBox(height: KSpacing.xl),
+            const SizedBox(height: KSpacing.lg),
             KPrimaryButton(
               label: 'প্রকাশ করুন',
               isLoading: _saving,

@@ -9,6 +9,7 @@ import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_error_message.dart';
 import '../../../../core/widgets/k_primary_button.dart';
+import '../../../../core/widgets/k_trust_banner.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../onboarding/presentation/controllers/onboarding_controller.dart';
 import '../../domain/entities/otp_challenge.dart';
@@ -98,6 +99,14 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
     final isLoading = state.status == AuthStatus.loading;
     return Scaffold(
       appBar: AppBar(
+        title: const Text(
+          'KAAJ',
+          style: TextStyle(
+            color: KColors.primary,
+            letterSpacing: 1.2,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         leading: IconButton(
           tooltip: l10n.backToPhone,
           onPressed: isLoading ? null : () => context.go(AppRoutes.phone),
@@ -105,9 +114,15 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
         ),
       ),
       body: SafeArea(
-        child: Center(
+        child: Align(
+          alignment: Alignment.topCenter,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(KSpacing.lg),
+            padding: const EdgeInsets.fromLTRB(
+              KSpacing.lg,
+              KSpacing.md,
+              KSpacing.lg,
+              KSpacing.xl,
+            ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 480),
               child: Form(
@@ -115,10 +130,18 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(
-                      Icons.sms_outlined,
-                      size: 52,
-                      color: KColors.primary,
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: const BoxDecoration(
+                        color: KColors.surfaceAlt,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.sms_outlined,
+                        size: 28,
+                        color: KColors.primary,
+                      ),
                     ),
                     const SizedBox(height: KSpacing.lg),
                     Text(
@@ -145,11 +168,12 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
                         LengthLimitingTextInputFormatter(6),
                       ],
                       style: const TextStyle(
-                        fontSize: 24,
-                        letterSpacing: 12,
+                        fontSize: 22,
+                        letterSpacing: 10,
                         fontWeight: FontWeight.w600,
                         color: KColors.textPrimary,
                       ),
+                      textAlign: TextAlign.center,
                       decoration: InputDecoration(
                         labelText: l10n.otpLabel,
                         helperText: _remainingSeconds == 0
@@ -172,6 +196,12 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
                         }
                       },
                       onFieldSubmitted: (_) => _verify(),
+                    ),
+                    const SizedBox(height: KSpacing.md),
+                    const KTrustBanner(
+                      message: 'এই কোড কারও সঙ্গে শেয়ার করবেন না',
+                      icon: Icons.lock_outline_rounded,
+                      warning: true,
                     ),
                     const SizedBox(height: KSpacing.md),
                     if (state.failure != null) ...[

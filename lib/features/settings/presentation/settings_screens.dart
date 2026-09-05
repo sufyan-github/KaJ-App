@@ -28,8 +28,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final role =
-        ref.watch(onboardingControllerProvider).role ?? KaajRole.customer;
+    final onboarding = ref.watch(onboardingControllerProvider);
+    final role = onboarding.role ?? KaajRole.customer;
     final auth = ref.watch(authControllerProvider);
     final locale = ref.watch(localeControllerProvider);
     return Scaffold(
@@ -45,65 +45,74 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _SettingsSection(
             title: 'অ্যাকাউন্ট',
             children: [
-              if (role == KaajRole.worker)
-                _SettingsTile(
-                  icon: Icons.account_circle_outlined,
-                  title: 'আমার পাবলিক প্রোফাইল',
-                  subtitle: 'গ্রাহকেরা আপনার সম্পর্কে যা দেখেন',
-                  onTap: () => context.push(AppRoutes.publicWorkerProfile),
+              _SettingsTile(
+                icon: Icons.account_circle_outlined,
+                title: 'ব্যক্তিগত তথ্য',
+                subtitle: 'নাম, পরিচয় ও প্রোফাইলের তথ্য দেখুন',
+                onTap: () => context.push(
+                  role == KaajRole.worker
+                      ? AppRoutes.publicWorkerProfile
+                      : AppRoutes.accountSettings,
                 ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  KSpacing.md,
-                  KSpacing.sm,
-                  KSpacing.md,
-                  KSpacing.md,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.swap_horiz_outlined),
-                        const SizedBox(width: KSpacing.md),
-                        Expanded(
-                          child: KLocalizedText(
-                            'বর্তমান কাজের মোড',
-                            style: Theme.of(context).textTheme.titleSmall,
+              ),
+              _SettingsTile(
+                icon: Icons.language_outlined,
+                title: 'ভাষা',
+                subtitle: locale.languageCode == 'en'
+                    ? 'English — current language'
+                    : 'বাংলা — বর্তমান ভাষা',
+                onTap: _showLanguage,
+              ),
+              Card(
+                margin: const EdgeInsets.only(bottom: KSpacing.sm),
+                child: Padding(
+                  padding: const EdgeInsets.all(KSpacing.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.swap_horiz_outlined),
+                          const SizedBox(width: KSpacing.md),
+                          Expanded(
+                            child: KLocalizedText(
+                              'বর্তমান কাজের মোড',
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
                           ),
-                        ),
-                        if (_switchingRole)
-                          const SizedBox.square(
-                            dimension: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                          if (_switchingRole)
+                            const SizedBox.square(
+                              dimension: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: KSpacing.sm),
+                      SegmentedButton<KaajRole>(
+                        segments: const [
+                          ButtonSegment(
+                            value: KaajRole.customer,
+                            icon: Icon(Icons.work_outline),
+                            label: KLocalizedText('কাজ দেব'),
                           ),
-                      ],
-                    ),
-                    const SizedBox(height: KSpacing.sm),
-                    SegmentedButton<KaajRole>(
-                      segments: const [
-                        ButtonSegment(
-                          value: KaajRole.customer,
-                          icon: Icon(Icons.work_outline),
-                          label: KLocalizedText('কাজ দেব'),
-                        ),
-                        ButtonSegment(
-                          value: KaajRole.worker,
-                          icon: Icon(Icons.handyman_outlined),
-                          label: KLocalizedText('কাজ করব'),
-                        ),
-                      ],
-                      selected: {role},
-                      onSelectionChanged: _switchingRole
-                          ? null
-                          : (selection) => _switchRole(selection.first),
-                    ),
-                    const SizedBox(height: KSpacing.xs),
-                    const KLocalizedText(
-                      'মোড বদলালে হোমের কাজ ও সুবিধা সঙ্গে সঙ্গে বদলে যাবে।',
-                      style: TextStyle(color: KColors.textSecondary),
-                    ),
-                  ],
+                          ButtonSegment(
+                            value: KaajRole.worker,
+                            icon: Icon(Icons.handyman_outlined),
+                            label: KLocalizedText('কাজ করব'),
+                          ),
+                        ],
+                        selected: {role},
+                        onSelectionChanged: _switchingRole
+                            ? null
+                            : (selection) => _switchRole(selection.first),
+                      ),
+                      const SizedBox(height: KSpacing.xs),
+                      const KLocalizedText(
+                        'মোড বদলালে হোমের কাজ ও সুবিধা সঙ্গে সঙ্গে বদলে যাবে।',
+                        style: TextStyle(color: KColors.textSecondary),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               if (role == KaajRole.worker)
@@ -119,14 +128,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _SettingsSection(
             title: 'পছন্দ',
             children: [
-              _SettingsTile(
-                icon: Icons.language_outlined,
-                title: 'ভাষা',
-                subtitle: locale.languageCode == 'en'
-                    ? 'English — current language'
-                    : 'বাংলা — বর্তমান ভাষা',
-                onTap: _showLanguage,
-              ),
               _SettingsTile(
                 icon: Icons.notifications_outlined,
                 title: 'নোটিফিকেশন পছন্দ',
@@ -234,6 +235,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 : _confirmLogout,
             icon: const Icon(Icons.logout),
             label: const KLocalizedText('এই ডিভাইস থেকে সাইন আউট'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: KColors.danger,
+              side: const BorderSide(color: KColors.danger),
+            ),
           ),
         ],
       ),
@@ -910,11 +915,7 @@ class _SettingsSection extends StatelessWidget {
           style: Theme.of(context).textTheme.titleSmall,
         ),
       ),
-      Card(
-        margin: EdgeInsets.zero,
-        clipBehavior: Clip.antiAlias,
-        child: Column(children: children),
-      ),
+      Column(children: children),
     ],
   );
 }
@@ -933,12 +934,19 @@ class _SettingsTile extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => ListTile(
-    leading: Icon(icon),
-    title: KLocalizedText(title),
-    subtitle: subtitle == null ? null : KLocalizedText(subtitle!),
-    trailing: const Icon(Icons.chevron_right),
-    onTap: onTap,
+  Widget build(BuildContext context) => Card(
+    margin: const EdgeInsets.only(bottom: KSpacing.sm),
+    clipBehavior: Clip.antiAlias,
+    child: ListTile(
+      leading: Icon(icon),
+      title: KLocalizedText(title),
+      subtitle: subtitle == null ? null : KLocalizedText(subtitle!),
+      trailing: const Icon(
+        Icons.chevron_right_rounded,
+        color: KColors.textSecondary,
+      ),
+      onTap: onTap,
+    ),
   );
 }
 

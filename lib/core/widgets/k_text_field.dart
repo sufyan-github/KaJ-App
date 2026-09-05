@@ -11,7 +11,11 @@ class KTextField extends StatelessWidget {
     this.helperText,
     this.hintText,
     this.keyboardType,
+    this.maxLines = 1,
+    this.minLines,
     this.onChanged,
+    this.prefixIcon,
+    this.textInputAction,
     this.validator,
     super.key,
   });
@@ -23,7 +27,11 @@ class KTextField extends StatelessWidget {
   final String? helperText;
   final String? hintText;
   final TextInputType? keyboardType;
+  final int? maxLines;
+  final int? minLines;
   final ValueChanged<String>? onChanged;
+  final IconData? prefixIcon;
+  final TextInputAction? textInputAction;
   final FormFieldValidator<String>? validator;
 
   @override
@@ -36,6 +44,9 @@ class KTextField extends StatelessWidget {
         controller: controller,
         enabled: enabled,
         keyboardType: keyboardType,
+        maxLines: maxLines,
+        minLines: minLines,
+        textInputAction: textInputAction,
         onChanged: onChanged,
         validator: validator,
         decoration: InputDecoration(
@@ -49,6 +60,7 @@ class KTextField extends StatelessWidget {
           errorText: errorText == null
               ? null
               : KaajLocalizations.text(context, errorText!),
+          prefixIcon: prefixIcon == null ? null : Icon(prefixIcon),
         ),
       ),
     );
