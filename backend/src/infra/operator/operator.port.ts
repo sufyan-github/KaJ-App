@@ -10,6 +10,7 @@ export interface OperatorEligibilityResult {
 }
 
 export interface OperatorPort {
+  readonly managesRemoteBilling?: boolean;
   checkEligibility(input: {
     operatorCode: string;
     phoneE164: string;

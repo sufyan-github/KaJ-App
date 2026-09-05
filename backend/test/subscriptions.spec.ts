@@ -130,4 +130,77 @@ describe("subscription and operator Version 1", () => {
       ),
     ).rejects.toThrow("Unknown subscription feature");
   });
+
+  it("activates a selected plan only after the operator confirms registration", async () => {
+    const transaction = {
+      auditLog: { create: jest.fn() },
+      subscription: { create: jest.fn().mockResolvedValue({ id: planId }) },
+      subscriptionPayment: { create: jest.fn() },
+      userOperatorIdentity: { upsert: jest.fn() },
+    };
+    const prisma = {
+      $transaction: jest.fn(
+        async (work: (client: typeof transaction) => Promise<void>) =>
+          work(transaction),
+      ),
+      mobileOperator: {
+        findFirst: jest.fn().mockResolvedValue({ id: planId, code: "ROBI" }),
+      },
+      subscription: { findFirst: jest.fn().mockResolvedValue(null) },
+      subscriptionPlan: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: planId,
+          currency: "BDT",
+          duration_days: 30,
+          price_poisha: 10_000n,
+        }),
+      },
+      user: {
+        findUnique: jest
+          .fn()
+          .mockResolvedValue({ phone_e164: "+8801812345678" }),
+      },
+    };
+    const service = new SubscriptionsService(prisma as never, {
+      checkEligibility: jest.fn().mockResolvedValue({
+        operatorCode: "ROBI",
+        providerReference: "provider-ref",
+        status: "VERIFIED",
+      }),
+      managesRemoteBilling: true,
+    });
+    jest.spyOn(service, "mine").mockResolvedValue({} as never);
+
+    await service.request("user-id", {
+      operatorCode: "ROBI",
+      planId,
+    });
+
+    expect(transaction.subscription.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ status: "ACTIVE" }),
+    });
+    expect(transaction.subscriptionPayment.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        provider_ref: "provider-ref",
+        status: "PAID",
+      }),
+    });
+  });
+
+  it("never presents a local cancellation as carrier billing cancellation", async () => {
+    const service = new SubscriptionsService(
+      {
+        subscription: {
+          findFirst: jest
+            .fn()
+            .mockResolvedValue({ id: planId, status: "ACTIVE" }),
+        },
+      } as never,
+      { checkEligibility: jest.fn(), managesRemoteBilling: true } as never,
+    );
+
+    await expect(service.cancel("user-id")).rejects.toMatchObject({
+      descriptor: { code: "OPERATOR_CANCELLATION_REQUIRED" },
+    });
+  });
 });

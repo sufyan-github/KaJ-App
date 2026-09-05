@@ -5,6 +5,8 @@ const environmentSchema = z
     API_BASE_URL: z.url().default("http://localhost:3000"),
     ADMIN_SESSION_SECRET: z.string().default(""),
     ADMIN_TOTP_ENCRYPTION_KEY: z.string().default(""),
+    BDAPPS_GATEWAY_URL: z.union([z.literal(""), z.url()]).default(""),
+    BDAPPS_INTERNAL_API_KEY: z.string().default(""),
     DATABASE_URL: z
       .string()
       .min(1)
@@ -45,11 +47,33 @@ const environmentSchema = z
     S3_REGION: z.string().default("ap-south-1"),
     S3_SECRET: z.string().default("kaj_minio_local_only"),
     SENTRY_DSN: z.string().default(""),
-    SMS_PROVIDER: z.enum(["console", "disabled"]).default("console"),
+    SMS_PROVIDER: z.enum(["console", "disabled", "bdapps"]).default("console"),
+    OPERATOR_PROVIDER: z.enum(["pending", "bdapps"]).default("pending"),
     STORAGE_PROVIDER: z.literal("s3").default("s3"),
     PUSH_PROVIDER: z.literal("disabled").default("disabled"),
   })
   .superRefine((environment, context) => {
+    const usesBdapps =
+      environment.SMS_PROVIDER === "bdapps" ||
+      environment.OPERATOR_PROVIDER === "bdapps";
+
+    if (usesBdapps) {
+      if (environment.BDAPPS_GATEWAY_URL === "") {
+        context.addIssue({
+          code: "custom",
+          message: "is required when a bdapps provider is enabled",
+          path: ["BDAPPS_GATEWAY_URL"],
+        });
+      }
+      if (environment.BDAPPS_INTERNAL_API_KEY.length < 32) {
+        context.addIssue({
+          code: "custom",
+          message: "must contain at least 32 characters when bdapps is enabled",
+          path: ["BDAPPS_INTERNAL_API_KEY"],
+        });
+      }
+    }
+
     if (environment.NODE_ENV !== "production") return;
 
     for (const key of [
@@ -72,6 +96,13 @@ const environmentSchema = z
         code: "custom",
         message: "console SMS is not allowed in production",
         path: ["SMS_PROVIDER"],
+      });
+    }
+    if (usesBdapps && !environment.BDAPPS_GATEWAY_URL.startsWith("https://")) {
+      context.addIssue({
+        code: "custom",
+        message: "must use HTTPS in production",
+        path: ["BDAPPS_GATEWAY_URL"],
       });
     }
     if (environment.OTP_FIXED_CODE !== "") {

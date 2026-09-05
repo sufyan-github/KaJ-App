@@ -15,8 +15,10 @@ import {
 
 import {
   OPERATOR_PORT,
+  OperatorEligibilityResult,
   OperatorPort,
 } from "../../infra/operator/operator.port";
+import { fromBdappsSubscriberId } from "../../infra/bdapps/bdapps-subscriber";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import {
   AdminActor,
@@ -31,6 +33,7 @@ import {
   UpdateSubscriptionPlanDto,
 } from "./dto/subscriptions.dto";
 import { SubscriptionFeatures } from "./subscription-feature";
+import { operatorCancellationRequiredError } from "./subscription.errors";
 
 const subscriptionInclude = {
   plan: true,
@@ -63,6 +66,10 @@ export class SubscriptionsService {
     });
     if (!user?.phone_e164) throw new NotFoundException("User not found.");
     await this.ensureOperatorHint(userId, user.phone_e164);
+    const operatorStatusRefreshFailed = await this.refreshOperatorStatus(
+      userId,
+      user.phone_e164,
+    );
     const [
       identity,
       active,
@@ -123,6 +130,7 @@ export class SubscriptionsService {
       })),
       onlinePaymentsEnabled: false,
       workerWithdrawalsEnabled: false,
+      operatorStatusRefreshFailed,
     };
   }
 
@@ -183,6 +191,8 @@ export class SubscriptionsService {
         "Operator subscription eligibility was not confirmed.",
       );
 
+    const activated = eligibility.status === "VERIFIED";
+    const now = new Date();
     await this.prisma.$transaction(async (transaction) => {
       await transaction.userOperatorIdentity.upsert({
         where: { user_id: userId },
@@ -205,7 +215,13 @@ export class SubscriptionsService {
         data: {
           user_id: userId,
           plan_id: plan.id,
-          status: SubscriptionStatus.PENDING,
+          status: activated
+            ? SubscriptionStatus.ACTIVE
+            : SubscriptionStatus.PENDING,
+          starts_at: activated ? now : null,
+          expires_at: activated
+            ? new Date(now.getTime() + plan.duration_days * 86_400_000)
+            : null,
         },
       });
       await transaction.subscriptionPayment.create({
@@ -215,7 +231,11 @@ export class SubscriptionsService {
           amount_poisha: plan.price_poisha,
           currency: plan.currency,
           method: SubscriptionPaymentMethod.OPERATOR_BILLING,
-          status: SubscriptionPaymentStatus.PENDING,
+          status: activated
+            ? SubscriptionPaymentStatus.PAID
+            : SubscriptionPaymentStatus.PENDING,
+          provider_ref: eligibility.providerReference,
+          paid_at: activated ? now : null,
         },
       });
       await transaction.auditLog.create({
@@ -228,7 +248,9 @@ export class SubscriptionsService {
           after_json: {
             operatorCode: operator.code,
             planId: plan.id,
-            status: SubscriptionStatus.PENDING,
+            status: activated
+              ? SubscriptionStatus.ACTIVE
+              : SubscriptionStatus.PENDING,
           },
         },
       });
@@ -248,6 +270,12 @@ export class SubscriptionsService {
       throw new ConflictException(
         "There is no active or pending subscription to cancel.",
       );
+    if (
+      this.operatorPort.managesRemoteBilling &&
+      subscription.status === SubscriptionStatus.ACTIVE
+    ) {
+      throw operatorCancellationRequiredError();
+    }
     const now = new Date();
     await this.prisma.$transaction([
       this.prisma.subscription.update({
@@ -604,6 +632,157 @@ export class SubscriptionsService {
         expires_at: { lte: new Date() },
       },
       data: { status: SubscriptionStatus.EXPIRED },
+    });
+  }
+
+  async applyBdappsWebhook(input: {
+    providerEventId: string | null;
+    status: "REGISTERED" | "UNSUBSCRIBED";
+    subscriberId: string;
+  }) {
+    const phoneE164 = fromBdappsSubscriberId(input.subscriberId);
+    if (!phoneE164) throw new BadRequestException("Invalid subscriberId.");
+    const user = await this.prisma.user.findUnique({
+      where: { phone_e164: phoneE164 },
+      select: { id: true },
+    });
+    if (!user) return { processed: false };
+
+    await this.ensureOperatorHint(user.id, phoneE164);
+    const identity = await this.prisma.userOperatorIdentity.findUnique({
+      where: { user_id: user.id },
+      include: { operator: true },
+    });
+    if (!identity?.operator) return { processed: false };
+
+    await this.syncOperatorEligibility(user.id, {
+      operatorCode: identity.operator.code,
+      providerReference: input.providerEventId,
+      status: input.status === "REGISTERED" ? "VERIFIED" : "PENDING",
+    });
+    return { processed: true };
+  }
+
+  private async refreshOperatorStatus(
+    userId: string,
+    phoneE164: string,
+  ): Promise<boolean> {
+    if (!this.operatorPort.managesRemoteBilling) return false;
+    const identity = await this.prisma.userOperatorIdentity.findUnique({
+      where: { user_id: userId },
+      include: { operator: true },
+    });
+    if (!identity?.operator) return false;
+    if (
+      identity.last_checked_at &&
+      Date.now() - identity.last_checked_at.getTime() < 60_000
+    ) {
+      return false;
+    }
+    try {
+      const eligibility = await this.operatorPort.checkEligibility({
+        operatorCode: identity.operator.code,
+        phoneE164,
+      });
+      await this.syncOperatorEligibility(userId, eligibility);
+      return false;
+    } catch {
+      return true;
+    }
+  }
+
+  private async syncOperatorEligibility(
+    userId: string,
+    eligibility: OperatorEligibilityResult,
+  ): Promise<void> {
+    const now = new Date();
+    await this.prisma.$transaction(async (transaction) => {
+      await transaction.userOperatorIdentity.update({
+        where: { user_id: userId },
+        data: {
+          status: eligibility.status,
+          provider_ref: eligibility.providerReference,
+          last_checked_at: now,
+          verified_at: eligibility.status === "VERIFIED" ? now : null,
+        },
+      });
+      if (eligibility.status === "VERIFIED") {
+        const active = await transaction.subscription.findFirst({
+          where: {
+            user_id: userId,
+            status: SubscriptionStatus.ACTIVE,
+            starts_at: { lte: now },
+            expires_at: { gt: now },
+          },
+        });
+        if (active) return;
+        const pending = await transaction.subscription.findFirst({
+          where: { user_id: userId, status: SubscriptionStatus.PENDING },
+          include: { plan: true },
+          orderBy: { created_at: "desc" },
+        });
+        if (!pending) return;
+        await transaction.subscription.update({
+          where: { id: pending.id },
+          data: {
+            status: SubscriptionStatus.ACTIVE,
+            starts_at: now,
+            expires_at: new Date(
+              now.getTime() + pending.plan.duration_days * 86_400_000,
+            ),
+          },
+        });
+        await transaction.subscriptionPayment.updateMany({
+          where: {
+            subscription_id: pending.id,
+            status: SubscriptionPaymentStatus.PENDING,
+          },
+          data: {
+            status: SubscriptionPaymentStatus.PAID,
+            provider_ref: eligibility.providerReference,
+            paid_at: now,
+          },
+        });
+        await transaction.auditLog.create({
+          data: {
+            actor_user_id: userId,
+            action: "subscription.operator-activated",
+            entity: "subscription",
+            entity_id: pending.id,
+            before_json: { status: SubscriptionStatus.PENDING },
+            after_json: {
+              operatorCode: eligibility.operatorCode,
+              status: SubscriptionStatus.ACTIVE,
+            },
+          },
+        });
+        return;
+      }
+
+      const activeSubscriptions = await transaction.subscription.findMany({
+        where: { user_id: userId, status: SubscriptionStatus.ACTIVE },
+        select: { id: true },
+      });
+      if (activeSubscriptions.length === 0) return;
+      await transaction.subscription.updateMany({
+        where: {
+          id: { in: activeSubscriptions.map((item) => item.id) },
+        },
+        data: { status: SubscriptionStatus.CANCELLED, cancelled_at: now },
+      });
+      await transaction.auditLog.create({
+        data: {
+          actor_user_id: userId,
+          action: "subscription.operator-deactivated",
+          entity: "subscription",
+          entity_id: activeSubscriptions[0]?.id ?? null,
+          before_json: { status: SubscriptionStatus.ACTIVE },
+          after_json: {
+            operatorCode: eligibility.operatorCode,
+            status: SubscriptionStatus.CANCELLED,
+          },
+        },
+      });
     });
   }
 

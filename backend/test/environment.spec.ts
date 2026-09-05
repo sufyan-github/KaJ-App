@@ -54,4 +54,24 @@ describe("environment validation", () => {
       }),
     ).toThrow("OTP_FIXED_CODE");
   });
+
+  it("requires the private gateway URL and HMAC key for bdapps", () => {
+    expect(() => validateEnvironment({ SMS_PROVIDER: "bdapps" })).toThrow(
+      "BDAPPS_GATEWAY_URL",
+    );
+    expect(() =>
+      validateEnvironment({
+        BDAPPS_GATEWAY_URL: "https://gateway.example/api",
+        BDAPPS_INTERNAL_API_KEY: "short",
+        SMS_PROVIDER: "bdapps",
+      }),
+    ).toThrow("BDAPPS_INTERNAL_API_KEY");
+    expect(
+      validateEnvironment({
+        BDAPPS_GATEWAY_URL: "http://127.0.0.1:8766/api",
+        BDAPPS_INTERNAL_API_KEY: "a".repeat(64),
+        OPERATOR_PROVIDER: "bdapps",
+      }).OPERATOR_PROVIDER,
+    ).toBe("bdapps");
+  });
 });

@@ -9,4 +9,9 @@ export interface SmsOtp {
 
 export interface SmsPort {
   sendOtp(message: SmsOtp): Promise<void>;
+  verifyOtp?(input: {
+    challengeId: string;
+    code: string;
+    phoneE164: string;
+  }): Promise<{ valid: boolean }>;
 }

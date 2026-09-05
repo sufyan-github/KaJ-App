@@ -135,7 +135,14 @@ export class AuthService {
       throw otpAttemptsExceededError();
     }
 
-    if (!(await compare(code, challenge.codeHash))) {
+    const verification = this.sms.verifyOtp
+      ? await this.sms.verifyOtp({
+          challengeId: challenge.id,
+          code,
+          phoneE164: challenge.phoneE164,
+        })
+      : { valid: await compare(code, challenge.codeHash) };
+    if (!verification.valid) {
       const counted = await this.repository.incrementOtpAttempts(
         challenge.id,
         this.maxOtpAttempts,

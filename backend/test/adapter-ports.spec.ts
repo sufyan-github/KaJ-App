@@ -9,6 +9,7 @@ import { DisabledSmsAdapter } from "../src/infra/sms/disabled.adapter";
 import { selectSmsAdapter } from "../src/infra/sms/sms.provider";
 import { S3StorageAdapter } from "../src/infra/storage/s3.adapter";
 import { PendingOperatorAdapter } from "../src/infra/operator/pending.adapter";
+import { selectOperatorAdapter } from "../src/infra/operator/operator.provider";
 
 describe("provider-neutral adapter ports", () => {
   const fixedClock: Clock = {
@@ -25,9 +26,31 @@ describe("provider-neutral adapter ports", () => {
     expect(selectSmsAdapter("disabled", consoleAdapter, disabledAdapter)).toBe(
       disabledAdapter,
     );
+    const bdappsAdapter: import("../src/infra/sms/sms.port").SmsPort = {
+      sendOtp: async () => undefined,
+    };
+    expect(
+      selectSmsAdapter(
+        "bdapps",
+        consoleAdapter,
+        disabledAdapter,
+        bdappsAdapter,
+      ),
+    ).toBe(bdappsAdapter);
     expect(() =>
       selectSmsAdapter("unknown", consoleAdapter, disabledAdapter),
     ).toThrow("Unsupported SMS provider");
+  });
+
+  it("selects the configured operator adapter without changing callers", () => {
+    const pending = new PendingOperatorAdapter();
+    const bdapps = { checkEligibility: jest.fn() };
+
+    expect(selectOperatorAdapter("pending", pending, bdapps)).toBe(pending);
+    expect(selectOperatorAdapter("bdapps", pending, bdapps)).toBe(bdapps);
+    expect(() => selectOperatorAdapter("unknown", pending, bdapps)).toThrow(
+      "Unsupported operator provider",
+    );
   });
 
   it("forbids the development console SMS adapter in production", () => {

@@ -9,6 +9,8 @@ import { OperatorEligibilityResult, OperatorPort } from "./operator.port";
  */
 @Injectable()
 export class PendingOperatorAdapter implements OperatorPort {
+  readonly managesRemoteBilling = false;
+
   async checkEligibility(input: {
     operatorCode: string;
     phoneE164: string;
