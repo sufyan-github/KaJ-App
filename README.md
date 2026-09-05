@@ -43,6 +43,15 @@ fail after the signing step.
 The local defaults are API port `3100` and MinIO port `9000`. Override them with
 `KAAJ_API_PORT` and `KAAJ_STORAGE_PORT` when needed.
 
+To run a connected phone against the deployed production test API, use:
+
+```bash
+./tool/run_live_android.sh <android-device-id>
+```
+
+This uses `https://kaaj-api.onrender.com/api/v1` by default. Override it with
+`KAAJ_LIVE_API_URL` when a custom production domain is connected.
+
 The API URL must use HTTPS because Android cleartext traffic is disabled. Default flavor endpoints follow the specification:
 
 - dev: `https://api-dev.kaaj.app/api/v1`

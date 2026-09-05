@@ -12,6 +12,13 @@
 .swiftpm/
 migrate_working_dir/
 
+# Local secrets and credential-bearing deployment bundles
+/.env
+/.env.*
+!/.env.example
+/kaaj-bdapps-gateway-secure.zip
+/kaaj-cpanel-*.zip
+
 # IntelliJ related
 *.iml
 *.ipr
