@@ -3,10 +3,17 @@ import 'package:kaaj/features/auth/domain/usecases/auth_validators.dart';
 
 void main() {
   group('AuthValidators', () {
-    test('accepts supported Bangladeshi phone formats', () {
-      expect(AuthValidators.isValidPhone('01712345678'), isTrue);
-      expect(AuthValidators.isValidPhone('+8801712345678'), isTrue);
-      expect(AuthValidators.isValidPhone('8801712345678'), isTrue);
+    test('accepts valid Bangladeshi phone formats', () {
+      expect(AuthValidators.isValidPhone('01812345678'), isTrue);
+      expect(AuthValidators.isValidPhone('+8801812345678'), isTrue);
+      expect(AuthValidators.isValidPhone('8801812345678'), isTrue);
+    });
+
+    test('only supports Robi and Airtel operator prefixes', () {
+      expect(AuthValidators.isSupportedOperatorPhone('01812345678'), isTrue);
+      expect(AuthValidators.isSupportedOperatorPhone('+8801612345678'), isTrue);
+      expect(AuthValidators.isSupportedOperatorPhone('01712345678'), isFalse);
+      expect(AuthValidators.isSupportedOperatorPhone('01912345678'), isFalse);
     });
 
     test('rejects incomplete or impossible operator prefixes', () {
@@ -16,7 +23,7 @@ void main() {
     });
 
     test('normalizes local phone numbers to E.164', () {
-      expect(AuthValidators.normalizePhone('01712-345678'), '+8801712345678');
+      expect(AuthValidators.normalizePhone('01812-345678'), '+8801812345678');
     });
 
     test('accepts exactly six numeric OTP digits', () {

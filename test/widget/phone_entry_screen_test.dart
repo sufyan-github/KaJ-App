@@ -42,9 +42,46 @@ void main() {
     expect(find.text('Send verification code'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('rejects unsupported operator before requesting an OTP', (
+    tester,
+  ) async {
+    final repository = _FakeAuthRepository();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [authRepositoryProvider.overrideWithValue(repository)],
+        child: const MaterialApp(
+          locale: Locale('en'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          home: PhoneEntryScreen(),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextFormField), '01712345678');
+    await tester.tap(
+      find.text('I agree to the Terms of Service and Privacy Policy.'),
+    );
+    await tester.tap(find.text('Send verification code'));
+    await tester.pump();
+
+    expect(
+      find.text('Only Robi (018) and Airtel (016) numbers can register.'),
+      findsOneWidget,
+    );
+    expect(repository.requestOtpCalls, 0);
+  });
 }
 
 class _FakeAuthRepository implements AuthRepository {
+  int requestOtpCalls = 0;
+
   @override
   Future<void> logout() async {}
 
@@ -52,11 +89,14 @@ class _FakeAuthRepository implements AuthRepository {
   Future<void> logoutAll() async {}
 
   @override
-  Future<OtpChallenge> requestOtp(String phone) async => OtpChallenge(
-    id: '5c24b335-3c2a-4f6f-a37a-237d6f5644d0',
-    phone: phone,
-    expiresInSeconds: 300,
-  );
+  Future<OtpChallenge> requestOtp(String phone) async {
+    requestOtpCalls += 1;
+    return OtpChallenge(
+      id: '5c24b335-3c2a-4f6f-a37a-237d6f5644d0',
+      phone: phone,
+      expiresInSeconds: 300,
+    );
+  }
 
   @override
   Future<bool> restoreSession() async => false;

@@ -35,7 +35,8 @@ class AppLocalizationsBn extends AppLocalizations {
   String get phoneTitle => 'আপনার ফোন নম্বর দিন';
 
   @override
-  String get phoneSubtitle => 'আমরা ৬ সংখ্যার একটি যাচাই কোড পাঠাব।';
+  String get phoneSubtitle =>
+      'রবি (০১৮) অথবা এয়ারটেল (০১৬) নম্বর দিন। আমরা ৬ সংখ্যার যাচাই কোড পাঠাব।';
 
   @override
   String get phoneLabel => 'মোবাইল নম্বর';
@@ -45,6 +46,9 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get phoneConsent => 'আমি সেবার শর্ত ও গোপনীয়তা নীতিতে সম্মত।';
+
+  @override
+  String get phoneSafety => 'আপনার ফোন নম্বর নিরাপদ থাকবে।';
 
   @override
   String get sendCode => 'যাচাই কোড পাঠান';
@@ -141,6 +145,10 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get invalidPhone => 'সঠিক বাংলাদেশি মোবাইল নম্বর লিখুন।';
+
+  @override
+  String get unsupportedOperatorPhone =>
+      'শুধু রবি (০১৮) ও এয়ারটেল (০১৬) নম্বর দিয়ে নিবন্ধন করা যাবে।';
 
   @override
   String get invalidOtp => 'সম্পূর্ণ ৬ সংখ্যার যাচাই কোড লিখুন।';

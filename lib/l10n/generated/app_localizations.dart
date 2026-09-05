@@ -149,7 +149,7 @@ abstract class AppLocalizations {
   /// No description provided for @phoneSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'We will send a 6-digit verification code.'**
+  /// **'Use a Robi (018) or Airtel (016) number. We will send a 6-digit verification code.'**
   String get phoneSubtitle;
 
   /// No description provided for @phoneLabel.
@@ -169,6 +169,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'I agree to the Terms of Service and Privacy Policy.'**
   String get phoneConsent;
+
+  /// No description provided for @phoneSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Your phone number will remain secure.'**
+  String get phoneSafety;
 
   /// No description provided for @sendCode.
   ///
@@ -331,6 +337,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a valid Bangladeshi mobile number.'**
   String get invalidPhone;
+
+  /// No description provided for @unsupportedOperatorPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Only Robi (018) and Airtel (016) numbers can register.'**
+  String get unsupportedOperatorPhone;
 
   /// No description provided for @invalidOtp.
   ///

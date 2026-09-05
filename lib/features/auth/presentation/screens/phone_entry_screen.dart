@@ -126,10 +126,16 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                         ),
                         prefixIcon: const Icon(Icons.phone_outlined),
                       ),
-                      validator: (value) =>
-                          AuthValidators.isValidPhone(value ?? '')
-                          ? null
-                          : l10n.invalidPhone,
+                      validator: (value) {
+                        final phone = value ?? '';
+                        if (!AuthValidators.isValidPhone(phone)) {
+                          return l10n.invalidPhone;
+                        }
+                        if (!AuthValidators.isSupportedOperatorPhone(phone)) {
+                          return l10n.unsupportedOperatorPhone;
+                        }
+                        return null;
+                      },
                       onChanged: (_) {
                         if (state.failure != null) {
                           ref
@@ -140,8 +146,8 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                       onFieldSubmitted: (_) => _submit(),
                     ),
                     const SizedBox(height: KSpacing.sm),
-                    const KTrustBanner(
-                      message: 'আপনার নম্বর নিরাপদ থাকবে',
+                    KTrustBanner(
+                      message: l10n.phoneSafety,
                       icon: Icons.shield_outlined,
                     ),
                     const SizedBox(height: KSpacing.md),

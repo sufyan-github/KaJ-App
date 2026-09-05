@@ -36,7 +36,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get phoneTitle => 'Enter your phone number';
 
   @override
-  String get phoneSubtitle => 'We will send a 6-digit verification code.';
+  String get phoneSubtitle =>
+      'Use a Robi (018) or Airtel (016) number. We will send a 6-digit verification code.';
 
   @override
   String get phoneLabel => 'Mobile number';
@@ -47,6 +48,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get phoneConsent =>
       'I agree to the Terms of Service and Privacy Policy.';
+
+  @override
+  String get phoneSafety => 'Your phone number will remain secure.';
 
   @override
   String get sendCode => 'Send verification code';
@@ -145,6 +149,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidPhone => 'Enter a valid Bangladeshi mobile number.';
+
+  @override
+  String get unsupportedOperatorPhone =>
+      'Only Robi (018) and Airtel (016) numbers can register.';
 
   @override
   String get invalidOtp => 'Enter the complete 6-digit verification code.';

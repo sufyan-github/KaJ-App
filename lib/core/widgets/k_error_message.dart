@@ -58,6 +58,7 @@ class KErrorMessage extends StatelessWidget {
 String localizedFailureMessage(AppLocalizations l10n, Failure failure) =>
     switch (failure.code) {
       'AUTH_INVALID_PHONE' => l10n.invalidPhone,
+      'AUTH_UNSUPPORTED_OPERATOR' => l10n.unsupportedOperatorPhone,
       'OTP_INVALID' => l10n.otpIncorrectMessage,
       'OTP_EXPIRED' => l10n.codeExpired,
       'OTP_RATE_LIMITED' => l10n.rateLimitedMessage,
