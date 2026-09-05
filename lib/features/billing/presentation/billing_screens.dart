@@ -54,6 +54,10 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
               _AccessCard(overview: data),
               const SizedBox(height: KSpacing.md),
               _OperatorCard(identity: data.operatorIdentity),
+              if (data.operatorStatusRefreshFailed) ...[
+                const SizedBox(height: KSpacing.sm),
+                const _OperatorRefreshWarning(),
+              ],
               const SizedBox(height: KSpacing.lg),
               KLocalizedText(
                 'প্ল্যানসমূহ',
@@ -111,7 +115,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         final languageCode = Localizations.localeOf(context).languageCode;
         final explanation = KaajLocalizations.text(
           context,
-          'এই সংস্করণ কোনো টাকা কাটবে না। অপারেটর যাচাই ও অ্যাডমিন অনুমোদনের পর প্ল্যান সক্রিয় হবে।',
+          'অনুরোধ নিশ্চিত করার আগে মূল্য ও মেয়াদ দেখুন। অপারেটর নিবন্ধন নিশ্চিত হলে অনুমোদিত নিয়মে মোবাইল ব্যালেন্স থেকে চার্জ কাটা হতে পারে।',
         );
         return AlertDialog(
           title: const KLocalizedText('সাবস্ক্রিপশন অনুরোধ পাঠাবেন?'),
@@ -134,13 +138,26 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     if (confirmed != true || !mounted) return;
     setState(() => _saving = true);
     try {
-      await ref
+      final updated = await ref
           .read(billingRepositoryProvider)
           .requestSubscription(planId: plan.id, operatorCode: operator.code);
       ref.invalidate(subscriptionOverviewProvider);
-      if (mounted) _snack('সাবস্ক্রিপশন অনুরোধ অপেক্ষমাণ আছে।');
+      if (mounted) {
+        _snack(
+          updated.current?.status == 'ACTIVE'
+              ? 'সাবস্ক্রিপশন সক্রিয় হয়েছে।'
+              : 'সাবস্ক্রিপশন অনুরোধ অপেক্ষমাণ আছে।',
+        );
+      }
     } on Object catch (error) {
-      if (mounted) _snack(_failure(error).message);
+      if (mounted) {
+        final failure = _failure(error);
+        _snack(
+          failure.code == 'OPERATOR_CANCELLATION_REQUIRED'
+              ? 'KAAJ থেকে অপারেটর বিলিং বন্ধ করা যায় না। অপারেটরের নিশ্চিতকরণ SMS-এ দেওয়া বন্ধ করার নিয়ম অনুসরণ করুন, তারপর এই পেজ রিফ্রেশ করুন।'
+              : failure.message,
+        );
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -219,6 +236,32 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   void _snack(String value) => ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: KLocalizedText(value)));
+}
+
+class _OperatorRefreshWarning extends StatelessWidget {
+  const _OperatorRefreshWarning();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(KSpacing.md),
+    decoration: BoxDecoration(
+      color: KColors.warning.withValues(alpha: .10),
+      border: Border.all(color: KColors.warning.withValues(alpha: .35)),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: const Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(Icons.sync_problem_outlined, color: KColors.warning),
+        SizedBox(width: KSpacing.sm),
+        Expanded(
+          child: KLocalizedText(
+            'অপারেটরের সর্বশেষ অবস্থা এখন যাচাই করা যায়নি। আগের নিরাপদ অবস্থা দেখানো হচ্ছে; কিছুক্ষণ পর আবার রিফ্রেশ করুন।',
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class JobPaymentHistoryScreen extends ConsumerWidget {

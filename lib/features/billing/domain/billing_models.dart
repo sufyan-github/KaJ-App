@@ -134,6 +134,7 @@ class SubscriptionOverview {
     required this.accessActive,
     required this.gateEnabled,
     required this.onlinePaymentsEnabled,
+    required this.operatorStatusRefreshFailed,
     required this.workerWithdrawalsEnabled,
     required this.plans,
     required this.operators,
@@ -141,48 +142,50 @@ class SubscriptionOverview {
     this.current,
   });
 
-  factory SubscriptionOverview.fromJson(Map<String, dynamic> json) =>
-      SubscriptionOverview(
-        accessActive: json['accessActive'] == true,
-        gateEnabled: json['gateEnabled'] == true,
-        onlinePaymentsEnabled: json['onlinePaymentsEnabled'] == true,
-        workerWithdrawalsEnabled: json['workerWithdrawalsEnabled'] == true,
-        operatorIdentity: json['operator'] is Map
-            ? OperatorIdentity.fromJson(
-                Map<String, dynamic>.from(json['operator'] as Map),
-              )
-            : null,
-        current: json['current'] is Map
-            ? SubscriptionRecord.fromJson(
-                Map<String, dynamic>.from(json['current'] as Map),
-              )
-            : null,
-        plans:
-            (json['plans'] as List?)
-                ?.whereType<Map>()
-                .map(
-                  (item) => SubscriptionPlan.fromJson(
-                    Map<String, dynamic>.from(item),
-                  ),
-                )
-                .toList(growable: false) ??
-            const [],
-        operators:
-            (json['operators'] as List?)
-                ?.whereType<Map>()
-                .map(
-                  (item) => MobileOperatorOption.fromJson(
-                    Map<String, dynamic>.from(item),
-                  ),
-                )
-                .toList(growable: false) ??
-            const [],
-      );
+  factory SubscriptionOverview.fromJson(
+    Map<String, dynamic> json,
+  ) => SubscriptionOverview(
+    accessActive: json['accessActive'] == true,
+    gateEnabled: json['gateEnabled'] == true,
+    onlinePaymentsEnabled: json['onlinePaymentsEnabled'] == true,
+    operatorStatusRefreshFailed: json['operatorStatusRefreshFailed'] == true,
+    workerWithdrawalsEnabled: json['workerWithdrawalsEnabled'] == true,
+    operatorIdentity: json['operator'] is Map
+        ? OperatorIdentity.fromJson(
+            Map<String, dynamic>.from(json['operator'] as Map),
+          )
+        : null,
+    current: json['current'] is Map
+        ? SubscriptionRecord.fromJson(
+            Map<String, dynamic>.from(json['current'] as Map),
+          )
+        : null,
+    plans:
+        (json['plans'] as List?)
+            ?.whereType<Map>()
+            .map(
+              (item) =>
+                  SubscriptionPlan.fromJson(Map<String, dynamic>.from(item)),
+            )
+            .toList(growable: false) ??
+        const [],
+    operators:
+        (json['operators'] as List?)
+            ?.whereType<Map>()
+            .map(
+              (item) => MobileOperatorOption.fromJson(
+                Map<String, dynamic>.from(item),
+              ),
+            )
+            .toList(growable: false) ??
+        const [],
+  );
 
   final bool accessActive;
   final SubscriptionRecord? current;
   final bool gateEnabled;
   final bool onlinePaymentsEnabled;
+  final bool operatorStatusRefreshFailed;
   final OperatorIdentity? operatorIdentity;
   final List<MobileOperatorOption> operators;
   final List<SubscriptionPlan> plans;

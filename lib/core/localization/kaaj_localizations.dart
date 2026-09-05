@@ -311,10 +311,15 @@ const _reviewedEnglish = <String, String>{
   'প্ল্যানের অনুরোধ পাঠান': 'Request this plan',
   'সাবস্ক্রিপশন বাতিল করুন': 'Cancel subscription',
   'সাবস্ক্রিপশন অনুরোধ পাঠাবেন?': 'Send subscription request?',
-  'এই সংস্করণ কোনো টাকা কাটবে না। অপারেটর যাচাই ও অ্যাডমিন অনুমোদনের পর প্ল্যান সক্রিয় হবে।':
-      'This version will not charge you. The plan activates only after operator verification and admin approval.',
+  'অনুরোধ নিশ্চিত করার আগে মূল্য ও মেয়াদ দেখুন। অপারেটর নিবন্ধন নিশ্চিত হলে অনুমোদিত নিয়মে মোবাইল ব্যালেন্স থেকে চার্জ কাটা হতে পারে।':
+      'Review the price and duration before confirming. Once operator registration is confirmed, the approved charge may be deducted from your mobile balance.',
   'অনুরোধ পাঠান': 'Send request',
   'সাবস্ক্রিপশন অনুরোধ অপেক্ষমাণ আছে।': 'Your subscription request is pending.',
+  'সাবস্ক্রিপশন সক্রিয় হয়েছে।': 'Subscription activated.',
+  'KAAJ থেকে অপারেটর বিলিং বন্ধ করা যায় না। অপারেটরের নিশ্চিতকরণ SMS-এ দেওয়া বন্ধ করার নিয়ম অনুসরণ করুন, তারপর এই পেজ রিফ্রেশ করুন।':
+      'Carrier billing cannot be stopped inside KAAJ. Follow the unsubscribe instructions in your operator confirmation SMS, then refresh this page.',
+  'অপারেটরের সর্বশেষ অবস্থা এখন যাচাই করা যায়নি। আগের নিরাপদ অবস্থা দেখানো হচ্ছে; কিছুক্ষণ পর আবার রিফ্রেশ করুন।':
+      'The latest operator status could not be checked. The last safe state is shown; refresh again shortly.',
   'এই মুহূর্তে কোনো সমর্থিত অপারেটর নেই।':
       'No supported operator is available right now.',
   'মোবাইল অপারেটর বাছুন': 'Choose mobile operator',
