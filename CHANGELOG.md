@@ -6,6 +6,12 @@ All notable project changes are documented here.
 
 ### Engineering
 
+- Added provider-neutral Robi/Airtel operator hints, subscription plans/history/statuses, configurable
+  entitlement rules, audited admin management, and fail-closed pending operator verification.
+- Added a zero-commission Version 1 cash-on-completion lifecycle with poster-only confirmation,
+  idempotency, worker notification, disputes, payment history, and separate subscription/job records.
+- Added bilingual subscription and job-payment operations views, explicit manual external-payment
+  confirmation, and responsive narrow-screen administration without enabling online payment.
 - Added provider-neutral SMS, push, object-storage, and payment ports with a single global
   infrastructure module and environment-selected adapters.
 - Added deterministic S3-compatible signed URLs, unsafe-key rejection, a disabled push adapter,

@@ -98,6 +98,14 @@ databaseDescribe("money core with PostgreSQL and Redis", () => {
       where: { actor_user_id: posterId },
     });
     await prisma.payment.deleteMany({ where: { assignment_id: assignmentId } });
+    await prisma.assignment.update({
+      where: { id: assignmentId },
+      data: { status: "CONFIRMED" },
+    });
+    await prisma.job.update({
+      where: { id: jobId },
+      data: { status: "DRAFT" },
+    });
   });
 
   afterAll(async () => {
@@ -134,9 +142,9 @@ databaseDescribe("money core with PostgreSQL and Redis", () => {
     expect(first).toMatchObject({
       customerPaysPoisha: "50000",
       digitalPaymentsEnabled: false,
-      feePoisha: "4000",
+      feePoisha: "0",
       method: "CASH_ON_COMPLETION",
-      workerReceivesPoisha: "46000",
+      workerReceivesPoisha: "50000",
     });
   });
 
@@ -149,5 +157,42 @@ databaseDescribe("money core with PostgreSQL and Redis", () => {
     expect(
       await prisma.payment.count({ where: { assignment_id: assignmentId } }),
     ).toBe(1);
+  });
+
+  it("records an offline cash payment once and advances the job", async () => {
+    await prisma.assignment.update({
+      where: { id: assignmentId },
+      data: { status: "COMPLETED" },
+    });
+    await prisma.job.update({
+      where: { id: jobId },
+      data: { status: "COMPLETED" },
+    });
+
+    const first = await service.markCashPaid(posterId, assignmentId);
+    const repeated = await service.markCashPaid(posterId, assignmentId);
+
+    expect(first).toMatchObject({
+      customerPaysPoisha: "50000",
+      feePoisha: "0",
+      method: "CASH_ON_COMPLETION",
+      status: "CASH_RECORDED",
+      workerReceivesPoisha: "50000",
+    });
+    expect(repeated).toEqual(first);
+    await expect(
+      prisma.payment.count({ where: { assignment_id: assignmentId } }),
+    ).resolves.toBe(1);
+    await expect(
+      prisma.job.findUnique({ where: { id: jobId } }),
+    ).resolves.toMatchObject({ status: "PAYMENT_RECORDED" });
+    await expect(
+      prisma.auditLog.count({
+        where: {
+          actor_user_id: posterId,
+          action: "cash-payment.recorded",
+        },
+      }),
+    ).resolves.toBe(1);
   });
 });

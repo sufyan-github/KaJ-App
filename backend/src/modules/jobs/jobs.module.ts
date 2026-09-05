@@ -9,6 +9,7 @@ import { JobsController } from "./jobs.controller";
 import { JobsService } from "./jobs.service";
 import { RecurrenceRunner } from "./recurrence/recurrence.runner";
 import { RecurrenceService } from "./recurrence/recurrence.service";
+import { PaymentsModule } from "../payments/payments.module";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { RecurrenceService } from "./recurrence/recurrence.service";
     ChatModule,
     MatchingModule,
     NotificationsModule,
+    PaymentsModule,
   ],
   controllers: [JobsController],
   providers: [

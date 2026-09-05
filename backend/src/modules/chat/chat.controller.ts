@@ -21,6 +21,10 @@ import {
   ReportConversationDto,
   SendMessageDto,
 } from "./dto/chat.dto";
+import {
+  SubscriptionFeature,
+  SubscriptionFeatures,
+} from "../subscriptions/subscription-feature";
 
 @ApiTags("chat")
 @Controller()
@@ -35,6 +39,7 @@ export class ChatController {
 
   @Post("jobs/:jobId/conversations")
   @Policy(Policies.authenticated())
+  @SubscriptionFeature(SubscriptionFeatures.directContact)
   open(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("jobId", new ParseUUIDPipe()) jobId: string,

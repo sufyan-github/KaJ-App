@@ -48,6 +48,8 @@ import { DisputesModule } from "./modules/disputes/disputes.module";
 import { AttendanceModule } from "./modules/attendance/attendance.module";
 import { ModerationModule } from "./modules/moderation/moderation.module";
 import { RiskModule } from "./modules/risk/risk.module";
+import { SubscriptionGuard } from "./modules/subscriptions/subscription.guard";
+import { SubscriptionsModule } from "./modules/subscriptions/subscriptions.module";
 
 @Module({
   imports: [
@@ -73,6 +75,7 @@ import { RiskModule } from "./modules/risk/risk.module";
     AttendanceModule,
     ModerationModule,
     RiskModule,
+    SubscriptionsModule,
     AvailabilityModule,
     CatalogModule,
     HealthModule,
@@ -98,6 +101,7 @@ import { RiskModule } from "./modules/risk/risk.module";
     { provide: APP_GUARD, useClass: AccountModerationGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_GUARD, useClass: PolicyGuard },
+    { provide: APP_GUARD, useClass: SubscriptionGuard },
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
     { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
   ],

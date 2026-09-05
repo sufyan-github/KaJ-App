@@ -74,7 +74,10 @@ export class ReviewsService {
           assignment.worker_user_id,
           assignment.job.poster_user_id,
         ]);
-        if (assignment.job.status === JobStatus.PAYMENT_RELEASED) {
+        if (
+          assignment.job.status === JobStatus.PAYMENT_RELEASED ||
+          assignment.job.status === JobStatus.PAYMENT_RECORDED
+        ) {
           await this.states.transitionInTransaction(
             transaction,
             assignment.job,

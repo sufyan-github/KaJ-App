@@ -1259,8 +1259,13 @@ export class AdminOpsService {
           "An appeal requires a second administrator.",
         );
     }
-    const targetStatus = input.jobStatus ?? JobStatus.COMPLETED;
     const payment = dispute.assignment.payments[0];
+    const targetStatus =
+      input.jobStatus ??
+      (payment?.method === PaymentMethod.CASH_ON_COMPLETION &&
+      payment.cash_recorded_at
+        ? JobStatus.PAYMENT_RECORDED
+        : JobStatus.COMPLETED);
     let allocation;
     try {
       allocation = planDisputeAllocation({
@@ -1324,7 +1329,13 @@ export class AdminOpsService {
         await transaction.payment.update({
           where: { id: payment.id },
           data: {
-            status: allocation.status,
+            status:
+              payment.method === PaymentMethod.CASH_ON_COMPLETION
+                ? payment.cash_recorded_at
+                  ? PaymentStatus.CASH_RECORDED
+                  : PaymentStatus.PENDING
+                : allocation.status,
+            disputed_at: null,
             frozen_at: null,
             freeze_reason: null,
           },

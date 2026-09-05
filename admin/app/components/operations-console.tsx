@@ -27,6 +27,8 @@ type ModuleKey =
   | "config"
   | "flags"
   | "disputes"
+  | "subscriptions"
+  | "jobPayments"
   | "notifications"
   | "analytics"
   | "audit";
@@ -43,6 +45,8 @@ const modules: Array<[ModuleKey, string, string]> = [
   ["config", "Configuration", "Preview and revert"],
   ["flags", "Feature flags", "Percentage rollouts"],
   ["disputes", "Disputes", "Evidence and resolution"],
+  ["subscriptions", "Subscriptions", "Plans and operator access"],
+  ["jobPayments", "Job payments", "Offline cash payment oversight"],
   ["notifications", "Notifications", "Campaign dry-runs"],
   ["analytics", "Analytics", "Marketplace health"],
   ["audit", "Audit trail", "Who changed what"],
@@ -149,6 +153,8 @@ function ModuleView({ active }: { active: ModuleKey }) {
   if (active === "config") return <Configuration />;
   if (active === "flags") return <Flags />;
   if (active === "disputes") return <Disputes />;
+  if (active === "subscriptions") return <Subscriptions />;
+  if (active === "jobPayments") return <JobPayments />;
   if (active === "notifications") return <Notifications />;
   if (active === "analytics") return <Analytics />;
   return <AuditTrail />;
@@ -206,7 +212,7 @@ function Dashboard() {
         {Object.entries(data?.counts ?? {}).map(([key, value]) => (
           <article key={key}>
             <span>{humanize(key)}</span>
-            <strong>{value}</strong>
+            <strong>{formatNumber(value)}</strong>
           </article>
         ))}
       </div>
@@ -225,6 +231,564 @@ function Dashboard() {
                 <Badge value={job.status} />
               </td>
               <td>{formatDate(job.updated_at)}</td>
+            </tr>
+          ))}
+        </DataTable>
+      </Section>
+    </State>
+  );
+}
+
+type SubscriptionPlanItem = {
+  id: string;
+  code: string;
+  nameEn: string;
+  nameBn: string;
+  descriptionEn: string | null;
+  descriptionBn: string | null;
+  pricePoisha: string;
+  currency: string;
+  durationDays: number;
+  featureKeys: string[];
+  isActive: boolean;
+  sortOrder: number;
+};
+type SubscriptionRuleItem = {
+  featureKey: string;
+  isActive: boolean;
+  requiresActiveSubscription: boolean;
+  description: string | null;
+};
+type SubscriptionItem = {
+  id: string;
+  status: string;
+  startsAt: string | null;
+  expiresAt: string | null;
+  plan: SubscriptionPlanItem;
+  payment: { status: string; method: string } | null;
+  user: {
+    displayName: string;
+    maskedPhone: string;
+    operator: {
+      status: string;
+      operator: { nameEn: string; nameBn: string; code: string } | null;
+    } | null;
+  };
+};
+function Subscriptions() {
+  const overview = useData<{
+    subscriptions: Record<string, number>;
+    payments: Record<string, number>;
+    operators: Record<string, number>;
+    plans: SubscriptionPlanItem[];
+    accessRules: SubscriptionRuleItem[];
+  }>("subscriptions/overview");
+  const subscribers = useData<{ items: SubscriptionItem[] }>(
+    "subscriptions?limit=100",
+  );
+  const [createPlan, setCreatePlan] = useState(false);
+  const [editPlan, setEditPlan] = useState<SubscriptionPlanItem | null>(null);
+  const [subscriberAction, setSubscriberAction] = useState<{
+    item: SubscriptionItem;
+    status: "ACTIVE" | "CANCELLED";
+  } | null>(null);
+  const [ruleAction, setRuleAction] = useState<SubscriptionRuleItem | null>(
+    null,
+  );
+  const loading = overview.loading || subscribers.loading;
+  const error = overview.error || subscribers.error;
+  const reload = async () => {
+    await Promise.all([overview.reload(), subscribers.reload()]);
+  };
+  return (
+    <State loading={loading} error={error}>
+      <div className="metric-grid">
+        <article>
+          <span>{tr("Active subscriptions")}</span>
+          <strong>
+            {formatNumber(overview.data?.subscriptions.ACTIVE ?? 0)}
+          </strong>
+        </article>
+        <article>
+          <span>{tr("Pending requests")}</span>
+          <strong>
+            {formatNumber(overview.data?.subscriptions.PENDING ?? 0)}
+          </strong>
+        </article>
+        <article>
+          <span>{tr("Verified operators")}</span>
+          <strong>
+            {formatNumber(overview.data?.operators.VERIFIED ?? 0)}
+          </strong>
+        </article>
+      </div>
+      <div className="notice compact">
+        <strong>{tr("No automatic operator charging")}</strong>
+        <span>
+          {tr(
+            "Version 1 records requests only. Prefix detection is never treated as operator verification.",
+          )}
+        </span>
+      </div>
+      <Section
+        title="Subscription plans"
+        note="Create pricing only after the commercial plan is approved"
+      >
+        <div className="toolbar">
+          <Summary
+            count={overview.data?.plans.length ?? 0}
+            label={tr("plans")}
+          />
+          <button
+            className="primary small-button"
+            onClick={() => setCreatePlan(true)}
+          >
+            {tr("Create plan")}
+          </button>
+        </div>
+        <DataTable
+          headers={["Plan", "Price", "Duration", "Access", "Status", "Action"]}
+        >
+          {(overview.data?.plans ?? []).map((plan) => (
+            <tr key={plan.id}>
+              <td>
+                <strong>{localizedEntityName(plan.nameEn, plan.nameBn)}</strong>
+                <small>{plan.code}</small>
+              </td>
+              <td>{formatPoisha(plan.pricePoisha)}</td>
+              <td>
+                {formatNumber(plan.durationDays)} {tr("days")}
+              </td>
+              <td>{plan.featureKeys.map(humanize).join(", ") || tr("None")}</td>
+              <td>
+                <Badge value={plan.isActive ? "ACTIVE" : "INACTIVE"} />
+              </td>
+              <td className="actions">
+                <button onClick={() => setEditPlan(plan)}>
+                  {tr("Edit plan")}
+                </button>
+              </td>
+            </tr>
+          ))}
+        </DataTable>
+      </Section>
+      <Section
+        title="Access rules"
+        note="Rules apply only when subscriptions_enabled reaches full rollout"
+      >
+        <DataTable
+          headers={[
+            "Feature",
+            "Subscription required",
+            "Rule status",
+            "Action",
+          ]}
+        >
+          {(overview.data?.accessRules ?? []).map((rule) => (
+            <tr key={rule.featureKey}>
+              <td>
+                <strong>{humanize(rule.featureKey)}</strong>
+                <small>{tr(rule.description ?? "")}</small>
+              </td>
+              <td>{tr(rule.requiresActiveSubscription ? "Yes" : "No")}</td>
+              <td>
+                <Badge value={rule.isActive ? "ACTIVE" : "INACTIVE"} />
+              </td>
+              <td className="actions">
+                <button onClick={() => setRuleAction(rule)}>
+                  {tr(
+                    rule.requiresActiveSubscription
+                      ? "Make optional"
+                      : "Require subscription",
+                  )}
+                </button>
+              </td>
+            </tr>
+          ))}
+        </DataTable>
+      </Section>
+      <Section
+        title="Subscribers"
+        note="Subscription payment records are separate from job payments"
+      >
+        <DataTable
+          headers={[
+            "Person",
+            "Plan",
+            "Operator",
+            "Payment",
+            "Status",
+            "Actions",
+          ]}
+        >
+          {(subscribers.data?.items ?? []).map((item) => (
+            <tr key={item.id}>
+              <td>
+                <strong>{tr(item.user.displayName)}</strong>
+                <small>{item.user.maskedPhone}</small>
+              </td>
+              <td>{localizedEntityName(item.plan.nameEn, item.plan.nameBn)}</td>
+              <td>
+                {item.user.operator?.operator
+                  ? localizedEntityName(
+                      item.user.operator.operator.nameEn,
+                      item.user.operator.operator.nameBn,
+                    )
+                  : tr("Unavailable")}
+                <small>
+                  {humanize(item.user.operator?.status ?? "UNSUPPORTED")}
+                </small>
+              </td>
+              <td>
+                <Badge value={item.payment?.status ?? "PENDING"} />
+                <small>
+                  {humanize(item.payment?.method ?? "OPERATOR_BILLING")}
+                </small>
+              </td>
+              <td>
+                <Badge value={item.status} />
+                {item.expiresAt && <small>{formatDate(item.expiresAt)}</small>}
+              </td>
+              <td className="actions">
+                {item.status === "PENDING" && (
+                  <button
+                    onClick={() =>
+                      setSubscriberAction({ item, status: "ACTIVE" })
+                    }
+                  >
+                    {tr("Confirm external payment and activate")}
+                  </button>
+                )}
+                {(item.status === "ACTIVE" || item.status === "PENDING") && (
+                  <button
+                    onClick={() =>
+                      setSubscriberAction({ item, status: "CANCELLED" })
+                    }
+                  >
+                    {tr("Cancel")}
+                  </button>
+                )}
+              </td>
+            </tr>
+          ))}
+        </DataTable>
+      </Section>
+      {createPlan && (
+        <PlanDialog
+          rules={overview.data?.accessRules ?? []}
+          onClose={() => setCreatePlan(false)}
+          onDone={async () => {
+            setCreatePlan(false);
+            await reload();
+          }}
+        />
+      )}
+      {editPlan && (
+        <PlanDialog
+          plan={editPlan}
+          rules={overview.data?.accessRules ?? []}
+          onClose={() => setEditPlan(null)}
+          onDone={async () => {
+            setEditPlan(null);
+            await reload();
+          }}
+        />
+      )}
+      {subscriberAction && (
+        <ReasonDialog
+          title={
+            subscriberAction.status === "ACTIVE"
+              ? "Confirm payment, verify operator and activate subscription"
+              : "Cancel subscription"
+          }
+          confirmLabel={
+            subscriberAction.status === "ACTIVE"
+              ? "Confirm external payment and activate"
+              : "Confirm cancellation"
+          }
+          extra={
+            subscriberAction.status === "ACTIVE" ? (
+              <p className="muted">
+                {tr(
+                  "Use this only after payment and operator eligibility were verified outside KAAJ. This is a manual record, not an online charge.",
+                )}
+              </p>
+            ) : undefined
+          }
+          onClose={() => setSubscriberAction(null)}
+          onConfirm={async (reason) => {
+            await adminApi(
+              `subscriptions/${subscriberAction.item.id}/status`,
+              json("PUT", {
+                status: subscriberAction.status,
+                reason,
+                operatorVerified: subscriberAction.status === "ACTIVE",
+                paymentStatus:
+                  subscriberAction.status === "ACTIVE" ? "PAID" : "CANCELLED",
+              }),
+            );
+            setSubscriberAction(null);
+            await reload();
+          }}
+        />
+      )}
+      {ruleAction && (
+        <ReasonDialog
+          title={`Update access rule: ${humanize(ruleAction.featureKey)}`}
+          confirmLabel="Update access rule"
+          onClose={() => setRuleAction(null)}
+          onConfirm={async (reason) => {
+            await adminApi(
+              `subscriptions/access-rules/${ruleAction.featureKey}`,
+              json("PUT", {
+                requiresActiveSubscription:
+                  !ruleAction.requiresActiveSubscription,
+                isActive: ruleAction.isActive,
+                description: ruleAction.description,
+                reason,
+              }),
+            );
+            setRuleAction(null);
+            await reload();
+          }}
+        />
+      )}
+    </State>
+  );
+}
+
+function PlanDialog({
+  plan,
+  rules,
+  onClose,
+  onDone,
+}: {
+  plan?: SubscriptionPlanItem;
+  rules: SubscriptionRuleItem[];
+  onClose: () => void;
+  onDone: () => Promise<void>;
+}) {
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const editing = plan !== undefined;
+  return (
+    <Dialog
+      title={editing ? "Edit subscription plan" : "Create subscription plan"}
+      onClose={onClose}
+    >
+      <form
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setBusy(true);
+          setError("");
+          const form = new FormData(event.currentTarget);
+          try {
+            const payload: Record<string, unknown> = {
+              nameEn: String(form.get("nameEn")).trim(),
+              nameBn: String(form.get("nameBn")).trim(),
+              descriptionEn: String(form.get("descriptionEn")).trim(),
+              descriptionBn: String(form.get("descriptionBn")).trim(),
+              pricePoisha: String(
+                Math.round(Number(form.get("priceTaka")) * 100),
+              ),
+              durationDays: Number(form.get("durationDays")),
+              featureKeys: form.getAll("featureKeys").map(String),
+              isActive: form.get("isActive") === "on",
+              sortOrder: plan?.sortOrder ?? 0,
+              reason: String(form.get("reason")),
+            };
+            if (!editing) {
+              payload.code = String(form.get("code")).trim().toUpperCase();
+            }
+            await adminApi(
+              editing
+                ? `subscriptions/plans/${plan.id}`
+                : "subscriptions/plans",
+              json(editing ? "PUT" : "POST", payload),
+            );
+            await onDone();
+          } catch (caught) {
+            setError(friendlyAdminError(caught));
+            setBusy(false);
+          }
+        }}
+      >
+        <div className="form-grid">
+          <label>
+            {tr("Plan code")}
+            <input
+              name="code"
+              pattern="[A-Za-z0-9_]+"
+              defaultValue={plan?.code}
+              disabled={editing}
+              required={!editing}
+            />
+          </label>
+          <label>
+            {tr("Duration in days")}
+            <input
+              name="durationDays"
+              type="number"
+              min="1"
+              max="366"
+              defaultValue={plan?.durationDays}
+              required
+            />
+          </label>
+          <label>
+            {tr("English name")}
+            <input
+              name="nameEn"
+              minLength={2}
+              defaultValue={plan?.nameEn}
+              required
+            />
+          </label>
+          <label>
+            {tr("Bangla name")}
+            <input
+              name="nameBn"
+              minLength={2}
+              defaultValue={plan?.nameBn}
+              required
+            />
+          </label>
+          <label>
+            {tr("Price in BDT")}
+            <input
+              name="priceTaka"
+              type="number"
+              min="0"
+              step="0.01"
+              defaultValue={plan ? Number(plan.pricePoisha) / 100 : undefined}
+              required
+            />
+          </label>
+        </div>
+        <label>
+          {tr("English description")}
+          <textarea
+            name="descriptionEn"
+            defaultValue={plan?.descriptionEn ?? ""}
+          />
+        </label>
+        <label>
+          {tr("Bangla description")}
+          <textarea
+            name="descriptionBn"
+            defaultValue={plan?.descriptionBn ?? ""}
+          />
+        </label>
+        <fieldset>
+          <legend>{tr("Included marketplace access")}</legend>
+          <div className="check-grid">
+            {rules.map((rule) => (
+              <label key={rule.featureKey}>
+                <input
+                  type="checkbox"
+                  name="featureKeys"
+                  value={rule.featureKey}
+                  defaultChecked={plan?.featureKeys.includes(rule.featureKey)}
+                />
+                {humanize(rule.featureKey)}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <label className="inline-check">
+          <input
+            type="checkbox"
+            name="isActive"
+            defaultChecked={plan?.isActive}
+          />
+          {tr("Make plan visible immediately")}
+        </label>
+        <label>
+          {tr("Required operational reason")}
+          <textarea name="reason" minLength={8} required />
+        </label>
+        {error && <p className="error">{error}</p>}
+        <button className="primary" disabled={busy}>
+          {tr(
+            busy
+              ? editing
+                ? "Updating…"
+                : "Creating…"
+              : editing
+                ? "Save plan"
+                : "Create plan",
+          )}
+        </button>
+      </form>
+    </Dialog>
+  );
+}
+
+function JobPayments() {
+  const { data, loading, error } = useData<{
+    capabilities: Record<string, boolean>;
+    counts: Record<string, number>;
+    items: Array<{
+      id: string;
+      assignmentId: string;
+      jobTitle: string;
+      payerMaskedPhone: string;
+      agreedPoisha: string;
+      method: string;
+      status: string;
+      cashRecordedAt: string | null;
+      disputedAt: string | null;
+      createdAt: string;
+    }>;
+  }>("job-payments/overview");
+  return (
+    <State loading={loading} error={error}>
+      <div className="metric-grid">
+        <article>
+          <span>{tr("Pending cash payments")}</span>
+          <strong>{formatNumber(data?.counts.PENDING ?? 0)}</strong>
+        </article>
+        <article>
+          <span>{tr("Cash payments recorded")}</span>
+          <strong>{formatNumber(data?.counts.CASH_RECORDED ?? 0)}</strong>
+        </article>
+        <article>
+          <span>{tr("Disputed payments")}</span>
+          <strong>{formatNumber(data?.counts.DISPUTED ?? 0)}</strong>
+        </article>
+      </div>
+      <div className="notice compact">
+        <strong>{tr("Cash on completion only")}</strong>
+        <span>
+          {tr(
+            "Online payments, mobile banking, wallets and withdrawals are coming soon and are not connected.",
+          )}
+        </span>
+      </div>
+      <Section
+        title="Job payment records"
+        note="Job payments are kept separate from subscription payments"
+      >
+        <DataTable
+          headers={["Job", "Payer", "Amount", "Method", "Status", "Updated"]}
+        >
+          {(data?.items ?? []).map((item) => (
+            <tr key={item.id}>
+              <td>
+                <strong>{item.jobTitle}</strong>
+                <small>{item.assignmentId}</small>
+              </td>
+              <td>{item.payerMaskedPhone}</td>
+              <td>{formatPoisha(item.agreedPoisha)}</td>
+              <td>{humanize(item.method)}</td>
+              <td>
+                <Badge value={item.status} />
+              </td>
+              <td>
+                {formatDate(
+                  item.cashRecordedAt ?? item.disputedAt ?? item.createdAt,
+                )}
+              </td>
             </tr>
           ))}
         </DataTable>
@@ -457,11 +1021,11 @@ function RiskReview() {
       <div className="metric-grid">
         <article>
           <span>{tr("Queue items")}</span>
-          <strong>{data?.total ?? 0}</strong>
+          <strong>{formatNumber(data?.total ?? 0)}</strong>
         </article>
         <article>
           <span>{tr("Adjudicated")}</span>
-          <strong>{metrics?.adjudicatedCount ?? 0}</strong>
+          <strong>{formatNumber(metrics?.adjudicatedCount ?? 0)}</strong>
         </article>
         <article>
           <span>{tr("Observed precision")}</span>
@@ -1800,7 +2364,7 @@ function Analytics() {
           .map(([key, value]) => (
             <article key={key}>
               <span>{humanize(key)}</span>
-              <strong>{value}</strong>
+              <strong>{formatNumber(Number(value))}</strong>
             </article>
           ))}
       </div>
@@ -1938,7 +2502,7 @@ function Section({
 function Summary({ count, label }: { count: number; label: string }) {
   return (
     <div className="summary">
-      <strong>{count}</strong>
+      <strong>{formatNumber(count)}</strong>
       <span>
         {tr(label)} {tr("in this operational view")}
       </span>
@@ -2001,8 +2565,20 @@ function formatDate(value: string) {
     {
       dateStyle: "medium",
       timeStyle: "short",
+      hour12: getActiveAdminLocale() !== "bn",
     },
   ).format(new Date(value));
+}
+function formatPoisha(value: string) {
+  return new Intl.NumberFormat(
+    getActiveAdminLocale() === "bn" ? "bn-BD" : "en-BD",
+    { style: "currency", currency: "BDT" },
+  ).format(Number(value) / 100);
+}
+function formatNumber(value: number) {
+  return new Intl.NumberFormat(
+    getActiveAdminLocale() === "bn" ? "bn-BD" : "en-BD",
+  ).format(value);
 }
 function formatBasisPoints(value?: number | null) {
   return value == null

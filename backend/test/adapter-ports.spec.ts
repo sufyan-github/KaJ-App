@@ -8,6 +8,7 @@ import { ConsoleSmsAdapter } from "../src/infra/sms/console.adapter";
 import { DisabledSmsAdapter } from "../src/infra/sms/disabled.adapter";
 import { selectSmsAdapter } from "../src/infra/sms/sms.provider";
 import { S3StorageAdapter } from "../src/infra/storage/s3.adapter";
+import { PendingOperatorAdapter } from "../src/infra/operator/pending.adapter";
 
 describe("provider-neutral adapter ports", () => {
   const fixedClock: Clock = {
@@ -131,5 +132,20 @@ describe("provider-neutral adapter ports", () => {
     await expect(
       adapter.verifyWebhook({ body: Buffer.from("{}"), headers: {} }),
     ).resolves.toEqual({ valid: false });
+  });
+
+  it("never treats an operator prefix as verified or charged", async () => {
+    const adapter = new PendingOperatorAdapter();
+
+    await expect(
+      adapter.checkEligibility({
+        operatorCode: "ROBI",
+        phoneE164: "+8801812345678",
+      }),
+    ).resolves.toEqual({
+      operatorCode: "ROBI",
+      providerReference: null,
+      status: "PENDING",
+    });
   });
 });

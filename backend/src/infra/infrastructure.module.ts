@@ -3,6 +3,8 @@ import { ConfigService } from "@nestjs/config";
 
 import { ManualPaymentAdapter } from "./payment/manual.adapter";
 import { PAYMENT_PORT } from "./payment/payment.port";
+import { OPERATOR_PORT } from "./operator/operator.port";
+import { PendingOperatorAdapter } from "./operator/pending.adapter";
 import { DisabledPushAdapter } from "./push/disabled.adapter";
 import { PUSH_PORT } from "./push/push.port";
 import { ConsoleSmsAdapter } from "./sms/console.adapter";
@@ -14,12 +16,13 @@ import { STORAGE_PORT } from "./storage/storage.port";
 
 @Global()
 @Module({
-  exports: [PAYMENT_PORT, PUSH_PORT, SMS_PORT, STORAGE_PORT],
+  exports: [OPERATOR_PORT, PAYMENT_PORT, PUSH_PORT, SMS_PORT, STORAGE_PORT],
   providers: [
     ConsoleSmsAdapter,
     DisabledSmsAdapter,
     DisabledPushAdapter,
     ManualPaymentAdapter,
+    PendingOperatorAdapter,
     S3StorageAdapter,
     {
       inject: [ConfigService, ConsoleSmsAdapter, DisabledSmsAdapter],
@@ -38,6 +41,7 @@ import { STORAGE_PORT } from "./storage/storage.port";
     { provide: PUSH_PORT, useExisting: DisabledPushAdapter },
     { provide: STORAGE_PORT, useExisting: S3StorageAdapter },
     { provide: PAYMENT_PORT, useExisting: ManualPaymentAdapter },
+    { provide: OPERATOR_PORT, useExisting: PendingOperatorAdapter },
   ],
 })
 export class InfrastructureModule {}

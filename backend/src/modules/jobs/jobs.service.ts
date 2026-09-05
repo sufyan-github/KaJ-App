@@ -44,6 +44,7 @@ import { JobStateMachine } from "./state-machine/job-state.machine";
 import { recurrenceRuleJson } from "./recurrence/recurrence";
 import { RecurrenceService } from "./recurrence/recurrence.service";
 import { hasTrust } from "../verification/trust-level";
+import { PaymentsService } from "../payments/payments.service";
 
 const jobInclude = {
   category: { select: { id: true, name_bn: true, name_en: true } },
@@ -67,6 +68,7 @@ export class JobsService {
     @Optional() @Inject(CLOCK) private readonly clock?: Clock,
     @Optional() private readonly chat?: ChatService,
     @Optional() private readonly recurrence?: RecurrenceService,
+    @Optional() private readonly payments?: PaymentsService,
   ) {}
 
   private now() {
@@ -383,6 +385,7 @@ export class JobsService {
       },
       include: {
         job: { select: { title: true, poster_user_id: true, status: true } },
+        payments: { orderBy: { created_at: "desc" }, take: 1 },
       },
       orderBy: { created_at: "desc" },
       take: 100,
@@ -399,6 +402,9 @@ export class JobsService {
         isWorker: assignment.worker_user_id === userId,
         isPoster: assignment.job.poster_user_id === userId,
         posterUserId: assignment.job.poster_user_id,
+        payment: assignment.payments[0]
+          ? serializeCashPayment(assignment.payments[0])
+          : null,
       })),
     };
   }
@@ -418,6 +424,7 @@ export class JobsService {
           },
         },
         contracts: { orderBy: { version: "desc" } },
+        payments: { orderBy: { created_at: "desc" }, take: 1 },
       },
     });
     if (!assignment) throw new NotFoundException();
@@ -435,6 +442,9 @@ export class JobsService {
       submittedAt: assignment.submitted_at?.toISOString() ?? null,
       completionDueAt: assignment.completion_due_at?.toISOString() ?? null,
       contractVersion: assignment.contracts[0]?.version ?? null,
+      payment: assignment.payments[0]
+        ? serializeCashPayment(assignment.payments[0])
+        : null,
       timeline: assignment.job.status_history.map((item) => ({
         status: item.to_status,
         at: item.created_at.toISOString(),
@@ -1181,6 +1191,7 @@ export class JobsService {
     const result = await this.prisma.$transaction(async (transaction) => {
       const assignment = await transaction.assignment.findUniqueOrThrow({
         where: { id: assignmentId },
+        include: { job: true },
       });
       const job = await transaction.job.findUniqueOrThrow({
         where: { id: assignment.job_id },
@@ -1188,19 +1199,13 @@ export class JobsService {
       if (job.status !== JobStatus.CUSTOMER_REVIEW) {
         throw new ConflictException("Work is not awaiting completion review.");
       }
-      const completed = await this.states.transitionInTransaction(
+      await this.states.transitionInTransaction(
         transaction,
         job,
         JobStatus.COMPLETED,
         { type: actorType, userId: actorUserId },
       );
-      await this.states.transitionInTransaction(
-        transaction,
-        completed,
-        JobStatus.PAYMENT_RELEASED,
-        { type: JobActorType.SYSTEM },
-        "Payments disabled; completion recorded",
-      );
+      await this.payments?.ensureCashPending(transaction, assignment);
       await transaction.job.update({
         where: { id: job.id },
         data: { completed_at: this.now() },
@@ -1472,5 +1477,29 @@ function serializeAssignment(assignment: {
     agreedPricePoisha: assignment.agreed_price_poisha.toString(),
     agreedStartsAt: assignment.agreed_starts_at?.toISOString() ?? null,
     agreedEndsAt: assignment.agreed_ends_at?.toISOString() ?? null,
+  };
+}
+
+function serializeCashPayment(payment: {
+  id: string;
+  agreed_amount_poisha: bigint;
+  amount_poisha: bigint;
+  worker_earning_poisha: bigint;
+  fee_poisha: bigint;
+  method: string;
+  status: string;
+  cash_recorded_at: Date | null;
+  disputed_at: Date | null;
+}) {
+  return {
+    id: payment.id,
+    agreedPoisha: payment.agreed_amount_poisha.toString(),
+    customerPaysPoisha: payment.amount_poisha.toString(),
+    workerReceivesPoisha: payment.worker_earning_poisha.toString(),
+    feePoisha: payment.fee_poisha.toString(),
+    method: payment.method,
+    status: payment.status,
+    cashRecordedAt: payment.cash_recorded_at?.toISOString() ?? null,
+    disputedAt: payment.disputed_at?.toISOString() ?? null,
   };
 }

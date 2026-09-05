@@ -40,7 +40,8 @@ claim escrow.
 assignment, reads the immutable assignment amount, resolves fees in user → tier → category → global
 order, creates at most one payment, audits the mutation, and stores the exact first response in
 PostgreSQL and Redis. Until both an approved non-manual provider and the 100% feature flag are
-configured, the result remains `CASH_ON_COMPLETION` and no ledger money movement occurs.
+configured, the result remains `CASH_ON_COMPLETION`, its Version 1 fee is zero, and no ledger money
+movement occurs.
 
 Ledger posting rejects non-positive or unbalanced operations before insertion. The database rejects
 all updates and deletes to ledger entries. Reconciliation independently totals debits and credits.
@@ -59,7 +60,8 @@ all updates and deletes to ledger entries. Reconciliation independently totals d
 - Prisma format, validation, generation, migration deployment, and seed: pass.
 - Backend TypeScript compile: pass.
 - `money-core.spec.ts`: 8/8 pass.
-- `money-core.prisma.e2e-spec.ts` with live PostgreSQL and Redis: 2/2 pass.
+- `money-core.prisma.e2e-spec.ts` with live PostgreSQL and Redis: 3/3 pass, including offline cash
+  confirmation, audit, and job-state advancement.
 - Concurrent distinct idempotency keys converge on one payment row.
 - Repeated identical key returns the exact first response.
 

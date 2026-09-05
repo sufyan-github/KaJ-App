@@ -24,6 +24,8 @@ describe("JobStateMachine", () => {
     [JobStatus.CONFIRMATION_PENDING, JobStatus.CONFIRMED, JobActorType.WORKER],
     [JobStatus.IN_PROGRESS, JobStatus.SUBMITTED, JobActorType.WORKER],
     [JobStatus.CUSTOMER_REVIEW, JobStatus.COMPLETED, JobActorType.POSTER],
+    [JobStatus.COMPLETED, JobStatus.PAYMENT_RECORDED, JobActorType.POSTER],
+    [JobStatus.PAYMENT_RECORDED, JobStatus.REVIEWED, JobActorType.SYSTEM],
     [JobStatus.DISPUTED, JobStatus.COMPLETED, JobActorType.ADMIN],
   ])("allows %s -> %s by %s", (from, to, actor) => {
     expect(() => machine.assertAllowed(from, to, actor)).not.toThrow();

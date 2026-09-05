@@ -1,8 +1,9 @@
 # KAJ Completion Tracker
 
-**Last updated:** 2026-09-01
+**Last updated:** 2026-09-05
 **Current phase:** Phase 2 — identity, taxonomy, and profiles
 **Current task:** Phase 2 exit gate — timed human onboarding evidence
+**Active expansion workstream:** Version 1 subscription architecture and offline cash payment are implemented; external operator billing remains gated.
 **Product-code gate:** Owner overrode the sequencing gate on 2026-08-18; Phase 0 remains unreviewed
 
 ## Status legend
@@ -88,23 +89,24 @@ production handling of personal data.
 
 ## Phases 9–14 — gated expansion and release
 
-| Phase    | Status            | Gate / task family                                                                                  |
-| -------- | ----------------- | --------------------------------------------------------------------------------------------------- |
-| Phase 9  | PARTIAL / BLOCKED | P9-PAY-01 provider-neutral money core delivered; provider, payout, UI, tax, and legal gates remain. |
-| Phase 10 | IN PROGRESS       | P10-TRUST-01..05 delivered; mobile trust, attendance, dispute, and safety surfaces remain.          |
-| Phase 11 | PLANNED           | P11 recurrence, repeat hire, business profiles, shifts, workforce.                                  |
-| Phase 12 | BLOCKED           | P12 AI requires real data thresholds, evaluation, and approved flags.                               |
-| Phase 13 | PLANNED           | P13 canonical events, metrics, imbalance detection, admin analytics.                                |
-| Phase 14 | PLANNED           | P14 security, performance, load, recovery, observability, legal/store, rollout.                     |
+| Phase    | Status            | Gate / task family                                                                                                                           |
+| -------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phase 9  | PARTIAL / BLOCKED | Money core, offline cash UI/lifecycle, and subscription/operator architecture delivered; real provider, payout, tax, and legal gates remain. |
+| Phase 10 | IN PROGRESS       | P10-TRUST-01..05 delivered; mobile trust, attendance, dispute, and safety surfaces remain.                                                   |
+| Phase 11 | PLANNED           | P11 recurrence, repeat hire, business profiles, shifts, workforce.                                                                           |
+| Phase 12 | BLOCKED           | P12 AI requires real data thresholds, evaluation, and approved flags.                                                                        |
+| Phase 13 | PLANNED           | P13 canonical events, metrics, imbalance detection, admin analytics.                                                                         |
+| Phase 14 | PLANNED           | P14 security, performance, load, recovery, observability, legal/store, rollout.                                                              |
 
 ### Phase 9 task status
 
-| Task      | Status      | Evidence                                                                                                                                 |
-| --------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| P9-PAY-01 | IMPLEMENTED | Server-derived intent, fee chain, durable idempotency, balanced immutable ledger, live concurrency tests; `docs/completed/P9-PAY-01.md`. |
-| P9-PAY-02 | BLOCKED     | Requires signed legal/compliance checklist and selected provider contract before adapter/webhook work.                                   |
-| P9-PAY-03 | BLOCKED     | Requires approved payout, refund, tax, and flow-of-funds model.                                                                          |
-| P9-UI-04  | BLOCKED     | Digital-payment UI must not imply unavailable payment, wallet, refund, or payout capability.                                             |
+| Task          | Status      | Evidence                                                                                                                                                                   |
+| ------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P9-PAY-01     | IMPLEMENTED | Server-derived intent, fee chain, durable idempotency, balanced immutable ledger, live concurrency tests; `docs/completed/P9-PAY-01.md`.                                   |
+| P9-PAY-02     | BLOCKED     | Requires signed legal/compliance checklist and selected provider contract before adapter/webhook work.                                                                     |
+| P9-PAY-03     | BLOCKED     | Requires approved payout, refund, tax, and flow-of-funds model.                                                                                                            |
+| P9-UI-04      | BLOCKED     | Digital-payment UI must not imply unavailable payment, wallet, refund, or payout capability.                                                                               |
+| V1-SUB-PAY-01 | IMPLEMENTED | Provider-neutral operator/subscription model, audited admin management, gated entitlements, and zero-commission offline cash lifecycle; `docs/completed/V1-SUB-PAY-01.md`. |
 
 ### Phase 10 task status
 

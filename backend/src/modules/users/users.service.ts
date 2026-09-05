@@ -105,6 +105,7 @@ export class UsersService {
               notIn: [
                 "COMPLETED",
                 "PAYMENT_RELEASED",
+                "PAYMENT_RECORDED",
                 "REVIEWED",
                 "EXPIRED",
                 "CANCELLED_BY_CUSTOMER",

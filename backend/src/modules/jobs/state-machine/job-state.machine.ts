@@ -51,7 +51,12 @@ const transitions = new Map<TransitionKey, readonly JobActorType[]>([
     [JobActorType.POSTER, JobActorType.WORKER],
   ],
   [key(JobStatus.COMPLETED, JobStatus.PAYMENT_RELEASED), [JobActorType.SYSTEM]],
+  [
+    key(JobStatus.COMPLETED, JobStatus.PAYMENT_RECORDED),
+    [JobActorType.POSTER, JobActorType.SYSTEM],
+  ],
   [key(JobStatus.PAYMENT_RELEASED, JobStatus.REVIEWED), [JobActorType.SYSTEM]],
+  [key(JobStatus.PAYMENT_RECORDED, JobStatus.REVIEWED), [JobActorType.SYSTEM]],
   [key(JobStatus.PUBLISHED, JobStatus.EXPIRED), [JobActorType.SYSTEM]],
   [key(JobStatus.APPLICATIONS_OPEN, JobStatus.EXPIRED), [JobActorType.SYSTEM]],
   [key(JobStatus.DISPUTED, JobStatus.COMPLETED), [JobActorType.ADMIN]],

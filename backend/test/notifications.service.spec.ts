@@ -29,13 +29,23 @@ describe("NotificationsService", () => {
             read_at: new Date("2026-09-05T04:35:00.000Z"),
             created_at: new Date("2026-09-05T04:25:00.000Z"),
           },
+          {
+            id: "notification-3",
+            user_id: "user-1",
+            type: "CASH_PAYMENT_RECORDED",
+            title_key: "Cash payment recorded",
+            body_key: "গণিত পড়ানো has been marked as paid in cash.",
+            payload_json: { assignmentId: "assignment-2" },
+            read_at: null,
+            created_at: new Date("2026-09-05T04:20:00.000Z"),
+          },
         ]),
       },
     } as unknown as PrismaService;
 
     const result = await new NotificationsService(prisma).list("user-1");
 
-    expect(result.unreadCount).toBe(1);
+    expect(result.unreadCount).toBe(2);
     expect(result.items[0]).toMatchObject({
       title: "যাচাইয়ের অনুরোধ জমা হয়েছে",
       body: "আপনার পরিচয় যাচাইয়ের অনুরোধ পর্যালোচনার জন্য জমা হয়েছে।",
@@ -51,6 +61,13 @@ describe("NotificationsService", () => {
       titleEn: "Application accepted",
       bodyEn: "You were selected for গণিত পড়ানো.",
       deepLink: "/assignments/assignment-1",
+    });
+    expect(result.items[2]).toMatchObject({
+      titleBn: "নগদ পেমেন্ট রেকর্ড হয়েছে",
+      bodyBn: "গণিত পড়ানো কাজটির নগদ পেমেন্ট রেকর্ড হয়েছে।",
+      titleEn: "Cash payment recorded",
+      bodyEn: "গণিত পড়ানো has been marked as paid in cash.",
+      deepLink: "/assignments/assignment-2",
     });
   });
 

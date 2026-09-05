@@ -28,6 +28,10 @@ import {
 } from "./dto/jobs.dto";
 import { JobsService } from "./jobs.service";
 import { RecurrenceService } from "./recurrence/recurrence.service";
+import {
+  SubscriptionFeature,
+  SubscriptionFeatures,
+} from "../subscriptions/subscription-feature";
 
 @ApiTags("jobs")
 @Controller()
@@ -40,6 +44,7 @@ export class JobsController {
   @Post("jobs")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
   @Policy(Policies.authenticated())
+  @SubscriptionFeature(SubscriptionFeatures.jobPosting)
   create(@CurrentUser() claims: AccessTokenClaims, @Body() body: CreateJobDto) {
     return this.jobs.create(claims.sub, body);
   }
@@ -47,6 +52,7 @@ export class JobsController {
   @Post("jobs/:id/publish")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
   @Policy(Policies.authenticated())
+  @SubscriptionFeature(SubscriptionFeatures.jobPosting)
   publish(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("id", new ParseUUIDPipe()) id: string,
@@ -123,6 +129,7 @@ export class JobsController {
   @Get("jobs/:id/suggested-workers")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
   @Policy(Policies.authenticated())
+  @SubscriptionFeature(SubscriptionFeatures.workerDiscovery)
   suggestedWorkers(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("id", new ParseUUIDPipe()) id: string,
@@ -133,6 +140,7 @@ export class JobsController {
   @Post("jobs/:id/applications")
   @Roles(RoleMode.WORKER)
   @Policy(Policies.authenticated())
+  @SubscriptionFeature(SubscriptionFeatures.jobApplication)
   apply(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("id", new ParseUUIDPipe()) id: string,
@@ -160,6 +168,7 @@ export class JobsController {
   @Post("applications/:id/accept")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
   @Policy(Policies.authenticated())
+  @SubscriptionFeature(SubscriptionFeatures.workerHiring)
   accept(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("id", new ParseUUIDPipe()) id: string,
@@ -171,6 +180,7 @@ export class JobsController {
   @Post("workers/:workerId/booking-requests")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
   @Policy(Policies.authenticated())
+  @SubscriptionFeature(SubscriptionFeatures.workerHiring)
   book(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("workerId", new ParseUUIDPipe()) workerId: string,

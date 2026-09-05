@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Controller,
+  Get,
   Headers,
   Param,
   ParseUUIDPipe,
@@ -12,12 +13,45 @@ import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { Policy } from "../../common/policy/policy.decorator";
 import { Policies } from "../../common/policy/policy.types";
 import { AccessTokenClaims } from "../auth/auth-token.service";
+import { Roles } from "../../common/decorators/roles.decorator";
+import { RoleMode } from "@prisma/client";
 import { PaymentsService } from "./payments.service";
 
 @ApiTags("payments")
 @Controller()
 export class PaymentsController {
   constructor(private readonly payments: PaymentsService) {}
+
+  @Get("payments/capabilities")
+  @Policy(Policies.authenticated())
+  capabilities() {
+    return this.payments.capabilities();
+  }
+
+  @Get("payments/history")
+  @Policy(Policies.authenticated())
+  history(@CurrentUser() claims: AccessTokenClaims) {
+    return this.payments.history(claims.sub);
+  }
+
+  @Get("assignments/:id/payment")
+  @Policy(Policies.authenticated())
+  assignmentPayment(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) assignmentId: string,
+  ) {
+    return this.payments.forAssignment(claims.sub, assignmentId);
+  }
+
+  @Post("assignments/:id/payment/cash-paid")
+  @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
+  @Policy(Policies.authenticated())
+  markCashPaid(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) assignmentId: string,
+  ) {
+    return this.payments.markCashPaid(claims.sub, assignmentId);
+  }
 
   @Post("assignments/:id/payment-intent")
   @Policy(Policies.authenticated())

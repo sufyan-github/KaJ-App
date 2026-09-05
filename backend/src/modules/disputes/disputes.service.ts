@@ -10,6 +10,7 @@ import {
   DisputeStatus,
   JobActorType,
   JobStatus,
+  PaymentStatus,
   Prisma,
 } from "@prisma/client";
 
@@ -27,6 +28,7 @@ const ELIGIBLE_STATUSES: JobStatus[] = [
   JobStatus.SUBMITTED,
   JobStatus.CUSTOMER_REVIEW,
   JobStatus.COMPLETED,
+  JobStatus.PAYMENT_RECORDED,
 ];
 const DAY_MS = 24 * 60 * 60_000;
 
@@ -124,7 +126,12 @@ export class DisputesService {
       });
       await transaction.payment.updateMany({
         where: { assignment_id: assignmentId },
-        data: { frozen_at: now, freeze_reason: `DISPUTE:${created.id}` },
+        data: {
+          disputed_at: now,
+          frozen_at: now,
+          freeze_reason: `DISPUTE:${created.id}`,
+          status: PaymentStatus.DISPUTED,
+        },
       });
       await transaction.auditLog.create({
         data: {

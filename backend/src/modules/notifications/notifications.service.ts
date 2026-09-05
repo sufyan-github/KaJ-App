@@ -155,6 +155,7 @@ function titleEnglishFor(type: string, value: string): string {
     ASSIGNMENT_CONFIRMED: "Booking confirmed",
     ASSIGNMENT_DECLINED: "Worker declined the job",
     BOOKING_REQUESTED: "New booking request",
+    CASH_PAYMENT_RECORDED: "Cash payment recorded",
     CHAT_MESSAGE: "New message",
     DISPUTE_OPENED: "Dispute opened",
     JOB_APPLICATION_RECEIVED: "New application",
@@ -175,6 +176,12 @@ function bodyEnglishFor(type: string, value: string): string {
   }
   if (value === "dispute.opened.body") {
     return "Your dispute was submitted. Updates will appear here.";
+  }
+  if (
+    type === "CASH_PAYMENT_RECORDED" &&
+    /^.+ has been marked as paid in cash[.]?$/u.test(value)
+  ) {
+    return value;
   }
   if (/^[\x00-\x7F]+$/.test(value) && !value.includes(".")) return value;
 
@@ -240,6 +247,7 @@ function titleFor(type: string, value: string): string {
     ASSIGNMENT_CONFIRMED: "বুকিং নিশ্চিত হয়েছে",
     ASSIGNMENT_DECLINED: "কর্মী কাজটি নিশ্চিত করেননি",
     BOOKING_REQUESTED: "নতুন বুকিং অনুরোধ",
+    CASH_PAYMENT_RECORDED: "নগদ পেমেন্ট রেকর্ড হয়েছে",
     DISPUTE_OPENED: "বিরোধের অনুরোধ খোলা হয়েছে",
     JOB_APPLICATION_RECEIVED: "নতুন আবেদন",
     REVIEW_RECEIVED: "নতুন রিভিউ",
@@ -267,6 +275,10 @@ function bodyFor(type: string, value: string): string {
   }
 
   const dynamicEnglish: Array<[RegExp, (detail: string) => string]> = [
+    [
+      /^(.+) has been marked as paid in cash[.]?$/,
+      (detail) => `${detail} কাজটির নগদ পেমেন্ট রেকর্ড হয়েছে।`,
+    ],
     [
       /^A worker applied to (.+)$/,
       (detail) => `${detail} কাজটিতে একজন কর্মী আবেদন করেছেন। আবেদন দেখুন।`,
@@ -344,6 +356,7 @@ const assignmentNotificationTypes = new Set([
   "ASSIGNMENT_CONFIRMED",
   "ASSIGNMENT_DECLINED",
   "BOOKING_REQUESTED",
+  "CASH_PAYMENT_RECORDED",
   "COMPLETION_PENDING",
   "JOB_CONFIRMED",
   "JOB_REMINDER_1H",

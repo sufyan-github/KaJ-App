@@ -61,6 +61,7 @@ enum JobStatus {
   SUBMITTED
   CUSTOMER_REVIEW
   COMPLETED
+  PAYMENT_RECORDED
   PAYMENT_RELEASED
   REVIEWED
   EXPIRED
@@ -96,6 +97,8 @@ enum VerificationStatus {
 enum PaymentStatus {
   NONE
   PENDING
+  CASH_RECORDED
+  DISPUTED
   HELD
   RELEASED
   REFUNDED
@@ -177,6 +180,33 @@ enum PaymentMethod {
   MOBILE_FINANCIAL_SERVICE
   CARD
   BANK_TRANSFER
+}
+
+enum OperatorVerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  UNSUPPORTED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+  PENDING
+  CANCELLED
+}
+
+enum SubscriptionPaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+enum SubscriptionPaymentMethod {
+  OPERATOR_BILLING
+  MANUAL_ADMIN
 }
 
 enum LedgerAccountType {
@@ -333,6 +363,7 @@ model User {
   availability_rules          AvailabilityRule[]
   availability_exceptions     AvailabilityException[]
   payments                    Payment[]                 @relation("PaymentPayer")
+  cash_payments_recorded      Payment[]                 @relation("CashPaymentRecorder")
   payouts                     Payout[]
   wallet                      Wallet?
   reviews_written             Review[]                  @relation("ReviewWriter")
@@ -374,6 +405,9 @@ model User {
   notification_campaigns      NotificationCampaign[]
   fee_rules                   FeeRule[]
   idempotency_records         IdempotencyRecord[]
+  operator_identity           UserOperatorIdentity?
+  subscriptions               Subscription[]
+  subscription_payments       SubscriptionPayment[]
 
   @@index([status, deleted_at])
   @@map("users")
@@ -938,6 +972,9 @@ model Payment {
   status                PaymentStatus @default(NONE)
   method                PaymentMethod @default(CASH_ON_COMPLETION)
   provider_ref          String?
+  cash_recorded_at      DateTime?
+  cash_recorded_by      String?       @db.Uuid
+  disputed_at           DateTime?
   frozen_at             DateTime?
   freeze_reason         String?
   idempotency_key       String
@@ -946,13 +983,119 @@ model Payment {
   job                   Job           @relation(fields: [job_id], references: [id], onDelete: Restrict)
   assignment            Assignment    @relation(fields: [assignment_id], references: [id], onDelete: Restrict)
   payer                 User          @relation("PaymentPayer", fields: [payer_user_id], references: [id], onDelete: Restrict)
+  cash_recorder         User?         @relation("CashPaymentRecorder", fields: [cash_recorded_by], references: [id], onDelete: Restrict)
   ledger_entries        LedgerEntry[]
 
   @@unique([assignment_id])
   @@unique([payer_user_id, idempotency_key])
   @@index([job_id, status])
   @@index([payer_user_id])
+  @@index([cash_recorded_by])
   @@map("payments")
+}
+
+model MobileOperator {
+  id                    String                 @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  code                  String                 @unique
+  name_en               String
+  name_bn               String
+  number_prefixes       String[]
+  supports_subscription Boolean                @default(false)
+  is_active             Boolean                @default(true)
+  created_at            DateTime               @default(now())
+  updated_at            DateTime               @updatedAt
+  identities            UserOperatorIdentity[]
+
+  @@index([is_active, supports_subscription])
+  @@map("mobile_operators")
+}
+
+model UserOperatorIdentity {
+  id              String                     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id         String                     @unique @db.Uuid
+  operator_id     String?                    @db.Uuid
+  status          OperatorVerificationStatus @default(PENDING)
+  provider_ref    String?
+  last_checked_at DateTime?
+  verified_at     DateTime?
+  created_at      DateTime                   @default(now())
+  updated_at      DateTime                   @updatedAt
+  user            User                       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  operator        MobileOperator?            @relation(fields: [operator_id], references: [id], onDelete: SetNull)
+
+  @@index([operator_id, status])
+  @@map("user_operator_identities")
+}
+
+model SubscriptionPlan {
+  id             String         @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  code           String         @unique
+  name_en        String
+  name_bn        String
+  description_en String?
+  description_bn String?
+  price_poisha   BigInt
+  currency       String         @default("BDT") @db.Char(3)
+  duration_days  Int
+  feature_keys   String[]
+  is_active      Boolean        @default(false)
+  sort_order     Int            @default(0)
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
+  subscriptions  Subscription[]
+
+  @@index([is_active, sort_order])
+  @@map("subscription_plans")
+}
+
+model Subscription {
+  id           String                @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id      String                @db.Uuid
+  plan_id      String                @db.Uuid
+  status       SubscriptionStatus    @default(PENDING)
+  starts_at    DateTime?
+  expires_at   DateTime?
+  cancelled_at DateTime?
+  created_at   DateTime              @default(now())
+  updated_at   DateTime              @updatedAt
+  user         User                  @relation(fields: [user_id], references: [id], onDelete: Restrict)
+  plan         SubscriptionPlan      @relation(fields: [plan_id], references: [id], onDelete: Restrict)
+  payments     SubscriptionPayment[]
+
+  @@index([user_id, status, expires_at(sort: Desc)])
+  @@index([plan_id, status])
+  @@map("subscriptions")
+}
+
+model SubscriptionPayment {
+  id              String                    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  subscription_id String                    @db.Uuid
+  user_id         String                    @db.Uuid
+  amount_poisha   BigInt
+  currency        String                    @default("BDT") @db.Char(3)
+  method          SubscriptionPaymentMethod @default(OPERATOR_BILLING)
+  status          SubscriptionPaymentStatus @default(PENDING)
+  provider_ref    String?
+  paid_at         DateTime?
+  created_at      DateTime                  @default(now())
+  updated_at      DateTime                  @updatedAt
+  subscription    Subscription              @relation(fields: [subscription_id], references: [id], onDelete: Restrict)
+  user            User                      @relation(fields: [user_id], references: [id], onDelete: Restrict)
+
+  @@index([subscription_id, created_at(sort: Desc)])
+  @@index([user_id, status, created_at(sort: Desc)])
+  @@map("subscription_payments")
+}
+
+model SubscriptionAccessRule {
+  feature_key                  String   @id
+  requires_active_subscription Boolean  @default(true)
+  is_active                    Boolean  @default(true)
+  description                  String?
+  created_at                   DateTime @default(now())
+  updated_at                   DateTime @updatedAt
+
+  @@map("subscription_access_rules")
 }
 
 model LedgerEntry {
