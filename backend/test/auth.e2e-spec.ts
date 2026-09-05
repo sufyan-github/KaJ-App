@@ -33,7 +33,7 @@ import {
   OtpCodeGenerator,
 } from "../src/modules/auth/otp-code.generator";
 
-const PHONE = "+8801712345678";
+const PHONE = "+8801812345678";
 const DEVICE_ID = "018f4f6f-13e8-7d9a-8c2b-6b6a9f62f531";
 const OTP_CODE = "123456";
 
@@ -314,7 +314,7 @@ describe("phone OTP authentication", () => {
   }
 
   it("normalizes a BD phone and completes the happy path without exposing the code", async () => {
-    const response = await requestOtp("01712 345-678").expect(201);
+    const response = await requestOtp("01812 345-678").expect(201);
 
     expect(response.body.data).toEqual({
       challengeId: expect.any(String),
@@ -346,6 +346,13 @@ describe("phone OTP authentication", () => {
     const response = await requestOtp("+14155552671").expect(400);
     expect(response.body.error.code).toBe("AUTH_INVALID_PHONE");
     expect(response.body.error.field).toBe("phone");
+  });
+
+  it("rejects unsupported operators without sending an OTP", async () => {
+    const response = await requestOtp("01712 345-678").expect(422);
+    expect(response.body.error.code).toBe("AUTH_UNSUPPORTED_OPERATOR");
+    expect(response.body.error.field).toBe("phone");
+    expect(sms.messages).toHaveLength(0);
   });
 
   it("rejects a wrong code", async () => {

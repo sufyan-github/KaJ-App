@@ -9,3 +9,7 @@ export function normalizeBangladeshPhone(phone: string): string | null {
   if (!/^01[3-9]\d{8}$/.test(national)) return null;
   return `+88${national}`;
 }
+
+export function isRobiOrAirtelPhone(phoneE164: string): boolean {
+  return /^\+8801(?:6|8)\d{8}$/.test(phoneE164);
+}

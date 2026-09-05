@@ -20,6 +20,7 @@ import {
   otpRateLimitError,
   refreshInvalidError,
   refreshReuseError,
+  unsupportedOperatorError,
 } from "./auth.errors";
 import { AUTH_RATE_LIMITER, AuthRateLimiter } from "./auth-rate-limiter";
 import {
@@ -30,7 +31,7 @@ import {
 } from "./auth.repository";
 import { AccessTokenClaims, AuthTokenService } from "./auth-token.service";
 import { OTP_CODE_GENERATOR, OtpCodeGenerator } from "./otp-code.generator";
-import { normalizeBangladeshPhone } from "./phone";
+import { isRobiOrAirtelPhone, normalizeBangladeshPhone } from "./phone";
 
 const OTP_BCRYPT_ROUNDS = 10;
 const OTP_WINDOW_SECONDS = 3_600;
@@ -78,6 +79,7 @@ export class AuthService {
   ): Promise<{ challengeId: string; expiresIn: number }> {
     const phoneE164 = normalizeBangladeshPhone(phone);
     if (!phoneE164) throw invalidPhoneError();
+    if (!isRobiOrAirtelPhone(phoneE164)) throw unsupportedOperatorError();
 
     await this.enforceRateLimit(
       "otp-phone",

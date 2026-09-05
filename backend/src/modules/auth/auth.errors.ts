@@ -33,6 +33,18 @@ export function invalidPhoneError(): KajHttpException {
   );
 }
 
+export function unsupportedOperatorError(): KajHttpException {
+  return new KajHttpException(
+    descriptor(
+      "AUTH_UNSUPPORTED_OPERATOR",
+      "error.auth.unsupported_operator",
+      "Only Robi (018) and Airtel (016) numbers can register.",
+      "phone",
+    ),
+    HttpStatus.UNPROCESSABLE_ENTITY,
+  );
+}
+
 export function otpRateLimitError(
   retryAfterSeconds: number,
 ): RateLimitException {

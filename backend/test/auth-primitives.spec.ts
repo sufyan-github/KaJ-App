@@ -1,6 +1,9 @@
 import { ConsoleSmsAdapter } from "../src/infra/sms/console.adapter";
 import { CryptoOtpCodeGenerator } from "../src/modules/auth/otp-code.generator";
-import { normalizeBangladeshPhone } from "../src/modules/auth/phone";
+import {
+  isRobiOrAirtelPhone,
+  normalizeBangladeshPhone,
+} from "../src/modules/auth/phone";
 import { parseTtlSeconds } from "../src/modules/auth/ttl";
 
 describe("auth primitives", () => {
@@ -13,6 +16,18 @@ describe("auth primitives", () => {
   ])("normalizes %s as %s", (input, expected) => {
     expect(normalizeBangladeshPhone(input)).toBe(expected);
   });
+
+  it.each([
+    ["+8801812345678", true],
+    ["+8801612345678", true],
+    ["+8801712345678", false],
+    ["+8801912345678", false],
+  ])(
+    "checks whether %s uses a supported operator prefix",
+    (phone, expected) => {
+      expect(isRobiOrAirtelPhone(phone)).toBe(expected);
+    },
+  );
 
   it("parses configured access and refresh TTLs", () => {
     expect(parseTtlSeconds("15m")).toBe(900);
