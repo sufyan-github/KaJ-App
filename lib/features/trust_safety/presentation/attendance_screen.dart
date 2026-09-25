@@ -15,12 +15,14 @@ import 'trust_safety_providers.dart';
 class AttendanceScreen extends ConsumerStatefulWidget {
   const AttendanceScreen({
     required this.assignmentId,
-    required this.title,
     required this.isPoster,
+    this.title,
     super.key,
   });
   final String assignmentId;
-  final String title;
+
+  /// Absent when opened from a deep link rather than the assignment screen.
+  final String? title;
   final bool isPoster;
 
   @override
@@ -66,7 +68,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     return ListView(
       padding: const EdgeInsets.all(KSpacing.lg),
       children: [
-        Text(widget.title, style: Theme.of(context).textTheme.headlineSmall),
+        Text(
+          widget.title ?? KaajLocalizations.text(context, 'কাজের উপস্থিতি'),
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
         const SizedBox(height: KSpacing.md),
         _StatusCard(state: state),
         const SizedBox(height: KSpacing.md),

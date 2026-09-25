@@ -9,6 +9,7 @@ import '../../../core/errors/failure.dart';
 import '../../../core/localization/kaaj_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/k_localized_text.dart';
+import '../../../core/widgets/k_network_image.dart';
 import '../../../core/widgets/k_primary_button.dart';
 import '../../catalog/domain/entities/catalog_category.dart';
 import '../../catalog/presentation/controllers/catalog_providers.dart';
@@ -620,18 +621,10 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
                           child: ListTile(
                             leading: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                item.imageUrl,
+                              child: KNetworkImage(
+                                url: item.imageUrl,
                                 width: 52,
                                 height: 52,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => const SizedBox(
-                                  width: 52,
-                                  height: 52,
-                                  child: Icon(
-                                    Icons.image_not_supported_outlined,
-                                  ),
-                                ),
                               ),
                             ),
                             title: KLocalizedText(item.categoryName),
@@ -752,13 +745,9 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
               Expanded(
                 child: InteractiveViewer(
                   child: Center(
-                    child: Image.network(
-                      item.imageUrl,
+                    child: KNetworkImage(
+                      url: item.imageUrl,
                       fit: BoxFit.contain,
-                      errorBuilder: (_, _, _) => const Padding(
-                        padding: EdgeInsets.all(KSpacing.xl),
-                        child: KLocalizedText('ছবিটি এখন দেখানো যাচ্ছে না।'),
-                      ),
                     ),
                   ),
                 ),
@@ -995,25 +984,11 @@ class _PortfolioCard extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Image.network(
-                  item.imageUrl,
+                KNetworkImage(
+                  url: item.imageUrl,
                   semanticLabel: KaajLocalizations.text(
                     context,
                     '${item.categoryName} কাজের ছবি',
-                  ),
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, progress) => progress == null
-                      ? child
-                      : const Center(child: CircularProgressIndicator()),
-                  errorBuilder: (_, _, _) => const Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.broken_image_outlined),
-                        SizedBox(height: KSpacing.xs),
-                        KLocalizedText('ছবি লোড হয়নি'),
-                      ],
-                    ),
                   ),
                 ),
                 if (busy)

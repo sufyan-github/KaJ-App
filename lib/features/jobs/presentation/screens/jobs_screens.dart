@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/formatting/kaaj_format.dart';
 import '../../../../core/localization/kaaj_localizations.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/routing/route_arguments.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_localized_text.dart';
 import '../../../../core/widgets/k_primary_button.dart';
@@ -18,6 +20,7 @@ import '../../../profile/domain/public_worker_profile.dart';
 import '../../../profile/presentation/controllers/public_profile_provider.dart';
 import '../../../trust_safety/domain/trust_models.dart';
 import '../../../trust_safety/presentation/trust_safety_providers.dart';
+import '../../data/jobs_repository.dart';
 import '../../domain/job_models.dart';
 import '../controllers/jobs_providers.dart';
 
@@ -378,8 +381,9 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
       }
       return;
     }
+    final budget = job.budgetMaxPoisha ?? job.budgetMinPoisha;
     final amount = TextEditingController(
-      text: _taka(job.budgetMaxPoisha ?? job.budgetMinPoisha) ?? '',
+      text: budget == null ? '' : budget.wholeTaka.toString(),
     );
     final message = TextEditingController();
     final start = job.startsAt ?? DateTime.now().add(const Duration(days: 1));
@@ -721,10 +725,14 @@ class _JobCard extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-          if (_taka(job.budgetMaxPoisha ?? job.budgetMinPoisha)
+          if (KFormat.moneyRange(
+                context,
+                job.budgetMinPoisha,
+                job.budgetMaxPoisha,
+              )
               case final amount?)
-            KLocalizedText(
-              '৳$amount',
+            Text(
+              amount,
               textAlign: TextAlign.center,
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
@@ -964,7 +972,21 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
         'endsAt': endsAt.toUtc().toIso8601String(),
       });
       ref.invalidate(jobFeedProvider);
+      ref.invalidate(myJobsProvider);
       if (mounted) context.pop();
+    } on JobDraftPublishFailure {
+      // The job was saved but not published. Say so, so the poster does not
+      // retype the whole form or assume nothing was created.
+      ref.invalidate(myJobsProvider);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: KLocalizedText(
+              'কাজটি খসড়া হিসেবে সংরক্ষিত হয়েছে, কিন্তু প্রকাশ করা যায়নি। "আমার কাজ" থেকে আবার প্রকাশ করুন।',
+            ),
+          ),
+        );
+      }
     } on Object {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1419,11 +1441,8 @@ class _AssignmentDetailBody extends ConsumerWidget {
           const SizedBox(height: KSpacing.sm),
           OutlinedButton.icon(
             onPressed: () => context.push(
-              AppRoutes.attendance(
-                item.id,
-                title: item.title,
-                isPoster: item.isPoster,
-              ),
+              AppRoutes.attendance(item.id),
+              extra: AttendanceArgs(title: item.title, isPoster: item.isPoster),
             ),
             icon: const Icon(Icons.location_on_outlined),
             label: KLocalizedText(
@@ -1644,8 +1663,8 @@ class _AssignmentDetailBody extends ConsumerWidget {
       ref.invalidate(conversationsProvider);
       if (context.mounted) {
         await context.push(
-          AppRoutes.chatThread(
-            id,
+          AppRoutes.chatThread(id),
+          extra: ChatThreadArgs(
             jobTitle: item.title,
             otherName: item.isWorker ? 'কাজের মালিক' : 'কর্মী',
             otherUserId: otherUserId,
@@ -1693,7 +1712,7 @@ class _AssignmentDetailBody extends ConsumerWidget {
         builder: (context) => AlertDialog(
           title: const KLocalizedText('বাতিলের আগে ফলাফল দেখুন'),
           content: KLocalizedText(
-            '${preview.summaryFor(Localizations.localeOf(context).languageCode)}\n\n${KaajLocalizations.text(context, 'ফেরত')}: ৳${_taka(preview.refundPoisha)} · ${KaajLocalizations.text(context, 'ফি')}: ৳${_taka(preview.feePoisha)}',
+            '${preview.summaryFor(Localizations.localeOf(context).languageCode)}\n\n${KaajLocalizations.text(context, 'ফেরত')}: ${KFormat.money(context, preview.refundPoisha)} · ${KaajLocalizations.text(context, 'ফি')}: ${KFormat.money(context, preview.feePoisha)}',
           ),
           actions: [
             TextButton(
@@ -1781,7 +1800,7 @@ class _CashPaymentPanel extends StatelessWidget {
                 ),
                 if (payment != null)
                   Text(
-                    '৳${_taka(payment!.agreedPoisha)}',
+                    KFormat.money(context, payment!.agreedPoisha),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
               ],
@@ -2135,11 +2154,6 @@ String _time(DateTime value) {
   final hour = local.hour.toString().padLeft(2, '0');
   final minute = local.minute.toString().padLeft(2, '0');
   return '$hour:$minute';
-}
-
-String? _taka(String? poisha) {
-  final value = int.tryParse(poisha ?? '');
-  return value == null ? null : (value ~/ 100).toString();
 }
 
 String _matchReasonBn(String reason) => switch (reason) {

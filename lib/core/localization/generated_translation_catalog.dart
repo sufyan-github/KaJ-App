@@ -4,6 +4,8 @@
 // Reviewed overrides live in kaaj_localizations.dart.
 
 const generatedEnglishTranslations = <String, String>{
+  "কাজটি খসড়া হিসেবে সংরক্ষিত হয়েছে, কিন্তু প্রকাশ করা যায়নি। \"আমার কাজ\" থেকে আবার প্রকাশ করুন।":
+      "The job was saved as a draft but could not be published. Publish it again from My jobs.",
   "কী কাজ করাতে চান?": "What work do you need done?",
   "আপনার এলাকা": "Your area",
   "কাজ অনুসন্ধান": "Search work",

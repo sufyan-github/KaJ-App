@@ -1,3 +1,5 @@
+import '../../../core/formatting/money.dart';
+
 class MobileOperatorOption {
   const MobileOperatorOption({
     required this.code,
@@ -64,7 +66,7 @@ class SubscriptionPlan {
         nameBn: json['nameBn'] as String? ?? '',
         descriptionEn: json['descriptionEn'] as String?,
         descriptionBn: json['descriptionBn'] as String?,
-        pricePoisha: json['pricePoisha']?.toString() ?? '0',
+        pricePoisha: Money.parseOrZero(json['pricePoisha']),
         currency: json['currency'] as String? ?? 'BDT',
         durationDays: (json['durationDays'] as num?)?.toInt() ?? 0,
         featureKeys:
@@ -83,7 +85,7 @@ class SubscriptionPlan {
   final String id;
   final String nameBn;
   final String nameEn;
-  final String pricePoisha;
+  final Money pricePoisha;
 
   String nameFor(String languageCode) => languageCode == 'en' ? nameEn : nameBn;
 
@@ -214,7 +216,7 @@ class JobPaymentRecord {
     assignmentId: json['assignmentId'] as String? ?? '',
     jobTitle: json['jobTitle'] as String? ?? 'কাজ',
     role: json['role'] as String? ?? '',
-    agreedPoisha: json['agreedPoisha']?.toString() ?? '0',
+    agreedPoisha: Money.parseOrZero(json['agreedPoisha']),
     currency: json['currency'] as String? ?? 'BDT',
     method: json['method'] as String? ?? 'CASH_ON_COMPLETION',
     status: json['status'] as String? ?? 'PENDING',
@@ -224,7 +226,7 @@ class JobPaymentRecord {
         DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
   );
 
-  final String agreedPoisha;
+  final Money agreedPoisha;
   final String assignmentId;
   final DateTime? cashRecordedAt;
   final DateTime createdAt;

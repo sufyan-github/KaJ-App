@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../core/errors/error_mapper.dart';
+import '../../../core/errors/failure.dart';
 import '../domain/job_models.dart';
 
 class JobsRepository {
@@ -39,17 +41,36 @@ class JobsRepository {
     }
   }
 
+  /// Creates a job and publishes it as one user action.
+  ///
+  /// This is still two calls, because the API has no combined endpoint. What
+  /// changed is that both carry the *same* idempotency key: on a dropped 3G
+  /// connection the poster used to see an error, retry, and create a second
+  /// draft, because each call minted its own key. If publishing fails the
+  /// draft id is still returned inside the failure so the caller can offer to
+  /// resume it rather than orphaning it.
   Future<String> createAndPublishJob(Map<String, dynamic> payload) async {
+    final actionKey = const Uuid().v4();
+    String? draftId;
     try {
       final created = await _dio.post<Map<String, dynamic>>(
         '/jobs',
         data: payload,
+        options: Options(headers: {'Idempotency-Key': 'job-create-$actionKey'}),
       );
-      final id = _data(created.data)['id'] as String;
-      await _dio.post<Map<String, dynamic>>('/jobs/$id/publish');
-      return id;
+      draftId = _data(created.data)['id'] as String;
+      await _dio.post<Map<String, dynamic>>(
+        '/jobs/$draftId/publish',
+        options: Options(
+          headers: {'Idempotency-Key': 'job-publish-$actionKey'},
+        ),
+      );
+      return draftId;
     } on Object catch (error) {
-      throw ErrorMapper.from(error);
+      final failure = ErrorMapper.from(error);
+      throw draftId == null
+          ? failure
+          : JobDraftPublishFailure(draftId: draftId, cause: failure);
     }
   }
 
@@ -328,4 +349,17 @@ class JobsRepository {
         .map((item) => Map<String, dynamic>.from(item))
         .toList(growable: false);
   }
+}
+
+/// Raised when a job was created but could not be published. The draft exists
+/// server-side, so the UI can offer to retry publishing instead of losing the
+/// form the poster just filled in.
+class JobDraftPublishFailure implements Exception {
+  const JobDraftPublishFailure({required this.draftId, required this.cause});
+
+  final Failure cause;
+  final String draftId;
+
+  @override
+  String toString() => 'JobDraftPublishFailure($draftId, $cause)';
 }

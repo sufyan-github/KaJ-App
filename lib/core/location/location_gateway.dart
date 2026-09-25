@@ -7,6 +7,7 @@ class KLocation {
     required this.accuracyM,
     required this.capturedAt,
     required this.mockLocation,
+    this.age = Duration.zero,
   });
 
   final double latitude;
@@ -14,6 +15,12 @@ class KLocation {
   final double accuracyM;
   final DateTime capturedAt;
   final bool mockLocation;
+
+  /// How old the underlying fix was when it was read, measured against the
+  /// device's elapsed-realtime clock rather than its wall clock. The native
+  /// side already refuses anything stale; this is here so the server can be
+  /// told, and can decide independently.
+  final Duration age;
 }
 
 class LocationGateway {
@@ -33,6 +40,7 @@ class LocationGateway {
         (result['time'] as num).toInt(),
       ),
       mockLocation: result['mockLocation'] == true,
+      age: Duration(milliseconds: (result['ageMillis'] as num?)?.toInt() ?? 0),
     );
   }
 }

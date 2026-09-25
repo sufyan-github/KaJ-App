@@ -50,3 +50,17 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Build artifacts that must never enter history
+*.apk
+*.aab
+*.aab.sha256
+/output/
+/tmp/
+/exports/
+*.symbols
+
+# Landing page
+/landing-page/node_modules/
+/landing-page/dist/
+/landing-page/*.zip

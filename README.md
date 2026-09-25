@@ -43,14 +43,16 @@ fail after the signing step.
 The local defaults are API port `3100` and MinIO port `9000`. Override them with
 `KAAJ_API_PORT` and `KAAJ_STORAGE_PORT` when needed.
 
-To run a connected phone against the deployed production test API, use:
+To run a connected phone against the deployed production API, use:
 
 ```bash
 ./tool/run_live_android.sh <android-device-id>
 ```
 
-This uses `https://kaaj-api.onrender.com/api/v1` by default. Override it with
-`KAAJ_LIVE_API_URL` when a custom production domain is connected.
+This uses `https://api.kaaj.app/api/v1` by default. Override it with
+`KAAJ_LIVE_API_URL` while testing a different public API endpoint. Provider,
+database and signing credentials belong on the server and are never passed to
+Flutter or embedded in an APK.
 
 The API URL must use HTTPS because Android cleartext traffic is disabled. Default flavor endpoints follow the specification:
 
@@ -60,23 +62,85 @@ The API URL must use HTTPS because Android cleartext traffic is disabled. Defaul
 
 ## Quality gates
 
-```powershell
+```bash
 dart format --output=none --set-exit-if-changed .
 flutter analyze --fatal-infos
-flutter test
-flutter build apk --debug --flavor dev
-flutter build apk --debug --flavor staging
-flutter build apk --debug --flavor prod
+flutter test --coverage
+flutter build apk --release --flavor prod --target-platform android-arm64
 ```
+
+CI runs all four. The release build is part of the gate on purpose: a debug
+build cannot catch an R8 or resource-shrinking regression, and CI fails if the
+arm64 release APK grows past 35 MB.
+
+## Release
+
+```bash
+KAAJ_API_URL=https://api.kaaj.app/api/v1 \
+KAAJ_SENTRY_DSN=<dsn> \
+./tool/build_release.sh
+```
+
+This produces the signed App Bundle and writes obfuscation symbols to
+`build/symbols/<version>/`. **Archive that symbol directory with every
+release** — without the symbols for a specific build, its Sentry stack traces
+cannot be read.
+
+Release builds have R8 code shrinking, resource shrinking and Dart obfuscation
+enabled, and the bundle splits by ABI and density. The arm64 download is about
+25 MB; a universal unshrunk APK was 63 MB.
+
+`android/key.properties` is required and is never committed. It supports
+`keyPassword`/`storePassword` inline or `keyPasswordFile`/`storePasswordFile`
+pointing at files outside the repository.
 
 ## Architecture
 
 Each feature owns `data`, `domain`, and `presentation` layers. Domain code does not import Flutter or data implementations. API DTOs remain in data sources/repositories, while widgets depend on domain contracts through Riverpod providers.
 
+Some shared rules that are easy to break by accident:
+
+- **Money is never a string.** Parse API amounts once at the data boundary with
+  `Money.tryParse` (optional fields) or `Money.parseOrZero` (required ones), and
+  render with `KFormat.money`. A missing amount must stay `null` rather than
+  becoming ৳0.
+- **Dates and numbers go through `KFormat`.** It takes the active locale, so
+  Bangla screens get Bangla numerals and month names. A bare `DateFormat(...)`
+  with no locale silently prints English.
+- **Remote images use `KNetworkImage`, never `Image.network`.** It disk-caches,
+  decodes to the drawn size, and has real placeholder and error states. Repeated
+  downloads cost the user prepaid data.
+- **`dioProvider` must not depend on the locale.** `Accept-Language` is read per
+  request from `ApiLocale`. Making Dio depend on the locale rebuilds the auth
+  controller and every repository cache on a language switch; there is a
+  regression test for this in `test/core/api_locale_test.dart`.
+- **User-authored content stays out of route URLs.** Titles and names travel
+  through GoRouter `extra` (see `core/routing/route_arguments.dart`); a cold
+  deep link falls back to localized wording.
+
 ## Deliberate deviation
 
 The source specification is Bangla-first. The project owner explicitly requested English, so English is the authored and default locale in this implementation. The localization boundary remains in place for adding Bangla later.
 
+## Known gaps
+
+Two things are deliberately not done yet and are not hidden by the code:
+
+- **Push notifications.** There is a notification inbox but no FCM, so nothing
+  reaches a user whose app is closed. Realtime is a per-conversation socket only.
+- **Authentication remains in its testing phase.** Registration is still
+  restricted to Robi (018) and Airtel (016) because OTP and subscription
+  charging both run through BDApps. Opening this up to Grameenphone (017/013),
+  Banglalink (019/014) and Teletalk (015) needs an operator-neutral SMS gateway
+  first. `AuthValidators._bangladeshPhone` already accepts every valid prefix
+  and is the switch to flip when that lands.
+
+The app is dark-theme only. `KColors` is referenced directly at 273 call sites,
+so adding a light theme means moving those to a `ThemeExtension` first.
+
 ## Maintenance note
 
-Flutter 3.47.2 currently reports that `sentry_flutter` applies the Kotlin Gradle Plugin and will need a future Built-in Kotlin-compatible release. All three flavor builds currently succeed; this is a forward-compatibility warning, not a failed gate.
+Flutter 3.47.2 reports that `sentry_flutter` and `flutter_image_compress_common`
+apply the Kotlin Gradle Plugin and will need Built-in Kotlin-compatible
+releases. All flavor builds currently succeed; this is a forward-compatibility
+warning, not a failed gate.

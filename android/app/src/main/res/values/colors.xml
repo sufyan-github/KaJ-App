@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- KColors.primaryDark — the launcher plate behind the KAAJ mark. -->
+    <color name="ic_launcher_background">#076943</color>
+    <color name="kaaj_background">#111713</color>
+</resources>

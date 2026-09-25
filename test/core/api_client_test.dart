@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kaaj/core/config/app_environment.dart';
 import 'package:kaaj/core/network/api_client.dart';
+import 'package:kaaj/core/network/api_locale.dart';
 import 'package:kaaj/core/storage/session_token_store.dart';
 
 void main() {
@@ -46,7 +47,7 @@ void main() {
     final client = ApiClient(
       environment: environment,
       tokenStore: _MemoryTokenStore(),
-      localeCode: 'en',
+      locale: ApiLocale('en'),
       httpClientAdapter: adapter,
     );
 
@@ -54,6 +55,26 @@ void main() {
 
     expect(adapter.requests.single.headers['Accept-Language'], 'en');
   });
+
+  test(
+    'never sends a private provider credential from the public client',
+    () async {
+      final adapter = _RecordingAdapter((request, attempt) {
+        return _jsonResponse(200, {
+          'data': {'accepted': true},
+        });
+      });
+      final client = ApiClient(
+        environment: environment,
+        tokenStore: _MemoryTokenStore(),
+        httpClientAdapter: adapter,
+      );
+
+      await client.dio.get<Map<String, dynamic>>('/jobs');
+
+      expect(adapter.requests.single.headers.containsKey('X-API-Key'), isFalse);
+    },
+  );
 
   test('adds an idempotency key to DELETE requests', () async {
     final adapter = _RecordingAdapter(

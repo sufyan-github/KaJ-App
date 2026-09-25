@@ -8,7 +8,12 @@ if [[ $# -ne 1 ]]; then
 fi
 
 KAAJ_DEVICE_ID="$1"
-KAAJ_LIVE_API_URL="${KAAJ_LIVE_API_URL:-https://kaaj-api.onrender.com/api/v1}"
+KAAJ_LIVE_API_URL="${KAAJ_LIVE_API_URL:-https://api.kaaj.app/api/v1}"
+
+if [[ "$KAAJ_LIVE_API_URL" != https://* ]]; then
+  echo "KAAJ_LIVE_API_URL must use HTTPS." >&2
+  exit 78
+fi
 
 exec flutter run \
   -d "$KAAJ_DEVICE_ID" \

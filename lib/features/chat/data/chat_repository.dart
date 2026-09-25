@@ -71,61 +71,104 @@ class ChatRepository {
     }
   }
 
-  Future<ChatMessage> sendImage(String conversationId, Uint8List source) async {
-    final compressed = await FlutterImageCompress.compressWithList(
-      source,
-      minWidth: 1600,
-      minHeight: 1600,
-      quality: 78,
-      format: CompressFormat.jpeg,
-    );
-    final signedResponse = await _dio.post<Map<String, dynamic>>(
-      '/uploads/sign',
-      data: {
-        'kind': 'CHAT_IMAGE',
-        'mime': 'image/jpeg',
-        'sizeBytes': compressed.length,
-      },
-    );
-    final signed = _data(signedResponse.data);
-    await Dio().put<void>(
-      signed['uploadUrl'] as String,
-      data: Stream.fromIterable([compressed]),
-      options: Options(
-        headers: Map<String, dynamic>.from(
-          signed['requiredHeaders'] as Map? ?? const {},
-        )..['content-length'] = compressed.length,
-      ),
-    );
-    final completedResponse = await _dio.post<Map<String, dynamic>>(
-      '/uploads/complete',
-      data: {
-        'kind': 'CHAT_IMAGE',
-        'mime': 'image/jpeg',
-        'sizeBytes': compressed.length,
-        'key': signed['key'],
-      },
-    );
-    final documentId = _data(completedResponse.data)['documentId'] as String;
-    final response = await _dio.post<Map<String, dynamic>>(
-      '/conversations/$conversationId/messages',
-      data: {
-        'type': 'IMAGE',
-        'attachmentDocumentId': documentId,
-        'clientNonce': const Uuid().v4(),
-      },
-    );
-    return ChatMessage.fromJson(_data(response.data));
+  /// Signs, uploads and attaches a chat photo.
+  ///
+  /// All three steps share one `try`, so a failure anywhere surfaces as a
+  /// [Failure] like every other repository call rather than escaping as a raw
+  /// [DioException] the controller cannot render. [onProgress] reports upload
+  /// completion between 0 and 1 — on a slow uplink the signing step succeeds
+  /// long before the bytes land, and without it the bubble sits on an
+  /// indeterminate spinner with no sign of progress.
+  Future<ChatMessage> sendImage(
+    String conversationId,
+    Uint8List source, {
+    void Function(double progress)? onProgress,
+  }) async {
+    try {
+      final compressed = await FlutterImageCompress.compressWithList(
+        source,
+        minWidth: 1600,
+        minHeight: 1600,
+        quality: 78,
+        format: CompressFormat.jpeg,
+      );
+      final signedResponse = await _dio.post<Map<String, dynamic>>(
+        '/uploads/sign',
+        data: {
+          'kind': 'CHAT_IMAGE',
+          'mime': 'image/jpeg',
+          'sizeBytes': compressed.length,
+        },
+      );
+      final signed = _data(signedResponse.data);
+      // A separate client on purpose: the pre-signed storage URL must not
+      // receive the KAAJ bearer token. The timeouts are generous because this
+      // is the single largest upload the app performs on a mobile uplink.
+      final uploader = Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 30),
+          sendTimeout: const Duration(minutes: 3),
+          receiveTimeout: const Duration(minutes: 1),
+        ),
+      );
+      try {
+        await uploader.put<void>(
+          signed['uploadUrl'] as String,
+          data: Stream.fromIterable([compressed]),
+          onSendProgress: onProgress == null
+              ? null
+              : (sent, total) {
+                  if (total > 0) onProgress(sent / total);
+                },
+          options: Options(
+            headers: Map<String, dynamic>.from(
+              signed['requiredHeaders'] as Map? ?? const {},
+            )..['content-length'] = compressed.length,
+          ),
+        );
+      } finally {
+        uploader.close();
+      }
+      final completedResponse = await _dio.post<Map<String, dynamic>>(
+        '/uploads/complete',
+        data: {
+          'kind': 'CHAT_IMAGE',
+          'mime': 'image/jpeg',
+          'sizeBytes': compressed.length,
+          'key': signed['key'],
+        },
+      );
+      final documentId = _data(completedResponse.data)['documentId'] as String;
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/conversations/$conversationId/messages',
+        data: {
+          'type': 'IMAGE',
+          'attachmentDocumentId': documentId,
+          'clientNonce': const Uuid().v4(),
+        },
+      );
+      return ChatMessage.fromJson(_data(response.data));
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
   }
 
   Future<void> markRead(String conversationId) async {
-    await _dio.post<Map<String, dynamic>>(
-      '/conversations/$conversationId/read',
-    );
+    try {
+      await _dio.post<Map<String, dynamic>>(
+        '/conversations/$conversationId/read',
+      );
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
   }
 
   Future<void> blockUser(String userId) async {
-    await _dio.post<Map<String, dynamic>>('/users/$userId/block');
+    try {
+      await _dio.post<Map<String, dynamic>>('/users/$userId/block');
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
   }
 
   List<PendingChatMessage> pending(String conversationId) {

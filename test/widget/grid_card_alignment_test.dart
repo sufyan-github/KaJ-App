@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kaaj/core/formatting/money.dart';
 import 'package:kaaj/core/theme/app_theme.dart';
 import 'package:kaaj/features/auth/domain/repositories/auth_repository.dart';
 import 'package:kaaj/features/auth/presentation/controllers/auth_controller.dart';
@@ -145,7 +146,7 @@ void main() {
       status: 'PUBLISHED',
       skills: const ['ইলেকট্রিক কাজ'],
       startsAt: startsAt,
-      budgetMaxPoisha: '150000',
+      budgetMaxPoisha: const Money(150000),
       matchScore: 92,
       matchReasons: const ['SKILL_MATCH'],
       timeCompatibility: 'AVAILABLE',

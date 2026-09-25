@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'app.dart';
@@ -12,6 +13,10 @@ import 'features/onboarding/data/onboarding_repository.dart';
 
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Without this, every DateFormat falls back to `en_US` and Bangla screens
+  // print English month names and Latin digits.
+  await initializeDateFormatting('bn_BD');
+  await initializeDateFormatting('en');
   await Hive.initFlutter();
   await Hive.openBox<dynamic>(onboardingBoxName);
   await Hive.openBox<dynamic>('kaaj_chat');
@@ -43,6 +48,9 @@ Future<void> bootstrap() async {
       ..dsn = environment.sentryDsn
       ..sendDefaultPii = false
       ..environment = environment.flavor.name;
+    if (environment.sentryRelease.isNotEmpty) {
+      options.release = environment.sentryRelease;
+    }
   }, appRunner: start);
 }
 

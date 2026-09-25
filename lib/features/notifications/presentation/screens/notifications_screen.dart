@@ -112,7 +112,67 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
         )
         .toList(growable: false);
 
-    return ListView(
+    // The inbox grows without bound, so the rows are flattened into a
+    // lightweight model and built lazily. Materialising every card up front
+    // meant a few hundred notifications allocated a few hundred Cards on a
+    // 2 GB device before the first frame.
+    final rows = _inboxRows(visibleItems);
+    final header = <Widget>[
+      FutureBuilder<KPermissionStatus>(
+        future: _permissionStatus,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData || snapshot.data == KPermissionStatus.granted) {
+            return const SizedBox.shrink();
+          }
+          return Padding(
+            padding: const EdgeInsets.only(bottom: KSpacing.md),
+            child: _PermissionBanner(onOpenSettings: _openNotificationSettings),
+          );
+        },
+      ),
+      _InboxSummary(unreadCount: inbox.unreadCount),
+      const SizedBox(height: KSpacing.md),
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: NotificationGroup.values
+              .map(
+                (group) => Padding(
+                  padding: const EdgeInsets.only(right: KSpacing.sm),
+                  child: FilterChip(
+                    label: KLocalizedText(_groupLabel(group)),
+                    selected: _selectedGroup == group,
+                    selectedColor: Color.alphaBlend(
+                      KColors.primary.withValues(alpha: 0.12),
+                      Theme.of(context).colorScheme.surface,
+                    ),
+                    checkmarkColor: KColors.primary,
+                    side: BorderSide(
+                      color: _selectedGroup == group
+                          ? KColors.primary
+                          : KColors.border,
+                    ),
+                    onSelected: (_) => setState(() => _selectedGroup = group),
+                  ),
+                ),
+              )
+              .toList(growable: false),
+        ),
+      ),
+      const SizedBox(height: KSpacing.md),
+      if (visibleItems.isEmpty)
+        KEmptyState(
+          icon: Icons.notifications_none_outlined,
+          title: inbox.items.isEmpty
+              ? 'এখনো কোনো নোটিফিকেশন নেই'
+              : 'এই ধরনের কোনো আপডেট নেই',
+          message: inbox.items.isEmpty
+              ? 'আবেদন, বুকিং, বার্তা ও যাচাইয়ের খবর এখানে দেখা যাবে।'
+              : 'অন্য একটি বিভাগ বেছে দেখুন বা নিচে টেনে রিফ্রেশ করুন।',
+        ),
+    ];
+
+    return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(
         KSpacing.md,
@@ -120,100 +180,49 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
         KSpacing.md,
         KSpacing.xl,
       ),
-      children: [
-        FutureBuilder<KPermissionStatus>(
-          future: _permissionStatus,
-          builder: (context, snapshot) {
-            if (!snapshot.hasData ||
-                snapshot.data == KPermissionStatus.granted) {
-              return const SizedBox.shrink();
-            }
-            return Padding(
-              padding: const EdgeInsets.only(bottom: KSpacing.md),
-              child: _PermissionBanner(
-                onOpenSettings: _openNotificationSettings,
-              ),
-            );
-          },
-        ),
-        _InboxSummary(unreadCount: inbox.unreadCount),
-        const SizedBox(height: KSpacing.md),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: NotificationGroup.values
-                .map(
-                  (group) => Padding(
-                    padding: const EdgeInsets.only(right: KSpacing.sm),
-                    child: FilterChip(
-                      label: KLocalizedText(_groupLabel(group)),
-                      selected: _selectedGroup == group,
-                      selectedColor: Color.alphaBlend(
-                        KColors.primary.withValues(alpha: 0.12),
-                        Theme.of(context).colorScheme.surface,
-                      ),
-                      checkmarkColor: KColors.primary,
-                      side: BorderSide(
-                        color: _selectedGroup == group
-                            ? KColors.primary
-                            : KColors.border,
-                      ),
-                      onSelected: (_) => setState(() => _selectedGroup = group),
-                    ),
-                  ),
-                )
-                .toList(growable: false),
+      itemCount: header.length + rows.length,
+      itemBuilder: (context, index) {
+        if (index < header.length) return header[index];
+        final row = rows[index - header.length];
+        return switch (row) {
+          _InboxDayRow(:final day, :final isFirst) => Padding(
+            padding: EdgeInsets.only(
+              top: isFirst ? 0 : KSpacing.md,
+              bottom: KSpacing.sm,
+              left: KSpacing.xs,
+            ),
+            child: KLocalizedText(
+              _dayLabel(day),
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(color: KColors.textSecondary),
+            ),
           ),
-        ),
-        const SizedBox(height: KSpacing.md),
-        if (visibleItems.isEmpty)
-          KEmptyState(
-            icon: Icons.notifications_none_outlined,
-            title: inbox.items.isEmpty
-                ? 'এখনো কোনো নোটিফিকেশন নেই'
-                : 'এই ধরনের কোনো আপডেট নেই',
-            message: inbox.items.isEmpty
-                ? 'আবেদন, বুকিং, বার্তা ও যাচাইয়ের খবর এখানে দেখা যাবে।'
-                : 'অন্য একটি বিভাগ বেছে দেখুন বা নিচে টেনে রিফ্রেশ করুন।',
-          )
-        else
-          ..._groupedRows(visibleItems),
-      ],
+          _InboxItemRow(:final item, :final startsDay) => Padding(
+            padding: EdgeInsets.only(top: startsDay ? 0 : KSpacing.sm),
+            child: _notificationCard(item),
+          ),
+        };
+      },
     );
   }
 
-  List<Widget> _groupedRows(List<AppNotification> items) {
-    final widgets = <Widget>[];
+  /// Flattens the grouped inbox into day headers and item rows so the list can
+  /// be built lazily while keeping the original day-separated appearance.
+  List<_InboxRow> _inboxRows(List<AppNotification> items) {
+    final rows = <_InboxRow>[];
     DateTime? currentDay;
     for (final item in items) {
       final local = item.createdAt.toLocal();
       final day = DateTime(local.year, local.month, local.day);
-      if (currentDay != day) {
+      final startsDay = currentDay != day;
+      if (startsDay) {
         currentDay = day;
-        widgets
-          ..add(
-            Padding(
-              padding: EdgeInsets.only(
-                top: widgets.isEmpty ? 0 : KSpacing.md,
-                bottom: KSpacing.sm,
-                left: KSpacing.xs,
-              ),
-              child: KLocalizedText(
-                _dayLabel(day),
-                style: Theme.of(
-                  context,
-                ).textTheme.labelLarge?.copyWith(color: KColors.textSecondary),
-              ),
-            ),
-          )
-          ..add(_notificationCard(item));
-      } else {
-        widgets
-          ..add(const SizedBox(height: KSpacing.sm))
-          ..add(_notificationCard(item));
+        rows.add(_InboxDayRow(day: day, isFirst: rows.isEmpty));
       }
+      rows.add(_InboxItemRow(item: item, startsDay: startsDay));
     }
-    return widgets;
+    return rows;
   }
 
   Widget _notificationCard(AppNotification item) {
@@ -619,4 +628,22 @@ Failure _notificationFailure(Object error) {
     requestId: failure.requestId,
     retryable: failure.retryable,
   );
+}
+
+sealed class _InboxRow {
+  const _InboxRow();
+}
+
+class _InboxDayRow extends _InboxRow {
+  const _InboxDayRow({required this.day, required this.isFirst});
+
+  final DateTime day;
+  final bool isFirst;
+}
+
+class _InboxItemRow extends _InboxRow {
+  const _InboxItemRow({required this.item, required this.startsDay});
+
+  final AppNotification item;
+  final bool startsDay;
 }

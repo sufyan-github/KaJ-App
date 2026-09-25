@@ -3,19 +3,27 @@ import 'package:uuid/uuid.dart';
 
 import '../config/app_environment.dart';
 import '../storage/session_token_store.dart';
+import 'api_locale.dart';
 
 class ApiClient {
   ApiClient({
     required AppEnvironment environment,
     required SessionTokenStore tokenStore,
-    this.localeCode = 'bn',
+    ApiLocale? locale,
     HttpClientAdapter? httpClientAdapter,
-  }) {
+  }) : locale = locale ?? ApiLocale() {
     final options = BaseOptions(
       baseUrl: environment.apiBaseUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 20),
-      headers: {'Accept': 'application/json', 'Accept-Language': localeCode},
+      // Bangladeshi mobile networks routinely stall well past a default
+      // timeout, so these are generous enough to survive a slow 3G handover
+      // but short enough that a dead connection still surfaces an error.
+      connectTimeout: const Duration(seconds: 20),
+      receiveTimeout: const Duration(seconds: 40),
+      sendTimeout: const Duration(seconds: 60),
+      headers: {
+        'Accept': 'application/json',
+        'Accept-Language': this.locale.languageCode,
+      },
     );
     dio = Dio(options);
     final refreshDio = Dio(options);
@@ -24,11 +32,11 @@ class ApiClient {
       refreshDio.httpClientAdapter = httpClientAdapter;
     }
     dio.interceptors.add(
-      _SessionInterceptor(dio, refreshDio, tokenStore, localeCode),
+      _SessionInterceptor(dio, refreshDio, tokenStore, this.locale),
     );
   }
 
-  final String localeCode;
+  final ApiLocale locale;
   late final Dio dio;
 }
 
@@ -37,7 +45,7 @@ class _SessionInterceptor extends QueuedInterceptor {
     this._client,
     this._refreshClient,
     this._tokenStore,
-    this._localeCode,
+    this._locale,
   );
 
   static const _retriedKey = 'kaaj.auth.retried';
@@ -45,13 +53,13 @@ class _SessionInterceptor extends QueuedInterceptor {
 
   final Dio _client;
   final Dio _refreshClient;
-  final String _localeCode;
+  final ApiLocale _locale;
   final SessionTokenStore _tokenStore;
   Future<String?>? _refreshInFlight;
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    options.headers['Accept-Language'] = _localeCode;
+    options.headers['Accept-Language'] = _locale.languageCode;
     final token = _tokenStore.accessToken;
     if (token != null && !options.path.endsWith('/auth/refresh')) {
       options.headers['Authorization'] = 'Bearer $token';

@@ -82,7 +82,40 @@ android {
             if (releasePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
+    }
+
+    // Ship only the languages the app actually localizes. Without this the APK
+    // carries every AndroidX translation, which is dead weight on metered data.
+    androidResources {
+        localeFilters += listOf("en", "bn")
+    }
+
+    packaging {
+        resources {
+            excludes += setOf(
+                "META-INF/*.kotlin_module",
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE*",
+                "META-INF/NOTICE*",
+            )
+        }
+    }
+
+    bundle {
+        language { enableSplit = false } // Bangla/English switch is in-app.
+        density { enableSplit = true }
+        abi { enableSplit = true }
     }
 }
 

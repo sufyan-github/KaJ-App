@@ -16,18 +16,43 @@ void main() {
     expect(sink.events, hasLength(1));
   });
 
-  test('analytics rejects PII-like parameter names', () async {
-    final dispatcher = AnalyticsDispatcher(_RecordingSink());
+  test('analytics drops PII-like parameters instead of throwing', () async {
+    final sink = _RecordingSink();
+    final rejections = <String>[];
+    final dispatcher = AnalyticsDispatcher(sink, onRejected: rejections.add);
 
-    await expectLater(
-      dispatcher.record(
-        const AnalyticsEvent(
-          name: 'unsafe_event',
-          parameters: {'phone': '+8801712345678'},
-        ),
+    await dispatcher.record(
+      const AnalyticsEvent(
+        name: 'unsafe_event',
+        parameters: {'phone': '+8801712345678'},
       ),
-      throwsArgumentError,
     );
+
+    expect(sink.events, isEmpty);
+    expect(rejections.single, contains('phone'));
+  });
+
+  test('analytics drops an unnamed event', () async {
+    final sink = _RecordingSink();
+    final rejections = <String>[];
+    final dispatcher = AnalyticsDispatcher(sink, onRejected: rejections.add);
+
+    await dispatcher.record(const AnalyticsEvent(name: '  '));
+
+    expect(sink.events, isEmpty);
+    expect(rejections, hasLength(1));
+  });
+
+  test('a throwing sink never reaches the caller', () async {
+    final rejections = <String>[];
+    final dispatcher = AnalyticsDispatcher(
+      _ThrowingSink(),
+      onRejected: rejections.add,
+    );
+
+    await dispatcher.record(const AnalyticsEvent(name: 'job_published'));
+
+    expect(rejections.single, contains('job_published'));
   });
 }
 
@@ -36,4 +61,10 @@ class _RecordingSink implements AnalyticsSink {
 
   @override
   Future<void> record(AnalyticsEvent event) async => events.add(event);
+}
+
+class _ThrowingSink implements AnalyticsSink {
+  @override
+  Future<void> record(AnalyticsEvent event) async =>
+      throw StateError('backend down');
 }

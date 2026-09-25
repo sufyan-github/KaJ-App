@@ -22,6 +22,7 @@ import '../../features/trust_safety/presentation/attendance_screen.dart';
 import '../../features/trust_safety/presentation/dispute_screens.dart';
 import '../../features/trust_safety/presentation/safety_screens.dart';
 import '../../features/trust_safety/presentation/verification_screens.dart';
+import 'route_arguments.dart';
 
 abstract final class AppRoutes {
   static const splash = '/';
@@ -84,30 +85,11 @@ abstract final class AppRoutes {
   static String assignmentDetail(String id) => '/assignments/$id';
   static String verificationCapture(String kind) =>
       '/verification/$kind/capture';
-  static String attendance(
-    String id, {
-    required String title,
-    required bool isPoster,
-  }) => Uri(
-    path: '/assignments/$id/attendance',
-    queryParameters: {'title': title, 'poster': '$isPoster'},
-  ).toString();
+  static String attendance(String id) => '/assignments/$id/attendance';
   static String openDispute(String id) => '/assignments/$id/dispute';
   static String dispute(String id) => '/disputes/$id';
   static String report(String type, String id) => '/report/$type/$id';
-  static String chatThread(
-    String id, {
-    required String jobTitle,
-    required String otherName,
-    String? otherUserId,
-  }) {
-    final parameters = {'jobTitle': jobTitle, 'otherName': otherName};
-    if (otherUserId != null) parameters['otherUserId'] = otherUserId;
-    return Uri(
-      path: '/conversations/$id',
-      queryParameters: parameters,
-    ).toString();
-  }
+  static String chatThread(String id) => '/conversations/$id';
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -270,13 +252,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.chatThreadPath,
-        builder: (context, state) => ChatThreadScreen(
-          conversationId: state.pathParameters['id']!,
-          jobTitle: state.uri.queryParameters['jobTitle'] ?? 'কাজের আলোচনা',
-          otherName:
-              state.uri.queryParameters['otherName'] ?? 'KAAJ ব্যবহারকারী',
-          otherUserId: state.uri.queryParameters['otherUserId'],
-        ),
+        builder: (context, state) {
+          final args = state.extra is ChatThreadArgs
+              ? state.extra! as ChatThreadArgs
+              : null;
+          return ChatThreadScreen(
+            conversationId: state.pathParameters['id']!,
+            jobTitle: args?.jobTitle,
+            otherName: args?.otherName,
+            otherUserId: args?.otherUserId,
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.workerBookingPath,
@@ -294,11 +280,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.attendancePath,
-        builder: (context, state) => AttendanceScreen(
-          assignmentId: state.pathParameters['id']!,
-          title: state.uri.queryParameters['title'] ?? 'কাজের উপস্থিতি',
-          isPoster: state.uri.queryParameters['poster'] == 'true',
-        ),
+        builder: (context, state) {
+          final args = state.extra is AttendanceArgs
+              ? state.extra! as AttendanceArgs
+              : null;
+          return AttendanceScreen(
+            assignmentId: state.pathParameters['id']!,
+            title: args?.title,
+            // A cold deep link cannot prove the opener is the poster, so the
+            // override affordance stays off until the screen loads the
+            // assignment and can tell.
+            isPoster: args?.isPoster ?? false,
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.disputes,

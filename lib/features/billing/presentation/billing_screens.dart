@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/errors/failure.dart';
+import '../../../core/formatting/kaaj_format.dart';
 import '../../../core/localization/kaaj_localizations.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/theme/app_theme.dart';
@@ -370,7 +370,9 @@ class _AccessCard extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             if (current.expiresAt != null)
-              KLocalizedText('মেয়াদ শেষ: ${_date(current.expiresAt!)}'),
+              KLocalizedText(
+                'মেয়াদ শেষ: ${KFormat.dateTime(context, current.expiresAt!)}',
+              ),
             if (current.paymentStatus != null)
               KLocalizedText(
                 'সাবস্ক্রিপশন পেমেন্ট: ${_subscriptionStatus(current.paymentStatus!)}',
@@ -459,7 +461,7 @@ class _PlanCard extends StatelessWidget {
               ),
             ),
             Text(
-              '৳${_taka(plan.pricePoisha)}',
+              KFormat.money(context, plan.pricePoisha),
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(color: KColors.primary),
@@ -563,12 +565,12 @@ class _PaymentHistoryCard extends StatelessWidget {
             ),
             const SizedBox(height: KSpacing.sm),
             Text(
-              '৳${_taka(item.agreedPoisha)} · ${KaajLocalizations.text(context, item.role == 'WORKER' ? 'কর্মী' : 'কাজের মালিক')}',
+              '${KFormat.money(context, item.agreedPoisha)} · ${KaajLocalizations.text(context, item.role == 'WORKER' ? 'কর্মী' : 'কাজের মালিক')}',
             ),
             KLocalizedText(
               item.cashRecordedAt == null
-                  ? 'তৈরি হয়েছে: ${_date(item.createdAt)}'
-                  : 'পেমেন্ট রেকর্ড: ${_date(item.cashRecordedAt!)}',
+                  ? 'তৈরি হয়েছে: ${KFormat.dateTime(context, item.createdAt)}'
+                  : 'পেমেন্ট রেকর্ড: ${KFormat.dateTime(context, item.cashRecordedAt!)}',
               style: const TextStyle(color: KColors.textSecondary),
             ),
           ],
@@ -606,12 +608,6 @@ Failure _failure(Object error) => error is Failure
         kind: FailureKind.unknown,
         message: 'অনুরোধটি সম্পন্ন করা যায়নি। আবার চেষ্টা করুন।',
       );
-
-String _date(DateTime value) =>
-    DateFormat('d MMM y, h:mm a').format(value.toLocal());
-
-String _taka(String poisha) => ((int.tryParse(poisha) ?? 0) / 100)
-    .toStringAsFixed((int.tryParse(poisha) ?? 0) % 100 == 0 ? 0 : 2);
 
 String _subscriptionStatus(String status) => switch (status) {
   'ACTIVE' => 'সক্রিয়',

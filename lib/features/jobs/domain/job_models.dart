@@ -1,3 +1,5 @@
+import '../../../core/formatting/money.dart';
+
 class JobSummary {
   const JobSummary({
     required this.id,
@@ -45,8 +47,8 @@ class JobSummary {
       status: json['status'] as String? ?? '',
       startsAt: DateTime.tryParse(json['starts_at'] as String? ?? ''),
       endsAt: DateTime.tryParse(json['ends_at'] as String? ?? ''),
-      budgetMinPoisha: json['budget_min_poisha']?.toString(),
-      budgetMaxPoisha: json['budget_max_poisha']?.toString(),
+      budgetMinPoisha: Money.tryParse(json['budget_min_poisha']),
+      budgetMaxPoisha: Money.tryParse(json['budget_max_poisha']),
       matchScore: (json['matchScore'] as num?)?.toInt(),
       timeCompatibility: json['timeCompatibility'] as String?,
       availabilityCoverage: (json['availabilityCoverage'] as num?)?.toDouble(),
@@ -76,8 +78,8 @@ class JobSummary {
     );
   }
 
-  final String? budgetMaxPoisha;
-  final String? budgetMinPoisha;
+  final Money? budgetMaxPoisha;
+  final Money? budgetMinPoisha;
   final double? availabilityCoverage;
   final String categoryId;
   final String categoryName;
@@ -370,7 +372,7 @@ class AssignmentPayment {
   factory AssignmentPayment.fromJson(Map<String, dynamic> json) =>
       AssignmentPayment(
         id: json['id'] as String? ?? '',
-        agreedPoisha: json['agreedPoisha']?.toString() ?? '0',
+        agreedPoisha: Money.parseOrZero(json['agreedPoisha']),
         method: json['method'] as String? ?? 'CASH_ON_COMPLETION',
         status: json['status'] as String? ?? 'PENDING',
         cashRecordedAt: DateTime.tryParse(
@@ -379,7 +381,7 @@ class AssignmentPayment {
         disputedAt: DateTime.tryParse(json['disputedAt'] as String? ?? ''),
       );
 
-  final String agreedPoisha;
+  final Money agreedPoisha;
   final DateTime? cashRecordedAt;
   final DateTime? disputedAt;
   final String id;
@@ -399,13 +401,13 @@ class CancellationPreview {
       CancellationPreview(
         summaryBn: json['summaryBn'] as String? ?? '',
         summaryEn: json['summaryEn'] as String? ?? '',
-        feePoisha: json['feePoisha']?.toString() ?? '0',
-        refundPoisha: json['refundPoisha']?.toString() ?? '0',
+        feePoisha: Money.parseOrZero(json['feePoisha']),
+        refundPoisha: Money.parseOrZero(json['refundPoisha']),
         needsAdminReview: json['needsAdminReview'] == true,
       );
-  final String feePoisha;
+  final Money feePoisha;
   final bool needsAdminReview;
-  final String refundPoisha;
+  final Money refundPoisha;
   final String summaryBn;
   final String summaryEn;
 
@@ -430,7 +432,7 @@ class JobApplicationSummary {
         status: json['status'] as String? ?? '',
         workerUserId: json['workerUserId'] as String? ?? '',
         message: json['message'] as String?,
-        proposedPricePoisha: json['proposedPricePoisha'] as String?,
+        proposedPricePoisha: Money.tryParse(json['proposedPricePoisha']),
         startsAt: DateTime.tryParse(json['proposedStartsAt'] as String? ?? ''),
         endsAt: DateTime.tryParse(json['proposedEndsAt'] as String? ?? ''),
       );
@@ -438,7 +440,7 @@ class JobApplicationSummary {
   final DateTime? endsAt;
   final String id;
   final String? message;
-  final String? proposedPricePoisha;
+  final Money? proposedPricePoisha;
   final DateTime? startsAt;
   final String status;
   final String workerUserId;

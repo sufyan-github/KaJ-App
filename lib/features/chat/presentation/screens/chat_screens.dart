@@ -5,8 +5,10 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/localization/kaaj_localizations.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/routing/route_arguments.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_localized_text.dart';
+import '../../../../core/widgets/k_network_image.dart';
 import '../../domain/chat_models.dart';
 import '../controllers/chat_providers.dart';
 
@@ -105,8 +107,8 @@ class _ConversationCard extends StatelessWidget {
       ),
       trailing: const Icon(Icons.chevron_right),
       onTap: () => context.push(
-        AppRoutes.chatThread(
-          item.id,
+        AppRoutes.chatThread(item.id),
+        extra: ChatThreadArgs(
           jobTitle: item.jobTitle,
           otherName: item.otherName,
           otherUserId: item.otherUserId,
@@ -119,15 +121,17 @@ class _ConversationCard extends StatelessWidget {
 class ChatThreadScreen extends ConsumerStatefulWidget {
   const ChatThreadScreen({
     required this.conversationId,
-    required this.jobTitle,
-    required this.otherName,
+    this.jobTitle,
+    this.otherName,
     this.otherUserId,
     super.key,
   });
 
   final String conversationId;
-  final String jobTitle;
-  final String otherName;
+
+  /// Absent when the thread was opened from a deep link rather than the list.
+  final String? jobTitle;
+  final String? otherName;
   final String? otherUserId;
 
   @override
@@ -156,7 +160,11 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.otherName, style: const TextStyle(fontSize: 18)),
+            Text(
+              widget.otherName ??
+                  KaajLocalizations.text(context, 'KAAJ ব্যবহারকারী'),
+              style: const TextStyle(fontSize: 18),
+            ),
             const KLocalizedText('আজ সক্রিয়', style: TextStyle(fontSize: 12)),
           ],
         ),
@@ -191,7 +199,8 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                 const SizedBox(width: KSpacing.sm),
                 Expanded(
                   child: Text(
-                    widget.jobTitle,
+                    widget.jobTitle ??
+                        KaajLocalizations.text(context, 'কাজের আলোচনা'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.titleSmall,
@@ -387,15 +396,10 @@ class _MessageBubble extends StatelessWidget {
             if (message.attachmentUrl != null)
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  message.attachmentUrl!,
+                child: KNetworkImage(
+                  url: message.attachmentUrl!,
                   width: 240,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => const SizedBox(
-                    width: 220,
-                    height: 120,
-                    child: Icon(Icons.broken_image_outlined),
-                  ),
+                  height: 180,
                 ),
               ),
             if (message.body?.isNotEmpty == true) Text(message.body!),

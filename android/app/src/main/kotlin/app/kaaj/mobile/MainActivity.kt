@@ -6,19 +6,36 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
-    private val channelName = "app.kaaj.mobile/location"
+    private companion object {
+        const val CHANNEL = "app.kaaj.mobile/location"
+
+        /** How long to wait for a live fix before falling back. */
+        const val FIX_TIMEOUT_MS = 15_000L
+
+        /**
+         * A cached fix older than this is refused.
+         *
+         * Attendance check-ins drive payment disputes. Returning
+         * `getLastKnownLocation` with no age check meant a fix recorded hours
+         * earlier and kilometres away could satisfy a geofence, which is a
+         * fraud surface rather than a convenience.
+         */
+        const val MAX_FIX_AGE_MS = 90_000L
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, channelName)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
             .setMethodCallHandler { call, result ->
                 if (call.method != "currentLocation") {
                     result.notImplemented()
@@ -29,55 +46,101 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun currentLocation(result: MethodChannel.Result) {
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-            checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-        ) {
+        if (!hasLocationPermission()) {
             result.error("PERMISSION_DENIED", "Location permission is required.", null)
             return
         }
+
         val manager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val provider = when {
-            manager.isProviderEnabled(LocationManager.GPS_PROVIDER) -> LocationManager.GPS_PROVIDER
-            manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) -> LocationManager.NETWORK_PROVIDER
-            else -> null
-        }
-        if (provider == null) {
+        // Listen on every enabled provider rather than picking one. Choosing
+        // GPS first meant an indoor worker waited out the whole timeout while
+        // the network provider already had a usable fix.
+        val providers = listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
+            .filter { runCatching { manager.isProviderEnabled(it) }.getOrDefault(false) }
+
+        if (providers.isEmpty()) {
             result.error("LOCATION_DISABLED", "Turn on device location and try again.", null)
             return
         }
+
+        val handler = Handler(Looper.getMainLooper())
         var delivered = false
-        lateinit var listener: LocationListener
-        fun deliver(location: Location?, error: String? = null) {
+        val listeners = mutableListOf<LocationListener>()
+
+        fun cleanUp() {
+            listeners.forEach { runCatching { manager.removeUpdates(it) } }
+            listeners.clear()
+        }
+
+        fun deliver(location: Location?, errorCode: String, errorMessage: String) {
             if (delivered) return
             delivered = true
-            manager.removeUpdates(listener)
+            handler.removeCallbacksAndMessages(null)
+            cleanUp()
             if (location == null) {
-                result.error("LOCATION_UNAVAILABLE", error ?: "Could not get current location.", null)
+                result.error(errorCode, errorMessage, null)
             } else {
-                result.success(
-                    mapOf(
-                        "latitude" to location.latitude,
-                        "longitude" to location.longitude,
-                        "accuracy" to location.accuracy.toDouble(),
-                        "time" to location.time,
-                        "mockLocation" to location.isFromMockProvider,
-                    ),
-                )
+                result.success(location.toPayload())
             }
         }
-        listener = object : LocationListener {
-            override fun onLocationChanged(location: Location) = deliver(location)
-            override fun onProviderDisabled(provider: String) = deliver(null, "Location was turned off.")
-            override fun onProviderEnabled(provider: String) = Unit
-            @Deprecated("Deprecated in Android")
-            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) = Unit
+
+        providers.forEach { provider ->
+            val listener = object : LocationListener {
+                override fun onLocationChanged(location: Location) =
+                    deliver(location, "LOCATION_UNAVAILABLE", "Could not get current location.")
+
+                override fun onProviderDisabled(provider: String) = Unit
+                override fun onProviderEnabled(provider: String) = Unit
+
+                @Deprecated("Deprecated in Android")
+                override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) = Unit
+            }
+            listeners += listener
+            runCatching {
+                @Suppress("MissingPermission")
+                manager.requestLocationUpdates(provider, 0L, 0f, listener, Looper.getMainLooper())
+            }
         }
-        @Suppress("MissingPermission")
-        manager.requestSingleUpdate(provider, listener, Looper.getMainLooper())
-        Handler(Looper.getMainLooper()).postDelayed({
-            @Suppress("MissingPermission")
-            val fallback = manager.getLastKnownLocation(provider)
-            deliver(fallback, "Location timed out. Move outdoors and try again.")
-        }, 12_000)
+
+        handler.postDelayed({
+            val fresh = providers
+                .mapNotNull { provider ->
+                    runCatching {
+                        @Suppress("MissingPermission")
+                        manager.getLastKnownLocation(provider)
+                    }.getOrNull()
+                }
+                .filter { it.ageMillis() <= MAX_FIX_AGE_MS }
+                .minByOrNull { it.accuracy }
+
+            deliver(
+                fresh,
+                "LOCATION_TIMEOUT",
+                "Could not get a recent location. Move to an open area and try again.",
+            )
+        }, FIX_TIMEOUT_MS)
     }
+
+    private fun hasLocationPermission(): Boolean =
+        checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+    /**
+     * Elapsed-realtime age, which a device clock change cannot forge.
+     */
+    private fun Location.ageMillis(): Long =
+        (SystemClock.elapsedRealtimeNanos() - elapsedRealtimeNanos) / 1_000_000
+
+    private fun Location.toPayload(): Map<String, Any> = mapOf(
+        "latitude" to latitude,
+        "longitude" to longitude,
+        "accuracy" to accuracy.toDouble(),
+        "time" to time,
+        "ageMillis" to ageMillis(),
+        "mockLocation" to isMockLocation(),
+    )
+
+    @Suppress("DEPRECATION")
+    private fun Location.isMockLocation(): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) isMock else isFromMockProvider
 }
