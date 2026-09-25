@@ -64,3 +64,11 @@ app.*.map.json
 /landing-page/node_modules/
 /landing-page/dist/
 /landing-page/*.zip
+/landing-page/qa/
+/landing-page/public/assets/*.webp
+
+# Local design/reference artifacts that are not part of the application build
+/.kilo/
+/assets/illustrations/
+/kaaj-logo*.png
+/kaaj-bdapps-faq-*.pdf

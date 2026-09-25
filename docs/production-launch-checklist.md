@@ -17,6 +17,8 @@ described below has been observed against the production system.
 - [x] Production version advanced to `1.0.1+2`.
 - [x] CI has client-secret policy and Git-history secret scanning gates.
 - [x] A non-mutating production API smoke-test script exists.
+- [x] The public-site production build and all four hosting-worker tests pass.
+- [x] The production-hardening branch has no pending tracked or untracked changes.
 
 ## Blocked or failing
 

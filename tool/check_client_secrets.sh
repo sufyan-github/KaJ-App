@@ -9,7 +9,7 @@ cd "$REPOSITORY_ROOT"
 # public mobile client or release commands usually means a secret is about to
 # be compiled into the APK.
 FORBIDDEN_PATTERN='API_KEY|X-API-Key|BDAPPS_(PASSWORD|APP_HASH)|JWT_(ACCESS|REFRESH)_SECRET|DATABASE_URL'
-SCOPES=(lib android tool README.md docs)
+SCOPES=(lib android tool landing-page README.md docs)
 
 if rg -n --hidden \
   --glob '!build/**' \
