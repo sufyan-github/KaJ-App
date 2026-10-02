@@ -9,6 +9,13 @@ env:
   FLUTTER_VERSION: 3.47.2
 
 jobs:
+  release-diagnostics:
+    name: Release diagnostic regression tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m unittest discover -s tool/tests -v
+
   secret-scan:
     name: Secret scan
     runs-on: ubuntu-latest
