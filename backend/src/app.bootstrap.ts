@@ -11,7 +11,10 @@ import { RequestValidationException } from "./common/errors/validation.exception
 
 export function configureApp(app: INestApplication): void {
   app.setGlobalPrefix("api/v1", {
-    exclude: [{ path: "health", method: RequestMethod.GET }],
+    exclude: [
+      { path: "health", method: RequestMethod.GET },
+      { path: "ready", method: RequestMethod.GET },
+    ],
   });
   app.useGlobalPipes(
     new ValidationPipe({

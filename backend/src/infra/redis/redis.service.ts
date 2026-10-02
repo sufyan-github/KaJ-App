@@ -11,13 +11,21 @@ export class RedisService implements OnModuleDestroy {
   getClient(): Redis {
     this.client ??= new Redis(this.config.getOrThrow<string>("REDIS_URL"), {
       lazyConnect: true,
-      maxRetriesPerRequest: null,
+      maxRetriesPerRequest: 1,
+      connectTimeout: 5_000,
+      commandTimeout: 5_000,
     });
     return this.client;
   }
 
   async onModuleDestroy(): Promise<void> {
     if (!this.client || this.client.status === "end") return;
-    await this.client.quit();
+    try {
+      await this.client.quit();
+    } catch {
+      // Shutdown must still complete when the cache is unreachable.
+    } finally {
+      this.client.disconnect();
+    }
   }
 }

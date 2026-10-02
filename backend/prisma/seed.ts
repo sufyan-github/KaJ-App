@@ -5,6 +5,14 @@ import { hash } from "bcryptjs";
 
 import { encryptTotpSecret } from "../src/modules/admin-auth/admin-auth.primitives";
 
+// This seed resets admin credentials, fees, settings, and feature flags.
+// Refuse before constructing a client or performing any database work.
+if (process.env.NODE_ENV !== "development" && process.env.NODE_ENV !== "test") {
+  throw new Error(
+    "Development seed requires NODE_ENV=development or test. Never run it against a production database.",
+  );
+}
+
 const prisma = new PrismaClient();
 
 const featureFlags = [

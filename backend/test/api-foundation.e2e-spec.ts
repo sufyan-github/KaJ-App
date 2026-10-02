@@ -7,6 +7,7 @@ import request from "supertest";
 
 import { configureApp } from "../src/app.bootstrap";
 import { AppModule } from "../src/app.module";
+import { ReadinessService } from "../src/modules/health/readiness.service";
 import { Policy } from "../src/common/policy/policy.decorator";
 import { Policies } from "../src/common/policy/policy.types";
 import { CLOCK, Clock } from "../src/common/time/clock";
@@ -37,6 +38,7 @@ class ProbeController {
 
 describe("API foundation", () => {
   let app: INestApplication;
+  const readiness = { isReady: jest.fn().mockResolvedValue(true) };
 
   const fixedClock: Clock = {
     now: () => new Date("2026-08-17T12:00:00.000Z"),
@@ -50,6 +52,8 @@ describe("API foundation", () => {
       controllers: [ProbeController],
       imports: [AppModule],
     })
+      .overrideProvider(ReadinessService)
+      .useValue(readiness)
       .overrideProvider(CLOCK)
       .useValue(fixedClock)
       .overrideProvider(REQUEST_ID_GENERATOR)
@@ -62,6 +66,25 @@ describe("API foundation", () => {
   });
 
   afterAll(() => app.close());
+
+  it("exposes uncached readiness outside the versioned API prefix", async () => {
+    readiness.isReady.mockResolvedValueOnce(true);
+    const response = await request(app.getHttpServer())
+      .get("/ready")
+      .expect(200);
+    expect(response.body.data).toEqual({ status: "ok" });
+    expect(response.headers["cache-control"]).toBe("no-store");
+  });
+
+  it("returns 503 during a dependency outage while liveness stays available", async () => {
+    readiness.isReady.mockResolvedValueOnce(false);
+    const response = await request(app.getHttpServer())
+      .get("/ready")
+      .expect(503);
+    expect(response.body.error.retryable).toBe(true);
+    expect(response.body.error.requestId).toBe("test-request-id");
+    await request(app.getHttpServer()).get("/health").expect(200);
+  });
 
   it("wraps GET /health in the exact E1 success envelope", async () => {
     const response = await request(app.getHttpServer())
