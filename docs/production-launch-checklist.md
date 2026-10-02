@@ -20,6 +20,12 @@ described below has been observed against the production system.
 - [x] The public-site production build and all four hosting-worker tests pass.
 - [x] Release diagnostics have 10 passing regression tests, included in CI.
 - [x] The Git remote matches the repository observed in Render deployment settings.
+- [x] Backend hardening on isolated branch `codex/production-readiness` passes
+  256 tests, type checking, build, changed-file formatting, and six tooling tests.
+  The 33 database-backed tests remain skipped; these results do not certify live workflows.
+- [x] Backend adds dependency readiness, bounded Redis waits, and a production
+  development-seed guard. Commit `787876c` in `codex/production-readiness`
+  (`/home/sufyan/kaaj-production-backend`) is local, not deployed.
 
 ## Production incident evidence
 
@@ -30,10 +36,14 @@ API smoke checks without a code deployment or credential change.
 
 On 3 October, the catalog failure recurred. After the Render instance woke up,
 health returned 200, categories and locations returned 500, invalid OTP input
-returned 400, and unauthenticated jobs returned 401. The current database state
-has not been inspected; another pause is a hypothesis, not a confirmed cause.
+returned 400, and unauthenticated jobs returned 401. After the approved Chrome
+restart, the Supabase dashboard showed services coming up, then Database,
+PostgREST, and Auth healthy. A later public smoke run passed all five checks:
+health 200, categories 200, locations 200, invalid OTP input 400, and unauthenticated
+jobs 401. Another pause remains a hypothesis, not a confirmed cause of this recurrence.
+No code deployment or credential change was made during this recovery check.
 
-Current failed request IDs:
+Earlier failed request IDs:
 
 - Categories: `f18b2fcf-6e85-46cf-be2d-9aa2ad040007`
 - Locations: `f39e3ed7-4d2c-4161-91b6-99b3d2090129`
@@ -41,13 +51,26 @@ Current failed request IDs:
 The user reported bdApps Active Production on 26 September. This does not
 establish successful OTP delivery, subscription verification, or credential
 rotation. The supplied provider key matched the previously exposed value.
+On 3 October the Render dashboard confirmed `NODE_ENV=production`,
+`SMS_PROVIDER=bdapps`, `OPERATOR_PROVIDER=bdapps`, and `PUSH_PROVIDER=disabled`.
+These observed modes are not proof of provider delivery or successful billing.
 
-## Blocked or failing
+The observed Render build command includes the development seed. Source review
+shows this seed overwrites admin credentials, feature flags, fees, and settings.
+The local guard now refuses to run outside explicit development/test environments.
+Before deploying, remove the seed step and audit existing seeded admin access and
+configuration. The backend README contains deployment and remediation instructions.
+
+## Live checks and remaining launch gates
 
 - [ ] `kaaj.app` resolves publicly and serves HTTPS.
 - [ ] `api.kaaj.app` resolves publicly and serves the production API over HTTPS.
-- [ ] `/api/v1/categories` returns 200 from production (currently 500 on Render).
-- [ ] `/api/v1/locations` returns 200 from production (currently 500 on Render).
+- [x] `/api/v1/categories` returns 200 from the Render deployment on 3 October.
+- [x] `/api/v1/locations` returns 200 from the Render deployment on 3 October.
+- [ ] Reviewed backend hardening is deployed; Render uses `/ready` after deployment.
+- [ ] Production build no longer runs the development seed; seeded admin access,
+  credentials, flags, fee rules, and configuration are audited and remediated.
+- [ ] Recurring database unavailability is resolved with a verified availability plan.
 - [ ] Rotated bdApps credentials are installed only in the private gateway.
 - [ ] The previously exposed bdApps credential has been revoked.
 - [ ] Real Robi/Airtel OTP request and verification pass with an owner-approved test number.
@@ -93,7 +116,7 @@ and request IDs.
 
 1. DNS control for `kaaj.app` and `api.kaaj.app`.
 2. A newly rotated bdApps production credential and confirmation the old one is revoked.
-3. Restore dashboard browser access to inspect today's database failure.
+3. Approval for the reviewed production deployment and seeded-admin remediation.
 4. Firebase Android project configuration for `app.kaaj.mobile`.
 5. Production Sentry Flutter/backend projects and DSNs.
 6. Backup-provider access for a real restore drill.
