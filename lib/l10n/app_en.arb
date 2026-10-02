@@ -19,6 +19,7 @@
   "otpSubtitle": "Enter the 6-digit code sent to {phone}.",
   "@otpSubtitle": {"placeholders": {"phone": {"type": "String"}}},
   "otpLabel": "Verification code",
+  "otpSubscriptionConsent": "I agree to the KAAJ subscription at BDT 2.78 per day, charged to my mobile balance and renewed daily until I unsubscribe. Verifying this code activates the subscription.",
   "verifyCode": "Verify and continue",
   "resendCode": "Send a new code",
   "resendInSeconds": "Send a new code in {seconds}s",

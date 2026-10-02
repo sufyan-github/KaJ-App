@@ -33,6 +33,7 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
   late OtpChallenge _challenge;
   late DateTime _expiresAt;
   int _resendSeconds = 30;
+  bool _subscriptionAccepted = false;
 
   int get _remainingSeconds {
     final seconds = _expiresAt.difference(DateTime.now()).inSeconds;
@@ -67,6 +68,10 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
   }
 
   Future<void> _verify() async {
+    if (!_subscriptionAccepted ||
+        ref.read(authControllerProvider).status == AuthStatus.loading) {
+      return;
+    }
     if (!_formKey.currentState!.validate()) return;
     final verified = await ref
         .read(authControllerProvider.notifier)
@@ -204,6 +209,18 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
                       warning: true,
                     ),
                     const SizedBox(height: KSpacing.md),
+                    CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      value: _subscriptionAccepted,
+                      onChanged: isLoading
+                          ? null
+                          : (value) => setState(() {
+                              _subscriptionAccepted = value ?? false;
+                            }),
+                      title: Text(l10n.otpSubscriptionConsent),
+                    ),
+                    const SizedBox(height: KSpacing.md),
                     if (state.failure != null) ...[
                       KErrorMessage(failure: state.failure!),
                       const SizedBox(height: KSpacing.md),
@@ -211,7 +228,7 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
                     KPrimaryButton(
                       label: l10n.verifyCode,
                       isLoading: isLoading,
-                      onPressed: _verify,
+                      onPressed: _subscriptionAccepted ? _verify : null,
                     ),
                     const SizedBox(height: KSpacing.sm),
                     SizedBox(

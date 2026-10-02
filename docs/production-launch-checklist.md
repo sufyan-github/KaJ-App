@@ -9,7 +9,8 @@ described below has been observed against the production system.
 
 ## Completed locally
 
-- [x] Flutter formatting, analyzer and 112 automated tests passed on 25 September.
+- [x] Flutter analyzer and all 114 automated tests passed on 3 October, including
+  Bangla/English paid-subscription consent and keyboard-bypass regression tests.
 - [x] A signed arm64 production APK builds and its v2 signature verifies.
 - [x] Release secrets are stored outside Git and password files use mode 0600.
 - [x] The public client no longer accepts, stores or sends a provider API key.
@@ -20,12 +21,18 @@ described below has been observed against the production system.
 - [x] The public-site production build and all four hosting-worker tests pass.
 - [x] Release diagnostics have 10 passing regression tests, included in CI.
 - [x] The Git remote matches the repository observed in Render deployment settings.
-- [x] Backend hardening on isolated branch `codex/production-readiness` passes
-  256 tests, type checking, build, changed-file formatting, and six tooling tests.
-  The 33 database-backed tests remain skipped; these results do not certify live workflows.
-- [x] Backend adds dependency readiness, bounded Redis waits, and a production
-  development-seed guard. Commit `787876c` in `codex/production-readiness`
-  (`/home/sufyan/kaaj-production-backend`) is local, not deployed.
+- [x] Backend passes all 290 tests in 53 suites with no skipped tests, using
+  isolated local PostgreSQL/Redis, plus type checking, build and six tooling tests.
+- [x] Admin type checking and eight Playwright UI workflow tests pass. These tests
+  mock API responses and do not certify live admin or billing workflows.
+- [x] Backend hardening through `c0ba76d` is deployed on Render: dependency
+  readiness, bounded Redis waits, a production development-seed guard, and
+  graceful risk-scan shutdown before database disconnection.
+- [x] A release-signed staging APK with paid-consent UI was installed and launched
+  on the connected phone. Its login screen and visible typed input were inspected.
+  It uses the LIVE Render API; it is not a sandbox. The original app remains intact.
+  Production-package replacement failed because the installed signing key differs;
+  resolving signing continuity remains necessary before an upgrade release.
 
 ## Production incident evidence
 
@@ -48,18 +55,35 @@ Earlier failed request IDs:
 - Categories: `f18b2fcf-6e85-46cf-be2d-9aa2ad040007`
 - Locations: `f39e3ed7-4d2c-4161-91b6-99b3d2090129`
 
-The user reported bdApps Active Production on 26 September. This does not
-establish successful OTP delivery, subscription verification, or credential
-rotation. The supplied provider key matched the previously exposed value.
+The user reported bdApps Active Production on 26 September. The supplied
+provider key matched the previously exposed value; rotation is still unverified.
 On 3 October the Render dashboard confirmed `NODE_ENV=production`,
 `SMS_PROVIDER=bdapps`, `OPERATOR_PROVIDER=bdapps`, and `PUSH_PROVIDER=disabled`.
-These observed modes are not proof of provider delivery or successful billing.
+Real OTP delivery and verification were subsequently tested on 3 October with
+the owner's explicit consent to BDT 2.78/day, renewing daily until unsubscribed.
+Login succeeded, authenticated session/jobs/notifications reads passed, and the
+carrier independently returned `REGISTERED`. The first operator status refresh
+failed transiently; a later refresh returned `VERIFIED` without an error.
 
-The observed Render build command includes the development seed. Source review
-shows this seed overwrites admin credentials, feature flags, fees, and settings.
-The local guard now refuses to run outside explicit development/test environments.
-Before deploying, remove the seed step and audit existing seeded admin access and
-configuration. The backend README contains deployment and remediation instructions.
+At the owner's request, the test subscription was then cancelled from the approved
+cPanel server using the carrier unsubscribe API. bdApps returned `S1000` and
+`UNREGISTERED`; a separate signed gateway status request confirmed `UNREGISTERED`.
+Direct requests from the development computer were refused with `E1303` (IP not
+allowlisted). No gateway source changes were needed for this one-time cancellation.
+The dedicated API test refresh session was revoked (logout HTTP 204).
+The owner supplied the SMS fallback: send `STOP Kaaj` to `21213` from the subscribed
+number. That SMS was not sent because API cancellation succeeded.
+
+**Billing launch blocker:** `/subscriptions/me` returned no local subscription,
+no plans, `gateEnabled: false`, and `accessActive: true` while the carrier was
+registered. In-app cancellation is not connected to carrier cancellation. The
+manual unsubscribe above does not certify callbacks, reconciliation, charging
+amounts, entitlement enforcement, or the full cancellation workflow.
+
+The unsafe development seed was removed from the Render build command before
+deploying hardening. The deployed guard refuses production execution. Existing
+seeded admin credentials, feature flags, fees, and settings still need an audit;
+removing the command does not undo previous seed effects.
 
 ## Live checks and remaining launch gates
 
@@ -67,13 +91,17 @@ configuration. The backend README contains deployment and remediation instructio
 - [ ] `api.kaaj.app` resolves publicly and serves the production API over HTTPS.
 - [x] `/api/v1/categories` returns 200 from the Render deployment on 3 October.
 - [x] `/api/v1/locations` returns 200 from the Render deployment on 3 October.
-- [ ] Reviewed backend hardening is deployed; Render uses `/ready` after deployment.
-- [ ] Production build no longer runs the development seed; seeded admin access,
-  credentials, flags, fee rules, and configuration are audited and remediated.
+- [x] Reviewed backend hardening is deployed; Render uses `/ready`, verified HTTP 200.
+- [x] Production build no longer runs the development seed.
+- [ ] Seeded admin access, credentials, flags, fee rules, and configuration are
+  audited and remediated.
 - [ ] Recurring database unavailability is resolved with a verified availability plan.
 - [ ] Rotated bdApps credentials are installed only in the private gateway.
 - [ ] The previously exposed bdApps credential has been revoked.
-- [ ] Real Robi/Airtel OTP request and verification pass with an owner-approved test number.
+- [x] Real Robi OTP request and verification pass with an owner-approved test number.
+- [ ] Airtel live delivery and verification pass in an explicitly approved test window.
+- [x] This test subscription was cancelled and carrier status independently verified.
+- [ ] Production plan, subscription records and entitlement policy match carrier billing.
 - [ ] Subscription callbacks, idempotency, cancellation and reconciliation pass.
 - [ ] Firebase/FCM is configured and tested in foreground/background/terminated states.
 - [ ] A production Sentry DSN is configured and a filtered test event arrives.
@@ -116,9 +144,16 @@ and request IDs.
 
 1. DNS control for `kaaj.app` and `api.kaaj.app`.
 2. A newly rotated bdApps production credential and confirmation the old one is revoked.
-3. Approval for the reviewed production deployment and seeded-admin remediation.
+3. Seeded-admin remediation scope and approval; backend deployment was approved and completed.
 4. Firebase Android project configuration for `app.kaaj.mobile`.
 5. Production Sentry Flutter/backend projects and DSNs.
 6. Backup-provider access for a real restore drill.
 7. Approved legal entity name, address, privacy contact and support contact.
-8. An owner-approved Robi/Airtel test number for the live login test.
+8. A separate approved Airtel test window, if required; the Robi test is complete and cancelled.
+
+## Verification limits
+
+Not every screen or marketplace mutation was manually tested on the phone.
+No real job/application, verification-document, booking, messaging, or hiring
+workflow is certified by the read-only live smoke checks. Production release
+also remains blocked on signing continuity and the unchecked launch gates above.

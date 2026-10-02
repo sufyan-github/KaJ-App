@@ -67,6 +67,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get otpLabel => 'Verification code';
 
   @override
+  String get otpSubscriptionConsent =>
+      'I agree to the KAAJ subscription at BDT 2.78 per day, charged to my mobile balance and renewed daily until I unsubscribe. Verifying this code activates the subscription.';
+
+  @override
   String get verifyCode => 'Verify and continue';
 
   @override

@@ -65,6 +65,10 @@ class AppLocalizationsBn extends AppLocalizations {
   String get otpLabel => 'যাচাই কোড';
 
   @override
+  String get otpSubscriptionConsent =>
+      'আমি কাজ-এর দৈনিক ২.৭৮ টাকার সাবস্ক্রিপশনে সম্মত। মোবাইল ব্যালেন্স থেকে টাকা কাটা হবে এবং বন্ধ না করা পর্যন্ত প্রতিদিন নবায়ন হবে। এই কোড যাচাই করলে সাবস্ক্রিপশন চালু হবে।';
+
+  @override
   String get verifyCode => 'যাচাই করে এগিয়ে যান';
 
   @override

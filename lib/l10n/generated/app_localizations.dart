@@ -200,6 +200,12 @@ abstract class AppLocalizations {
   /// **'Verification code'**
   String get otpLabel;
 
+  /// No description provided for @otpSubscriptionConsent.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree to the KAAJ subscription at BDT 2.78 per day, charged to my mobile balance and renewed daily until I unsubscribe. Verifying this code activates the subscription.'**
+  String get otpSubscriptionConsent;
+
   /// No description provided for @verifyCode.
   ///
   /// In en, this message translates to:
