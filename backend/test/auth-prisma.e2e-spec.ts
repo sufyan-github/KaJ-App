@@ -17,7 +17,8 @@ import {
   OtpCodeGenerator,
 } from "../src/modules/auth/otp-code.generator";
 
-const PHONE = "+8801912345678";
+// Synthetic Robi fixture; SMS is replaced with discardSms in this suite.
+const PHONE = "+8801812345678";
 const DEVICE_ID = "018f4f6f-13e8-7d9a-8c2b-6b6a9f62f541";
 const OTP_CODE = "234567";
 
@@ -46,7 +47,9 @@ databaseDescribe("phone OTP authentication with PostgreSQL", () => {
 
     app = moduleRef.createNestApplication({ logger: false });
     configureApp(app);
-    await app.init();
+    // Keep one listener alive for concurrent requests. Supertest otherwise
+    // owns and closes an ephemeral listener as individual requests finish.
+    await app.listen(0, "127.0.0.1");
     prisma = app.get(PrismaService);
   });
 

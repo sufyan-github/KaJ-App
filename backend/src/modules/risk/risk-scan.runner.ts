@@ -13,6 +13,8 @@ const DAILY_SCAN_INTERVAL_MS = 24 * 60 * 60_000;
 export class RiskScanRunner implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(RiskScanRunner.name);
   private timer?: NodeJS.Timeout;
+  private pending?: Promise<void>;
+  private stopping = false;
 
   constructor(private readonly risk: RiskService) {}
 
@@ -22,20 +24,32 @@ export class RiskScanRunner implements OnModuleInit, OnModuleDestroy {
     this.timer.unref();
   }
 
-  onModuleDestroy() {
+  async onModuleDestroy() {
+    this.stopping = true;
     if (this.timer) clearInterval(this.timer);
+    await this.pending;
   }
 
   private run() {
-    void this.risk
-      .scan("Scheduled daily deterministic risk scan for human review.", null, {
-        ip: null,
-        ua: "system:risk-scan-runner",
+    if (this.stopping || this.pending) return;
+    this.pending = Promise.resolve()
+      .then(() =>
+        this.risk.scan(
+          "Scheduled daily deterministic risk scan for human review.",
+          null,
+          {
+            ip: null,
+            ua: "system:risk-scan-runner",
+          },
+        ),
+      )
+      .then(() => undefined)
+      .catch(() => {
+        // Database errors may contain connection details or private query data.
+        this.logger.error("Daily risk scan failed");
       })
-      .catch((error: unknown) => {
-        this.logger.error(
-          error instanceof Error ? error.message : "Daily risk scan failed",
-        );
+      .finally(() => {
+        this.pending = undefined;
       });
   }
 }

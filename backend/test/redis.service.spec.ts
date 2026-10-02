@@ -23,9 +23,9 @@ describe("bounded Redis requests", () => {
           disconnect,
         }) as unknown as Redis,
     );
-    service = new RedisService(
-      new ConfigService({ REDIS_URL: "redis://localhost:6379" }),
-    );
+    service = new RedisService({
+      getOrThrow: () => "redis://localhost:6379",
+    } as unknown as ConfigService);
   });
 
   it("bounds connection, command waits, and retries and reuses one client", () => {
