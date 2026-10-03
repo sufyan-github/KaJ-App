@@ -11,12 +11,12 @@ import {
 import { Server, Socket } from "socket.io";
 
 import { AuthTokenService } from "../auth/auth-token.service";
-import { ChatEvents } from "./chat.events";
+import { ChatEvent, ChatEvents } from "./chat.events";
 import { ChatService } from "./chat.service";
 import { SendMessageDto } from "./dto/chat.dto";
 
 interface AuthenticatedSocket extends Socket {
-  data: { userId?: string };
+  data: { userId?: string; accessToken?: string };
 }
 
 @WebSocketGateway({
@@ -36,13 +36,29 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection {
 
   afterInit() {
     this.events.messages.subscribe((event) => {
-      for (const userId of event.participantUserIds) {
-        this.server.to(userRoom(userId)).emit("chat:message", {
-          ...event.message,
-          isMine: event.message.senderUserId === userId,
-        });
-      }
+      void this.deliverMessage(event);
     });
+  }
+
+  private async deliverMessage(event: ChatEvent) {
+    try {
+      for (const userId of event.participantUserIds) {
+        const clients = await this.server.in(userRoom(userId)).fetchSockets();
+        for (const client of clients) {
+          try {
+            await this.tokens.verifyAccessToken(client.data.accessToken ?? "");
+            client.emit("chat:message", {
+              ...event.message,
+              isMine: event.message.senderUserId === userId,
+            });
+          } catch {
+            client.disconnect(true);
+          }
+        }
+      }
+    } catch {
+      /* Do not expose tokens or message contents in diagnostics. */
+    }
   }
 
   async handleConnection(client: AuthenticatedSocket) {
@@ -53,6 +69,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection {
         typeof raw === "string" ? raw.replace(/^Bearer\s+/i, "") : "";
       const claims = await this.tokens.verifyAccessToken(token);
       client.data.userId = claims.sub;
+      client.data.accessToken = token;
       await client.join(userRoom(claims.sub));
       client.emit("chat:ready", { userId: claims.sub });
     } catch {
@@ -66,7 +83,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection {
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() body: { conversationId?: string },
   ) {
-    const userId = this.userId(client);
+    const userId = await this.userId(client);
     if (!body.conversationId) throw new WsException("Missing conversation id.");
     await this.chat.assertParticipant(userId, body.conversationId);
     await client.join(conversationRoom(body.conversationId));
@@ -79,13 +96,19 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection {
     @MessageBody()
     body: SendMessageDto & { conversationId?: string },
   ) {
-    const userId = this.userId(client);
+    const userId = await this.userId(client);
     if (!body.conversationId) throw new WsException("Missing conversation id.");
     return this.chat.send(userId, body.conversationId, body);
   }
 
-  private userId(client: AuthenticatedSocket) {
+  private async userId(client: AuthenticatedSocket) {
     if (!client.data.userId) throw new WsException("Unauthorized.");
+    try {
+      await this.tokens.verifyAccessToken(client.data.accessToken ?? "");
+    } catch {
+      client.disconnect(true);
+      throw new WsException("Unauthorized.");
+    }
     return client.data.userId;
   }
 }

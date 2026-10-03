@@ -168,3 +168,76 @@ docs/                      Plans, research, decisions, and completion evidence
 - `docs/completed/` — one evidence report for each completed step.
 
 See `CONTRIBUTING.md` for the task workflow and `SECURITY.md` for private vulnerability reporting.
+
+## Mobile password authentication (3 October 2026; pending deployment)
+
+Existing subscribers can authenticate with their mobile number and password.
+Login creates only a session/device record and existing risk observations; it
+does not call OTP, subscription registration or payment APIs. The client then
+reads the existing `/subscriptions/me` decision. An inactive subscriber remains
+authenticated and is directed to the existing subscription page. Subscription
+plans, prices, duration, renewal, callbacks, provider adapters and access flags
+are unchanged. In particular, the existing disabled production access gate and
+missing local plan/subscription records remain a separate launch blocker.
+
+New authenticated subscribers can set a password once existing verification
+shows an active paid subscription or verified remote-carrier subscription.
+Passwords use the project's existing bcrypt library at cost 12, with a minimum
+of 12 characters and a maximum of 72 UTF-8 bytes (reject rather than truncate).
+The existing admin `password_hash` is never overwritten by mobile setup/reset.
+See [OWASP password storage guidance](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html).
+
+| Route (under `/api/v1`)                | Authentication                               | Purpose                                                            |
+| -------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------ |
+| `POST /auth/password/login`            | Public                                       | Existing mobile number/password; returns current-format token pair |
+| `GET /auth/password/status`            | Session                                      | Whether this account has a mobile password                         |
+| `POST /auth/password/setup`            | Session + existing subscription verification | First password only; cannot overwrite                              |
+| `POST /auth/password/recovery/request` | Public + `subscriptionConsent: true`         | Existing-account recovery OTP                                      |
+| `POST /auth/password/recovery/verify`  | Public + `subscriptionConsent: true`         | Recovery code + new password; revokes old mobile sessions          |
+
+Per the owner's explicit instruction, recovery reuses the existing **paid**
+bdApps subscription OTP. The bilingual UI asks for consent both before requesting
+and verifying a code, explains BDT 2.78/day and daily renewal until unsubscribed,
+and never promises a free reset or a one-off charge. Actual carrier billing
+remains controlled by the unchanged gateway. Product approval is not permission
+to run another live paid test.
+
+Recovery challenges are purpose-bound, time-limited, attempt-limited and
+single-use. A database claim prevents concurrent verification of one challenge.
+If provider verification times out or its outcome becomes uncertain, the claim
+is retained to prevent automatic repetition of a paid call. The user must check
+the subscription outcome and explicitly request a new code if needed; a crashed
+verification is not silently retried. Unknown accounts receive a generic request
+response without sending SMS or creating a user. Successful reset increments a
+mobile auth version and revokes all refresh tokens; HTTP and chat check that
+version, including existing chat send/receive activity. Old JWTs without a version
+remain compatible at version zero until the first reset.
+
+### Migration and release order
+
+Migration `20261003060000_mobile_password_auth` adds nullable
+`users.mobile_password_hash`, `users.mobile_auth_version` (default zero), and
+`otp_challenges.recovery_verifying` (default false). It does not delete data,
+backfill passwords, or touch subscription/payment tables. Apply it with
+`corepack pnpm --filter @kaj/backend migrate` against the intended database after
+the normal backup/review process. Never run the development seed in production.
+Deploy the backend before distributing the updated Flutter client. No new
+gateway secret or environment variable is required. A rollback must retain
+auth-version enforcement once resets have occurred; an old binary would not
+honor that revocation mechanism.
+
+### Verification
+
+- All 308 backend tests passed in 55 suites with none skipped, using isolated
+  PostgreSQL/Redis. Carrier delivery and eligibility were mocked; no live charge
+  was performed for this change.
+- New database tests cover repeated/multi-device login without billing changes,
+  expired/cancelled/inactive subscribers, existing renewal and preserved history,
+  initial OTP account/password setup, admin-credential isolation, reset/expiry/
+  replay/concurrency, consent validation, rate limits and the existing pilot gate.
+- Dedicated chat tests cover revocation during connection, send, join and delivery.
+- Flutter: all 130 tests and analyzer passed, including Bangla/English at 200%
+  text size, password mismatch/UTF-8 limits, inactive routing, both recovery
+  consent steps and suppression of automatic recovery-request replay.
+- This update is not yet deployed. Actual recovery delivery and carrier charging
+  still require a separately approved live test.

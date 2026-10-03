@@ -3,7 +3,7 @@ import { createHash, createHmac } from "node:crypto";
 import { Inject, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { compare, hash } from "bcryptjs";
-import { RiskIdentityKind } from "@prisma/client";
+import { OtpPurpose, RiskIdentityKind } from "@prisma/client";
 
 import { CLOCK, Clock } from "../../common/time/clock";
 import { SMS_PORT, SmsPort } from "../../infra/sms/sms.port";
@@ -76,6 +76,7 @@ export class AuthService {
   async requestOtp(
     phone: string,
     ipAddress: string,
+    purpose: OtpPurpose = "LOGIN",
   ): Promise<{ challengeId: string; expiresIn: number }> {
     const phoneE164 = normalizeBangladeshPhone(phone);
     if (!phoneE164) throw invalidPhoneError();
@@ -108,6 +109,7 @@ export class AuthService {
       this.clock.now().getTime() + this.otpTtlSeconds * 1_000,
     );
     const challenge = await this.repository.createOtpChallenge({
+      purpose,
       codeHash,
       expiresAt,
       phoneE164,
@@ -129,6 +131,8 @@ export class AuthService {
   ): Promise<TokenPair & { isNewUser: boolean }> {
     const challenge = await this.repository.findOtpChallenge(challengeId);
     if (!challenge) throw otpNotFoundError();
+    if (challenge.purpose && challenge.purpose !== "LOGIN")
+      throw otpNotFoundError();
     if (challenge.consumedAt) throw otpAlreadyUsedError();
     if (challenge.expiresAt.getTime() <= this.clock.now().getTime()) {
       throw otpExpiredError();
@@ -160,24 +164,11 @@ export class AuthService {
       now: this.clock.now(),
       phoneE164: challenge.phoneE164,
       refreshToken: refresh.record,
-      riskObservations: [
-        {
-          kind: RiskIdentityKind.DEVICE,
-          valueHash: this.riskHash("device", deviceId),
-        },
-        {
-          kind: RiskIdentityKind.PHONE,
-          valueHash: this.riskHash("phone", challenge.phoneE164),
-        },
-        ...(ipAddress === "unknown"
-          ? []
-          : [
-              {
-                kind: RiskIdentityKind.IP,
-                valueHash: this.riskHash("ip", ipAddress),
-              },
-            ]),
-      ],
+      riskObservations: this.riskObservationsFor(
+        challenge.phoneE164,
+        deviceId,
+        ipAddress,
+      ),
     });
     if (!session) throw otpAlreadyUsedError();
     if (session.user.status !== "ACTIVE") {
@@ -293,6 +284,27 @@ export class AuthService {
 
   private rateLimitKey(value: string): string {
     return createHash("sha256").update(value).digest("hex");
+  }
+
+  riskObservationsFor(phone: string, deviceId: string, ipAddress: string) {
+    return [
+      {
+        kind: RiskIdentityKind.DEVICE,
+        valueHash: this.riskHash("device", deviceId),
+      },
+      {
+        kind: RiskIdentityKind.PHONE,
+        valueHash: this.riskHash("phone", phone),
+      },
+      ...(ipAddress === "unknown"
+        ? []
+        : [
+            {
+              kind: RiskIdentityKind.IP,
+              valueHash: this.riskHash("ip", ipAddress),
+            },
+          ]),
+    ];
   }
 
   private riskHash(kind: string, value: string): string {

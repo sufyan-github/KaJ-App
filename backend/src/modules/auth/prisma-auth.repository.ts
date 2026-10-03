@@ -14,6 +14,7 @@ import {
 } from "./auth.repository";
 
 const userSelect = {
+  mobile_auth_version: true,
   active_role: true,
   id: true,
   is_admin: true,
@@ -23,6 +24,7 @@ const userSelect = {
 } as const;
 
 function toAuthUser(user: {
+  mobile_auth_version: number;
   active_role: AuthUser["activeRole"];
   id: string;
   is_admin: boolean;
@@ -33,6 +35,7 @@ function toAuthUser(user: {
   if (!user.phone_e164)
     throw new Error("Authenticated user has no phone number");
   return {
+    mobileAuthVersion: user.mobile_auth_version,
     activeRole: user.active_role,
     id: user.id,
     isAdmin: user.is_admin,
@@ -54,6 +57,7 @@ export class PrismaAuthRepository implements AuthRepository {
         code_hash: input.codeHash,
         expires_at: input.expiresAt,
         phone_e164: input.phoneE164,
+        purpose: input.purpose ?? "LOGIN",
       },
       select: { id: true },
     });
@@ -71,6 +75,7 @@ export class PrismaAuthRepository implements AuthRepository {
           expiresAt: challenge.expires_at,
           id: challenge.id,
           phoneE164: challenge.phone_e164,
+          purpose: challenge.purpose,
         }
       : null;
   }
@@ -97,6 +102,7 @@ export class PrismaAuthRepository implements AuthRepository {
           consumed_at: null,
           expires_at: { gt: input.now },
           id: input.challengeId,
+          purpose: "LOGIN",
         },
       });
       if (consumed.count !== 1) return null;

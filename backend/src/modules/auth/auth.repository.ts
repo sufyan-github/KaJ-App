@@ -3,11 +3,13 @@ import {
   RiskIdentityKind,
   RoleMode,
   UserStatus,
+  OtpPurpose,
 } from "@prisma/client";
 
 export const AUTH_REPOSITORY = Symbol("AUTH_REPOSITORY");
 
 export interface AuthUser {
+  mobileAuthVersion?: number;
   activeRole: RoleMode;
   id: string;
   isAdmin: boolean;
@@ -22,6 +24,7 @@ export interface AuthSession {
 }
 
 export interface StoredOtpChallenge {
+  purpose?: OtpPurpose;
   attempts: number;
   codeHash: string;
   consumedAt: Date | null;
@@ -44,6 +47,7 @@ export interface StoredRefreshToken extends NewRefreshToken {
 }
 
 export interface CreateOtpChallengeInput {
+  purpose?: OtpPurpose;
   codeHash: string;
   expiresAt: Date;
   phoneE164: string;

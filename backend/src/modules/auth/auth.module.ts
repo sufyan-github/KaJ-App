@@ -15,12 +15,22 @@ import {
 } from "./otp-code.generator";
 import { PrismaAuthRepository } from "./prisma-auth.repository";
 import { RedisAuthRateLimiter } from "./redis-auth-rate-limiter";
+import { SubscriptionsModule } from "../subscriptions/subscriptions.module";
+import { MobilePasswordController } from "./mobile-password.controller";
+import { MobilePasswordService } from "./mobile-password.service";
 
 @Module({
-  controllers: [AuthController],
+  controllers: [AuthController, MobilePasswordController],
   exports: [AuthService, AuthTokenService],
-  imports: [JwtModule.register({}), PrismaModule, RedisModule, TimeModule],
+  imports: [
+    JwtModule.register({}),
+    PrismaModule,
+    RedisModule,
+    TimeModule,
+    SubscriptionsModule,
+  ],
   providers: [
+    MobilePasswordService,
     AuthService,
     AuthTokenService,
     CryptoOtpCodeGenerator,

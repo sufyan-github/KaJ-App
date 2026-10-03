@@ -331,6 +331,8 @@ model User {
   phone_e164                  String?         @unique
   email                       String?         @unique
   password_hash               String?
+  mobile_password_hash        String?
+  mobile_auth_version         Int             @default(0)
   status                      UserStatus      @default(ACTIVE)
   role_modes                  RoleMode[]      @default([CUSTOMER])
   active_role                 RoleMode        @default(CUSTOMER)
@@ -499,6 +501,7 @@ model OtpChallenge {
   attempts    Int        @default(0)
   expires_at  DateTime
   consumed_at DateTime?
+  recovery_verifying Boolean @default(false)
   created_at  DateTime   @default(now())
 
   @@index([phone_e164, purpose, created_at(sort: Desc)])

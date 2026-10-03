@@ -5,10 +5,16 @@ import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 
 import { CLOCK, Clock } from "../../common/time/clock";
-import { AuthUser, NewRefreshToken } from "./auth.repository";
+import {
+  AUTH_REPOSITORY,
+  AuthRepository,
+  AuthUser,
+  NewRefreshToken,
+} from "./auth.repository";
 import { parseTtlSeconds } from "./ttl";
 
 export interface AccessTokenClaims {
+  mobileAuthVersion?: number;
   activeRole: AuthUser["activeRole"];
   deviceId: string;
   exp: number;
@@ -41,6 +47,7 @@ export class AuthTokenService {
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
     @Inject(CLOCK) private readonly clock: Clock,
+    @Inject(AUTH_REPOSITORY) private readonly repository: AuthRepository,
   ) {
     this.accessSecret =
       config.get<string>("JWT_ACCESS_SECRET") || localOnlySecret("access");
@@ -57,6 +64,7 @@ export class AuthTokenService {
   async createAccessToken(user: AuthUser, deviceId: string): Promise<string> {
     const issuedAt = Math.floor(this.clock.now().getTime() / 1_000);
     const claims: AccessTokenClaims = {
+      mobileAuthVersion: user.mobileAuthVersion ?? 0,
       activeRole: user.activeRole,
       deviceId,
       exp: issuedAt + this.accessTtlSeconds,
@@ -102,6 +110,14 @@ export class AuthTokenService {
     });
     if (claims.type !== "access" || !claims.sub || !claims.deviceId) {
       throw new Error("Invalid access-token claims");
+    }
+    const session = await this.repository.findSession(claims.sub);
+    if (
+      !session ||
+      session.user.status !== "ACTIVE" ||
+      (session.user.mobileAuthVersion ?? 0) !== (claims.mobileAuthVersion ?? 0)
+    ) {
+      throw new Error("Revoked access-token session");
     }
     return claims;
   }

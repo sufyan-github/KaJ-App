@@ -3,7 +3,15 @@ export const AUTH_RATE_LIMITER = Symbol("AUTH_RATE_LIMITER");
 export interface AuthRateLimitRequest {
   key: string;
   limit: number;
-  scope: "otp-cooldown" | "otp-ip" | "otp-phone";
+  scope:
+    | "otp-cooldown"
+    | "otp-ip"
+    | "otp-phone"
+    | "password-phone"
+    | "password-ip"
+    | "recovery-phone"
+    | "recovery-ip"
+    | "password-setup";
   windowSeconds: number;
 }
 
