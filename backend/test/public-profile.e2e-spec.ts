@@ -85,4 +85,13 @@ describe("public worker profile endpoint", () => {
       .get("/api/v1/users/not-a-uuid/public")
       .expect(400);
   });
+
+  it.each(["skillId", "locationId"])(
+    "rejects malformed directory %s before querying storage",
+    async (field) => {
+      await request(app.getHttpServer())
+        .get(`/api/v1/users/workers?${field}=not-a-uuid`)
+        .expect(400);
+    },
+  );
 });

@@ -4,6 +4,7 @@ import { ApiTags } from "@nestjs/swagger";
 import { Policy } from "../../common/policy/policy.decorator";
 import { Policies } from "../../common/policy/policy.types";
 import { PublicProfilesService } from "./public-profiles.service";
+import { WorkerDirectoryQueryDto } from "./dto/worker-directory-query.dto";
 
 @ApiTags("users")
 @Controller("users")
@@ -12,11 +13,8 @@ export class PublicProfilesController {
 
   @Get("workers")
   @Policy(Policies.public())
-  listWorkers(
-    @Query("skillId") skillId?: string,
-    @Query("locationId") locationId?: string,
-  ) {
-    return this.profiles.listWorkers(skillId, locationId);
+  listWorkers(@Query() query: WorkerDirectoryQueryDto) {
+    return this.profiles.listWorkers(query.skillId, query.locationId);
   }
 
   @Get(":id/public")

@@ -6,6 +6,13 @@ All notable project changes are documented here.
 
 ### Engineering
 
+- Hardened marketplace validation: malformed worker filter identifiers return 400 and duplicate
+  applications return 409 without incrementing the application count. Added a real-database
+  job lifecycle regression covering publication through completion and authorization boundaries.
+- Updated Next, sharp and vulnerable transitive dependencies; removed stale advisory suppressions.
+  Four remaining dependency advisories are openly tracked, not declared resolved.
+- Verified 312 backend tests, eight mocked admin browser workflows, backend/admin builds and
+  type checks for the 3 October audit release. No schema or billing configuration change.
 - Added provider-neutral Robi/Airtel operator hints, subscription plans/history/statuses, configurable
   entitlement rules, audited admin management, and fail-closed pending operator verification.
 - Added a zero-commission Version 1 cash-on-completion lifecycle with poster-only confirmation,

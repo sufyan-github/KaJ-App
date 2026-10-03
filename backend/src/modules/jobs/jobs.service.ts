@@ -335,23 +335,34 @@ export class JobsService {
     if (!result.isAvailable) {
       throw new ConflictException("Worker is not available for this slot.");
     }
-    const application = await this.prisma.$transaction(async (transaction) => {
-      const created = await transaction.application.create({
-        data: {
-          job_id: jobId,
-          worker_user_id: workerUserId,
-          message: input.message?.trim(),
-          proposed_price_poisha: toBigInt(input.proposedPricePoisha),
-          proposed_starts_at: window.startsAt,
-          proposed_ends_at: window.endsAt,
-        },
+    const application = await this.prisma
+      .$transaction(async (transaction) => {
+        const created = await transaction.application.create({
+          data: {
+            job_id: jobId,
+            worker_user_id: workerUserId,
+            message: input.message?.trim(),
+            proposed_price_poisha: toBigInt(input.proposedPricePoisha),
+            proposed_starts_at: window.startsAt,
+            proposed_ends_at: window.endsAt,
+          },
+        });
+        await transaction.job.update({
+          where: { id: jobId },
+          data: { applications_count: { increment: 1 } },
+        });
+        return created;
+      })
+      .catch((error: unknown) => {
+        // The database unique constraint remains the race-safe source of truth.
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2002"
+        ) {
+          throw new ConflictException("You have already applied to this job.");
+        }
+        throw error;
       });
-      await transaction.job.update({
-        where: { id: jobId },
-        data: { applications_count: { increment: 1 } },
-      });
-      return created;
-    });
     await this.notifications?.create({
       userId: job.poster_user_id,
       type: "JOB_APPLICATION_RECEIVED",
