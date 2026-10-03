@@ -55,7 +55,7 @@ Needed from owner:
    existing app to conceal this mismatch.
 3. Firebase Android configuration and backend service-account file paths to implement/verify
    external push; never embed the backend private key in the mobile client.
-4. Completion of GitHub CLI authorization for workflow scope to publish the mobile branch.
+4. GitHub CLI authorization is complete: workflow scope was verified after owner approval.
 5. Separate authorization and acceptance plan for carrier/local entitlement reconciliation;
    previous instruction to preserve billing settings still applies.
 

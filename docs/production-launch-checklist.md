@@ -21,8 +21,8 @@ described below has been observed against the production system.
 - Local audit verification: 312 backend tests, 146 Flutter tests, eight mocked
   admin browser workflows, six workspace tooling tests and ten release diagnostics
   passed; Flutter analysis and backend/admin build/type/lint checks passed.
-- Mobile source is prepared as `1.0.2+3`, commit `4698f91`. Publishing its new branch
-  requires the GitHub CLI workflow permission; authorization requested from owner.
+- Mobile source is prepared as `1.0.2+3`, commit `4698f91`. The owner completed
+  GitHub authorization and the CLI workflow permission is verified.
 - Final production App Bundle remains blocked by the required `KAAJ_SENTRY_DSN`.
   The release script refused to build without it; no placeholder DSN or bypass used.
 - Original installed production-app signing continuity remains unresolved.
