@@ -9,6 +9,113 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get passwordLoginTitle => 'Welcome back';
+
+  @override
+  String get passwordLoginSubtitle =>
+      'Sign in with your mobile number and password. Login does not purchase or renew a subscription.';
+
+  @override
+  String get passwordLabel => 'Password';
+
+  @override
+  String get confirmPasswordLabel => 'Confirm password';
+
+  @override
+  String get passwordSignIn => 'Sign in';
+
+  @override
+  String get passwordShow => 'Show password';
+
+  @override
+  String get passwordHide => 'Hide password';
+
+  @override
+  String get passwordForgot => 'Forgot password?';
+
+  @override
+  String get passwordRegister => 'Register or set up access with OTP';
+
+  @override
+  String get passwordSetupTitle => 'Set your password';
+
+  @override
+  String get passwordSetupSubtitle =>
+      'Use this password with your registered mobile number next time. Your subscription is unchanged.';
+
+  @override
+  String get passwordSave => 'Save password';
+
+  @override
+  String get passwordRules =>
+      'Use at least 12 characters (maximum 72 UTF-8 bytes). Longer phrases are easier to remember; Bangla characters use more than one byte.';
+
+  @override
+  String get passwordMismatch => 'Passwords do not match.';
+
+  @override
+  String get passwordRequired => 'Enter your password.';
+
+  @override
+  String get passwordInvalidCredentials =>
+      'The mobile number or password is incorrect.';
+
+  @override
+  String get passwordAlreadySet =>
+      'A password is already set. Use password recovery to change it.';
+
+  @override
+  String get passwordSubscriptionRequired =>
+      'Complete the existing subscription verification before setting a password.';
+
+  @override
+  String get passwordRecoveryTitle => 'Recover your password';
+
+  @override
+  String get passwordRecoveryConsent =>
+      'I agree to use the existing bdApps subscription OTP for recovery. Verification may charge BDT 2.78 and activate daily renewal until I unsubscribe. This is not a free password-reset SMS.';
+
+  @override
+  String get passwordRecoverySent =>
+      'If this number has an available account, a recovery code has been sent. Enter it below before it expires.';
+
+  @override
+  String get passwordRecoveryVerifyConsent =>
+      'I understand that verifying this recovery code may activate the BDT 2.78/day subscription, renewing daily until I unsubscribe.';
+
+  @override
+  String get passwordReset => 'Verify and reset password';
+
+  @override
+  String get passwordResetSuccess =>
+      'Your password has been reset and previous sessions revoked. Sign in with your new password.';
+
+  @override
+  String get passwordRequestAnother => 'Request another recovery code';
+
+  @override
+  String get passwordCheckAccess => 'Checking your account and subscription…';
+
+  @override
+  String get subscriptionInactiveLogin =>
+      'Your subscription is inactive. Please subscribe to continue accessing the platform.';
+
+  @override
+  String get passwordBackToLogin => 'Back to sign in';
+
+  @override
+  String get passwordManage => 'Password and account access';
+
+  @override
+  String get passwordContinueSubscription => 'Open subscription';
+
+  @override
+  String get passwordRetry => 'Try again';
+
+  @override
+  String get passwordSignOut => 'Sign out';
+
+  @override
   String get appName => 'KAAJ';
 
   @override

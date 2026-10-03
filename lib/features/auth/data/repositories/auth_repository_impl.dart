@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+
 import '../../../../core/errors/error_mapper.dart';
 import '../../../../core/storage/session_token_store.dart';
 import '../../domain/entities/auth_result.dart';
@@ -58,9 +60,14 @@ class AuthRepositoryImpl implements AuthRepository {
         refreshToken: data['refreshToken'] as String,
       );
       return true;
-    } on Object {
-      await _tokens.clearSession();
-      return false;
+    } on DioException catch (error) {
+      if (error.response?.statusCode == 401) {
+        await _tokens.clearSession();
+        return false;
+      }
+      throw ErrorMapper.from(error);
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
     }
   }
 

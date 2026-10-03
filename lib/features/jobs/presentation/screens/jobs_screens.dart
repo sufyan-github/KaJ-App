@@ -789,20 +789,7 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
         .where((item) => item.categoryId == _categoryId)
         .toList();
     return Scaffold(
-      appBar: AppBar(
-        title: const KLocalizedText('নতুন কাজ পোস্ট করুন'),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: KSpacing.md),
-            child: Center(
-              child: KLocalizedText(
-                'ধাপ ১ / ৩',
-                style: TextStyle(color: KColors.textSecondary),
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const KLocalizedText('নতুন কাজ পোস্ট করুন')),
       body: Form(
         key: _form,
         child: ListView(
@@ -813,8 +800,6 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
             KSpacing.xl,
           ),
           children: [
-            const LinearProgressIndicator(value: 1 / 3, minHeight: 5),
-            const SizedBox(height: KSpacing.md),
             KLocalizedText(
               'কাজটি কী?',
               style: Theme.of(context).textTheme.titleLarge,
@@ -861,7 +846,9 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
                 _categoryId = value;
                 _skillId = null;
               }),
-              validator: (value) => value == null ? 'কাজের ধরন বেছে নিন' : null,
+              validator: (value) => value == null
+                  ? KaajLocalizations.text(context, 'কাজের ধরন বেছে নিন')
+                  : null,
             ),
             const SizedBox(height: KSpacing.md),
             DropdownButtonFormField<String>(
@@ -945,7 +932,16 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
   Future<void> _save() async {
     if (!_form.currentState!.validate()) return;
     final locationId = ref.read(onboardingControllerProvider).locationId;
-    if (locationId == null) return;
+    if (locationId == null || locationId.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: KLocalizedText(
+            'কাজ পোস্ট করার আগে প্রোফাইলে আপনার এলাকা নির্বাচন করুন।',
+          ),
+        ),
+      );
+      return;
+    }
     final startsAt = _combine(_date, _start);
     final endsAt = _combine(_date, _end);
     if (!endsAt.isAfter(startsAt)) {
@@ -1063,17 +1059,26 @@ class _WorkerCard extends StatelessWidget {
             ),
             const SizedBox(height: KSpacing.sm),
             Text(
-              worker.displayName,
+              worker.displayName.trim().isEmpty
+                  ? KaajLocalizations.text(context, 'নাম দেওয়া হয়নি')
+                  : worker.displayName,
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             KLocalizedText(
-              worker.areaNameFor(
-                    Localizations.localeOf(context).languageCode,
-                  ) ??
-                  '',
+              (worker
+                          .areaNameFor(
+                            Localizations.localeOf(context).languageCode,
+                          )
+                          ?.trim()
+                          .isNotEmpty ??
+                      false)
+                  ? worker.areaNameFor(
+                      Localizations.localeOf(context).languageCode,
+                    )!
+                  : 'এলাকা দেওয়া হয়নি',
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

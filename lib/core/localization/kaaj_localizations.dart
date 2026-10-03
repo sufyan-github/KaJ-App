@@ -91,6 +91,9 @@ abstract final class KaajLocalizations {
   }
 
   static bool _isDynamicSystemCopy(String value) {
+    if (RegExp(r'^★ [0-9০-৯.]+ · [0-9০-৯]+ কাজ$').hasMatch(value)) {
+      return true;
+    }
     const prefixes = <String>[
       'কেন প্রত্যাখ্যাত:',
       'লোকেশন যথেষ্ট নির্ভুল নয়',
@@ -142,6 +145,23 @@ const _reviewedBangla = <String, String>{
 };
 
 const _reviewedEnglish = <String, String>{
+  'কাজ পোস্ট করার আগে প্রোফাইলে আপনার এলাকা নির্বাচন করুন।':
+      'Choose your area in your profile before posting a job.',
+  'হোম': 'Home',
+  'নতুন কাজ পোস্ট করুন': 'Post a job',
+  'পারিশ্রমিক (টাকা)': 'Pay (BDT)',
+  'শুরু': 'Start',
+  'শেষ': 'End',
+  'আমার কাজ': 'My work',
+  'ফোন': 'Phone',
+  'ব্যবসা': 'Business',
+  'আবেদনের জন্য আবশ্যিক · NID ও সেলফি': 'Required to apply · NID and selfie',
+  'ঐচ্ছিক · সনদ, লাইসেন্স বা কাজের প্রমাণ':
+      'Optional · Certificate, licence or work evidence',
+  'খুঁজুন': 'Search',
+  'প্রোফাইল': 'Profile',
+  'নাম দেওয়া হয়নি': 'Name not provided',
+  'এলাকা দেওয়া হয়নি': 'Area not provided',
   'আজ': 'Today',
   'বর্তমান কাজের মোড': 'Current role',
   'মোড বদলালে হোমের কাজ ও সুবিধা সঙ্গে সঙ্গে বদলে যাবে।':
@@ -283,6 +303,7 @@ const _reviewedEnglish = <String, String>{
   'সনাক্তকরণ': 'Verification',
   'সব সময়': 'All times',
   'সাবস্ক্রিপশন ও পেমেন্ট': 'Subscription and payments',
+  'পাসওয়ার্ড ও অ্যাকাউন্টে প্রবেশ': 'Password and account access',
   'সাবস্ক্রিপশন': 'Subscription',
   'প্ল্যান, অপারেটর যাচাই ও সুবিধার অবস্থা দেখুন':
       'View plans, operator verification and access status',

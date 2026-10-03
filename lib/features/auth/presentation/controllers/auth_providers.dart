@@ -10,6 +10,7 @@ import '../../../../core/network/api_locale.dart';
 import '../../../../core/storage/session_token_store.dart';
 import '../../data/datasources/auth_remote_data_source.dart';
 import '../../data/repositories/auth_repository_impl.dart';
+import '../../data/repositories/password_repository.dart';
 import '../../domain/repositories/auth_repository.dart';
 import 'auth_controller.dart';
 
@@ -55,4 +56,11 @@ final authControllerProvider = StateNotifierProvider<AuthController, AuthState>(
   (ref) {
     return AuthController(ref.watch(authRepositoryProvider));
   },
+);
+
+final passwordRepositoryProvider = Provider<PasswordRepository>(
+  (ref) => PasswordRepository(
+    ref.watch(dioProvider),
+    ref.watch(sessionTokenStoreProvider),
+  ),
 );

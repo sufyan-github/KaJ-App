@@ -48,7 +48,14 @@ class KTextField extends StatelessWidget {
         minLines: minLines,
         textInputAction: textInputAction,
         onChanged: onChanged,
-        validator: validator,
+        validator: validator == null
+            ? null
+            : (value) {
+                final message = validator!(value);
+                return message == null
+                    ? null
+                    : KaajLocalizations.text(context, message);
+              },
         decoration: InputDecoration(
           labelText: localizedLabel,
           hintText: hintText == null

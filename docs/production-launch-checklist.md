@@ -157,3 +157,71 @@ Not every screen or marketplace mutation was manually tested on the phone.
 No real job/application, verification-document, booking, messaging, or hiring
 workflow is certified by the read-only live smoke checks. Production release
 also remains blocked on signing continuity and the unchecked launch gates above.
+
+## Mobile password update — backend deployed, client release pending
+
+Implemented on 3 October after the live OTP test. Existing subscription/payment
+workflow, prices, duration, gateway code and access flags are unchanged, as the
+owner explicitly requested. The disabled production access gate and missing
+local plans/subscription records are still a separate launch blocker. Do not
+interpret successful password authentication as proof of subscription payment.
+
+- Primary login is mobile number + password, without OTP or billing calls.
+- After authentication, the app checks the existing subscription access decision.
+  When that decision denies access, it keeps the account authenticated, displays
+  “Your subscription is inactive. Please subscribe to continue accessing the
+  platform.” (with Bangla translation), and opens the existing subscription page.
+- Password setup is offered after existing subscription verification. It never
+  overwrites a configured password or the separate admin credential.
+- Per the owner's instruction, recovery uses the existing paid bdApps OTP, with
+  explicit unchecked consent before requesting and before verifying. The UI
+  discloses BDT 2.78/day and renewal until unsubscribed. No new live charged test
+  was authorized or performed for this change.
+- Successful recovery revokes old HTTP/chat access and refresh sessions; replay,
+  concurrent verification and uncertain provider outcomes cannot automatically
+  repeat a paid verification call.
+
+Modified areas:
+
+- Flutter: `password_repository.dart`, `password_screens.dart`, auth controller/
+  providers, OTP success routing, `app_router.dart`, API retry exclusions,
+  localized error mapping, subscription-page access messaging, settings entry,
+  English/Bangla ARB/generated translations and the existing settings dictionary.
+- Flutter tests: new password-screen coverage, routing and API-retry tests.
+- Backend (`/home/sufyan/kaaj-production-backend`): new mobile-password service,
+  controller, DTOs and errors; auth module, repository, OTP-purpose checks,
+  shared risk observations, login throttling and token-version verification;
+  chat-session checks; new database and chat-revocation tests.
+- Database: additive migration `20261003060000_mobile_password_auth`, adding
+  `users.mobile_password_hash`, `users.mobile_auth_version` and
+  `otp_challenges.recovery_verifying`. No user/subscription/payment data is deleted.
+
+Verification: 308 backend tests (55 suites, none skipped), 130 Flutter tests,
+Flutter analyzer, backend type checking and backend build passed. Database tests
+ran against disposable local PostgreSQL/Redis; all carrier operations were mocked.
+See the backend README's mobile-password section for endpoint contracts and the
+release procedure. The updated arm64 staging APK builds successfully (25.7 MB)
+and its Android v2 signature verifies. It is installed as KAAJ Staging on the
+connected Motorola, pointing to the live Render API; the original KAAJ app was
+not replaced. Client credential-policy checks pass.
+
+### Deployment evidence — 3 October 2026
+
+- User approved deploying the backend and additive migration, preserving billing.
+- Backend commit `6cdb27061ec127c2cfd6f41795d148339f447ed2` was pushed to the
+  existing Render source branch `agent/p1-ui-07-tracker`.
+- Render deploy `dep-db07eseq1p3s73e360s0` succeeded and became live at 09:34
+  Asia/Dhaka. Build logs confirmed migration
+  `20261003060000_mobile_password_auth` applied successfully. No seed ran.
+- Seven live smoke checks passed: `/ready` returned 200; protected password
+  status and setup returned 401 without a session; empty login returned 400;
+  a synthetic invalid credential request reached the database-backed login
+  handler and returned `AUTH_INVALID_CREDENTIALS` (401); both recovery endpoints
+  rejected missing consent with 400 and field `subscriptionConsent`.
+- The previous password-status 404 deployment blocker is resolved. No SMS,
+  paid OTP verification, subscription activation, password mutation, or billing
+  configuration change was performed during deployment verification.
+- These checks do not prove successful subscriber login, setup, paid recovery,
+  or all post-login phone flows. Those still require an authorized test account
+  and separate consent for any paid carrier action. Existing production billing
+  gate/local-subscription reconciliation blockers remain unchanged.

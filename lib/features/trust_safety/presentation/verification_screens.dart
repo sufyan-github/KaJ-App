@@ -164,7 +164,13 @@ class _VerificationStep extends StatelessWidget {
               ),
             ),
             title: KLocalizedText(title),
-            subtitle: KLocalizedText('$subtitle\n${_statusLabel(status)}'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                KLocalizedText(subtitle),
+                KLocalizedText(_statusLabel(status)),
+              ],
+            ),
             isThreeLine: true,
             trailing: pending
                 ? const Icon(Icons.hourglass_top, color: KColors.warning)

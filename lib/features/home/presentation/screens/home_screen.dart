@@ -697,22 +697,28 @@ class _HomeNavigation extends StatelessWidget {
           context.push(AppRoutes.settings);
       }
     },
-    destinations: const [
+    destinations: [
       NavigationDestination(
-        icon: Icon(Icons.home_outlined),
-        selectedIcon: Icon(Icons.home_rounded, color: KColors.primary),
-        label: 'Home',
-      ),
-      NavigationDestination(icon: Icon(Icons.search_rounded), label: 'Search'),
-      NavigationDestination(
-        icon: Icon(Icons.handshake_outlined),
-        label: 'Work',
+        icon: const Icon(Icons.home_outlined),
+        selectedIcon: const Icon(Icons.home_rounded, color: KColors.primary),
+        label: KaajLocalizations.text(context, 'হোম'),
       ),
       NavigationDestination(
-        icon: Icon(Icons.chat_bubble_outline),
-        label: 'Messages',
+        icon: const Icon(Icons.search_rounded),
+        label: KaajLocalizations.text(context, 'খুঁজুন'),
       ),
-      NavigationDestination(icon: Icon(Icons.person_outline), label: 'Profile'),
+      NavigationDestination(
+        icon: const Icon(Icons.handshake_outlined),
+        label: KaajLocalizations.text(context, 'আমার কাজ'),
+      ),
+      NavigationDestination(
+        icon: const Icon(Icons.chat_bubble_outline),
+        label: KaajLocalizations.text(context, 'বার্তা'),
+      ),
+      NavigationDestination(
+        icon: const Icon(Icons.person_outline),
+        label: KaajLocalizations.text(context, 'প্রোফাইল'),
+      ),
     ],
   );
 }

@@ -159,6 +159,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             title: 'গোপনীয়তা ও নিরাপত্তা',
             children: [
               _SettingsTile(
+                icon: Icons.password_outlined,
+                title: 'পাসওয়ার্ড ও অ্যাকাউন্টে প্রবেশ',
+                onTap: () => context.push(AppRoutes.passwordSetup),
+              ),
+              _SettingsTile(
                 icon: Icons.privacy_tip_outlined,
                 title: 'গোপনীয়তা ও অনুমতি',
                 subtitle: 'কোন তথ্য কোথায় ব্যবহৃত হয় ও ফোনের অনুমতি দেখুন',

@@ -6,6 +6,7 @@ import '../../features/auth/domain/entities/otp_challenge.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/controllers/auth_providers.dart';
 import '../../features/auth/presentation/screens/otp_verify_screen.dart';
+import '../../features/auth/presentation/screens/password_screens.dart';
 import '../../features/auth/presentation/screens/phone_entry_screen.dart';
 import '../../features/billing/presentation/billing_screens.dart';
 import '../../features/bootstrap/presentation/screens/splash_screen.dart';
@@ -25,6 +26,10 @@ import '../../features/trust_safety/presentation/verification_screens.dart';
 import 'route_arguments.dart';
 
 abstract final class AppRoutes {
+  static const register = '/auth/register';
+  static const accessCheck = '/auth/access';
+  static const passwordSetup = '/auth/password/setup';
+  static const passwordRecovery = '/auth/password/recovery';
   static const splash = '/';
   static const phone = '/auth/phone';
   static const otp = '/auth/otp';
@@ -116,7 +121,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.phone,
-        builder: (context, state) => const PhoneEntryScreen(),
+        builder: (context, state) => const PasswordLoginScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.register,
+        builder: (_, _) => const PhoneEntryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.accessCheck,
+        builder: (_, _) => const AuthAccessScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.passwordSetup,
+        builder: (_, _) => const PasswordSetupScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.passwordRecovery,
+        builder: (_, _) => const PasswordRecoveryScreen(),
       ),
       GoRoute(
         path: AppRoutes.otp,
@@ -333,15 +354,44 @@ String? authRedirect(
   OnboardingState onboarding = const OnboardingState(),
 }) {
   final isSplash = location == AppRoutes.splash;
-  final isAuthRoute = location == AppRoutes.phone || location == AppRoutes.otp;
+  final isAuthRoute = {
+    AppRoutes.phone,
+    AppRoutes.otp,
+    AppRoutes.register,
+    AppRoutes.passwordRecovery,
+  }.contains(location);
 
   if (auth.status == AuthStatus.initial) {
     return isSplash ? null : AppRoutes.splash;
   }
   if (auth.status == AuthStatus.unauthenticated) {
-    return location == AppRoutes.phone ? null : AppRoutes.phone;
+    return {
+          AppRoutes.phone,
+          AppRoutes.register,
+          AppRoutes.passwordRecovery,
+        }.contains(location)
+        ? null
+        : AppRoutes.phone;
+  }
+  if (auth.status == AuthStatus.codeSent && !isAuthRoute) {
+    return AppRoutes.phone;
   }
   if (auth.status == AuthStatus.authenticated) {
+    if (location == AppRoutes.passwordRecovery) return null;
+    if (!auth.accessChecked) {
+      return location == AppRoutes.accessCheck ? null : AppRoutes.accessCheck;
+    }
+    if (!auth.subscriptionAccess) {
+      return location == AppRoutes.subscription ? null : AppRoutes.subscription;
+    }
+    if (auth.needsPasswordSetup) {
+      return {
+            AppRoutes.passwordSetup,
+            AppRoutes.subscription,
+          }.contains(location)
+          ? null
+          : AppRoutes.passwordSetup;
+    }
     if (auth.isNewUser && !onboarding.started) {
       return location == AppRoutes.onboardingProfile
           ? null
@@ -351,7 +401,10 @@ String? authRedirect(
       final target = onboardingRouteForStep(onboarding);
       return location.startsWith('/onboarding/') ? null : target;
     }
-    return isSplash || isAuthRoute || location.startsWith('/onboarding/')
+    return isSplash ||
+            isAuthRoute ||
+            location == AppRoutes.accessCheck ||
+            location.startsWith('/onboarding/')
         ? AppRoutes.home
         : null;
   }

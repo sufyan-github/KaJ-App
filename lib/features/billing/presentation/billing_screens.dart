@@ -12,6 +12,9 @@ import '../../../core/widgets/k_empty_state.dart';
 import '../../../core/widgets/k_error_state.dart';
 import '../../../core/widgets/k_localized_text.dart';
 import '../../../core/widgets/k_primary_button.dart';
+import '../../../l10n/generated/app_localizations.dart';
+import '../../auth/presentation/controllers/auth_controller.dart';
+import '../../auth/presentation/controllers/auth_providers.dart';
 import '../domain/billing_models.dart';
 import 'billing_providers.dart';
 
@@ -28,6 +31,18 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   @override
   Widget build(BuildContext context) {
     final overview = ref.watch(subscriptionOverviewProvider);
+    final auth = ref.watch(authControllerProvider);
+    final l10n = AppLocalizations.of(context);
+    ref.listen(subscriptionOverviewProvider, (_, next) {
+      final data = next.asData?.value;
+      if (data != null &&
+          auth.status == AuthStatus.authenticated &&
+          auth.accessChecked &&
+          !auth.subscriptionAccess &&
+          data.accessActive) {
+        ref.read(authControllerProvider.notifier).recheckAccess();
+      }
+    });
     return Scaffold(
       appBar: AppBar(title: const KLocalizedText('সাবস্ক্রিপশন')),
       body: overview.when(
@@ -51,6 +66,24 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
               KSpacing.xxl,
             ),
             children: [
+              if (!data.accessActive) ...[
+                Semantics(
+                  liveRegion: true,
+                  child: Text(l10n.subscriptionInactiveLogin),
+                ),
+                const SizedBox(height: KSpacing.md),
+              ],
+              if (!auth.subscriptionAccess)
+                TextButton(
+                  onPressed: () =>
+                      ref.read(authControllerProvider.notifier).logout(),
+                  child: Text(l10n.passwordSignOut),
+                ),
+              if (data.accessActive && auth.needsPasswordSetup)
+                TextButton(
+                  onPressed: () => context.go(AppRoutes.passwordSetup),
+                  child: Text(l10n.passwordSetupTitle),
+                ),
               _AccessCard(overview: data),
               const SizedBox(height: KSpacing.md),
               _OperatorCard(identity: data.operatorIdentity),

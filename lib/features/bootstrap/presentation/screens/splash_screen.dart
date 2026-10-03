@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/k_error_message.dart';
 import '../../../../features/auth/presentation/controllers/auth_providers.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 
@@ -26,12 +27,36 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         .read(authControllerProvider.notifier)
         .restoreSession();
     if (!mounted) return;
+    if (ref.read(authControllerProvider).failure != null) return;
     context.go(restored ? AppRoutes.home : AppRoutes.phone);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final failure = ref.watch(authControllerProvider).failure;
+    if (failure != null) {
+      return Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(KSpacing.lg),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  KErrorMessage(failure: failure),
+                  const SizedBox(height: KSpacing.md),
+                  FilledButton(
+                    onPressed: _resolveSession,
+                    child: Text(l10n.tryAgain),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return Scaffold(
       backgroundColor: KColors.background,
       body: SafeArea(

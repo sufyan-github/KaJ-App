@@ -40,7 +40,9 @@ class ApiClient {
   late final Dio dio;
 }
 
-class _SessionInterceptor extends QueuedInterceptor {
+// Refresh is explicitly single-flight below. A QueuedInterceptor deadlocks when
+// a replay fails: its onError waits behind the original onError awaiting it.
+class _SessionInterceptor extends Interceptor {
   _SessionInterceptor(
     this._client,
     this._refreshClient,
@@ -82,7 +84,9 @@ class _SessionInterceptor extends QueuedInterceptor {
         request.extra[_retriedKey] != true &&
         !request.path.endsWith('/auth/refresh') &&
         !request.path.endsWith('/auth/otp/request') &&
-        !request.path.endsWith('/auth/otp/verify');
+        !request.path.endsWith('/auth/otp/verify') &&
+        !request.path.endsWith('/auth/password/login') &&
+        !request.path.contains('/auth/password/recovery/');
     if (!shouldRefresh) {
       handler.next(error);
       return;
@@ -94,20 +98,35 @@ class _SessionInterceptor extends QueuedInterceptor {
       return;
     }
 
+    String? access;
     try {
       final requestToken = _bearerToken(request);
       final currentToken = _tokenStore.accessToken;
-      final access = currentToken != null && currentToken != requestToken
+      access = currentToken != null && currentToken != requestToken
           ? currentToken
           : await _refreshAccessToken(refreshToken);
       if (access == null) throw const FormatException('Missing access token');
-      request
-        ..extra[_retriedKey] = true
-        ..headers['Authorization'] = 'Bearer $access';
-      handler.resolve(await _client.fetch<dynamic>(request));
+    } on DioException catch (refreshError) {
+      // A timeout, lost connection or 5xx does not invalidate the credential.
+      if (refreshError.response?.statusCode == 401) {
+        await _tokenStore.clearSession();
+      }
+      handler.next(refreshError);
+      return;
     } on Object {
-      await _tokenStore.clearSession();
       handler.next(error);
+      return;
+    }
+    request
+      ..extra[_retriedKey] = true
+      ..headers['Authorization'] = 'Bearer $access';
+    try {
+      handler.resolve(await _client.fetch<dynamic>(request));
+    } on DioException catch (replayError) {
+      if (replayError.response?.statusCode == 401) {
+        await _tokenStore.clearSession();
+      }
+      handler.next(replayError);
     }
   }
 

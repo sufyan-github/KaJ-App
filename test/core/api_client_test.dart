@@ -16,6 +16,36 @@ void main() {
     sentryDsn: '',
   );
 
+  for (final path in [
+    '/auth/password/login',
+    '/auth/password/recovery/verify',
+  ]) {
+    test(
+      '$path failures never refresh or replay a paid recovery request',
+      () async {
+        final store = _MemoryTokenStore(
+          accessToken: 'old-access',
+          refreshToken: 'old-refresh',
+        );
+        final adapter = _RecordingAdapter(
+          (request, attempt) => _jsonResponse(401, {
+            'error': {'code': 'AUTH_INVALID_CREDENTIALS', 'message': 'Invalid'},
+          }),
+        );
+        final client = ApiClient(
+          environment: environment,
+          tokenStore: store,
+          httpClientAdapter: adapter,
+        );
+        await expectLater(
+          client.dio.post<void>(path, data: {'password': 'test only'}),
+          throwsA(isA<DioException>()),
+        );
+        expect(adapter.requests.map((r) => r.path), [path]);
+      },
+    );
+  }
+
   test('adds Bangla locale and an idempotency key to mutations', () async {
     final adapter = _RecordingAdapter((request, attempt) {
       return _jsonResponse(200, {
@@ -184,6 +214,76 @@ void main() {
       hasLength(1),
     );
   });
+
+  test('temporary refresh outage preserves the saved session', () async {
+    final store = _MemoryTokenStore(
+      accessToken: 'expired-access',
+      refreshToken: 'valid-refresh',
+    );
+    final client = ApiClient(
+      environment: environment,
+      tokenStore: store,
+      httpClientAdapter: _RecordingAdapter(
+        (request, _) =>
+            _jsonResponse(request.path.endsWith('/auth/refresh') ? 503 : 401, {
+              'error': {'code': 'TEMPORARY_FAILURE'},
+            }),
+      ),
+    );
+    await expectLater(
+      client.dio.get<void>('/me'),
+      throwsA(isA<DioException>()),
+    );
+    expect(await store.readRefreshToken(), 'valid-refresh');
+  });
+
+  for (final retryStatus in [401, 403, 500]) {
+    test(
+      'failed replay ($retryStatus) completes without interceptor deadlock',
+      () async {
+        final store = _MemoryTokenStore(
+          accessToken: 'expired-access',
+          refreshToken: 'valid-refresh',
+        );
+        final adapter = _RecordingAdapter((request, attempt) {
+          if (request.path.endsWith('/auth/refresh')) {
+            return _jsonResponse(200, {
+              'data': {
+                'accessToken': 'new-access',
+                'refreshToken': 'new-refresh',
+              },
+            });
+          }
+          return _jsonResponse(attempt == 1 ? 401 : retryStatus, {
+            'error': {'code': 'REQUEST_REJECTED'},
+          });
+        });
+        final client = ApiClient(
+          environment: environment,
+          tokenStore: store,
+          httpClientAdapter: adapter,
+        );
+        await expectLater(
+          client.dio.get<void>('/me').timeout(const Duration(seconds: 2)),
+          throwsA(
+            isA<DioException>().having(
+              (e) => e.response?.statusCode,
+              'replayed response status',
+              retryStatus,
+            ),
+          ),
+        );
+        expect(
+          await store.readRefreshToken(),
+          retryStatus == 401 ? null : 'new-refresh',
+        );
+        expect(
+          adapter.requests.where((r) => r.path == '/auth/refresh'),
+          hasLength(1),
+        );
+      },
+    );
+  }
 }
 
 class _MemoryTokenStore extends SessionTokenStore {

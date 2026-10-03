@@ -44,6 +44,8 @@ void main() {
   test('dynamic marketplace messages localize without mixed scripts', () {
     final bangla = RegExp(r'[\u0980-\u09FF]');
     const messages = [
+      '★ 0 · 0 কাজ',
+      '★ ৪.৯ · ৩২ কাজ',
       '২টি অপঠিত আপডেট আছে',
       '৩টি উপধরন',
       'পোস্টের সময়: ৫ সেপ্টেম্বর',

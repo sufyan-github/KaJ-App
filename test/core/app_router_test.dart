@@ -5,6 +5,57 @@ import 'package:kaaj/features/auth/presentation/controllers/auth_controller.dart
 import 'package:kaaj/features/onboarding/domain/onboarding_state.dart';
 
 void main() {
+  test(
+    'password login checks subscription before onboarding or marketplace',
+    () {
+      const auth = AuthState(
+        status: AuthStatus.authenticated,
+        accessChecked: false,
+      );
+      expect(authRedirect(auth, AppRoutes.home), AppRoutes.accessCheck);
+      expect(authRedirect(auth, AppRoutes.accessCheck), isNull);
+    },
+  );
+
+  test(
+    'inactive subscription retains authentication and opens existing subscription page',
+    () {
+      const auth = AuthState(
+        status: AuthStatus.authenticated,
+        subscriptionAccess: false,
+      );
+      expect(authRedirect(auth, AppRoutes.home), AppRoutes.subscription);
+      expect(authRedirect(auth, AppRoutes.subscription), isNull);
+      expect(authRedirect(auth, AppRoutes.passwordRecovery), isNull);
+    },
+  );
+
+  test('new activated account sets password before accessing marketplace', () {
+    const auth = AuthState(
+      status: AuthStatus.authenticated,
+      needsPasswordSetup: true,
+      isNewUser: true,
+    );
+    expect(authRedirect(auth, AppRoutes.home), AppRoutes.passwordSetup);
+    expect(authRedirect(auth, AppRoutes.passwordSetup), isNull);
+    expect(authRedirect(auth, AppRoutes.subscription), isNull);
+  });
+
+  test(
+    'registration and recovery remain public but an OTP alone grants no access',
+    () {
+      const auth = AuthState(status: AuthStatus.unauthenticated);
+      expect(authRedirect(auth, AppRoutes.register), isNull);
+      expect(authRedirect(auth, AppRoutes.passwordRecovery), isNull);
+      expect(
+        authRedirect(
+          const AuthState(status: AuthStatus.codeSent),
+          AppRoutes.jobs,
+        ),
+        AppRoutes.phone,
+      );
+    },
+  );
   test('unknown sessions are held on splash', () {
     const auth = AuthState();
 

@@ -98,6 +98,198 @@ abstract class AppLocalizations {
     Locale('en'),
   ];
 
+  /// No description provided for @passwordLoginTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back'**
+  String get passwordLoginTitle;
+
+  /// No description provided for @passwordLoginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with your mobile number and password. Login does not purchase or renew a subscription.'**
+  String get passwordLoginSubtitle;
+
+  /// No description provided for @passwordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get passwordLabel;
+
+  /// No description provided for @confirmPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get confirmPasswordLabel;
+
+  /// No description provided for @passwordSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get passwordSignIn;
+
+  /// No description provided for @passwordShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get passwordShow;
+
+  /// No description provided for @passwordHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get passwordHide;
+
+  /// No description provided for @passwordForgot.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get passwordForgot;
+
+  /// No description provided for @passwordRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Register or set up access with OTP'**
+  String get passwordRegister;
+
+  /// No description provided for @passwordSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your password'**
+  String get passwordSetupTitle;
+
+  /// No description provided for @passwordSetupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this password with your registered mobile number next time. Your subscription is unchanged.'**
+  String get passwordSetupSubtitle;
+
+  /// No description provided for @passwordSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save password'**
+  String get passwordSave;
+
+  /// No description provided for @passwordRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Use at least 12 characters (maximum 72 UTF-8 bytes). Longer phrases are easier to remember; Bangla characters use more than one byte.'**
+  String get passwordRules;
+
+  /// No description provided for @passwordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match.'**
+  String get passwordMismatch;
+
+  /// No description provided for @passwordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password.'**
+  String get passwordRequired;
+
+  /// No description provided for @passwordInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'The mobile number or password is incorrect.'**
+  String get passwordInvalidCredentials;
+
+  /// No description provided for @passwordAlreadySet.
+  ///
+  /// In en, this message translates to:
+  /// **'A password is already set. Use password recovery to change it.'**
+  String get passwordAlreadySet;
+
+  /// No description provided for @passwordSubscriptionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the existing subscription verification before setting a password.'**
+  String get passwordSubscriptionRequired;
+
+  /// No description provided for @passwordRecoveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recover your password'**
+  String get passwordRecoveryTitle;
+
+  /// No description provided for @passwordRecoveryConsent.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree to use the existing bdApps subscription OTP for recovery. Verification may charge BDT 2.78 and activate daily renewal until I unsubscribe. This is not a free password-reset SMS.'**
+  String get passwordRecoveryConsent;
+
+  /// No description provided for @passwordRecoverySent.
+  ///
+  /// In en, this message translates to:
+  /// **'If this number has an available account, a recovery code has been sent. Enter it below before it expires.'**
+  String get passwordRecoverySent;
+
+  /// No description provided for @passwordRecoveryVerifyConsent.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand that verifying this recovery code may activate the BDT 2.78/day subscription, renewing daily until I unsubscribe.'**
+  String get passwordRecoveryVerifyConsent;
+
+  /// No description provided for @passwordReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify and reset password'**
+  String get passwordReset;
+
+  /// No description provided for @passwordResetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your password has been reset and previous sessions revoked. Sign in with your new password.'**
+  String get passwordResetSuccess;
+
+  /// No description provided for @passwordRequestAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Request another recovery code'**
+  String get passwordRequestAnother;
+
+  /// No description provided for @passwordCheckAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking your account and subscription…'**
+  String get passwordCheckAccess;
+
+  /// No description provided for @subscriptionInactiveLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Your subscription is inactive. Please subscribe to continue accessing the platform.'**
+  String get subscriptionInactiveLogin;
+
+  /// No description provided for @passwordBackToLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to sign in'**
+  String get passwordBackToLogin;
+
+  /// No description provided for @passwordManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Password and account access'**
+  String get passwordManage;
+
+  /// No description provided for @passwordContinueSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Open subscription'**
+  String get passwordContinueSubscription;
+
+  /// No description provided for @passwordRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get passwordRetry;
+
+  /// No description provided for @passwordSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get passwordSignOut;
+
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
