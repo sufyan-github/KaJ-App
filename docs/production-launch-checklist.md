@@ -7,6 +7,32 @@ described below has been observed against the production system.
 
 **NOT YET PRODUCTION READY**
 
+## Latest deployment — 3 October 2026 audit fixes
+
+- Backend commit `94adf43` is live on Render, deployment
+  `dep-db0ge95g1s2s738mgov0` (observed Live; duration 1m50s).
+- Deployment branch remains `agent/p1-ui-07-tracker`. The build runs frozen
+  dependency installation, Prisma generation/migration and backend build; no seed.
+- Thirteen post-deploy checks passed: five standard public smoke checks and eight
+  readiness, worker-filter, password authorization and malformed-request checks.
+  Invalid worker filter UUIDs now return 400 rather than the previous 500.
+- No new schema migration, production fixture creation, paid OTP, subscription
+  activation, pricing change or entitlement-setting change occurred.
+- Local audit verification: 312 backend tests, 146 Flutter tests, eight mocked
+  admin browser workflows, six workspace tooling tests and ten release diagnostics
+  passed; Flutter analysis and backend/admin build/type/lint checks passed.
+- Mobile source is prepared as `1.0.2+3`, commit `4698f91`. Publishing its new branch
+  requires the GitHub CLI workflow permission; authorization requested from owner.
+- Final production App Bundle remains blocked by the required `KAAJ_SENTRY_DSN`.
+  The release script refused to build without it; no placeholder DSN or bypass used.
+- Original installed production-app signing continuity remains unresolved.
+  Existing staging APK and the production app were not uninstalled or reset.
+- Remaining security findings are visible: one high and three moderate dependency
+  advisories. Billing reconciliation, push delivery, credential rotation, monitoring,
+  backups and live integration acceptance remain public-launch gates.
+
+See `production-deployment-2026-10-03.md` for deployment evidence and next inputs.
+
 ## Completed locally
 
 - [x] Flutter analyzer and all 114 automated tests passed on 3 October, including

@@ -1,5 +1,9 @@
 # KAAJ application audit — 3 October 2026
 
+Follow-up: backend commit `94adf43` has since been deployed and 13 safe live checks passed.
+See [deployment record](production-deployment-2026-10-03.md). The audit results below describe
+the original test pass; its “not deployed” statements are historical, not current backend status.
+
 ## Decision and scope
 
 **Not yet approved for unrestricted public production launch.** This audit pass found and corrected reproducible session, API, localization and UI defects. It exercised critical workflows against disposable databases and the existing authenticated Android staging app. It is not a claim that every screen permutation, carrier transaction, device, or production integration has been tested.
