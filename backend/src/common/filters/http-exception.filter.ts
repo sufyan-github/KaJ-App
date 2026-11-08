@@ -4,7 +4,9 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import { Response } from "express";
 
 import { ApiErrorDescriptor, ApiErrorEnvelope } from "../api/api-envelope";
@@ -88,23 +90,76 @@ const internalError: ApiErrorDescriptor = {
   retryable: true,
 };
 
+// Prisma errors that describe a client problem rather than a server fault.
+const prismaErrors: Record<
+  string,
+  { status: HttpStatus; descriptor: ApiErrorDescriptor }
+> = {
+  P2002: {
+    status: HttpStatus.CONFLICT,
+    descriptor: {
+      ...errorByStatus[HttpStatus.CONFLICT]!,
+      code: "ALREADY_EXISTS",
+      message: "A matching record already exists.",
+      messageKey: "error.common.already_exists",
+    },
+  },
+  P2003: {
+    status: HttpStatus.UNPROCESSABLE_ENTITY,
+    descriptor: {
+      ...errorByStatus[HttpStatus.UNPROCESSABLE_ENTITY]!,
+      code: "INVALID_REFERENCE",
+      message: "A referenced record does not exist.",
+      messageKey: "error.common.invalid_reference",
+    },
+  },
+  P2025: {
+    status: HttpStatus.NOT_FOUND,
+    descriptor: errorByStatus[HttpStatus.NOT_FOUND]!,
+  },
+  P2034: {
+    status: HttpStatus.CONFLICT,
+    descriptor: {
+      ...errorByStatus[HttpStatus.CONFLICT]!,
+      code: "CONCURRENT_UPDATE",
+      message: "The resource changed at the same time. Try again.",
+      messageKey: "error.common.concurrent_update",
+      retryable: true,
+    },
+  },
+};
+
+const CODE_PATTERN = /^[A-Z][A-Z0-9_]{1,63}$/;
+// Nest's router reports unmatched routes as "Cannot GET /path"; the API
+// contract keeps its generic not-found message for those.
+const FRAMEWORK_ROUTE_MESSAGE = /^Cannot [A-Z]+ \//;
+const MESSAGE_KEY_PATTERN = /^[a-z][a-z0-9_.]{1,127}$/;
+
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(HttpExceptionFilter.name);
+
   constructor(private readonly requestContext: RequestContextStorage) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<Response>();
-    const status =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
-    const descriptor = this.getDescriptor(exception, status);
+    const { status, descriptor } = this.resolve(exception);
+    const requestId = this.requestContext.getRequestId();
     const envelope: ApiErrorEnvelope = {
-      error: {
-        ...descriptor,
-        requestId: this.requestContext.getRequestId(),
-      },
+      error: { ...descriptor, requestId },
     };
+
+    if (status >= 500) {
+      const error =
+        exception instanceof Error
+          ? exception
+          : new Error("Non-Error value thrown");
+      // Only the error itself is logged; request bodies and headers are not.
+      this.logger.error(
+        { err: { name: error.name, message: error.message }, requestId },
+        error.stack,
+      );
+    }
 
     if (exception instanceof RateLimitException) {
       response.setHeader("Retry-After", exception.retryAfterSeconds.toString());
@@ -113,11 +168,73 @@ export class HttpExceptionFilter implements ExceptionFilter {
     response.status(status).json(envelope);
   }
 
-  private getDescriptor(
-    exception: unknown,
-    status: number,
-  ): ApiErrorDescriptor {
-    if (exception instanceof KajHttpException) return exception.descriptor;
-    return errorByStatus[status as HttpStatus] ?? internalError;
+  private resolve(exception: unknown): {
+    status: number;
+    descriptor: ApiErrorDescriptor;
+  } {
+    if (exception instanceof KajHttpException)
+      return {
+        status: exception.getStatus(),
+        descriptor: exception.descriptor,
+      };
+
+    if (exception instanceof HttpException) {
+      const status = exception.getStatus();
+      const base = errorByStatus[status as HttpStatus] ?? {
+        ...internalError,
+        retryable: status >= 500,
+      };
+      return {
+        status,
+        descriptor: withThrownDetails(base, exception.getResponse()),
+      };
+    }
+
+    if (exception instanceof Prisma.PrismaClientKnownRequestError) {
+      const mapped = prismaErrors[exception.code];
+      if (mapped) return mapped;
+    }
+
+    return {
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      descriptor: internalError,
+    };
   }
+}
+
+/**
+ * Keeps the generic per-status descriptor (so clients that branch on the
+ * status-level code still work) but carries over the message, and any
+ * explicit code/messageKey/field, that the throwing code supplied.
+ */
+function withThrownDetails(
+  base: ApiErrorDescriptor,
+  thrown: string | object,
+): ApiErrorDescriptor {
+  const usable = (value: unknown): value is string =>
+    typeof value === "string" &&
+    value.trim().length > 0 &&
+    !FRAMEWORK_ROUTE_MESSAGE.test(value);
+
+  if (typeof thrown === "string")
+    return usable(thrown) ? { ...base, message: thrown } : base;
+
+  const body = thrown as Record<string, unknown>;
+  const message = Array.isArray(body.message) ? body.message[0] : body.message;
+  return {
+    ...base,
+    ...(usable(message) ? { message } : {}),
+    ...(typeof body.code === "string" && CODE_PATTERN.test(body.code)
+      ? { code: body.code }
+      : {}),
+    ...(typeof body.messageKey === "string" &&
+    MESSAGE_KEY_PATTERN.test(body.messageKey)
+      ? { messageKey: body.messageKey }
+      : {}),
+    ...(typeof body.field === "string" ? { field: body.field } : {}),
+    ...(Array.isArray(body.details) ? { details: body.details } : {}),
+    ...(typeof body.retryable === "boolean"
+      ? { retryable: body.retryable }
+      : {}),
+  };
 }
