@@ -17,6 +17,9 @@ jobs:
     name: Lint, typecheck, build, audit
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      # prisma validate/generate read the URL but never connect in this job.
+      DATABASE_URL: postgresql://unused:unused@localhost:5432/unused
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
