@@ -43,6 +43,8 @@ const environmentSchema = z
     // Number of reverse proxies in front of the API (Render: confirm the hop
     // count). 0 keeps Express's default and uses the socket address.
     TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
+    // "false" on every instance except one when the API runs on several.
+    RUN_SCHEDULERS: z.enum(["true", "false"]).default("true"),
     REDIS_URL: z.string().min(1).default("redis://localhost:6379"),
     S3_BUCKET: z.string().default("kaj-local"),
     S3_ENDPOINT: z.string().default("http://localhost:9000"),

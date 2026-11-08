@@ -54,13 +54,19 @@ export class NotificationsService {
   }
 
   async list(userId: string) {
-    const items = await this.prisma.notification.findMany({
-      where: { user_id: userId },
-      orderBy: { created_at: "desc" },
-      take: 100,
-    });
+    const [items, unreadCount] = await Promise.all([
+      this.prisma.notification.findMany({
+        where: { user_id: userId },
+        orderBy: { created_at: "desc" },
+        take: 100,
+      }),
+      // Counted separately: counting within the latest 100 capped the badge.
+      this.prisma.notification.count({
+        where: { user_id: userId, read_at: null },
+      }),
+    ]);
     return {
-      unreadCount: items.filter((item) => !item.read_at).length,
+      unreadCount,
       items: items.map(serializeNotification),
     };
   }
