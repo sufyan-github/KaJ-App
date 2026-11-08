@@ -58,7 +58,9 @@ export class DisputesService {
           include: {
             conversations: {
               include: {
+                participants: { select: { user_id: true } },
                 messages: {
+                  where: { deleted_at: null },
                   orderBy: { created_at: "asc" },
                   select: {
                     sender_user_id: true,
@@ -370,10 +372,28 @@ function isParty(
 }
 
 function autoEvidence(assignment: {
+  worker_user_id: string;
   contracts: Array<{ snapshot_json: Prisma.JsonValue }>;
   work_sessions: unknown[];
-  job: { conversations: Array<{ messages: unknown[] }> };
+  job: {
+    poster_user_id: string;
+    conversations: Array<{
+      participants: Array<{ user_id: string }>;
+      messages: unknown[];
+    }>;
+  };
 }) {
+  // Only the conversation between the two dispute parties. A job has one
+  // conversation per applicant, and the others are private to them.
+  const parties = new Set([
+    assignment.worker_user_id,
+    assignment.job.poster_user_id,
+  ]);
+  const partyConversations = assignment.job.conversations.filter(
+    (conversation) =>
+      conversation.participants.length === parties.size &&
+      conversation.participants.every((item) => parties.has(item.user_id)),
+  );
   return [
     {
       kind: "SYSTEM_CONTRACT_SNAPSHOT",
@@ -381,9 +401,7 @@ function autoEvidence(assignment: {
     },
     {
       kind: "SYSTEM_CHAT_TRANSCRIPT",
-      text: safeJson(
-        assignment.job.conversations.flatMap((item) => item.messages),
-      ),
+      text: safeJson(partyConversations.flatMap((item) => item.messages)),
     },
     {
       kind: "SYSTEM_CHECKIN_SNAPSHOT",

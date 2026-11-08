@@ -16,6 +16,7 @@ import {
   JobType,
   PaymentModel,
   Prisma,
+  RoleMode,
   TrustLevel,
   UserStatus,
   type Job,
@@ -46,6 +47,11 @@ import { JobStateMachine } from "./state-machine/job-state.machine";
 import { recurrenceRuleJson } from "./recurrence/recurrence";
 import { RecurrenceService } from "./recurrence/recurrence.service";
 import { hasTrust } from "../verification/trust-level";
+import {
+  type HiringRequirement,
+  posterRequirementGaps,
+  workerRequirementGaps,
+} from "./hiring-policy";
 import { PaymentsService } from "../payments/payments.service";
 
 const jobInclude = {
@@ -90,6 +96,7 @@ export class JobsService {
     }
     if (input.recurrenceRule) await this.recurrence?.assertEnabled();
     assertSingleWorker(input.workersRequired ?? 1);
+    await this.assertActiveReferences(input.categoryId, input.locationId);
     const window = parseWindow(input.startsAt, input.endsAt);
     const job = await this.prisma.$transaction(async (transaction) => {
       const created = await transaction.job.create({
@@ -143,6 +150,7 @@ export class JobsService {
       throw new ConflictException("Only draft jobs can be published.");
     }
     validatePublishable(job);
+    await this.assertPosterEligible(posterUserId, job.category_id);
     if (job.job_type === JobType.RECURRING) {
       if (!job.recurrence_rule) {
         throw new BadRequestException(
@@ -187,6 +195,8 @@ export class JobsService {
       where: {
         status: JobStatus.APPLICATIONS_OPEN,
         deleted_at: null,
+        poster_user_id: { not: userId },
+        OR: [{ expires_at: null }, { expires_at: { gt: this.now() } }],
         category_id: query.categoryId,
         location_id: query.locationId,
         skills: query.skillId
@@ -237,7 +247,7 @@ export class JobsService {
       );
       return {
         items: ranked.map(({ job, match }) => ({
-          ...serializeJob(job),
+          ...publicJob(job),
           ...availabilityByJob.get(job.id),
           matchScore: match.score,
           matchReasons: match.reasons,
@@ -247,7 +257,7 @@ export class JobsService {
     }
     return {
       items: visibleJobs.map((job) => ({
-        ...serializeJob(job),
+        ...publicJob(job),
         ...availabilityByJob.get(job.id),
       })),
     };
@@ -287,13 +297,25 @@ export class JobsService {
     return { items: jobs.map(serializeJob) };
   }
 
-  async get(jobId: string) {
+  /**
+   * Open jobs are visible to every signed-in user (without private location
+   * fields). Drafts and closed jobs are visible only to the poster, applicants
+   * and assigned workers; to anyone else they don't exist.
+   */
+  async get(userId: string, jobId: string) {
     const job = await this.prisma.job.findFirst({
       where: { id: jobId, deleted_at: null },
       include: jobInclude,
     });
     if (!job) throw new NotFoundException();
-    return serializeJob(job);
+    if (job.poster_user_id === userId) return serializeJob(job);
+    if (OPEN_JOB_STATUSES.has(job.status)) return publicJob(job);
+    const involved = await this.prisma.application.findFirst({
+      where: { job_id: jobId, worker_user_id: userId },
+      select: { id: true },
+    });
+    if (!involved) throw new NotFoundException();
+    return publicJob(job);
   }
 
   async apply(workerUserId: string, jobId: string, input: ApplyToJobDto) {
@@ -315,25 +337,26 @@ export class JobsService {
       }),
     ]);
     if (!job) throw new NotFoundException();
-    if (
-      !worker ||
-      worker.status !== UserStatus.ACTIVE ||
-      worker.reverification_required ||
-      !hasTrust(
-        worker.profile?.trust_level ?? TrustLevel.NONE,
-        TrustLevel.IDENTITY,
-      )
-    ) {
-      throw new ForbiddenException(
-        "Approved identity verification with NID and selfie is required before applying.",
-      );
-    }
+    if (!worker) throw new NotFoundException();
     if (job.poster_user_id === workerUserId) {
       throw new ForbiddenException(
         "A job poster cannot apply to their own job.",
       );
     }
+    if (job.expires_at && job.expires_at <= this.now()) {
+      throw new ConflictException({
+        code: "JOB_EXPIRED",
+        message: "This job is no longer taking applications.",
+        messageKey: "error.job.expired",
+      });
+    }
+    await this.assertWorkerEligible(
+      workerUserId,
+      job.poster_user_id,
+      job.category_id,
+    );
     const window = requiredWindow(input.proposedStartsAt, input.proposedEndsAt);
+    this.assertFutureSlot(window.startsAt);
     const result = await this.availability.evaluate(workerUserId, window, 1);
     if (!result.isAvailable) {
       throw new ConflictException("Worker is not available for this slot.");
@@ -722,6 +745,7 @@ export class JobsService {
     if (!application.proposed_starts_at || !application.proposed_ends_at) {
       throw new BadRequestException("Application has no proposed slot.");
     }
+    this.assertFutureSlot(application.proposed_starts_at);
     const price =
       toBigInt(input.agreedPricePoisha) ??
       application.proposed_price_poisha ??
@@ -808,7 +832,15 @@ export class JobsService {
     if (posterUserId === workerUserId) {
       throw new BadRequestException("You cannot book yourself.");
     }
+    await this.assertActiveReferences(input.categoryId, input.locationId);
+    await this.assertPosterEligible(posterUserId, input.categoryId);
+    await this.assertWorkerEligible(
+      workerUserId,
+      posterUserId,
+      input.categoryId,
+    );
     const window = requiredWindow(input.startsAt, input.endsAt);
+    this.assertFutureSlot(window.startsAt);
     const result = await this.availability.evaluate(workerUserId, window, 1);
     if (!result.isAvailable) {
       throw new ConflictException("Worker is not available for this slot.");
@@ -932,6 +964,15 @@ export class JobsService {
     if (!assignment.agreed_starts_at || !assignment.agreed_ends_at) {
       throw new BadRequestException("Assignment has no agreed slot.");
     }
+    const assignedJob = await this.prisma.job.findUniqueOrThrow({
+      where: { id: assignment.job_id },
+      select: { poster_user_id: true, category_id: true },
+    });
+    await this.assertWorkerEligible(
+      workerUserId,
+      assignedJob.poster_user_id,
+      assignedJob.category_id,
+    );
     const availability = await this.availability.evaluate(
       workerUserId,
       {
@@ -1240,6 +1281,127 @@ export class JobsService {
   }
 
   /**
+   * One eligibility check for applying, being booked and confirming a booking:
+   * an active, identity-verified worker account, not blocked by or blocking
+   * the poster, meeting the category's safety rules.
+   */
+  private async assertWorkerEligible(
+    workerUserId: string,
+    posterUserId: string,
+    categoryId: string,
+  ) {
+    const [worker, category, block] = await Promise.all([
+      this.prisma.user.findFirst({
+        where: { id: workerUserId, deleted_at: null },
+        select: {
+          status: true,
+          reverification_required: true,
+          role_modes: true,
+          profile: { select: { trust_level: true, birth_year: true } },
+        },
+      }),
+      this.prisma.category.findUnique({
+        where: { id: categoryId },
+        select: CATEGORY_POLICY_SELECT,
+      }),
+      this.prisma.userBlock.findFirst({
+        where: {
+          OR: [
+            { blocker_user_id: posterUserId, blocked_user_id: workerUserId },
+            { blocker_user_id: workerUserId, blocked_user_id: posterUserId },
+          ],
+        },
+        select: { blocker_user_id: true },
+      }),
+    ]);
+    if (!worker) throw new NotFoundException();
+    const trustLevel = worker.profile?.trust_level ?? TrustLevel.NONE;
+    if (
+      worker.status !== UserStatus.ACTIVE ||
+      worker.reverification_required ||
+      !hasTrust(trustLevel, TrustLevel.IDENTITY)
+    ) {
+      throw new ForbiddenException(
+        "Approved identity verification with NID and selfie is required before applying.",
+      );
+    }
+    if (!worker.role_modes.includes(RoleMode.WORKER)) {
+      throw new UnprocessableEntityException({
+        code: "WORKER_ROLE_REQUIRED",
+        message: "This account is not set up to take work.",
+        messageKey: "error.job.worker_role_required",
+      });
+    }
+    if (block) {
+      // Deliberately does not say who blocked whom.
+      throw new UnprocessableEntityException({
+        code: "HIRING_UNAVAILABLE",
+        message: "This worker can't be hired for this job.",
+        messageKey: "error.job.hiring_unavailable",
+      });
+    }
+    const gaps = category
+      ? workerRequirementGaps(
+          category,
+          { birthYear: worker.profile?.birth_year ?? null, trustLevel },
+          this.now(),
+        )
+      : [];
+    if (gaps.length > 0) throw categoryPolicyUnmet(gaps);
+  }
+
+  private async assertPosterEligible(posterUserId: string, categoryId: string) {
+    const [poster, category] = await Promise.all([
+      this.prisma.profile.findUnique({
+        where: { user_id: posterUserId },
+        select: { trust_level: true },
+      }),
+      this.prisma.category.findUnique({
+        where: { id: categoryId },
+        select: CATEGORY_POLICY_SELECT,
+      }),
+    ]);
+    const gaps = category
+      ? posterRequirementGaps(category, {
+          trustLevel: poster?.trust_level ?? TrustLevel.NONE,
+        })
+      : [];
+    if (gaps.length > 0) throw categoryPolicyUnmet(gaps);
+  }
+
+  /** Unknown or deactivated catalogue entries used to fail as 500s. */
+  private async assertActiveReferences(categoryId: string, locationId: string) {
+    const [category, location] = await Promise.all([
+      this.prisma.category.findFirst({
+        where: { id: categoryId, is_active: true },
+        select: { id: true },
+      }),
+      this.prisma.location.findFirst({
+        where: { id: locationId, is_active: true },
+        select: { id: true },
+      }),
+    ]);
+    if (!category || !location) {
+      throw new UnprocessableEntityException({
+        code: "INVALID_REFERENCE",
+        field: !category ? "categoryId" : "locationId",
+        message: "The selected category or area is not available.",
+        messageKey: "error.common.invalid_reference",
+      });
+    }
+  }
+
+  private assertFutureSlot(startsAt: Date) {
+    if (startsAt.getTime() <= this.now().getTime()) {
+      throw new UnprocessableEntityException({
+        code: "SLOT_IN_PAST",
+        message: "The proposed time has already passed.",
+        messageKey: "error.job.slot_in_past",
+      });
+    }
+  }
+
+  /**
    * A customer may report that the worker never arrived: only once the agreed
    * start plus a grace period has passed and no check-in exists. It closes
    * the job without a customer penalty and is queued for admin review; it
@@ -1482,6 +1644,20 @@ function integerValue(value: Prisma.JsonValue | undefined): number | undefined {
     : undefined;
 }
 
+const OPEN_JOB_STATUSES = new Set<JobStatus>([
+  JobStatus.PUBLISHED,
+  JobStatus.APPLICATIONS_OPEN,
+]);
+
+/** Fields only the poster may see: the exact address and pin. */
+const PRIVATE_JOB_FIELDS = ["exact_address_encrypted", "lat", "lng"] as const;
+
+function publicJob<T extends Record<string, unknown>>(job: T) {
+  const serialized = serializeJob(job) as Record<string, unknown>;
+  for (const field of PRIVATE_JOB_FIELDS) delete serialized[field];
+  return serialized as Omit<T, (typeof PRIVATE_JOB_FIELDS)[number]>;
+}
+
 function serializeJob<T extends Record<string, unknown>>(job: T) {
   return JSON.parse(
     JSON.stringify(job, (_key, value: unknown) =>
@@ -1588,4 +1764,21 @@ function assertSingleWorker(workersRequired: number) {
         "Jobs for more than one worker are not available yet. Post one job per worker.",
       messageKey: "error.job.multi_worker_not_supported",
     });
+}
+
+const CATEGORY_POLICY_SELECT = {
+  min_age: true,
+  requires_identity: true,
+  requires_certificate: true,
+  requires_licence: true,
+  requires_poster_identity: true,
+} as const;
+
+function categoryPolicyUnmet(gaps: HiringRequirement[]) {
+  return new UnprocessableEntityException({
+    code: "CATEGORY_POLICY_UNMET",
+    details: gaps,
+    message: "Some requirements for this kind of work are not met yet.",
+    messageKey: "error.job.category_policy_unmet",
+  });
 }

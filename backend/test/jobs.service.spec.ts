@@ -40,6 +40,7 @@ describe("JobsService slot confirmation", () => {
   const prisma = {
     assignment: { findUnique: assignmentFindUnique },
     $transaction: jest.fn((callback) => callback(transactionClient)),
+    ...eligibleWorkerLookups(),
   } as unknown as PrismaService;
   const availability = {
     evaluate: jest.fn(),
@@ -251,16 +252,16 @@ describe("JobsService application identity gate", () => {
       evaluate: jest.fn(),
     } as unknown as AvailabilityService;
     const prisma = {
+      ...eligibleWorkerLookups(TrustLevel.PHONE),
       job: { findFirst: jest.fn().mockResolvedValue(job) },
-      user: {
-        findFirst: jest.fn().mockResolvedValue({
-          status: UserStatus.ACTIVE,
-          reverification_required: false,
-          profile: { trust_level: TrustLevel.PHONE },
-        }),
-      },
     } as unknown as PrismaService;
-    const service = new JobsService(prisma, availability);
+    const service = new JobsService(
+      prisma,
+      availability,
+      undefined,
+      undefined,
+      fixedClock,
+    );
 
     await expect(
       service.apply("worker-id", job.id, input),
@@ -273,16 +274,16 @@ describe("JobsService application identity gate", () => {
       evaluate: jest.fn().mockResolvedValue({ isAvailable: false }),
     } as unknown as AvailabilityService;
     const prisma = {
+      ...eligibleWorkerLookups(TrustLevel.IDENTITY),
       job: { findFirst: jest.fn().mockResolvedValue(job) },
-      user: {
-        findFirst: jest.fn().mockResolvedValue({
-          status: UserStatus.ACTIVE,
-          reverification_required: false,
-          profile: { trust_level: TrustLevel.IDENTITY },
-        }),
-      },
     } as unknown as PrismaService;
-    const service = new JobsService(prisma, availability);
+    const service = new JobsService(
+      prisma,
+      availability,
+      undefined,
+      undefined,
+      fixedClock,
+    );
 
     await expect(
       service.apply("worker-id", job.id, input),
@@ -290,3 +291,28 @@ describe("JobsService application identity gate", () => {
     expect(availability.evaluate).toHaveBeenCalledTimes(1);
   });
 });
+
+/** Before the identity-gate fixtures' slots (7 Sep 2026). */
+const fixedClock = { now: () => new Date("2026-09-01T00:00:00.000Z") };
+
+/** Lookups made by the shared worker-eligibility check. */
+function eligibleWorkerLookups(trustLevel: TrustLevel = TrustLevel.IDENTITY) {
+  return {
+    user: {
+      findFirst: jest.fn().mockResolvedValue({
+        status: UserStatus.ACTIVE,
+        reverification_required: false,
+        role_modes: ["WORKER"],
+        profile: { trust_level: trustLevel, birth_year: null },
+      }),
+    },
+    category: { findUnique: jest.fn().mockResolvedValue(null) },
+    userBlock: { findFirst: jest.fn().mockResolvedValue(null) },
+    job: {
+      findUniqueOrThrow: jest.fn().mockResolvedValue({
+        poster_user_id: "poster-id",
+        category_id: "category-id",
+      }),
+    },
+  };
+}

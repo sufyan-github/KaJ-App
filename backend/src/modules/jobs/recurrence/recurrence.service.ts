@@ -104,7 +104,19 @@ export class RecurrenceService {
     return { series: jobs.length, generated };
   }
 
-  async list(jobId: string) {
+  /** Occurrences are visible only to the poster and the series' workers. */
+  async list(userId: string, jobId: string) {
+    const permitted = await this.prisma.job.findFirst({
+      where: {
+        id: jobId,
+        OR: [
+          { poster_user_id: userId },
+          { assignments: { some: { worker_user_id: userId } } },
+        ],
+      },
+      select: { id: true },
+    });
+    if (!permitted) throw new NotFoundException();
     const items = await this.prisma.jobOccurrence.findMany({
       where: { job_id: jobId },
       include: {
