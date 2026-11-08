@@ -3,10 +3,12 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  Optional,
 } from "@nestjs/common";
 import {
   AdminRole,
   ApplicationStatus,
+  AssignmentStatus,
   DisputeAppealStatus,
   DisputeDecision,
   DisputeStatus,
@@ -50,7 +52,9 @@ import {
   highestTrust,
   trustForVerification,
 } from "../verification/trust-level";
+import { JobStateMachine } from "../jobs/state-machine/job-state.machine";
 import { LedgerService } from "../payments/ledger.service";
+import { PaymentsService } from "../payments/payments.service";
 import { planDisputeAllocation } from "../disputes/dispute-ledger";
 import { randomUUID } from "node:crypto";
 
@@ -68,7 +72,10 @@ export class AdminOpsService {
     @Inject(STORAGE_PORT) private readonly storage: StoragePort,
     @Inject(CLOCK) private readonly clock: Clock,
     private readonly ledger: LedgerService,
+    @Optional() private readonly payments?: PaymentsService,
   ) {}
+
+  private readonly states = new JobStateMachine();
 
   async overview(actor: AdminActor, context: AdminRequestContext) {
     const today = new Date();
@@ -1230,6 +1237,63 @@ export class AdminOpsService {
     };
   }
 
+  /**
+   * Brings the assignment in line with the resolved job status. Without this
+   * the assignment stayed CONFIRMED with no completion date, which blocked
+   * reviews and cash recording permanently.
+   */
+  private async settleDisputedAssignment(
+    transaction: Prisma.TransactionClient,
+    assignmentId: string,
+    jobStatus: JobStatus,
+    now: Date,
+  ) {
+    const assignment = await transaction.assignment.findUniqueOrThrow({
+      where: { id: assignmentId },
+      include: { job: true },
+    });
+    const finished =
+      jobStatus === JobStatus.COMPLETED ||
+      jobStatus === JobStatus.PAYMENT_RECORDED;
+    const cancelled =
+      jobStatus === JobStatus.CANCELLED_BY_CUSTOMER ||
+      jobStatus === JobStatus.CANCELLED_BY_WORKER;
+    if (finished) {
+      if (assignment.status !== AssignmentStatus.COMPLETED)
+        await transaction.assignment.update({
+          where: { id: assignmentId },
+          data: {
+            status: AssignmentStatus.COMPLETED,
+            submitted_at: assignment.submitted_at ?? now,
+          },
+        });
+      if (!assignment.job.completed_at)
+        await transaction.job.update({
+          where: { id: assignment.job_id },
+          data: { completed_at: now },
+        });
+      if (jobStatus === JobStatus.COMPLETED)
+        await this.payments?.ensureCashPending(transaction, assignment);
+    } else if (cancelled && assignment.status !== AssignmentStatus.CANCELLED) {
+      await transaction.assignment.update({
+        where: { id: assignmentId },
+        data: {
+          status: AssignmentStatus.CANCELLED,
+          cancelled_at: now,
+          cancel_reason: "DISPUTE_RESOLUTION",
+        },
+      });
+      if (
+        assignment.status === AssignmentStatus.CONFIRMED &&
+        assignment.job.workers_filled > 0
+      )
+        await transaction.job.update({
+          where: { id: assignment.job_id },
+          data: { workers_filled: { decrement: 1 } },
+        });
+    }
+  }
+
   async resolveDispute(
     id: string,
     input: DisputeResolutionDto,
@@ -1266,6 +1330,13 @@ export class AdminOpsService {
       payment.cash_recorded_at
         ? JobStatus.PAYMENT_RECORDED
         : JobStatus.COMPLETED);
+    if (dispute.job.status === JobStatus.DISPUTED)
+      // Refuse an invalid outcome (e.g. a pre-work status) before any write.
+      this.states.assertAllowed(
+        JobStatus.DISPUTED,
+        targetStatus,
+        JobActorType.ADMIN,
+      );
     let allocation;
     try {
       allocation = planDisputeAllocation({
@@ -1342,20 +1413,22 @@ export class AdminOpsService {
         });
       }
       if (dispute.job.status === JobStatus.DISPUTED) {
-        await transaction.job.update({
+        const job = await transaction.job.findUniqueOrThrow({
           where: { id: dispute.job_id },
-          data: { status: targetStatus },
         });
-        await transaction.jobStatusHistory.create({
-          data: {
-            job_id: dispute.job_id,
-            from_status: JobStatus.DISPUTED,
-            to_status: targetStatus,
-            actor_user_id: actor.userId,
-            actor_type: JobActorType.ADMIN,
-            reason: input.reason,
-          },
-        });
+        await this.states.transitionInTransaction(
+          transaction,
+          job,
+          targetStatus,
+          { type: JobActorType.ADMIN, userId: actor.userId },
+          input.reason,
+        );
+        await this.settleDisputedAssignment(
+          transaction,
+          dispute.assignment_id,
+          targetStatus,
+          now,
+        );
       }
       await transaction.notification.createMany({
         data: [

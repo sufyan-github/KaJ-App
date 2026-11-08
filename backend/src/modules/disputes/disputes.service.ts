@@ -17,6 +17,7 @@ import {
 import { CLOCK, Clock } from "../../common/time/clock";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { STORAGE_PORT, StoragePort } from "../../infra/storage/storage.port";
+import { JobStateMachine } from "../jobs/state-machine/job-state.machine";
 import { NotificationsService } from "../notifications/notifications.service";
 import {
   AddDisputeEvidenceDto,
@@ -25,6 +26,9 @@ import {
 } from "./dto/disputes.dto";
 
 const ELIGIBLE_STATUSES: JobStatus[] = [
+  // IN_PROGRESS lets either side raise a no-show or stalled job, which had no
+  // way out once the clock advanced it.
+  JobStatus.IN_PROGRESS,
   JobStatus.SUBMITTED,
   JobStatus.CUSTOMER_REVIEW,
   JobStatus.COMPLETED,
@@ -34,6 +38,8 @@ const DAY_MS = 24 * 60 * 60_000;
 
 @Injectable()
 export class DisputesService {
+  private readonly states = new JobStateMachine();
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
@@ -107,23 +113,19 @@ export class DisputesService {
           },
         },
       });
-      await transaction.job.update({
-        where: { id: assignment.job_id },
-        data: { status: JobStatus.DISPUTED },
-      });
-      await transaction.jobStatusHistory.create({
-        data: {
-          job_id: assignment.job_id,
-          from_status: assignment.job.status,
-          to_status: JobStatus.DISPUTED,
-          actor_user_id: userId,
-          actor_type:
+      await this.states.transitionInTransaction(
+        transaction,
+        assignment.job,
+        JobStatus.DISPUTED,
+        {
+          type:
             userId === assignment.worker_user_id
               ? JobActorType.WORKER
               : JobActorType.POSTER,
-          reason: input.reasonCode,
+          userId,
         },
-      });
+        input.reasonCode,
+      );
       await transaction.payment.updateMany({
         where: { assignment_id: assignmentId },
         data: {
@@ -285,23 +287,21 @@ export class DisputesService {
         where: { id },
         data: { status: DisputeStatus.UNDER_REVIEW },
       });
-      await transaction.job.update({
-        where: { id: dispute.job_id },
-        data: { status: JobStatus.DISPUTED },
-      });
-      await transaction.jobStatusHistory.create({
-        data: {
-          job_id: dispute.job_id,
-          from_status: dispute.job.status,
-          to_status: JobStatus.DISPUTED,
-          actor_user_id: userId,
-          actor_type:
+      await this.states.transitionInTransaction(
+        transaction,
+        await transaction.job.findUniqueOrThrow({
+          where: { id: dispute.job_id },
+        }),
+        JobStatus.DISPUTED,
+        {
+          type:
             userId === dispute.assignment.worker_user_id
               ? JobActorType.WORKER
               : JobActorType.POSTER,
-          reason: "Dispute appeal opened",
+          userId,
         },
-      });
+        "Dispute appeal opened",
+      );
       await transaction.payment.updateMany({
         where: { assignment_id: dispute.assignment_id },
         data: { frozen_at: now, freeze_reason: `APPEAL:${created.id}` },

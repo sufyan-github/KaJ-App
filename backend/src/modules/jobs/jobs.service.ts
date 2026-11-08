@@ -5,6 +5,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
   Optional,
 } from "@nestjs/common";
 import {
@@ -38,6 +39,7 @@ import {
   calculateCancellation,
   defaultCancellationPolicy,
   type CancellationActor,
+  type CancellationPreview,
   type CancellationPolicy,
 } from "./cancellation/cancellation.calculator";
 import { JobStateMachine } from "./state-machine/job-state.machine";
@@ -87,6 +89,7 @@ export class JobsService {
       );
     }
     if (input.recurrenceRule) await this.recurrence?.assertEnabled();
+    assertSingleWorker(input.workersRequired ?? 1);
     const window = parseWindow(input.startsAt, input.endsAt);
     const job = await this.prisma.$transaction(async (transaction) => {
       const created = await transaction.job.create({
@@ -571,14 +574,21 @@ export class JobsService {
       throw new BadRequestException("Preview and confirm cancellation first.");
     }
     const assignment = await this.participantAssignment(userId, assignmentId);
+    // Only a live assignment can cancel the job. A worker whose assignment was
+    // declined or expired could otherwise cancel a job another worker is
+    // booked on.
     if (
-      assignment.status === AssignmentStatus.CANCELLED ||
-      assignment.status === AssignmentStatus.COMPLETED
+      assignment.status !== AssignmentStatus.PENDING_CONFIRMATION &&
+      assignment.status !== AssignmentStatus.CONFIRMED
     ) {
       throw new ConflictException("Assignment can no longer be cancelled.");
     }
     const actor = this.cancellationActor(userId, assignment);
-    const preview = await this.cancelPreview(userId, assignmentId, input);
+    const noShow = input.reasonCode === WORKER_NO_SHOW;
+    if (noShow) await this.assertNoShow(actor, assignment);
+    const preview = noShow
+      ? noShowPreview(await this.cancelPreview(userId, assignmentId, input))
+      : await this.cancelPreview(userId, assignmentId, input);
     const to =
       actor === "customer"
         ? JobStatus.CANCELLED_BY_CUSTOMER
@@ -626,7 +636,7 @@ export class JobsService {
           data: { workers_filled: { decrement: 1 } },
         });
       }
-      if (actor === "customer") {
+      if (actor === "customer" && !noShow) {
         await transaction.customerProfile.updateMany({
           where: { user_id: userId },
           data: { cancellation_count: { increment: 1 } },
@@ -1229,6 +1239,36 @@ export class JobsService {
     return serializeAssignment(result);
   }
 
+  /**
+   * A customer may report that the worker never arrived: only once the agreed
+   * start plus a grace period has passed and no check-in exists. It closes
+   * the job without a customer penalty and is queued for admin review; it
+   * does not penalise the worker automatically.
+   */
+  private async assertNoShow(
+    actor: CancellationActor,
+    assignment: { id: string; agreed_starts_at: Date | null },
+  ) {
+    if (actor !== "customer")
+      throw new ConflictException("Only the customer can report a no-show.");
+    if (
+      !assignment.agreed_starts_at ||
+      this.now().getTime() <
+        assignment.agreed_starts_at.getTime() + NO_SHOW_GRACE_MINUTES * 60_000
+    )
+      throw new ConflictException(
+        `A no-show can be reported ${NO_SHOW_GRACE_MINUTES} minutes after the agreed start time.`,
+      );
+    const checkedIn = await this.prisma.workSession.findFirst({
+      where: { assignment_id: assignment.id, checkin_at: { not: null } },
+      select: { id: true },
+    });
+    if (checkedIn)
+      throw new ConflictException(
+        "The worker has checked in, so this is not a no-show.",
+      );
+  }
+
   private participantAssignment(userId: string, assignmentId: string) {
     return this.prisma.assignment.findFirstOrThrow({
       where: {
@@ -1318,6 +1358,7 @@ function validatePublishable(job: Job): void {
   if (job.workers_required < 1 || job.workers_required > 20) {
     throw new BadRequestException("Published jobs require 1–20 workers.");
   }
+  assertSingleWorker(job.workers_required);
   if (job.starts_at && job.starts_at.getTime() < Date.now() + 30 * 60_000) {
     throw new BadRequestException(
       "A job must start at least 30 minutes from now.",
@@ -1513,4 +1554,38 @@ function serializeCashPayment(payment: {
     cashRecordedAt: payment.cash_recorded_at?.toISOString() ?? null,
     disputedAt: payment.disputed_at?.toISOString() ?? null,
   };
+}
+
+const WORKER_NO_SHOW = "WORKER_NO_SHOW";
+const NO_SHOW_GRACE_MINUTES = 30;
+
+/** A reported no-show carries no customer penalty and always goes to review. */
+function noShowPreview(preview: CancellationPreview): CancellationPreview {
+  return {
+    ...preview,
+    penaltyCode: "none",
+    feePoisha: "0",
+    reliabilityDelta: 0,
+    addsStrike: false,
+    needsAdminReview: true,
+    summaryBn:
+      "কর্মী না আসার অভিযোগ প্রশাসক যাচাই করবেন। আপনার কোনো জরিমানা হবে না।",
+    summaryEn:
+      "An administrator will review the reported no-show. You are not penalised.",
+  };
+}
+
+/**
+ * Jobs needing more than one worker can't fill past the first slot, because
+ * one job status drives every assignment. Refuse them clearly until the
+ * per-assignment lifecycle lands, instead of failing at the second accept.
+ */
+function assertSingleWorker(workersRequired: number) {
+  if (workersRequired > 1)
+    throw new UnprocessableEntityException({
+      code: "MULTI_WORKER_NOT_SUPPORTED",
+      message:
+        "Jobs for more than one worker are not available yet. Post one job per worker.",
+      messageKey: "error.job.multi_worker_not_supported",
+    });
 }

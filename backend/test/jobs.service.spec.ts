@@ -12,6 +12,7 @@ describe("JobsService slot confirmation", () => {
   const assignmentUpdateMany = jest.fn();
   const assignmentFindUniqueOrThrow = jest.fn();
   const jobUpdate = jest.fn();
+  const jobUpdateMany = jest.fn();
   const jobFindUniqueOrThrow = jest.fn();
   const historyCreate = jest.fn();
   const executeRaw = jest.fn();
@@ -23,7 +24,11 @@ describe("JobsService slot confirmation", () => {
       updateMany: assignmentUpdateMany,
       findUniqueOrThrow: assignmentFindUniqueOrThrow,
     },
-    job: { update: jobUpdate, findUniqueOrThrow: jobFindUniqueOrThrow },
+    job: {
+      update: jobUpdate,
+      updateMany: jobUpdateMany,
+      findUniqueOrThrow: jobFindUniqueOrThrow,
+    },
     jobStatusHistory: { create: historyCreate },
     configSetting: { findUnique: jest.fn().mockResolvedValue(null) },
     user: { findMany: jest.fn().mockResolvedValue([]) },
@@ -68,6 +73,7 @@ describe("JobsService slot confirmation", () => {
       agreed_ends_at: new Date("2026-09-03T10:00:00Z"),
     });
     jobUpdate.mockResolvedValue({});
+    jobUpdateMany.mockResolvedValue({ count: 1 });
     jobFindUniqueOrThrow.mockResolvedValue({
       id: "job-id",
       status: "CONFIRMATION_PENDING",
@@ -115,6 +121,7 @@ describe("JobsService confirmation deadline", () => {
       workers_filled: 0,
       workers_required: 1,
     });
+    const jobStatusUpdate = jest.fn().mockResolvedValue({ count: 1 });
     const transaction = {
       assignment: { updateMany: assignmentUpdateMany },
       application: { update: applicationUpdate },
@@ -128,6 +135,7 @@ describe("JobsService confirmation deadline", () => {
           workers_required: 1,
         }),
         update: jobUpdate,
+        updateMany: jobStatusUpdate,
       },
       jobStatusHistory: { create: jest.fn().mockResolvedValue({}) },
     };
@@ -166,11 +174,10 @@ describe("JobsService confirmation deadline", () => {
         data: expect.objectContaining({ status: "DECLINED" }),
       }),
     );
-    expect(jobUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: { status: "APPLICATIONS_OPEN" },
-      }),
-    );
+    expect(jobStatusUpdate).toHaveBeenCalledWith({
+      where: { id: "job-id", status: "CONFIRMATION_PENDING" },
+      data: { status: "APPLICATIONS_OPEN" },
+    });
     expect(availability.evaluate).not.toHaveBeenCalled();
   });
 });
