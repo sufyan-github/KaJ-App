@@ -222,6 +222,21 @@ export class PrismaAuthRepository implements AuthRepository {
     });
   }
 
+  async revokeAllSessions(userId: string, now: Date): Promise<void> {
+    await this.prisma.$transaction([
+      this.prisma.refreshToken.updateMany({
+        data: { revoked_at: now },
+        where: { user_id: userId, revoked_at: null },
+      }),
+      // Access tokens carry this version; bumping it ends them immediately,
+      // including open chat sockets, as a password reset already does.
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { mobile_auth_version: { increment: 1 } },
+      }),
+    ]);
+  }
+
   async revokeRefreshTokenByHash(tokenHash: string, now: Date): Promise<void> {
     await this.prisma.refreshToken.updateMany({
       data: { revoked_at: now },

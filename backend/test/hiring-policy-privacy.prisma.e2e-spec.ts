@@ -392,4 +392,36 @@ databaseDescribe("hiring eligibility and job privacy (real HTTP)", () => {
     expect(transcript.text).toContain("party message");
     expect(transcript.text).not.toContain("private applicant message");
   });
+
+  it("issues a working token on role activation after the session version moved", async () => {
+    const account = await actor([RoleMode.CUSTOMER]);
+    // As after a password reset or "log out everywhere".
+    await db.user.update({
+      where: { id: account.id },
+      data: { mobile_auth_version: 2 },
+    });
+    const user = await db.user.findUniqueOrThrow({ where: { id: account.id } });
+    const current = await app.get(AuthTokenService).createAccessToken(
+      {
+        id: user.id,
+        phoneE164: user.phone_e164!,
+        status: user.status,
+        roles: user.role_modes,
+        activeRole: user.active_role!,
+        isAdmin: false,
+        mobileAuthVersion: 2,
+      },
+      randomUUID(),
+    );
+    const activated = await call(
+      "post",
+      "me/roles/activate",
+      { id: account.id, token: current },
+      { role: "WORKER" },
+    ).expect(201);
+    await call("get", "auth/session", {
+      id: account.id,
+      token: activated.body.data.accessToken,
+    }).expect(200);
+  });
 });

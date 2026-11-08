@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
 import { HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { compare, hash } from "bcryptjs";
@@ -204,9 +204,13 @@ export class MobilePasswordService {
       select: { status: true, deleted_at: true },
     });
     if (!user || user.status !== "ACTIVE" || user.deleted_at) {
-      // Same public response, but no account creation or charge for an unknown number.
+      // Same public response, limits and id format as a real request, but no
+      // SMS, account creation or charge for an unknown number.
+      await this.auth.consumeOtpRequestLimits(phoneE164, ip);
+      const [{ id }] = await this.prisma.$queryRaw<[{ id: string }]>`
+        SELECT uuid_generate_v7()::text AS id`;
       return {
-        challengeId: randomUUID(),
+        challengeId: id,
         expiresIn: this.config.get<number>("OTP_TTL_SECONDS", 300),
       };
     }

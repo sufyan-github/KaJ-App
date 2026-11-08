@@ -15,8 +15,16 @@ import {
 } from "./account-moderation.reader";
 import { AuthenticatedRequest } from "./jwt.guard";
 
+// Writes still allowed for restricted or re-verifying accounts: safety
+// reports, blocks, verification, and the ways out (cancel a paid
+// subscription, delete the account, dispute or report).
 const SAFETY_WRITE_PATHS = [
   /\/reports(?:\/|$)/u,
+  /\/conversations\/[0-9a-f-]+\/report$/u,
+  /\/assignments\/[0-9a-f-]+\/disputes$/u,
+  /\/disputes\/[0-9a-f-]+\/(?:evidence|appeal)$/u,
+  /\/subscriptions\/cancel$/u,
+  /\/api\/v1\/me$/u,
   /\/users\/[0-9a-f-]+\/block$/u,
   /\/verification-requests(?:\/|$)/u,
   /\/uploads(?:\/|$)/u,

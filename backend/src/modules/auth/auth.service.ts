@@ -82,26 +82,7 @@ export class AuthService {
     if (!phoneE164) throw invalidPhoneError();
     if (!isRobiOrAirtelPhone(phoneE164)) throw unsupportedOperatorError();
 
-    await this.enforceRateLimit(
-      "otp-phone",
-      this.rateLimitKey(phoneE164),
-      OTP_PHONE_LIMIT,
-      OTP_WINDOW_SECONDS,
-    );
-    await this.enforceRateLimit(
-      "otp-ip",
-      this.rateLimitKey(ipAddress),
-      OTP_IP_LIMIT,
-      OTP_WINDOW_SECONDS,
-    );
-    if (this.otpCooldownSeconds > 0) {
-      await this.enforceRateLimit(
-        "otp-cooldown",
-        this.rateLimitKey(phoneE164),
-        1,
-        this.otpCooldownSeconds,
-      );
-    }
+    await this.consumeOtpRequestLimits(phoneE164, ipAddress);
 
     const code = this.otpCodeGenerator.generate();
     const codeHash = await hash(code, OTP_BCRYPT_ROUNDS);
@@ -247,10 +228,8 @@ export class AuthService {
       this.tokens.hashRefreshToken(refreshToken),
     );
     if (!current) return;
-    await this.repository.revokeRefreshFamily(
-      current.familyId,
-      this.clock.now(),
-    );
+    // Every device, not only this refresh-token family.
+    await this.repository.revokeAllSessions(current.user.id, this.clock.now());
   }
 
   async getSession(claims: AccessTokenClaims): Promise<AuthSession> {
@@ -313,6 +292,34 @@ export class AuthService {
     return createHmac("sha256", secret)
       .update(`${kind}:${value}`)
       .digest("hex");
+  }
+
+  /**
+   * The per-number, per-IP and resend-cooldown limits of an OTP request.
+   * Public so that flows answering for unknown numbers (password recovery)
+   * apply exactly the same limits and can't be told apart by a 429.
+   */
+  async consumeOtpRequestLimits(phoneE164: string, ipAddress: string) {
+    await this.enforceRateLimit(
+      "otp-phone",
+      this.rateLimitKey(phoneE164),
+      OTP_PHONE_LIMIT,
+      OTP_WINDOW_SECONDS,
+    );
+    await this.enforceRateLimit(
+      "otp-ip",
+      this.rateLimitKey(ipAddress),
+      OTP_IP_LIMIT,
+      OTP_WINDOW_SECONDS,
+    );
+    if (this.otpCooldownSeconds > 0) {
+      await this.enforceRateLimit(
+        "otp-cooldown",
+        this.rateLimitKey(phoneE164),
+        1,
+        this.otpCooldownSeconds,
+      );
+    }
   }
 
   private async enforceRateLimit(
