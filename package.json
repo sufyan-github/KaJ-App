@@ -12,7 +12,7 @@
   "scripts": {
     "build": "corepack pnpm --recursive --if-present run build",
     "dev": "node --env-file=.env.example --env-file-if-exists=.env tools/run-workspace-script.mjs dev",
-    "format": "prettier --write README.md CONTRIBUTING.md SECURITY.md package.json pnpm-lock.yaml pnpm-workspace.yaml backend admin infrastructure packages test tools",
+    "format": "prettier --write README.md CONTRIBUTING.md SECURITY.md package.json pnpm-workspace.yaml backend admin infrastructure packages test tools",
     "lint": "prettier --check README.md CONTRIBUTING.md SECURITY.md package.json pnpm-lock.yaml pnpm-workspace.yaml backend admin infrastructure packages test tools && corepack pnpm --recursive --if-present run lint",
     "migrate": "node --env-file=.env.example --env-file-if-exists=.env tools/run-workspace-script.mjs migrate",
     "migrate:reset": "node --env-file=.env.example --env-file-if-exists=.env tools/run-workspace-script.mjs migrate:reset",
@@ -37,13 +37,17 @@
       "prisma"
     ],
     "overrides": {
-      "body-parser": "1.20.6",
+      "body-parser": "1.20.9",
       "js-yaml": "4.3.2",
       "lodash": "4.18.0",
-      "multer": "2.4.0",
-      "qs": "6.16.0",
+      "multer": "2.5.0",
+      "qs": "6.16.1",
       "engine.io": "6.6.11",
-      "postcss": "8.5.28"
+      "postcss": "8.5.28",
+      "proxy-addr": "2.0.8",
+      "file-type": "21.3.3",
+      "deepmerge-ts": "8.0.1",
+      "source-map-js": "1.2.2"
     }
   }
 }

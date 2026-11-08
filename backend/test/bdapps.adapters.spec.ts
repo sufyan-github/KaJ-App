@@ -31,7 +31,25 @@ function fakeRedis() {
   return { getClient: () => client, values };
 }
 
+// ConfigService reads process.env before its own values, so an ambient (even
+// empty) BDAPPS_* variable would override the configuration built here.
+const AMBIENT_KEYS = ["BDAPPS_GATEWAY_URL", "BDAPPS_INTERNAL_API_KEY"] as const;
+const ambient = new Map<string, string | undefined>();
+
 describe("bdapps adapters", () => {
+  beforeAll(() => {
+    for (const key of AMBIENT_KEYS) {
+      ambient.set(key, process.env[key]);
+      delete process.env[key];
+    }
+  });
+  afterAll(() => {
+    for (const key of AMBIENT_KEYS) {
+      const value = ambient.get(key);
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  });
   afterEach(() => jest.restoreAllMocks());
 
   it("converts only valid Bangladesh subscriber identifiers", () => {

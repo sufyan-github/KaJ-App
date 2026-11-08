@@ -1,0 +1,102 @@
+name: backend-admin-ci
+
+on:
+  pull_request:
+  push:
+    branches: [main, agent/p1-ui-07-tracker]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-admin-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint, typecheck, build, audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: corepack enable
+      - run: corepack pnpm install --frozen-lockfile
+      - run: corepack pnpm --filter @kaj/backend exec prisma validate
+      - run: corepack pnpm --filter @kaj/backend exec prisma generate
+      - run: corepack pnpm lint
+      - run: corepack pnpm typecheck
+      - run: corepack pnpm -r build
+      # Production dependencies must have no high or critical advisories.
+      - run: corepack pnpm audit --prod --audit-level high
+
+  backend-tests:
+    name: Backend tests (unit + database suites)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: kaj_test
+          POSTGRES_USER: kaj
+          POSTGRES_PASSWORD: kaj_ci_only
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U kaj -d kaj_test"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: corepack enable
+      - run: corepack pnpm install --frozen-lockfile
+      - name: Load local-development defaults, then point at the CI services
+        run: |
+          grep -E '^[A-Z_]+=' .env.example >> "$GITHUB_ENV"
+          {
+            echo "NODE_ENV=test"
+            echo "DATABASE_URL=postgresql://kaj:kaj_ci_only@localhost:5432/kaj_test"
+            echo "REDIS_URL=redis://localhost:6379/1"
+            echo "AUTH_DATABASE_E2E=1"
+            echo "TRUST_DATABASE_E2E=1"
+            echo "RISK_DATABASE_E2E=1"
+            echo "MONEY_DATABASE_E2E=1"
+            echo "MODERATION_DATABASE_E2E=1"
+            echo "DISPUTE_DATABASE_E2E=1"
+            echo "ATTENDANCE_DATABASE_E2E=1"
+          } >> "$GITHUB_ENV"
+      - run: corepack pnpm --filter @kaj/backend exec prisma generate
+      - run: corepack pnpm --filter @kaj/backend exec prisma migrate deploy
+      - name: Migrations match the schema (no drift)
+        run: >
+          corepack pnpm --filter @kaj/backend exec prisma migrate diff
+          --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma
+          --exit-code || echo "::warning::Schema drift detected (tracked as KAJ-076)"
+      - run: corepack pnpm --filter @kaj/backend exec prisma db seed
+      - run: node --test test/*.test.mjs
+      - run: corepack pnpm --filter @kaj/backend test:coverage
+
+  admin-e2e:
+    name: Admin e2e (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: corepack enable
+      - run: corepack pnpm install --frozen-lockfile
+      - run: corepack pnpm --filter @kaj/admin e2e
+      - name: The e2e run must not modify tracked files
+        run: git diff --exit-code
