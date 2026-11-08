@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 
 import { RecurrenceService } from "./recurrence.service";
+import { schedulersEnabled } from "../../../common/scheduling/schedulers-enabled";
 
 @Injectable()
 export class RecurrenceRunner implements OnModuleInit, OnModuleDestroy {
@@ -15,6 +16,7 @@ export class RecurrenceRunner implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly recurrence: RecurrenceService) {}
 
   onModuleInit() {
+    if (!schedulersEnabled()) return;
     this.run();
     this.timer = setInterval(() => this.run(), 60 * 60_000);
     this.timer.unref();

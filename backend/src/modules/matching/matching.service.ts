@@ -13,8 +13,9 @@ import {
   type MatchExplanation,
   normalizeMatchingWeights,
 } from "./score.calculator";
+import { DHAKA_OFFSET_MINUTES } from "../availability/availability.calculator";
 
-const workerSelect = {
+export const workerSelect = {
   id: true,
   profile: { select: { display_name: true, primary_location_id: true } },
   worker_profile: {
@@ -24,7 +25,9 @@ const workerSelect = {
       monthly_rate_poisha: true,
       experience_years: true,
       rating_avg: true,
+      rating_count: true,
       reliability_score: true,
+      completed_jobs_count: true,
     },
   },
   skills: {
@@ -157,8 +160,14 @@ export class MatchingService {
         availability: availabilitySignal(job, worker),
         budget,
         experience,
-        rating: Number(profile?.rating_avg ?? 0) / 5,
-        reliability: Number(profile?.reliability_score ?? 0),
+        rating: rankingRating(
+          Number(profile?.rating_avg ?? 0),
+          profile?.rating_count ?? 0,
+        ),
+        reliability: rankingReliability(
+          Number(profile?.reliability_score ?? 0),
+          profile?.completed_jobs_count ?? 0,
+        ),
       },
       weights,
     );
@@ -168,10 +177,9 @@ export class MatchingService {
 function availabilitySignal(job: MatchableJob, worker: Worker): number {
   if (!job.starts_at || !job.ends_at)
     return worker.availability_rules.length ? 0.7 : 0.4;
-  const day = job.starts_at.getUTCDay();
-  const start =
-    job.starts_at.getUTCHours() * 60 + job.starts_at.getUTCMinutes();
-  const end = job.ends_at.getUTCHours() * 60 + job.ends_at.getUTCMinutes();
+  const slot = dhakaLocalSlot(job.starts_at, job.ends_at);
+  if (!slot) return 0;
+  const { day, start, end } = slot;
   return worker.availability_rules.some(
     (rule) =>
       rule.day_of_week === day &&
@@ -211,4 +219,44 @@ function emptyMatch(): MatchExplanation {
     rating: 0,
     reliability: 0,
   });
+}
+
+/**
+ * Availability rules are stored as Dhaka wall-clock times. Job times are UTC
+ * instants, so they must be shifted before comparing; using the UTC hours
+ * was six hours off, and the weekday was wrong for 00:00–06:00 Dhaka.
+ * Returns null for a slot that crosses local midnight (no rule can cover it).
+ */
+export function dhakaLocalSlot(startsAt: Date, endsAt: Date) {
+  const offset = DHAKA_OFFSET_MINUTES * 60_000;
+  const start = new Date(startsAt.getTime() + offset);
+  const end = new Date(endsAt.getTime() + offset);
+  if (start.getUTCDay() !== end.getUTCDay()) return null;
+  return {
+    day: start.getUTCDay(),
+    start: start.getUTCHours() * 60 + start.getUTCMinutes(),
+    end: end.getUTCHours() * 60 + end.getUTCMinutes(),
+  };
+}
+
+const RATING_PRIOR_COUNT = 5;
+const RATING_PRIOR_AVERAGE = 4;
+const RELIABILITY_MIN_JOBS = 5;
+const NEUTRAL_RELIABILITY = 0.75;
+
+/**
+ * Damped rating (spec D7) for ranking: a new worker starts at the neutral
+ * prior instead of 0, and one early review can't dominate.
+ */
+export function rankingRating(average: number, count: number) {
+  return (
+    (RATING_PRIOR_COUNT * RATING_PRIOR_AVERAGE + average * count) /
+    (RATING_PRIOR_COUNT + count) /
+    5
+  );
+}
+
+/** Too few jobs to judge: neutral, never the worst score. */
+export function rankingReliability(score: number, completedJobs: number) {
+  return completedJobs < RELIABILITY_MIN_JOBS ? NEUTRAL_RELIABILITY : score;
 }

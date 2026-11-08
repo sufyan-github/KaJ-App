@@ -7,11 +7,20 @@ export async function backendRequest(
   path: string,
   init: RequestInit = {},
   token?: string,
+  client?: Request,
 ): Promise<Response> {
   const headers = new Headers(init.headers);
   headers.set("accept", "application/json");
   if (init.body) headers.set("content-type", "application/json");
   if (token) headers.set("authorization", `Bearer ${token}`);
+  if (client) {
+    // Without these the API's audit log and login limits saw this server,
+    // not the operator. The API trusts them only up to TRUST_PROXY_HOPS.
+    const forwardedFor = client.headers.get("x-forwarded-for");
+    if (forwardedFor) headers.set("x-forwarded-for", forwardedFor);
+    const userAgent = client.headers.get("user-agent");
+    if (userAgent) headers.set("user-agent", userAgent);
+  }
   return fetch(`${API_URL}/api/v1${path}`, {
     ...init,
     cache: "no-store",

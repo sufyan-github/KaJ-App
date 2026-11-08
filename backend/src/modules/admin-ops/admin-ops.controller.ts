@@ -34,7 +34,10 @@ import {
   ForceTransitionDto,
   JobQueryDto,
   LocationDto,
+  DisputeQueryDto,
   PageQueryDto,
+  SkillDto,
+  SkillQueryDto,
   ReasonDto,
   UserActionDto,
   UserQueryDto,
@@ -234,6 +237,40 @@ export class AdminOpsController {
     return this.ops.saveCategory(id, body, actor, this.context(request));
   }
 
+  @Get("skills")
+  @Policy(Policies.public())
+  @AdminRoles(...OPS_ROLES)
+  skills(
+    @Query() query: SkillQueryDto,
+    @CurrentAdmin() actor: AdminActor,
+    @Req() request: Request,
+  ) {
+    return this.ops.skills(query, actor, this.context(request));
+  }
+
+  @Post("skills")
+  @Policy(Policies.public())
+  @AdminRoles(AdminRole.ADMIN)
+  createSkill(
+    @Body() body: SkillDto,
+    @CurrentAdmin() actor: AdminActor,
+    @Req() request: Request,
+  ) {
+    return this.ops.saveSkill(null, body, actor, this.context(request));
+  }
+
+  @Put("skills/:id")
+  @Policy(Policies.public())
+  @AdminRoles(AdminRole.ADMIN)
+  updateSkill(
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @Body() body: SkillDto,
+    @CurrentAdmin() actor: AdminActor,
+    @Req() request: Request,
+  ) {
+    return this.ops.saveSkill(id, body, actor, this.context(request));
+  }
+
   @Get("locations")
   @Policy(Policies.public())
   @AdminRoles(...OPS_ROLES)
@@ -335,7 +372,7 @@ export class AdminOpsController {
     AdminRole.FINANCE,
   )
   disputes(
-    @Query() query: PageQueryDto,
+    @Query() query: DisputeQueryDto,
     @CurrentAdmin() actor: AdminActor,
     @Req() request: Request,
   ) {

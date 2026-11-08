@@ -34,6 +34,35 @@ describe("environment validation", () => {
     expect(environment.NODE_ENV).toBe("production");
   });
 
+  it("refuses blank secrets on a deployed non-production server", () => {
+    expect(() =>
+      validateEnvironment({
+        NODE_ENV: "development",
+        API_BASE_URL: "https://api-staging.kaaj.app",
+      }),
+    ).toThrow("outside local development");
+  });
+
+  it("keeps the development fallbacks for localhost and tests", () => {
+    expect(() =>
+      validateEnvironment({ API_BASE_URL: "http://127.0.0.1:3100" }),
+    ).not.toThrow();
+    expect(() =>
+      validateEnvironment({
+        NODE_ENV: "test",
+        API_BASE_URL: "https://ci.example",
+      }),
+    ).not.toThrow();
+  });
+
+  it("parses the trusted proxy hop count", () => {
+    expect(validateEnvironment({}).TRUST_PROXY_HOPS).toBe(0);
+    expect(
+      validateEnvironment({ TRUST_PROXY_HOPS: "1" }).TRUST_PROXY_HOPS,
+    ).toBe(1);
+    expect(() => validateEnvironment({ TRUST_PROXY_HOPS: "-1" })).toThrow();
+  });
+
   it("accepts a six-digit fixed OTP only outside production", () => {
     expect(
       validateEnvironment({ OTP_FIXED_CODE: "123456" }).OTP_FIXED_CODE,

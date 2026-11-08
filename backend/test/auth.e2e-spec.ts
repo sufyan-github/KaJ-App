@@ -197,6 +197,12 @@ class InMemoryAuthRepository implements AuthRepository {
     }
   }
 
+  async revokeAllSessions(userId: string, now: Date): Promise<void> {
+    for (const token of this.refreshTokens.values()) {
+      if (token.user.id === userId && !token.revokedAt) token.revokedAt = now;
+    }
+  }
+
   async revokeRefreshTokenByHash(tokenHash: string, now: Date): Promise<void> {
     const token = this.refreshTokens.get(tokenHash);
     if (token && !token.revokedAt) token.revokedAt = now;
@@ -471,6 +477,26 @@ describe("phone OTP authentication", () => {
     await request(app.getHttpServer())
       .post("/api/v1/auth/refresh")
       .send({ refreshToken: rotated.body.data.refreshToken })
+      .expect(401);
+  });
+
+  it("logs out every session, not only the calling device, on logout-all", async () => {
+    const first = await login();
+    clock.advance(61_000); // past the OTP resend cooldown
+    const second = await login();
+    // The first session is still valid before logout-all.
+    const firstRotated = await request(app.getHttpServer())
+      .post("/api/v1/auth/refresh")
+      .send({ refreshToken: first.refreshToken })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post("/api/v1/auth/logout-all")
+      .send({ refreshToken: second.refreshToken })
+      .expect(204);
+    await request(app.getHttpServer())
+      .post("/api/v1/auth/refresh")
+      .send({ refreshToken: firstRotated.body.data.refreshToken })
       .expect(401);
   });
 

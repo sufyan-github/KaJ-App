@@ -253,6 +253,19 @@ databaseDescribe("dispute lifecycle with PostgreSQL", () => {
     expect(
       await prisma.ledgerEntry.count({ where: { payment_id: paymentId } }),
     ).toBe(0);
+    // The assignment is settled too, so reviews and cash recording work.
+    const [assignment, job] = await Promise.all([
+      prisma.assignment.findUniqueOrThrow({ where: { id: assignmentId } }),
+      prisma.job.findUniqueOrThrow({ where: { id: jobId } }),
+    ]);
+    expect(assignment.status).toBe("COMPLETED");
+    expect(job.status).toBe(JobStatus.COMPLETED);
+    expect(job.completed_at).not.toBeNull();
+    expect(
+      await prisma.jobStatusHistory.count({
+        where: { job_id: jobId, to_status: JobStatus.COMPLETED },
+      }),
+    ).toBe(1);
   });
 
   it("allows one appeal and requires a second administrator", async () => {

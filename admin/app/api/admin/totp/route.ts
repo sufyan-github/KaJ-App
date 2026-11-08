@@ -3,10 +3,12 @@ import { NextResponse } from "next/server";
 import { backendRequest, SESSION_COOKIE } from "@/lib/backend";
 
 export async function POST(request: Request) {
-  const response = await backendRequest("/admin/auth/totp", {
-    method: "POST",
-    body: JSON.stringify(await request.json()),
-  });
+  const response = await backendRequest(
+    "/admin/auth/totp",
+    { method: "POST", body: JSON.stringify(await request.json()) },
+    undefined,
+    request,
+  );
   const body = await response.json();
   if (!response.ok) return NextResponse.json(body, { status: response.status });
 

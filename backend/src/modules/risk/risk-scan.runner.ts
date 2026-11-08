@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 
 import { RiskService } from "./risk.service";
+import { schedulersEnabled } from "../../common/scheduling/schedulers-enabled";
 
 const DAILY_SCAN_INTERVAL_MS = 24 * 60 * 60_000;
 
@@ -19,6 +20,7 @@ export class RiskScanRunner implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly risk: RiskService) {}
 
   onModuleInit() {
+    if (!schedulersEnabled()) return;
     this.run();
     this.timer = setInterval(() => this.run(), DAILY_SCAN_INTERVAL_MS);
     this.timer.unref();

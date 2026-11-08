@@ -17,6 +17,7 @@ import {
 import {
   ApplicationStatus,
   DisputeDecision,
+  DisputeStatus,
   JobStatus,
   LocationType,
   UserStatus,
@@ -35,6 +36,17 @@ export class PageQueryDto {
   @IsString()
   @MaxLength(120)
   search?: string;
+
+  /** The last item id of the previous page (see `nextCursor`). */
+  @IsOptional()
+  @IsUUID()
+  cursor?: string;
+}
+
+export class DisputeQueryDto extends PageQueryDto {
+  @IsOptional()
+  @IsEnum(DisputeStatus)
+  status?: DisputeStatus;
 }
 
 export class UserQueryDto extends PageQueryDto {
@@ -85,6 +97,32 @@ export class ApplicationActionDto extends ReasonDto {
 export class VerificationDecisionDto extends ReasonDto {
   @IsEnum(VerificationStatus)
   status!: VerificationStatus;
+}
+
+export class SkillDto {
+  @IsUUID()
+  categoryId!: string;
+
+  @IsString()
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/u)
+  slug!: string;
+
+  @IsString()
+  @MinLength(2)
+  nameEn!: string;
+
+  @IsString()
+  @MinLength(2)
+  nameBn!: string;
+
+  @IsBoolean()
+  isActive = true;
+}
+
+export class SkillQueryDto {
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
 }
 
 export class CategoryDto {

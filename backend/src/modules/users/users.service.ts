@@ -78,6 +78,7 @@ export class UsersService {
         role_modes: true,
         active_role: true,
         is_admin: true,
+        mobile_auth_version: true,
       },
     });
     if (!user?.phone_e164) throw new NotFoundException();
@@ -89,6 +90,9 @@ export class UsersService {
         roles: user.role_modes,
         activeRole: user.active_role,
         isAdmin: user.is_admin,
+        // Without the current version the token was rejected at once for
+        // anyone who had reset their password or logged out everywhere.
+        mobileAuthVersion: user.mobile_auth_version,
       },
       deviceId,
     );
@@ -160,6 +164,75 @@ export class UsersService {
     };
   }
 
+  /**
+   * Everything the app needs to restore a signed-in user's state on a new
+   * install: profile, area, roles, worker details and skills.
+   */
+  async getOwnProfile(userId: string) {
+    const user = await this.prisma.user.findFirst({
+      where: { id: userId, deleted_at: null },
+      select: {
+        id: true,
+        role_modes: true,
+        active_role: true,
+        profile: {
+          include: {
+            primary_location: {
+              select: {
+                id: true,
+                parent_id: true,
+                type: true,
+                name_en: true,
+                name_bn: true,
+              },
+            },
+          },
+        },
+        worker_profile: true,
+      },
+    });
+    if (!user) throw new NotFoundException();
+    const profile = user.profile;
+    const worker = user.worker_profile;
+    return {
+      userId: user.id,
+      roles: user.role_modes,
+      activeRole: user.active_role,
+      profile: profile
+        ? {
+            id: profile.id,
+            displayName: profile.display_name,
+            bio: profile.bio,
+            gender: profile.gender,
+            birthYear: profile.birth_year,
+            primaryLocationId: profile.primary_location_id,
+            primaryLocation: profile.primary_location
+              ? {
+                  id: profile.primary_location.id,
+                  parentId: profile.primary_location.parent_id,
+                  type: profile.primary_location.type,
+                  nameEn: profile.primary_location.name_en,
+                  nameBn: profile.primary_location.name_bn,
+                }
+              : null,
+            trustLevel: profile.trust_level,
+          }
+        : null,
+      worker: worker
+        ? {
+            headline: worker.headline,
+            experienceYears: worker.experience_years,
+            hourlyRatePoisha: worker.hourly_rate_poisha?.toString() ?? null,
+            dailyRatePoisha: worker.daily_rate_poisha?.toString() ?? null,
+            monthlyRatePoisha: worker.monthly_rate_poisha?.toString() ?? null,
+            serviceRadiusKm: worker.service_radius_km?.toString() ?? null,
+            isAvailableNow: worker.is_available_now,
+          }
+        : null,
+      skills: await this.loadWorkerSkills(userId),
+    };
+  }
+
   async updateProfile(userId: string, input: UpdateProfileDto) {
     const profile = await this.prisma.profile.upsert({
       where: { user_id: userId },
@@ -216,15 +289,26 @@ export class UsersService {
       if (activeSkills !== skillIds.length) {
         throw new BadRequestException("Every skill must be active and known.");
       }
-      await transaction.userSkill.deleteMany({ where: { user_id: userId } });
-      if (inputs.length > 0) {
-        await transaction.userSkill.createMany({
-          data: inputs.map((input) => ({
+      // Upsert instead of delete-and-recreate, so verification fields and
+      // years on skills the worker keeps are not wiped by every save.
+      await transaction.userSkill.deleteMany({
+        where: { user_id: userId, skill_id: { notIn: skillIds } },
+      });
+      for (const input of inputs) {
+        await transaction.userSkill.upsert({
+          where: {
+            user_id_skill_id: { user_id: userId, skill_id: input.skillId },
+          },
+          update: {
+            level: input.level,
+            ...(input.years === undefined ? {} : { years: input.years }),
+          },
+          create: {
             user_id: userId,
             skill_id: input.skillId,
             level: input.level,
             years: input.years,
-          })),
+          },
         });
       }
     });

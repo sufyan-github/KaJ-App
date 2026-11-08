@@ -11,11 +11,20 @@ import { CLOCK, Clock } from "../time/clock";
 import {
   ACCOUNT_MODERATION_READER,
   AccountModerationReader,
+  AccountModerationState,
 } from "./account-moderation.reader";
 import { AuthenticatedRequest } from "./jwt.guard";
 
+// Writes still allowed for restricted or re-verifying accounts: safety
+// reports, blocks, verification, and the ways out (cancel a paid
+// subscription, delete the account, dispute or report).
 const SAFETY_WRITE_PATHS = [
   /\/reports(?:\/|$)/u,
+  /\/conversations\/[0-9a-f-]+\/report$/u,
+  /\/assignments\/[0-9a-f-]+\/disputes$/u,
+  /\/disputes\/[0-9a-f-]+\/(?:evidence|appeal)$/u,
+  /\/subscriptions\/cancel$/u,
+  /\/api\/v1\/me$/u,
   /\/users\/[0-9a-f-]+\/block$/u,
   /\/verification-requests(?:\/|$)/u,
   /\/uploads(?:\/|$)/u,
@@ -34,36 +43,41 @@ export class AccountModerationGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     if (!request.auth) return true;
     const user = await this.accounts.findAccount(request.auth.sub);
-    if (!user || user.deleted_at || user.status === UserStatus.BANNED) {
-      throw new ForbiddenException("This account is unavailable.");
-    }
-    if (
-      user.status === UserStatus.SUSPENDED ||
-      user.status === UserStatus.PENDING_DELETION
-    ) {
-      throw new ForbiddenException("This account is suspended.");
-    }
-
     const mutation = !["GET", "HEAD", "OPTIONS"].includes(request.method);
-    if (!mutation) return true;
     const path = request.path || request.originalUrl.split("?")[0]!;
-    const safetyWrite = SAFETY_WRITE_PATHS.some((pattern) =>
-      pattern.test(path),
-    );
-    if (user.reverification_required && !safetyWrite) {
-      throw new ForbiddenException(
-        "Identity re-verification is required before marketplace actions.",
-      );
-    }
-    const activeRestriction =
-      user.moderation_level === ModerationLevel.RESTRICT &&
-      (!user.restriction_ends_at ||
-        user.restriction_ends_at > this.clock.now());
-    if (activeRestriction && !safetyWrite) {
-      throw new ForbiddenException(
-        "Marketplace actions are temporarily restricted.",
-      );
-    }
+    const denial = accountActionDenial(user, this.clock.now(), {
+      mutation,
+      safetyWrite: SAFETY_WRITE_PATHS.some((pattern) => pattern.test(path)),
+    });
+    if (denial) throw new ForbiddenException(denial);
     return true;
   }
+}
+
+/**
+ * The account rules shared by HTTP (this guard) and the chat gateway, which
+ * Nest does not run global guards for. Returns the denial message, or null
+ * when the action is allowed.
+ */
+export function accountActionDenial(
+  user: AccountModerationState | null,
+  now: Date,
+  action: { mutation: boolean; safetyWrite: boolean },
+): string | null {
+  if (!user || user.deleted_at || user.status === UserStatus.BANNED)
+    return "This account is unavailable.";
+  if (
+    user.status === UserStatus.SUSPENDED ||
+    user.status === UserStatus.PENDING_DELETION
+  )
+    return "This account is suspended.";
+  if (!action.mutation || action.safetyWrite) return null;
+  if (user.reverification_required)
+    return "Identity re-verification is required before marketplace actions.";
+  const activeRestriction =
+    user.moderation_level === ModerationLevel.RESTRICT &&
+    (!user.restriction_ends_at || user.restriction_ends_at > now);
+  if (activeRestriction)
+    return "Marketplace actions are temporarily restricted.";
+  return null;
 }

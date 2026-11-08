@@ -64,6 +64,47 @@ describe("AccountModerationGuard", () => {
     ).resolves.toBe(true);
   });
 
+  it.each([
+    ["DELETE", "/api/v1/me"],
+    ["POST", "/api/v1/subscriptions/cancel"],
+    [
+      "POST",
+      "/api/v1/conversations/018f4f6f-13e8-7d9a-8c2b-6b6a9f62f531/report",
+    ],
+    [
+      "POST",
+      "/api/v1/assignments/018f4f6f-13e8-7d9a-8c2b-6b6a9f62f531/disputes",
+    ],
+    ["POST", "/api/v1/disputes/018f4f6f-13e8-7d9a-8c2b-6b6a9f62f531/appeal"],
+  ])(
+    "lets a restricted account still use the way out: %s %s",
+    async (method, path) => {
+      findAccount.mockResolvedValue({
+        status: UserStatus.ACTIVE,
+        moderation_level: ModerationLevel.RESTRICT,
+        restriction_ends_at: null,
+        reverification_required: true,
+        deleted_at: null,
+      });
+      await expect(guard.canActivate(context(method, path))).resolves.toBe(
+        true,
+      );
+    },
+  );
+
+  it("does not treat other /me writes as exit actions", async () => {
+    findAccount.mockResolvedValue({
+      status: UserStatus.ACTIVE,
+      moderation_level: ModerationLevel.RESTRICT,
+      restriction_ends_at: null,
+      reverification_required: false,
+      deleted_at: null,
+    });
+    await expect(
+      guard.canActivate(context("POST", "/api/v1/me/roles/activate")),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
   it("limits re-verification accounts to safety and verification writes", async () => {
     findAccount.mockResolvedValue({
       status: UserStatus.ACTIVE,

@@ -40,6 +40,11 @@ const environmentSchema = z
       .max(10_000)
       .default(800),
     PORT: z.coerce.number().int().min(1).max(65_535).default(3000),
+    // Number of reverse proxies in front of the API (Render: confirm the hop
+    // count). 0 keeps Express's default and uses the socket address.
+    TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
+    // "false" on every instance except one when the API runs on several.
+    RUN_SCHEDULERS: z.enum(["true", "false"]).default("true"),
     REDIS_URL: z.string().min(1).default("redis://localhost:6379"),
     S3_BUCKET: z.string().default("kaj-local"),
     S3_ENDPOINT: z.string().default("http://localhost:9000"),
@@ -74,7 +79,25 @@ const environmentSchema = z
       }
     }
 
-    if (environment.NODE_ENV !== "production") return;
+    // Development fallback secrets are publicly derivable, so they are only
+    // acceptable on a developer's own machine or in tests. Any other
+    // non-production deployment (staging, previews) must set real secrets.
+    const localOnly =
+      environment.NODE_ENV === "test" || isLocalUrl(environment.API_BASE_URL);
+    if (environment.NODE_ENV !== "production") {
+      if (localOnly) return;
+      for (const key of SESSION_SECRET_KEYS) {
+        if (environment[key].length < 32) {
+          context.addIssue({
+            code: "custom",
+            message:
+              "must contain at least 32 characters outside local development",
+            path: [key],
+          });
+        }
+      }
+      return;
+    }
 
     for (const key of [
       "JWT_ACCESS_SECRET",
@@ -115,6 +138,23 @@ const environmentSchema = z
   });
 
 export type Environment = z.infer<typeof environmentSchema>;
+
+const SESSION_SECRET_KEYS = [
+  "JWT_ACCESS_SECRET",
+  "JWT_REFRESH_SECRET",
+  "OTP_HASH_SECRET",
+  "ADMIN_SESSION_SECRET",
+  "ADMIN_TOTP_ENCRYPTION_KEY",
+] as const;
+
+function isLocalUrl(value: string) {
+  try {
+    const host = new URL(value).hostname;
+    return host === "localhost" || host === "127.0.0.1" || host === "::1";
+  } catch {
+    return false;
+  }
+}
 
 export function validateEnvironment(
   input: Record<string, unknown>,

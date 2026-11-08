@@ -21,6 +21,7 @@ async function forward(request: Request, context: RouteContext) {
     `/admin/${path.map(encodeURIComponent).join("/")}${query}`,
     { method, body: body || undefined },
     token,
+    request,
   );
   const payload = await response.json().catch(() => null);
   const result = NextResponse.json(payload, { status: response.status });

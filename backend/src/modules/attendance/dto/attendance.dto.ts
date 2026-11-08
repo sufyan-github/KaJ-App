@@ -1,4 +1,4 @@
-import { Type } from "class-transformer";
+import { Transform } from "class-transformer";
 import {
   IsBoolean,
   IsDateString,
@@ -12,21 +12,40 @@ import {
   MinLength,
 } from "class-validator";
 
-export class CheckInDto {
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 7 })
+/**
+ * Rounds to the precision the database stores instead of rejecting longer
+ * values. Android reports coordinates with many decimals and widens the
+ * Float accuracy to a Double (3.9 → 3.9000000953674316), which the previous
+ * `maxDecimalPlaces` rules rejected with 400.
+ */
+function RoundTo(places: number) {
+  const factor = 10 ** places;
+  return Transform(({ value }: { value: unknown }) => {
+    const number =
+      typeof value === "string" && value.trim() !== "" ? Number(value) : value;
+    if (typeof number !== "number" || !Number.isFinite(number)) return value;
+    return Math.round(number * factor) / factor;
+  });
+}
+
+const FINITE = { allowNaN: false, allowInfinity: false } as const;
+
+/** Fields shared by check-in and check-out (stored as decimal(9,6) / (8,2)). */
+export class AttendanceLocationDto {
+  @RoundTo(6)
+  @IsNumber(FINITE)
   @Min(-90)
   @Max(90)
   lat!: number;
 
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 7 })
+  @RoundTo(6)
+  @IsNumber(FINITE)
   @Min(-180)
   @Max(180)
   lng!: number;
 
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 2 })
+  @RoundTo(2)
+  @IsNumber(FINITE)
   @Min(0)
   @Max(10_000)
   accuracyM!: number;
@@ -42,47 +61,19 @@ export class CheckInDto {
   @IsOptional()
   @IsDateString()
   capturedAt?: string;
-
-  @IsOptional()
-  @IsUUID()
-  photoDocumentId?: string;
 
   @IsOptional()
   @IsBoolean()
   mockLocation?: boolean;
 }
 
-export class CheckOutDto {
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 7 })
-  @Min(-90)
-  @Max(90)
-  lat!: number;
-
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 7 })
-  @Min(-180)
-  @Max(180)
-  lng!: number;
-
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  @Max(10_000)
-  accuracyM!: number;
-
-  @IsBoolean()
-  consentGranted!: boolean;
-
-  @IsString()
-  @MinLength(3)
-  @MaxLength(80)
-  consentVersion!: string;
-
+export class CheckInDto extends AttendanceLocationDto {
   @IsOptional()
-  @IsDateString()
-  capturedAt?: string;
+  @IsUUID()
+  photoDocumentId?: string;
+}
 
+export class CheckOutDto extends AttendanceLocationDto {
   @IsOptional()
   @IsString()
   @MaxLength(1000)

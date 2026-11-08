@@ -90,6 +90,8 @@ export interface AuthRepository {
   findSession(userId: string): Promise<AuthSession | null>;
   incrementOtpAttempts(id: string, maxAttempts: number): Promise<boolean>;
   revokeRefreshFamily(familyId: string, now: Date): Promise<void>;
+  /** Revokes every refresh token and invalidates outstanding access tokens. */
+  revokeAllSessions(userId: string, now: Date): Promise<void>;
   revokeRefreshTokenByHash(tokenHash: string, now: Date): Promise<void>;
   rotateRefreshToken(input: RotateRefreshTokenInput): Promise<boolean>;
   upsertDevice(input: UpsertDeviceInput): Promise<void>;
