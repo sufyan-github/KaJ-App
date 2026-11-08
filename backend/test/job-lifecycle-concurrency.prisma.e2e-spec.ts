@@ -24,6 +24,7 @@ databaseDescribe("job lifecycle under concurrent requests", () => {
   let db: PrismaService;
   let poster: { id: string; token: string };
   let worker: { id: string; token: string };
+  let newActor: (role: RoleMode) => Promise<{ id: string; token: string }>;
   let categoryId: string;
   let locationId: string;
   const start = new Date(Date.now() + 3 * 86_400_000);
@@ -67,6 +68,7 @@ databaseDescribe("job lifecycle under concurrent requests", () => {
       );
       return { id: user.id, token };
     }
+    newActor = actor;
     poster = await actor(RoleMode.CUSTOMER);
     worker = await actor(RoleMode.WORKER);
     await db.availabilityRule.createMany({
@@ -106,10 +108,10 @@ databaseDescribe("job lifecycle under concurrent requests", () => {
     return result.body.data.id as string;
   }
 
-  async function confirmedAssignment() {
+  async function confirmedAssignment(as = worker) {
     const id = await draft();
     await post(`jobs/${id}/publish`, poster.token).expect(201);
-    const application = await post(`jobs/${id}/applications`, worker.token, {
+    const application = await post(`jobs/${id}/applications`, as.token, {
       message: "I can do this job on time.",
       proposedPricePoisha: "15000",
       proposedStartsAt: start.toISOString(),
@@ -120,7 +122,7 @@ databaseDescribe("job lifecycle under concurrent requests", () => {
       poster.token,
     ).expect(201);
     const assignmentId = accepted.body.data.id as string;
-    await post(`assignments/${assignmentId}/confirm`, worker.token).expect(201);
+    await post(`assignments/${assignmentId}/confirm`, as.token).expect(201);
     return { jobId: id, assignmentId };
   }
 
@@ -301,9 +303,19 @@ databaseDescribe("job lifecycle under concurrent requests", () => {
   });
 
   it("counts only worker-caused cancellations in the worker's cancellation rate", async () => {
+    // A fresh worker, so earlier tests' cancellations don't affect the rate.
+    const fresh = await newActor(RoleMode.WORKER);
+    await db.availabilityRule.createMany({
+      data: Array.from({ length: 7 }, (_, day) => ({
+        user_id: fresh.id,
+        day_of_week: day,
+        start_time: new Date("1970-01-01T08:00:00Z"),
+        end_time: new Date("1970-01-01T22:00:00Z"),
+      })),
+    });
     await db.workerProfile.upsert({
-      where: { user_id: worker.id },
-      create: { user_id: worker.id },
+      where: { user_id: fresh.id },
+      create: { user_id: fresh.id },
       update: {},
     });
     const reviews = app.get(ReviewsService) as unknown as {
@@ -313,27 +325,28 @@ databaseDescribe("job lifecycle under concurrent requests", () => {
       ): Promise<void>;
     };
     const rate = async () => {
-      await reviews.recomputeProfiles(db, [worker.id]);
+      await reviews.recomputeProfiles(db, [fresh.id]);
       return (
         await db.workerProfile.findUniqueOrThrow({
-          where: { user_id: worker.id },
+          where: { user_id: fresh.id },
         })
       ).cancellation_rate_bps;
     };
     const before = await rate();
 
-    const byCustomer = await confirmedAssignment();
+    const byCustomer = await confirmedAssignment(fresh);
     await post(`assignments/${byCustomer.assignmentId}/cancel`, poster.token, {
       reasonCode: "CHANGE_OF_PLAN",
       confirmed: true,
     }).expect(201);
-    expect(await rate()).toBe(before);
+    expect(before).toBe(0);
+    expect(await rate()).toBe(0);
 
-    const byWorker = await confirmedAssignment();
-    await post(`assignments/${byWorker.assignmentId}/cancel`, worker.token, {
+    const byWorker = await confirmedAssignment(fresh);
+    await post(`assignments/${byWorker.assignmentId}/cancel`, fresh.token, {
       reasonCode: "CHANGE_OF_PLAN",
       confirmed: true,
     }).expect(201);
-    expect(await rate()).toBeGreaterThan(before);
+    expect(await rate()).toBeGreaterThan(0);
   });
 });
