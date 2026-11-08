@@ -664,24 +664,10 @@ export class JobsService {
           where: { user_id: userId },
           data: { cancellation_count: { increment: 1 } },
         });
-      } else if (preview.reliabilityDelta) {
-        const profile = await transaction.workerProfile.findUnique({
-          where: { user_id: userId },
-        });
-        if (profile) {
-          await transaction.workerProfile.update({
-            where: { user_id: userId },
-            data: {
-              reliability_score: Math.max(
-                0,
-                Number(profile.reliability_score) +
-                  preview.reliabilityDelta / 100,
-              ),
-              cancellation_rate_bps: { increment: 100 },
-            },
-          });
-        }
       }
+      // Worker reputation (reliability, cancellation rate) is written only by
+      // the reputation recompute, from the job's status history. This path
+      // used to adjust the same columns with a different formula.
       await transaction.auditLog.create({
         data: {
           actor_user_id: userId,

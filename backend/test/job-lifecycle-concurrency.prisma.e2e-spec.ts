@@ -8,6 +8,7 @@ import { AppModule } from "../src/app.module";
 import { configureApp } from "../src/app.bootstrap";
 import { PrismaService } from "../src/infra/prisma/prisma.service";
 import { AuthTokenService } from "../src/modules/auth/auth-token.service";
+import { ReviewsService } from "../src/modules/reviews/reviews.service";
 
 const DISPUTE_REASON = "NO_SHOW";
 
@@ -297,5 +298,42 @@ databaseDescribe("job lifecycle under concurrent requests", () => {
       }).expect(422);
       expect(response.body.error.code).toBe("MULTI_WORKER_NOT_SUPPORTED");
     });
+  });
+
+  it("counts only worker-caused cancellations in the worker's cancellation rate", async () => {
+    await db.workerProfile.upsert({
+      where: { user_id: worker.id },
+      create: { user_id: worker.id },
+      update: {},
+    });
+    const reviews = app.get(ReviewsService) as unknown as {
+      recomputeProfiles(
+        client: PrismaService,
+        userIds: string[],
+      ): Promise<void>;
+    };
+    const rate = async () => {
+      await reviews.recomputeProfiles(db, [worker.id]);
+      return (
+        await db.workerProfile.findUniqueOrThrow({
+          where: { user_id: worker.id },
+        })
+      ).cancellation_rate_bps;
+    };
+    const before = await rate();
+
+    const byCustomer = await confirmedAssignment();
+    await post(`assignments/${byCustomer.assignmentId}/cancel`, poster.token, {
+      reasonCode: "CHANGE_OF_PLAN",
+      confirmed: true,
+    }).expect(201);
+    expect(await rate()).toBe(before);
+
+    const byWorker = await confirmedAssignment();
+    await post(`assignments/${byWorker.assignmentId}/cancel`, worker.token, {
+      reasonCode: "CHANGE_OF_PLAN",
+      confirmed: true,
+    }).expect(201);
+    expect(await rate()).toBeGreaterThan(before);
   });
 });

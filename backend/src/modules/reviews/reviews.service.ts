@@ -10,6 +10,7 @@ import {
   JobStatus,
   Prisma,
   ReviewDirection,
+  TrustLevel,
 } from "@prisma/client";
 
 import { CLOCK, Clock } from "../../common/time/clock";
@@ -17,7 +18,8 @@ import { PrismaService } from "../../infra/prisma/prisma.service";
 import { JobStateMachine } from "../jobs/state-machine/job-state.machine";
 import { NotificationsService } from "../notifications/notifications.service";
 import { CreateReviewDto } from "./dto/create-review.dto";
-import { eligibleBadgeSlugs } from "./badge.rules";
+import { hasTrust } from "../verification/trust-level";
+import { eligibleBadgeSlugs, RULE_BADGE_SLUGS } from "./badge.rules";
 import { rateBps, rawRating, workerReliability } from "./reputation.calculator";
 
 const REVIEW_WINDOW_MS = 7 * 24 * 60 * 60_000;
@@ -228,8 +230,19 @@ export class ReviewsService {
         const completed = await transaction.assignment.count({
           where: { worker_user_id: userId, status: AssignmentStatus.COMPLETED },
         });
+        // Only cancellations the worker caused: by the worker, or decided
+        // against the worker in a dispute. Customer cancellations and expired
+        // confirmations used to count against the worker too.
         const cancelled = await transaction.assignment.count({
-          where: { worker_user_id: userId, status: AssignmentStatus.CANCELLED },
+          where: {
+            worker_user_id: userId,
+            status: AssignmentStatus.CANCELLED,
+            job: {
+              status_history: {
+                some: { to_status: JobStatus.CANCELLED_BY_WORKER },
+              },
+            },
+          },
         });
         const facts = {
           completedJobs: completed,
@@ -279,7 +292,12 @@ export class ReviewsService {
       if (!user.worker_profile) continue;
       const eligible = new Set(
         eligibleBadgeSlugs({
-          isVerified: user.profile?.trust_level !== "NONE",
+          // Identity checked, not merely phone-registered (every account
+          // starts at PHONE, so everyone was shown as "verified").
+          isVerified: hasTrust(
+            user.profile?.trust_level ?? TrustLevel.NONE,
+            TrustLevel.IDENTITY,
+          ),
           completedJobs: user.worker_profile.completed_jobs_count,
           ratingAverage: user.worker_profile.rating_avg.toNumber(),
           ratingCount: user.worker_profile.rating_count,
@@ -287,6 +305,7 @@ export class ReviewsService {
         }),
       );
       for (const [slug, badge] of badgeBySlug) {
+        if (!RULE_BADGE_SLUGS.has(slug)) continue; // staff-granted badges
         const current = user.badges.find((item) => item.badge_id === badge.id);
         const shouldHave = eligible.has(slug);
         if (shouldHave && current?.revoked_at) {

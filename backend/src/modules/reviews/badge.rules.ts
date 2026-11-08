@@ -6,6 +6,18 @@ export interface BadgeFacts {
   completionRateBps: number;
 }
 
+/**
+ * Badges derived from these rules. Others (e.g. "business-verified") are
+ * granted by staff and must not be revoked by the rule reconcile.
+ */
+export const RULE_BADGE_SLUGS: ReadonlySet<string> = new Set([
+  "verified",
+  "new-worker",
+  "reliable",
+  "top-rated",
+  "experienced",
+]);
+
 export function eligibleBadgeSlugs(facts: BadgeFacts): string[] {
   return [
     ...(facts.isVerified ? ["verified"] : []),
