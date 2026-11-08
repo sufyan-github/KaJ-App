@@ -424,4 +424,67 @@ databaseDescribe("hiring eligibility and job privacy (real HTTP)", () => {
       token: activated.body.data.accessToken,
     }).expect(200);
   });
+
+  describe("own profile and skills", () => {
+    const put = (path: string, as: Actor, body: unknown) =>
+      request(app.getHttpServer())
+        .put(`/api/v1/${path}`)
+        .auth(as.token, { type: "bearer" })
+        .send(body as object);
+
+    it("returns the caller's own profile, area, roles and skills", async () => {
+      const someone = await actor([RoleMode.WORKER]);
+      const skill = await db.skill.findFirstOrThrow({
+        where: { is_active: true },
+      });
+      await put("profiles/me", someone, {
+        displayName: "Restorable worker",
+        primaryLocationId: locationId,
+      }).expect(200);
+      await put("profiles/me/skills", someone, {
+        skills: [{ skillId: skill.id, level: "INTERMEDIATE", years: 4 }],
+      }).expect(200);
+      const own = await call("get", "profiles/me", someone).expect(200);
+      expect(own.body.data).toMatchObject({
+        userId: someone.id,
+        roles: ["WORKER"],
+        profile: {
+          displayName: "Restorable worker",
+          primaryLocationId: locationId,
+          primaryLocation: { id: locationId },
+        },
+        skills: [{ skillId: skill.id, level: "INTERMEDIATE", years: "4" }],
+      });
+    });
+
+    it("keeps verification and years when skills are saved again, and removes dropped skills", async () => {
+      const someone = await actor([RoleMode.WORKER]);
+      const [first, second] = await db.skill.findMany({
+        where: { is_active: true },
+        take: 2,
+      });
+      await put("profiles/me/skills", someone, {
+        skills: [
+          { skillId: first!.id, level: "ADVANCED", years: 6 },
+          { skillId: second!.id, level: "BEGINNER" },
+        ],
+      }).expect(200);
+      await db.userSkill.update({
+        where: {
+          user_id_skill_id: { user_id: someone.id, skill_id: first!.id },
+        },
+        data: { is_verified: true, verified_at: new Date() },
+      });
+      // The app re-saves without years and drops the second skill.
+      await put("profiles/me/skills", someone, {
+        skills: [{ skillId: first!.id, level: "ADVANCED" }],
+      }).expect(200);
+      const rows = await db.userSkill.findMany({
+        where: { user_id: someone.id },
+      });
+      expect(rows).toHaveLength(1);
+      expect(rows[0]).toMatchObject({ skill_id: first!.id, is_verified: true });
+      expect(rows[0]!.years?.toString()).toBe("6");
+    });
+  });
 });

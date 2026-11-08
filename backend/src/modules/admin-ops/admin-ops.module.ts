@@ -2,13 +2,14 @@ import { Module } from "@nestjs/common";
 
 import { PrismaModule } from "../../infra/prisma/prisma.module";
 import { AdminAuthModule } from "../admin-auth/admin-auth.module";
+import { CatalogModule } from "../catalog/catalog.module";
 import { PaymentsModule } from "../payments/payments.module";
 import { AdminOpsController } from "./admin-ops.controller";
 import { AdminOpsService } from "./admin-ops.service";
 
 @Module({
   controllers: [AdminOpsController],
-  imports: [AdminAuthModule, PaymentsModule, PrismaModule],
+  imports: [AdminAuthModule, CatalogModule, PaymentsModule, PrismaModule],
   providers: [AdminOpsService],
 })
 export class AdminOpsModule {}

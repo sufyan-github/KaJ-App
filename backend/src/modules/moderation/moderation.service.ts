@@ -14,6 +14,7 @@ import {
 } from "@prisma/client";
 
 import { CLOCK, Clock } from "../../common/time/clock";
+import { pageArgs, pageResult } from "../../common/api/cursor-page";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import {
   AdminActor,
@@ -144,14 +145,15 @@ export class ModerationService {
     actor: AdminActor,
     context: AdminRequestContext,
   ) {
+    // Actionable by default, so decided reports can't push new ones out.
     const where: Prisma.ReportWhereInput = query.status
       ? { status: query.status }
-      : {};
-    const [items, total] = await Promise.all([
+      : { status: { in: [ReportStatus.OPEN, ReportStatus.UNDER_REVIEW] } };
+    const [page, total] = await Promise.all([
       this.prisma.report.findMany({
         where,
-        orderBy: { created_at: "asc" },
-        take: query.limit,
+        orderBy: [{ created_at: "asc" }, { id: "asc" }],
+        ...pageArgs(query),
         include: {
           reporter: { include: { profile: true } },
           subject: { include: { profile: true } },
@@ -169,8 +171,10 @@ export class ModerationService {
       { status: query.status ?? null, limit: query.limit },
       context,
     );
+    const { items, nextCursor } = pageResult(page, query.limit);
     return {
       total,
+      nextCursor,
       items: items.map((item) => ({
         id: item.id,
         targetType: item.target_type,

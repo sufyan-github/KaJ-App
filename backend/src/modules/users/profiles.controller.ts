@@ -82,6 +82,12 @@ export class ProfilesController {
     return this.portfolio.remove(claims.sub, id);
   }
 
+  @Get()
+  @Policy(Policies.authenticated())
+  getOwnProfile(@CurrentUser() claims: AccessTokenClaims) {
+    return this.users.getOwnProfile(claims.sub);
+  }
+
   @Put()
   @Policy(Policies.authenticated())
   updateProfile(

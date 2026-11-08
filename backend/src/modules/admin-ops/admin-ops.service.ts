@@ -23,6 +23,7 @@ import {
   VerificationStatus,
 } from "@prisma/client";
 
+import { pageArgs, pageResult } from "../../common/api/cursor-page";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { STORAGE_PORT, StoragePort } from "../../infra/storage/storage.port";
 import { CLOCK, Clock } from "../../common/time/clock";
@@ -41,7 +42,10 @@ import {
   ForceTransitionDto,
   JobQueryDto,
   LocationDto,
+  DisputeQueryDto,
   PageQueryDto,
+  SkillDto,
+  SkillQueryDto,
   UserActionDto,
   UserQueryDto,
   VerificationDecisionDto,
@@ -52,6 +56,7 @@ import {
   highestTrust,
   trustForVerification,
 } from "../verification/trust-level";
+import { CatalogService } from "../catalog/catalog.service";
 import { JobStateMachine } from "../jobs/state-machine/job-state.machine";
 import { LedgerService } from "../payments/ledger.service";
 import { PaymentsService } from "../payments/payments.service";
@@ -73,6 +78,7 @@ export class AdminOpsService {
     @Inject(CLOCK) private readonly clock: Clock,
     private readonly ledger: LedgerService,
     @Optional() private readonly payments?: PaymentsService,
+    @Optional() private readonly catalog?: CatalogService,
   ) {}
 
   private readonly states = new JobStateMachine();
@@ -535,9 +541,15 @@ export class AdminOpsService {
   ) {
     const item = await this.prisma.application.findUnique({ where: { id } });
     if (!item) throw new NotFoundException();
+    // An accepted application has a live assignment (resetting it allowed a
+    // second accept); a withdrawn one was the worker's own decision.
+    if (!UNSTICKABLE_APPLICATION_STATUSES.includes(item.status))
+      throw new ConflictException(
+        `A ${item.status.toLowerCase()} application can't be reset.`,
+      );
     await this.prisma.$transaction([
-      this.prisma.application.update({
-        where: { id },
+      this.prisma.application.updateMany({
+        where: { id, status: { in: UNSTICKABLE_APPLICATION_STATUSES } },
         data: { status: input.status, responded_at: null, withdrawn_at: null },
       }),
       this.auditCreate(
@@ -559,7 +571,9 @@ export class AdminOpsService {
     context: AdminRequestContext,
   ) {
     const where: Prisma.VerificationRequestWhereInput = {
-      ...(query.status ? { status: query.status } : {}),
+      // Actionable by default: oldest-first with no filter let 100 decided
+      // requests hide every new one.
+      status: query.status ?? VerificationStatus.PENDING,
       ...(query.search
         ? {
             user: {
@@ -570,10 +584,10 @@ export class AdminOpsService {
           }
         : {}),
     };
-    const items = await this.prisma.verificationRequest.findMany({
+    const page = await this.prisma.verificationRequest.findMany({
       where,
-      take: query.limit,
-      orderBy: { created_at: "asc" },
+      ...pageArgs(query),
+      orderBy: [{ created_at: "asc" }, { id: "asc" }],
       include: {
         user: {
           include: { profile: true },
@@ -599,7 +613,9 @@ export class AdminOpsService {
       },
       context,
     );
+    const { items, nextCursor } = pageResult(page, query.limit);
     return {
+      nextCursor,
       items: items.map((item) => ({
         id: item.id,
         kind: item.kind,
@@ -817,7 +833,69 @@ export class AdminOpsService {
       serializeCategory(saved),
       context,
     );
+    // The app's catalogue is cached for an hour; without this, a deactivated
+    // (e.g. unsafe) category stayed visible.
+    await this.catalog?.invalidateCache();
     return serializeCategory(saved);
+  }
+
+  async skills(
+    query: SkillQueryDto,
+    actor: AdminActor,
+    context: AdminRequestContext,
+  ) {
+    const items = await this.prisma.skill.findMany({
+      where: { category_id: query.categoryId },
+      orderBy: [{ category_id: "asc" }, { name_en: "asc" }],
+    });
+    await this.audit(
+      actor,
+      "ADMIN_SKILLS_VIEWED",
+      "SKILL",
+      null,
+      null,
+      { categoryId: query.categoryId ?? null },
+      context,
+    );
+    return { items: items.map(serializeSkill) };
+  }
+
+  async saveSkill(
+    id: string | null,
+    input: SkillDto,
+    actor: AdminActor,
+    context: AdminRequestContext,
+  ) {
+    const category = await this.prisma.category.findUnique({
+      where: { id: input.categoryId },
+      select: { id: true },
+    });
+    if (!category) throw new NotFoundException("Category not found.");
+    const before = id
+      ? await this.prisma.skill.findUnique({ where: { id } })
+      : null;
+    if (id && !before) throw new NotFoundException();
+    const data = {
+      category_id: input.categoryId,
+      slug: input.slug,
+      name_en: input.nameEn.trim(),
+      name_bn: input.nameBn.trim(),
+      is_active: input.isActive,
+    };
+    const saved = id
+      ? await this.prisma.skill.update({ where: { id }, data })
+      : await this.prisma.skill.create({ data });
+    await this.audit(
+      actor,
+      id ? "ADMIN_SKILL_UPDATED" : "ADMIN_SKILL_CREATED",
+      "SKILL",
+      saved.id,
+      before ? serializeSkill(before) : null,
+      serializeSkill(saved),
+      context,
+    );
+    await this.catalog?.invalidateCache();
+    return serializeSkill(saved);
   }
 
   async locations(actor: AdminActor, context: AdminRequestContext) {
@@ -862,6 +940,7 @@ export class AdminOpsService {
       serializeLocation(saved),
       context,
     );
+    await this.catalog?.invalidateCache();
     return serializeLocation(saved);
   }
 
@@ -1094,13 +1173,30 @@ export class AdminOpsService {
   }
 
   async disputes(
-    query: PageQueryDto,
+    query: DisputeQueryDto,
     actor: AdminActor,
     context: AdminRequestContext,
   ) {
-    const items = await this.prisma.dispute.findMany({
-      take: query.limit,
-      orderBy: { created_at: "asc" },
+    const page = await this.prisma.dispute.findMany({
+      // Actionable by default: open disputes and resolved ones under appeal.
+      where: query.status
+        ? { status: query.status }
+        : {
+            OR: [
+              {
+                status: {
+                  in: [
+                    DisputeStatus.OPEN,
+                    DisputeStatus.EVIDENCE,
+                    DisputeStatus.UNDER_REVIEW,
+                  ],
+                },
+              },
+              { appeal: { status: DisputeAppealStatus.PENDING } },
+            ],
+          },
+      ...pageArgs(query),
+      orderBy: [{ created_at: "asc" }, { id: "asc" }],
       include: {
         job: {
           include: {
@@ -1133,7 +1229,9 @@ export class AdminOpsService {
       null,
       context,
     );
+    const { items, nextCursor } = pageResult(page, query.limit);
     return {
+      nextCursor,
       items: items.map((item) => ({
         id: item.id,
         reason_code: item.reason_code,
@@ -1805,5 +1903,30 @@ function campaignWhere(
     ...(role && ["CUSTOMER", "WORKER", "BUSINESS"].includes(role)
       ? { role_modes: { has: role as any } }
       : {}),
+  };
+}
+
+const UNSTICKABLE_APPLICATION_STATUSES: ApplicationStatus[] = [
+  ApplicationStatus.PENDING,
+  ApplicationStatus.SHORTLISTED,
+  ApplicationStatus.REJECTED,
+  ApplicationStatus.EXPIRED,
+];
+
+function serializeSkill(skill: {
+  id: string;
+  category_id: string;
+  slug: string;
+  name_en: string;
+  name_bn: string;
+  is_active: boolean;
+}) {
+  return {
+    id: skill.id,
+    categoryId: skill.category_id,
+    slug: skill.slug,
+    nameEn: skill.name_en,
+    nameBn: skill.name_bn,
+    isActive: skill.is_active,
   };
 }
