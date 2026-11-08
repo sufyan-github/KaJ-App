@@ -33,6 +33,18 @@ export class SendMessageDto {
   clientNonce!: string;
 }
 
+/** Socket `message:send` payload: the REST body plus the conversation id. */
+export class SocketSendMessageDto extends SendMessageDto {
+  @IsUUID()
+  conversationId!: string;
+}
+
+/** Socket `conversation:join` payload. */
+export class JoinConversationDto {
+  @IsUUID()
+  conversationId!: string;
+}
+
 export class MessagePageQueryDto {
   @IsOptional()
   @IsUUID()

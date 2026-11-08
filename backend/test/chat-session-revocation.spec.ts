@@ -1,4 +1,5 @@
 import { Socket, Server } from "socket.io";
+import { AccountModerationReader } from "../src/common/guards/account-moderation.reader";
 import { AuthTokenService } from "../src/modules/auth/auth-token.service";
 import { ChatEvents } from "../src/modules/chat/chat.events";
 import { ChatGateway } from "../src/modules/chat/chat.gateway";
@@ -26,6 +27,16 @@ describe("chat respects password-reset session revocation", () => {
       { verifyAccessToken: verify } as unknown as AuthTokenService,
       { send, assertParticipant } as unknown as ChatService,
       events,
+      {
+        findAccount: async () => ({
+          deleted_at: null,
+          moderation_level: "NONE",
+          restriction_ends_at: null,
+          reverification_required: false,
+          status: "ACTIVE",
+        }),
+      } as unknown as AccountModerationReader,
+      { now: () => new Date() },
     );
   });
 
