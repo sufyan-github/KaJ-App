@@ -37,6 +37,8 @@ databaseDescribe("attendance lifecycle with PostgreSQL", () => {
   const jobs = new JobsService(prismaService, {} as AvailabilityService);
   let categoryId: string;
   let locationId: string;
+  // An area with a validated centre and radius, created for this suite.
+  let pinnedAreaId: string;
   let originalFlag: {
     is_enabled: boolean;
     rollout_percent: number;
@@ -54,6 +56,18 @@ databaseDescribe("attendance lifecycle with PostgreSQL", () => {
     categoryId = category.id;
     locationId = location.id;
     originalFlag = flag;
+    const pinnedArea = await prisma.location.create({
+      data: {
+        parent_id: location.parent_id,
+        type: "AREA",
+        name_en: `Attendance test area ${Date.now()}`,
+        name_bn: "উপস্থিতি পরীক্ষা এলাকা",
+        lat: JOB.lat,
+        lng: JOB.lng,
+        radius_km: 1,
+      },
+    });
+    pinnedAreaId = pinnedArea.id;
     await prisma.featureFlag.upsert({
       where: { key: "checkin_enabled" },
       update: { is_enabled: true, rollout_percent: 100 },
@@ -92,6 +106,7 @@ databaseDescribe("attendance lifecycle with PostgreSQL", () => {
     });
     await prisma.job.deleteMany({ where: { id: { in: createdJobIds } } });
     await prisma.user.deleteMany({ where: { id: { in: createdUserIds } } });
+    await prisma.location.delete({ where: { id: pinnedAreaId } });
     await prisma.featureFlag.update({
       where: { key: "checkin_enabled" },
       data: originalFlag ?? { is_enabled: false, rollout_percent: 0 },
@@ -222,6 +237,73 @@ databaseDescribe("attendance lifecycle with PostgreSQL", () => {
     );
   });
 
+  it("falls back to the area centre and radius when the job has no pin", async () => {
+    const inside = await fixture("area-in", now, {
+      pinned: false,
+      locationId: pinnedAreaId,
+    });
+    const response = await attendance.checkIn(
+      inside.workerId,
+      inside.assignmentId,
+      checkinInput(pointNorth(900)),
+      "area-in-key",
+    );
+    expect(response.checkinDistanceM).toBe(900);
+
+    const outside = await fixture("area-out", now, {
+      pinned: false,
+      locationId: pinnedAreaId,
+    });
+    await expect(
+      attendance.checkIn(
+        outside.workerId,
+        outside.assignmentId,
+        checkinInput(pointNorth(1_100)),
+        "area-out-key",
+      ),
+    ).rejects.toThrow("Move within 1000 m");
+  });
+
+  it("asks for an override when neither the job nor its area has coordinates", async () => {
+    const area = await prisma.location.findUniqueOrThrow({
+      where: { id: locationId },
+    });
+    expect(area.lat).toBeNull();
+    const item = await fixture("no-coordinates", now, { pinned: false });
+    await expect(
+      attendance.checkIn(
+        item.workerId,
+        item.assignmentId,
+        checkinInput(pointNorth(10)),
+        "no-coordinates-key",
+      ),
+    ).rejects.toThrow("no check-in coordinates");
+  });
+
+  it("accepts mockLocation on check-out and records it for review", async () => {
+    const item = await fixture("checkout-mock");
+    await attendance.checkIn(
+      item.workerId,
+      item.assignmentId,
+      checkinInput(pointNorth(10)),
+      "checkout-mock-in",
+    );
+    now = new Date(now.getTime() + 30 * 60_000);
+    await attendance.checkOut(
+      item.workerId,
+      item.assignmentId,
+      { ...checkinInput(pointNorth(12)), mockLocation: true },
+      "checkout-mock-out",
+    );
+    const audit = await prisma.auditLog.findFirst({
+      where: {
+        actor_user_id: item.workerId,
+        action: "ATTENDANCE_MOCK_LOCATION_REPORTED",
+      },
+    });
+    expect(audit?.after_json).toMatchObject({ event: "CHECKOUT" });
+  });
+
   it("records a reason and audit trail for a poster override", async () => {
     const item = await fixture("override");
     const response = await attendance.overrideByPoster(
@@ -301,7 +383,11 @@ databaseDescribe("attendance lifecycle with PostgreSQL", () => {
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
-  async function fixture(label: string, startsAt = now) {
+  async function fixture(
+    label: string,
+    startsAt = now,
+    place: { pinned: boolean; locationId?: string } = { pinned: true },
+  ) {
     const suffix = `${Date.now()}${createdJobIds.length}`.slice(-10);
     const [poster, worker] = await Promise.all([
       prisma.user.create({
@@ -333,9 +419,8 @@ databaseDescribe("attendance lifecycle with PostgreSQL", () => {
         payment_model: PaymentModel.FIXED,
         budget_min_poisha: 50_000,
         budget_max_poisha: 50_000,
-        location_id: locationId,
-        lat: JOB.lat,
-        lng: JOB.lng,
+        location_id: place.locationId ?? locationId,
+        ...(place.pinned ? { lat: JOB.lat, lng: JOB.lng } : {}),
         starts_at: startsAt,
         ends_at: new Date(startsAt.getTime() + 2 * 3_600_000),
         status: JobStatus.UPCOMING,

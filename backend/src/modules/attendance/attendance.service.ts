@@ -9,6 +9,7 @@ import {
 } from "@nestjs/common";
 import {
   AssignmentStatus,
+  type Job,
   JobActorType,
   JobStatus,
   Prisma,
@@ -38,6 +39,8 @@ interface AttendanceSettings {
   maxOfflineSyncMinutes: number;
   maxClockSkewSeconds: number;
   consentVersion: string;
+  /** Geofence around an area centre when the job has no pin and the area has no radius. */
+  areaGeofenceRadiusM: number;
 }
 
 const DEFAULT_SETTINGS: AttendanceSettings = {
@@ -47,6 +50,7 @@ const DEFAULT_SETTINGS: AttendanceSettings = {
   maxOfflineSyncMinutes: 15,
   maxClockSkewSeconds: 120,
   consentVersion: "location-checkin-v1",
+  areaGeofenceRadiusM: 1_500,
 };
 
 @Injectable()
@@ -99,7 +103,10 @@ export class AttendanceService {
         );
         const assignment = await transaction.assignment.findUnique({
           where: { id: assignmentId },
-          include: { job: true, work_sessions: true },
+          include: {
+            job: { include: { location: true } },
+            work_sessions: true,
+          },
         });
         if (
           !assignment ||
@@ -112,19 +119,19 @@ export class AttendanceService {
           throw new ConflictException("This assignment is already checked in.");
         }
         this.assertWindow(assignment.agreed_starts_at, capturedAt, settings);
-        const location = this.jobLocation(assignment.job);
+        const location = this.jobLocation(assignment.job, settings);
         const distanceM = distanceMetres(location, {
           lat: input.lat,
           lng: input.lng,
         });
-        this.assertInside(distanceM, settings);
+        this.assertInside(distanceM, location.radiusM);
         const photoKey = await this.photoKey(
           transaction,
           workerUserId,
           input.photoDocumentId,
         );
 
-        let job = assignment.job;
+        let job: Job = assignment.job;
         if (job.status === JobStatus.CONFIRMED) {
           job = await this.states.transitionInTransaction(
             transaction,
@@ -226,7 +233,10 @@ export class AttendanceService {
         );
         const assignment = await transaction.assignment.findUnique({
           where: { id: assignmentId },
-          include: { job: true, work_sessions: true },
+          include: {
+            job: { include: { location: true } },
+            work_sessions: true,
+          },
         });
         if (
           !assignment ||
@@ -252,11 +262,12 @@ export class AttendanceService {
         if (assignment.job.status !== JobStatus.IN_PROGRESS) {
           throw new ConflictException("This job cannot be checked out now.");
         }
-        const distanceM = distanceMetres(this.jobLocation(assignment.job), {
+        const location = this.jobLocation(assignment.job, settings);
+        const distanceM = distanceMetres(location, {
           lat: input.lat,
           lng: input.lng,
         });
-        this.assertInside(distanceM, settings);
+        this.assertInside(distanceM, location.radiusM);
         const minutesWorked = Math.max(
           0,
           Math.floor(
@@ -301,6 +312,21 @@ export class AttendanceService {
             minutes_worked: minutesWorked,
           },
         });
+        if (input.mockLocation) {
+          await transaction.auditLog.create({
+            data: {
+              actor_user_id: workerUserId,
+              action: "ATTENDANCE_MOCK_LOCATION_REPORTED",
+              entity: "WORK_SESSION",
+              entity_id: session.id,
+              after_json: {
+                assignmentId,
+                event: "CHECKOUT",
+                reviewRequired: true,
+              },
+            },
+          });
+        }
         return this.sessionResponse(updated, settings);
       },
     );
@@ -369,7 +395,10 @@ export class AttendanceService {
         const now = this.clock.now();
         const assignment = await transaction.assignment.findUnique({
           where: { id: assignmentId },
-          include: { job: true, work_sessions: true },
+          include: {
+            job: { include: { location: true } },
+            work_sessions: true,
+          },
         });
         if (!assignment || assignment.status !== AssignmentStatus.CONFIRMED) {
           throw new NotFoundException();
@@ -384,7 +413,7 @@ export class AttendanceService {
           throw new ConflictException("This assignment is already checked in.");
         }
         this.assertWindow(assignment.agreed_starts_at, now, settings);
-        let job = assignment.job;
+        let job: Job = assignment.job;
         if (job.status === JobStatus.CONFIRMED) {
           job = await this.states.transitionInTransaction(
             transaction,
@@ -541,6 +570,9 @@ export class AttendanceService {
         typeof value?.consentVersion === "string"
           ? value.consentVersion
           : DEFAULT_SETTINGS.consentVersion,
+      areaGeofenceRadiusM:
+        positiveInteger(value?.areaGeofenceRadiusM, 100, 10_000) ??
+        DEFAULT_SETTINGS.areaGeofenceRadiusM,
     };
   }
 
@@ -609,22 +641,52 @@ export class AttendanceService {
     }
   }
 
-  private jobLocation(job: {
-    lat: Prisma.Decimal | null;
-    lng: Prisma.Decimal | null;
-  }) {
-    if (job.lat === null || job.lng === null) {
-      throw new UnprocessableEntityException(
-        "This job has no check-in coordinates. Request a manual override.",
-      );
+  /**
+   * The job's own pin when it has one; otherwise the centre of the job's area,
+   * with the area's radius (or the configured area radius) as the geofence.
+   * Area centres come from owner-validated reference data; until an area has
+   * coordinates, check-in still needs a manual override.
+   */
+  private jobLocation(
+    job: {
+      lat: Prisma.Decimal | null;
+      lng: Prisma.Decimal | null;
+      location: {
+        lat: Prisma.Decimal | null;
+        lng: Prisma.Decimal | null;
+        radius_km: Prisma.Decimal | null;
+      } | null;
+    },
+    settings: AttendanceSettings,
+  ) {
+    if (job.lat !== null && job.lng !== null) {
+      return {
+        lat: Number(job.lat),
+        lng: Number(job.lng),
+        radiusM: settings.geofenceRadiusM,
+      };
     }
-    return { lat: Number(job.lat), lng: Number(job.lng) };
+    const area = job.location;
+    if (area && area.lat !== null && area.lng !== null) {
+      const areaRadiusM =
+        area.radius_km !== null
+          ? Math.round(Number(area.radius_km) * 1_000)
+          : settings.areaGeofenceRadiusM;
+      return {
+        lat: Number(area.lat),
+        lng: Number(area.lng),
+        radiusM: Math.max(settings.geofenceRadiusM, areaRadiusM),
+      };
+    }
+    throw new UnprocessableEntityException(
+      "This job has no check-in coordinates. Request a manual override.",
+    );
   }
 
-  private assertInside(distanceM: number, settings: AttendanceSettings) {
-    if (!isInsideGeofence(distanceM, settings.geofenceRadiusM)) {
+  private assertInside(distanceM: number, radiusM: number) {
+    if (!isInsideGeofence(distanceM, radiusM)) {
       throw new UnprocessableEntityException(
-        `You are ${Math.round(distanceM)} m from the job location. Move within ${settings.geofenceRadiusM} m or request an override.`,
+        `You are ${Math.round(distanceM)} m from the job location. Move within ${radiusM} m or request an override.`,
       );
     }
   }
