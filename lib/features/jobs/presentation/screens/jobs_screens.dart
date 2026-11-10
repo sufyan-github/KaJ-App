@@ -23,6 +23,7 @@ import '../../../profile/presentation/controllers/public_profile_provider.dart';
 import '../../../trust_safety/domain/trust_models.dart';
 import '../../../trust_safety/presentation/trust_safety_providers.dart';
 import '../../data/jobs_repository.dart';
+import '../../domain/job_alert_errors.dart';
 import '../../domain/job_models.dart';
 import '../controllers/jobs_providers.dart';
 
@@ -46,6 +47,31 @@ class JobFeedScreen extends ConsumerStatefulWidget {
 
 class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
   bool _availableOnly = false;
+  bool _creatingAlert = false;
+
+  Future<void> _createAlert() async {
+    setState(() => _creatingAlert = true);
+    try {
+      await ref
+          .read(jobsRepositoryProvider)
+          .createJobAlert(
+            categoryId: widget.skillId == null ? widget.categoryId : null,
+            skillId: widget.skillId,
+          );
+      ref.invalidate(jobAlertsProvider);
+      if (mounted) {
+        _feedSnack('কাজের সতর্কতা চালু হয়েছে। মিলে গেলে নোটিফিকেশন পাবেন।');
+      }
+    } on Object catch (error) {
+      if (mounted) _feedSnack(jobAlertFailureMessage(error));
+    } finally {
+      if (mounted) setState(() => _creatingAlert = false);
+    }
+  }
+
+  void _feedSnack(String message) => ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: KLocalizedText(message)));
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +105,12 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
               (isWorker ? 'কাজ খুঁজুন' : 'আমার পোস্ট করা কাজ'),
         ),
         actions: [
+          if (isWorker)
+            IconButton(
+              tooltip: KaajLocalizations.text(context, 'কাজের সতর্কতা'),
+              onPressed: () => context.push(AppRoutes.jobAlerts),
+              icon: const Icon(Icons.notifications_active_outlined),
+            ),
           IconButton(
             tooltip: KaajLocalizations.text(
               context,
@@ -141,6 +173,24 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                 ],
               ),
             ),
+          if (isWorker && browsingType)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                KSpacing.md,
+                KSpacing.xs,
+                KSpacing.md,
+                0,
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  key: const ValueKey('notify-similar-jobs'),
+                  onPressed: _creatingAlert ? null : _createAlert,
+                  icon: const Icon(Icons.notification_add_outlined),
+                  label: const KLocalizedText('এমন কাজ এলে আমাকে জানান'),
+                ),
+              ),
+            ),
           Expanded(
             child: jobs.when(
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -185,7 +235,8 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                               ? null
                               : 'আবেদন দেখুন',
                           onAction: isWorker
-                              ? () => _showApply(context, ref, items[index])
+                              ? () =>
+                                    showJobApplyFlow(context, ref, items[index])
                               : browsingType
                               ? null
                               : () => _showApplications(
@@ -351,151 +402,100 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
       ),
     );
   }
+}
 
-  Future<void> _showApply(
-    BuildContext context,
-    WidgetRef ref,
-    JobSummary job,
-  ) async {
-    late final ApplicationEligibility eligibility;
-    try {
-      eligibility = await ref.read(applicationEligibilityProvider.future);
-    } on Object {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: KLocalizedText(
-              'আবেদনের যোগ্যতা যাচাই করা যায়নি। আবার চেষ্টা করুন।',
-            ),
-          ),
-        );
-      }
-      return;
-    }
-    if (!context.mounted) return;
-    if (!eligibility.canApply) {
-      final startVerification = await _showApplicationRequirements(
-        context,
-        eligibility,
-      );
-      if (startVerification == true && context.mounted) {
-        await context.push(AppRoutes.verificationCapture('IDENTITY'));
-      }
-      return;
-    }
-    final budget = job.budgetMaxPoisha ?? job.budgetMinPoisha;
-    final amount = TextEditingController(
-      text: budget == null ? '' : budget.wholeTaka.toString(),
-    );
-    final message = TextEditingController();
-    final start = job.startsAt ?? DateTime.now().add(const Duration(days: 1));
-    final end = job.endsAt ?? start.add(const Duration(hours: 1));
-    await showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const KLocalizedText('এই কাজে আবেদন করুন'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: KLocalizedText(
-                  'কাজের সময়: ${_dateTime(start)} – ${_time(end)}',
-                ),
-              ),
-              if (job.isTimeAvailable)
-                const ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.event_available, color: KColors.success),
-                  title: KLocalizedText(
-                    'এই সময়টি আপনার ডিফল্ট সময়ের সঙ্গে মেলে',
-                  ),
-                ),
-              if (job.isTimeUnavailable) ...[
-                const ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.event_busy, color: KColors.warning),
-                  title: KLocalizedText('এই সময়টি আপনার ডিফল্ট সময়ের বাইরে'),
-                  subtitle: KLocalizedText(
-                    'আবেদন করার আগে চাইলে পোস্টের সময়টি আপনার কাজের সময়ে যোগ করুন।',
-                  ),
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () async {
-                      try {
-                        await ref
-                            .read(onboardingRepositoryProvider)
-                            .addAvailabilityWindow(start, end);
-                        ref.invalidate(jobFeedProvider);
-                        if (dialogContext.mounted) Navigator.pop(dialogContext);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: KLocalizedText(
-                                'পোস্টের সময়টি আপনার ডিফল্ট কাজের সময়ে যোগ হয়েছে। এখন আবেদন করতে পারবেন।',
-                              ),
-                            ),
-                          );
-                        }
-                      } on Object {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: KLocalizedText(
-                                'কাজের সময় আপডেট করা যায়নি।',
-                              ),
-                            ),
-                          );
-                        }
-                      }
-                    },
-                    icon: const Icon(Icons.playlist_add),
-                    label: const KLocalizedText('এই পোস্টের সময় যোগ করুন'),
-                  ),
-                ),
-              ],
-              const SizedBox(height: KSpacing.md),
-              KTextField(
-                label: 'প্রস্তাবিত টাকা',
-                controller: amount,
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: KSpacing.sm),
-              KTextField(label: 'বার্তা (ঐচ্ছিক)', controller: message),
-            ],
+/// The apply flow shared by the job feed and the job detail page.
+///
+/// Checks identity eligibility first, then shows the proposal dialog.
+/// [onApplied] runs after the application is accepted by the API.
+Future<void> showJobApplyFlow(
+  BuildContext context,
+  WidgetRef ref,
+  JobSummary job, {
+  VoidCallback? onApplied,
+}) async {
+  late final ApplicationEligibility eligibility;
+  try {
+    eligibility = await ref.read(applicationEligibilityProvider.future);
+  } on Object {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: KLocalizedText(
+            'আবেদনের যোগ্যতা যাচাই করা যায়নি। আবার চেষ্টা করুন।',
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const KLocalizedText('ফিরুন'),
-          ),
-          FilledButton(
-            onPressed: job.isTimeUnavailable
-                ? null
-                : () async {
-                    final taka = int.tryParse(amount.text);
-                    if (taka == null || taka <= 0) return;
+      );
+    }
+    return;
+  }
+  if (!context.mounted) return;
+  if (!eligibility.canApply) {
+    final startVerification = await _showApplicationRequirements(
+      context,
+      eligibility,
+    );
+    if (startVerification == true && context.mounted) {
+      await context.push(AppRoutes.verificationCapture('IDENTITY'));
+    }
+    return;
+  }
+  final budget = job.budgetMaxPoisha ?? job.budgetMinPoisha;
+  final amount = TextEditingController(
+    text: budget == null ? '' : budget.wholeTaka.toString(),
+  );
+  final message = TextEditingController();
+  final start = job.startsAt ?? DateTime.now().add(const Duration(days: 1));
+  final end = job.endsAt ?? start.add(const Duration(hours: 1));
+  await showDialog<void>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const KLocalizedText('এই কাজে আবেদন করুন'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: KLocalizedText(
+                'কাজের সময়: ${_dateTime(start)} – ${_time(end)}',
+              ),
+            ),
+            if (job.isTimeAvailable)
+              const ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.event_available, color: KColors.success),
+                title: KLocalizedText(
+                  'এই সময়টি আপনার ডিফল্ট সময়ের সঙ্গে মেলে',
+                ),
+              ),
+            if (job.isTimeUnavailable) ...[
+              const ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.event_busy, color: KColors.warning),
+                title: KLocalizedText('এই সময়টি আপনার ডিফল্ট সময়ের বাইরে'),
+                subtitle: KLocalizedText(
+                  'আবেদন করার আগে চাইলে পোস্টের সময়টি আপনার কাজের সময়ে যোগ করুন।',
+                ),
+              ),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
                     try {
                       await ref
-                          .read(jobsRepositoryProvider)
-                          .apply(
-                            jobId: job.id,
-                            startsAt: start,
-                            endsAt: end,
-                            proposedPricePoisha: taka * 100,
-                            message: message.text,
-                          );
+                          .read(onboardingRepositoryProvider)
+                          .addAvailabilityWindow(start, end);
+                      ref.invalidate(jobFeedProvider);
                       if (dialogContext.mounted) Navigator.pop(dialogContext);
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: KLocalizedText('আবেদন পাঠানো হয়েছে।'),
+                            content: KLocalizedText(
+                              'পোস্টের সময়টি আপনার ডিফল্ট কাজের সময়ে যোগ হয়েছে। এখন আবেদন করতে পারবেন।',
+                            ),
                           ),
                         );
                       }
@@ -504,86 +504,140 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: KLocalizedText(
-                              'আবেদন পাঠানো যায়নি। সময়টি যাচাই করুন।',
+                              'কাজের সময় আপডেট করা যায়নি।',
                             ),
                           ),
                         );
                       }
                     }
                   },
-            child: const KLocalizedText('আবেদন পাঠান'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<bool?> _showApplicationRequirements(
-    BuildContext context,
-    ApplicationEligibility eligibility,
-  ) => showDialog<bool>(
-    context: context,
-    builder: (dialogContext) {
-      final pending = eligibility.identityStatus == 'PENDING';
-      final rejected = eligibility.identityStatus == 'REJECTED';
-      return AlertDialog(
-        title: const KLocalizedText('আবেদনের আগে পরিচয় যাচাই করুন'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              KLocalizedText(
-                pending
-                    ? 'আপনার NID ও সেলফি পর্যালোচনাধীন। অনুমোদন হলে আবেদন করতে পারবেন।'
-                    : rejected
-                    ? 'আগের যাচাই অনুমোদিত হয়নি। পরিষ্কার NID ও নতুন সেলফি দিয়ে আবার জমা দিন।'
-                    : 'নিরাপদে কাজ পেতে নিচের আবশ্যিক তথ্য যাচাই সম্পন্ন করুন।',
-              ),
-              const SizedBox(height: KSpacing.md),
-              _EligibilityRow(
-                label: 'ফোন নম্বর',
-                verified: eligibility.phoneVerified,
-              ),
-              _EligibilityRow(
-                label: 'পরিচয় তথ্য',
-                verified: eligibility.identityInformationVerified,
-              ),
-              _EligibilityRow(
-                label: 'জাতীয় পরিচয়পত্র (NID)',
-                verified: eligibility.nidVerified,
-              ),
-              _EligibilityRow(
-                label: 'সেলফি',
-                verified: eligibility.selfieVerified,
-              ),
-              const Divider(height: KSpacing.lg),
-              const _EligibilityRow(label: 'অভিজ্ঞতা', optional: true),
-              const _EligibilityRow(
-                label: 'দক্ষতা / বিশেষজ্ঞতা',
-                optional: true,
+                  icon: const Icon(Icons.playlist_add),
+                  label: const KLocalizedText('এই পোস্টের সময় যোগ করুন'),
+                ),
               ),
             ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const KLocalizedText('পরে'),
-          ),
-          if (!pending)
-            FilledButton.icon(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              icon: const Icon(Icons.verified_user_outlined),
-              label: KLocalizedText(
-                rejected ? 'আবার যাচাই করুন' : 'যাচাই শুরু করুন',
-              ),
+            const SizedBox(height: KSpacing.md),
+            KTextField(
+              label: 'প্রস্তাবিত টাকা',
+              controller: amount,
+              keyboardType: TextInputType.number,
             ),
-        ],
-      );
-    },
+            const SizedBox(height: KSpacing.sm),
+            KTextField(label: 'বার্তা (ঐচ্ছিক)', controller: message),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext),
+          child: const KLocalizedText('ফিরুন'),
+        ),
+        FilledButton(
+          onPressed: job.isTimeUnavailable
+              ? null
+              : () async {
+                  final taka = int.tryParse(amount.text);
+                  if (taka == null || taka <= 0) return;
+                  try {
+                    await ref
+                        .read(jobsRepositoryProvider)
+                        .apply(
+                          jobId: job.id,
+                          startsAt: start,
+                          endsAt: end,
+                          proposedPricePoisha: taka * 100,
+                          message: message.text,
+                        );
+                    if (dialogContext.mounted) Navigator.pop(dialogContext);
+                    onApplied?.call();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: KLocalizedText('আবেদন পাঠানো হয়েছে।'),
+                        ),
+                      );
+                    }
+                  } on Object {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: KLocalizedText(
+                            'আবেদন পাঠানো যায়নি। সময়টি যাচাই করুন।',
+                          ),
+                        ),
+                      );
+                    }
+                  }
+                },
+          child: const KLocalizedText('আবেদন পাঠান'),
+        ),
+      ],
+    ),
   );
 }
+
+Future<bool?> _showApplicationRequirements(
+  BuildContext context,
+  ApplicationEligibility eligibility,
+) => showDialog<bool>(
+  context: context,
+  builder: (dialogContext) {
+    final pending = eligibility.identityStatus == 'PENDING';
+    final rejected = eligibility.identityStatus == 'REJECTED';
+    return AlertDialog(
+      title: const KLocalizedText('আবেদনের আগে পরিচয় যাচাই করুন'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            KLocalizedText(
+              pending
+                  ? 'আপনার NID ও সেলফি পর্যালোচনাধীন। অনুমোদন হলে আবেদন করতে পারবেন।'
+                  : rejected
+                  ? 'আগের যাচাই অনুমোদিত হয়নি। পরিষ্কার NID ও নতুন সেলফি দিয়ে আবার জমা দিন।'
+                  : 'নিরাপদে কাজ পেতে নিচের আবশ্যিক তথ্য যাচাই সম্পন্ন করুন।',
+            ),
+            const SizedBox(height: KSpacing.md),
+            _EligibilityRow(
+              label: 'ফোন নম্বর',
+              verified: eligibility.phoneVerified,
+            ),
+            _EligibilityRow(
+              label: 'পরিচয় তথ্য',
+              verified: eligibility.identityInformationVerified,
+            ),
+            _EligibilityRow(
+              label: 'জাতীয় পরিচয়পত্র (NID)',
+              verified: eligibility.nidVerified,
+            ),
+            _EligibilityRow(
+              label: 'সেলফি',
+              verified: eligibility.selfieVerified,
+            ),
+            const Divider(height: KSpacing.lg),
+            const _EligibilityRow(label: 'অভিজ্ঞতা', optional: true),
+            const _EligibilityRow(label: 'দক্ষতা / বিশেষজ্ঞতা', optional: true),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: const KLocalizedText('পরে'),
+        ),
+        if (!pending)
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            icon: const Icon(Icons.verified_user_outlined),
+            label: KLocalizedText(
+              rejected ? 'আবার যাচাই করুন' : 'যাচাই শুরু করুন',
+            ),
+          ),
+      ],
+    );
+  },
+);
 
 class _EligibilityRow extends StatelessWidget {
   const _EligibilityRow({
@@ -638,117 +692,120 @@ class _JobCard extends StatelessWidget {
   Widget build(BuildContext context) => Card(
     margin: EdgeInsets.zero,
     clipBehavior: Clip.antiAlias,
-    child: Padding(
-      padding: const EdgeInsets.all(KSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: KColors.primary.withValues(alpha: .1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.work_outline, color: KColors.primary),
-              ),
-              if (job.matchScore case final score? when score > 0)
-                Padding(
-                  padding: const EdgeInsets.only(left: KSpacing.xs),
-                  child: Chip(
-                    visualDensity: VisualDensity.compact,
-                    avatar: const Icon(Icons.auto_awesome, size: 16),
-                    label: KLocalizedText('$score%'),
+    child: InkWell(
+      onTap: () => context.push(AppRoutes.jobDetail(job.id)),
+      child: Padding(
+        padding: const EdgeInsets.all(KSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: KColors.primary.withValues(alpha: .1),
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  child: const Icon(Icons.work_outline, color: KColors.primary),
                 ),
-            ],
-          ),
-          const SizedBox(height: KSpacing.sm),
-          Text(
-            job.title,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: KSpacing.xs),
-          KLocalizedText(
-            '${job.categoryNameFor(Localizations.localeOf(context).languageCode)} · ${job.locationNameFor(Localizations.localeOf(context).languageCode)}',
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: KSpacing.xs),
-          Text(
-            job.description,
-            textAlign: TextAlign.center,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (job.matchReasons.isNotEmpty)
-            KLocalizedText(
-              _matchReasonBn(job.matchReasons.first),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: KColors.primary,
-                fontWeight: FontWeight.w600,
-              ),
+                if (job.matchScore case final score? when score > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(left: KSpacing.xs),
+                    child: Chip(
+                      visualDensity: VisualDensity.compact,
+                      avatar: const Icon(Icons.auto_awesome, size: 16),
+                      label: KLocalizedText('$score%'),
+                    ),
+                  ),
+              ],
             ),
-          const Spacer(),
-          if (job.startsAt != null)
-            KLocalizedText(
-              'কাজের সময়: ${_dateTime(job.startsAt!)}',
+            const SizedBox(height: KSpacing.sm),
+            Text(
+              job.title,
               textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: KSpacing.xs),
+            KLocalizedText(
+              '${job.categoryNameFor(Localizations.localeOf(context).languageCode)} · ${job.locationNameFor(Localizations.localeOf(context).languageCode)}',
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall,
             ),
-          if (job.isTimeAvailable)
-            const KLocalizedText(
-              '✓ আপনার সময়ে মেলে',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: KColors.success,
-                fontWeight: FontWeight.w600,
-              ),
-            )
-          else if (job.isTimeUnavailable)
-            const KLocalizedText(
-              'সময় যোগ করলে আবেদন করা যাবে',
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: KColors.warning,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          if (KFormat.moneyRange(
-                context,
-                job.budgetMinPoisha,
-                job.budgetMaxPoisha,
-              )
-              case final amount?)
+            const SizedBox(height: KSpacing.xs),
             Text(
-              amount,
+              job.description,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.w700),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
             ),
-          if (actionLabel != null) ...[
-            const SizedBox(height: KSpacing.sm),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: onAction,
-                child: KLocalizedText(actionLabel!),
+            if (job.matchReasons.isNotEmpty)
+              KLocalizedText(
+                _matchReasonBn(job.matchReasons.first),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: KColors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
+            const Spacer(),
+            if (job.startsAt != null)
+              KLocalizedText(
+                'কাজের সময়: ${_dateTime(job.startsAt!)}',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            if (job.isTimeAvailable)
+              const KLocalizedText(
+                '✓ আপনার সময়ে মেলে',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: KColors.success,
+                  fontWeight: FontWeight.w600,
+                ),
+              )
+            else if (job.isTimeUnavailable)
+              const KLocalizedText(
+                'সময় যোগ করলে আবেদন করা যাবে',
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: KColors.warning,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            if (KFormat.moneyRange(
+                  context,
+                  job.budgetMinPoisha,
+                  job.budgetMaxPoisha,
+                )
+                case final amount?)
+              Text(
+                amount,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+            if (actionLabel != null) ...[
+              const SizedBox(height: KSpacing.sm),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: onAction,
+                  child: KLocalizedText(actionLabel!),
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     ),
   );
@@ -2249,6 +2306,9 @@ String _matchReasonBn(String reason) => switch (reason) {
   'Reliable work history' => 'নির্ভরযোগ্যতার সঙ্গে মেলে',
   _ => reason,
 };
+
+/// Bangla source label for a job, application or assignment status.
+String jobStatusLabel(String status) => _statusBn(status);
 
 String _statusBn(String status) => switch (status) {
   'DRAFT' => 'খসড়া',

@@ -32,6 +32,53 @@ class JobsRepository {
     }
   }
 
+  Future<JobDetail> getJob(String id) async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>('/jobs/$id');
+      return JobDetail.fromJson(_data(response.data));
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
+  Future<List<JobAlert>> jobAlerts() async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>('/me/job-alerts');
+      return _items(response.data).map(JobAlert.fromJson).toList();
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
+  /// At least one filter must be set; the API refuses an empty alert.
+  Future<JobAlert> createJobAlert({
+    String? categoryId,
+    String? skillId,
+    String? locationId,
+  }) async {
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/me/job-alerts',
+        data: {
+          'categoryId': ?categoryId,
+          'skillId': ?skillId,
+          'locationId': ?locationId,
+        },
+      );
+      return JobAlert.fromJson(_data(response.data));
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
+  Future<void> deleteJobAlert(String id) async {
+    try {
+      await _dio.delete<void>('/me/job-alerts/$id');
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
   Future<List<JobSummary>> getMyJobs() async {
     try {
       final response = await _dio.get<Map<String, dynamic>>('/jobs/mine');

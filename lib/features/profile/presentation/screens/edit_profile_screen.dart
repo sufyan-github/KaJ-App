@@ -1,0 +1,240 @@
+import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../../../../core/errors/error_mapper.dart';
+import '../../../../core/localization/kaaj_localizations.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/k_error_state.dart';
+import '../../../../core/widgets/k_localized_text.dart';
+import '../../../../core/widgets/k_network_image.dart';
+import '../../../../core/widgets/k_primary_button.dart';
+import '../../../../core/widgets/k_text_field.dart';
+import '../../../catalog/domain/entities/service_location.dart';
+import '../../../catalog/presentation/controllers/catalog_providers.dart';
+import '../../../trust_safety/presentation/trust_safety_providers.dart';
+import '../../domain/my_profile.dart';
+import '../controllers/my_profile_provider.dart';
+import '../widgets/profile_completeness_card.dart';
+
+typedef ProfilePhotoPicker = Future<Uint8List?> Function();
+
+Future<Uint8List?> _pickFromGallery() async {
+  final picked = await ImagePicker().pickImage(
+    source: ImageSource.gallery,
+    imageQuality: 92,
+    maxWidth: 2400,
+  );
+  return picked?.readAsBytes();
+}
+
+class EditProfileScreen extends ConsumerWidget {
+  const EditProfileScreen({this.pickPhoto = _pickFromGallery, super.key});
+
+  final ProfilePhotoPicker pickPhoto;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = ref.watch(myProfileProvider);
+    return Scaffold(
+      appBar: AppBar(title: const KLocalizedText('প্রোফাইল সম্পাদনা')),
+      body: profile.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(
+          child: KErrorState(
+            failure: ErrorMapper.from(error),
+            retryLabel: 'আবার চেষ্টা করুন',
+            onRetry: () => ref.invalidate(myProfileProvider),
+          ),
+        ),
+        data: (value) => _EditProfileForm(profile: value, pickPhoto: pickPhoto),
+      ),
+    );
+  }
+}
+
+class _EditProfileForm extends ConsumerStatefulWidget {
+  const _EditProfileForm({required this.profile, required this.pickPhoto});
+
+  final ProfilePhotoPicker pickPhoto;
+  final MyProfile profile;
+
+  @override
+  ConsumerState<_EditProfileForm> createState() => _EditProfileFormState();
+}
+
+class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _name;
+  late final TextEditingController _bio;
+  String? _locationId;
+  bool _saving = false;
+  bool _uploading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _name = TextEditingController(text: widget.profile.displayName);
+    _bio = TextEditingController(text: widget.profile.bio);
+    _locationId = widget.profile.primaryLocation?.id;
+  }
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _bio.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() => _saving = true);
+    try {
+      await ref
+          .read(myProfileRepositoryProvider)
+          .update(
+            displayName: _name.text,
+            bio: _bio.text,
+            primaryLocationId: _locationId,
+          );
+      ref.invalidate(myProfileProvider);
+      if (mounted) _snack('প্রোফাইল সংরক্ষণ হয়েছে।');
+    } on Object {
+      if (mounted) _snack('সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।');
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _changePhoto() async {
+    final Uint8List? bytes;
+    try {
+      bytes = await widget.pickPhoto();
+    } on Object {
+      if (mounted) _snack('ছবি বেছে নেওয়া যায়নি।');
+      return;
+    }
+    if (bytes == null || !mounted) return;
+    setState(() => _uploading = true);
+    try {
+      await ref.read(trustSafetyRepositoryProvider).uploadProfilePhoto(bytes);
+      ref.invalidate(myProfileProvider);
+      if (mounted) _snack('প্রোফাইল ছবি আপডেট হয়েছে।');
+    } on Object {
+      if (mounted) _snack('ছবি আপলোড করা যায়নি। আবার চেষ্টা করুন।');
+    } finally {
+      if (mounted) setState(() => _uploading = false);
+    }
+  }
+
+  void _snack(String message) => ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: KLocalizedText(message)));
+
+  @override
+  Widget build(BuildContext context) {
+    final language = Localizations.localeOf(context).languageCode;
+    final locations = ref
+        .watch(catalogLocationsProvider)
+        .maybeWhen(data: (items) => items, orElse: () => null);
+    final photoUrl = widget.profile.photoUrl;
+    final knownLocation =
+        locations?.any((item) => item.id == _locationId) ?? false;
+    return Form(
+      key: _formKey,
+      child: ListView(
+        padding: const EdgeInsets.all(KSpacing.md),
+        children: [
+          const ProfileCompletenessCard(),
+          const SizedBox(height: KSpacing.sm),
+          Center(
+            child: CircleAvatar(
+              radius: 48,
+              backgroundColor: KColors.surfaceAlt,
+              child: photoUrl == null
+                  ? const Icon(Icons.person_outline, size: 44)
+                  : ClipOval(
+                      child: KNetworkImage(
+                        url: photoUrl,
+                        width: 96,
+                        height: 96,
+                        semanticLabel: KaajLocalizations.text(
+                          context,
+                          'প্রোফাইল ছবি',
+                        ),
+                      ),
+                    ),
+            ),
+          ),
+          Center(
+            child: TextButton.icon(
+              key: const ValueKey('change-photo'),
+              onPressed: _uploading ? null : _changePhoto,
+              icon: _uploading
+                  ? const SizedBox.square(
+                      dimension: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.add_a_photo_outlined),
+              label: const KLocalizedText('ছবি বদলান'),
+            ),
+          ),
+          const SizedBox(height: KSpacing.md),
+          KTextField(
+            key: const ValueKey('profile-name'),
+            label: 'নাম',
+            controller: _name,
+            textInputAction: TextInputAction.next,
+            validator: (value) {
+              final length = value?.trim().length ?? 0;
+              return length < 2 || length > 80
+                  ? 'নাম ২ থেকে ৮০ অক্ষরের মধ্যে লিখুন।'
+                  : null;
+            },
+          ),
+          const SizedBox(height: KSpacing.md),
+          KTextField(
+            key: const ValueKey('profile-bio'),
+            label: 'নিজের সম্পর্কে',
+            helperText: 'আপনার কাজ ও অভিজ্ঞতা ছোট করে লিখুন।',
+            controller: _bio,
+            maxLines: 4,
+            minLines: 2,
+            validator: (value) => (value?.trim().length ?? 0) > 500
+                ? 'সর্বোচ্চ ৫০০ অক্ষর লেখা যাবে।'
+                : null,
+          ),
+          const SizedBox(height: KSpacing.md),
+          DropdownButtonFormField<String>(
+            key: const ValueKey('profile-area'),
+            initialValue: knownLocation ? _locationId : null,
+            isExpanded: true,
+            decoration: InputDecoration(
+              labelText: KaajLocalizations.text(context, 'এলাকা'),
+              helperText:
+                  !knownLocation && widget.profile.primaryLocation != null
+                  ? widget.profile.primaryLocation!.nameFor(language)
+                  : null,
+            ),
+            items: [
+              for (final location in locations ?? const <ServiceLocation>[])
+                DropdownMenuItem(
+                  value: location.id,
+                  child: Text(location.nameFor(language)),
+                ),
+            ],
+            onChanged: (value) => setState(() => _locationId = value),
+          ),
+          const SizedBox(height: KSpacing.lg),
+          KPrimaryButton(
+            label: 'সংরক্ষণ করুন',
+            isLoading: _saving,
+            onPressed: _save,
+          ),
+        ],
+      ),
+    );
+  }
+}

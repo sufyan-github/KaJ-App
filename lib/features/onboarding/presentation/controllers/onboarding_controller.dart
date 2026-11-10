@@ -5,6 +5,7 @@ import '../../../auth/presentation/controllers/auth_providers.dart';
 import '../../data/onboarding_repository.dart';
 import '../../domain/availability_schedule.dart';
 import '../../domain/onboarding_state.dart';
+import '../../domain/worker_skill_input.dart';
 
 final onboardingRepositoryProvider = Provider<OnboardingRepository>((ref) {
   return OnboardingRepository(
@@ -48,14 +49,19 @@ class OnboardingController extends StateNotifier<OnboardingState> {
     await _save(next);
   }
 
+  /// Skills already saved on the server, used to prefill the skills step.
+  Future<List<WorkerSkillInput>> loadWorkerSkills() =>
+      _repository.getWorkerSkills();
+
   Future<void> saveWorkerSetup(
-    List<String> skillIds, {
+    List<WorkerSkillInput> skills, {
     int? hourlyRatePoisha,
   }) async {
     await _repository.updateWorkerSkills(
-      skillIds,
+      skills,
       hourlyRatePoisha: hourlyRatePoisha,
     );
+    final skillIds = skills.map((skill) => skill.skillId).toList();
     await _save(state.copyWith(skillIds: skillIds, step: 4));
   }
 

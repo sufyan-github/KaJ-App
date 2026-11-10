@@ -4,6 +4,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import '../../../core/storage/session_token_store.dart';
 import '../domain/availability_schedule.dart';
 import '../domain/onboarding_state.dart';
+import '../domain/worker_skill_input.dart';
 
 const onboardingBoxName = 'kaaj_onboarding_v1';
 
@@ -46,22 +47,41 @@ class OnboardingRepository {
     }
   }
 
+  /// The skills already saved on the server, with level, years and the
+  /// prior-training answer, so saving the form never resets them.
+  Future<List<WorkerSkillInput>> getWorkerSkills() async {
+    final response = await _runAsWorker(
+      () => _dio.get<Map<String, dynamic>>('/profiles/me/skills'),
+    );
+    final data = response.data?['data'];
+    final items = data is Map ? data['items'] : data;
+    if (items is! List) throw const FormatException('Missing skills data');
+    return items
+        .whereType<Map>()
+        .map(
+          (item) => WorkerSkillInput.fromJson(Map<String, dynamic>.from(item)),
+        )
+        .where((item) => item.skillId.isNotEmpty)
+        .toList(growable: false);
+  }
+
   Future<void> updateWorkerSkills(
-    List<String> skillIds, {
+    List<WorkerSkillInput> skills, {
     int? hourlyRatePoisha,
   }) async {
     await _dio.put<Map<String, dynamic>>(
       '/profiles/me/skills',
       data: {
-        'skills': skillIds
-            .map((id) => {'skillId': id, 'level': 'BEGINNER'})
-            .toList(growable: false),
+        'skills': skills.map((skill) => skill.toJson()).toList(growable: false),
       },
     );
-    await _dio.put<Map<String, dynamic>>(
-      '/profiles/me/worker',
-      data: {'hourlyRatePoisha': hourlyRatePoisha},
-    );
+    // An empty rate field means "unchanged", not "clear my rate".
+    if (hourlyRatePoisha != null) {
+      await _dio.put<Map<String, dynamic>>(
+        '/profiles/me/worker',
+        data: {'hourlyRatePoisha': hourlyRatePoisha},
+      );
+    }
   }
 
   Future<void> updateAvailability(

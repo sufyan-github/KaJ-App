@@ -11,14 +11,22 @@ import '../../features/auth/presentation/screens/phone_entry_screen.dart';
 import '../../features/billing/presentation/billing_screens.dart';
 import '../../features/bootstrap/presentation/screens/splash_screen.dart';
 import '../../features/chat/presentation/screens/chat_screens.dart';
+import '../../features/help/presentation/help_centre_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/jobs/presentation/screens/job_alerts_screen.dart';
+import '../../features/jobs/presentation/screens/job_detail_screen.dart';
 import '../../features/jobs/presentation/screens/jobs_screens.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/onboarding/domain/onboarding_state.dart';
 import '../../features/onboarding/presentation/controllers/onboarding_controller.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screens.dart';
+import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 import '../../features/profile/presentation/screens/phase2_hub_screens.dart';
 import '../../features/settings/presentation/settings_screens.dart';
+import '../../features/training/presentation/screens/certificates_screen.dart';
+import '../../features/training/presentation/screens/course_screen.dart';
+import '../../features/training/presentation/screens/training_catalog_screen.dart';
+import '../../features/training/presentation/screens/training_test_screen.dart';
 import '../../features/trust_safety/presentation/attendance_screen.dart';
 import '../../features/trust_safety/presentation/dispute_screens.dart';
 import '../../features/trust_safety/presentation/safety_screens.dart';
@@ -71,6 +79,18 @@ abstract final class AppRoutes {
   static const blockedUsers = '/settings/blocked';
   static const reportPath = '/report/:type/:id';
   static const portfolio = '/w/profile/portfolio';
+  static const training = '/training';
+  static const trainingCoursePath = '/training/courses/:id';
+  static const trainingTestPath = '/training/courses/:id/test';
+  static const trainingCertificates = '/training/certificates';
+  static const jobDetailPath = '/jobs/:id';
+  static const editProfile = '/profile/edit';
+  static const jobAlerts = '/settings/job-alerts';
+  static const help = '/help';
+
+  static String trainingCourse(String id) => '/training/courses/$id';
+  static String trainingTest(String id) => '/training/courses/$id/test';
+  static String jobDetail(String id) => '/jobs/$id';
 
   static String workerBooking(String id) => '/workers/$id/book';
   static String jobsForType({
@@ -243,6 +263,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const CreateJobScreen(),
       ),
       GoRoute(
+        path: AppRoutes.jobDetailPath,
+        builder: (context, state) =>
+            JobDetailScreen(jobId: state.pathParameters['id']!),
+      ),
+      GoRoute(
         path: AppRoutes.workers,
         builder: (context, state) => const WorkerDirectoryScreen(),
       ),
@@ -343,6 +368,36 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.portfolio,
         builder: (context, state) => const PortfolioScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.training,
+        builder: (context, state) => const TrainingCatalogScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.trainingCertificates,
+        builder: (context, state) => const CertificatesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.trainingCoursePath,
+        builder: (context, state) =>
+            CourseScreen(courseId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.trainingTestPath,
+        builder: (context, state) =>
+            TrainingTestScreen(courseId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.editProfile,
+        builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.jobAlerts,
+        builder: (context, state) => const JobAlertsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.help,
+        builder: (context, state) => const HelpCentreScreen(),
       ),
     ],
   );

@@ -799,4 +799,210 @@ const generatedEnglishTranslations = <String, String>{
   "৯৯+": "99+",
   "✓ আপনার সময়ে মেলে": "✓ Match your time",
   "📷 ছবি": "📷 Photo",
+  "এই ভিডিওটি পাওয়া যাচ্ছে না — নিচের নোট পড়ুন":
+      "This video is unavailable — read the notes below",
+  "আপনি মোবাইল ডেটায় আছেন। চাইলে Wi-Fi পেলে ভিডিওটি দেখুন।":
+      "You are on mobile data. You can wait for Wi-Fi to watch this video.",
+  "ভিডিও দেখা ঐচ্ছিক। নিচের নোট পড়েও পরীক্ষা দিতে পারবেন।":
+      "Watching is optional. You can read the notes below and take the test.",
+  "ভিডিও চালু করুন": "Load video",
+  "আপনার কাজের জন্য ঐচ্ছিক প্রশিক্ষণ": "Optional training for your work",
+  "প্রশিক্ষণ ছাড়াও কাজে আবেদন করতে পারবেন। পরীক্ষায় পাস করলে প্রোফাইলে সার্টিফিকেট দেখা যাবে।":
+      "You can apply for jobs without training. If you pass a test, the certificate shows on your profile.",
+  "এখনই শুরু করুন": "Start now",
+  "আমি অভিজ্ঞ — সরাসরি পরীক্ষা দিই": "I’m experienced — take the test",
+  "আমার প্রশিক্ষণ": "My training",
+  "ঐচ্ছিক কোর্স ও জ্ঞান পরীক্ষা": "Optional courses and knowledge tests",
+  "চালিয়ে যান": "Continue",
+  "আমার সার্টিফিকেট": "My certificates",
+  "Kaaj জ্ঞান পরীক্ষায় উত্তীর্ণ": "Passed the Kaaj knowledge test",
+  "এটি কোনো লাইসেন্স নয়": "This is not a licence",
+  "আজকের তিনটি চেষ্টা শেষ হয়েছে। আগামীকাল আবার চেষ্টা করুন।":
+      "You have used today’s three tries. Please try again tomorrow.",
+  "এই কোর্সের সার্টিফিকেট আপনার আগেই আছে।":
+      "You already have a certificate for this course.",
+  "এই পরীক্ষার সময় শেষ হয়েছে বা আগেই জমা হয়েছে। নতুন করে শুরু করুন।":
+      "This test has expired or was already submitted. Start a new one.",
+  "এই কোর্সটি এখন পাওয়া যাচ্ছে না।": "This course is not available right now.",
+  "নিরাপত্তা বিষয়ক": "Safety",
+  "পরীক্ষা এখনো দেওয়া হয়নি": "Test not taken yet",
+  "প্রশিক্ষণ": "Training",
+  "সার্টিফিকেট": "Certificates",
+  "এখনো কোনো কোর্স নেই": "No courses yet",
+  "নতুন কোর্স এলে এখানে দেখা যাবে।": "New courses will appear here.",
+  "প্রশিক্ষণ ঐচ্ছিক। কাজে আবেদন করতে কোনো কোর্স লাগে না। অভিজ্ঞ হলে সরাসরি পরীক্ষা দিতে পারেন।":
+      "Training is optional. You do not need any course to apply for jobs. If you are experienced, you can take the test directly.",
+  "আপনার দক্ষতার কোর্স": "Courses for your skills",
+  "সব কর্মীর জন্য": "For all workers",
+  "অন্যান্য কোর্স": "Other courses",
+  "এখনো কোনো সার্টিফিকেট নেই": "No certificates yet",
+  "কোর্সের পরীক্ষায় পাস করলে সার্টিফিকেট এখানে দেখা যাবে।":
+      "When you pass a course test, the certificate appears here.",
+  "কোর্স দেখুন": "See courses",
+  "প্রতিটি সার্টিফিকেট শুধু বলে যে আপনি Kaaj জ্ঞান পরীক্ষায় পাস করেছেন। কোড দিয়ে যে কেউ এটি যাচাই করতে পারেন।":
+      "Each certificate only says that you passed the Kaaj knowledge test. Anyone can check it with the code.",
+  "এই সার্টিফিকেট বাতিল করা হয়েছে।": "This certificate has been revoked.",
+  "শেয়ার করার লেখা কপি হয়েছে।": "Share text copied.",
+  "শেয়ার করুন": "Share",
+  "জ্ঞান পরীক্ষা": "Knowledge test",
+  "জমা দিতে সব প্রশ্নের উত্তর দিন।": "Answer every question to submit.",
+  "কোর্সে ফিরুন": "Back to course",
+  "আপনি পাস করেছেন": "You passed",
+  "এবার পাস হয়নি": "Not passed this time",
+  "সার্টিফিকেট দেখুন": "View certificate",
+  "নিচের ব্যাখ্যা পড়ে আবার চেষ্টা করতে পারেন। দিনে তিনবার পর্যন্ত চেষ্টা করা যায়।":
+      "Read the explanations below and try again. You can try up to three times a day.",
+  "আবার পরীক্ষা দিন": "Take the test again",
+  "উত্তরের ব্যাখ্যা": "Answer explanations",
+  "কোর্স": "Course",
+  "পাঠ": "Lessons",
+  "পাঠ খোলার টিক শুধু আপনার নিজের হিসাবের জন্য। অভিজ্ঞ হলে পাঠ বাদ দিয়ে সরাসরি পরীক্ষা দিন।":
+      "Lesson ticks are only a private checklist for you. If you are experienced, skip the lessons and take the test directly.",
+  "নিরাপত্তা বিষয়ক কোর্স। পরীক্ষায় পাস করলে জ্ঞান যাচাই হয়, এটি কোনো লাইসেন্স নয়।":
+      "Safety course. Passing the test checks knowledge. This is not a licence.",
+  "ভিডিও ও নোট": "Video and notes",
+  "লেখা নোট": "Written notes",
+  "নোট": "Notes",
+  "পরীক্ষা দিন": "Take the test",
+  "কাজের বিবরণ": "Job details",
+  "এলাকা": "Area",
+  "সময়": "Time",
+  "পরিচয় যাচাইকৃত": "Identity verified",
+  "ফোন যাচাইকৃত": "Phone verified",
+  "এখনো যাচাই হয়নি": "Not verified yet",
+  "ব্যবসা যাচাইকৃত": "Business verified",
+  "নির্ভরযোগ্য": "Reliable",
+  "শীর্ষ রেটিং": "Top rated",
+  "অভিজ্ঞ": "Experienced",
+  "পোস্টদাতা": "Posted by",
+  "এটি আপনার পোস্ট করা কাজ।": "This is a job you posted.",
+  "আবেদন করা হয়েছে": "Applied",
+  "এই কাজে এখন আবেদন নেওয়া হচ্ছে না।":
+      "This job is not taking applications now.",
+  "আবেদন করতে সেটিংস থেকে কাজ করব মোড চালু করুন।":
+      "To apply, switch to the find work mode in Settings.",
+  "আবেদন করুন": "Apply",
+  "কাজের সতর্কতা মুছে ফেলা হয়েছে।": "Job alert deleted.",
+  "সতর্কতা মুছে ফেলা যায়নি। আবার চেষ্টা করুন।":
+      "Could not delete the alert. Please try again.",
+  "কাজের সতর্কতা চালু হয়েছে। মিলে গেলে নোটিফিকেশন পাবেন।":
+      "Job alert is on. You will get a notification when a job matches.",
+  "কাজের সতর্কতা": "Job alerts",
+  "নতুন সতর্কতা": "New alert",
+  "কোনো কাজের সতর্কতা নেই": "No job alerts",
+  "কাজের ধরন, দক্ষতা বা এলাকা বেছে নিন। মিলে যাওয়া নতুন কাজ এলে নোটিফিকেশন পাবেন।":
+      "Choose a work type, skill or area. You will get a notification when a matching new job is posted.",
+  "সর্বোচ্চ ১০টি সতর্কতা রাখা যায়।": "You can keep up to 10 alerts.",
+  "সতর্কতা মুছুন": "Delete alert",
+  "নতুন কাজের সতর্কতা": "New job alert",
+  "অন্তত একটি বেছে নিন। যেগুলো বাছবেন, নতুন কাজে সবগুলো মিললে জানানো হবে।":
+      "Choose at least one. You are notified when a new job matches everything you chose.",
+  "সতর্কতা চালু করুন": "Turn on alert",
+  "এমন কাজ এলে আমাকে জানান": "Notify me about jobs like this",
+  "সর্বোচ্চ ১০টি কাজের সতর্কতা রাখা যায়। একটি মুছে নতুনটি যোগ করুন।":
+      "You can keep up to 10 job alerts. Delete one to add a new one.",
+  "এই ধরনের কাজের সতর্কতা আগেই চালু আছে।":
+      "You already have an alert for these jobs.",
+  "কাজের সতর্কতা সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।":
+      "Could not save the job alert. Please try again.",
+  "প্রোফাইল ছবি যোগ করুন": "Add a profile photo",
+  "নিজের সম্পর্কে ছোট করে লিখুন": "Write a short bio",
+  "আপনার দক্ষতা যোগ করুন": "Add your skills",
+  "পরিচয় যাচাই করুন": "Verify your identity",
+  "একটি ঐচ্ছিক প্রশিক্ষণ পরীক্ষা দিন": "Take an optional training test",
+  "প্রোফাইল সম্পূর্ণ করুন": "Complete your profile",
+  "প্রোফাইল সম্পাদনা": "Edit profile",
+  "প্রোফাইল সংরক্ষণ হয়েছে।": "Profile saved.",
+  "ছবি বেছে নেওয়া যায়নি।": "Could not pick the photo.",
+  "প্রোফাইল ছবি আপডেট হয়েছে।": "Profile photo updated.",
+  "ছবি আপলোড করা যায়নি। আবার চেষ্টা করুন।":
+      "Could not upload the photo. Please try again.",
+  "প্রোফাইল ছবি": "Profile photo",
+  "ছবি বদলান": "Change photo",
+  "নাম": "Name",
+  "নাম ২ থেকে ৮০ অক্ষরের মধ্যে লিখুন।":
+      "Enter a name between 2 and 80 characters.",
+  "নিজের সম্পর্কে": "About you",
+  "আপনার কাজ ও অভিজ্ঞতা ছোট করে লিখুন।":
+      "Briefly describe your work and experience.",
+  "সর্বোচ্চ ৫০০ অক্ষর লেখা যাবে।": "You can write up to 500 characters.",
+  "সংরক্ষণ করুন": "Save",
+  "আপনার আগের দক্ষতা লোড করা যায়নি। আবার চেষ্টা করুন।":
+      "Could not load your saved skills. Please try again.",
+  "কখনো করিনি": "Never",
+  "অল্প (১ বছরের কম)": "A little (<1 yr)",
+  "নিয়মিত (১–৩ বছর)": "Regularly (1–3 yrs)",
+  "দক্ষ (৩+ বছর)": "Expert (3+ yrs)",
+  "এই কাজে আপনার অভিজ্ঞতা কতটা?":
+      "How much experience do you have in this work?",
+  "কোনো প্রশিক্ষণ বা সার্টিফিকেট আছে?": "Any training or certificate?",
+  "হ্যাঁ": "Yes",
+  "না": "No",
+  "সাইন ইন": "Signing in",
+  "কীভাবে সাইন ইন করব?": "How do I sign in?",
+  "ফোন নম্বর ও পাসওয়ার্ড দিয়ে সাইন ইন করুন। প্রথমবার নম্বরে আসা OTP দিয়ে অ্যাকাউন্ট খুলে পাসওয়ার্ড ঠিক করুন।":
+      "Sign in with your phone number and password. The first time, open your account with the OTP sent to your number and set a password.",
+  "পাসওয়ার্ড ভুলে গেলে কী করব?": "What if I forget my password?",
+  "সাইন ইন পাতায় পাসওয়ার্ড পুনরুদ্ধার বেছে নিন। নম্বরে আসা OTP দিয়ে নতুন পাসওয়ার্ড দিন। OTP কাউকে বলবেন না।":
+      "Choose password recovery on the sign-in page. Use the OTP sent to your number to set a new password. Never tell anyone your OTP.",
+  "কাজ পোস্ট করা": "Posting a job",
+  "কীভাবে কাজ পোস্ট করব?": "How do I post a job?",
+  "হোম থেকে কাজ পোস্ট করুন বেছে নিন। কাজের ধরন, বিবরণ, সময়, এলাকা ও বাজেট লিখে প্রকাশ করুন। আবেদন এলে নোটিফিকেশন পাবেন।":
+      "Choose Post a job from Home. Enter the work type, description, time, area and budget, then publish. You get a notification when someone applies.",
+  "কর্মী কীভাবে বাছব?": "How do I choose a worker?",
+  "আমার পোস্ট থেকে আবেদন দেখুন। পরিচয় যাচাই, রিভিউ ও অভিজ্ঞতা দেখে একজনকে গ্রহণ করুন।":
+      "See applications from My posts. Check identity verification, reviews and experience, then accept one.",
+  "কাজে আবেদন": "Applying for jobs",
+  "কাজে আবেদন করতে কী লাগে?": "What do I need to apply for a job?",
+  "আবেদনের আগে NID ও সেলফি দিয়ে পরিচয় যাচাই করতে হয়। প্রশিক্ষণ বা সার্টিফিকেট লাগে না।":
+      "Before applying, verify your identity with your NID and a selfie. No training or certificate is needed.",
+  "আবেদন করেছি কি না কীভাবে বুঝব?": "How do I know I have applied?",
+  "কাজের বিবরণ পাতায় আবেদন করা হয়েছে লেখা ও আবেদনের অবস্থা দেখা যায়।":
+      "The job details page shows Applied and your application status.",
+  "চেক-ইন ও চেক-আউট": "Check-in and check-out",
+  "চেক-ইন কীভাবে করব?": "How do I check in?",
+  "কাজের জায়গায় পৌঁছে বুকিং থেকে চেক-ইন চাপুন। লোকেশন অনুমতি দিন। কাজ শেষে একইভাবে চেক-আউট করুন।":
+      "When you reach the work site, tap Check in on the booking and allow location. Check out the same way when the work is done.",
+  "চেক-ইন না হলে কী করব?": "What if check-in does not work?",
+  "খোলা জায়গায় গিয়ে আবার চেষ্টা করুন। তাও না হলে কাজের মালিক চেক-ইন নিশ্চিত করতে পারেন।":
+      "Move to an open area and try again. If it still fails, the work owner can confirm your check-in.",
+  "বাতিল করা": "Cancellations",
+  "বুকিং কীভাবে বাতিল করব?": "How do I cancel a booking?",
+  "বুকিং খুলে বাতিল করুন বেছে নিন। কারণ বেছে নিলে বাতিলের ফলাফল আগে দেখানো হবে, তারপর নিশ্চিত করুন।":
+      "Open the booking and choose Cancel. After you pick a reason, the result of cancelling is shown first, then you confirm.",
+  "বারবার বাতিল করলে কী হয়?": "What happens if I cancel often?",
+  "শেষ মুহূর্তে বারবার বাতিল করলে নির্ভরযোগ্যতার রেকর্ডে প্রভাব পড়ে। সম্ভব হলে আগে জানান।":
+      "Frequent last-minute cancellations affect your reliability record. Let the other person know early when you can.",
+  "কাজের টাকা কীভাবে দেব বা পাব?": "How is the work paid?",
+  "এই সংস্করণে কাজের টাকা সরাসরি নগদে দেওয়া হয়। KAAJ শুধু কাজের মালিকের নিশ্চিতকরণ রেকর্ড করে, কোনো কমিশন নেয় না।":
+      "In this version, work is paid directly in cash. KAAJ only records the work owner confirmation and takes no commission.",
+  "টাকা নিয়ে সমস্যা হলে?": "What if there is a payment problem?",
+  "বুকিং থেকে বিরোধ খুলুন এবং প্রমাণ দিন। আগাম ব্যক্তিগত ট্রান্সফার করবেন না।":
+      "Open a dispute from the booking and add evidence. Do not send personal advance transfers.",
+  "নিরাপত্তা": "Safety",
+  "বিপদে পড়লে কী করব?": "What do I do in danger?",
+  "তাৎক্ষণিক বিপদে ৯৯৯-এ কল করুন। KAAJ জরুরি সেবা নয়। পরে অ্যাপ থেকে রিপোর্ট করুন।":
+      "In immediate danger, call 999. KAAJ is not an emergency service. Report it from the app afterwards.",
+  "কোন তথ্য শেয়ার করব না?": "What should I never share?",
+  "চ্যাটে NID, পিন, OTP বা পাসওয়ার্ড দেবেন না। কথা ও চুক্তি KAAJ-এর ভেতরে রাখুন।":
+      "Never share your NID, PIN, OTP or password in chat. Keep conversations and agreements inside KAAJ.",
+  "প্রশিক্ষণ ও সার্টিফিকেট": "Training and certificates",
+  "প্রশিক্ষণ কি বাধ্যতামূলক?": "Is training required?",
+  "না। প্রশিক্ষণ ঐচ্ছিক। প্রশিক্ষণ ছাড়াও কাজে আবেদন করা যায়। অভিজ্ঞ হলে পাঠ বাদ দিয়ে সরাসরি পরীক্ষা দিতে পারেন।":
+      "No. Training is optional. You can apply for jobs without it. If you are experienced, you can skip the lessons and take the test directly.",
+  "সার্টিফিকেট মানে কী?": "What does a certificate mean?",
+  "সার্টিফিকেট শুধু বলে যে আপনি Kaaj জ্ঞান পরীক্ষায় পাস করেছেন। এটি কোনো লাইসেন্স নয়। ভিডিও দেখার জন্য কোনো পুরস্কার নেই।":
+      "A certificate only says that you passed the Kaaj knowledge test. It is not a licence. There is no reward for watching videos.",
+  "পরীক্ষায় পাস না করলে?": "What if I do not pass?",
+  "ব্যাখ্যা পড়ে আবার চেষ্টা করুন। ২৪ ঘণ্টায় তিনবার পর্যন্ত চেষ্টা করা যায়।":
+      "Read the explanations and try again. You can try up to three times in 24 hours.",
+  "সহায়তা কেন্দ্র": "Help centre",
+  "সাধারণ প্রশ্নের উত্তর। ইন্টারনেট ছাড়াও পড়া যায়।":
+      "Answers to common questions. You can read them without internet.",
+  "KAAJ সহায়তার সঙ্গে যোগাযোগ": "Contact KAAJ support",
+  "নিরাপত্তা সমস্যা, রিপোর্ট বা বিরোধের জন্য সহায়তা ও নিরাপত্তা পাতা খুলুন।":
+      "For safety issues, reports or disputes, open the Help and safety page.",
+  "মিলে যাওয়া নতুন কাজের খবর পান": "Get told about matching new jobs",
+  "সাধারণ প্রশ্নের উত্তর": "Answers to common questions",
+  "নাম, ছবি, নিজের সম্পর্কে ও এলাকা": "Name, photo, bio and area",
 };

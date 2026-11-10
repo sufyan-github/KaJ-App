@@ -13,6 +13,7 @@ import '../../../catalog/presentation/controllers/catalog_providers.dart';
 import '../../../jobs/presentation/controllers/jobs_providers.dart';
 import '../../domain/availability_schedule.dart';
 import '../../domain/onboarding_state.dart';
+import '../../domain/worker_skill_input.dart';
 import '../controllers/onboarding_controller.dart';
 
 class ProfileSetupScreen extends ConsumerStatefulWidget {
@@ -256,19 +257,84 @@ class WorkerSkillsScreen extends ConsumerStatefulWidget {
 
 class _WorkerSkillsScreenState extends ConsumerState<WorkerSkillsScreen> {
   final _rate = TextEditingController();
-  final Set<String> _selected = {};
+
+  /// Selected skills in the order they were chosen.
+  final List<String> _selected = [];
+
+  /// What the server already holds for each skill. Kept untouched unless the
+  /// worker changes the answer, so saving never resets level or years.
+  final Map<String, WorkerSkillInput> _saved = {};
+  final Map<String, SkillExperience> _answers = {};
+  final Map<String, bool> _training = {};
+  bool _loading = true;
+  bool _loadFailed = false;
   bool _saving = false;
 
   @override
   void initState() {
     super.initState();
-    _selected.addAll(ref.read(onboardingControllerProvider).skillIds);
+    _preload();
+  }
+
+  void _retryPreload() {
+    setState(() {
+      _loading = true;
+      _loadFailed = false;
+    });
+    _preload();
+  }
+
+  Future<void> _preload() async {
+    try {
+      final existing = await ref
+          .read(onboardingControllerProvider.notifier)
+          .loadWorkerSkills();
+      if (!mounted) return;
+      final local = ref.read(onboardingControllerProvider).skillIds;
+      setState(() {
+        _saved
+          ..clear()
+          ..addEntries(existing.map((item) => MapEntry(item.skillId, item)));
+        _selected
+          ..clear()
+          ..addAll(existing.map((item) => item.skillId));
+        for (final id in local) {
+          if (!_selected.contains(id) && _selected.length < 8) {
+            _selected.add(id);
+          }
+        }
+      });
+    } on Object {
+      if (mounted) setState(() => _loadFailed = true);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override
   void dispose() {
     _rate.dispose();
     super.dispose();
+  }
+
+  SkillExperience? _experienceFor(String skillId) =>
+      _answers[skillId] ?? _saved[skillId]?.experience;
+
+  bool _trainingFor(String skillId) =>
+      _training[skillId] ?? _saved[skillId]?.hasPriorTraining ?? false;
+
+  WorkerSkillInput _inputFor(String skillId) {
+    final saved = _saved[skillId];
+    final answer = _answers[skillId];
+    final training = _trainingFor(skillId);
+    if (saved != null && answer == null) {
+      return saved.copyWith(hasPriorTraining: training);
+    }
+    return WorkerSkillInput.fromExperience(
+      skillId,
+      answer ?? SkillExperience.never,
+      hasPriorTraining: training,
+    );
   }
 
   Future<void> _submit() async {
@@ -278,7 +344,7 @@ class _WorkerSkillsScreenState extends ConsumerState<WorkerSkillsScreen> {
       await ref
           .read(onboardingControllerProvider.notifier)
           .saveWorkerSetup(
-            _selected.toList(growable: false),
+            _selected.map(_inputFor).toList(growable: false),
             hourlyRatePoisha: taka == null ? null : taka * 100,
           );
       if (mounted) {
@@ -295,7 +361,8 @@ class _WorkerSkillsScreenState extends ConsumerState<WorkerSkillsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final skills = ref.watch(_skillsProvider);
+    final skills = ref.watch(catalogSkillsProvider);
+    final language = Localizations.localeOf(context).languageCode;
     return _OnboardingScaffold(
       step: 4,
       title: 'আপনার দক্ষতা যোগ করুন (ঐচ্ছিক)',
@@ -304,20 +371,51 @@ class _WorkerSkillsScreenState extends ConsumerState<WorkerSkillsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          skills.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, _) =>
-                const KLocalizedText('দক্ষতার তালিকা লোড করা যায়নি।'),
-            data: (items) => Wrap(
-              spacing: KSpacing.sm,
-              runSpacing: KSpacing.sm,
-              children: items.map(_skillChip).toList(growable: false),
+          if (_loading)
+            const Center(child: CircularProgressIndicator())
+          else if (_loadFailed) ...[
+            const KLocalizedText(
+              'আপনার আগের দক্ষতা লোড করা যায়নি। আবার চেষ্টা করুন।',
             ),
-          ),
-          if (_selected.length >= 8) ...[
-            const SizedBox(height: KSpacing.sm),
-            const KLocalizedText('আপনি সর্বোচ্চ ৮টি দক্ষতা বেছে নিয়েছেন।'),
-          ],
+            TextButton(
+              onPressed: _retryPreload,
+              child: const KLocalizedText('আবার চেষ্টা করুন'),
+            ),
+          ] else
+            skills.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, _) =>
+                  const KLocalizedText('দক্ষতার তালিকা লোড করা যায়নি।'),
+              data: (items) => Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Wrap(
+                    spacing: KSpacing.sm,
+                    runSpacing: KSpacing.sm,
+                    children: items.map(_skillChip).toList(growable: false),
+                  ),
+                  if (_selected.length >= 8) ...[
+                    const SizedBox(height: KSpacing.sm),
+                    const KLocalizedText(
+                      'আপনি সর্বোচ্চ ৮টি দক্ষতা বেছে নিয়েছেন।',
+                    ),
+                  ],
+                  for (final id in _selected)
+                    if (items.where((item) => item.id == id).firstOrNull
+                        case final skill?)
+                      _ExperienceCard(
+                        key: ValueKey('experience-$id'),
+                        name: skill.nameFor(language),
+                        experience: _experienceFor(id),
+                        hasTraining: _trainingFor(id),
+                        onExperience: (value) =>
+                            setState(() => _answers[id] = value),
+                        onTraining: (value) =>
+                            setState(() => _training[id] = value),
+                      ),
+                ],
+              ),
+            ),
           const SizedBox(height: KSpacing.lg),
           TextField(
             controller: _rate,
@@ -333,7 +431,7 @@ class _WorkerSkillsScreenState extends ConsumerState<WorkerSkillsScreen> {
           KPrimaryButton(
             label: _selected.isEmpty ? 'এখন বাদ দিন' : 'দক্ষতা সংরক্ষণ করুন',
             isLoading: _saving,
-            onPressed: _submit,
+            onPressed: _loading || _loadFailed ? null : _submit,
           ),
         ],
       ),
@@ -357,9 +455,76 @@ class _WorkerSkillsScreenState extends ConsumerState<WorkerSkillsScreen> {
   }
 }
 
-final _skillsProvider = FutureProvider<List<CatalogSkill>>((ref) {
-  return ref.watch(catalogRepositoryProvider).getSkills();
-});
+const _experienceLabels = <SkillExperience, String>{
+  SkillExperience.never: 'কখনো করিনি',
+  SkillExperience.aLittle: 'অল্প (১ বছরের কম)',
+  SkillExperience.regularly: 'নিয়মিত (১–৩ বছর)',
+  SkillExperience.expert: 'দক্ষ (৩+ বছর)',
+};
+
+class _ExperienceCard extends StatelessWidget {
+  const _ExperienceCard({
+    required this.name,
+    required this.experience,
+    required this.hasTraining,
+    required this.onExperience,
+    required this.onTraining,
+    super.key,
+  });
+
+  final SkillExperience? experience;
+  final bool hasTraining;
+  final String name;
+  final ValueChanged<SkillExperience> onExperience;
+  final ValueChanged<bool> onTraining;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    margin: const EdgeInsets.only(top: KSpacing.md),
+    child: Padding(
+      padding: const EdgeInsets.all(KSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(name, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: KSpacing.xs),
+          const KLocalizedText('এই কাজে আপনার অভিজ্ঞতা কতটা?'),
+          const SizedBox(height: KSpacing.xs),
+          Wrap(
+            spacing: KSpacing.xs,
+            runSpacing: KSpacing.xs,
+            children: [
+              for (final entry in _experienceLabels.entries)
+                ChoiceChip(
+                  label: KLocalizedText(entry.value),
+                  selected: experience == entry.key,
+                  onSelected: (_) => onExperience(entry.key),
+                ),
+            ],
+          ),
+          const SizedBox(height: KSpacing.sm),
+          const KLocalizedText('কোনো প্রশিক্ষণ বা সার্টিফিকেট আছে?'),
+          const SizedBox(height: KSpacing.xs),
+          Wrap(
+            spacing: KSpacing.xs,
+            children: [
+              ChoiceChip(
+                label: const KLocalizedText('হ্যাঁ'),
+                selected: hasTraining,
+                onSelected: (_) => onTraining(true),
+              ),
+              ChoiceChip(
+                label: const KLocalizedText('না'),
+                selected: !hasTraining,
+                onSelected: (_) => onTraining(false),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+}
 
 class AvailabilitySetupScreen extends ConsumerStatefulWidget {
   const AvailabilitySetupScreen({this.isEditing = false, super.key});

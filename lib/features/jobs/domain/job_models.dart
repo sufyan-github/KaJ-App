@@ -445,3 +445,111 @@ class JobApplicationSummary {
   final String status;
   final String workerUserId;
 }
+
+class JobPoster {
+  const JobPoster({
+    required this.id,
+    required this.displayName,
+    required this.trustLevel,
+    required this.badges,
+  });
+
+  factory JobPoster.fromJson(Map<String, dynamic> json) => JobPoster(
+    id: json['id'] as String? ?? '',
+    displayName: json['displayName'] as String? ?? '',
+    trustLevel: json['trustLevel'] as String? ?? 'NONE',
+    badges:
+        (json['badges'] as List?)?.whereType<String>().toList(
+          growable: false,
+        ) ??
+        const [],
+  );
+
+  final List<String> badges;
+  final String displayName;
+  final String id;
+  final String trustLevel;
+}
+
+/// `GET /jobs/:id`: the public job plus what the viewer needs to act on it.
+class JobDetail {
+  const JobDetail({
+    required this.job,
+    required this.viewerIsPoster,
+    this.poster,
+    this.viewerApplicationStatus,
+    this.subcategoryName,
+    this.subcategoryNameEn,
+  });
+
+  factory JobDetail.fromJson(Map<String, dynamic> json) {
+    final poster = json['poster'];
+    final subcategory = json['subcategory'];
+    return JobDetail(
+      job: JobSummary.fromJson(json),
+      poster: poster is Map
+          ? JobPoster.fromJson(Map<String, dynamic>.from(poster))
+          : null,
+      viewerApplicationStatus: json['viewerApplicationStatus'] as String?,
+      viewerIsPoster: json['viewerIsPoster'] == true,
+      subcategoryName: subcategory is Map
+          ? subcategory['name_bn'] as String?
+          : null,
+      subcategoryNameEn: subcategory is Map
+          ? subcategory['name_en'] as String?
+          : null,
+    );
+  }
+
+  final JobSummary job;
+  final JobPoster? poster;
+  final String? subcategoryName;
+  final String? subcategoryNameEn;
+  final String? viewerApplicationStatus;
+  final bool viewerIsPoster;
+
+  bool get hasApplied => viewerApplicationStatus != null;
+
+  bool get isOpen =>
+      job.status == 'APPLICATIONS_OPEN' || job.status == 'PUBLISHED';
+
+  String? subcategoryNameFor(String languageCode) =>
+      languageCode == 'en' && (subcategoryNameEn?.isNotEmpty ?? false)
+      ? subcategoryNameEn
+      : subcategoryName;
+}
+
+class JobAlert {
+  const JobAlert({
+    required this.id,
+    required this.labelEn,
+    required this.labelBn,
+    required this.createdAt,
+    this.categoryId,
+    this.skillId,
+    this.locationId,
+  });
+
+  factory JobAlert.fromJson(Map<String, dynamic> json) => JobAlert(
+    id: json['id'] as String? ?? '',
+    categoryId: json['categoryId'] as String?,
+    skillId: json['skillId'] as String?,
+    locationId: json['locationId'] as String?,
+    labelEn: json['labelEn'] as String? ?? '',
+    labelBn: json['labelBn'] as String? ?? '',
+    createdAt:
+        DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+  );
+
+  final String? categoryId;
+  final DateTime createdAt;
+  final String id;
+  final String labelBn;
+  final String labelEn;
+  final String? locationId;
+  final String? skillId;
+
+  String labelFor(String languageCode) => languageCode == 'en'
+      ? (labelEn.isNotEmpty ? labelEn : labelBn)
+      : (labelBn.isNotEmpty ? labelBn : labelEn);
+}

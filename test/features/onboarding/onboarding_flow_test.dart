@@ -9,6 +9,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:kaaj/core/storage/session_token_store.dart';
 import 'package:kaaj/features/onboarding/data/onboarding_repository.dart';
 import 'package:kaaj/features/onboarding/domain/onboarding_state.dart';
+import 'package:kaaj/features/onboarding/domain/worker_skill_input.dart';
 import 'package:kaaj/features/onboarding/presentation/controllers/onboarding_controller.dart';
 
 void main() {
@@ -51,7 +52,10 @@ void main() {
       expect(tokens.accessToken, 'worker-access-token');
 
       await relaunched.saveWorkerSetup([
-        '018f4f6f-13e8-7d9a-8c2b-6b6a9f62f802',
+        WorkerSkillInput.fromExperience(
+          '018f4f6f-13e8-7d9a-8c2b-6b6a9f62f802',
+          SkillExperience.regularly,
+        ),
       ], hourlyRatePoisha: 50_000);
       await relaunched.saveAvailability(
         [0, 2, 5],

@@ -59,6 +59,7 @@ class AppNotification {
 
   NotificationGroup get group => switch (type) {
     'JOB_MATCH' ||
+    'JOB_ALERT_MATCH' ||
     'SAVED_SEARCH_MATCH' ||
     'JOB_CONFIRMED' ||
     'JOB_REMINDER_24H' ||
@@ -105,6 +106,7 @@ String? _fallbackRoute(String type, Map<String, dynamic> payload) {
   final assignmentId = _text(payload['assignmentId']);
   final conversationId = _text(payload['conversationId']);
   final disputeId = _text(payload['disputeId']);
+  final jobId = _text(payload['jobId']);
 
   if (assignmentId != null && _assignmentTypes.contains(type)) {
     return '/assignments/$assignmentId';
@@ -116,6 +118,8 @@ String? _fallbackRoute(String type, Map<String, dynamic> payload) {
   if (disputeId != null && type.startsWith('DISPUTE_')) {
     return '/disputes/$disputeId';
   }
+  if (jobId != null && type == 'JOB_ALERT_MATCH') return '/jobs/$jobId';
+  if (type == 'TRAINING_CERTIFICATE_ISSUED') return '/training/certificates';
   if (type.startsWith('VERIFICATION_')) return '/verification';
   if (type == 'REVIEW_RECEIVED' || type == 'REVIEW_REQUEST') {
     return '/reviews';

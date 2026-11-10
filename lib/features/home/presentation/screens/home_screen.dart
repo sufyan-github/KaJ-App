@@ -10,6 +10,9 @@ import '../../../../core/widgets/k_trust_banner.dart';
 import '../../../notifications/presentation/controllers/notifications_providers.dart';
 import '../../../onboarding/domain/onboarding_state.dart';
 import '../../../onboarding/presentation/controllers/onboarding_controller.dart';
+import '../../../profile/presentation/widgets/profile_completeness_card.dart';
+import '../../../training/presentation/widgets/my_training_card.dart';
+import '../../../training/presentation/widgets/training_offer_gate.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -62,145 +65,152 @@ class HomeScreen extends ConsumerWidget {
       bottomNavigationBar: _HomeNavigation(isWorker: isWorker),
       body: SafeArea(
         top: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            KSpacing.md,
-            KSpacing.sm,
-            KSpacing.md,
-            KSpacing.xl,
-          ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 620),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (!isWorker)
-                    KLocalizedText(
-                      'কী কাজ করাতে চান?',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  if (!isWorker) const SizedBox(height: KSpacing.sm),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _TopAction(
-                          icon: Icons.location_on_outlined,
-                          label: 'আপনার এলাকা',
-                          onTap: () => context.push(AppRoutes.categories),
-                        ),
+        child: TrainingOfferGate(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              KSpacing.md,
+              KSpacing.sm,
+              KSpacing.md,
+              KSpacing.xl,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 620),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (!isWorker)
+                      KLocalizedText(
+                        'কী কাজ করাতে চান?',
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
-                      const SizedBox(width: KSpacing.sm),
-                      Expanded(
-                        child: _TopAction(
-                          icon: Icons.search_rounded,
-                          label: isWorker ? 'কাজ অনুসন্ধান' : 'সেবা খুঁজুন',
-                          onTap: () => context.push(
-                            isWorker ? AppRoutes.jobs : AppRoutes.workers,
+                    if (!isWorker) const SizedBox(height: KSpacing.sm),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _TopAction(
+                            icon: Icons.location_on_outlined,
+                            label: 'আপনার এলাকা',
+                            onTap: () => context.push(AppRoutes.categories),
                           ),
                         ),
+                        const SizedBox(width: KSpacing.sm),
+                        Expanded(
+                          child: _TopAction(
+                            icon: Icons.search_rounded,
+                            label: isWorker ? 'কাজ অনুসন্ধান' : 'সেবা খুঁজুন',
+                            onTap: () => context.push(
+                              isWorker ? AppRoutes.jobs : AppRoutes.workers,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (isWorker) ...[
+                      const SizedBox(height: KSpacing.sm),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: FilledButton(
+                              onPressed: () => context.push(AppRoutes.jobs),
+                              child: const KLocalizedText('আপনার জন্য'),
+                            ),
+                          ),
+                          const SizedBox(width: KSpacing.sm),
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () => context.push(AppRoutes.jobs),
+                              style: TextButton.styleFrom(
+                                backgroundColor: KColors.surfaceAlt,
+                                minimumSize: const Size.fromHeight(44),
+                              ),
+                              child: const KLocalizedText('আপনার এলাকায়'),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
-                  ),
-                  if (isWorker) ...[
+                    const SizedBox(height: 12),
+                    _LocalDiscoveryCard(
+                      isWorker: isWorker,
+                      onTap: () => context.push(
+                        isWorker ? AppRoutes.jobs : AppRoutes.createJob,
+                      ),
+                    ),
+                    if (isWorker) ...[
+                      const SizedBox(height: KSpacing.sm),
+                      const ProfileCompletenessCard(),
+                      const MyTrainingCard(),
+                    ],
+                    const SizedBox(height: KSpacing.md),
+                    _SectionHeader(
+                      title: isWorker ? 'কাছাকাছি কাজ' : 'জনপ্রিয় সেবা',
+                      onTap: () => context.push(
+                        isWorker ? AppRoutes.jobs : AppRoutes.categories,
+                      ),
+                    ),
                     const SizedBox(height: KSpacing.sm),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: FilledButton(
-                            onPressed: () => context.push(AppRoutes.jobs),
-                            child: const KLocalizedText('আপনার জন্য'),
+                    if (isWorker)
+                      Column(
+                        children: [
+                          _ShortcutRow(
+                            icon: Icons.school_outlined,
+                            title: 'দক্ষতার সঙ্গে মেলা কাজ',
+                            subtitle: 'এলাকা, সময় ও দক্ষতা অনুযায়ী',
+                            onTap: () => context.push(AppRoutes.jobs),
                           ),
-                        ),
-                        const SizedBox(width: KSpacing.sm),
-                        Expanded(
-                          child: TextButton(
-                            onPressed: () => context.push(AppRoutes.jobs),
-                            style: TextButton.styleFrom(
-                              backgroundColor: KColors.surfaceAlt,
-                              minimumSize: const Size.fromHeight(44),
+                          const SizedBox(height: KSpacing.sm),
+                          _ShortcutRow(
+                            icon: Icons.event_available_outlined,
+                            title: 'আপনার সময়ে মেলা কাজ',
+                            subtitle: 'খালি সময়ের পোস্টগুলো আগে দেখুন',
+                            onTap: () => context.push(AppRoutes.jobs),
+                          ),
+                        ],
+                      )
+                    else
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _ServiceShortcut(
+                              icon: Icons.cleaning_services_outlined,
+                              label: 'পরিষ্কার',
+                              onTap: () => context.push(AppRoutes.categories),
                             ),
-                            child: const KLocalizedText('আপনার এলাকায়'),
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: KSpacing.sm),
+                          Expanded(
+                            child: _ServiceShortcut(
+                              icon: Icons.handyman_outlined,
+                              label: 'মেরামত',
+                              onTap: () => context.push(AppRoutes.categories),
+                            ),
+                          ),
+                          const SizedBox(width: KSpacing.sm),
+                          Expanded(
+                            child: _ServiceShortcut(
+                              icon: Icons.school_outlined,
+                              label: 'পড়াশোনা',
+                              onTap: () => context.push(AppRoutes.categories),
+                            ),
+                          ),
+                        ],
+                      ),
+                    const SizedBox(height: KSpacing.md),
+                    const KTrustBanner(
+                      message: 'পরিচয় যাচাই ও নিরাপদ কাজের রেকর্ড',
+                      icon: Icons.shield_outlined,
+                      warning: true,
+                    ),
+                    const SizedBox(height: KSpacing.xl),
+                    _SectionHeader(title: 'সব সুবিধা'),
+                    const SizedBox(height: KSpacing.md),
+                    _DashboardGrid(
+                      isWorker: isWorker,
+                      unreadNotifications: unreadNotifications,
                     ),
                   ],
-                  const SizedBox(height: 12),
-                  _LocalDiscoveryCard(
-                    isWorker: isWorker,
-                    onTap: () => context.push(
-                      isWorker ? AppRoutes.jobs : AppRoutes.createJob,
-                    ),
-                  ),
-                  const SizedBox(height: KSpacing.md),
-                  _SectionHeader(
-                    title: isWorker ? 'কাছাকাছি কাজ' : 'জনপ্রিয় সেবা',
-                    onTap: () => context.push(
-                      isWorker ? AppRoutes.jobs : AppRoutes.categories,
-                    ),
-                  ),
-                  const SizedBox(height: KSpacing.sm),
-                  if (isWorker)
-                    Column(
-                      children: [
-                        _ShortcutRow(
-                          icon: Icons.school_outlined,
-                          title: 'দক্ষতার সঙ্গে মেলা কাজ',
-                          subtitle: 'এলাকা, সময় ও দক্ষতা অনুযায়ী',
-                          onTap: () => context.push(AppRoutes.jobs),
-                        ),
-                        const SizedBox(height: KSpacing.sm),
-                        _ShortcutRow(
-                          icon: Icons.event_available_outlined,
-                          title: 'আপনার সময়ে মেলা কাজ',
-                          subtitle: 'খালি সময়ের পোস্টগুলো আগে দেখুন',
-                          onTap: () => context.push(AppRoutes.jobs),
-                        ),
-                      ],
-                    )
-                  else
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _ServiceShortcut(
-                            icon: Icons.cleaning_services_outlined,
-                            label: 'পরিষ্কার',
-                            onTap: () => context.push(AppRoutes.categories),
-                          ),
-                        ),
-                        const SizedBox(width: KSpacing.sm),
-                        Expanded(
-                          child: _ServiceShortcut(
-                            icon: Icons.handyman_outlined,
-                            label: 'মেরামত',
-                            onTap: () => context.push(AppRoutes.categories),
-                          ),
-                        ),
-                        const SizedBox(width: KSpacing.sm),
-                        Expanded(
-                          child: _ServiceShortcut(
-                            icon: Icons.school_outlined,
-                            label: 'পড়াশোনা',
-                            onTap: () => context.push(AppRoutes.categories),
-                          ),
-                        ),
-                      ],
-                    ),
-                  const SizedBox(height: KSpacing.md),
-                  const KTrustBanner(
-                    message: 'পরিচয় যাচাই ও নিরাপদ কাজের রেকর্ড',
-                    icon: Icons.shield_outlined,
-                    warning: true,
-                  ),
-                  const SizedBox(height: KSpacing.xl),
-                  _SectionHeader(title: 'সব সুবিধা'),
-                  const SizedBox(height: KSpacing.md),
-                  _DashboardGrid(
-                    isWorker: isWorker,
-                    unreadNotifications: unreadNotifications,
-                  ),
-                ],
+                ),
               ),
             ),
           ),
@@ -583,7 +593,25 @@ class _DashboardGrid extends StatelessWidget {
               subtitle: 'আপনার কাজের নমুনা দেখান',
               onTap: () => context.push(AppRoutes.portfolio),
             ),
+            _DashboardTile(
+              icon: Icons.school_outlined,
+              title: 'প্রশিক্ষণ',
+              subtitle: 'ঐচ্ছিক কোর্স ও জ্ঞান পরীক্ষা',
+              onTap: () => context.push(AppRoutes.training),
+            ),
+            _DashboardTile(
+              icon: Icons.notifications_active_outlined,
+              title: 'কাজের সতর্কতা',
+              subtitle: 'মিলে যাওয়া নতুন কাজের খবর পান',
+              onTap: () => context.push(AppRoutes.jobAlerts),
+            ),
           ],
+          _DashboardTile(
+            icon: Icons.help_outline_rounded,
+            title: 'সহায়তা কেন্দ্র',
+            subtitle: 'সাধারণ প্রশ্নের উত্তর',
+            onTap: () => context.push(AppRoutes.help),
+          ),
           _DashboardTile(
             icon: Icons.settings_outlined,
             title: 'সেটিংস',

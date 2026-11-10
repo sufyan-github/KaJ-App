@@ -62,7 +62,33 @@ class TrustSafetyRepository {
     void Function(double progress)? onProgress,
     CancelToken? cancelToken,
   }) async {
-    final portfolio = kind == 'PORTFOLIO_IMAGE';
+    final completed = await _signedUpload(
+      kind,
+      source,
+      onProgress: onProgress,
+      cancelToken: cancelToken,
+    );
+    return completed['documentId'] as String;
+  }
+
+  /// Uploads a new profile photo through the same signed flow.
+  ///
+  /// The API attaches a `PROFILE_PHOTO` upload to the profile itself when the
+  /// upload completes, so there is no document id to pass on afterwards.
+  Future<void> uploadProfilePhoto(
+    Uint8List source, {
+    void Function(double progress)? onProgress,
+  }) => _guard(() async {
+    await _signedUpload('PROFILE_PHOTO', source, onProgress: onProgress);
+  });
+
+  Future<Map<String, dynamic>> _signedUpload(
+    String kind,
+    Uint8List source, {
+    void Function(double progress)? onProgress,
+    CancelToken? cancelToken,
+  }) async {
+    final portfolio = kind == 'PORTFOLIO_IMAGE' || kind == 'PROFILE_PHOTO';
     final bytes = await FlutterImageCompress.compressWithList(
       source,
       minWidth: portfolio ? 1600 : 1800,
@@ -97,7 +123,7 @@ class TrustSafetyRepository {
         'key': signed['key'],
       },
     );
-    return _data(complete.data)['documentId'] as String;
+    return _data(complete.data);
   }
 
   Future<AttendanceState> attendance(String assignmentId) async =>

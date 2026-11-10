@@ -6,6 +6,7 @@ import '../../data/datasources/catalog_remote_data_source.dart';
 import '../../data/repositories/catalog_repository_impl.dart';
 import '../../domain/entities/catalog_category.dart';
 import '../../domain/entities/catalog_skill.dart';
+import '../../domain/entities/service_location.dart';
 import '../../domain/repositories/catalog_repository.dart';
 
 final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
@@ -21,4 +22,8 @@ final categoryTreeProvider = FutureProvider<List<CatalogCategory>>((ref) {
 
 final catalogSkillsProvider = FutureProvider<List<CatalogSkill>>((ref) {
   return ref.watch(catalogRepositoryProvider).getSkills();
+});
+
+final catalogLocationsProvider = FutureProvider<List<ServiceLocation>>((ref) {
+  return ref.watch(catalogRepositoryProvider).getLocations();
 });

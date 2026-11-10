@@ -44,6 +44,14 @@ final jobFeedProvider = FutureProvider.family<List<JobSummary>, JobFeedFilter>(
       ),
 );
 
+final jobDetailProvider = FutureProvider.family<JobDetail, String>(
+  (ref, id) => ref.watch(jobsRepositoryProvider).getJob(id),
+);
+
+final jobAlertsProvider = FutureProvider<List<JobAlert>>(
+  (ref) => ref.watch(jobsRepositoryProvider).jobAlerts(),
+);
+
 final myJobsProvider = FutureProvider<List<JobSummary>>(
   (ref) => ref.watch(jobsRepositoryProvider).getMyJobs(),
 );

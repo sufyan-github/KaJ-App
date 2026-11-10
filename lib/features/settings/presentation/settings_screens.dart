@@ -13,6 +13,7 @@ import '../../auth/presentation/controllers/auth_controller.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
 import '../../onboarding/domain/onboarding_state.dart';
 import '../../onboarding/presentation/controllers/onboarding_controller.dart';
+import '../../profile/presentation/widgets/profile_completeness_card.dart';
 import '../domain/settings_models.dart';
 import 'settings_providers.dart';
 
@@ -42,9 +43,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           KSpacing.xxl,
         ),
         children: [
+          const ProfileCompletenessCard(),
           _SettingsSection(
             title: 'অ্যাকাউন্ট',
             children: [
+              _SettingsTile(
+                icon: Icons.edit_outlined,
+                title: 'প্রোফাইল সম্পাদনা',
+                subtitle: 'নাম, ছবি, নিজের সম্পর্কে ও এলাকা',
+                onTap: () => context.push(AppRoutes.editProfile),
+              ),
               _SettingsTile(
                 icon: Icons.account_circle_outlined,
                 title: 'ব্যক্তিগত তথ্য',
@@ -134,6 +142,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 subtitle: 'কোন ধরনের আপডেট পাবেন তা ঠিক করুন',
                 onTap: () => context.push(AppRoutes.notificationSettings),
               ),
+              if (role == KaajRole.worker) ...[
+                _SettingsTile(
+                  icon: Icons.notifications_active_outlined,
+                  title: 'কাজের সতর্কতা',
+                  subtitle: 'মিলে যাওয়া নতুন কাজের খবর পান',
+                  onTap: () => context.push(AppRoutes.jobAlerts),
+                ),
+                _SettingsTile(
+                  icon: Icons.school_outlined,
+                  title: 'প্রশিক্ষণ ও সার্টিফিকেট',
+                  subtitle: 'ঐচ্ছিক কোর্স ও জ্ঞান পরীক্ষা',
+                  onTap: () => context.push(AppRoutes.training),
+                ),
+              ],
             ],
           ),
           const SizedBox(height: KSpacing.lg),
@@ -192,6 +214,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _SettingsSection(
             title: 'সহায়তা',
             children: [
+              _SettingsTile(
+                icon: Icons.help_outline_rounded,
+                title: 'সহায়তা কেন্দ্র',
+                subtitle: 'সাধারণ প্রশ্নের উত্তর',
+                onTap: () => context.push(AppRoutes.help),
+              ),
               _SettingsTile(
                 icon: Icons.health_and_safety_outlined,
                 title: 'সহায়তা ও নিরাপত্তা',
