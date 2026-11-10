@@ -120,7 +120,7 @@ class TrustSafetyRepository {
     final response = await _dio.post<Map<String, dynamic>>(
       '/assignments/$assignmentId/checkin',
       options: Options(headers: {'idempotency-key': const Uuid().v4()}),
-      data: _locationPayload(location, consentVersion)
+      data: _locationPayload(location, consentVersion, includeMockFlag: true)
         ..addAll({'photoDocumentId': ?documentId}),
     );
     return AttendanceState.fromJson(_data(response.data));
@@ -135,7 +135,7 @@ class TrustSafetyRepository {
     final response = await _dio.post<Map<String, dynamic>>(
       '/assignments/$assignmentId/checkout',
       options: Options(headers: {'idempotency-key': const Uuid().v4()}),
-      data: _locationPayload(location, consentVersion)
+      data: _locationPayload(location, consentVersion, includeMockFlag: false)
         ..addAll({
           if (notes?.trim().isNotEmpty ?? false) 'notes': notes!.trim(),
         }),
@@ -279,18 +279,30 @@ class TrustSafetyRepository {
     await _dio.delete<Map<String, dynamic>>('/profiles/me/portfolio/$id');
   });
 
+  /// The API accepts at most 7 decimal places for coordinates and 2 for
+  /// accuracy. Raw GPS doubles carry ~15, and Android reports accuracy as a
+  /// float (12.3 arrives as 12.300000190734863), so both must be rounded or
+  /// every real check-in is rejected.
+  ///
+  /// [includeMockFlag] is false for check-out: API builds before November
+  /// 2026 reject unknown check-out fields, and the flag is already recorded
+  /// at check-in.
   Map<String, dynamic> _locationPayload(
     KLocation location,
-    String consentVersion,
-  ) => {
-    'lat': location.latitude,
-    'lng': location.longitude,
-    'accuracyM': location.accuracyM,
+    String consentVersion, {
+    required bool includeMockFlag,
+  }) => {
+    'lat': _roundTo(location.latitude, 7),
+    'lng': _roundTo(location.longitude, 7),
+    'accuracyM': _roundTo(location.accuracyM, 2),
     'capturedAt': location.capturedAt.toUtc().toIso8601String(),
-    'mockLocation': location.mockLocation,
+    if (includeMockFlag) 'mockLocation': location.mockLocation,
     'consentGranted': true,
     'consentVersion': consentVersion,
   };
+
+  static double _roundTo(double value, int places) =>
+      double.parse(value.toStringAsFixed(places));
 
   Future<T> _guard<T>(Future<T> Function() work) async {
     try {

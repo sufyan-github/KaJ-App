@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/formatting/kaaj_format.dart';
 import '../../../../core/localization/kaaj_localizations.dart';
+import '../../../../core/location/location_gateway.dart';
+import '../../../../core/permissions/permission_gateway.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/routing/route_arguments.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -753,7 +755,12 @@ class _JobCard extends StatelessWidget {
 }
 
 class CreateJobScreen extends ConsumerStatefulWidget {
-  const CreateJobScreen({super.key});
+  const CreateJobScreen({
+    super.key,
+    this.permissionGateway = const PermissionGateway(),
+  });
+
+  final PermissionGateway permissionGateway;
 
   @override
   ConsumerState<CreateJobScreen> createState() => _CreateJobScreenState();
@@ -770,6 +777,11 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
   TimeOfDay _start = const TimeOfDay(hour: 9, minute: 0);
   TimeOfDay _end = const TimeOfDay(hour: 11, minute: 0);
   bool _saving = false;
+  // Optional work-site pin. Worker GPS check-in is measured against it;
+  // without one, attendance needs a manual override.
+  KLocation? _site;
+  bool _pinning = false;
+  static const _maxSiteAccuracyM = 100.0;
 
   @override
   void dispose() {
@@ -894,6 +906,36 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
                 onEnd: () => _pickTime(false),
               ),
             ),
+            const SizedBox(height: KSpacing.sm),
+            Card(
+              child: ListTile(
+                leading: Icon(
+                  _site == null
+                      ? Icons.add_location_alt_outlined
+                      : Icons.where_to_vote_outlined,
+                ),
+                title: KLocalizedText(
+                  _site == null
+                      ? 'কাজের জায়গা পিন করুন'
+                      : 'কাজের জায়গা পিন করা হয়েছে',
+                ),
+                subtitle: const KLocalizedText(
+                  'কর্মী এই জায়গায় পৌঁছে চেক-ইন করবেন। এখন কাজের জায়গায় থাকলে তবেই পিন করুন।',
+                ),
+                trailing: _pinning
+                    ? const SizedBox.square(
+                        dimension: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : _site == null
+                    ? null
+                    : TextButton(
+                        onPressed: () => setState(() => _site = null),
+                        child: const KLocalizedText('পিন সরান'),
+                      ),
+                onTap: _pinning || _site != null ? null : _pinSite,
+              ),
+            ),
             const SizedBox(height: KSpacing.md),
             KLocalizedText(
               'পারিশ্রমিক',
@@ -919,6 +961,37 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _pinSite() async {
+    setState(() => _pinning = true);
+    try {
+      final permission = await widget.permissionGateway.request(
+        KPermission.location,
+      );
+      if (permission != KPermissionStatus.granted) {
+        _notify('লোকেশন অনুমতি দিন, তারপর আবার চেষ্টা করুন।');
+        return;
+      }
+      final location = await ref.read(locationGatewayProvider).current();
+      // A mocked or vague fix would put the pin where no worker can check in.
+      if (location.mockLocation || location.accuracyM > _maxSiteAccuracyM) {
+        _notify('লোকেশন পাওয়া যায়নি। খোলা জায়গায় গিয়ে আবার চেষ্টা করুন।');
+        return;
+      }
+      if (mounted) setState(() => _site = location);
+    } on Object {
+      _notify('লোকেশন পাওয়া যায়নি। খোলা জায়গায় গিয়ে আবার চেষ্টা করুন।');
+    } finally {
+      if (mounted) setState(() => _pinning = false);
+    }
+  }
+
+  void _notify(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: KLocalizedText(message)));
   }
 
   Future<void> _pickTime(bool start) async {
@@ -966,6 +1039,11 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
         'locationId': locationId,
         'startsAt': startsAt.toUtc().toIso8601String(),
         'endsAt': endsAt.toUtc().toIso8601String(),
+        // Stored with 6 decimal places (~0.1 m) by the API.
+        if (_site case final site?) ...{
+          'lat': double.parse(site.latitude.toStringAsFixed(6)),
+          'lng': double.parse(site.longitude.toStringAsFixed(6)),
+        },
       });
       ref.invalidate(jobFeedProvider);
       ref.invalidate(myJobsProvider);

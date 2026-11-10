@@ -73,6 +73,40 @@ void main() {
   );
 
   test(
+    'rounds real device readings to the precision the API accepts',
+    () async {
+      final adapter = _TrustAdapter();
+      final repository = TrustSafetyRepository(
+        Dio(BaseOptions(baseUrl: 'https://kaaj.test/api/v1'))
+          ..httpClientAdapter = adapter,
+      );
+      // Values as Android actually reports them: full-precision doubles and a
+      // float accuracy widened to double.
+      final reading = KLocation(
+        latitude: 24.374012345678912,
+        longitude: 88.601234567891234,
+        accuracyM: 12.300000190734863,
+        capturedAt: DateTime.utc(2026, 9, 5, 1),
+        mockLocation: true,
+      );
+
+      await repository.checkIn('assignment-1', reading, 'location-checkin-v1');
+      final checkIn = adapter.requests.last.data as Map<String, dynamic>;
+      expect(checkIn['lat'], 24.3740123);
+      expect(checkIn['lng'], 88.6012346);
+      expect(checkIn['accuracyM'], 12.3);
+      expect(checkIn, containsPair('mockLocation', true));
+
+      await repository.checkOut('assignment-1', reading, 'location-checkin-v1');
+      final checkOut = adapter.requests.last.data as Map<String, dynamic>;
+      expect(adapter.requests.last.path, '/assignments/assignment-1/checkout');
+      expect(checkOut['lat'], 24.3740123);
+      expect(checkOut['accuracyM'], 12.3);
+      expect(checkOut.containsKey('mockLocation'), isFalse);
+    },
+  );
+
+  test(
     'updates portfolio details and sends the complete display order',
     () async {
       final adapter = _TrustAdapter();

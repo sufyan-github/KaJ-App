@@ -42,6 +42,9 @@ void main() {
         const CreateJobScreen(),
         locale: Locale(language),
         textScale: 1,
+        // Tall enough that every field of the form is built, including the
+        // optional work-site card above the price.
+        surfaceSize: const Size(360, 1200),
         overrides: [
           categoryTreeProvider.overrideWith(
             (ref) async => const [

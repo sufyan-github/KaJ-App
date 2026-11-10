@@ -4,6 +4,15 @@
 // Reviewed overrides live in kaaj_localizations.dart.
 
 const generatedEnglishTranslations = <String, String>{
+  "কাজের জায়গা পিন করুন": "Pin the work site",
+  "কাজের জায়গা পিন করা হয়েছে": "Work site pinned",
+  "কর্মী এই জায়গায় পৌঁছে চেক-ইন করবেন। এখন কাজের জায়গায় থাকলে তবেই পিন করুন।":
+      "The worker checks in at this spot. Pin it only while you are at the work site.",
+  "পিন সরান": "Remove pin",
+  "লোকেশন অনুমতি দিন, তারপর আবার চেষ্টা করুন।":
+      "Allow location access, then try again.",
+  "লোকেশন পাওয়া যায়নি। খোলা জায়গায় গিয়ে আবার চেষ্টা করুন।":
+      "Could not get an accurate location. Move to an open area and try again.",
   "কাজটি খসড়া হিসেবে সংরক্ষিত হয়েছে, কিন্তু প্রকাশ করা যায়নি। \"আমার কাজ\" থেকে আবার প্রকাশ করুন।":
       "The job was saved as a draft but could not be published. Publish it again from My jobs.",
   "কী কাজ করাতে চান?": "What work do you need done?",
