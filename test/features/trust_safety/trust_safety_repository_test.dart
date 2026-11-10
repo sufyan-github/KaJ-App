@@ -73,6 +73,28 @@ void main() {
   );
 
   test(
+    'reads the nested session from the attendance status endpoint',
+    () async {
+      final adapter = _TrustAdapter();
+      final repository = TrustSafetyRepository(
+        Dio(BaseOptions(baseUrl: 'https://kaaj.test/api/v1'))
+          ..httpClientAdapter = adapter,
+      );
+
+      // Shapes copied from GET /assignments/:id/attendance on the real API.
+      final checkedIn = await repository.attendance('checked-in');
+      final notYet = await repository.attendance('not-checked-in');
+
+      expect(checkedIn.checkinAt, DateTime.utc(2026, 11, 10, 19, 46, 36, 251));
+      expect(checkedIn.checkinDistanceM, 0);
+      expect(checkedIn.verifiedBy, 'SYSTEM');
+      expect(checkedIn.geofenceRadiusM, 300);
+      expect(notYet.checkinAt, isNull);
+      expect(notYet.maxAccuracyM, 100);
+    },
+  );
+
+  test(
     'rounds real device readings to the precision the API accepts',
     () async {
       final adapter = _TrustAdapter();
@@ -210,6 +232,36 @@ class _TrustAdapter implements HttpClientAdapter {
             'category': {'id': 'category-1', 'nameBn': 'বৈদ্যুতিক'},
           },
         ],
+      },
+      '/assignments/checked-in/attendance' => {
+        'assignmentStatus': 'IN_PROGRESS',
+        'agreedStartsAt': '2026-11-10T19:43:40.536Z',
+        'settings': {
+          'geofenceRadiusM': 300,
+          'maxAccuracyM': 100,
+          'consentVersion': 'location-checkin-v1',
+        },
+        'session': {
+          'id': 'session-2',
+          'checkinAt': '2026-11-10T19:46:36.251Z',
+          'checkinDistanceM': 0,
+          'checkinAccuracyM': 100,
+          'mockLocationReported': false,
+          'checkoutAt': null,
+          'minutesWorked': null,
+          'verifiedBy': 'SYSTEM',
+          'overrideReason': null,
+        },
+      },
+      '/assignments/not-checked-in/attendance' => {
+        'assignmentStatus': 'UPCOMING',
+        'agreedStartsAt': '2026-11-10T19:43:40.536Z',
+        'settings': {
+          'geofenceRadiusM': 300,
+          'maxAccuracyM': 100,
+          'consentVersion': 'location-checkin-v1',
+        },
+        'session': null,
       },
       _ => {
         'id': 'session-1',

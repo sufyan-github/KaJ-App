@@ -76,18 +76,25 @@ class AttendanceState {
     this.overrideReason,
   });
 
+  /// Accepts both API shapes: check-in/check-out return the session itself,
+  /// while GET /assignments/:id/attendance nests it under `session` (null
+  /// before check-in). Reading only the top level made the screen show
+  /// "check-in pending" forever after a successful check-in.
   factory AttendanceState.fromJson(Map<String, dynamic> json) {
+    final session = json['session'] is Map
+        ? Map<String, dynamic>.from(json['session'] as Map)
+        : json;
     final settings = Map<String, dynamic>.from(
-      json['settings'] as Map? ?? const {},
+      json['settings'] as Map? ?? session['settings'] as Map? ?? const {},
     );
     return AttendanceState(
-      checkinAt: DateTime.tryParse(json['checkinAt'] as String? ?? ''),
-      checkoutAt: DateTime.tryParse(json['checkoutAt'] as String? ?? ''),
-      checkinDistanceM: (json['checkinDistanceM'] as num?)?.toInt(),
-      checkoutDistanceM: (json['checkoutDistanceM'] as num?)?.toInt(),
-      minutesWorked: (json['minutesWorked'] as num?)?.toInt(),
-      verifiedBy: json['verifiedBy'] as String?,
-      overrideReason: json['overrideReason'] as String?,
+      checkinAt: DateTime.tryParse(session['checkinAt'] as String? ?? ''),
+      checkoutAt: DateTime.tryParse(session['checkoutAt'] as String? ?? ''),
+      checkinDistanceM: (session['checkinDistanceM'] as num?)?.toInt(),
+      checkoutDistanceM: (session['checkoutDistanceM'] as num?)?.toInt(),
+      minutesWorked: (session['minutesWorked'] as num?)?.toInt(),
+      verifiedBy: session['verifiedBy'] as String?,
+      overrideReason: session['overrideReason'] as String?,
       geofenceRadiusM: (settings['geofenceRadiusM'] as num?)?.toInt() ?? 300,
       maxAccuracyM: (settings['maxAccuracyM'] as num?)?.toDouble() ?? 100,
       consentVersion:
