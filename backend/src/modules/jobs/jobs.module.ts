@@ -10,11 +10,13 @@ import { JobsService } from "./jobs.service";
 import { RecurrenceRunner } from "./recurrence/recurrence.runner";
 import { RecurrenceService } from "./recurrence/recurrence.service";
 import { PaymentsModule } from "../payments/payments.module";
+import { JobAlertsModule } from "../job-alerts/job-alerts.module";
 
 @Module({
   imports: [
     AvailabilityModule,
     ChatModule,
+    JobAlertsModule,
     MatchingModule,
     NotificationsModule,
     PaymentsModule,

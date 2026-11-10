@@ -12,12 +12,16 @@ const WORKER_ID = "018f4f6f-13e8-7d9a-8c2b-6b6a9f62f901";
 describe("public worker profile endpoint", () => {
   let app: INestApplication;
   const findFirst = jest.fn();
+  const certificates = jest.fn();
   const createDownloadUrl = jest.fn();
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(PrismaService)
-      .useValue({ user: { findFirst } })
+      .useValue({
+        user: { findFirst },
+        trainingCertificate: { findMany: certificates },
+      })
       .overrideProvider(STORAGE_PORT)
       .useValue({ createDownloadUrl })
       .compile();
@@ -30,6 +34,7 @@ describe("public worker profile endpoint", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    certificates.mockResolvedValue([]);
     createDownloadUrl.mockResolvedValue({
       downloadUrl: "https://signed.test/photo?expires=300",
       expiresAt: new Date("2026-09-01T12:05:00Z"),
@@ -66,6 +71,7 @@ describe("public worker profile endpoint", () => {
       photoUrl: "https://signed.test/photo?expires=300",
       location: { latitude: 24.375, longitude: 88.605 },
       availability: ["EVENING"],
+      trainings: [],
     });
     const serialized = JSON.stringify(response.body.data);
     expect(serialized).not.toMatch(

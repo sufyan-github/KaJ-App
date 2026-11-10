@@ -25,6 +25,7 @@ import { CreatePortfolioItemDto } from "./dto/create-portfolio-item.dto";
 import { PortfolioService } from "./portfolio.service";
 import { ReorderPortfolioItemsDto } from "./dto/reorder-portfolio-items.dto";
 import { UpdatePortfolioItemDto } from "./dto/update-portfolio-item.dto";
+import { ProfileOverviewService } from "./profile-overview.service";
 
 @ApiTags("profiles")
 @Controller("profiles/me")
@@ -32,7 +33,14 @@ export class ProfilesController {
   constructor(
     private readonly users: UsersService,
     private readonly portfolio: PortfolioService,
+    private readonly overview: ProfileOverviewService,
   ) {}
+
+  @Get()
+  @Policy(Policies.authenticated())
+  me(@CurrentUser() claims: AccessTokenClaims) {
+    return this.overview.get(claims.sub);
+  }
 
   @Get("portfolio")
   @Roles(RoleMode.WORKER)

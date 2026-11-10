@@ -3,6 +3,7 @@ import { Type } from "class-transformer";
 import {
   ArrayMaxSize,
   IsArray,
+  IsBoolean,
   IsEnum,
   IsNumber,
   IsOptional,
@@ -24,6 +25,11 @@ export class WorkerSkillInputDto {
   @Min(0)
   @Max(80)
   years?: number;
+
+  // Self-reported. Omitted keeps the stored answer.
+  @IsOptional()
+  @IsBoolean()
+  hasPriorTraining?: boolean;
 }
 
 export class UpdateWorkerSkillsDto {

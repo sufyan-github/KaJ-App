@@ -11,7 +11,8 @@ export interface AuthRateLimitRequest {
     | "password-ip"
     | "recovery-phone"
     | "recovery-ip"
-    | "password-setup";
+    | "password-setup"
+    | "certificate-ip";
   windowSeconds: number;
 }
 

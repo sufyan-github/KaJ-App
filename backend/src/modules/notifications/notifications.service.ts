@@ -4,19 +4,25 @@ import { NotificationChannel, Prisma } from "@prisma/client";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { NotificationPreferenceDto } from "./dto/notification-preference.dto";
 
+export interface NotificationInput {
+  userId: string;
+  type: string;
+  title: string;
+  body: string;
+  payload?: Prisma.InputJsonObject;
+  dedupeKey?: string;
+}
+
 @Injectable()
 export class NotificationsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(input: {
-    userId: string;
-    type: string;
-    title: string;
-    body: string;
-    payload?: Prisma.InputJsonObject;
-    dedupeKey?: string;
-  }) {
-    const preference = await this.prisma.notificationPreference.findUnique({
+  /** Pass a transaction client to make the notification part of a larger write. */
+  async create(
+    input: NotificationInput,
+    client: Prisma.TransactionClient = this.prisma,
+  ) {
+    const preference = await client.notificationPreference.findUnique({
       where: {
         user_id_channel_type: {
           user_id: input.userId,
@@ -32,7 +38,7 @@ export class NotificationsService {
       ...(input.dedupeKey ? { dedupeKey: input.dedupeKey } : {}),
     };
     if (input.dedupeKey) {
-      const existing = await this.prisma.notification.findFirst({
+      const existing = await client.notification.findFirst({
         where: {
           user_id: input.userId,
           type: input.type,
@@ -42,7 +48,7 @@ export class NotificationsService {
       });
       if (existing) return existing;
     }
-    return this.prisma.notification.create({
+    return client.notification.create({
       data: {
         user_id: input.userId,
         type: input.type,
@@ -51,6 +57,71 @@ export class NotificationsService {
         payload_json: payload,
       },
     });
+  }
+
+  /**
+   * Batched variant of create for fan-out: one preference query, one dedupe
+   * query and one insert, whatever the number of recipients.
+   */
+  async createMany(inputs: readonly NotificationInput[]): Promise<number> {
+    if (inputs.length === 0) return 0;
+    const userIds = [...new Set(inputs.map((input) => input.userId))];
+    const types = [...new Set(inputs.map((input) => input.type))];
+    const keyed = inputs.filter((input) => input.dedupeKey);
+    const [disabled, existing] = await Promise.all([
+      this.prisma.notificationPreference.findMany({
+        where: {
+          user_id: { in: userIds },
+          channel: NotificationChannel.IN_APP,
+          type: { in: types },
+          is_enabled: false,
+        },
+        select: { user_id: true, type: true },
+      }),
+      keyed.length === 0
+        ? []
+        : this.prisma.notification.findMany({
+            where: {
+              created_at: { gte: new Date(Date.now() - 24 * 60 * 60_000) },
+              OR: keyed.map((input) => ({
+                user_id: input.userId,
+                type: input.type,
+                payload_json: {
+                  path: ["dedupeKey"],
+                  equals: input.dedupeKey!,
+                },
+              })),
+            },
+            select: { user_id: true, type: true, payload_json: true },
+          }),
+    ]);
+    const muted = new Set(disabled.map((row) => `${row.user_id}:${row.type}`));
+    const seen = new Set(
+      existing.map(
+        (row) =>
+          `${row.user_id}:${row.type}:${String(asPayload(row.payload_json).dedupeKey)}`,
+      ),
+    );
+    const data = inputs
+      .filter((input) => !muted.has(`${input.userId}:${input.type}`))
+      .filter(
+        (input) =>
+          !input.dedupeKey ||
+          !seen.has(`${input.userId}:${input.type}:${input.dedupeKey}`),
+      )
+      .map((input) => ({
+        user_id: input.userId,
+        type: input.type,
+        title_key: input.title,
+        body_key: input.body,
+        payload_json: {
+          ...(input.payload ?? {}),
+          ...(input.dedupeKey ? { dedupeKey: input.dedupeKey } : {}),
+        },
+      }));
+    if (data.length === 0) return 0;
+    const result = await this.prisma.notification.createMany({ data });
+    return result.count;
   }
 
   async list(userId: string) {
@@ -158,8 +229,10 @@ function titleEnglishFor(type: string, value: string): string {
     CASH_PAYMENT_RECORDED: "Cash payment recorded",
     CHAT_MESSAGE: "New message",
     DISPUTE_OPENED: "Dispute opened",
+    JOB_ALERT_MATCH: "New job for you",
     JOB_APPLICATION_RECEIVED: "New application",
     REVIEW_RECEIVED: "New review",
+    TRAINING_CERTIFICATE_ISSUED: "Test passed",
     VERIFICATION_SUBMITTED: "Verification submitted",
     WORKER_CHECKED_IN: "Worker checked in",
     WORK_REVIEW_REMINDER: "Job awaiting review",
@@ -219,6 +292,14 @@ function bodyEnglishFor(type: string, value: string): string {
       /^কর্মী (.+) কাজের স্থানে পৌঁছে চেক-ইন করেছেন।$/,
       (detail) => `The worker checked in for ${detail}.`,
     ],
+    [
+      /^আপনার সতর্কতার সাথে মেলে এমন নতুন কাজ: (.+)$/,
+      (detail) => `A new job matches your alert: ${detail}`,
+    ],
+    [
+      /^আপনি (.+) কোর্সের Kaaj জ্ঞান পরীক্ষায় পাস করেছেন।$/,
+      (detail) => `You passed the Kaaj knowledge test for ${detail}.`,
+    ],
   ];
   for (const [pattern, render] of dynamicBangla) {
     const match = pattern.exec(value);
@@ -249,8 +330,10 @@ function titleFor(type: string, value: string): string {
     BOOKING_REQUESTED: "নতুন বুকিং অনুরোধ",
     CASH_PAYMENT_RECORDED: "নগদ পেমেন্ট রেকর্ড হয়েছে",
     DISPUTE_OPENED: "বিরোধের অনুরোধ খোলা হয়েছে",
+    JOB_ALERT_MATCH: "আপনার জন্য নতুন কাজ",
     JOB_APPLICATION_RECEIVED: "নতুন আবেদন",
     REVIEW_RECEIVED: "নতুন রিভিউ",
+    TRAINING_CERTIFICATE_ISSUED: "পরীক্ষায় পাস করেছেন",
     VERIFICATION_SUBMITTED: "যাচাইয়ের অনুরোধ জমা হয়েছে",
     WORKER_CHECKED_IN: "কর্মী চেক-ইন করেছেন",
     WORK_REVIEW_REMINDER: "কাজটি পর্যালোচনার অপেক্ষায়",

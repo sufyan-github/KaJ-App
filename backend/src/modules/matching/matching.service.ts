@@ -9,6 +9,7 @@ import {
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import {
+  applyTrainingBonus,
   calculateMatch,
   type MatchExplanation,
   normalizeMatchingWeights,
@@ -37,6 +38,10 @@ const workerSelect = {
   availability_rules: {
     where: { is_active: true },
     select: { day_of_week: true, start_time: true, end_time: true },
+  },
+  training_certificates: {
+    where: { revoked_at: null, course: { skill_id: { not: null } } },
+    select: { course: { select: { skill_id: true } } },
   },
 } satisfies Prisma.UserSelect;
 
@@ -128,11 +133,19 @@ export class MatchingService {
   ) {
     const workerSkillIds = new Set(worker.skills.map((item) => item.skill_id));
     const requiredSkillIds = job.skills.map((item) => item.skill_id);
-    const skill =
+    const certifiedSkillIds = new Set(
+      worker.training_certificates.flatMap((item) =>
+        item.course.skill_id ? [item.course.skill_id] : [],
+      ),
+    );
+    const skill = applyTrainingBonus(
       requiredSkillIds.length === 0
         ? 0.5
         : requiredSkillIds.filter((id) => workerSkillIds.has(id)).length /
-          requiredSkillIds.length;
+            requiredSkillIds.length,
+      requiredSkillIds,
+      certifiedSkillIds,
+    );
     const locations = new Set(
       [
         worker.profile?.primary_location_id,

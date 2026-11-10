@@ -97,7 +97,7 @@ databaseDescribe("trust and fairness fixes with PostgreSQL", () => {
     expect(Number(stored.lng)).toBe(88.601235);
     expect(created).not.toHaveProperty("lat");
     expect(created).not.toHaveProperty("lng");
-    const fetched = await jobs.get(created.id);
+    const fetched = await jobs.get(created.id, poster.id);
     expect(JSON.stringify(fetched)).not.toContain("24.374012");
   });
 

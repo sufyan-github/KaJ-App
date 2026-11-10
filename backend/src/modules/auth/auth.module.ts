@@ -21,7 +21,7 @@ import { MobilePasswordService } from "./mobile-password.service";
 
 @Module({
   controllers: [AuthController, MobilePasswordController],
-  exports: [AuthService, AuthTokenService],
+  exports: [AuthService, AuthTokenService, AUTH_RATE_LIMITER],
   imports: [
     JwtModule.register({}),
     PrismaModule,

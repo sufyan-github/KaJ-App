@@ -1,8 +1,14 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  Optional,
+} from "@nestjs/common";
 import { Prisma, RoleMode, UserStatus } from "@prisma/client";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { STORAGE_PORT, StoragePort } from "../../infra/storage/storage.port";
+import { TrainingCertificatesService } from "../training/training-certificates.service";
 import { createPublicProfileProjection } from "./public-profile.projection";
 
 const workerPublicSelect = {
@@ -54,6 +60,7 @@ export class PublicProfilesService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(STORAGE_PORT) private readonly storage: StoragePort,
+    @Optional() private readonly certificates?: TrainingCertificatesService,
   ) {}
 
   async getWorkerProfile(userId: string) {
@@ -68,7 +75,11 @@ export class PublicProfilesService {
     });
     if (!user?.profile || !user.worker_profile) throw new NotFoundException();
 
-    return this.project(user);
+    const [projection, trainings] = await Promise.all([
+      this.project(user),
+      this.certificates?.publicTrainings(user.id) ?? [],
+    ]);
+    return { ...projection, trainings };
   }
 
   async listWorkers(skillId?: string, locationId?: string) {

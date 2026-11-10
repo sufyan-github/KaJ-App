@@ -45,6 +45,15 @@ import { recurrenceRuleJson } from "./recurrence/recurrence";
 import { RecurrenceService } from "./recurrence/recurrence.service";
 import { hasTrust } from "../verification/trust-level";
 import { PaymentsService } from "../payments/payments.service";
+import { JobAlertsService } from "../job-alerts/job-alerts.service";
+import { maskPublicDisplayName } from "../users/public-profile.projection";
+
+// Anyone signed in may read these; every other state is private to the
+// poster and the workers who applied or were assigned.
+const PUBLICLY_OPEN_STATUSES: readonly JobStatus[] = [
+  JobStatus.PUBLISHED,
+  JobStatus.APPLICATIONS_OPEN,
+];
 
 const jobInclude = {
   category: { select: { id: true, name_bn: true, name_en: true } },
@@ -69,6 +78,7 @@ export class JobsService {
     @Optional() private readonly chat?: ChatService,
     @Optional() private readonly recurrence?: RecurrenceService,
     @Optional() private readonly payments?: PaymentsService,
+    @Optional() private readonly jobAlerts?: JobAlertsService,
   ) {}
 
   private now() {
@@ -179,6 +189,8 @@ export class JobsService {
     if (job.job_type === JobType.RECURRING) {
       await this.recurrence?.generate(jobId);
     }
+    // Runs after the publish transaction; it logs and swallows its own errors.
+    await this.jobAlerts?.notifyForPublishedJob(updated);
     return serializeJob(updated);
   }
 
@@ -287,13 +299,57 @@ export class JobsService {
     return { items: jobs.map(serializeJob) };
   }
 
-  async get(jobId: string) {
+  async get(jobId: string, viewerUserId: string) {
     const job = await this.prisma.job.findFirst({
       where: { id: jobId, deleted_at: null },
-      include: jobInclude,
+      include: {
+        ...jobInclude,
+        poster: {
+          select: {
+            id: true,
+            profile: { select: { display_name: true, trust_level: true } },
+            badges: {
+              where: { revoked_at: null },
+              select: { badge: { select: { slug: true } } },
+            },
+          },
+        },
+        applications: {
+          where: { worker_user_id: viewerUserId },
+          select: { status: true },
+          take: 1,
+        },
+        assignments: {
+          where: { worker_user_id: viewerUserId },
+          select: { id: true },
+          take: 1,
+        },
+      },
     });
     if (!job) throw new NotFoundException();
-    return serializeJob(job);
+    const viewerIsPoster = job.poster_user_id === viewerUserId;
+    const involved =
+      viewerIsPoster ||
+      job.applications.length > 0 ||
+      job.assignments.length > 0;
+    if (!involved && !PUBLICLY_OPEN_STATUSES.includes(job.status)) {
+      throw new NotFoundException();
+    }
+    const { poster, applications, assignments: _assignments, ...rest } = job;
+    const displayName = poster.profile?.display_name ?? "";
+    return {
+      ...serializeJob(rest),
+      poster: {
+        id: poster.id,
+        displayName: viewerIsPoster
+          ? displayName
+          : maskPublicDisplayName(displayName),
+        trustLevel: poster.profile?.trust_level ?? TrustLevel.NONE,
+        badges: poster.badges.map(({ badge }) => badge.slug),
+      },
+      viewerApplicationStatus: applications[0]?.status ?? null,
+      viewerIsPoster,
+    };
   }
 
   async apply(workerUserId: string, jobId: string, input: ApplyToJobDto) {

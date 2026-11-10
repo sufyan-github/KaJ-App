@@ -28,6 +28,28 @@ const labels: Record<MatchFactor, string> = {
   reliability: "Reliable work history",
 };
 
+export const MAX_TRAINING_SKILL_BONUS = 0.1;
+
+/**
+ * Passed knowledge tests for the job's required skills raise the skill
+ * signal by at most MAX_TRAINING_SKILL_BONUS. Having no certificate never
+ * lowers it, and the result stays within 0..1.
+ */
+export function applyTrainingBonus(
+  skillSignal: number,
+  requiredSkillIds: readonly string[],
+  certifiedSkillIds: ReadonlySet<string>,
+): number {
+  const base = clamp(skillSignal);
+  if (requiredSkillIds.length === 0) return base;
+  const certified = requiredSkillIds.filter((id) =>
+    certifiedSkillIds.has(id),
+  ).length;
+  const bonus =
+    MAX_TRAINING_SKILL_BONUS * (certified / requiredSkillIds.length);
+  return Math.min(1, base + bonus);
+}
+
 export function normalizeMatchingWeights(value: unknown): MatchingWeights {
   const source = isRecord(value) ? value : {};
   const candidate = Object.fromEntries(

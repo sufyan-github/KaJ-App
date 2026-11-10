@@ -220,6 +220,11 @@ export class UsersService {
       if (activeSkills !== skillIds.length) {
         throw new BadRequestException("Every skill must be active and known.");
       }
+      const previous = await transaction.userSkill.findMany({
+        where: { user_id: userId, has_prior_training: true },
+        select: { skill_id: true },
+      });
+      const hadPriorTraining = new Set(previous.map((row) => row.skill_id));
       await transaction.userSkill.deleteMany({ where: { user_id: userId } });
       if (inputs.length > 0) {
         await transaction.userSkill.createMany({
@@ -228,6 +233,8 @@ export class UsersService {
             skill_id: input.skillId,
             level: input.level,
             years: input.years,
+            has_prior_training:
+              input.hasPriorTraining ?? hadPriorTraining.has(input.skillId),
           })),
         });
       }
@@ -320,6 +327,7 @@ export class UsersService {
       level: row.level,
       years: row.years?.toString() ?? null,
       isVerified: row.is_verified,
+      hasPriorTraining: row.has_prior_training,
     }));
   }
 }

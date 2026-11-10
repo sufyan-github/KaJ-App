@@ -1,0 +1,808 @@
+{
+  "courses": [
+    {
+      "slug": "working-with-customers",
+      "skillSlug": null,
+      "titleEn": "Working with customers",
+      "titleBn": "গ্রাহকের সঙ্গে কাজ করা",
+      "summaryEn": "Basics every KAAJ worker needs: being on time, behaving well in a customer's home, agreeing the work and price, and how KAAJ check-in, cancellations and reviews work.",
+      "summaryBn": "প্রত্যেক KAAJ কর্মীর জন্য মূল বিষয়: সময়মতো পৌঁছানো, গ্রাহকের বাসায় ভালো আচরণ, কাজ ও দাম আগে ঠিক করা, এবং KAAJ-এ চেক-ইন, বাতিল ও রিভিউ যেভাবে কাজ করে।",
+      "minutes": 20,
+      "estDataMb": 50,
+      "passMarkPct": 70,
+      "questionCount": 10,
+      "isSafetyCritical": false,
+      "sortOrder": 1,
+      "lessons": [
+        {
+          "titleEn": "Be on time and keep the customer informed",
+          "titleBn": "সময়মতো পৌঁছান, গ্রাহককে জানিয়ে রাখুন",
+          "summaryEn": "Confirm the address and time the day before.\nLeave early enough to arrive 5 to 10 minutes before the start time.\nIf you will be late, call or message the customer before the start time and give a new arrival time.\nAnswer calls politely: say your name and that you are coming through KAAJ.\nKeep your phone charged and your number reachable on the job day.",
+          "summaryBn": "আগের দিন ঠিকানা ও সময় নিশ্চিত করুন।\nশুরুর সময়ের ৫ থেকে ১০ মিনিট আগে পৌঁছানোর মতো সময় হাতে রেখে বের হন।\nদেরি হলে শুরুর সময়ের আগেই গ্রাহককে ফোন বা মেসেজ করে নতুন সময় জানান।\nফোনে ভদ্রভাবে কথা বলুন: নিজের নাম বলুন এবং জানান যে আপনি KAAJ-এর মাধ্যমে আসছেন।\nকাজের দিন ফোনে চার্জ রাখুন এবং নম্বর চালু রাখুন।",
+          "youtubeVideoId": "vhOtPPs7Q-I",
+          "durationS": 356,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Respect and safety in a customer's home",
+          "titleBn": "গ্রাহকের বাসায় সম্মান ও নিরাপত্তা",
+          "summaryEn": "Greet the customer, introduce yourself and confirm what work is needed.\nRespect privacy: stay in the rooms where the work is and do not touch personal belongings.\nKeep your work area tidy and clean up after the job.\nDo not share the customer's address, photos or details with anyone.\nIf you ever feel unsafe, leave and report it in the app. In an emergency, call 999.",
+          "summaryBn": "গ্রাহককে শুভেচ্ছা জানান, নিজের পরিচয় দিন এবং কী কাজ লাগবে তা নিশ্চিত করুন।\nগোপনীয়তা রক্ষা করুন: যে ঘরে কাজ সেখানেই থাকুন এবং ব্যক্তিগত জিনিসে হাত দেবেন না।\nকাজের জায়গা গুছিয়ে রাখুন এবং কাজ শেষে পরিষ্কার করুন।\nগ্রাহকের ঠিকানা, ছবি বা তথ্য কারও সঙ্গে শেয়ার করবেন না।\nকখনো অনিরাপদ মনে হলে সরে যান এবং অ্যাপে রিপোর্ট করুন। জরুরি অবস্থায় ৯৯৯-এ ফোন করুন।",
+          "youtubeVideoId": "F6Tf8L73so0",
+          "durationS": 224,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Agree the work and price before you start",
+          "titleBn": "কাজ শুরুর আগে কাজ ও দাম ঠিক করুন",
+          "summaryEn": "Before starting, repeat back what you will do and what is not included.\nAgree the price in the app or in the chat before work starts. Avoid deals made only by word of mouth.\nIf the job turns out bigger, stop and agree a new price before continuing.\nWhen finished, show the customer the work and ask them to check it.\nIf you are paid in cash, record it in the app so you both have a record.",
+          "summaryBn": "কাজ শুরুর আগে আপনি কী করবেন এবং কী এর মধ্যে নেই তা আবার বলে নিশ্চিত করুন।\nকাজ শুরুর আগে অ্যাপে বা চ্যাটে দাম ঠিক করুন। শুধু মুখের কথায় চুক্তি করবেন না।\nকাজ বলা কাজের চেয়ে বড় হলে থামুন এবং নতুন দাম ঠিক করে তারপর কাজ চালিয়ে যান।\nকাজ শেষে গ্রাহককে কাজটি দেখান এবং যাচাই করতে বলুন।\nনগদ টাকা পেলে অ্যাপে রেকর্ড করুন, যাতে দুজনের কাছেই প্রমাণ থাকে।",
+          "youtubeVideoId": null,
+          "durationS": null,
+          "isSafety": false
+        },
+        {
+          "titleEn": "How KAAJ check-in, cancellations and reviews work",
+          "titleBn": "KAAJ-এ চেক-ইন, বাতিল ও রিভিউ যেভাবে কাজ করে",
+          "summaryEn": "On the job day, open the job and tap Check in when you reach the work site. The app checks that you are within the allowed distance.\nCheck out when the work is done. The customer then reviews and confirms the work.\nCancelling less than 24 hours before the start can lower your reliability, unless it is an emergency such as illness or an accident.\nAfter each job, you and the customer both leave a review. Reviews stay hidden until both have reviewed, or until 7 days have passed.\nGood reviews and completed jobs help you get more work.",
+          "summaryBn": "কাজের দিন কাজের জায়গায় পৌঁছে কাজটি খুলে চেক-ইন চাপুন। অ্যাপ দেখে নেয় আপনি অনুমোদিত দূরত্বের মধ্যে আছেন কি না।\nকাজ শেষ হলে চেক-আউট করুন। এরপর গ্রাহক কাজটি পর্যালোচনা করে নিশ্চিত করবেন।\nশুরুর ২৪ ঘণ্টার কম আগে বাতিল করলে আপনার নির্ভরযোগ্যতা কমতে পারে, তবে অসুস্থতা বা দুর্ঘটনার মতো জরুরি কারণে নয়।\nপ্রতিটি কাজের পর আপনি ও গ্রাহক দুজনেই রিভিউ দেবেন। দুজন রিভিউ না দেওয়া পর্যন্ত বা ৭ দিন না যাওয়া পর্যন্ত রিভিউ লুকানো থাকে।\nভালো রিভিউ ও সম্পন্ন কাজ আপনাকে আরও কাজ পেতে সাহায্য করে।",
+          "youtubeVideoId": null,
+          "durationS": null,
+          "isSafety": false
+        }
+      ],
+      "questions": [
+        {
+          "promptEn": "You will arrive 20 minutes late. What should you do?",
+          "promptBn": "আপনি ২০ মিনিট দেরিতে পৌঁছাবেন। কী করা উচিত?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Call or message the customer before the start time with a new arrival time",
+              "bn": "শুরুর সময়ের আগেই গ্রাহককে ফোন বা মেসেজ করে নতুন সময় জানানো"
+            },
+            {
+              "id": "b",
+              "en": "Say nothing and arrive late",
+              "bn": "কিছু না বলে দেরিতে পৌঁছানো"
+            },
+            {
+              "id": "c",
+              "en": "Cancel without telling the customer",
+              "bn": "গ্রাহককে না জানিয়ে বাতিল করা"
+            },
+            {
+              "id": "d",
+              "en": "Send someone else instead",
+              "bn": "নিজের বদলে অন্য কাউকে পাঠানো"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Telling the customer early lets them plan and keeps their trust.",
+          "explanationBn": "আগেভাগে জানালে গ্রাহক পরিকল্পনা করতে পারেন এবং আপনার ওপর আস্থা থাকে।"
+        },
+        {
+          "promptEn": "When should the price be agreed?",
+          "promptBn": "দাম কখন ঠিক করা উচিত?",
+          "options": [
+            {
+              "id": "a",
+              "en": "After the work is finished",
+              "bn": "কাজ শেষ হওয়ার পরে"
+            },
+            {
+              "id": "b",
+              "en": "Before starting, in the app or the chat",
+              "bn": "কাজ শুরুর আগে, অ্যাপে বা চ্যাটে"
+            },
+            {
+              "id": "c",
+              "en": "Whatever the customer decides at the end",
+              "bn": "শেষে গ্রাহক যা ঠিক করেন"
+            },
+            {
+              "id": "d",
+              "en": "It does not need to be agreed",
+              "bn": "দাম ঠিক করার দরকার নেই"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "A price agreed before starting avoids arguments and is recorded.",
+          "explanationBn": "কাজ শুরুর আগে দাম ঠিক করলে ঝগড়া এড়ানো যায় এবং তা রেকর্ডে থাকে।"
+        },
+        {
+          "promptEn": "The job turns out to be bigger than described. What do you do?",
+          "promptBn": "কাজটি বলা কাজের চেয়ে বড় দেখা গেল। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Continue and charge more at the end",
+              "bn": "কাজ চালিয়ে যাওয়া এবং শেষে বেশি টাকা চাওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Stop and agree a new price before continuing",
+              "bn": "থেমে নতুন দাম ঠিক করে তারপর কাজ চালিয়ে যাওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Leave the job halfway",
+              "bn": "কাজ অর্ধেক রেখে চলে যাওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Quietly do less work",
+              "bn": "চুপচাপ কম কাজ করা"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Agree changes before doing extra work, so nobody is surprised.",
+          "explanationBn": "বাড়তি কাজের আগে পরিবর্তনে একমত হোন, যাতে কেউ অবাক না হন।"
+        },
+        {
+          "promptEn": "Inside a customer's home you should:",
+          "promptBn": "গ্রাহকের বাসার ভেতরে আপনার উচিত:",
+          "options": [
+            {
+              "id": "a",
+              "en": "Stay in the rooms where the work is and not touch personal belongings",
+              "bn": "যে ঘরে কাজ সেখানেই থাকা এবং ব্যক্তিগত জিনিসে হাত না দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Look around the other rooms",
+              "bn": "অন্য ঘরগুলো ঘুরে দেখা"
+            },
+            {
+              "id": "c",
+              "en": "Use the customer's phone",
+              "bn": "গ্রাহকের ফোন ব্যবহার করা"
+            },
+            {
+              "id": "d",
+              "en": "Take photos of the house",
+              "bn": "বাসার ছবি তোলা"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Respecting privacy is the base of trust in home services.",
+          "explanationBn": "গোপনীয়তা রক্ষা করাই বাসার কাজে আস্থার ভিত্তি।"
+        },
+        {
+          "promptEn": "Sharing a customer's address or photos with friends is:",
+          "promptBn": "বন্ধুদের সঙ্গে গ্রাহকের ঠিকানা বা ছবি শেয়ার করা:",
+          "options": [
+            {
+              "id": "a",
+              "en": "Fine if the friends ask",
+              "bn": "বন্ধুরা চাইলে ঠিক আছে"
+            },
+            {
+              "id": "b",
+              "en": "Not allowed",
+              "bn": "অনুমোদিত নয়"
+            },
+            {
+              "id": "c",
+              "en": "Fine after the job is finished",
+              "bn": "কাজ শেষ হলে ঠিক আছে"
+            },
+            {
+              "id": "d",
+              "en": "Fine on Facebook",
+              "bn": "ফেসবুকে দিলে ঠিক আছে"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Customer details are private and must not be shared.",
+          "explanationBn": "গ্রাহকের তথ্য ব্যক্তিগত এবং শেয়ার করা যাবে না।"
+        },
+        {
+          "promptEn": "You feel unsafe in a customer's home. What is right?",
+          "promptBn": "গ্রাহকের বাসায় আপনি অনিরাপদ বোধ করছেন। কোনটি সঠিক?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Stay quiet and keep working",
+              "bn": "চুপ থেকে কাজ চালিয়ে যাওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Leave, report it in the app, and call 999 in an emergency",
+              "bn": "সরে যাওয়া, অ্যাপে রিপোর্ট করা, এবং জরুরি হলে ৯৯৯-এ ফোন করা"
+            },
+            {
+              "id": "c",
+              "en": "Argue with the customer",
+              "bn": "গ্রাহকের সঙ্গে তর্ক করা"
+            },
+            {
+              "id": "d",
+              "en": "Delete the app",
+              "bn": "অ্যাপ মুছে ফেলা"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Your safety comes first. Leaving is always allowed.",
+          "explanationBn": "আপনার নিরাপত্তাই প্রথম। সরে যাওয়া সবসময় অনুমোদিত।"
+        },
+        {
+          "promptEn": "When should you check in on the KAAJ app?",
+          "promptBn": "KAAJ অ্যাপে কখন চেক-ইন করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "At home before leaving",
+              "bn": "বের হওয়ার আগে বাসা থেকে"
+            },
+            {
+              "id": "b",
+              "en": "When you reach the work site",
+              "bn": "কাজের জায়গায় পৌঁছানোর পর"
+            },
+            {
+              "id": "c",
+              "en": "After finishing the job",
+              "bn": "কাজ শেষ হওয়ার পরে"
+            },
+            {
+              "id": "d",
+              "en": "Never",
+              "bn": "কখনোই না"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Check-in only works near the work site.",
+          "explanationBn": "চেক-ইন শুধু কাজের জায়গার কাছেই কাজ করে।"
+        },
+        {
+          "promptEn": "You cancel a job 3 hours before it starts because your plans changed. What can happen?",
+          "promptBn": "পরিকল্পনা বদলানোয় শুরুর ৩ ঘণ্টা আগে কাজ বাতিল করলেন। কী হতে পারে?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Nothing at all",
+              "bn": "কিছুই হবে না"
+            },
+            {
+              "id": "b",
+              "en": "Your reliability can go down",
+              "bn": "আপনার নির্ভরযোগ্যতা কমতে পারে"
+            },
+            {
+              "id": "c",
+              "en": "Your rating goes up",
+              "bn": "আপনার রেটিং বাড়বে"
+            },
+            {
+              "id": "d",
+              "en": "You are banned forever",
+              "bn": "আপনাকে চিরতরে নিষিদ্ধ করা হবে"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Late cancellations without an emergency lower reliability.",
+          "explanationBn": "জরুরি কারণ ছাড়া দেরিতে বাতিল করলে নির্ভরযোগ্যতা কমে।"
+        },
+        {
+          "promptEn": "When do KAAJ reviews become visible?",
+          "promptBn": "KAAJ-এ রিভিউ কখন দেখা যায়?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Immediately",
+              "bn": "সঙ্গে সঙ্গে"
+            },
+            {
+              "id": "b",
+              "en": "When both people have reviewed, or after 7 days",
+              "bn": "দুজনেই রিভিউ দিলে, অথবা ৭ দিন পরে"
+            },
+            {
+              "id": "c",
+              "en": "Never",
+              "bn": "কখনোই না"
+            },
+            {
+              "id": "d",
+              "en": "Only to administrators",
+              "bn": "শুধু অ্যাডমিনরা দেখতে পান"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Hidden reviews let both sides write honestly.",
+          "explanationBn": "রিভিউ লুকানো থাকায় দুই পক্ষই সৎভাবে লিখতে পারে।"
+        },
+        {
+          "promptEn": "When is the best time to confirm the address and time?",
+          "promptBn": "ঠিকানা ও সময় নিশ্চিত করার সবচেয়ে ভালো সময় কখন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "The day before the job",
+              "bn": "কাজের আগের দিন"
+            },
+            {
+              "id": "b",
+              "en": "After you arrive",
+              "bn": "পৌঁছানোর পরে"
+            },
+            {
+              "id": "c",
+              "en": "It is not needed",
+              "bn": "দরকার নেই"
+            },
+            {
+              "id": "d",
+              "en": "After the job",
+              "bn": "কাজ শেষে"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Confirming early avoids wasted trips.",
+          "explanationBn": "আগে নিশ্চিত করলে অযথা যাতায়াত এড়ানো যায়।"
+        },
+        {
+          "promptEn": "The customer paid you in cash. What should you do?",
+          "promptBn": "গ্রাহক নগদ টাকা দিয়েছেন। আপনার কী করা উচিত?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Nothing",
+              "bn": "কিছুই না"
+            },
+            {
+              "id": "b",
+              "en": "Record the payment in the app",
+              "bn": "অ্যাপে টাকা পাওয়ার রেকর্ড রাখা"
+            },
+            {
+              "id": "c",
+              "en": "Ask them to pay again online",
+              "bn": "আবার অনলাইনে টাকা দিতে বলা"
+            },
+            {
+              "id": "d",
+              "en": "Post about it on Facebook",
+              "bn": "ফেসবুকে পোস্ট করা"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "A record protects both of you if there is a question later.",
+          "explanationBn": "পরে প্রশ্ন উঠলে রেকর্ড দুজনকেই সুরক্ষা দেয়।"
+        },
+        {
+          "promptEn": "When you finish the job, you should:",
+          "promptBn": "কাজ শেষ হলে আপনার উচিত:",
+          "options": [
+            {
+              "id": "a",
+              "en": "Leave quickly",
+              "bn": "দ্রুত চলে যাওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Show the work and ask the customer to check it",
+              "bn": "কাজটি দেখিয়ে গ্রাহককে যাচাই করতে বলা"
+            },
+            {
+              "id": "c",
+              "en": "Offer a discount in return for a 5-star review",
+              "bn": "৫-তারা রিভিউয়ের বিনিময়ে ছাড় দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Lock the door behind you",
+              "bn": "পেছনে দরজা লাগিয়ে দেওয়া"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Checking together catches problems before you leave. Trading discounts for reviews is not allowed.",
+          "explanationBn": "একসঙ্গে যাচাই করলে চলে যাওয়ার আগেই সমস্যা ধরা পড়ে। ছাড়ের বিনিময়ে রিভিউ নেওয়া অনুমোদিত নয়।"
+        }
+      ]
+    },
+    {
+      "slug": "home-cleaning-basics",
+      "skillSlug": "cleaning",
+      "titleEn": "Home cleaning basics",
+      "titleBn": "বাসা পরিষ্কারের মূল বিষয়",
+      "summaryEn": "Tools, safe use of cleaning chemicals, cleaning a kitchen and bathroom step by step, and finishing the job with the customer.",
+      "summaryBn": "সরঞ্জাম, পরিষ্কারক রাসায়নিকের নিরাপদ ব্যবহার, ধাপে ধাপে রান্নাঘর ও বাথরুম পরিষ্কার, এবং গ্রাহকের সঙ্গে কাজ শেষ করা।",
+      "minutes": 25,
+      "estDataMb": 60,
+      "passMarkPct": 70,
+      "questionCount": 10,
+      "isSafetyCritical": false,
+      "sortOrder": 2,
+      "lessons": [
+        {
+          "titleEn": "Tools and supplies",
+          "titleBn": "সরঞ্জাম ও উপকরণ",
+          "summaryEn": "Basic kit: broom, mop and bucket, microfibre or cotton cloths, scrubbing brush, sponge, rubber gloves, dustpan, rubbish bags.\nUse separate cloths for the toilet, the kitchen and other surfaces so dirt and germs do not spread.\nAsk the customer which products to use, or bring mild ones: dish soap, floor cleaner, glass cleaner.\nRinse and dry cloths and tools after use, and wash your hands when you finish.",
+          "summaryBn": "মূল সরঞ্জাম: ঝাড়ু, মপ ও বালতি, মাইক্রোফাইবার বা সুতির কাপড়, ঘষার ব্রাশ, স্পঞ্জ, রাবারের গ্লাভস, ডাস্টপ্যান, ময়লার ব্যাগ।\nটয়লেট, রান্নাঘর ও অন্যান্য জায়গার জন্য আলাদা কাপড় ব্যবহার করুন, যাতে ময়লা ও জীবাণু না ছড়ায়।\nকোন পরিষ্কারক ব্যবহার করবেন তা গ্রাহককে জিজ্ঞেস করুন, অথবা হালকা পরিষ্কারক আনুন: থালা ধোয়ার সাবান, ফ্লোর ক্লিনার, গ্লাস ক্লিনার।\nব্যবহারের পর কাপড় ও সরঞ্জাম ধুয়ে শুকিয়ে রাখুন এবং কাজ শেষে হাত ধুয়ে নিন।",
+          "youtubeVideoId": "CIwty39A_Y8",
+          "durationS": 224,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Using cleaning chemicals safely",
+          "titleBn": "পরিষ্কারক রাসায়নিক নিরাপদে ব্যবহার",
+          "summaryEn": "Never mix bleach with toilet cleaner, acids, vinegar or ammonia: it releases toxic gas.\nUse one product at a time, and rinse the surface with water before using another.\nWear rubber gloves. Open windows or switch on a fan for fresh air.\nRead the label and follow the dilution instructions. More product does not clean better.\nIf a chemical gets in the eyes, rinse with clean water for 15 minutes and get medical help.\nKeep products closed and away from children and food.",
+          "summaryBn": "ব্লিচের সঙ্গে টয়লেট ক্লিনার, অ্যাসিড, ভিনেগার বা অ্যামোনিয়া কখনো মেশাবেন না: এতে বিষাক্ত গ্যাস তৈরি হয়।\nএকবারে একটি পরিষ্কারক ব্যবহার করুন, এবং অন্যটি ব্যবহারের আগে জায়গাটি পানি দিয়ে ধুয়ে নিন।\nরাবারের গ্লাভস পরুন। জানালা খুলে দিন বা ফ্যান চালান।\nলেবেল পড়ুন এবং কতটুকু পানিতে মেশাতে হবে তা মেনে চলুন। বেশি দিলে বেশি পরিষ্কার হয় না।\nচোখে রাসায়নিক গেলে পরিষ্কার পানি দিয়ে ১৫ মিনিট ধুয়ে ফেলুন এবং চিকিৎসা নিন।\nপরিষ্কারক বন্ধ করে শিশু ও খাবার থেকে দূরে রাখুন।",
+          "youtubeVideoId": "y_J6_4eobsI",
+          "durationS": 296,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Cleaning a kitchen and bathroom step by step",
+          "titleBn": "ধাপে ধাপে রান্নাঘর ও বাথরুম পরিষ্কার",
+          "summaryEn": "Work top to bottom: shelves and surfaces first and the floor last, so dust falls on areas you have not cleaned yet.\nWork dry before wet: sweep or dust first, then wipe and mop.\nKitchen: clear and wipe the counters, wash the sink, clean the stove only when it is off and cool, then the floor.\nBathroom: apply toilet cleaner and let it sit, clean the basin and taps, scrub the toilet with its own brush, then the floor.\nUnplug appliances before wiping them, and keep water away from sockets.",
+          "summaryBn": "উপর থেকে নিচে কাজ করুন: আগে তাক ও উপরের জায়গা, শেষে মেঝে, যাতে ধুলো পরিষ্কার না-করা জায়গায় পড়ে।\nআগে শুকনো, পরে ভেজা কাজ: আগে ঝাড়ু দিন বা ধুলো ঝাড়ুন, তারপর মুছুন ও মপ করুন।\nরান্নাঘর: কাউন্টার খালি করে মুছুন, সিঙ্ক ধুয়ে ফেলুন, চুলা বন্ধ ও ঠান্ডা থাকলে তবেই পরিষ্কার করুন, তারপর মেঝে।\nবাথরুম: টয়লেট ক্লিনার দিয়ে কিছুক্ষণ রেখে দিন, বেসিন ও কল পরিষ্কার করুন, টয়লেটের নিজস্ব ব্রাশ দিয়ে ঘষুন, তারপর মেঝে।\nকোনো যন্ত্র মোছার আগে প্লাগ খুলে নিন এবং সকেট থেকে পানি দূরে রাখুন।",
+          "youtubeVideoId": "lpOO6N5WyL8",
+          "durationS": 133,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Finishing the job",
+          "titleBn": "কাজ শেষ করা",
+          "summaryEn": "Walk through the rooms with the customer and ask them to check the work.\nIf something they point out was part of the agreed work, fix it before you leave.\nPut furniture and items back where they were.\nTake the rubbish out if the customer asks, and pack your tools.\nCheck out in the app and thank the customer.",
+          "summaryBn": "গ্রাহকের সঙ্গে ঘরগুলো ঘুরে দেখুন এবং কাজটি যাচাই করতে বলুন।\nতাঁরা যা দেখান তা চুক্তির কাজের মধ্যে থাকলে যাওয়ার আগে ঠিক করে দিন।\nআসবাব ও জিনিসপত্র আগের জায়গায় রাখুন।\nগ্রাহক বললে ময়লা বাইরে ফেলে দিন এবং নিজের সরঞ্জাম গুছিয়ে নিন।\nঅ্যাপে চেক-আউট করুন এবং গ্রাহককে ধন্যবাদ দিন।",
+          "youtubeVideoId": null,
+          "durationS": null,
+          "isSafety": false
+        }
+      ],
+      "questions": [
+        {
+          "promptEn": "Which mixture is dangerous?",
+          "promptBn": "কোন মিশ্রণটি বিপজ্জনক?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Bleach and toilet cleaner",
+              "bn": "ব্লিচ ও টয়লেট ক্লিনার"
+            },
+            {
+              "id": "b",
+              "en": "Dish soap and warm water",
+              "bn": "থালা ধোয়ার সাবান ও গরম পানি"
+            },
+            {
+              "id": "c",
+              "en": "Floor cleaner and water as the label says",
+              "bn": "লেবেল অনুযায়ী ফ্লোর ক্লিনার ও পানি"
+            },
+            {
+              "id": "d",
+              "en": "Clean water only",
+              "bn": "শুধু পরিষ্কার পানি"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Bleach with acid cleaners releases toxic gas. Never mix them.",
+          "explanationBn": "অ্যাসিডযুক্ত ক্লিনারের সঙ্গে ব্লিচ মেশালে বিষাক্ত গ্যাস তৈরি হয়। কখনো মেশাবেন না।"
+        },
+        {
+          "promptEn": "What is the right order for cleaning a room?",
+          "promptBn": "একটি ঘর পরিষ্কারের সঠিক ক্রম কোনটি?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Floor first, then shelves",
+              "bn": "আগে মেঝে, তারপর তাক"
+            },
+            {
+              "id": "b",
+              "en": "Top to bottom, floor last",
+              "bn": "উপর থেকে নিচে, মেঝে সবশেষে"
+            },
+            {
+              "id": "c",
+              "en": "Any order",
+              "bn": "যেকোনো ক্রমে"
+            },
+            {
+              "id": "d",
+              "en": "Only the floor",
+              "bn": "শুধু মেঝে"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Dust falls down, so the floor goes last.",
+          "explanationBn": "ধুলো নিচে পড়ে, তাই মেঝে সবশেষে।"
+        },
+        {
+          "promptEn": "Dry or wet cleaning first?",
+          "promptBn": "আগে শুকনো না ভেজা পরিষ্কার?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Wet first",
+              "bn": "আগে ভেজা"
+            },
+            {
+              "id": "b",
+              "en": "Dry first (sweep or dust), then wipe and mop",
+              "bn": "আগে শুকনো (ঝাড়ু বা ধুলো ঝাড়া), তারপর মোছা ও মপ"
+            },
+            {
+              "id": "c",
+              "en": "Only wet",
+              "bn": "শুধু ভেজা"
+            },
+            {
+              "id": "d",
+              "en": "It does not matter",
+              "bn": "কোনো পার্থক্য নেই"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Wet cleaning on dust makes mud.",
+          "explanationBn": "ধুলোর ওপর ভেজা মুছলে কাদা হয়ে যায়।"
+        },
+        {
+          "promptEn": "Why use separate cloths for the toilet and the kitchen?",
+          "promptBn": "টয়লেট ও রান্নাঘরের জন্য আলাদা কাপড় কেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "It looks nicer",
+              "bn": "দেখতে ভালো লাগে"
+            },
+            {
+              "id": "b",
+              "en": "To stop germs spreading",
+              "bn": "জীবাণু ছড়ানো বন্ধ করতে"
+            },
+            {
+              "id": "c",
+              "en": "It is cheaper",
+              "bn": "খরচ কম"
+            },
+            {
+              "id": "d",
+              "en": "Only if the customer asks",
+              "bn": "শুধু গ্রাহক চাইলে"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Germs from the toilet must never reach food areas.",
+          "explanationBn": "টয়লেটের জীবাণু কখনো খাবারের জায়গায় যাওয়া উচিত নয়।"
+        },
+        {
+          "promptEn": "A cleaning chemical gets in your eyes. What do you do?",
+          "promptBn": "চোখে পরিষ্কারক রাসায়নিক গেল। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Rub your eyes",
+              "bn": "চোখ ঘষা"
+            },
+            {
+              "id": "b",
+              "en": "Rinse with clean water for 15 minutes and get medical help",
+              "bn": "পরিষ্কার পানি দিয়ে ১৫ মিনিট ধোয়া এবং চিকিৎসা নেওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Keep working",
+              "bn": "কাজ চালিয়ে যাওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Wipe with a dirty cloth",
+              "bn": "ময়লা কাপড় দিয়ে মোছা"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Long rinsing with clean water is the first aid for chemical splashes.",
+          "explanationBn": "রাসায়নিক ছিটকে গেলে অনেকক্ষণ পরিষ্কার পানি দিয়ে ধোয়াই প্রাথমিক চিকিৎসা।"
+        },
+        {
+          "promptEn": "Before wiping a kitchen appliance you should:",
+          "promptBn": "রান্নাঘরের যন্ত্র মোছার আগে আপনার উচিত:",
+          "options": [
+            {
+              "id": "a",
+              "en": "Unplug it",
+              "bn": "প্লাগ খুলে নেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Spray water into it",
+              "bn": "ভেতরে পানি স্প্রে করা"
+            },
+            {
+              "id": "c",
+              "en": "Keep it switched on",
+              "bn": "চালু রাখা"
+            },
+            {
+              "id": "d",
+              "en": "Pour bleach on it",
+              "bn": "ওপরে ব্লিচ ঢালা"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Water and electricity together can cause a shock.",
+          "explanationBn": "পানি ও বিদ্যুৎ একসঙ্গে হলে শক লাগতে পারে।"
+        },
+        {
+          "promptEn": "When should you clean the stove?",
+          "promptBn": "চুলা কখন পরিষ্কার করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "While it is on and hot",
+              "bn": "চালু ও গরম অবস্থায়"
+            },
+            {
+              "id": "b",
+              "en": "When it is off and cool",
+              "bn": "বন্ধ ও ঠান্ডা অবস্থায়"
+            },
+            {
+              "id": "c",
+              "en": "While someone is cooking",
+              "bn": "কেউ রান্না করার সময়"
+            },
+            {
+              "id": "d",
+              "en": "Any time",
+              "bn": "যেকোনো সময়"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "A hot stove can burn you and dry cleaner into stains.",
+          "explanationBn": "গরম চুলায় হাত পুড়তে পারে এবং দাগ শক্ত হয়ে যায়।"
+        },
+        {
+          "promptEn": "Using more cleaning product than the label says:",
+          "promptBn": "লেবেলে যা লেখা তার চেয়ে বেশি পরিষ্কারক ব্যবহার করলে:",
+          "options": [
+            {
+              "id": "a",
+              "en": "Cleans better",
+              "bn": "বেশি পরিষ্কার হয়"
+            },
+            {
+              "id": "b",
+              "en": "Does not clean better and can be unsafe",
+              "bn": "বেশি পরিষ্কার হয় না এবং বিপজ্জনক হতে পারে"
+            },
+            {
+              "id": "c",
+              "en": "Is required",
+              "bn": "এটাই নিয়ম"
+            },
+            {
+              "id": "d",
+              "en": "Saves time",
+              "bn": "সময় বাঁচে"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Follow the label. Extra product wastes money and can harm health.",
+          "explanationBn": "লেবেল মেনে চলুন। বেশি দিলে টাকা নষ্ট হয় এবং স্বাস্থ্যের ক্ষতি হতে পারে।"
+        },
+        {
+          "promptEn": "When using cleaning chemicals, you should:",
+          "promptBn": "পরিষ্কারক রাসায়নিক ব্যবহারের সময় আপনার উচিত:",
+          "options": [
+            {
+              "id": "a",
+              "en": "Close all the windows",
+              "bn": "সব জানালা বন্ধ রাখা"
+            },
+            {
+              "id": "b",
+              "en": "Open windows or switch on a fan",
+              "bn": "জানালা খোলা বা ফ্যান চালানো"
+            },
+            {
+              "id": "c",
+              "en": "Breathe in close to check the smell",
+              "bn": "কাছে গিয়ে গন্ধ শুঁকে দেখা"
+            },
+            {
+              "id": "d",
+              "en": "Work in a closed cupboard",
+              "bn": "বন্ধ আলমারির ভেতরে কাজ করা"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Fresh air keeps fumes from building up.",
+          "explanationBn": "খোলা বাতাস থাকলে ধোঁয়া জমে না।"
+        },
+        {
+          "promptEn": "How do you use toilet cleaner correctly?",
+          "promptBn": "টয়লেট ক্লিনার সঠিকভাবে কীভাবে ব্যবহার করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Apply it, let it sit, then scrub with the toilet brush",
+              "bn": "লাগিয়ে কিছুক্ষণ রেখে টয়লেটের ব্রাশ দিয়ে ঘষা"
+            },
+            {
+              "id": "b",
+              "en": "Mix it with bleach for extra strength",
+              "bn": "বেশি কাজের জন্য ব্লিচের সঙ্গে মেশানো"
+            },
+            {
+              "id": "c",
+              "en": "Scrub with the kitchen sponge",
+              "bn": "রান্নাঘরের স্পঞ্জ দিয়ে ঘষা"
+            },
+            {
+              "id": "d",
+              "en": "Skip the toilet",
+              "bn": "টয়লেট বাদ দেওয়া"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Waiting lets the cleaner work. Use the toilet brush only for the toilet.",
+          "explanationBn": "অপেক্ষা করলে ক্লিনার কাজ করে। টয়লেটের ব্রাশ শুধু টয়লেটেই ব্যবহার করুন।"
+        },
+        {
+          "promptEn": "Which products should you use in a customer's home?",
+          "promptBn": "গ্রাহকের বাসায় কোন পরিষ্কারক ব্যবহার করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "The strongest one available",
+              "bn": "সবচেয়ে কড়া যেটা আছে"
+            },
+            {
+              "id": "b",
+              "en": "Ask the customer, or use mild products",
+              "bn": "গ্রাহককে জিজ্ঞেস করা, অথবা হালকা পরিষ্কারক"
+            },
+            {
+              "id": "c",
+              "en": "Mix several together",
+              "bn": "কয়েকটা একসঙ্গে মিশিয়ে"
+            },
+            {
+              "id": "d",
+              "en": "Only bleach",
+              "bn": "শুধু ব্লিচ"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Some surfaces are damaged by strong products, and customers may have preferences.",
+          "explanationBn": "কড়া পরিষ্কারকে কিছু জিনিস নষ্ট হয়, আর গ্রাহকের পছন্দও থাকতে পারে।"
+        },
+        {
+          "promptEn": "Before you leave a cleaning job, you should:",
+          "promptBn": "পরিষ্কারের কাজ শেষে যাওয়ার আগে আপনার উচিত:",
+          "options": [
+            {
+              "id": "a",
+              "en": "Ask the customer to check the work",
+              "bn": "গ্রাহককে কাজটি যাচাই করতে বলা"
+            },
+            {
+              "id": "b",
+              "en": "Leave without telling anyone",
+              "bn": "কাউকে না বলে চলে যাওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Leave the furniture where you moved it",
+              "bn": "সরানো আসবাব সেভাবেই রেখে যাওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Leave the rubbish bags inside",
+              "bn": "ময়লার ব্যাগ ভেতরে রেখে যাওয়া"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "A quick check together avoids complaints and bad reviews.",
+          "explanationBn": "একসঙ্গে দ্রুত যাচাই করলে অভিযোগ ও খারাপ রিভিউ এড়ানো যায়।"
+        }
+      ]
+    }
+  ]
+}

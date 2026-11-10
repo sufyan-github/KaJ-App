@@ -33,6 +33,8 @@ import { InfrastructureModule } from "./infra/infrastructure.module";
 import { HealthModule } from "./modules/health/health.module";
 import { AvailabilityModule } from "./modules/availability/availability.module";
 import { UsersModule } from "./modules/users/users.module";
+import { TrainingModule } from "./modules/training/training.module";
+import { JobAlertsModule } from "./modules/job-alerts/job-alerts.module";
 import { UploadsModule } from "./modules/uploads/uploads.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { CatalogModule } from "./modules/catalog/catalog.module";
@@ -85,6 +87,8 @@ import { SubscriptionsModule } from "./modules/subscriptions/subscriptions.modul
     ChatModule,
     UsersModule,
     UploadsModule,
+    TrainingModule,
+    JobAlertsModule,
   ],
   providers: [
     AbilityFactory,

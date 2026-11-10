@@ -319,6 +319,13 @@ enum RiskSeverity {
   CRITICAL
 }
 
+enum EvidenceLevel {
+  SELF_REPORTED
+  KNOWLEDGE_TESTED
+  PRACTICAL_CHECKED
+  OFFICIALLY_CERTIFIED
+}
+
 enum AdminRole {
   ADMIN
   MODERATOR
@@ -410,6 +417,9 @@ model User {
   operator_identity           UserOperatorIdentity?
   subscriptions               Subscription[]
   subscription_payments       SubscriptionPayment[]
+  training_lesson_opens       TrainingLessonOpen[]
+  training_attempts           TrainingAttempt[]
+  training_certificates       TrainingCertificate[]
 
   @@index([status, deleted_at])
   @@map("users")
@@ -494,15 +504,15 @@ model RefreshToken {
 }
 
 model OtpChallenge {
-  id          String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  phone_e164  String
-  code_hash   String
-  purpose     OtpPurpose @default(LOGIN)
-  attempts    Int        @default(0)
-  expires_at  DateTime
-  consumed_at DateTime?
-  recovery_verifying Boolean @default(false)
-  created_at  DateTime   @default(now())
+  id                 String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  phone_e164         String
+  code_hash          String
+  purpose            OtpPurpose @default(LOGIN)
+  attempts           Int        @default(0)
+  expires_at         DateTime
+  consumed_at        DateTime?
+  recovery_verifying Boolean    @default(false)
+  created_at         DateTime   @default(now())
 
   @@index([phone_e164, purpose, created_at(sort: Desc)])
   @@index([expires_at])
@@ -630,33 +640,35 @@ model Category {
 }
 
 model Skill {
-  id          String      @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  slug        String      @unique
-  name_en     String
-  name_bn     String
-  category_id String      @db.Uuid
-  is_active   Boolean     @default(true)
-  created_at  DateTime    @default(now())
-  updated_at  DateTime    @updatedAt
-  category    Category    @relation(fields: [category_id], references: [id], onDelete: Restrict)
-  user_skills UserSkill[]
-  job_skills  JobSkill[]
+  id               String           @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  slug             String           @unique
+  name_en          String
+  name_bn          String
+  category_id      String           @db.Uuid
+  is_active        Boolean          @default(true)
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+  category         Category         @relation(fields: [category_id], references: [id], onDelete: Restrict)
+  user_skills      UserSkill[]
+  job_skills       JobSkill[]
+  training_courses TrainingCourse[]
 
   @@index([category_id, is_active])
   @@map("skills")
 }
 
 model UserSkill {
-  user_id     String     @db.Uuid
-  skill_id    String     @db.Uuid
-  level       SkillLevel @default(BEGINNER)
-  years       Decimal?   @db.Decimal(4, 1)
-  is_verified Boolean    @default(false)
-  verified_at DateTime?
-  created_at  DateTime   @default(now())
-  updated_at  DateTime   @updatedAt
-  user        User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  skill       Skill      @relation(fields: [skill_id], references: [id], onDelete: Cascade)
+  user_id            String     @db.Uuid
+  skill_id           String     @db.Uuid
+  level              SkillLevel @default(BEGINNER)
+  years              Decimal?   @db.Decimal(4, 1)
+  is_verified        Boolean    @default(false)
+  verified_at        DateTime?
+  has_prior_training Boolean    @default(false)
+  created_at         DateTime   @default(now())
+  updated_at         DateTime   @updatedAt
+  user               User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  skill              Skill      @relation(fields: [skill_id], references: [id], onDelete: Cascade)
 
   @@id([user_id, skill_id])
   @@index([skill_id, is_verified])
@@ -1661,4 +1673,121 @@ model AuditLog {
   @@index([entity, entity_id, created_at(sort: Desc)])
   @@index([actor_user_id, created_at(sort: Desc)])
   @@map("audit_logs")
+}
+
+model TrainingCourse {
+  id                 String                @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  slug               String                @unique
+  skill_id           String?               @db.Uuid
+  title_en           String
+  title_bn           String
+  summary_en         String
+  summary_bn         String
+  minutes            Int
+  est_data_mb        Int
+  pass_mark_pct      Int                   @default(70)
+  question_count     Int                   @default(10)
+  is_safety_critical Boolean               @default(false)
+  is_published       Boolean               @default(false)
+  version            Int                   @default(1)
+  sort_order         Int                   @default(0)
+  created_at         DateTime              @default(now())
+  updated_at         DateTime              @updatedAt
+  skill              Skill?                @relation(fields: [skill_id], references: [id], onDelete: SetNull)
+  lessons            TrainingLesson[]
+  questions          TrainingQuestion[]
+  attempts           TrainingAttempt[]
+  certificates       TrainingCertificate[]
+
+  @@index([skill_id, is_published])
+  @@map("training_courses")
+}
+
+model TrainingLesson {
+  id               String               @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  course_id        String               @db.Uuid
+  sort_order       Int
+  title_en         String
+  title_bn         String
+  summary_en       String
+  summary_bn       String
+  youtube_video_id String?
+  duration_s       Int?
+  is_safety        Boolean              @default(false)
+  course           TrainingCourse       @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  opens            TrainingLessonOpen[]
+
+  @@unique([course_id, sort_order])
+  @@map("training_lessons")
+}
+
+model TrainingQuestion {
+  id                String         @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  course_id         String         @db.Uuid
+  prompt_en         String
+  prompt_bn         String
+  options_json      Json
+  correct_option_id String
+  explanation_en    String
+  explanation_bn    String
+  is_active         Boolean        @default(true)
+  course            TrainingCourse @relation(fields: [course_id], references: [id], onDelete: Cascade)
+
+  @@index([course_id, is_active])
+  @@map("training_questions")
+}
+
+// Private progress only: opening a lesson never earns anything.
+model TrainingLessonOpen {
+  user_id         String         @db.Uuid
+  lesson_id       String         @db.Uuid
+  first_opened_at DateTime       @default(now())
+  last_opened_at  DateTime       @default(now())
+  user            User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  lesson          TrainingLesson @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, lesson_id])
+  @@index([lesson_id])
+  @@map("training_lesson_opens")
+}
+
+model TrainingAttempt {
+  id             String               @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id        String               @db.Uuid
+  course_id      String               @db.Uuid
+  course_version Int
+  question_ids   Json
+  answers_json   Json?
+  score_pct      Int?
+  passed         Boolean?
+  started_at     DateTime             @default(now())
+  expires_at     DateTime
+  submitted_at   DateTime?
+  user           User                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  course         TrainingCourse       @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  certificate    TrainingCertificate?
+
+  @@index([user_id, course_id, started_at])
+  @@index([course_id])
+  @@map("training_attempts")
+}
+
+model TrainingCertificate {
+  id             String          @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id        String          @db.Uuid
+  course_id      String          @db.Uuid
+  attempt_id     String          @unique @db.Uuid
+  course_version Int
+  evidence_level EvidenceLevel
+  score_pct      Int
+  public_code    String          @unique
+  issued_at      DateTime        @default(now())
+  revoked_at     DateTime?
+  user           User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  course         TrainingCourse  @relation(fields: [course_id], references: [id], onDelete: Restrict)
+  attempt        TrainingAttempt @relation(fields: [attempt_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, revoked_at])
+  @@index([course_id])
+  @@map("training_certificates")
 }

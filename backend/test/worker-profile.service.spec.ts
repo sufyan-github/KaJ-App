@@ -10,9 +10,10 @@ describe("worker skills and rates", () => {
   const deleteMany = jest.fn();
   const createMany = jest.fn();
   const findMany = jest.fn();
+  const previousFindMany = jest.fn();
   const transaction = {
     skill: { count: skillCount },
-    userSkill: { createMany, deleteMany },
+    userSkill: { createMany, deleteMany, findMany: previousFindMany },
   };
   const prisma = {
     $transaction: jest.fn((callback) => callback(transaction)),
@@ -25,6 +26,7 @@ describe("worker skills and rates", () => {
     skillCount.mockResolvedValue(1);
     deleteMany.mockResolvedValue({ count: 0 });
     createMany.mockResolvedValue({ count: 1 });
+    previousFindMany.mockResolvedValue([]);
     findMany.mockResolvedValue([
       {
         level: SkillLevel.ADVANCED,
@@ -54,6 +56,7 @@ describe("worker skills and rates", () => {
           skill_id: skillId,
           level: SkillLevel.ADVANCED,
           years: 3.5,
+          has_prior_training: false,
         },
       ],
     });
@@ -61,6 +64,23 @@ describe("worker skills and rates", () => {
       nameEn: "Electrician",
       nameBn: "ইলেকট্রিশিয়ান",
     });
+  });
+
+  it("keeps a stored prior-training answer when the client omits it", async () => {
+    const skillId = "018f4f6f-13e8-7d9a-8c2b-6b6a9f62f601";
+    const otherId = "018f4f6f-13e8-7d9a-8c2b-6b6a9f62f602";
+    previousFindMany.mockResolvedValue([{ skill_id: skillId }]);
+    skillCount.mockResolvedValue(2);
+
+    await service.updateWorkerSkills("user-id", [
+      { skillId, level: SkillLevel.BEGINNER },
+      { skillId: otherId, level: SkillLevel.BEGINNER, hasPriorTraining: true },
+    ]);
+
+    expect(createMany.mock.calls[0][0].data).toEqual([
+      expect.objectContaining({ skill_id: skillId, has_prior_training: true }),
+      expect.objectContaining({ skill_id: otherId, has_prior_training: true }),
+    ]);
   });
 
   it("rejects an unknown or inactive skill before replacing the set", async () => {

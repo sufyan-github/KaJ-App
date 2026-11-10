@@ -7,10 +7,17 @@ import { UsersController } from "./users.controller";
 import { UsersService } from "./users.service";
 import { PortfolioService } from "./portfolio.service";
 import { AuthModule } from "../auth/auth.module";
+import { TrainingModule } from "../training/training.module";
+import { ProfileOverviewService } from "./profile-overview.service";
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, TrainingModule],
   controllers: [ProfilesController, PublicProfilesController, UsersController],
-  providers: [PortfolioService, PublicProfilesService, UsersService],
+  providers: [
+    PortfolioService,
+    ProfileOverviewService,
+    PublicProfilesService,
+    UsersService,
+  ],
 })
 export class UsersModule {}

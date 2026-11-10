@@ -1,0 +1,358 @@
+{
+  "courses": [
+    {
+      "slug": "fixture-cleaning-basics",
+      "skillSlug": "cleaning",
+      "titleEn": "Fixture cleaning basics",
+      "titleBn": "নমুনা পরিষ্কারের মৌলিক বিষয়",
+      "summaryEn": "A small course used by the database tests.",
+      "summaryBn": "ডেটাবেস পরীক্ষার জন্য একটি ছোট কোর্স।",
+      "minutes": 15,
+      "estDataMb": 30,
+      "passMarkPct": 70,
+      "questionCount": 4,
+      "isSafetyCritical": false,
+      "sortOrder": 1,
+      "lessons": [
+        {
+          "titleEn": "Tools",
+          "titleBn": "সরঞ্জাম",
+          "summaryEn": "Which tools to bring.",
+          "summaryBn": "কোন সরঞ্জাম আনতে হবে।",
+          "youtubeVideoId": "dQw4w9WgXcQ",
+          "durationS": 240,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Chemicals",
+          "titleBn": "রাসায়নিক",
+          "summaryEn": "Never mix bleach and acids.",
+          "summaryBn": "ব্লিচ ও অ্যাসিড কখনো মেশাবেন না।",
+          "youtubeVideoId": null,
+          "durationS": null,
+          "isSafety": true
+        }
+      ],
+      "questions": [
+        {
+          "promptEn": "Fixture question 1?",
+          "promptBn": "নমুনা প্রশ্ন 1?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Answer A1",
+              "bn": "উত্তর ক1"
+            },
+            {
+              "id": "b",
+              "en": "Answer B1",
+              "bn": "উত্তর খ1"
+            },
+            {
+              "id": "c",
+              "en": "Answer C1",
+              "bn": "উত্তর গ1"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Explanation 1.",
+          "explanationBn": "ব্যাখ্যা 1।"
+        },
+        {
+          "promptEn": "Fixture question 2?",
+          "promptBn": "নমুনা প্রশ্ন 2?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Answer A2",
+              "bn": "উত্তর ক2"
+            },
+            {
+              "id": "b",
+              "en": "Answer B2",
+              "bn": "উত্তর খ2"
+            },
+            {
+              "id": "c",
+              "en": "Answer C2",
+              "bn": "উত্তর গ2"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Explanation 2.",
+          "explanationBn": "ব্যাখ্যা 2।"
+        },
+        {
+          "promptEn": "Fixture question 3?",
+          "promptBn": "নমুনা প্রশ্ন 3?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Answer A3",
+              "bn": "উত্তর ক3"
+            },
+            {
+              "id": "b",
+              "en": "Answer B3",
+              "bn": "উত্তর খ3"
+            },
+            {
+              "id": "c",
+              "en": "Answer C3",
+              "bn": "উত্তর গ3"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Explanation 3.",
+          "explanationBn": "ব্যাখ্যা 3।"
+        },
+        {
+          "promptEn": "Fixture question 4?",
+          "promptBn": "নমুনা প্রশ্ন 4?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Answer A4",
+              "bn": "উত্তর ক4"
+            },
+            {
+              "id": "b",
+              "en": "Answer B4",
+              "bn": "উত্তর খ4"
+            },
+            {
+              "id": "c",
+              "en": "Answer C4",
+              "bn": "উত্তর গ4"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Explanation 4.",
+          "explanationBn": "ব্যাখ্যা 4।"
+        },
+        {
+          "promptEn": "Fixture question 5?",
+          "promptBn": "নমুনা প্রশ্ন 5?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Answer A5",
+              "bn": "উত্তর ক5"
+            },
+            {
+              "id": "b",
+              "en": "Answer B5",
+              "bn": "উত্তর খ5"
+            },
+            {
+              "id": "c",
+              "en": "Answer C5",
+              "bn": "উত্তর গ5"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Explanation 5.",
+          "explanationBn": "ব্যাখ্যা 5।"
+        }
+      ]
+    },
+    {
+      "slug": "fixture-general-conduct",
+      "skillSlug": null,
+      "titleEn": "Fixture working with customers",
+      "titleBn": "নমুনা গ্রাহকের সাথে কাজ",
+      "summaryEn": "General conduct for every worker.",
+      "summaryBn": "সব কর্মীর জন্য সাধারণ আচরণ।",
+      "minutes": 10,
+      "estDataMb": 20,
+      "passMarkPct": 70,
+      "questionCount": 3,
+      "isSafetyCritical": false,
+      "sortOrder": 2,
+      "lessons": [
+        {
+          "titleEn": "Arrive on time",
+          "titleBn": "সময়মতো পৌঁছান",
+          "summaryEn": "Tell the customer if you are late.",
+          "summaryBn": "দেরি হলে গ্রাহককে জানান।",
+          "youtubeVideoId": null,
+          "durationS": null,
+          "isSafety": false
+        }
+      ],
+      "questions": [
+        {
+          "promptEn": "Fixture question 1?",
+          "promptBn": "নমুনা প্রশ্ন 1?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Answer A1",
+              "bn": "উত্তর ক1"
+            },
+            {
+              "id": "b",
+              "en": "Answer B1",
+              "bn": "উত্তর খ1"
+            },
+            {
+              "id": "c",
+              "en": "Answer C1",
+              "bn": "উত্তর গ1"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Explanation 1.",
+          "explanationBn": "ব্যাখ্যা 1।"
+        },
+        {
+          "promptEn": "Fixture question 2?",
+          "promptBn": "নমুনা প্রশ্ন 2?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Answer A2",
+              "bn": "উত্তর ক2"
+            },
+            {
+              "id": "b",
+              "en": "Answer B2",
+              "bn": "উত্তর খ2"
+            },
+            {
+              "id": "c",
+              "en": "Answer C2",
+              "bn": "উত্তর গ2"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Explanation 2.",
+          "explanationBn": "ব্যাখ্যা 2।"
+        },
+        {
+          "promptEn": "Fixture question 3?",
+          "promptBn": "নমুনা প্রশ্ন 3?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Answer A3",
+              "bn": "উত্তর ক3"
+            },
+            {
+              "id": "b",
+              "en": "Answer B3",
+              "bn": "উত্তর খ3"
+            },
+            {
+              "id": "c",
+              "en": "Answer C3",
+              "bn": "উত্তর গ3"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Explanation 3.",
+          "explanationBn": "ব্যাখ্যা 3।"
+        }
+      ]
+    },
+    {
+      "slug": "fixture-electrical-safety",
+      "skillSlug": "electrical-work",
+      "titleEn": "Fixture electrical safety",
+      "titleBn": "নমুনা বৈদ্যুতিক নিরাপত্তা",
+      "summaryEn": "Safety-critical basics.",
+      "summaryBn": "নিরাপত্তা-সংবেদনশীল মৌলিক বিষয়।",
+      "minutes": 25,
+      "estDataMb": 50,
+      "passMarkPct": 80,
+      "questionCount": 3,
+      "isSafetyCritical": true,
+      "sortOrder": 3,
+      "lessons": [
+        {
+          "titleEn": "Switch off the supply",
+          "titleBn": "সংযোগ বন্ধ করুন",
+          "summaryEn": "Always isolate first.",
+          "summaryBn": "সবসময় আগে সংযোগ বিচ্ছিন্ন করুন।",
+          "youtubeVideoId": null,
+          "durationS": null,
+          "isSafety": true
+        }
+      ],
+      "questions": [
+        {
+          "promptEn": "Fixture question 1?",
+          "promptBn": "নমুনা প্রশ্ন 1?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Answer A1",
+              "bn": "উত্তর ক1"
+            },
+            {
+              "id": "b",
+              "en": "Answer B1",
+              "bn": "উত্তর খ1"
+            },
+            {
+              "id": "c",
+              "en": "Answer C1",
+              "bn": "উত্তর গ1"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Explanation 1.",
+          "explanationBn": "ব্যাখ্যা 1।"
+        },
+        {
+          "promptEn": "Fixture question 2?",
+          "promptBn": "নমুনা প্রশ্ন 2?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Answer A2",
+              "bn": "উত্তর ক2"
+            },
+            {
+              "id": "b",
+              "en": "Answer B2",
+              "bn": "উত্তর খ2"
+            },
+            {
+              "id": "c",
+              "en": "Answer C2",
+              "bn": "উত্তর গ2"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Explanation 2.",
+          "explanationBn": "ব্যাখ্যা 2।"
+        },
+        {
+          "promptEn": "Fixture question 3?",
+          "promptBn": "নমুনা প্রশ্ন 3?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Answer A3",
+              "bn": "উত্তর ক3"
+            },
+            {
+              "id": "b",
+              "en": "Answer B3",
+              "bn": "উত্তর খ3"
+            },
+            {
+              "id": "c",
+              "en": "Answer C3",
+              "bn": "উত্তর গ3"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Explanation 3.",
+          "explanationBn": "ব্যাখ্যা 3।"
+        }
+      ]
+    }
+  ]
+}
