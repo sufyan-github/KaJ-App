@@ -1,5 +1,9 @@
+import { TrustLevel } from "@prisma/client";
+
+import { hasTrust } from "../verification/trust-level";
+
 export interface BadgeFacts {
-  isVerified: boolean;
+  trustLevel: TrustLevel;
   completedJobs: number;
   ratingAverage: number;
   ratingCount: number;
@@ -8,7 +12,12 @@ export interface BadgeFacts {
 
 export function eligibleBadgeSlugs(facts: BadgeFacts): string[] {
   return [
-    ...(facts.isVerified ? ["verified"] : []),
+    // "Verified" means a reviewed national ID, never just a confirmed phone:
+    // every account starts at PHONE trust.
+    ...(hasTrust(facts.trustLevel, TrustLevel.IDENTITY) ? ["verified"] : []),
+    ...(hasTrust(facts.trustLevel, TrustLevel.BUSINESS)
+      ? ["business-verified"]
+      : []),
     ...(facts.completedJobs <= 2 ? ["new-worker"] : []),
     ...(facts.completedJobs >= 5 && facts.completionRateBps >= 9000
       ? ["reliable"]

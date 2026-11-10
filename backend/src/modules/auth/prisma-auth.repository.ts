@@ -222,6 +222,21 @@ export class PrismaAuthRepository implements AuthRepository {
     });
   }
 
+  async revokeAllUserSessions(userId: string, now: Date): Promise<void> {
+    // Bumping the version makes verifyAccessToken reject every access token
+    // already issued, so other devices are signed out within one request.
+    await this.prisma.$transaction([
+      this.prisma.refreshToken.updateMany({
+        data: { revoked_at: now },
+        where: { user_id: userId, revoked_at: null },
+      }),
+      this.prisma.user.update({
+        data: { mobile_auth_version: { increment: 1 } },
+        where: { id: userId },
+      }),
+    ]);
+  }
+
   async revokeRefreshTokenByHash(tokenHash: string, now: Date): Promise<void> {
     await this.prisma.refreshToken.updateMany({
       data: { revoked_at: now },

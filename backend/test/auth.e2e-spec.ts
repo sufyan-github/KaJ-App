@@ -197,6 +197,14 @@ class InMemoryAuthRepository implements AuthRepository {
     }
   }
 
+  async revokeAllUserSessions(userId: string, now: Date): Promise<void> {
+    for (const token of this.refreshTokens.values()) {
+      if (token.user.id === userId && !token.revokedAt) token.revokedAt = now;
+    }
+    const user = this.users.get(userId);
+    if (user) user.mobileAuthVersion = (user.mobileAuthVersion ?? 0) + 1;
+  }
+
   async revokeRefreshTokenByHash(tokenHash: string, now: Date): Promise<void> {
     const token = this.refreshTokens.get(tokenHash);
     if (token && !token.revokedAt) token.revokedAt = now;
@@ -471,6 +479,25 @@ describe("phone OTP authentication", () => {
     await request(app.getHttpServer())
       .post("/api/v1/auth/refresh")
       .send({ refreshToken: rotated.body.data.refreshToken })
+      .expect(401);
+  });
+
+  it("signs out every device on logout-all, not just the caller's", async () => {
+    const thisDevice = await login();
+    clock.advance(61_000);
+    const otherDevice = await login();
+
+    await request(app.getHttpServer())
+      .post("/api/v1/auth/logout-all")
+      .send({ refreshToken: thisDevice.refreshToken })
+      .expect(204);
+    await request(app.getHttpServer())
+      .post("/api/v1/auth/refresh")
+      .send({ refreshToken: otherDevice.refreshToken })
+      .expect(401);
+    await request(app.getHttpServer())
+      .get("/api/v1/auth/session")
+      .set("Authorization", `Bearer ${otherDevice.accessToken}`)
       .expect(401);
   });
 

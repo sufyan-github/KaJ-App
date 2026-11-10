@@ -301,6 +301,21 @@ export class AttendanceService {
             minutes_worked: minutesWorked,
           },
         });
+        if (input.mockLocation) {
+          await transaction.auditLog.create({
+            data: {
+              actor_user_id: workerUserId,
+              action: "ATTENDANCE_MOCK_LOCATION_REPORTED",
+              entity: "WORK_SESSION",
+              entity_id: session.id,
+              after_json: {
+                assignmentId,
+                event: "CHECKOUT",
+                reviewRequired: true,
+              },
+            },
+          });
+        }
         return this.sessionResponse(updated, settings);
       },
     );

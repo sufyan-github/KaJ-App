@@ -163,6 +163,40 @@ databaseDescribe("dispute lifecycle with PostgreSQL", () => {
       },
     });
     paymentId = payment.id;
+    await prisma.conversation.create({
+      data: {
+        job_id: jobId,
+        scope_key: `${jobId}:${workerId}`,
+        messages: {
+          create: [
+            {
+              sender_user_id: posterId,
+              type: "TEXT",
+              body: "Assigned worker chat line",
+            },
+            {
+              sender_user_id: workerId,
+              type: "TEXT",
+              body: "Deleted assigned worker line",
+              deleted_at: now,
+            },
+          ],
+        },
+      },
+    });
+    await prisma.conversation.create({
+      data: {
+        job_id: jobId,
+        scope_key: `${jobId}:${outsiderId}`,
+        messages: {
+          create: {
+            sender_user_id: posterId,
+            type: "TEXT",
+            body: "Private chat with another applicant",
+          },
+        },
+      },
+    });
   });
 
   afterAll(async () => {
@@ -179,6 +213,7 @@ databaseDescribe("dispute lifecycle with PostgreSQL", () => {
     await prisma.contract.deleteMany({
       where: { assignment_id: assignmentId },
     });
+    await prisma.conversation.deleteMany({ where: { job_id: jobId } });
     await prisma.assignment.delete({ where: { id: assignmentId } });
     await prisma.application.delete({ where: { id: applicationId } });
     await prisma.job.delete({ where: { id: jobId } });
@@ -204,6 +239,12 @@ databaseDescribe("dispute lifecycle with PostgreSQL", () => {
       prisma.job.findUniqueOrThrow({ where: { id: jobId } }),
     ]);
     expect(stored.evidence).toHaveLength(3);
+    const transcript =
+      stored.evidence.find((item) => item.kind === "SYSTEM_CHAT_TRANSCRIPT")
+        ?.text ?? "";
+    expect(transcript).toContain("Assigned worker chat line");
+    expect(transcript).not.toContain("Deleted assigned worker line");
+    expect(transcript).not.toContain("Private chat with another applicant");
     expect(payment.frozen_at).toEqual(now);
     expect(job.status).toBe(JobStatus.DISPUTED);
     await expect(disputes.detail(outsiderId, disputeId)).rejects.toThrow();

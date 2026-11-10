@@ -222,6 +222,34 @@ databaseDescribe("attendance lifecycle with PostgreSQL", () => {
     );
   });
 
+  it("records a mock location reported at check-out for review", async () => {
+    const item = await fixture("checkout-mock");
+    await attendance.checkIn(
+      item.workerId,
+      item.assignmentId,
+      checkinInput(pointNorth(25)),
+      "checkout-mock-in-key",
+    );
+    now = new Date(now.getTime() + 30 * 60_000);
+    await attendance.checkOut(
+      item.workerId,
+      item.assignmentId,
+      { ...checkinInput(pointNorth(30)), mockLocation: true },
+      "checkout-mock-out-key",
+    );
+    const audit = await prisma.auditLog.findFirstOrThrow({
+      where: {
+        actor_user_id: item.workerId,
+        action: "ATTENDANCE_MOCK_LOCATION_REPORTED",
+      },
+    });
+    expect(audit.after_json).toMatchObject({
+      assignmentId: item.assignmentId,
+      event: "CHECKOUT",
+      reviewRequired: true,
+    });
+  });
+
   it("records a reason and audit trail for a poster override", async () => {
     const item = await fixture("override");
     const response = await attendance.overrideByPoster(

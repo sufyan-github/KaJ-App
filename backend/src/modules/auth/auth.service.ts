@@ -247,8 +247,8 @@ export class AuthService {
       this.tokens.hashRefreshToken(refreshToken),
     );
     if (!current) return;
-    await this.repository.revokeRefreshFamily(
-      current.familyId,
+    await this.repository.revokeAllUserSessions(
+      current.user.id,
       this.clock.now(),
     );
   }

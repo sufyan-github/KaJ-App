@@ -6,6 +6,7 @@ import {
   IsDateString,
   IsEnum,
   IsInt,
+  IsNumber,
   IsOptional,
   IsString,
   IsIn,
@@ -18,6 +19,8 @@ import {
   MinLength,
   ValidateNested,
 } from "class-validator";
+
+import { RoundTo } from "../../../common/validation/round-to.decorator";
 
 const MONEY_PATTERN = /^\d{1,15}$/;
 const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -119,6 +122,22 @@ export class CreateJobDto {
   @IsString()
   @MaxLength(180)
   areaLabel?: string;
+
+  // Work-site pin for attendance geofencing. Send both or neither; when absent
+  // the poster's saved profile location is used.
+  @IsOptional()
+  @RoundTo(6)
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  lat?: number;
+
+  @IsOptional()
+  @RoundTo(6)
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  lng?: number;
 
   @IsOptional()
   @IsDateString()
@@ -234,6 +253,22 @@ export class CreateBookingRequestDto {
 
   @Matches(MONEY_PATTERN)
   offeredPricePoisha!: string;
+
+  // Work-site pin for attendance geofencing. Send both or neither; when absent
+  // the poster's saved profile location is used.
+  @IsOptional()
+  @RoundTo(6)
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  lat?: number;
+
+  @IsOptional()
+  @RoundTo(6)
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  lng?: number;
 }
 
 export class CancelAssignmentDto {

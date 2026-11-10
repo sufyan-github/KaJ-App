@@ -77,6 +77,7 @@ describe("UsersService role activation", () => {
           role_modes: [RoleMode.CUSTOMER, RoleMode.WORKER],
           active_role: RoleMode.WORKER,
           is_admin: false,
+          mobile_auth_version: 3,
         }),
       },
     } as unknown as PrismaService;
@@ -99,6 +100,7 @@ describe("UsersService role activation", () => {
       expect.objectContaining({
         roles: [RoleMode.CUSTOMER, RoleMode.WORKER],
         activeRole: RoleMode.WORKER,
+        mobileAuthVersion: 3,
       }),
       "device-id",
     );

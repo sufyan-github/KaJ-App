@@ -10,6 +10,7 @@ import {
   JobStatus,
   Prisma,
   ReviewDirection,
+  TrustLevel,
 } from "@prisma/client";
 
 import { CLOCK, Clock } from "../../common/time/clock";
@@ -228,8 +229,15 @@ export class ReviewsService {
         const completed = await transaction.assignment.count({
           where: { worker_user_id: userId, status: AssignmentStatus.COMPLETED },
         });
+        // Only cancellations the worker caused and the policy penalised count.
+        // Customer, emergency and early cancellations are outside their control.
         const cancelled = await transaction.assignment.count({
-          where: { worker_user_id: userId, status: AssignmentStatus.CANCELLED },
+          where: {
+            worker_user_id: userId,
+            status: AssignmentStatus.CANCELLED,
+            cancelled_by_user_id: userId,
+            cancellation_penalised: true,
+          },
         });
         const facts = {
           completedJobs: completed,
@@ -279,7 +287,7 @@ export class ReviewsService {
       if (!user.worker_profile) continue;
       const eligible = new Set(
         eligibleBadgeSlugs({
-          isVerified: user.profile?.trust_level !== "NONE",
+          trustLevel: user.profile?.trust_level ?? TrustLevel.NONE,
           completedJobs: user.worker_profile.completed_jobs_count,
           ratingAverage: user.worker_profile.rating_avg.toNumber(),
           ratingCount: user.worker_profile.rating_count,

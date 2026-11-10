@@ -89,6 +89,7 @@ export class JobsService {
     if (input.recurrenceRule) await this.recurrence?.assertEnabled();
     const window = parseWindow(input.startsAt, input.endsAt);
     const job = await this.prisma.$transaction(async (transaction) => {
+      const site = await siteCoordinates(transaction, posterUserId, input);
       const created = await transaction.job.create({
         data: {
           poster_user_id: posterUserId,
@@ -96,6 +97,8 @@ export class JobsService {
           description: input.description.trim(),
           category_id: input.categoryId,
           subcategory_id: input.subcategoryId,
+          lat: site.lat,
+          lng: site.lng,
           job_type: input.jobType,
           payment_model: input.paymentModel,
           budget_min_poisha: toBigInt(input.budgetMinPoisha),
@@ -571,9 +574,11 @@ export class JobsService {
       throw new BadRequestException("Preview and confirm cancellation first.");
     }
     const assignment = await this.participantAssignment(userId, assignmentId);
+    // Only live assignments can be cancelled. A DECLINED assignment belongs to
+    // a job that has already reopened for other applicants.
     if (
-      assignment.status === AssignmentStatus.CANCELLED ||
-      assignment.status === AssignmentStatus.COMPLETED
+      assignment.status !== AssignmentStatus.PENDING_CONFIRMATION &&
+      assignment.status !== AssignmentStatus.CONFIRMED
     ) {
       throw new ConflictException("Assignment can no longer be cancelled.");
     }
@@ -615,6 +620,9 @@ export class JobsService {
           status: AssignmentStatus.CANCELLED,
           cancelled_at: this.now(),
           cancel_reason: `${input.reasonCode}${input.note ? `: ${input.note.trim()}` : ""}`,
+          cancelled_by_user_id: userId,
+          cancellation_penalised:
+            actor === "worker" && preview.reliabilityDelta !== 0,
         },
       });
       if (
@@ -805,12 +813,15 @@ export class JobsService {
     }
     const price = BigInt(input.offeredPricePoisha);
     const assignment = await this.prisma.$transaction(async (transaction) => {
+      const site = await siteCoordinates(transaction, posterUserId, input);
       const job = await transaction.job.create({
         data: {
           poster_user_id: posterUserId,
           title: input.title.trim(),
           description: input.description.trim(),
           category_id: input.categoryId,
+          lat: site.lat,
+          lng: site.lng,
           job_type: JobType.SERVICE_BOOKING,
           payment_model: PaymentModel.FIXED,
           budget_min_poisha: price,
@@ -1441,12 +1452,45 @@ function integerValue(value: Prisma.JsonValue | undefined): number | undefined {
     : undefined;
 }
 
+// The work-site pin and address are private: attendance reads them from the
+// database, and they are often the poster's home. Never return them.
+const PRIVATE_JOB_FIELDS = new Set(["lat", "lng", "exact_address_encrypted"]);
+
 function serializeJob<T extends Record<string, unknown>>(job: T) {
   return JSON.parse(
-    JSON.stringify(job, (_key, value: unknown) =>
-      typeof value === "bigint" ? value.toString() : value,
+    JSON.stringify(job, (key, value: unknown) =>
+      PRIVATE_JOB_FIELDS.has(key)
+        ? undefined
+        : typeof value === "bigint"
+          ? value.toString()
+          : value,
     ),
-  ) as T;
+  ) as Omit<T, "lat" | "lng" | "exact_address_encrypted">;
+}
+
+async function siteCoordinates(
+  transaction: Prisma.TransactionClient,
+  posterUserId: string,
+  input: { lat?: number; lng?: number },
+): Promise<{
+  lat: Prisma.Decimal | number | null;
+  lng: Prisma.Decimal | number | null;
+}> {
+  if ((input.lat === undefined) !== (input.lng === undefined)) {
+    throw new BadRequestException(
+      "Send both lat and lng for the work site, or neither.",
+    );
+  }
+  if (input.lat !== undefined && input.lng !== undefined) {
+    return { lat: input.lat, lng: input.lng };
+  }
+  const profile = await transaction.profile.findUnique({
+    where: { user_id: posterUserId },
+    select: { lat: true, lng: true },
+  });
+  return profile?.lat != null && profile.lng != null
+    ? { lat: profile.lat, lng: profile.lng }
+    : { lat: null, lng: null };
 }
 
 function serializeApplication(application: {

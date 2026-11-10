@@ -48,28 +48,30 @@ export class DisputesService {
       include: {
         contracts: { orderBy: { version: "desc" }, take: 1 },
         work_sessions: true,
-        job: {
-          include: {
-            conversations: {
-              include: {
-                messages: {
-                  orderBy: { created_at: "asc" },
-                  select: {
-                    sender_user_id: true,
-                    type: true,
-                    body: true,
-                    attachment_key: true,
-                    created_at: true,
-                  },
-                },
-              },
-            },
-          },
-        },
+        job: true,
       },
     });
     if (!assignment || !isParty(assignment, userId))
       throw new NotFoundException();
+    // Only the poster's chat with this assignment's worker is evidence. A job
+    // has one conversation per applicant, and both parties can read the
+    // transcript, so loading every conversation would expose other applicants.
+    const transcript = await this.prisma.message.findMany({
+      where: {
+        deleted_at: null,
+        conversation: {
+          scope_key: `${assignment.job_id}:${assignment.worker_user_id}`,
+        },
+      },
+      orderBy: { created_at: "asc" },
+      select: {
+        sender_user_id: true,
+        type: true,
+        body: true,
+        attachment_key: true,
+        created_at: true,
+      },
+    });
     if (!ELIGIBLE_STATUSES.includes(assignment.job.status))
       throw new ConflictException(
         "This assignment is not eligible for dispute.",
@@ -85,7 +87,7 @@ export class DisputesService {
       userId === assignment.worker_user_id
         ? assignment.job.poster_user_id
         : assignment.worker_user_id;
-    const evidence = autoEvidence(assignment);
+    const evidence = autoEvidence(assignment, transcript);
     const dispute = await this.prisma.$transaction(async (transaction) => {
       const existing = await transaction.dispute.findUnique({
         where: { assignment_id: assignmentId },
@@ -369,11 +371,13 @@ function isParty(
   );
 }
 
-function autoEvidence(assignment: {
-  contracts: Array<{ snapshot_json: Prisma.JsonValue }>;
-  work_sessions: unknown[];
-  job: { conversations: Array<{ messages: unknown[] }> };
-}) {
+function autoEvidence(
+  assignment: {
+    contracts: Array<{ snapshot_json: Prisma.JsonValue }>;
+    work_sessions: unknown[];
+  },
+  transcript: unknown[],
+) {
   return [
     {
       kind: "SYSTEM_CONTRACT_SNAPSHOT",
@@ -381,9 +385,7 @@ function autoEvidence(assignment: {
     },
     {
       kind: "SYSTEM_CHAT_TRANSCRIPT",
-      text: safeJson(
-        assignment.job.conversations.flatMap((item) => item.messages),
-      ),
+      text: safeJson(transcript),
     },
     {
       kind: "SYSTEM_CHECKIN_SNAPSHOT",

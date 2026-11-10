@@ -866,6 +866,10 @@ model Assignment {
   completion_due_at        DateTime?
   cancelled_at             DateTime?
   cancel_reason            String?
+  /// Who cancelled. Only cancellations the policy penalised (worker cancelled
+  /// late, not an emergency) count against the worker's completion rate.
+  cancelled_by_user_id     String?          @db.Uuid
+  cancellation_penalised   Boolean          @default(false)
   created_at               DateTime         @default(now())
   updated_at               DateTime         @updatedAt
   job                      Job              @relation(fields: [job_id], references: [id], onDelete: Restrict)

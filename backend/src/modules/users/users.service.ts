@@ -78,6 +78,7 @@ export class UsersService {
         role_modes: true,
         active_role: true,
         is_admin: true,
+        mobile_auth_version: true,
       },
     });
     if (!user?.phone_e164) throw new NotFoundException();
@@ -89,6 +90,9 @@ export class UsersService {
         roles: user.role_modes,
         activeRole: user.active_role,
         isAdmin: user.is_admin,
+        // Without this the token defaults to version 0 and is rejected for
+        // anyone who has ever reset their password or signed out everywhere.
+        mobileAuthVersion: user.mobile_auth_version,
       },
       deviceId,
     );

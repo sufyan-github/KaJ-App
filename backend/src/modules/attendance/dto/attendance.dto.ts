@@ -1,4 +1,3 @@
-import { Type } from "class-transformer";
 import {
   IsBoolean,
   IsDateString,
@@ -12,21 +11,23 @@ import {
   MinLength,
 } from "class-validator";
 
+import { RoundTo } from "../../../common/validation/round-to.decorator";
+
 export class CheckInDto {
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 7 })
+  @RoundTo(7)
+  @IsNumber()
   @Min(-90)
   @Max(90)
   lat!: number;
 
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 7 })
+  @RoundTo(7)
+  @IsNumber()
   @Min(-180)
   @Max(180)
   lng!: number;
 
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 2 })
+  @RoundTo(2)
+  @IsNumber()
   @Min(0)
   @Max(10_000)
   accuracyM!: number;
@@ -53,20 +54,20 @@ export class CheckInDto {
 }
 
 export class CheckOutDto {
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 7 })
+  @RoundTo(7)
+  @IsNumber()
   @Min(-90)
   @Max(90)
   lat!: number;
 
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 7 })
+  @RoundTo(7)
+  @IsNumber()
   @Min(-180)
   @Max(180)
   lng!: number;
 
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 2 })
+  @RoundTo(2)
+  @IsNumber()
   @Min(0)
   @Max(10_000)
   accuracyM!: number;
@@ -87,6 +88,11 @@ export class CheckOutDto {
   @IsString()
   @MaxLength(1000)
   notes?: string;
+
+  // Sent by app versions up to 1.0.2; recorded for review like check-in.
+  @IsOptional()
+  @IsBoolean()
+  mockLocation?: boolean;
 }
 
 export class AttendanceOverrideDto {
