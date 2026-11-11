@@ -33,7 +33,7 @@ export const copy = {
     howCta: 'যেভাবে কাজ করে',
     pilotBuild: 'পাইলট বিল্ড',
     chips: ['পরিচয় যাচাইকৃত কর্মী', 'বাংলা ও English', 'রাজশাহীতে চালু'],
-    heroAlt: 'একজন স্থানীয় ইলেকট্রিশিয়ান বাসায় সুইচবোর্ড মেরামত করছেন, পাশে বাড়ির মালিক দাঁড়িয়ে',
+    heroAlt: 'কাঠের টেবিলে সাজানো হাতুড়ি, রেঞ্চ, প্লায়ার্স ও স্ক্রুড্রাইভারসহ মেরামতের যন্ত্রপাতি',
 
     workTypesTitle: 'যেসব কাজের জন্য KAAJ',
 
@@ -42,8 +42,8 @@ export const copy = {
     howBody: 'আপনি কাজ করাতে চান বা কাজ খুঁজছেন — একই অ্যাপে দুই ভূমিকাই আছে।',
     forClients: 'ক্লায়েন্টদের জন্য', clientsTitle: 'কাজ করিয়ে নিন',
     forWorkers: 'কর্মীদের জন্য', workersTitle: 'কাজ খুঁজে নিন',
-    clientAlt: 'সোফায় বসে একজন ব্যক্তি ফোনে KAAJ ব্যবহার করছেন',
-    workerAlt: 'নিজের ওয়ার্কশপে হাসিমুখে দাঁড়িয়ে একজন কর্মী',
+    clientAlt: 'ইটের দেয়াল, কাঠের সোফা ও সুইচবোর্ডসহ একটি পরিপাটি বসার ঘর',
+    workerAlt: 'ওয়ার্কশপের দেয়ালে সারি করে ঝোলানো রেঞ্চ, স্ক্রুড্রাইভার ও প্লায়ার্স',
 
     featuresKicker: 'অ্যাপে যা আছে',
     featuresTitle: 'স্থানীয় কাজের জন্য দরকারি সব কিছু',
@@ -53,7 +53,7 @@ export const copy = {
     safetyKicker: 'বিশ্বাস ও নিরাপত্তা',
     safetyTitle: 'অপরিচিত কারও সঙ্গে কাজ — তাই আগে যাচাই',
     safetyBody: 'KAAJ এমনভাবে তৈরি যাতে দুই পক্ষই জেনে-বুঝে সিদ্ধান্ত নিতে পারেন।',
-    safetyAlt: 'রাজশাহীর একটি রাস্তায় দুজন মানুষ একসঙ্গে ফোন দেখছেন',
+    safetyAlt: 'রাজশাহীর বরেন্দ্র গবেষণা জাদুঘরের সাদা ভবন, সামনে গোলাপের বাগান',
     emergencyTitle: 'জরুরি অবস্থায় ৯৯৯-এ কল করুন',
     emergencyBody: 'KAAJ কোনো জরুরি সেবা নয়। বিপদ বা দুর্ঘটনায় সরাসরি জাতীয় জরুরি সেবা ৯৯৯-এ কল করুন।',
     call999: '৯৯৯-এ কল করুন',
@@ -142,7 +142,7 @@ export const copy = {
     howCta: 'How it works',
     pilotBuild: 'Pilot build',
     chips: ['Identity-verified workers', 'Bangla & English', 'Live in Rajshahi'],
-    heroAlt: 'A local electrician repairing a switchboard at home while the homeowner looks on',
+    heroAlt: 'Hammers, spanners, pliers and screwdrivers laid out on a wooden table',
 
     workTypesTitle: 'Work you can find or hire for',
 
@@ -151,8 +151,8 @@ export const copy = {
     howBody: 'Whether you need work done or you are looking for work, both roles live in the same app.',
     forClients: 'For clients', clientsTitle: 'Get work done',
     forWorkers: 'For workers', workersTitle: 'Find work nearby',
-    clientAlt: 'A person on a sofa using the KAAJ app on his phone',
-    workerAlt: 'A smiling worker standing in his workshop',
+    clientAlt: 'A tidy living room with a brick wall, wooden sofas and wall switches',
+    workerAlt: 'Spanners, screwdrivers and pliers hanging in rows on a workshop wall',
 
     featuresKicker: 'In the app',
     featuresTitle: 'Everything local work needs',
@@ -162,7 +162,7 @@ export const copy = {
     safetyKicker: 'Trust & safety',
     safetyTitle: 'Working with someone new? Verify first.',
     safetyBody: 'KAAJ is designed so both sides can make an informed decision before any work starts.',
-    safetyAlt: 'Two people looking at a phone together on a street in Rajshahi',
+    safetyAlt: 'The white Varendra Research Museum building in Rajshahi, behind a rose garden',
     emergencyTitle: 'In an emergency, call 999',
     emergencyBody: 'KAAJ is not an emergency service. If you are in danger or there is an accident, call the national emergency service 999 directly.',
     call999: 'Call 999',
