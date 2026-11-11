@@ -341,7 +341,7 @@ abstract class AppLocalizations {
   /// No description provided for @phoneSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Use a Robi (018) or Airtel (016) number. We will send a 6-digit verification code.'**
+  /// **'Use a Robi (018) or Cirkle (016) number. We will send a 6-digit verification code.'**
   String get phoneSubtitle;
 
   /// No description provided for @phoneLabel.
@@ -539,7 +539,7 @@ abstract class AppLocalizations {
   /// No description provided for @unsupportedOperatorPhone.
   ///
   /// In en, this message translates to:
-  /// **'Only Robi (018) and Airtel (016) numbers can register.'**
+  /// **'Only Robi (018) and Cirkle (016) numbers can register.'**
   String get unsupportedOperatorPhone;
 
   /// No description provided for @invalidOtp.

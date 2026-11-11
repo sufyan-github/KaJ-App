@@ -144,7 +144,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get phoneSubtitle =>
-      'রবি (০১৮) অথবা এয়ারটেল (০১৬) নম্বর দিন। আমরা ৬ সংখ্যার যাচাই কোড পাঠাব।';
+      'রবি (০১৮) অথবা সার্কেল (০১৬) নম্বর দিন। আমরা ৬ সংখ্যার যাচাই কোড পাঠাব।';
 
   @override
   String get phoneLabel => 'মোবাইল নম্বর';
@@ -260,7 +260,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get unsupportedOperatorPhone =>
-      'শুধু রবি (০১৮) ও এয়ারটেল (০১৬) নম্বর দিয়ে নিবন্ধন করা যাবে।';
+      'শুধু রবি (০১৮) ও সার্কেল (০১৬) নম্বর দিয়ে নিবন্ধন করা যাবে।';
 
   @override
   String get invalidOtp => 'সম্পূর্ণ ৬ সংখ্যার যাচাই কোড লিখুন।';

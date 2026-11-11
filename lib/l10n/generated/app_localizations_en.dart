@@ -144,7 +144,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get phoneSubtitle =>
-      'Use a Robi (018) or Airtel (016) number. We will send a 6-digit verification code.';
+      'Use a Robi (018) or Cirkle (016) number. We will send a 6-digit verification code.';
 
   @override
   String get phoneLabel => 'Mobile number';
@@ -263,7 +263,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unsupportedOperatorPhone =>
-      'Only Robi (018) and Airtel (016) numbers can register.';
+      'Only Robi (018) and Cirkle (016) numbers can register.';
 
   @override
   String get invalidOtp => 'Enter the complete 6-digit verification code.';

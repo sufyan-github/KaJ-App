@@ -9,7 +9,7 @@ void main() {
       expect(AuthValidators.isValidPhone('8801812345678'), isTrue);
     });
 
-    test('only supports Robi and Airtel operator prefixes', () {
+    test('only supports Robi and Cirkle operator prefixes', () {
       expect(AuthValidators.isSupportedOperatorPhone('01812345678'), isTrue);
       expect(AuthValidators.isSupportedOperatorPhone('+8801612345678'), isTrue);
       expect(AuthValidators.isSupportedOperatorPhone('01712345678'), isFalse);

@@ -88,7 +88,7 @@ class _BillingAdapter implements HttpClientAdapter {
             'current': null,
             'plans': <Object>[],
             'operators': [
-              {'code': 'AIRTEL', 'nameEn': 'Airtel', 'nameBn': 'এয়ারটেল'},
+              {'code': 'AIRTEL', 'nameEn': 'Cirkle', 'nameBn': 'সার্কেল'},
               {'code': 'ROBI', 'nameEn': 'Robi', 'nameBn': 'রবি'},
             ],
           };

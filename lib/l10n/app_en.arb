@@ -41,7 +41,7 @@
   "offlineBanner": "You are offline. Some information may be out of date.",
   "continueLabel": "Continue",
   "phoneTitle": "Enter your phone number",
-  "phoneSubtitle": "Use a Robi (018) or Airtel (016) number. We will send a 6-digit verification code.",
+  "phoneSubtitle": "Use a Robi (018) or Cirkle (016) number. We will send a 6-digit verification code.",
   "phoneLabel": "Mobile number",
   "phoneHint": "01XXXXXXXXX",
   "phoneConsent": "I agree to the Terms of Service and Privacy Policy.",
@@ -77,7 +77,7 @@
   "otpAlreadyUsedMessage": "This verification code has already been used. Send a new code.",
   "otpNotFoundMessage": "This verification request was not found. Send a new code.",
   "invalidPhone": "Enter a valid Bangladeshi mobile number.",
-  "unsupportedOperatorPhone": "Only Robi (018) and Airtel (016) numbers can register.",
+  "unsupportedOperatorPhone": "Only Robi (018) and Cirkle (016) numbers can register.",
   "invalidOtp": "Enter the complete 6-digit verification code.",
   "acceptTerms": "Accept the Terms of Service and Privacy Policy to continue."
 }
