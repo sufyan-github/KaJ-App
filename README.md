@@ -118,7 +118,8 @@ exported by the global infrastructure module. Development uses `SMS_PROVIDER=con
 rejects console SMS and fixed OTP codes. Real operator login uses `SMS_PROVIDER=bdapps` and
 operator subscriptions use `OPERATOR_PROVIDER=bdapps`, with an HTTPS private gateway and a
 server-only internal API key. Configuration alone does not establish successful delivery or billing:
-verify these with an approved test number and explicit charge consent. `SMS_PROVIDER=disabled`
+verify these with an approved test number and explicit charge consent. The PHP gateway lives in
+`bdapps-gateway/` (with a local BDApps mock); see `docs/BDAPPS_INTEGRATION.md`. `SMS_PROVIDER=disabled`
 and the currently disabled push adapter fail explicitly rather than reporting false delivery.
 
 The S3 adapter signs uploads and downloads locally and validates object keys before signing. The

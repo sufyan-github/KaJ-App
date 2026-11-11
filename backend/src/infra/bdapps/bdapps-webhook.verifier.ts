@@ -40,7 +40,8 @@ export class BdappsWebhookVerifier {
     ) {
       throw new UnauthorizedException("Invalid operator webhook signature.");
     }
-    if (!this.safeEqual(apiKey, this.internalKey)) {
+    // X-API-Key is optional (older gateways still send it); when present it must match.
+    if (apiKey !== "" && !this.safeEqual(apiKey, this.internalKey)) {
       throw new UnauthorizedException("Invalid operator webhook signature.");
     }
     const timestampSeconds = Number(timestamp);

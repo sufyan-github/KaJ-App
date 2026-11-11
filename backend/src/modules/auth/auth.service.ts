@@ -1,12 +1,17 @@
 import { createHash, createHmac } from "node:crypto";
 
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger, Optional } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { compare, hash } from "bcryptjs";
 import { OtpPurpose, RiskIdentityKind } from "@prisma/client";
 
 import { CLOCK, Clock } from "../../common/time/clock";
-import { SMS_PORT, SmsPort } from "../../infra/sms/sms.port";
+import {
+  SMS_PORT,
+  SmsPort,
+  SmsVerificationResult,
+} from "../../infra/sms/sms.port";
+import { SubscriptionsService } from "../subscriptions/subscriptions.service";
 import {
   accessTokenInvalidError,
   accountUnavailableError,
@@ -51,6 +56,7 @@ export interface TokenPair {
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   private readonly maxOtpAttempts: number;
   private readonly otpCooldownSeconds: number;
   private readonly otpTtlSeconds: number;
@@ -64,6 +70,7 @@ export class AuthService {
     @Inject(CLOCK) private readonly clock: Clock,
     private readonly config: ConfigService,
     private readonly tokens: AuthTokenService,
+    @Optional() private readonly subscriptions?: SubscriptionsService,
   ) {
     this.maxOtpAttempts = config.get<number>("OTP_MAX_ATTEMPTS", 5);
     this.otpCooldownSeconds = config.get<number>(
@@ -141,7 +148,7 @@ export class AuthService {
       throw otpAttemptsExceededError();
     }
 
-    const verification = this.sms.verifyOtp
+    const verification: SmsVerificationResult = this.sms.verifyOtp
       ? await this.sms.verifyOtp({
           challengeId: challenge.id,
           code,
@@ -149,6 +156,14 @@ export class AuthService {
         })
       : { valid: await compare(code, challenge.codeHash) };
     if (!verification.valid) {
+      if (verification.failure === "expired") throw otpExpiredError();
+      if (verification.failure === "attempts_exceeded") {
+        await this.repository.incrementOtpAttempts(
+          challenge.id,
+          this.maxOtpAttempts,
+        );
+        throw otpAttemptsExceededError();
+      }
       const counted = await this.repository.incrementOtpAttempts(
         challenge.id,
         this.maxOtpAttempts,
@@ -178,6 +193,11 @@ export class AuthService {
       );
       throw accountUnavailableError();
     }
+    await this.applyCarrierVerification(
+      session.user.id,
+      challenge.phoneE164,
+      verification,
+    );
 
     return {
       accessToken: await this.tokens.createAccessToken(session.user, deviceId),
@@ -279,6 +299,27 @@ export class AuthService {
   ): Promise<void> {
     if (!(await this.repository.deleteDevice(deviceId, claims.sub))) {
       throw deviceNotFoundError();
+    }
+  }
+
+  /**
+   * Realtime entitlement after a carrier OTP: store the carrier subscriber id and
+   * grant access. Best-effort: a failure here must never fail authentication.
+   */
+  async applyCarrierVerification(
+    userId: string,
+    phoneE164: string,
+    verification: SmsVerificationResult,
+  ): Promise<void> {
+    if (!verification.carrier || !this.subscriptions) return;
+    try {
+      await this.subscriptions.onCarrierVerified(
+        userId,
+        phoneE164,
+        verification.carrier,
+      );
+    } catch {
+      this.logger.warn({ event: "bdapps_carrier_sync_failed", userId });
     }
   }
 

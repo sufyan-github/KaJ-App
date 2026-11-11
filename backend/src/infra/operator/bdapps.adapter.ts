@@ -1,7 +1,8 @@
 import { Injectable, ServiceUnavailableException } from "@nestjs/common";
 
 import { BdappsGatewayClient } from "../bdapps/bdapps-gateway.client";
-import { toBdappsSubscriberId } from "../bdapps/bdapps-subscriber";
+import { normalizeCarrierStatus } from "../bdapps/bdapps-status";
+import { subscriberIdFor } from "../bdapps/bdapps-subscriber";
 import { OperatorEligibilityResult, OperatorPort } from "./operator.port";
 
 const operatorPrefixes: Readonly<Record<string, string>> = {
@@ -18,43 +19,55 @@ export class BdappsOperatorAdapter implements OperatorPort {
   async checkEligibility(input: {
     operatorCode: string;
     phoneE164: string;
+    subscriberId?: string | null;
   }): Promise<OperatorEligibilityResult> {
     const prefix = operatorPrefixes[input.operatorCode];
-    if (!prefix) {
-      return { ...input, providerReference: null, status: "UNSUPPORTED" };
-    }
+    const base = { operatorCode: input.operatorCode, providerReference: null };
+    if (!prefix) return { ...base, status: "UNSUPPORTED" };
     if (!input.phoneE164.startsWith(prefix)) {
-      return { ...input, providerReference: null, status: "REJECTED" };
+      return { ...base, status: "REJECTED" };
     }
 
     const response = await this.gateway.post("status.php", {
-      subscriberId: toBdappsSubscriberId(input.phoneE164),
+      subscriberId: subscriberIdFor(input.phoneE164, input.subscriberId),
     });
     if (response.statusCode !== "S1000") {
       throw new ServiceUnavailableException(
         "The operator could not confirm subscription status right now.",
       );
     }
-    const status = String(
-      response.subscriptionStatus ?? response.status ?? "",
-    ).toUpperCase();
-    const inactiveStatuses = new Set([
-      "CANCELLED",
-      "EXPIRED",
-      "UNREGISTERED",
-      "UNSUBSCRIBED",
-    ]);
-    if (status !== "REGISTERED" && !inactiveStatuses.has(status)) {
+    const carrierStatus = normalizeCarrierStatus(
+      response.subscriptionStatus ?? response.status,
+    );
+    if (!carrierStatus) {
       throw new ServiceUnavailableException(
         "The operator returned an unrecognized subscription status.",
       );
     }
-    const providerReference =
-      typeof response.referenceNo === "string" ? response.referenceNo : null;
     return {
-      operatorCode: input.operatorCode,
-      providerReference,
-      status: status === "REGISTERED" ? "VERIFIED" : "PENDING",
+      ...base,
+      carrierStatus,
+      status: carrierStatus === "REGISTERED" ? "VERIFIED" : "PENDING",
     };
+  }
+
+  async cancelSubscription(input: {
+    phoneE164: string;
+    subscriberId?: string | null;
+  }): Promise<{ carrierStatus: "UNREGISTERED" }> {
+    const response = await this.gateway.post("unsubscribe.php", {
+      subscriberId: subscriberIdFor(input.phoneE164, input.subscriberId),
+    });
+    // The gateway already maps E1356 (already unregistered) to S1000.
+    if (
+      (response.statusCode !== "S1000" && response.statusCode !== "E1356") ||
+      (response.subscriptionStatus !== undefined &&
+        normalizeCarrierStatus(response.subscriptionStatus) !== "UNREGISTERED")
+    ) {
+      throw new ServiceUnavailableException(
+        "The operator could not stop the subscription right now.",
+      );
+    }
+    return { carrierStatus: "UNREGISTERED" };
   }
 }

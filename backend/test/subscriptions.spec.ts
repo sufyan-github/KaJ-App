@@ -147,6 +147,7 @@ describe("subscription and operator Version 1", () => {
         findFirst: jest.fn().mockResolvedValue({ id: planId, code: "ROBI" }),
       },
       subscription: { findFirst: jest.fn().mockResolvedValue(null) },
+      userOperatorIdentity: { findUnique: jest.fn().mockResolvedValue(null) },
       subscriptionPlan: {
         findFirst: jest.fn().mockResolvedValue({
           id: planId,
@@ -187,20 +188,41 @@ describe("subscription and operator Version 1", () => {
     });
   });
 
-  it("never presents a local cancellation as carrier billing cancellation", async () => {
-    const service = new SubscriptionsService(
-      {
-        subscription: {
-          findFirst: jest
-            .fn()
-            .mockResolvedValue({ id: planId, status: "ACTIVE" }),
-        },
-      } as never,
-      { checkEligibility: jest.fn(), managesRemoteBilling: true } as never,
-    );
+  it("stops carrier billing before ending access and offers the SMS fallback on failure", async () => {
+    const prisma = {
+      subscription: {
+        findFirst: jest
+          .fn()
+          .mockResolvedValue({ id: planId, status: "ACTIVE" }),
+      },
+      user: {
+        findUnique: jest
+          .fn()
+          .mockResolvedValue({ phone_e164: "+8801812345678" }),
+      },
+      userOperatorIdentity: {
+        findUnique: jest.fn().mockResolvedValue({
+          provider_subscriber_id: "tel:B%3Cmasked-id==",
+          operator: { code: "ROBI" },
+        }),
+      },
+    };
+    const operator = {
+      cancelSubscription: jest.fn().mockRejectedValue(new Error("E1601")),
+      checkEligibility: jest.fn(),
+      managesRemoteBilling: true,
+    };
+    const service = new SubscriptionsService(prisma as never, operator);
 
     await expect(service.cancel("user-id")).rejects.toMatchObject({
-      descriptor: { code: "OPERATOR_CANCELLATION_REQUIRED" },
+      descriptor: {
+        code: "OPERATOR_UNSUBSCRIBE_FAILED",
+        details: [{ shortCode: "21213", smsKeyword: "STOP kaaj" }],
+      },
+    });
+    expect(operator.cancelSubscription).toHaveBeenCalledWith({
+      phoneE164: "+8801812345678",
+      subscriberId: "tel:B%3Cmasked-id==",
     });
   });
 });

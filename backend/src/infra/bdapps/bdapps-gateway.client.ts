@@ -3,8 +3,16 @@ import { createHmac, randomBytes } from "node:crypto";
 import { Injectable, ServiceUnavailableException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
+export type BdappsGatewayEndpoint =
+  | "otp_request.php"
+  | "otp_verify.php"
+  | "status.php"
+  | "unsubscribe.php"
+  | "sms_send.php";
+
 export type BdappsGatewayResponse = Record<string, unknown> & {
   referenceNo?: unknown;
+  requestId?: unknown;
   status?: unknown;
   statusCode?: unknown;
   subscriptionStatus?: unknown;
@@ -24,7 +32,7 @@ export class BdappsGatewayClient {
   }
 
   async post(
-    endpoint: "otp_request.php" | "otp_verify.php" | "status.php",
+    endpoint: BdappsGatewayEndpoint,
     payload: Record<string, string>,
   ): Promise<BdappsGatewayResponse> {
     if (!this.baseUrl || this.internalKey.length < 32) {
@@ -42,8 +50,8 @@ export class BdappsGatewayClient {
       const response = await fetch(`${this.baseUrl}/${endpoint}`, {
         body,
         headers: {
+          // The shared secret never travels in a header: the HMAC is the credential.
           "Content-Type": "application/json",
-          "X-API-Key": this.internalKey,
           "X-Nonce": nonce,
           "X-Signature": signature,
           "X-Timestamp": timestamp,

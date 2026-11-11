@@ -7,6 +7,12 @@ const environmentSchema = z
     ADMIN_TOTP_ENCRYPTION_KEY: z.string().default(""),
     BDAPPS_GATEWAY_URL: z.union([z.literal(""), z.url()]).default(""),
     BDAPPS_INTERNAL_API_KEY: z.string().default(""),
+    BDAPPS_PLAN_CODE: z.string().trim().min(1).default("bdapps-daily"),
+    BDAPPS_SHORT_CODE: z
+      .string()
+      .regex(/^\d{3,8}$/)
+      .default("21213"),
+    BDAPPS_SMS_KEYWORD: z.string().trim().min(1).max(40).default("STOP kaaj"),
     DATABASE_URL: z
       .string()
       .min(1)

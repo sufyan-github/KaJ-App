@@ -1,0 +1,8 @@
+# Real configuration and runtime state never go into git.
+.env
+*.env
+!.env.example
+*.log
+*.log.*
+storage/*
+!storage/.htaccess

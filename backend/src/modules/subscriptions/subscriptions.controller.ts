@@ -14,6 +14,7 @@ import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { Policy } from "../../common/policy/policy.decorator";
 import { Policies } from "../../common/policy/policy.types";
 import { AccessTokenClaims } from "../auth/auth-token.service";
+import { isBdappsSubscriberId } from "../../infra/bdapps/bdapps-subscriber";
 import { BdappsWebhookVerifier } from "../../infra/bdapps/bdapps-webhook.verifier";
 import { RequestSubscriptionDto } from "./dto/subscriptions.dto";
 import { SubscriptionsService } from "./subscriptions.service";
@@ -33,21 +34,28 @@ export class SubscriptionsController {
     @Body() body: Record<string, unknown>,
   ) {
     await this.bdappsWebhook.verify(request.headers, request.rawBody);
-    const subscriberId = body.subscriberId;
-    const status = body.status;
-    const providerEventId = body.providerEventId;
+    const { subscriberId, status, providerEventId } = body;
+    const frequency = optionalString(body.frequency, 32);
+    const providerTimeStamp = optionalString(body.providerTimeStamp, 32);
     if (
-      typeof subscriberId !== "string" ||
-      (status !== "REGISTERED" && status !== "UNSUBSCRIBED") ||
+      !isBdappsSubscriberId(subscriberId) ||
+      (status !== "REGISTERED" &&
+        status !== "UNSUBSCRIBED" &&
+        status !== "CHARGE_PENDING") ||
       (providerEventId !== null &&
         providerEventId !== undefined &&
-        typeof providerEventId !== "string")
+        (typeof providerEventId !== "string" ||
+          providerEventId.length > 128)) ||
+      frequency === false ||
+      providerTimeStamp === false
     ) {
       throw new BadRequestException("Invalid verified webhook payload.");
     }
     return this.subscriptions.applyBdappsWebhook({
+      frequency,
       providerEventId:
         typeof providerEventId === "string" ? providerEventId : null,
+      providerTimeStamp,
       status,
       subscriberId,
     });
@@ -79,4 +87,13 @@ export class SubscriptionsController {
   cancel(@CurrentUser() claims: AccessTokenClaims) {
     return this.subscriptions.cancel(claims.sub);
   }
+}
+
+/** null when absent, the string when valid, false when malformed. */
+function optionalString(
+  value: unknown,
+  maxLength: number,
+): string | null | false {
+  if (value === undefined || value === null) return null;
+  return typeof value === "string" && value.length <= maxLength ? value : false;
 }

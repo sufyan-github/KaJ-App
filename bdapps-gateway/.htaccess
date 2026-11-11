@@ -1,0 +1,22 @@
+# KAAJ BDApps gateway. Only the api/*.php entry points are public.
+# Everything else is loaded server-side via require_once.
+Options -Indexes
+
+# Dotfiles (.env, .gitignore, .htaccess, ...), logs (incl. rotated *.log.1),
+# docs, examples and dev tooling.
+<FilesMatch "(^\.|\.(env|log|md|mjs|sh|example|dist|json|lock)$|\.log\.[0-9]+$)">
+    Require all denied
+</FilesMatch>
+
+# Library files are never entry points.
+<FilesMatch "^(config|Security|BDAppsClient|Http)\.php$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Nonce/event stores, logs and local tooling folders.
+    RewriteRule (^|/)(storage|dev)(/|$) - [F,L]
+    # Any dot-segment (e.g. /.git/).
+    RewriteRule (^|/)\. - [F,L]
+</IfModule>

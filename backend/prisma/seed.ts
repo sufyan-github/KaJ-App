@@ -402,6 +402,35 @@ async function seed() {
     },
   });
 
+  // Development-only carrier plan matching the BDApps daily charging product
+  // (Tk 2.78/day). Production plans are created by an administrator.
+  const carrierPlan = {
+    name_en: "Daily subscription",
+    name_bn: "দৈনিক সাবস্ক্রিপশন",
+    description_en: "Tk 2.78/day + VAT, renews daily through Robi/Airtel.",
+    description_bn: "৳২.৭৮/দিন + ভ্যাট, প্রতিদিন নবায়ন (রবি/এয়ারটেল)।",
+    price_poisha: 278n,
+    currency: "BDT",
+    duration_days: 1,
+    feature_keys: [
+      "DIRECT_CONTACT",
+      "JOB_APPLICATION",
+      "JOB_POSTING",
+      "WORKER_DISCOVERY",
+      "WORKER_HIRING",
+    ],
+    is_active: true,
+    sort_order: 0,
+  };
+  await prisma.subscriptionPlan.upsert({
+    where: { code: process.env.BDAPPS_PLAN_CODE || "bdapps-daily" },
+    update: carrierPlan,
+    create: {
+      code: process.env.BDAPPS_PLAN_CODE || "bdapps-daily",
+      ...carrierPlan,
+    },
+  });
+
   for (const [slug, name_en, name_bn, icon, rule_json] of badges) {
     await prisma.badge.upsert({
       where: { slug },

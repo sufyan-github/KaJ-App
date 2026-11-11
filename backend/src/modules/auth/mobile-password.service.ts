@@ -9,7 +9,11 @@ import {
   OPERATOR_PORT,
   OperatorPort,
 } from "../../infra/operator/operator.port";
-import { SMS_PORT, SmsPort } from "../../infra/sms/sms.port";
+import {
+  SMS_PORT,
+  SmsPort,
+  SmsVerificationResult,
+} from "../../infra/sms/sms.port";
 import { SubscriptionsService } from "../subscriptions/subscriptions.service";
 import {
   AUTH_RATE_LIMITER,
@@ -21,6 +25,8 @@ import { AuthService } from "./auth.service";
 import {
   accountUnavailableError,
   invalidPhoneError,
+  otpAttemptsExceededError,
+  otpExpiredError,
   otpInvalidError,
   unsupportedOperatorError,
 } from "./auth.errors";
@@ -250,7 +256,7 @@ export class MobilePasswordService {
     if (claimed.count !== 1) throw otpInvalidError();
     let retrySafe = false;
     try {
-      const verification = this.sms.verifyOtp
+      const verification: SmsVerificationResult = this.sms.verifyOtp
         ? await this.sms.verifyOtp({
             challengeId,
             code,
@@ -258,6 +264,10 @@ export class MobilePasswordService {
           })
         : { valid: await compare(code, challenge.code_hash) };
       if (!verification.valid) {
+        // Carrier-expired or exhausted challenges stay claimed: they can never succeed.
+        if (verification.failure === "expired") throw otpExpiredError();
+        if (verification.failure === "attempts_exceeded")
+          throw otpAttemptsExceededError();
         retrySafe = true;
         throw otpInvalidError();
       }
@@ -300,6 +310,11 @@ export class MobilePasswordService {
           data: { consumed_at: this.clock.now() },
         });
       });
+      await this.auth.applyCarrierVerification(
+        user.id,
+        challenge.phone_e164,
+        verification,
+      );
       return { reset: true };
     } finally {
       // Keep the claim on uncertain provider outcomes: never automatically retry a paid call.
