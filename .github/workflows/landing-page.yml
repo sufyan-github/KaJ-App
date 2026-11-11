@@ -39,13 +39,15 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      - name: Test
-        run: |
-          pnpm run test:release
-          pnpm run test:sites
+      - name: Test release selection
+        run: pnpm run test:release
 
       - name: Build
         run: pnpm run build
+
+      # Checks the built output, so it must run after the build.
+      - name: Test Sites packaging
+        run: pnpm run test:sites
 
       - name: Prepare static site
         run: |
