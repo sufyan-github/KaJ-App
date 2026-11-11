@@ -46,4 +46,30 @@ void main() {
     expect(failure.field, isNull);
     expect(failure.requestId, isNull);
   });
+
+  test('keeps structured error details and drops malformed entries', () {
+    final failure = ErrorMapper.from(
+      DioException(
+        requestOptions: RequestOptions(path: '/subscriptions/cancel'),
+        response: Response<Object>(
+          requestOptions: RequestOptions(path: '/subscriptions/cancel'),
+          statusCode: 503,
+          data: {
+            'error': {
+              'code': 'OPERATOR_UNSUBSCRIBE_FAILED',
+              'message': 'Operator unavailable',
+              'details': [
+                'not-a-map',
+                {'smsKeyword': 'STOP kaaj', 'shortCode': '21213'},
+              ],
+            },
+          },
+        ),
+      ),
+    );
+
+    expect(failure.details, [
+      {'smsKeyword': 'STOP kaaj', 'shortCode': '21213'},
+    ]);
+  });
 }

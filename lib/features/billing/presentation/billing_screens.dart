@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,6 +10,7 @@ import '../../../core/routing/app_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/k_card.dart';
 import '../../../core/widgets/k_empty_state.dart';
+import '../../../core/widgets/k_error_message.dart';
 import '../../../core/widgets/k_error_state.dart';
 import '../../../core/widgets/k_localized_text.dart';
 import '../../../core/widgets/k_primary_button.dart';
@@ -26,7 +28,38 @@ class SubscriptionScreen extends ConsumerStatefulWidget {
 }
 
 class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
+  late final AppLifecycleListener _lifecycle;
   bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Carrier status changes outside the app (renewals, SMS cancellation),
+    // so re-read it whenever the screen opens or the app comes back.
+    _lifecycle = AppLifecycleListener(onResume: _refresh);
+    if (ref.exists(subscriptionOverviewProvider)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _refresh();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
+  void _refresh() => ref.invalidate(subscriptionOverviewProvider);
+
+  Future<void> _pullToRefresh() async {
+    try {
+      _refresh();
+      await ref.read(subscriptionOverviewProvider.future);
+    } on Object {
+      // The error state below already explains the failure.
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,8 +88,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
           ),
         ),
         data: (data) => RefreshIndicator(
-          onRefresh: () async =>
-              ref.refresh(subscriptionOverviewProvider.future),
+          onRefresh: _pullToRefresh,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(
@@ -84,12 +116,27 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   onPressed: () => context.go(AppRoutes.passwordSetup),
                   child: Text(l10n.passwordSetupTitle),
                 ),
+              if (data.operatorPlanMissing) ...[
+                const _WarningBanner(
+                  icon: Icons.build_circle_outlined,
+                  message:
+                      'সাবস্ক্রিপশন প্ল্যান প্রস্তুত করা হচ্ছে। সহায়তার সঙ্গে যোগাযোগ করুন।',
+                ),
+                const SizedBox(height: KSpacing.md),
+              ],
               _AccessCard(overview: data),
               const SizedBox(height: KSpacing.md),
-              _OperatorCard(identity: data.operatorIdentity),
+              _OperatorCard(
+                identity: data.operatorIdentity,
+                carrierStatus: data.carrierStatus,
+              ),
               if (data.operatorStatusRefreshFailed) ...[
                 const SizedBox(height: KSpacing.sm),
-                const _OperatorRefreshWarning(),
+                const _WarningBanner(
+                  icon: Icons.sync_problem_outlined,
+                  message:
+                      'অপারেটরের সর্বশেষ অবস্থা এখন যাচাই করা যায়নি। আগের নিরাপদ অবস্থা দেখানো হচ্ছে; কিছুক্ষণ পর আবার রিফ্রেশ করুন।',
+                ),
               ],
               const SizedBox(height: KSpacing.lg),
               KLocalizedText(
@@ -124,7 +171,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
               if ({'ACTIVE', 'PENDING'}.contains(data.current?.status)) ...[
                 const SizedBox(height: KSpacing.lg),
                 OutlinedButton.icon(
-                  onPressed: _saving ? null : _cancel,
+                  onPressed: _saving ? null : () => _cancel(data),
                   icon: const Icon(Icons.cancel_outlined),
                   label: const KLocalizedText('সাবস্ক্রিপশন বাতিল করুন'),
                 ),
@@ -183,14 +230,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         );
       }
     } on Object catch (error) {
-      if (mounted) {
-        final failure = _failure(error);
-        _snack(
-          failure.code == 'OPERATOR_CANCELLATION_REQUIRED'
-              ? 'KAAJ থেকে অপারেটর বিলিং বন্ধ করা যায় না। অপারেটরের নিশ্চিতকরণ SMS-এ দেওয়া বন্ধ করার নিয়ম অনুসরণ করুন, তারপর এই পেজ রিফ্রেশ করুন।'
-              : failure.message,
-        );
-      }
+      if (mounted) _snackFailure(error);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -253,26 +293,243 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     );
   }
 
-  Future<void> _cancel() async {
+  Future<void> _cancel(SubscriptionOverview overview) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const KLocalizedText('সাবস্ক্রিপশন বাতিল করবেন?'),
+        content: const KLocalizedText(
+          'বাতিল করলে অপারেটরের দৈনিক চার্জ বন্ধ হবে এবং KAAJ সাবস্ক্রিপশনের সুবিধা এখনই শেষ হবে।',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const KLocalizedText('না, চালু রাখুন'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const KLocalizedText('হ্যাঁ, বাতিল করুন'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
     setState(() => _saving = true);
     try {
-      await ref.read(billingRepositoryProvider).cancelSubscription();
-      ref.invalidate(subscriptionOverviewProvider);
-      if (mounted) _snack('সাবস্ক্রিপশন বাতিল হয়েছে।');
+      final updated = await ref
+          .read(billingRepositoryProvider)
+          .cancelSubscription();
+      _refresh();
+      if (!mounted) return;
+      _snack('সাবস্ক্রিপশন বাতিল হয়েছে।');
+      final auth = ref.read(authControllerProvider);
+      if (updated != null &&
+          !updated.accessActive &&
+          auth.status == AuthStatus.authenticated &&
+          auth.subscriptionAccess) {
+        ref.read(authControllerProvider.notifier).recheckAccess();
+      }
     } on Object catch (error) {
-      if (mounted) _snack(_failure(error).message);
+      if (!mounted) return;
+      final failure = _failure(error);
+      if (failure.code == 'OPERATOR_UNSUBSCRIBE_FAILED') {
+        // Clear the busy state first so no spinner keeps running behind
+        // the sheet.
+        setState(() => _saving = false);
+        await _showSmsFallback(
+          CancelInstructions.fromDetails(failure.details) ??
+              overview.cancelInstructions,
+        );
+      } else {
+        _snackFailure(failure);
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
   }
 
+  Future<void> _showSmsFallback(CancelInstructions instructions) =>
+      showModalBottomSheet<void>(
+        context: context,
+        showDragHandle: true,
+        isScrollControlled: true,
+        builder: (_) => SmsCancelSheet(
+          instructions: instructions,
+          launcher: ref.read(externalUriLauncherProvider),
+        ),
+      );
+
   void _snack(String value) => ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: KLocalizedText(value)));
+
+  void _snackFailure(Object error) => ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        content: Text(
+          localizedFailureMessage(
+            AppLocalizations.of(context),
+            _failure(error),
+          ),
+        ),
+      ),
+    );
 }
 
-class _OperatorRefreshWarning extends StatelessWidget {
-  const _OperatorRefreshWarning();
+/// Shown when the operator could not process an in-app cancellation. The
+/// user can still stop billing by sending the keyword to the short code.
+class SmsCancelSheet extends StatefulWidget {
+  const SmsCancelSheet({
+    required this.instructions,
+    required this.launcher,
+    super.key,
+  });
+
+  final CancelInstructions instructions;
+  final ExternalUriLauncher launcher;
+
+  @override
+  State<SmsCancelSheet> createState() => _SmsCancelSheetState();
+}
+
+class _SmsCancelSheetState extends State<SmsCancelSheet> {
+  String? _notice;
+  bool _noticeIsWarning = false;
+
+  Future<void> _openSms() async {
+    var opened = false;
+    try {
+      opened = await widget.launcher(widget.instructions.smsUri);
+    } on Object {
+      opened = false;
+    }
+    if (!mounted || opened) return;
+    setState(() {
+      _notice = 'SMS অ্যাপ খোলা যায়নি। বার্তাটি কপি করে নিজে পাঠান।';
+      _noticeIsWarning = true;
+    });
+  }
+
+  Future<void> _copy() async {
+    await Clipboard.setData(
+      ClipboardData(text: widget.instructions.smsKeyword),
+    );
+    if (!mounted) return;
+    setState(() {
+      _notice = 'বার্তা কপি হয়েছে।';
+      _noticeIsWarning = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final instructions = widget.instructions;
+    final textTheme = Theme.of(context).textTheme;
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(
+          KSpacing.md,
+          0,
+          KSpacing.md,
+          KSpacing.lg,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            KLocalizedText('SMS দিয়ে বাতিল করুন', style: textTheme.titleLarge),
+            const SizedBox(height: KSpacing.sm),
+            const KLocalizedText(
+              'অপারেটর এখন বাতিলের অনুরোধ গ্রহণ করেনি। নিচের বার্তাটি SMS করে পাঠান, তারপর এই পেজ রিফ্রেশ করুন।',
+            ),
+            const SizedBox(height: KSpacing.md),
+            Container(
+              padding: const EdgeInsets.all(KSpacing.md),
+              decoration: BoxDecoration(
+                color: KColors.surfaceAlt,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _SmsValueRow(
+                    label: 'যে বার্তা পাঠাবেন',
+                    value: instructions.smsKeyword,
+                  ),
+                  const SizedBox(height: KSpacing.sm),
+                  _SmsValueRow(
+                    label: 'পাঠানোর নম্বর',
+                    value: instructions.shortCode,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: KSpacing.md),
+            FilledButton.icon(
+              onPressed: _openSms,
+              icon: const Icon(Icons.sms_outlined),
+              label: const KLocalizedText('SMS অ্যাপ খুলুন'),
+            ),
+            const SizedBox(height: KSpacing.sm),
+            OutlinedButton.icon(
+              onPressed: _copy,
+              icon: const Icon(Icons.copy_outlined),
+              label: const KLocalizedText('বার্তা কপি করুন'),
+            ),
+            if (_notice case final notice?) ...[
+              const SizedBox(height: KSpacing.sm),
+              Semantics(
+                liveRegion: true,
+                child: KLocalizedText(
+                  notice,
+                  style: TextStyle(
+                    color: _noticeIsWarning ? KColors.danger : KColors.success,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SmsValueRow extends StatelessWidget {
+  const _SmsValueRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SizedBox(
+        width: 120,
+        child: KLocalizedText(
+          label,
+          style: const TextStyle(color: KColors.textSecondary),
+        ),
+      ),
+      Expanded(
+        child: SelectableText(
+          value,
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        ),
+      ),
+    ],
+  );
+}
+
+class _WarningBanner extends StatelessWidget {
+  const _WarningBanner({required this.icon, required this.message});
+
+  final IconData icon;
+  final String message;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -282,16 +539,12 @@ class _OperatorRefreshWarning extends StatelessWidget {
       border: Border.all(color: KColors.warning.withValues(alpha: .35)),
       borderRadius: BorderRadius.circular(12),
     ),
-    child: const Row(
+    child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(Icons.sync_problem_outlined, color: KColors.warning),
-        SizedBox(width: KSpacing.sm),
-        Expanded(
-          child: KLocalizedText(
-            'অপারেটরের সর্বশেষ অবস্থা এখন যাচাই করা যায়নি। আগের নিরাপদ অবস্থা দেখানো হচ্ছে; কিছুক্ষণ পর আবার রিফ্রেশ করুন।',
-          ),
-        ),
+        Icon(icon, color: KColors.warning),
+        const SizedBox(width: KSpacing.sm),
+        Expanded(child: KLocalizedText(message)),
       ],
     ),
   );
@@ -402,6 +655,7 @@ class _AccessCard extends StatelessWidget {
               ),
               style: Theme.of(context).textTheme.titleMedium,
             ),
+            Text(_priceWording(context, current.plan)),
             if (current.expiresAt != null)
               KLocalizedText(
                 'মেয়াদ শেষ: ${KFormat.dateTime(context, current.expiresAt!)}',
@@ -425,8 +679,9 @@ class _AccessCard extends StatelessWidget {
 }
 
 class _OperatorCard extends StatelessWidget {
-  const _OperatorCard({required this.identity});
+  const _OperatorCard({required this.identity, this.carrierStatus});
 
+  final CarrierStatus? carrierStatus;
   final OperatorIdentity? identity;
 
   @override
@@ -458,6 +713,16 @@ class _OperatorCard extends StatelessWidget {
                       : 'অপারেটর যাচাই অপেক্ষমাণ',
                   style: const TextStyle(color: KColors.textSecondary),
                 ),
+                if (carrierStatus case final status?)
+                  KLocalizedText(
+                    _carrierStatusLabel(status),
+                    style: TextStyle(
+                      color: status == CarrierStatus.registered
+                          ? KColors.success
+                          : KColors.warning,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -485,24 +750,17 @@ class _PlanCard extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                plan.nameFor(Localizations.localeOf(context).languageCode),
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-            Text(
-              KFormat.money(context, plan.pricePoisha),
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(color: KColors.primary),
-            ),
-          ],
+        Text(
+          plan.nameFor(Localizations.localeOf(context).languageCode),
+          style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: KSpacing.xs),
-        KLocalizedText('${plan.durationDays} দিনের জন্য'),
+        Text(
+          _priceWording(context, plan),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(color: KColors.primary),
+        ),
         if (plan.descriptionFor(Localizations.localeOf(context).languageCode)
             case final description?) ...[
           const SizedBox(height: KSpacing.sm),
@@ -641,6 +899,27 @@ Failure _failure(Object error) => error is Failure
         kind: FailureKind.unknown,
         message: 'অনুরোধটি সম্পন্ন করা যায়নি। আবার চেষ্টা করুন।',
       );
+
+/// Daily carrier plans read as `৳২.৭৮/দিন + ভ্যাট, প্রতিদিন নবায়ন`.
+String _priceWording(BuildContext context, SubscriptionPlan plan) {
+  final price = KFormat.money(context, plan.pricePoisha);
+  const daily = '/দিন + ভ্যাট, প্রতিদিন নবায়ন';
+  if (plan.durationDays == 1) {
+    return price + KaajLocalizations.text(context, daily);
+  }
+  final period = KaajLocalizations.text(
+    context,
+    '${plan.durationDays} দিনের জন্য',
+  );
+  return '$price · $period';
+}
+
+String _carrierStatusLabel(CarrierStatus status) => switch (status) {
+  CarrierStatus.registered => 'অপারেটরে সাবস্ক্রিপশন চালু',
+  CarrierStatus.unregistered => 'অপারেটরে সাবস্ক্রিপশন বন্ধ',
+  CarrierStatus.chargePending =>
+    'অপারেটরের চার্জ অপেক্ষমাণ; মেয়াদ শেষ হওয়া পর্যন্ত সুবিধা চালু থাকবে',
+};
 
 String _subscriptionStatus(String status) => switch (status) {
   'ACTIVE' => 'সক্রিয়',

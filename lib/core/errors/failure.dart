@@ -19,6 +19,7 @@ class Failure implements Exception {
     this.field,
     this.requestId,
     this.retryable = false,
+    this.details = const [],
   });
 
   final FailureKind kind;
@@ -27,6 +28,10 @@ class Failure implements Exception {
   final String? field;
   final String? requestId;
   final bool retryable;
+
+  /// Structured extras from the error envelope, for example carrier SMS
+  /// instructions. Only map entries are kept.
+  final List<Map<String, Object?>> details;
 
   @override
   String toString() => 'Failure($kind, $code, $requestId)';

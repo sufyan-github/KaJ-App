@@ -256,6 +256,10 @@ class AppLocalizationsBn extends AppLocalizations {
       'এই যাচাই অনুরোধটি পাওয়া যায়নি। নতুন কোড নিন।';
 
   @override
+  String get operatorSmsUnavailableMessage =>
+      'এই মুহূর্তে যাচাই কোডের SMS পাঠানো যায়নি। কয়েক মিনিট পরে আবার চেষ্টা করুন।';
+
+  @override
   String get invalidPhone => 'সঠিক বাংলাদেশি মোবাইল নম্বর লিখুন।';
 
   @override

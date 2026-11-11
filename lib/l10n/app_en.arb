@@ -76,6 +76,7 @@
   "otpAttemptsExceededMessage": "Too many incorrect attempts. Send a new code.",
   "otpAlreadyUsedMessage": "This verification code has already been used. Send a new code.",
   "otpNotFoundMessage": "This verification request was not found. Send a new code.",
+  "operatorSmsUnavailableMessage": "We could not send the verification SMS right now. Wait a few minutes and try again.",
   "invalidPhone": "Enter a valid Bangladeshi mobile number.",
   "unsupportedOperatorPhone": "Only Robi (018) and Airtel (016) numbers can register.",
   "invalidOtp": "Enter the complete 6-digit verification code.",

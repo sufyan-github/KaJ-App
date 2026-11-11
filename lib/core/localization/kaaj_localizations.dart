@@ -337,8 +337,6 @@ const _reviewedEnglish = <String, String>{
   'অনুরোধ পাঠান': 'Send request',
   'সাবস্ক্রিপশন অনুরোধ অপেক্ষমাণ আছে।': 'Your subscription request is pending.',
   'সাবস্ক্রিপশন সক্রিয় হয়েছে।': 'Subscription activated.',
-  'KAAJ থেকে অপারেটর বিলিং বন্ধ করা যায় না। অপারেটরের নিশ্চিতকরণ SMS-এ দেওয়া বন্ধ করার নিয়ম অনুসরণ করুন, তারপর এই পেজ রিফ্রেশ করুন।':
-      'Carrier billing cannot be stopped inside KAAJ. Follow the unsubscribe instructions in your operator confirmation SMS, then refresh this page.',
   'অপারেটরের সর্বশেষ অবস্থা এখন যাচাই করা যায়নি। আগের নিরাপদ অবস্থা দেখানো হচ্ছে; কিছুক্ষণ পর আবার রিফ্রেশ করুন।':
       'The latest operator status could not be checked. The last safe state is shown; refresh again shortly.',
   'এই মুহূর্তে কোনো সমর্থিত অপারেটর নেই।':

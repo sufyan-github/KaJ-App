@@ -530,6 +530,12 @@ abstract class AppLocalizations {
   /// **'This verification request was not found. Send a new code.'**
   String get otpNotFoundMessage;
 
+  /// No description provided for @operatorSmsUnavailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not send the verification SMS right now. Wait a few minutes and try again.'**
+  String get operatorSmsUnavailableMessage;
+
   /// No description provided for @invalidPhone.
   ///
   /// In en, this message translates to:

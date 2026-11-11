@@ -57,8 +57,16 @@ abstract final class ErrorMapper {
               : null) ??
           error.response?.headers.value('x-request-id'),
       retryable: descriptor['retryable'] == true || (status ?? 0) >= 500,
+      details: _details(descriptor['details']),
     );
   }
+
+  static List<Map<String, Object?>> _details(Object? value) => value is List
+      ? value
+            .whereType<Map>()
+            .map(Map<String, Object?>.from)
+            .toList(growable: false)
+      : const [];
 
   static FailureKind _kindForStatus(int? status) => switch (status) {
     401 => FailureKind.unauthorized,

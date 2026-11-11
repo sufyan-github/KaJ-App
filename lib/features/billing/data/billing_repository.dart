@@ -34,9 +34,18 @@ class BillingRepository {
     }
   }
 
-  Future<void> cancelSubscription() async {
+  /// Cancels through the operator. Returns the refreshed overview when the
+  /// API includes one. A carrier failure surfaces as a `Failure` with code
+  /// `OPERATOR_UNSUBSCRIBE_FAILED` and SMS instructions in `details`.
+  Future<SubscriptionOverview?> cancelSubscription() async {
     try {
-      await _dio.post<Map<String, dynamic>>('/subscriptions/cancel');
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/subscriptions/cancel',
+      );
+      final data = response.data?['data'];
+      return data is Map
+          ? SubscriptionOverview.fromJson(Map<String, dynamic>.from(data))
+          : null;
     } on Object catch (error) {
       throw ErrorMapper.from(error);
     }

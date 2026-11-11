@@ -1005,4 +1005,26 @@ const generatedEnglishTranslations = <String, String>{
   "মিলে যাওয়া নতুন কাজের খবর পান": "Get told about matching new jobs",
   "সাধারণ প্রশ্নের উত্তর": "Answers to common questions",
   "নাম, ছবি, নিজের সম্পর্কে ও এলাকা": "Name, photo, bio and area",
+  "/দিন + ভ্যাট, প্রতিদিন নবায়ন": "/day + VAT, renews daily",
+  "SMS অ্যাপ খুলুন": "Open SMS app",
+  "SMS অ্যাপ খোলা যায়নি। বার্তাটি কপি করে নিজে পাঠান।":
+      "The SMS app could not be opened. Copy the message and send it yourself.",
+  "SMS দিয়ে বাতিল করুন": "Cancel by SMS",
+  "অপারেটর এখন বাতিলের অনুরোধ গ্রহণ করেনি। নিচের বার্তাটি SMS করে পাঠান, তারপর এই পেজ রিফ্রেশ করুন।":
+      "The operator did not accept the cancellation right now. Send the message below by SMS, then refresh this page.",
+  "অপারেটরে সাবস্ক্রিপশন চালু": "Subscribed with your operator",
+  "অপারেটরে সাবস্ক্রিপশন বন্ধ": "Not subscribed with your operator",
+  "অপারেটরের চার্জ অপেক্ষমাণ; মেয়াদ শেষ হওয়া পর্যন্ত সুবিধা চালু থাকবে":
+      "Operator charge pending; access continues until the current period ends",
+  "না, চালু রাখুন": "No, keep it",
+  "যে বার্তা পাঠাবেন": "Message to send",
+  "পাঠানোর নম্বর": "Send to number",
+  "বাতিল করলে অপারেটরের দৈনিক চার্জ বন্ধ হবে এবং KAAJ সাবস্ক্রিপশনের সুবিধা এখনই শেষ হবে।":
+      "Cancelling stops the daily operator charge and your KAAJ subscription access ends now.",
+  "বার্তা কপি করুন": "Copy message",
+  "বার্তা কপি হয়েছে।": "Message copied.",
+  "সাবস্ক্রিপশন প্ল্যান প্রস্তুত করা হচ্ছে। সহায়তার সঙ্গে যোগাযোগ করুন।":
+      "The subscription plan is being set up. Contact support.",
+  "সাবস্ক্রিপশন বাতিল করবেন?": "Cancel your subscription?",
+  "হ্যাঁ, বাতিল করুন": "Yes, cancel",
 };

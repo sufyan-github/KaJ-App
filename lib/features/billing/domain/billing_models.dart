@@ -131,6 +131,69 @@ class SubscriptionRecord {
   final String status;
 }
 
+/// How to stop carrier billing by SMS when the in-app cancel cannot reach the
+/// operator. Values come from the API; the defaults match the BDApps listing.
+class CancelInstructions {
+  const CancelInstructions({
+    this.smsKeyword = defaultSmsKeyword,
+    this.shortCode = defaultShortCode,
+    this.inApp = true,
+  });
+
+  factory CancelInstructions.fromJson(Map<String, Object?> json) =>
+      CancelInstructions(
+        smsKeyword: _keyword(json['smsKeyword']),
+        shortCode: _shortCode(json['shortCode']),
+        inApp: json['inApp'] != false,
+      );
+
+  /// Reads the first usable entry of an error `details` list.
+  static CancelInstructions? fromDetails(List<Map<String, Object?>> details) {
+    for (final item in details) {
+      if (item['smsKeyword'] is String || item['shortCode'] is String) {
+        return CancelInstructions.fromJson(item);
+      }
+    }
+    return null;
+  }
+
+  static const defaultSmsKeyword = 'STOP kaaj';
+  static const defaultShortCode = '21213';
+
+  final bool inApp;
+  final String shortCode;
+  final String smsKeyword;
+
+  /// `sms:21213?body=STOP%20kaaj` with the space percent-encoded, because
+  /// some SMS apps show a literal plus sign for form-style encoding.
+  Uri get smsUri =>
+      Uri.parse('sms:$shortCode?body=${Uri.encodeComponent(smsKeyword)}');
+
+  static String _keyword(Object? value) {
+    final text = value is String ? value.trim() : '';
+    return text.isEmpty || text.length > 40 ? defaultSmsKeyword : text;
+  }
+
+  static String _shortCode(Object? value) {
+    final text = value is String ? value.trim() : '';
+    return RegExp(r'^[0-9]{3,8}$').hasMatch(text) ? text : defaultShortCode;
+  }
+}
+
+/// Carrier side subscription state as last seen by the backend.
+enum CarrierStatus {
+  registered,
+  unregistered,
+  chargePending;
+
+  static CarrierStatus? parse(Object? value) => switch (value) {
+    'REGISTERED' => registered,
+    'UNREGISTERED' => unregistered,
+    'CHARGE_PENDING' => chargePending,
+    _ => null,
+  };
+}
+
 class SubscriptionOverview {
   const SubscriptionOverview({
     required this.accessActive,
@@ -142,6 +205,9 @@ class SubscriptionOverview {
     required this.operators,
     this.operatorIdentity,
     this.current,
+    this.carrierStatus,
+    this.cancelInstructions = const CancelInstructions(),
+    this.operatorPlanMissing = false,
   });
 
   factory SubscriptionOverview.fromJson(
@@ -151,6 +217,13 @@ class SubscriptionOverview {
     gateEnabled: json['gateEnabled'] == true,
     onlinePaymentsEnabled: json['onlinePaymentsEnabled'] == true,
     operatorStatusRefreshFailed: json['operatorStatusRefreshFailed'] == true,
+    operatorPlanMissing: json['operatorPlanMissing'] == true,
+    carrierStatus: CarrierStatus.parse(json['carrierStatus']),
+    cancelInstructions: json['cancelInstructions'] is Map
+        ? CancelInstructions.fromJson(
+            Map<String, Object?>.from(json['cancelInstructions'] as Map),
+          )
+        : const CancelInstructions(),
     workerWithdrawalsEnabled: json['workerWithdrawalsEnabled'] == true,
     operatorIdentity: json['operator'] is Map
         ? OperatorIdentity.fromJson(
@@ -184,9 +257,12 @@ class SubscriptionOverview {
   );
 
   final bool accessActive;
+  final CancelInstructions cancelInstructions;
+  final CarrierStatus? carrierStatus;
   final SubscriptionRecord? current;
   final bool gateEnabled;
   final bool onlinePaymentsEnabled;
+  final bool operatorPlanMissing;
   final bool operatorStatusRefreshFailed;
   final OperatorIdentity? operatorIdentity;
   final List<MobileOperatorOption> operators;

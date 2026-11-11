@@ -259,6 +259,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'This verification request was not found. Send a new code.';
 
   @override
+  String get operatorSmsUnavailableMessage =>
+      'We could not send the verification SMS right now. Wait a few minutes and try again.';
+
+  @override
   String get invalidPhone => 'Enter a valid Bangladeshi mobile number.';
 
   @override

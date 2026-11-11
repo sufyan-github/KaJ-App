@@ -64,10 +64,12 @@ String localizedFailureMessage(AppLocalizations l10n, Failure failure) =>
       'PASSWORD_SUBSCRIPTION_REQUIRED' => l10n.passwordSubscriptionRequired,
       'AUTH_RATE_LIMITED' => l10n.rateLimitedMessage,
       'AUTH_UNSUPPORTED_OPERATOR' => l10n.unsupportedOperatorPhone,
-      'OTP_INVALID' => l10n.otpIncorrectMessage,
-      'OTP_EXPIRED' => l10n.codeExpired,
+      'OTP_INVALID' || 'AUTH_OTP_INVALID' => l10n.otpIncorrectMessage,
+      'OTP_EXPIRED' || 'AUTH_OTP_EXPIRED' => l10n.codeExpired,
       'OTP_RATE_LIMITED' => l10n.rateLimitedMessage,
-      'OTP_ATTEMPTS_EXCEEDED' => l10n.otpAttemptsExceededMessage,
+      'OTP_ATTEMPTS_EXCEEDED' ||
+      'AUTH_OTP_ATTEMPTS_EXCEEDED' => l10n.otpAttemptsExceededMessage,
+      'OPERATOR_SMS_UNAVAILABLE' => l10n.operatorSmsUnavailableMessage,
       'OTP_ALREADY_USED' => l10n.otpAlreadyUsedMessage,
       'OTP_CHALLENGE_NOT_FOUND' => l10n.otpNotFoundMessage,
       _ => switch (failure.kind) {
