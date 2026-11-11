@@ -10,17 +10,17 @@ export const PACKAGE_NAME = 'app.kaaj.mobile';
 
 // Last known build. Used until (or instead of) the live GitHub lookup.
 export const FALLBACK_RELEASE = Object.freeze({
-  tag: 'v1.0.2',
-  version: '1.0.2',
-  versionCode: 3,
-  name: 'Kaaj 1.0.2 Pilot',
+  tag: 'v1.0.3',
+  version: '1.0.3',
+  versionCode: 4,
+  name: 'Kaaj 1.0.3 Pilot',
   prerelease: true,
-  publishedAt: '2026-10-20T07:54:51Z',
-  fileName: 'Kaaj-1.0.2-android.apk',
-  sizeBytes: 64876324,
-  downloadUrl: `https://github.com/${GITHUB_REPO}/releases/download/v1.0.2/Kaaj-1.0.2-android.apk`,
-  releaseUrl: `https://github.com/${GITHUB_REPO}/releases/tag/v1.0.2`,
-  sha256: 'efc831fc804d4370d04ddad5e7ba2abc7de03b2650a2e86eb44544d88e1d75c4',
+  publishedAt: '2026-11-11T11:36:46Z',
+  fileName: 'Kaaj-1.0.3-android.apk',
+  sizeBytes: 62402340,
+  downloadUrl: `https://github.com/${GITHUB_REPO}/releases/download/v1.0.3/Kaaj-1.0.3-android.apk`,
+  releaseUrl: `https://github.com/${GITHUB_REPO}/releases/tag/v1.0.3`,
+  sha256: '31a4308bdd28177b15b83dd6e64dcfda1184037e75b2539b753cf2ade2b502b3',
   source: 'fallback',
 });
 

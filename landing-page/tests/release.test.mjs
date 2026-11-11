@@ -29,7 +29,7 @@ test('picks the newest non-draft release that has an .apk asset (pre-releases al
 });
 
 test('uses the known checksum only for the exact fallback version, or a GitHub sha256 digest', () => {
-  const known = pickLatestApkRelease([{ tag_name: 'v1.0.2', published_at: '2026-10-20T07:54:51Z', assets: [apk('Kaaj-1.0.2-android.apk')] }]);
+  const known = pickLatestApkRelease([{ tag_name: FALLBACK_RELEASE.tag, published_at: FALLBACK_RELEASE.publishedAt, assets: [apk(FALLBACK_RELEASE.fileName)] }]);
   assert.equal(known.sha256, FALLBACK_RELEASE.sha256);
   const digest = 'a'.repeat(64);
   const withDigest = pickLatestApkRelease([{ tag_name: 'v1.2.0', published_at: '2026-11-01T00:00:00Z', assets: [apk('k.apk', { digest: `sha256:${digest}` })] }]);

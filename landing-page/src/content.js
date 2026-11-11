@@ -64,15 +64,15 @@ export const copy = {
     planName: 'KAAJ দৈনিক',
     price: '২.৭৮ টাকা', perDay: '/দিন',
     priceExtra: '+ ভ্যাট, সম্পূরক শুল্ক (SD) ও সার্ভিস চার্জ',
-    operators: 'শুধু রবি ও এয়ারটেল',
+    operators: 'শুধু রবি ও সার্কেল',
     pricingPoints: [
       'বাতিল না করা পর্যন্ত প্রতিদিন স্বয়ংক্রিয়ভাবে নবায়ন হয়',
-      'চার্জ কাটা হয় আপনার রবি/এয়ারটেল মোবাইল ব্যালেন্স থেকে',
+      'চার্জ কাটা হয় আপনার রবি/সার্কেল মোবাইল ব্যালেন্স থেকে',
       'কাজের পেমেন্ট থেকে KAAJ কোনো কমিশন নেয় না',
       'ভার্সন ১-এ ক্লায়েন্ট ও কর্মীর মধ্যে পেমেন্ট নগদে হয়',
     ],
     subscribeTitle: 'যেভাবে সাবস্ক্রাইব করবেন',
-    subscribeBody: 'অ্যাপে আপনার রবি/এয়ারটেল নম্বরে পাঠানো OTP দিয়ে নিশ্চিত করুন, অথবা SMS পাঠান:',
+    subscribeBody: 'অ্যাপে আপনার রবি/সার্কেল নম্বরে পাঠানো OTP দিয়ে নিশ্চিত করুন, অথবা SMS পাঠান:',
     unsubscribeTitle: 'যেভাবে আনসাবস্ক্রাইব করবেন',
     unsubscribeBody: 'যেকোনো সময় SMS পাঠান:',
     unsubscribeAlt: 'অ্যাপের প্রোফাইল → সাবস্ক্রিপশন থেকেও বাতিল করা যায়।',
@@ -173,15 +173,15 @@ export const copy = {
     planName: 'KAAJ Daily',
     price: 'Tk 2.78', perDay: '/day',
     priceExtra: '+ VAT, supplementary duty (SD) and service charge',
-    operators: 'Robi and Airtel only',
+    operators: 'Robi and Cirkle only',
     pricingPoints: [
       'Renews automatically every day until you cancel',
-      'Charged to your Robi or Airtel mobile balance',
+      'Charged to your Robi or Cirkle mobile balance',
       'KAAJ takes no commission on job payments',
       'In version 1, clients pay workers in cash',
     ],
     subscribeTitle: 'How to subscribe',
-    subscribeBody: 'Confirm in the app with the OTP sent to your Robi/Airtel number, or send an SMS:',
+    subscribeBody: 'Confirm in the app with the OTP sent to your Robi/Cirkle number, or send an SMS:',
     unsubscribeTitle: 'How to unsubscribe',
     unsubscribeBody: 'Any time, send an SMS:',
     unsubscribeAlt: 'You can also cancel in the app under Profile → Subscription.',
@@ -293,7 +293,7 @@ export const features = [
   ['language', 'বাংলা ও English', 'পুরো অ্যাপ বাংলায় ব্যবহার করুন, চাইলে English-এ বদলে নিন।', 'Bangla & English', 'Use the whole app in Bangla, or switch to English.'],
 ];
 
-export const comingSoonFeature = ['training', 'বিনামূল্যে দক্ষতা প্রশিক্ষণ', 'বিনামূল্যে প্রশিক্ষণ কোর্স ও জ্ঞান যাচাই পরীক্ষার পর সার্টিফিকেট — পরবর্তী আপডেটে আসছে, v1.0.2-এ নেই।', 'Free skill training', 'Free training courses with knowledge-test certificates — coming in a later update, not in v1.0.2.'];
+export const comingSoonFeature = ['training', 'বিনামূল্যে দক্ষতা প্রশিক্ষণ', 'বিনামূল্যে প্রশিক্ষণ কোর্স ও জ্ঞান যাচাই পরীক্ষার পর সার্টিফিকেট — পরবর্তী আপডেটে আসছে, v1.0.3-এ নেই।', 'Free skill training', 'Free training courses with knowledge-test certificates — coming in a later update, not in v1.0.3.'];
 
 // [icon key, bn title, bn body, en title, en body]
 export const safetyPoints = [
@@ -306,25 +306,25 @@ export const safetyPoints = [
 export const faqs = {
   bn: [
     ['KAAJ কোথায় ব্যবহার করা যায়?', 'KAAJ এখন রাজশাহীতে পাইলট হিসেবে চালু আছে। ক্লায়েন্ট ও কর্মী দুজনেই একই Android অ্যাপ ব্যবহার করেন।'],
-    ['সাবস্ক্রিপশনের খরচ কত?', 'প্রতিদিন ২.৭৮ টাকা + ভ্যাট, সম্পূরক শুল্ক ও সার্ভিস চার্জ। বাতিল না করা পর্যন্ত প্রতিদিন স্বয়ংক্রিয়ভাবে নবায়ন হয়। বর্তমানে শুধু রবি ও এয়ারটেল নম্বরে প্রযোজ্য।'],
+    ['সাবস্ক্রিপশনের খরচ কত?', 'প্রতিদিন ২.৭৮ টাকা + ভ্যাট, সম্পূরক শুল্ক ও সার্ভিস চার্জ। বাতিল না করা পর্যন্ত প্রতিদিন স্বয়ংক্রিয়ভাবে নবায়ন হয়। বর্তমানে শুধু রবি ও সার্কেল নম্বরে প্রযোজ্য।'],
     ['আমি কীভাবে আনসাবস্ক্রাইব করব?', 'যেকোনো সময় STOP kaaj লিখে 21213 নম্বরে SMS পাঠান। অ্যাপের প্রোফাইল → সাবস্ক্রিপশন থেকেও বাতিল করা যায়। মনে রাখবেন, শুধু অ্যাপ আনইনস্টল করলে চার্জ বন্ধ হয় না।'],
     ['KAAJ কি কাজের টাকা থেকে কমিশন নেয়?', 'না। কাজের পেমেন্ট থেকে KAAJ কোনো কমিশন নেয় না। ভার্সন ১-এ ক্লায়েন্ট সরাসরি কর্মীকে নগদে পরিশোধ করেন।'],
     ['কর্মীদের কেন পরিচয় যাচাই করতে হয়?', 'ক্লায়েন্টদের নিরাপত্তার জন্য কোনো কাজে আবেদনের আগে কর্মীদের ফোন নম্বর, NID ও সেলফি দিয়ে পরিচয় যাচাই করতে হয়।'],
     ['APK ইনস্টল হচ্ছে না, কী করব?', 'ফোনের Settings-এ যে অ্যাপ দিয়ে ফাইল খুলছেন (যেমন Chrome বা Files) তার জন্য “Install unknown apps” চালু করুন। ফোনে Android 8.0 বা নতুন ভার্সন এবং যথেষ্ট জায়গা আছে কিনা দেখুন। তারপরও না হলে ফাইলটি আবার ডাউনলোড করুন।'],
-    ['OTP আসছে না কেন?', 'মোবাইল নেটওয়ার্ক পরীক্ষা করুন, কয়েক মিনিট অপেক্ষা করুন এবং ৬০ সেকেন্ড পর আবার OTP পাঠান। সাবস্ক্রিপশনের OTP শুধু রবি ও এয়ারটেল নম্বরে আসে।'],
-    ['বিনামূল্যে প্রশিক্ষণ কোর্স কবে আসবে?', 'জ্ঞান যাচাই পরীক্ষাসহ বিনামূল্যে দক্ষতা প্রশিক্ষণ কোর্স তৈরি হয়েছে, তবে v1.0.2-এ নেই। পরবর্তী আপডেটে যোগ করা হবে।'],
+    ['OTP আসছে না কেন?', 'মোবাইল নেটওয়ার্ক পরীক্ষা করুন, কয়েক মিনিট অপেক্ষা করুন এবং ৬০ সেকেন্ড পর আবার OTP পাঠান। সাবস্ক্রিপশনের OTP শুধু রবি ও সার্কেল নম্বরে আসে।'],
+    ['বিনামূল্যে প্রশিক্ষণ কোর্স কবে আসবে?', 'জ্ঞান যাচাই পরীক্ষাসহ বিনামূল্যে দক্ষতা প্রশিক্ষণ কোর্স তৈরি হয়েছে, তবে v1.0.3-এ নেই। পরবর্তী আপডেটে যোগ করা হবে।'],
     ['আমার তথ্য কি নিরাপদ?', 'KAAJ সেবা চালানো ও সুরক্ষার জন্য আপনার তথ্য ব্যবহার করে। আমরা ব্যক্তিগত তথ্য বিক্রি করি না। বিস্তারিত নিচের গোপনীয়তা অংশে দেখুন।'],
     ['জরুরি অবস্থায় কী করব?', 'KAAJ কোনো জরুরি সেবা নয়। বিপদ বা দুর্ঘটনায় সরাসরি ৯৯৯-এ কল করুন।'],
   ],
   en: [
     ['Where can I use KAAJ?', 'KAAJ is currently running as a pilot in Rajshahi. Clients and workers use the same Android app.'],
-    ['How much does the subscription cost?', 'Tk 2.78 per day plus VAT, supplementary duty and service charge. It renews automatically every day until you cancel. It is currently available on Robi and Airtel numbers only.'],
+    ['How much does the subscription cost?', 'Tk 2.78 per day plus VAT, supplementary duty and service charge. It renews automatically every day until you cancel. It is currently available on Robi and Cirkle numbers only.'],
     ['How do I unsubscribe?', 'Send STOP kaaj to 21213 by SMS at any time. You can also cancel in the app under Profile → Subscription. Note that uninstalling the app does not stop billing.'],
     ['Does KAAJ take a commission on jobs?', 'No. KAAJ takes no commission on job payments. In version 1, clients pay workers directly in cash.'],
     ['Why do workers verify their identity?', 'To protect clients, workers must verify their phone number, NID and a selfie before they can apply to any job.'],
     ['The APK will not install. What should I do?', 'In your phone’s Settings, turn on “Install unknown apps” for the app you are opening the file with (for example Chrome or Files). Check that your phone runs Android 8.0 or newer and has enough free space. If it still fails, download the file again.'],
-    ['Why am I not receiving the OTP?', 'Check your mobile network, wait a few minutes, and request another OTP after 60 seconds. Subscription OTPs are sent to Robi and Airtel numbers only.'],
-    ['When are the free training courses coming?', 'Free skill training courses with knowledge-test certificates have been built but are not in v1.0.2. They will arrive in a later update.'],
+    ['Why am I not receiving the OTP?', 'Check your mobile network, wait a few minutes, and request another OTP after 60 seconds. Subscription OTPs are sent to Robi and Cirkle numbers only.'],
+    ['When are the free training courses coming?', 'Free skill training courses with knowledge-test certificates have been built but are not in v1.0.3. They will arrive in a later update.'],
     ['Is my information kept safe?', 'KAAJ uses your information to provide and protect the service. We do not sell personal data. See the privacy section below for details.'],
     ['What should I do in an emergency?', 'KAAJ is not an emergency service. If you are in danger or there is an accident, call 999 directly.'],
   ],
@@ -333,25 +333,25 @@ export const faqs = {
 export const legal = {
   bn: {
     terms: [
-      ['সাবস্ক্রিপশন ও বিলিং', 'KAAJ-এ সাবস্ক্রাইব করলে প্রতিদিন আপনার রবি বা এয়ারটেল মোবাইল ব্যালেন্স থেকে ২.৭৮ টাকা + ভ্যাট, সম্পূরক শুল্ক ও সার্ভিস চার্জ স্বয়ংক্রিয়ভাবে কাটা হবে, যতক্ষণ না আপনি আনসাবস্ক্রাইব করছেন।'],
+      ['সাবস্ক্রিপশন ও বিলিং', 'KAAJ-এ সাবস্ক্রাইব করলে প্রতিদিন আপনার রবি বা সার্কেল মোবাইল ব্যালেন্স থেকে ২.৭৮ টাকা + ভ্যাট, সম্পূরক শুল্ক ও সার্ভিস চার্জ স্বয়ংক্রিয়ভাবে কাটা হবে, যতক্ষণ না আপনি আনসাবস্ক্রাইব করছেন।'],
       ['যেভাবে আনসাবস্ক্রাইব করবেন', 'যেকোনো সময় STOP kaaj লিখে 21213 নম্বরে SMS পাঠান। অ্যাপের প্রোফাইল → সাবস্ক্রিপশন থেকেও বাতিল করা যায়। শুধু অ্যাপ আনইনস্টল করলে চার্জ বন্ধ হয় না।'],
       ['কাজের পেমেন্ট', 'কাজের পেমেন্ট থেকে KAAJ কোনো কমিশন নেয় না। ভার্সন ১-এ ক্লায়েন্ট ও কর্মীর মধ্যে পেমেন্ট নগদে হয়।'],
     ],
     privacy: [
       ['আমরা যে তথ্য ব্যবহার করি', 'সেবা চালানো ও সুরক্ষার জন্য আমরা অ্যাকাউন্ট পরিচিতি, মোবাইল নম্বর বা ইমেইল, কর্মী প্রোফাইল ও পরিচয় যাচাইয়ের তথ্য, কাজের পোস্ট, আবেদন, চ্যাট, পেমেন্ট স্ট্যাটাস ও সাপোর্ট রেকর্ড প্রক্রিয়া করি।'],
-      ['শেয়ারিং ও সংরক্ষণ', 'প্রয়োজনমতো অবকাঠামো, অথেন্টিকেশন, অ্যানালিটিক্স এবং রবি/এয়ারটেল/BDApps বিলিং প্রদানকারী ব্যবহার করা হয়। আমরা ব্যক্তিগত তথ্য বিক্রি করি না।'],
+      ['শেয়ারিং ও সংরক্ষণ', 'প্রয়োজনমতো অবকাঠামো, অথেন্টিকেশন, অ্যানালিটিক্স এবং রবি/সার্কেল/BDApps বিলিং প্রদানকারী ব্যবহার করা হয়। আমরা ব্যক্তিগত তথ্য বিক্রি করি না।'],
       ['এক্সপোর্ট বা ডিলিট', 'অ্যাপে প্রোফাইল → গোপনীয়তা ও অ্যাকাউন্ট থেকে ডেটা নিয়ন্ত্রণ করুন। অ্যাকাউন্ট মুছতে সক্রিয় সাবস্ক্রিপশন আগে বাতিল করুন।'],
     ],
   },
   en: {
     terms: [
-      ['Subscription and billing', 'A KAAJ subscription renews automatically every day at Tk 2.78 plus VAT, supplementary duty and service charge, charged to your Robi or Airtel mobile balance until you unsubscribe.'],
+      ['Subscription and billing', 'A KAAJ subscription renews automatically every day at Tk 2.78 plus VAT, supplementary duty and service charge, charged to your Robi or Cirkle mobile balance until you unsubscribe.'],
       ['How to unsubscribe', 'Send STOP kaaj to 21213 by SMS at any time. You can also cancel in the app under Profile → Subscription. Uninstalling the app does not stop billing.'],
       ['Job payments', 'KAAJ takes no commission on job payments. In version 1, payments between clients and workers are made in cash.'],
     ],
     privacy: [
       ['Information we use', 'To provide and protect KAAJ, we process account identifiers, mobile number or email, worker profiles and identity verification details, job posts, applications, chats, payment status and support records.'],
-      ['Sharing and retention', 'We use infrastructure, authentication, analytics and Robi/Airtel/BDApps billing providers only as needed. We do not sell personal data.'],
+      ['Sharing and retention', 'We use infrastructure, authentication, analytics and Robi/Cirkle/BDApps billing providers only as needed. We do not sell personal data.'],
       ['Export or delete', 'Use Profile → Privacy & account in the app to control your data. Cancel any active subscription before deleting your account.'],
     ],
   },
