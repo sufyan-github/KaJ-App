@@ -407,8 +407,8 @@ async function seed() {
   const carrierPlan = {
     name_en: "Daily subscription",
     name_bn: "দৈনিক সাবস্ক্রিপশন",
-    description_en: "Tk 2.78/day + VAT, renews daily through Robi/Airtel.",
-    description_bn: "৳২.৭৮/দিন + ভ্যাট, প্রতিদিন নবায়ন (রবি/এয়ারটেল)।",
+    description_en: "Tk 2.78/day + VAT, renews daily through Robi/Cirkle.",
+    description_bn: "৳২.৭৮/দিন + ভ্যাট, প্রতিদিন নবায়ন (রবি/সার্কেল)।",
     price_poisha: 278n,
     currency: "BDT",
     duration_days: 1,

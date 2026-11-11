@@ -1,4 +1,4 @@
-# bdapps integration (Robi/Airtel OTP subscription)
+# bdapps integration (Robi/Cirkle OTP subscription)
 
 KAAJ keeps the BDApps credentials only in the PHP gateway
 ([`bdapps-gateway/`](../bdapps-gateway/README.md)), which runs on the BDApps
@@ -182,7 +182,7 @@ The development seed adds the `bdapps-daily` plan (278 poisha, 1 day, active,
    (`E1303` otherwise).
 5. Set `BDAPPS_APP_CODE` to the real Android package name and use the KAAJ
    application hash (never another app's).
-6. Test with a **whitelisted** Robi and Airtel number: new registration (OTP),
+6. Test with a **whitelisted** Robi and Cirkle number: new registration (OTP),
    wrong code, already-subscribed login on a second phone (KAAJ SMS code),
    password recovery, in-app cancel (then confirm with `getStatus`), `STOP kaaj`
    to 21213, re-subscribe via notification, the next-day renewal (access must

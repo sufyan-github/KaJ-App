@@ -4,7 +4,7 @@ import { OperatorEligibilityResult, OperatorPort } from "./operator.port";
 
 /**
  * Safe Version 1 adapter. It never treats a number prefix as verified operator
- * eligibility and never creates a charge. A BDApps/Robi/Airtel adapter can
+ * eligibility and never creates a charge. A BDApps/Robi/Cirkle adapter can
  * replace this provider without changing authentication or subscriptions.
  */
 @Injectable()

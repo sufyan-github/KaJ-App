@@ -1,6 +1,6 @@
 # KAAJ BDApps gateway (PHP)
 
-A small PHP gateway that is the only component holding the BDApps (Robi/Airtel)
+A small PHP gateway that is the only component holding the BDApps (Robi/Cirkle)
 application credentials. BDApps only accepts calls from an allow-listed server
 IP, so this gateway runs on the allow-listed cPanel host and the KAAJ Nest API
 talks to it over HTTPS with an HMAC signature. See
@@ -82,7 +82,7 @@ Flutter app ──► Nest API ──HMAC──► gateway/api/*.php ──► d
 7. Rotate credentials: the BDApps password and the HMAC key that were in earlier
    zip bundles must be considered exposed. Generate a new BDApps password in the
    portal and a new `INTERNAL_API_KEY`, update both env files, redeploy.
-8. Smoke test with a whitelisted Robi/Airtel number (see
+8. Smoke test with a whitelisted Robi/Cirkle number (see
    `docs/BDAPPS_INTEGRATION.md` › Owner checklist).
 
 Deploy the Nest API **before** this gateway: the new Nest accepts webhook calls
