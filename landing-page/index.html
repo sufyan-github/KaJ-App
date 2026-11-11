@@ -1,15 +1,80 @@
 <!doctype html>
-<html lang="en">
+<html lang="bn">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Kaaj connects local workers with clients who need reliable help in Rajshahi." />
-    <meta name="theme-color" content="#063326" />
-    <link rel="icon" type="image/png" href="./assets/kaaj-logo-under-1mb.png" />
-    <title>Kaaj — Find Work. Find Workers.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KAAJ — রাজশাহীতে কাজ ও কর্মী খোঁজার Android অ্যাপ</title>
+    <meta name="description" content="KAAJ দিয়ে রাজশাহীতে কাজ পোস্ট করুন বা যাচাইকৃত কর্মী বুক করুন। কর্মীরা কাছের কাজ খুঁজে নিজের দাম দিয়ে আবেদন করেন। বাংলা ও English।" />
+    <meta name="theme-color" content="#0b2e21" />
+    <meta name="color-scheme" content="light" />
+    <link rel="canonical" href="https://kaaj.app/" />
+
+    <link rel="icon" href="./favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="KAAJ" />
+    <meta property="og:url" content="https://kaaj.app/" />
+    <meta property="og:title" content="KAAJ — এলাকার কাজ, এলাকার কর্মী" />
+    <meta property="og:description" content="Post a job or book an identity-verified worker in Rajshahi. Workers find nearby jobs and apply with their own price. Bangla &amp; English Android app." />
+    <meta property="og:image" content="https://kaaj.app/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="KAAJ — a local electrician at work in a Rajshahi home" />
+    <meta property="og:locale" content="bn_BD" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="KAAJ — Local jobs and local workers in Rajshahi" />
+    <meta name="twitter:description" content="Post a job or book an identity-verified worker in Rajshahi. Bangla &amp; English Android app." />
+    <meta name="twitter:image" content="https://kaaj.app/og-image.jpg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" />
+    <link rel="preconnect" href="https://api.github.com" crossorigin />
+    <link
+      rel="preload" as="image" type="image/webp" fetchpriority="high"
+      href="./assets/img/hero-960.webp"
+      imagesrcset="./assets/img/hero-640.webp 640w, ./assets/img/hero-960.webp 960w, ./assets/img/hero-1440.webp 1440w"
+      imagesizes="(min-width: 960px) 46vw, calc(100vw - 32px)"
+    />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "MobileApplication",
+        "name": "KAAJ",
+        "alternateName": "Kaaj",
+        "description": "Bangla-first Android app for local work in Rajshahi, Bangladesh. Clients post jobs or book workers; identity-verified workers find nearby jobs and apply with their own price.",
+        "url": "https://kaaj.app/",
+        "image": "https://kaaj.app/og-image.jpg",
+        "operatingSystem": "Android 8.0+",
+        "applicationCategory": "BusinessApplication",
+        "softwareVersion": "1.0.2",
+        "fileSize": "62MB",
+        "downloadUrl": "https://github.com/sufyan-github/KaJ-App/releases/download/v1.0.2/Kaaj-1.0.2-android.apk",
+        "inLanguage": ["bn", "en"],
+        "areaServed": { "@type": "City", "name": "Rajshahi", "address": { "@type": "PostalAddress", "addressCountry": "BD" } },
+        "offers": {
+          "@type": "Offer",
+          "price": "2.78",
+          "priceCurrency": "BDT",
+          "description": "Daily subscription for Robi and Airtel numbers, plus VAT, SD and service charge. Renews daily until cancelled; send STOP kaaj to 21213 to unsubscribe."
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <div style="max-width:640px;margin:40px auto;padding:0 16px;font-family:system-ui,sans-serif;line-height:1.6">
+        <h1>KAAJ</h1>
+        <p>রাজশাহীতে কাজ ও কর্মী খোঁজার Android অ্যাপ। Local jobs and workers in Rajshahi.</p>
+        <p><a href="https://github.com/sufyan-github/KaJ-App/releases">Download the Android APK from GitHub Releases</a></p>
+      </div>
+    </noscript>
     <script type="module" src="./src/main.jsx"></script>
   </body>
 </html>

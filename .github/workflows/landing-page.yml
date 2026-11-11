@@ -1,0 +1,73 @@
+name: Landing page
+
+# Builds the KAAJ landing page and publishes it to GitHub Pages on every push
+# that touches it. The site is static: the PHP contact form is not deployed.
+on:
+  push:
+    branches: [codex/production-hardening]
+    paths:
+      - "landing-page/**"
+      - ".github/workflows/landing-page.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: landing-page-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: landing-page
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: landing-page/pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Test
+        run: |
+          pnpm run test:release
+          pnpm run test:sites
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Prepare static site
+        run: |
+          rm -f dist/client/contact.php
+          cp dist/client/index.html dist/client/404.html
+          touch dist/client/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: landing-page/dist/client
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

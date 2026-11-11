@@ -1,97 +1,481 @@
-import {useEffect,useState} from'react';
-import{ArrowRight,Briefcase,CaretDown,Check,CheckCircle,CreditCard,Globe,Headset,IdentificationCard,List,LockKey,MagnifyingGlass,MapPin,PaintBrush,Phone,Plug,ShieldCheck,Sparkle,Toolbox,Users,WashingMachine,Wrench,X}from'@phosphor-icons/react';
-const APK_URL='https://github.com/sufyan-github/KaJ-App/releases/download/v1.0.0/Kaaj-1.0.0-android.apk';
-const RELEASE_URL='https://github.com/sufyan-github/KaJ-App/releases/tag/v1.0.0';
-const C={en:{nav:['Home','How it works','Features','For workers','For clients','Pricing','FAQ','Contact'],k:'Local work, made simpler',a:'Find Work. Find Workers.',b:'Get Kaaj Done.',body:'Kaaj connects local workers with clients who need reliable help—making it easier to find opportunities, hire workers, and get work completed.',dl:'Download Kaaj App',how:'How Kaaj Works',search:'Find help right now',need:'What service do you need?',popular:'Popular services',journey:'One app. Two clear journeys.',jsub:'Whether you need help or want to earn, Kaaj keeps every step simple.',client:'For clients',ct:'Get things done, without the hassle.',worker:'For workers',wt:'Find work. Grow your reputation.',features:'Everything you need to move work forward',fsub:'Practical tools for finding, managing and completing local work.',trust:'Built for trust and transparency',trbody:'Clear profiles, secure accounts, job details, payment-status tracking and accessible support—designed for a safer local marketplace.',metrics:'Kaaj is growing with the community',metricnote:'Live statistics will appear when backend reporting is connected.',pricing:'Simple subscription options',psub:'Final prices, taxes and renewal terms will be shown before launch. No surprise charges.',monthly:'Monthly',yearly:'Yearly',subscribe:'Subscribe',manage:'Manage subscription',payment:'Simple & transparent payments',paybody:'For the current release, the client completes the work and marks payment as done. Kaaj records the payment status for both sides.',coming:'Mobile banking integration — Coming Soon',take:'Take Kaaj With You',takebody:'Find jobs and workers wherever you are. Download Kaaj and manage your work from your phone.',faq:'Frequently asked questions',contact:'Talk to the Kaaj team',contactbody:'Have a question, partnership idea or support request? Send a message and we’ll get back to you.',send:'Send message',sent:'Thanks — your message is ready for the Kaaj team.',ready:'Ready to Get Kaaj Done?',readybody:"Whether you're looking for work or looking for someone to get the job done, Kaaj makes the connection easier."},bn:{nav:['হোম','যেভাবে কাজ করে','ফিচার','কর্মীদের জন্য','ক্লায়েন্টদের জন্য','মূল্য','প্রশ্নোত্তর','যোগাযোগ'],k:'স্থানীয় কাজ, এখন আরও সহজ',a:'কাজ খুঁজুন। কর্মী খুঁজুন।',b:'Kaaj দিয়ে কাজ শেষ করুন।',body:'Kaaj স্থানীয় কর্মীদের নির্ভরযোগ্য সাহায্য খোঁজা ক্লায়েন্টদের সঙ্গে যুক্ত করে—সুযোগ খোঁজা, কর্মী নিয়োগ এবং কাজ শেষ করা সহজ করে।',dl:'Kaaj অ্যাপ ডাউনলোড',how:'Kaaj যেভাবে কাজ করে',search:'এখনই সাহায্য খুঁজুন',need:'কোন সেবা দরকার?',popular:'জনপ্রিয় সেবা',journey:'একটি অ্যাপ। দুটি সহজ পথ।',jsub:'সাহায্য দরকার হোক বা আয় করতে চান—Kaaj প্রতিটি ধাপ সহজ রাখে।',client:'ক্লায়েন্টদের জন্য',ct:'ঝামেলা ছাড়াই কাজ সম্পন্ন করুন।',worker:'কর্মীদের জন্য',wt:'কাজ খুঁজুন। সুনাম গড়ুন।',features:'স্থানীয় কাজ এগিয়ে নেওয়ার সবকিছু',fsub:'কাজ খোঁজা, পরিচালনা ও সম্পন্ন করার ব্যবহারিক টুল।',trust:'আস্থা ও স্বচ্ছতার জন্য তৈরি',trbody:'পরিষ্কার প্রোফাইল, নিরাপদ অ্যাকাউন্ট, কাজের বিবরণ, পেমেন্ট স্ট্যাটাস এবং সহায়তা—নিরাপদ স্থানীয় মার্কেটপ্লেসের জন্য।',metrics:'কমিউনিটির সঙ্গে বাড়ছে Kaaj',metricnote:'ব্যাকএন্ড রিপোর্টিং যুক্ত হলে লাইভ পরিসংখ্যান এখানে দেখা যাবে।',pricing:'সহজ সাবস্ক্রিপশন অপশন',psub:'চূড়ান্ত মূল্য, কর ও নবায়নের শর্ত লঞ্চের আগে দেখানো হবে। কোনো গোপন চার্জ নয়।',monthly:'মাসিক',yearly:'বার্ষিক',subscribe:'সাবস্ক্রাইব',manage:'সাবস্ক্রিপশন পরিচালনা',payment:'সহজ ও স্বচ্ছ পেমেন্ট',paybody:'বর্তমান সংস্করণে কাজ শেষে ক্লায়েন্ট পেমেন্ট সম্পন্ন হিসেবে চিহ্নিত করেন। Kaaj উভয় পক্ষের জন্য পেমেন্ট স্ট্যাটাস সংরক্ষণ করে।',coming:'মোবাইল ব্যাংকিং ইন্টিগ্রেশন — শীঘ্রই আসছে',take:'Kaaj রাখুন সঙ্গে',takebody:'যেখানেই থাকুন কাজ ও কর্মী খুঁজুন। অ্যাপ ডাউনলোড করে ফোন থেকেই কাজ পরিচালনা করুন।',faq:'সাধারণ প্রশ্নোত্তর',contact:'Kaaj টিমের সঙ্গে কথা বলুন',contactbody:'প্রশ্ন, পার্টনারশিপ বা সহায়তা দরকার? বার্তা পাঠান, আমরা যোগাযোগ করব।',send:'বার্তা পাঠান',sent:'ধন্যবাদ—আপনার বার্তা Kaaj টিমের জন্য প্রস্তুত।',ready:'Kaaj দিয়ে শুরু করতে প্রস্তুত?',readybody:'কাজ খুঁজছেন বা কাউকে দিয়ে কাজ করাতে চান—Kaaj সহজে সংযোগ তৈরি করে।'}};
-const services=[['Electrical','ইলেকট্রিক্যাল',Plug],['Plumbing','প্লাম্বিং',Wrench],['Cleaning','পরিষ্কার',Sparkle],['AC repair','এসি মেরামত',Toolbox],['Painting','রং করা',PaintBrush],['Appliance repair','যন্ত্র মেরামত',WashingMachine]];
-const features=[['Location-based opportunities','এলাকাভিত্তিক সুযোগ',MapPin],['Worker profiles','কর্মী প্রোফাইল',IdentificationCard],['Job posting & hiring','কাজ পোস্ট ও নিয়োগ',Briefcase],['Job management','কাজ পরিচালনা',CheckCircle],['Payment status','পেমেন্ট স্ট্যাটাস',CreditCard],['Notifications','নোটিফিকেশন',Sparkle],['Secure accounts','নিরাপদ অ্যাকাউন্ট',LockKey],['English & বাংলা','বাংলা ও English',Globe]];
-const FAQ={en:[['How much does the subscription cost?','The Kaaj subscription costs ৳2.78 per day plus VAT, SD and service charge, with automatic renewal. It is currently available only to Robi and Airtel customers.'],['How do I unsubscribe?','In the app, open Profile → Subscription → Cancel subscription. The SMS unsubscribe keyword will be shown here once the Kaaj BDApps service code is finalized.'],['Why have I not received the OTP?','Wait a few minutes and check your mobile network. You can request another OTP after 60 seconds.'],['Is my information kept safe?','Kaaj uses your information only to provide and protect the marketplace service. We do not sell your personal data.'],['Which operators are supported?','Subscription billing currently supports Robi and Airtel numbers only.'],['How do payments work?','After work is completed, the client marks payment done and Kaaj records the status. Mobile banking is coming soon.']],bn:[['সাবস্ক্রিপশনের খরচ কত?','Kaaj সাবস্ক্রিপশনের খরচ প্রতিদিন ২.৭৮ টাকা + (VAT+SD+SC), Auto Renewal সহ। বর্তমানে শুধু রবি ও এয়ারটেল গ্রাহকদের জন্য প্রযোজ্য।'],['আমি কীভাবে আনসাবস্ক্রাইব করব?','অ্যাপে প্রোফাইল → সাবস্ক্রিপশন → সাবস্ক্রিপশন বাতিল করুন। Kaaj-এর BDApps সার্ভিস কোড চূড়ান্ত হলে SMS আনসাবস্ক্রাইব কীওয়ার্ড এখানে দেখানো হবে।'],['OTP আসছে না কেন?','কয়েক মিনিট অপেক্ষা করুন এবং মোবাইল নেটওয়ার্ক পরীক্ষা করুন। ৬০ সেকেন্ড পর আবার OTP পাঠাতে পারবেন।'],['আমি কি আমার তথ্য নিরাপদ রাখব?','Kaaj শুধু মার্কেটপ্লেস সেবা প্রদান ও সুরক্ষার জন্য আপনার তথ্য ব্যবহার করে। আমরা ব্যক্তিগত তথ্য বিক্রি করি না।'],['কোন কোন অপারেটর সাপোর্ট করে?','সাবস্ক্রিপশন বিলিং বর্তমানে শুধু রবি ও এয়ারটেল নম্বর সাপোর্ট করে।'],['পেমেন্ট কীভাবে কাজ করে?','কাজ শেষে ক্লায়েন্ট পেমেন্ট সম্পন্ন চিহ্নিত করেন এবং Kaaj স্ট্যাটাস রাখে। মোবাইল ব্যাংকিং শীঘ্রই আসছে।']]};
-const Btn=({children,href='#download',kind=''})=><a className={'btn '+kind} href={href}>{children}<ArrowRight weight="bold"/>
-</a>;
-export function App(){const[lang,setLang]=useState('en'),[menu,setMenu]=useState(false),[compact,setCompact]=useState(false),[faq,setFaq]=useState(0),[faqQuery,setFaqQuery]=useState(''),[toast,setToast]=useState(''),[mailState,setMailState]=useState('idle');const t=C[lang],bn=lang==='bn',ids=['home','how','features','workers','clients','pricing','faq','contact'];useEffect(()=>{let f=()=>setCompact(scrollY>24);addEventListener('scroll',f);return()=>removeEventListener('scroll',f)},[]);let act=x=>{setToast(x);setTimeout(()=>setToast(''),3000)};let sendMail=async e=>{e.preventDefault();setMailState('sending');try{let response=await fetch('./contact.php',{method:'POST',body:new FormData(e.currentTarget),headers:{Accept:'application/json'}}),data=await response.json();if(!response.ok||!data.ok)throw new Error(data.message||'Unable to send');setMailState('sent');e.currentTarget.reset()}catch{setMailState('error')}};let steps=bn?['অ্যাকাউন্ট খুলুন','প্রোফাইল তৈরি করুন','কাছের কাজ খুঁজুন','কাজ শেষ করুন']:['Create your account','Build your profile','Find nearby work','Complete the job'];let visibleFaqs=FAQ[lang].filter(([q,a])=>(q+' '+a).toLocaleLowerCase().includes(faqQuery.toLocaleLowerCase()));return <div className={bn?'app bn':'app'}>
-<header className={compact?'header compact':'header'}><a className="brand" href="#home">
-<img src="./assets/kaaj-logo-under-1mb.png" alt=""/>
-<b>KAAJ</b></a><nav className={menu?'open':''}>{t.nav.map((x,i)=><a href={'#'+ids[i]} onClick={()=>setMenu(false)} key={x}>{x}</a>)}</nav><div className="actions"><button onClick={()=>setLang(bn?'en':'bn')}><Globe/>
-{bn?'English':'বাংলা'}</button><button className="login" onClick={()=>act(bn?'অ্যাপ লগইন শীঘ্রই যুক্ত হবে':'App login will be connected soon')}>{bn?'লগ ইন':'Log in'}</button><Btn>{bn?'ডাউনলোড':'Download app'}</Btn><button className="hamb" onClick={()=>setMenu(!menu)} aria-label="Menu">{menu?<X/>
-:<List/>
-}</button></div></header>
+import { useEffect, useRef, useState } from 'react';
+import {
+  AndroidLogo, ArrowRight, Baby, BookOpenText, Briefcase, Broom, CaretDown, Car, ChatCircleText,
+  CheckCircle, ClockClockwise, Confetti, CookingPot, DownloadSimple, EnvelopeSimple, Flag, Globe,
+  GraduationCap, HandHeart, Info, Keyboard, Lightning, List, MagnifyingGlass, MapPin, Package,
+  Phone, ShieldCheck, Star, Tag, Translate, Truck, UserCircle, Warning, Wrench, X,
+} from '@phosphor-icons/react';
+import {
+  FALLBACK_RELEASE, MIN_ANDROID, PACKAGE_NAME, fetchLatestRelease, formatSizeMB,
+} from './release.js';
+import {
+  SMS_SHORTCODE, SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_PHONE_INTL, comingSoonFeature, copy, faqs,
+  features, legal, meta, safetyPoints, steps, workTypes,
+} from './content.js';
 
-<main><section id="home" className="hero">
-<img src="./assets/kaaj-hero.png" alt="Kaaj marketplace app over a map of Rajshahi"/>
-<div className="wrap heroCopy"><p className="eyebrow"><MapPin weight="fill"/>
-{t.k}</p><h1>{t.a}<br/>
-<span>{t.b}</span></h1><p>{t.body}</p><div className="row"><Btn>{t.dl}</Btn><Btn kind="ghost" href="#how">{t.how}</Btn></div><div className="trustbits"><span><MapPin/>
- {bn?'স্থানীয় সুযোগ':'Local opportunities'}</span><span><Users/>
- {bn?'সহজ নিয়োগ':'Easy hiring'}</span><span><CreditCard/>
- {bn?'পেমেন্ট স্ট্যাটাস':'Payment status'}</span><span><ShieldCheck/>
- {bn?'নিরাপদ অ্যাকাউন্ট':'Secure accounts'}</span></div><div className="finder"><b>{t.search}</b><label><MagnifyingGlass/>
-<input placeholder={t.need}/>
-</label><label><MapPin/>
-<select><option>{bn?'রাজশাহী':'Rajshahi'}</option></select></label><button onClick={()=>act(bn?'লাইভ ম্যাচের জন্য অ্যাপ ডাউনলোড করুন':'Download the app to search live matches')}>{bn?'খুঁজুন':'Search'}</button></div></div></section>
+const LANG_KEY = 'kaaj-lang';
+const RELEASE_CACHE_KEY = 'kaaj-latest-apk';
+const RELEASE_CACHE_MS = 30 * 60 * 1000;
 
-<section className="services wrap"><div className="line"><h2>{t.popular}</h2><a href="#features">{bn?'সব সেবা':'View all'} <ArrowRight/>
-</a></div><div>{services.map(([a,b,I])=><a href="#download" key={a}><I/>
-<b>{bn?b:a}</b></a>)}</div></section>
+const workIcons = {
+  cleaning: Broom, cooking: CookingPot, electrical: Lightning, plumbing: Wrench, elderly: HandHeart,
+  childcare: Baby, driving: Car, delivery: Package, tutoring: BookOpenText, data: Keyboard,
+  events: Confetti, moving: Truck,
+};
+const featureIcons = {
+  post: Briefcase, nearby: MagnifyingGlass, price: Tag, profile: UserCircle, verify: ShieldCheck,
+  chat: ChatCircleText, checkin: ClockClockwise, reviews: Star, report: Flag, language: Translate,
+  training: GraduationCap,
+};
 
-<section id="how" className="section journeys"><div className="wrap"><div className="center"><p className="eyebrow">{bn?'শুরু করা সহজ':'Easy to get started'}</p><h2>{t.journey}</h2><p>{t.jsub}</p></div><div className="journey">
-<img src="./assets/kaaj-journeys.png" alt="Local client and skilled worker" loading="lazy"/>
-{[[t.client,t.ct,'#clients'],[t.worker,t.wt,'#workers']].map(([k,h,id],n)=><article id={id.slice(1)} key={h}><p className="eyebrow">{k}</p><h3>{h}</h3><ol>{steps.map((x,i)=><li key={x}><i>{i+1}</i>{n&&i===1?(bn?'দক্ষতা দেখান':'Showcase your skills'):n===0&&i===1?(bn?'কাজ পোস্ট করুন':'Post your work'):x}</li>)}</ol><Btn href="#download" kind={n?'outline':''}>{n?(bn?'কাজ খুঁজুন':'Find work'):(bn?'কর্মী খুঁজুন':'Find a worker')}</Btn></article>)}</div></div></section>
+const srcSet = (name, widths) => widths.map((w) => `./assets/img/${name}-${w}.webp ${w}w`).join(', ');
 
-<section id="features" className="section features"><div className="wrap"><div className="heading"><div><p className="eyebrow">{bn?'ফিচার':'Features'}</p><h2>{t.features}</h2></div><p>{t.fsub}</p></div><div className="featureGrid">{features.map(([a,b,I])=><article key={a}><I/>
-<div><h3>{bn?b:a}</h3><p>{bn?'সহজ, পরিষ্কার ও স্থানীয় ব্যবহারকারীদের জন্য তৈরি।':'Simple, clear and designed around local users.'}</p></div></article>)}</div></div></section>
+function initialLanguage() {
+  try {
+    const fromUrl = new URLSearchParams(window.location.search).get('lang');
+    if (fromUrl === 'en' || fromUrl === 'bn') return fromUrl;
+    const stored = window.localStorage.getItem(LANG_KEY);
+    if (stored === 'en' || stored === 'bn') return stored;
+  } catch { /* storage unavailable */ }
+  return 'bn';
+}
 
-<section id="about" className="section about"><div className="wrap aboutGrid"><div><p className="eyebrow">{bn?'Kaaj সম্পর্কে':'About Kaaj'}</p><h2>{bn?'স্থানীয় কাজের জন্য আরও সহজ সংযোগ':'A better connection for local work'}</h2><p>{bn?'Kaaj তৈরি হয়েছে কাজ দরকার এমন মানুষকে কর্মী দরকার এমন মানুষ ও ব্যবসার সঙ্গে যুক্ত করতে। এটি স্থানীয় কর্মসংস্থান, সহজ নিয়োগ এবং দৈনন্দিন কাজের ডিজিটাল ব্যবস্থাপনাকে এক জায়গায় আনে।':'Kaaj is built to connect people who need work with households and businesses that need workers. It brings local opportunity, easier hiring and digital job management into one accessible place.'}</p></div><div className="purposeCards"><article><Briefcase/><h3>{bn?'আমাদের লক্ষ্য':'Our mission'}</h3><p>{bn?'স্থানীয় কমিউনিটির জন্য কাজ ও কর্মী খোঁজা সহজ, সাশ্রয়ী এবং কার্যকর করা।':'Make finding work and finding workers simple, accessible and efficient for local communities.'}</p></article><article><Users/><h3>{bn?'আমাদের ভবিষ্যৎ ভাবনা':'Our vision'}</h3><p>{bn?'এমন একটি বিশ্বস্ত স্থানীয় কর্মসংস্থান ব্যবস্থা গড়া, যেখানে মানুষ সহজে যুক্ত হয়ে কাজ ও উন্নতি করতে পারে।':'Build a trusted local employment ecosystem where people can easily connect, work and grow.'}</p></article></div></div></section>
+function readCachedRelease() {
+  try {
+    const cached = JSON.parse(window.sessionStorage.getItem(RELEASE_CACHE_KEY) || 'null');
+    if (cached && Date.now() - cached.savedAt < RELEASE_CACHE_MS && cached.release?.downloadUrl) return cached.release;
+  } catch { /* ignore */ }
+  return null;
+}
 
-<section className="section coverage"><div className="wrap coverageGrid"><div><p className="eyebrow">{bn?'স্থানীয় কভারেজ':'Local discovery'}</p><h2>{bn?'আপনার আশেপাশে কাজের সুযোগ':'Work Opportunities Around You'}</h2><p>{bn?'Kaaj এলাকাভিত্তিকভাবে প্রাসঙ্গিক কাজ ও কর্মী খুঁজে পেতে সাহায্য করে। শুরুতে প্ল্যাটফর্মটি রাজশাহীকেন্দ্রিক; বর্তমান প্রাপ্যতা সবসময় অ্যাপে দেখানো হবে।':'Kaaj is designed around local access, helping people discover relevant work and workers nearby. The initial focus is Rajshahi; current availability is always shown inside the app.'}</p><Btn href="#download">{bn?'অ্যাপে কভারেজ দেখুন':'Check coverage in the app'}</Btn></div><div className="coverageImage"><img src="./assets/kaaj-hero.png" alt={bn?'রাজশাহীতে Kaaj-এর এলাকাভিত্তিক সেবার মানচিত্র':'Map-style view of Kaaj local discovery in Rajshahi'} loading="lazy"/></div></div></section>
+// Starts with the bundled fallback so rendering never waits on GitHub.
+function useLatestRelease() {
+  const [release, setRelease] = useState(() => readCachedRelease() || FALLBACK_RELEASE);
+  useEffect(() => {
+    if (readCachedRelease()) return undefined;
+    let active = true;
+    fetchLatestRelease().then((latest) => {
+      if (!active) return;
+      setRelease(latest);
+      if (latest.source === 'github') {
+        try {
+          window.sessionStorage.setItem(RELEASE_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), release: latest }));
+        } catch { /* ignore */ }
+      }
+    });
+    return () => { active = false; };
+  }, []);
+  return release;
+}
 
-<section className="section stories"><div className="wrap"><div className="center"><p className="eyebrow">{bn?'কমিউনিটির গল্প':'Community stories'}</p><h2>{bn?'বাস্তব অভিজ্ঞতা, সত্যিকারের মানুষের কাছ থেকে':'Real experiences, from real people'}</h2><p>{bn?'যাচাই করা কর্মী ও ক্লায়েন্টের মতামত পাওয়ার পর এখানে প্রকাশ করা হবে। আমরা বানানো নাম, রেটিং বা বক্তব্য দেখাই না।':'Verified worker and client stories will appear here after consent. We do not publish invented names, ratings or quotes.'}</p></div><div className="storyGrid"><article><Users/><h3>{bn?'কর্মীর গল্প':'Worker stories'}</h3><p>{bn?'যাচাই করা মতামত শীঘ্রই যোগ হবে।':'Verified testimonials coming soon.'}</p></article><article><Briefcase/><h3>{bn?'ক্লায়েন্টের গল্প':'Client stories'}</h3><p>{bn?'যাচাই করা মতামত শীঘ্রই যোগ হবে।':'Verified testimonials coming soon.'}</p></article></div></div></section>
+function formatDate(iso, lang) {
+  const date = iso ? new Date(iso) : null;
+  if (!date || Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+}
 
-<section className="section trust">
-<img src="./assets/kaaj-trust.png" alt="Kaaj worker and client in Rajshahi" loading="lazy"/>
-<div className="wrap"><p className="eyebrow">{bn?'নিরাপত্তা':'Trust & safety'}</p><h2>{t.trust}</h2><p>{t.trbody}</p><div>{[[IdentificationCard,bn?'ব্যবহারকারী প্রোফাইল':'User profiles'],[LockKey,bn?'নিরাপদ লগইন':'Secure authentication'],[Headset,bn?'সমস্যা রিপোর্টিং':'Problem reporting'],[ShieldCheck,bn?'গোপনীয়তা':'Privacy protection']].map(([I,x])=><span key={x}><I/>
-{x}</span>)}</div></div></section>
+function SectionHeader({ kicker, title, body, id, align = 'start' }) {
+  return <div className={`section-header ${align === 'center' ? 'is-center' : ''}`}>
+    <p className="kicker">{kicker}</p>
+    <h2 id={id}>{title}</h2>
+    {body && <p className="section-lead">{body}</p>}
+  </div>;
+}
 
-<section className="metrics"><div className="wrap"><h2>{t.metrics}</h2><div>{[['0+',bn?'কর্মী':'Workers'],['0+',bn?'ক্লায়েন্ট':'Clients'],['0+',bn?'কাজ পোস্ট':'Jobs posted'],['0+',bn?'সম্পন্ন কাজ':'Jobs completed'],['—',bn?'কভারেজ':'Areas covered']].map(([n,l])=><span key={l}><b>{n}</b><small>{l}</small></span>)}</div><p>{t.metricnote}</p></div></section>
+function StepList({ items }) {
+  return <ol className="step-list">
+    {items.map(([title, body], index) => <li key={title}>
+      <span className="step-num" aria-hidden="true">{index + 1}</span>
+      <div><h4>{title}</h4><p>{body}</p></div>
+    </li>)}
+  </ol>;
+}
 
-<section id="pricing" className="section pricing"><div className="wrap"><div className="center"><p className="eyebrow">{bn?'মূল্য ও সাবস্ক্রিপশন':'Pricing & subscription'}</p><h2>{bn?'একটি সহজ দৈনিক সাবস্ক্রিপশন':'One simple daily subscription'}</h2><p>{bn?'মূল্য, নবায়ন ও বাতিল করার নিয়ম পরিষ্কারভাবে জানুন।':'Clear pricing, renewal and cancellation information before you subscribe.'}</p></div><div className="singlePlan"><article className="featured"><div><span className="planBadge">{bn?'রবি ও এয়ারটেল':'Robi & Airtel'}</span><h3>{bn?'Kaaj দৈনিক প্ল্যান':'Kaaj Daily Plan'}</h3><div className="price">৳2.78<small>{bn?'/দিন':'/day'}</small></div><p>{bn?'+ VAT, SD ও সার্ভিস চার্জ। Auto Renewal প্রযোজ্য।':'+ VAT, SD and service charge. Auto Renewal applies.'}</p></div><ul>{(bn?['কাছের কাজ ও কর্মী খোঁজা','কাজ পোস্ট ও প্রোফাইল টুল','নোটিফিকেশন ও পেমেন্ট স্ট্যাটাস','যেকোনো সময় বাতিলের সুবিধা']:['Find nearby work and workers','Job posting and profile tools','Notifications and payment status','Cancel at any time']).map(x=><li key={x}><Check/>
-{x}</li>)}</ul><button onClick={()=>act(bn?'সাবস্ক্রাইব করতে লগ ইন করুন':'Log in to subscribe')}>{t.subscribe}</button></article></div><div className="manage"><div><h3>{bn?'আপনার সাবস্ক্রিপশন পরিচালনা করুন':'Manage Your Subscription'}</h3><p>{bn?'লগ ইন করে বর্তমান প্ল্যান, নবায়ন, বিলিং ও ইতিহাস দেখুন। অ্যাপে প্রোফাইল → সাবস্ক্রিপশন → সাবস্ক্রিপশন বাতিল করুন।':'Sign in to view your plan, renewal, billing and history. In the app, go to Profile → Subscription → Cancel subscription.'}</p></div><button onClick={()=>act(bn?'পরিচালনা করতে লগ ইন করুন':'Log in to manage your subscription')}>{t.manage}<ArrowRight/>
-</button></div></div></section>
+function SmsCommand({ keyword, t }) {
+  return <p className="sms-command">
+    <code>{keyword}</code>
+    <span className="sms-to">{t.smsTo}</span>
+    <code>{SMS_SHORTCODE}</code>
+    <a className="sms-link" href={`sms:${SMS_SHORTCODE}?body=${encodeURIComponent(keyword)}`}>{t.sendSms}</a>
+  </p>;
+}
 
-<section className="section payment"><div className="wrap payGrid"><div><p className="eyebrow">{bn?'পেমেন্ট':'Payments'}</p><h2>{t.payment}</h2><p>{t.paybody}</p><b className="coming"><Sparkle/>
-{t.coming}</b></div><div className="flow">{(bn?['ক্লায়েন্ট','কাজ সম্পন্ন','পেমেন্ট সম্পন্ন','স্ট্যাটাস আপডেট','মোবাইল ব্যাংকিং — শীঘ্রই']:['Client','Work completed','Payment marked done','Status updated','Mobile banking — Coming soon']).map((x,i)=><span key={x}><i>{i+1}</i><b>{x}</b>{i<4&&<ArrowRight/>
-}</span>)}</div></div></section>
+export function App() {
+  const [lang, setLang] = useState(initialLanguage);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [openFaq, setOpenFaq] = useState(0);
+  const [formOpened, setFormOpened] = useState(false);
+  const formTimer = useRef(null);
+  const menuButton = useRef(null);
+  const release = useLatestRelease();
 
-<section id="download" className="section download"><div className="wrap dlGrid"><div><p className="eyebrow">Android app</p><h2>{t.take}</h2><p>{t.takebody}</p><div className="row"><a className="store" href={APK_URL} target="_blank" rel="noreferrer"><Phone/>
-<span><small>{bn?'APK ডাউনলোড':'Download APK'}</small><b>Android v1.0.0</b></span></a><span className="store planned" aria-disabled="true"><Phone/>
-<span><small>iOS</small><b>{bn?'পরিকল্পিত':'Planned'}</b></span></span></div><a className="releaseLink" href={RELEASE_URL} target="_blank" rel="noreferrer">{bn?'রিলিজ নোট ও ফাইলের তথ্য দেখুন':'View release notes and file details'} <ArrowRight/></a></div><a className="qr" href={APK_URL} target="_blank" rel="noreferrer">
-<img src="./assets/kaaj-logo-under-1mb.png" alt="Kaaj app icon"/>
-<p>{bn?'Kaaj 1.0.0 Android APK ডাউনলোড করুন':'Download Kaaj 1.0.0 Android APK'}</p><small>{bn?'Android 8.0 বা পরবর্তী সংস্করণ':'Android 8.0 or later'}</small></a></div></section>
+  const t = copy[lang];
+  const bn = lang === 'bn';
+  const sizeMB = formatSizeMB(release.sizeBytes, lang);
+  const releaseDate = formatDate(release.publishedAt, lang);
+  const releaseMeta = [`v${release.version}`, sizeMB && `${sizeMB} MB`, `Android ${MIN_ANDROID}+`].filter(Boolean).join(' · ');
 
-<section id="faq" className="section"><div className="wrap faq"><div><p className="eyebrow">{bn?'সহায়তা':'Help'}</p><h2>{t.faq}</h2><label className="faqSearch"><MagnifyingGlass/><span className="srOnly">{bn?'প্রশ্ন খুঁজুন':'Search questions'}</span><input value={faqQuery} onChange={e=>{setFaqQuery(e.target.value);setFaq(-1)}} placeholder={bn?'প্রশ্ন খুঁজুন…':'Search questions…'}/></label></div><div>{visibleFaqs.map(([q,a],i)=><article className={faq===i?'open':''} key={q}><button aria-expanded={faq===i} onClick={()=>setFaq(faq===i?-1:i)}>{q}<CaretDown/>
-</button><p>{a}</p></article>)}{visibleFaqs.length===0&&<p className="faqEmpty">{bn?'কোনো মিল পাওয়া যায়নি। অন্য শব্দ দিয়ে চেষ্টা করুন।':'No matching answer found. Try another search.'}</p>}</div></div></section>
+  useEffect(() => {
+    const root = document.documentElement;
+    root.lang = lang;
+    document.title = meta[lang].title;
+    document.querySelector('meta[name="description"]')?.setAttribute('content', meta[lang].description);
+    try { window.localStorage.setItem(LANG_KEY, lang); } catch { /* ignore */ }
+  }, [lang]);
 
-<section id="terms" className="section legal"><div className="wrap"><div className="center"><p className="eyebrow">{bn?'সাবস্ক্রিপশন শর্তাবলী':'Subscription terms'}</p><h2>{bn?'শর্তাবলী ও আনসাবস্ক্রাইব পদ্ধতি':'Terms and cancellation process'}</h2></div><div className="legalGrid"><article><h3>{bn?'সাবস্ক্রিপশন ও বিলিং':'Subscription and billing'}</h3><p>{bn?'Kaaj-এ সাবস্ক্রাইব করলে প্রতিদিন আপনার রবি বা এয়ারটেল মোবাইল ব্যালেন্স থেকে ২.৭৮ টাকা + (VAT+SD+SC) স্বয়ংক্রিয়ভাবে কাটা হবে, যতক্ষণ না আপনি আনসাবস্ক্রাইব করছেন।':'A Kaaj subscription renews automatically at ৳2.78 per day plus VAT, SD and service charge, charged to your Robi or Airtel mobile balance until you unsubscribe.'}</p><h3>{bn?'যেভাবে আনসাবস্ক্রাইব করবেন':'How to unsubscribe'}</h3><p>{bn?'অ্যাপে প্রোফাইল → সাবস্ক্রিপশন → সাবস্ক্রিপশন বাতিল করুন। SMS পদ্ধতি Kaaj-এর চূড়ান্ত BDApps সার্ভিস কীওয়ার্ড প্রকাশের পর এখানে যোগ করা হবে।':'In the app, open Profile → Subscription → Cancel subscription. The SMS method will be added here after Kaaj’s final BDApps service keyword is published.'}</p><h3>{bn?'সহায়তা':'Support'}</h3><p><a href="mailto:abusufyan.cse20@gmail.com">abusufyan.cse20@gmail.com</a> · <a href="tel:+8801776669345">01776669345</a></p></article><article id="privacy"><h3>{bn?'আপনার তথ্য, আপনার নিয়ন্ত্রণ':'Your data, your choice'}</h3><p><b>{bn?'যে তথ্য ব্যবহার করি। ':'Data we use. '}</b>{bn?'Kaaj সেবা প্রদান ও সুরক্ষার জন্য অ্যাকাউন্ট পরিচিতি, মোবাইল নম্বর বা ইমেইল, সাবস্ক্রিপশন স্ট্যাটাস, কর্মী প্রোফাইল, কাজের পোস্ট, আবেদন, বুকিং, চ্যাট, পেমেন্ট স্ট্যাটাস, রিপোর্ট ও সাপোর্ট রেকর্ড প্রক্রিয়া করে।':'Kaaj processes account identifiers, mobile number or email, subscription status, worker profiles, job posts, applications, bookings, chats, payment status, reports and support records to provide and protect the service.'}</p><p><b>{bn?'শেয়ারিং। ':'Sharing. '}</b>{bn?'সেবা চালাতে প্রয়োজনমতো অবকাঠামো, অথেন্টিকেশন, অ্যানালিটিক্স এবং রবি/এয়ারটেল/BDApps বিলিং প্রদানকারী ব্যবহার করা হয়। আমরা ব্যক্তিগত তথ্য বিক্রি করি না।':'We use infrastructure, authentication, analytics and Robi/Airtel/BDApps billing providers only as needed to operate Kaaj. We do not sell personal data.'}</p><p><b>{bn?'এক্সপোর্ট বা ডিলিট। ':'Export or delete. '}</b>{bn?'অ্যাপে প্রোফাইল → গোপনীয়তা ও অ্যাকাউন্ট খুলুন। অ্যাকাউন্ট মুছতে সক্রিয় সাবস্ক্রিপশন আগে বাতিল করুন।':'Open Profile → Privacy & account in the app. Cancel any active subscription before deleting your account so recurring billing is not left active.'}</p><p><b>{bn?'যোগাযোগ। ':'Contact. '}</b><a href="mailto:abusufyan.cse20@gmail.com">abusufyan.cse20@gmail.com</a> · <a href="tel:+8801776669345">01776669345</a></p></article></div><p className="legalNote">{bn?'সর্বশেষ আপডেট: ২০২৬। প্রকাশের আগে সম্পূর্ণ আইনি শর্তাবলী স্থানীয় আইনজীবীর মাধ্যমে পর্যালোচনা করান।':'Last updated: 2026. Have the complete legal terms reviewed locally before commercial launch.'}</p></div></section>
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const onKey = (event) => {
+      if (event.key === 'Escape') { setMenuOpen(false); menuButton.current?.focus(); }
+    };
+    const onResize = () => { if (window.innerWidth >= 960) setMenuOpen(false); };
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('resize', onResize);
+    return () => { window.removeEventListener('keydown', onKey); window.removeEventListener('resize', onResize); };
+  }, [menuOpen]);
 
-<section id="contact" className="section contact"><div className="wrap contactGrid"><div><p className="eyebrow">{bn?'সহায়তা':'Support'}</p><h2>{t.contact}</h2><p>{t.contactbody}</p><p><Headset/>
- <a href="mailto:abusufyan.cse20@gmail.com">abusufyan.cse20@gmail.com</a></p><p><Phone/>
- <a href="tel:+8801776669345">01776669345</a></p><p><MapPin/>
- {bn?'রাজশাহী, বাংলাদেশ':'Rajshahi, Bangladesh'}</p></div><form onSubmit={sendMail}>{mailState==='sent'&&<div className="success" role="status"><CheckCircle/>
-{t.sent}</div>}{mailState==='error'&&<div className="formError" role="alert"><X/>
-{bn?'বার্তা পাঠানো যায়নি। ইমেইল বা ফোনে যোগাযোগ করুন।':'Message could not be sent. Please use email or phone.'}</div>}<input className="honeypot" name="website" tabIndex="-1" autoComplete="off" aria-hidden="true"/>
-<div><label>{bn?'নাম':'Name'}<input name="name" required minLength="2" maxLength="80" autoComplete="name"/>
-</label><label>{bn?'ইমেইল বা ফোন':'Email or phone'}<input name="contact" required maxLength="120" autoComplete="email"/>
-</label></div><label>{bn?'বিষয়':'Subject'}<input name="subject" required minLength="3" maxLength="120"/>
-</label><label>{bn?'বার্তা':'Message'}<textarea name="message" required minLength="10" maxLength="3000" rows="4"/>
-</label><button disabled={mailState==='sending'}>{mailState==='sending'?(bn?'পাঠানো হচ্ছে…':'Sending…'):t.send}<ArrowRight/>
-</button></form></div></section>
+  useEffect(() => () => clearTimeout(formTimer.current), []);
 
-<section className="final">
-<img src="./assets/kaaj-trust.png" alt=""/>
-<div className="wrap"><h2>{t.ready}</h2><p>{t.readybody}</p><div className="row"><Btn>{t.dl}</Btn><Btn kind="ghost" href="#home">{bn?'শুরু করুন':'Get started'}</Btn></div></div></section>
-</main>
+  function toggleLanguage() {
+    setLang(bn ? 'en' : 'bn');
+    setMenuOpen(false);
+  }
 
+  function submitContact(event) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const subject = encodeURIComponent(`[KAAJ Website] ${data.get('subject')}`);
+    const body = encodeURIComponent(`Name: ${data.get('name')}\nEmail/Phone: ${data.get('contact')}\n\n${data.get('message')}`);
+    setFormOpened(true);
+    window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`;
+    clearTimeout(formTimer.current);
+    formTimer.current = window.setTimeout(() => setFormOpened(false), 8000);
+  }
 
-<footer><div className="wrap foot"><div><a className="brand" href="#home">
-<img src="./assets/kaaj-logo-under-1mb.png" alt=""/>
-<b>KAAJ</b></a><p>{bn?'স্থানীয় কাজ ও নিয়োগ সহজ করার Android-first মার্কেটপ্লেস।':'An Android-first local marketplace making work and hiring easier.'}</p></div>{(bn?[["Kaaj",[['পরিচিতি','#about'],['যেভাবে কাজ করে','#how'],['ফিচার','#features'],['অ্যাপ ডাউনলোড','#download']]],["প্ল্যাটফর্ম",[['কর্মীদের জন্য','#workers'],['ক্লায়েন্টদের জন্য','#clients'],['মূল্য','#pricing'],['প্রশ্নোত্তর','#faq']]],["সহায়তা",[['সহায়তা কেন্দ্র','#contact'],['যোগাযোগ','#contact'],['সমস্যা জানান','#contact']]],["আইনি",[['গোপনীয়তা নীতি','#privacy'],['শর্তাবলী','#terms'],['সাবস্ক্রিপশন নীতি','#terms'],['বাতিল নীতি','#terms'],['রিফান্ড নীতি','#terms'],['পেমেন্ট শর্ত','#terms']]]]:[['Kaaj',[['About','#about'],['How it works','#how'],['Features','#features'],['Download app','#download']]],['Platform',[['For workers','#workers'],['For clients','#clients'],['Pricing','#pricing'],['FAQ','#faq']]],['Support',[['Help center','#contact'],['Contact','#contact'],['Report a problem','#contact']]],['Legal',[['Privacy policy','#privacy'],['Terms & conditions','#terms'],['Subscription policy','#terms'],['Cancellation policy','#terms'],['Refund policy','#terms'],['Payment terms','#terms']]]]).map(([h,x])=><div key={h}><h3>{h}</h3>{x.map(([y,href])=><a href={href} key={y}>{y}</a>)}</div>)}</div><div className="wrap bottom"><span>© 2026 Kaaj. {bn?'সর্বস্বত্ব সংরক্ষিত।':'All rights reserved.'}</span><span>{bn?'রাজশাহী, বাংলাদেশ':'Rajshahi, Bangladesh'}</span></div></footer>{toast&&<div className="toast"><CheckCircle/>
-{toast}</div>}</div>}
+  const installSteps = t.installSteps.map(([title, body]) => [title, body.replace('{size}', sizeMB || '60')]);
+
+  return <div className="site">
+    <a className="skip-link" href="#main">{t.skip}</a>
+
+    <header className="site-header">
+      <div className="container header-inner">
+        <a className="brand" href="#top" aria-label={t.homeLabel}>
+          <img src="./assets/img/logo-96.webp" width="40" height="40" alt="" />
+          <span>KAAJ</span>
+        </a>
+        <nav id="site-nav" className={`main-nav ${menuOpen ? 'is-open' : ''}`} aria-label={t.navLabel}>
+          <ul>
+            {t.nav.map(([id, label]) => <li key={id}><a href={`#${id}`} onClick={() => setMenuOpen(false)}>{label}</a></li>)}
+            <li className="nav-download"><a className="btn btn-primary btn-block" href="#download" onClick={() => setMenuOpen(false)}><DownloadSimple weight="bold" aria-hidden="true" />{t.downloadApk}</a></li>
+          </ul>
+        </nav>
+        <div className="header-actions">
+          <button className="lang-toggle" type="button" onClick={toggleLanguage} aria-label={t.langSwitchLabel} lang={bn ? 'en' : 'bn'}>
+            <Globe aria-hidden="true" /><span className="lang-long">{t.langSwitch}</span><span className="lang-short" aria-hidden="true">{t.langSwitchShort}</span>
+          </button>
+          <a className="btn btn-primary btn-sm header-download" href="#download"><DownloadSimple weight="bold" aria-hidden="true" />{t.headerDownload}</a>
+          <button ref={menuButton} className="menu-toggle" type="button" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen} aria-controls="site-nav" aria-label={menuOpen ? t.menuClose : t.menuOpen}>
+            {menuOpen ? <X aria-hidden="true" /> : <List aria-hidden="true" />}
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" tabIndex="-1">
+      <section className="hero" id="top" aria-labelledby="hero-title">
+        <div className="container hero-grid">
+          <div className="hero-copy">
+            <p className="hero-badge"><MapPin weight="fill" aria-hidden="true" />{t.heroBadge}</p>
+            <h1 id="hero-title">{t.heroTitle}</h1>
+            <p className="hero-lead">{t.heroBody}</p>
+            <div className="hero-actions">
+              <a className="btn btn-primary btn-lg" href={release.downloadUrl} rel="noopener"><DownloadSimple weight="bold" aria-hidden="true" />{t.downloadApk}</a>
+              <a className="btn btn-secondary btn-lg" href="#how">{t.howCta}<ArrowRight weight="bold" aria-hidden="true" /></a>
+            </div>
+            <p className="hero-meta"><AndroidLogo weight="fill" aria-hidden="true" /><span>{releaseMeta}</span>{release.prerelease && <span className="pill pill-amber">{t.pilotBuild}</span>}</p>
+            <ul className="trust-chips">
+              {t.chips.map((chip, index) => {
+                const Icon = [ShieldCheck, Translate, MapPin][index];
+                return <li key={chip}><Icon weight="fill" aria-hidden="true" />{chip}</li>;
+              })}
+            </ul>
+          </div>
+          <figure className="hero-media">
+            <img
+              src="./assets/img/hero-960.webp"
+              srcSet={srcSet('hero', [640, 960, 1440])}
+              sizes="(min-width: 960px) 46vw, calc(100vw - 32px)"
+              width="1440" height="960" fetchPriority="high" alt={t.heroAlt}
+            />
+          </figure>
+        </div>
+      </section>
+
+      <section className="work-types" aria-labelledby="work-types-title">
+        <div className="container">
+          <h2 id="work-types-title" className="eyebrow-title">{t.workTypesTitle}</h2>
+          <ul className="work-chips">
+            {workTypes.map(([key, bnLabel, enLabel]) => {
+              const Icon = workIcons[key];
+              return <li key={key}><Icon aria-hidden="true" />{bn ? bnLabel : enLabel}</li>;
+            })}
+          </ul>
+        </div>
+      </section>
+
+      <section className="section" id="how" aria-labelledby="how-title">
+        <div className="container">
+          <SectionHeader id="how-title" kicker={t.howKicker} title={t.howTitle} body={t.howBody} align="center" />
+          <div className="journey-grid">
+            <article className="journey-card">
+              <img src="./assets/img/client-836.webp" srcSet={srcSet('client', [480, 836])} sizes="(min-width: 960px) 560px, calc(100vw - 32px)" width="836" height="557" loading="lazy" decoding="async" alt={t.clientAlt} />
+              <div className="journey-body">
+                <p className="overline">{t.forClients}</p>
+                <h3>{t.clientsTitle}</h3>
+                <StepList items={steps[lang].clients} />
+              </div>
+            </article>
+            <article className="journey-card">
+              <img src="./assets/img/worker-836.webp" srcSet={srcSet('worker', [480, 836])} sizes="(min-width: 960px) 560px, calc(100vw - 32px)" width="836" height="557" loading="lazy" decoding="async" alt={t.workerAlt} />
+              <div className="journey-body">
+                <p className="overline">{t.forWorkers}</p>
+                <h3>{t.workersTitle}</h3>
+                <StepList items={steps[lang].workers} />
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section className="section section-tint" id="features" aria-labelledby="features-title">
+        <div className="container">
+          <SectionHeader id="features-title" kicker={t.featuresKicker} title={t.featuresTitle} body={t.featuresBody} align="center" />
+          <ul className="feature-grid">
+            {features.map(([key, bnTitle, bnBody, enTitle, enBody]) => {
+              const Icon = featureIcons[key];
+              return <li className="feature-card" key={key}>
+                <span className="icon-tile"><Icon weight="duotone" aria-hidden="true" /></span>
+                <h3>{bn ? bnTitle : enTitle}</h3>
+                <p>{bn ? bnBody : enBody}</p>
+              </li>;
+            })}
+            <li className="feature-card is-soon">
+              <span className="icon-tile"><GraduationCap weight="duotone" aria-hidden="true" /></span>
+              <div>
+                <p className="pill pill-neutral">{t.comingSoon}</p>
+                <h3>{bn ? comingSoonFeature[1] : comingSoonFeature[3]}</h3>
+                <p>{bn ? comingSoonFeature[2] : comingSoonFeature[4]}</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section className="section" id="safety" aria-labelledby="safety-title">
+        <div className="container safety-grid">
+          <div>
+            <SectionHeader id="safety-title" kicker={t.safetyKicker} title={t.safetyTitle} body={t.safetyBody} />
+            <ul className="safety-list">
+              {safetyPoints.map(([key, bnTitle, bnBody, enTitle, enBody]) => {
+                const Icon = featureIcons[key];
+                return <li key={key}>
+                  <span className="icon-tile icon-tile-sm"><Icon weight="duotone" aria-hidden="true" /></span>
+                  <div><h3>{bn ? bnTitle : enTitle}</h3><p>{bn ? bnBody : enBody}</p></div>
+                </li>;
+              })}
+            </ul>
+          </div>
+          <div className="safety-aside">
+            <img src="./assets/img/rajshahi-1200.webp" srcSet={srcSet('rajshahi', [640, 1200])} sizes="(min-width: 960px) 520px, calc(100vw - 32px)" width="1200" height="675" loading="lazy" decoding="async" alt={t.safetyAlt} />
+            <div className="emergency" role="note">
+              <Warning weight="fill" aria-hidden="true" />
+              <div>
+                <h3>{t.emergencyTitle}</h3>
+                <p>{t.emergencyBody}</p>
+                <a className="btn btn-danger btn-sm" href="tel:999"><Phone weight="fill" aria-hidden="true" />{t.call999}</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section section-tint" id="pricing" aria-labelledby="pricing-title">
+        <div className="container pricing-grid">
+          <div className="pricing-header">
+            <SectionHeader id="pricing-title" kicker={t.pricingKicker} title={t.pricingTitle} body={t.pricingBody} />
+          </div>
+          <article className="price-card" aria-label={t.planName}>
+            <div className="price-head">
+              <h3>{t.planName}</h3>
+              <span className="pill pill-green">{t.operators}</span>
+            </div>
+            <p className="price"><strong>{t.price}</strong><span>{t.perDay}</span></p>
+            <p className="price-extra">{t.priceExtra}</p>
+            <ul className="check-list">
+              {t.pricingPoints.map((point) => <li key={point}><CheckCircle weight="fill" aria-hidden="true" />{point}</li>)}
+            </ul>
+            <p className="price-warning"><Info weight="fill" aria-hidden="true" /><span>{t.uninstallWarning}</span></p>
+          </article>
+          <div className="pricing-howto">
+            <div className="howto-card">
+              <h3>{t.subscribeTitle}</h3>
+              <p>{t.subscribeBody}</p>
+              <SmsCommand keyword="START kaaj" t={t} />
+            </div>
+            <div className="howto-card is-stop">
+              <h3>{t.unsubscribeTitle}</h3>
+              <p>{t.unsubscribeBody}</p>
+              <SmsCommand keyword="STOP kaaj" t={t} />
+              <p className="howto-note">{t.unsubscribeAlt}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="download" id="download" aria-labelledby="download-title">
+        <div className="container download-grid">
+          <div>
+            <SectionHeader id="download-title" kicker={t.downloadKicker} title={t.downloadTitle} body={t.downloadBody} />
+            <article className="release-card" aria-live="polite">
+              <div className="release-head">
+                <img src="./assets/img/logo-96.webp" width="56" height="56" alt="" loading="lazy" decoding="async" />
+                <div>
+                  <h3>{t.releaseCardTitle}</h3>
+                  <p className="release-name">{release.name}</p>
+                </div>
+                <span className={`pill ${release.prerelease ? 'pill-amber' : 'pill-green'}`}>{release.prerelease ? t.pilotBuild : t.latestBadge}</span>
+              </div>
+              <dl className="release-facts">
+                <div><dt>{t.version}</dt><dd>{release.version}</dd></div>
+                {sizeMB && <div><dt>{t.size}</dt><dd>{sizeMB} MB</dd></div>}
+                {releaseDate && <div><dt>{t.released}</dt><dd>{releaseDate}</dd></div>}
+                <div><dt>{t.requires}</dt><dd>{t.androidReq}</dd></div>
+              </dl>
+              <div className="release-actions">
+                <a className="btn btn-light btn-lg" href={release.downloadUrl} rel="noopener"><DownloadSimple weight="bold" aria-hidden="true" />{t.downloadApk}{sizeMB && <span className="btn-sub">{sizeMB} MB</span>}</a>
+                <a className="text-link" href={release.releaseUrl} target="_blank" rel="noopener noreferrer">{t.releasePage}<ArrowRight aria-hidden="true" /></a>
+              </div>
+              {release.sha256
+                ? <details className="checksum">
+                  <summary>{t.checksum}</summary>
+                  <p>{t.checksumHelp}</p>
+                  <code>{release.sha256}</code>
+                  <p className="package-id">{t.packageId}: <code>{PACKAGE_NAME}</code></p>
+                </details>
+                : <p className="checksum-missing">{t.checksumMissing}</p>}
+            </article>
+            <div className="pilot-note" role="note">
+              <Info weight="fill" aria-hidden="true" />
+              <div><strong>{t.pilotNoteTitle}</strong><p>{t.pilotNote}</p></div>
+            </div>
+          </div>
+          <div className="install-card" id="install">
+            <h3>{t.installTitle}</h3>
+            <ol className="install-steps">
+              {installSteps.map(([title, body], index) => <li key={title}>
+                <span className="step-num" aria-hidden="true">{index + 1}</span>
+                <div><h4>{title}</h4><p>{body}</p></div>
+              </li>)}
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section className="section" id="faq" aria-labelledby="faq-title">
+        <div className="container faq-grid">
+          <div>
+            <SectionHeader id="faq-title" kicker={t.faqKicker} title={t.faqTitle} />
+            <p className="faq-contact"><EnvelopeSimple aria-hidden="true" /><a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a></p>
+          </div>
+          <div className="faq-list">
+            {faqs[lang].map(([question, answer], index) => {
+              const open = openFaq === index;
+              return <div className={`faq-item ${open ? 'is-open' : ''}`} key={question}>
+                <h3>
+                  <button type="button" id={`faq-q-${index}`} aria-expanded={open} aria-controls={`faq-a-${index}`} onClick={() => setOpenFaq(open ? -1 : index)}>
+                    <span>{question}</span><CaretDown weight="bold" aria-hidden="true" />
+                  </button>
+                </h3>
+                <div id={`faq-a-${index}`} role="region" aria-labelledby={`faq-q-${index}`} hidden={!open}><p>{answer}</p></div>
+              </div>;
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="section section-tint" id="legal" aria-labelledby="legal-title">
+        <div className="container">
+          <SectionHeader id="legal-title" kicker={t.legalKicker} title={t.legalTitle} />
+          <div className="legal-grid">
+            <article className="legal-card" id="terms">
+              <h3>{t.termsTitle}</h3>
+              {legal[lang].terms.map(([title, body]) => <div key={title}><h4>{title}</h4><p>{body}</p></div>)}
+            </article>
+            <article className="legal-card" id="privacy">
+              <h3>{t.privacyTitle}</h3>
+              {legal[lang].privacy.map(([title, body]) => <div key={title}><h4>{title}</h4><p>{body}</p></div>)}
+            </article>
+          </div>
+          <p className="legal-updated">{t.lastUpdated}</p>
+        </div>
+      </section>
+
+      <section className="section" id="contact" aria-labelledby="contact-title">
+        <div className="container contact-grid">
+          <div>
+            <SectionHeader id="contact-title" kicker={t.contactKicker} title={t.contactTitle} body={t.contactBody} />
+            <address className="contact-list">
+              <a href={`mailto:${SUPPORT_EMAIL}`}><EnvelopeSimple aria-hidden="true" />{SUPPORT_EMAIL}</a>
+              <a href={`tel:${SUPPORT_PHONE_INTL}`}><Phone aria-hidden="true" />{SUPPORT_PHONE}</a>
+              <span><MapPin aria-hidden="true" />{t.location}</span>
+            </address>
+          </div>
+          <form className="contact-form" onSubmit={submitContact}>
+            <div className="form-row">
+              <label htmlFor="cf-name">{t.formName}<input id="cf-name" name="name" required minLength="2" maxLength="80" autoComplete="name" /></label>
+              <label htmlFor="cf-contact">{t.formContact}<input id="cf-contact" name="contact" required maxLength="120" autoComplete="email" /></label>
+            </div>
+            <label htmlFor="cf-subject">{t.formSubject}<input id="cf-subject" name="subject" required minLength="3" maxLength="120" /></label>
+            <label htmlFor="cf-message">{t.formMessage}<textarea id="cf-message" name="message" required minLength="10" maxLength="3000" rows="5" /></label>
+            <div className="form-foot">
+              <button className="btn btn-primary" type="submit">{t.formSend}<ArrowRight weight="bold" aria-hidden="true" /></button>
+              <p className="form-hint">{t.formHint}</p>
+            </div>
+            <p className="form-status" role="status">{formOpened && <><CheckCircle weight="fill" aria-hidden="true" />{t.formOpened}</>}</p>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer className="site-footer">
+      <div className="container footer-grid">
+        <div className="footer-brand">
+          <a className="brand" href="#top" aria-label={t.homeLabel}><img src="./assets/img/logo-96.webp" width="40" height="40" alt="" loading="lazy" decoding="async" /><span>KAAJ</span></a>
+          <p>{t.footerTagline}</p>
+        </div>
+        <nav aria-label={t.footerExplore}>
+          <h2>{t.footerExplore}</h2>
+          <ul>
+            <li><a href="#how">{t.nav[0][1]}</a></li>
+            <li><a href="#features">{t.nav[1][1]}</a></li>
+            <li><a href="#pricing">{t.nav[3][1]}</a></li>
+            <li><a href="#download">{t.footerDownload}</a></li>
+          </ul>
+        </nav>
+        <nav aria-label={t.footerSupport}>
+          <h2>{t.footerSupport}</h2>
+          <ul>
+            <li><a href="#faq">{t.nav[4][1]}</a></li>
+            <li><a href="#terms">{t.termsTitle}</a></li>
+            <li><a href="#privacy">{t.privacyTitle}</a></li>
+            <li><a href="#contact">{t.footerContact}</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div className="container footer-bottom">
+        <p>{t.copyright}</p>
+        <p>{t.footerEmergency}</p>
+      </div>
+    </footer>
+  </div>;
+}
