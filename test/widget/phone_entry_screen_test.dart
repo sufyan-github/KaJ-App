@@ -72,7 +72,7 @@ void main() {
     await tester.pump();
 
     expect(
-      find.text('Only Robi (018) and Airtel (016) numbers can register.'),
+      find.text('Only Robi (018) and Cirkle (016) numbers can register.'),
       findsOneWidget,
     );
     expect(repository.requestOtpCalls, 0);
