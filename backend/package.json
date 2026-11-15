@@ -13,6 +13,7 @@
     "prisma:validate": "prisma validate",
     "seed": "prisma db seed",
     "seed:demo": "tsx prisma/demo-seed.ts",
+    "seed:reference": "tsx prisma/reference-data-load.ts",
     "seed:training": "tsx prisma/training-seed.ts",
     "start": "node dist/main.js",
     "test": "jest --runInBand",

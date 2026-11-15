@@ -11,13 +11,25 @@ import {
   UrgencyLevel,
 } from "@prisma/client";
 
+// Demo data is for a developer's machine and automated tests only. An
+// allowlist, checked before a client exists: an unset or "staging"
+// NODE_ENV used to run it against whatever DATABASE_URL pointed at.
+if (process.env.NODE_ENV !== "development" && process.env.NODE_ENV !== "test") {
+  throw new Error(
+    "Demo seed requires NODE_ENV=development or test. Never run it against a shared or production database.",
+  );
+}
+
 const prisma = new PrismaClient();
 
+// 010 is not allocated to any Bangladeshi operator, so these can never be a
+// real subscriber's number (the old 017 numbers were Grameenphone's range).
+// The app's sign-in accepts only Robi/Airtel numbers, so they can't sign in.
 const DEMO_ACCOUNTS = {
-  customer: { phone: "+8801700000101", name: "সাবিনা রহমান" },
-  business: { phone: "+8801700000102", name: "রাজশাহী সেবা কেন্দ্র" },
-  worker: { phone: "+8801700000201", name: "আরিফ হোসেন" },
-  applicant: { phone: "+8801700000202", name: "নুসরাত জাহান" },
+  customer: { phone: "+8801000000101", name: "সাবিনা রহমান" },
+  business: { phone: "+8801000000102", name: "রাজশাহী সেবা কেন্দ্র" },
+  worker: { phone: "+8801000000201", name: "আরিফ হোসেন" },
+  applicant: { phone: "+8801000000202", name: "নুসরাত জাহান" },
 } as const;
 
 const jobs = [
@@ -246,10 +258,6 @@ async function demoUser(
 }
 
 async function seedDemo() {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Demo data cannot be seeded in production.");
-  }
-
   const [customer, business, worker, applicant] = await Promise.all([
     demoUser("customer", [RoleMode.CUSTOMER], RoleMode.CUSTOMER),
     demoUser(
@@ -493,7 +501,7 @@ async function seedDemo() {
 
   console.log(`KAAJ demo data ready: ${jobs.length} jobs, 4 accounts.`);
   console.log(
-    "Demo OTP: use the locally configured fixed OTP (currently 123456). ",
+    "Demo accounts use the unassigned +88010 range and cannot sign in by OTP; use them to fill lists and the admin console.",
   );
 }
 

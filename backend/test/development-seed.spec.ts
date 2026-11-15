@@ -21,4 +21,18 @@ describe("development seed production safety", () => {
       expect(client).not.toHaveBeenCalled();
     },
   );
+
+  it.each(["production", "staging", "", undefined])(
+    "refuses the demo seed for environment %s before creating a database client",
+    (environment) => {
+      if (environment === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = environment;
+      const client = jest.fn();
+      jest.doMock("@prisma/client", () => ({ PrismaClient: client }));
+      expect(() =>
+        jest.isolateModules(() => require("../prisma/demo-seed")),
+      ).toThrow("Demo seed requires NODE_ENV=development or test");
+      expect(client).not.toHaveBeenCalled();
+    },
+  );
 });

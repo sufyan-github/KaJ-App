@@ -4,6 +4,13 @@ import { AdminRole, PrismaClient, RoleMode } from "@prisma/client";
 import { hash } from "bcryptjs";
 
 import { encryptTotpSecret } from "../src/modules/admin-auth/admin-auth.primitives";
+import {
+  categories,
+  pilotAreas,
+  skills,
+  thanaNames,
+  thanas,
+} from "./reference-data";
 
 // This seed resets admin credentials, fees, settings, and feature flags.
 // Refuse before constructing a client or performing any database work.
@@ -29,115 +36,6 @@ const featureFlags = [
   "disputes_enabled",
   "referral_enabled",
 ] as const;
-
-const categories = [
-  {
-    slug: "home-services",
-    name_en: "Home services",
-    name_bn: "বাসার সেবা",
-    icon: "home",
-  },
-  {
-    slug: "construction-trades",
-    name_en: "Construction and trades",
-    name_bn: "নির্মাণ ও কারিগরি",
-    icon: "tools",
-  },
-  {
-    slug: "care-support",
-    name_en: "Care and support",
-    name_bn: "যত্ন ও সহায়তা",
-    icon: "care",
-  },
-  {
-    slug: "transport-delivery",
-    name_en: "Transport and delivery",
-    name_bn: "পরিবহন ও ডেলিভারি",
-    icon: "transport",
-  },
-  {
-    slug: "education",
-    name_en: "Education",
-    name_bn: "শিক্ষা",
-    icon: "education",
-  },
-  {
-    slug: "digital-business",
-    name_en: "Digital and business",
-    name_bn: "ডিজিটাল ও ব্যবসায়িক",
-    icon: "computer",
-  },
-  {
-    slug: "events-hospitality",
-    name_en: "Events and hospitality",
-    name_bn: "অনুষ্ঠান ও আপ্যায়ন",
-    icon: "event",
-  },
-  {
-    slug: "general-labour",
-    name_en: "General labour",
-    name_bn: "সাধারণ শ্রম",
-    icon: "work",
-  },
-] as const;
-
-const skills = [
-  ["cleaning", "Cleaning", "পরিষ্কার করা", "home-services"],
-  ["cooking", "Cooking", "রান্না", "home-services"],
-  [
-    "electrical-work",
-    "Electrical work",
-    "বৈদ্যুতিক কাজ",
-    "construction-trades",
-  ],
-  ["plumbing", "Plumbing", "প্লাম্বিং", "construction-trades"],
-  ["elderly-care", "Elderly care", "বয়স্কদের যত্ন", "care-support"],
-  ["childcare", "Childcare", "শিশু যত্ন", "care-support"],
-  ["driving", "Driving", "গাড়ি চালানো", "transport-delivery"],
-  ["delivery", "Delivery", "ডেলিভারি", "transport-delivery"],
-  ["tutoring", "Tutoring", "পড়ানো", "education"],
-  ["english-language", "English language", "ইংরেজি ভাষা", "education"],
-  ["data-entry", "Data entry", "ডেটা এন্ট্রি", "digital-business"],
-  ["graphic-design", "Graphic design", "গ্রাফিক ডিজাইন", "digital-business"],
-  ["event-setup", "Event setup", "অনুষ্ঠান প্রস্তুতি", "events-hospitality"],
-  ["food-service", "Food service", "খাবার পরিবেশন", "events-hospitality"],
-  ["moving", "Moving", "মালামাল সরানো", "general-labour"],
-  ["lifting", "Lifting", "ভার বহন", "general-labour"],
-] as const;
-
-const thanaNames = {
-  Boalia: "বোয়ালিয়া",
-  Motihar: "মতিহার",
-  Rajpara: "রাজপাড়া",
-  "Shah Makhdum": "শাহ মখদুম",
-} as const;
-const thanas = Object.keys(thanaNames) as (keyof typeof thanaNames)[];
-const pilotAreas: Record<(typeof thanas)[number], readonly [string, string][]> =
-  {
-    Boalia: [
-      ["Shaheb Bazar", "সাহেব বাজার"],
-      ["Hetem Khan", "হেতেম খাঁ"],
-      ["Padma R/A", "পদ্মা আবাসিক এলাকা"],
-    ],
-    Motihar: [
-      ["RUET", "রুয়েট"],
-      ["University of Rajshahi", "রাজশাহী বিশ্ববিদ্যালয়"],
-      ["Talaimari", "তালাইমারী"],
-      ["Kazla", "কাজলা"],
-      ["Binodpur", "বিনোদপুর"],
-      ["Motihar", "মতিহার"],
-    ],
-    Rajpara: [
-      ["Laxmipur", "লক্ষ্মীপুর"],
-      ["Court", "কোর্ট"],
-      ["Rajpara", "রাজপাড়া"],
-    ],
-    "Shah Makhdum": [
-      ["Shah Makhdum", "শাহ মখদুম"],
-      ["Uposhohor", "উপশহর"],
-      ["Novotheatre", "নভোথিয়েটার"],
-    ],
-  };
 
 const configSettings = [
   [
