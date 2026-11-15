@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/error_mapper.dart';
+import '../../../../core/errors/failure_copy.dart';
 import '../../../../core/formatting/kaaj_format.dart';
 import '../../../../core/localization/kaaj_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -31,8 +32,14 @@ class _JobAlertsScreenState extends ConsumerState<JobAlertsScreen> {
       await ref.read(jobsRepositoryProvider).deleteJobAlert(alert.id);
       ref.invalidate(jobAlertsProvider);
       if (mounted) _snack('কাজের সতর্কতা মুছে ফেলা হয়েছে।');
-    } on Object {
-      if (mounted) _snack('সতর্কতা মুছে ফেলা যায়নি। আবার চেষ্টা করুন।');
+    } on Object catch (error) {
+      if (mounted) {
+        showFailureSnack(
+          context,
+          error,
+          'সতর্কতা মুছে ফেলা যায়নি। আবার চেষ্টা করুন।',
+        );
+      }
     } finally {
       if (mounted) setState(() => _deleting.remove(alert.id));
     }

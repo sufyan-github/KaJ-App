@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/errors/failure_copy.dart';
 import '../../../../core/localization/kaaj_localizations.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/routing/route_arguments.dart';
@@ -333,12 +334,12 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
       try {
         await ref.read(chatRepositoryProvider).blockUser(widget.otherUserId!);
         if (mounted) context.pop();
-      } on Object {
+      } on Object catch (error) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: KLocalizedText('ব্লক করা যায়নি। আবার চেষ্টা করুন।'),
-            ),
+          showFailureSnack(
+            context,
+            error,
+            'ব্লক করা যায়নি। আবার চেষ্টা করুন।',
           );
         }
       }

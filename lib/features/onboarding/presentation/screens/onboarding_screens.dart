@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/errors/failure_copy.dart';
 import '../../../../core/localization/kaaj_localizations.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -200,8 +201,9 @@ class _LocationSelectionScreenState
           const SizedBox(height: KSpacing.md),
           locations.when(
             loading: () => const CircularProgressIndicator(),
-            error: (_, _) =>
-                const KLocalizedText('এলাকার তালিকা লোড করা যায়নি।'),
+            error: (error, _) => Text(
+              failureText(context, error, 'এলাকার তালিকা লোড করা যায়নি।'),
+            ),
             data: (items) {
               final filtered = items
                   .where(
@@ -386,8 +388,9 @@ class _WorkerSkillsScreenState extends ConsumerState<WorkerSkillsScreen> {
           ] else
             skills.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) =>
-                  const KLocalizedText('দক্ষতার তালিকা লোড করা যায়নি।'),
+              error: (error, _) => Text(
+                failureText(context, error, 'দক্ষতার তালিকা লোড করা যায়নি।'),
+              ),
               data: (items) => Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [

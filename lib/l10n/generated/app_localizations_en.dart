@@ -279,4 +279,46 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get sessionExpiredMessage =>
       'Your session has ended, for example because you signed out on another phone or changed your password. Sign in again to continue.';
+
+  @override
+  String get errorAccountRestricted =>
+      'Marketplace actions are temporarily restricted on your account. See Help & safety for details.';
+
+  @override
+  String get errorReverificationRequired =>
+      'Verify your identity again to continue. Open Settings, then Identity and skill verification.';
+
+  @override
+  String get errorAccountSuspended =>
+      'This account is suspended. Contact KAAJ support if you think this is a mistake.';
+
+  @override
+  String get errorAccountUnavailable =>
+      'This account cannot be used right now.';
+
+  @override
+  String get errorSubscriptionRequired =>
+      'Your subscription is inactive or has expired. Renew it in Settings to continue.';
+
+  @override
+  String get errorUserBlocked => 'You can\'t interact with this person.';
+
+  @override
+  String get errorHiringUnavailable =>
+      'This worker can\'t be hired for this job.';
+
+  @override
+  String get errorAlreadyApplied => 'You have already applied to this job.';
+
+  @override
+  String get errorPayloadTooLarge =>
+      'The file is too large. Choose a smaller photo or document.';
+
+  @override
+  String get errorServiceUnavailable =>
+      'KAAJ is busy right now. Please try again in a few minutes.';
+
+  @override
+  String get errorConcurrentUpdate =>
+      'This was just changed somewhere else. Refresh and try again.';
 }

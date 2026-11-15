@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/error_mapper.dart';
 import '../../../../core/errors/failure.dart';
+import '../../../../core/errors/failure_copy.dart';
 import '../../../../core/localization/kaaj_localizations.dart';
 import '../../../../core/permissions/permission_gateway.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -357,14 +358,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
     if (!item.isRead) {
       try {
         await ref.read(notificationsRepositoryProvider).markRead(item.id);
-      } on Object {
+      } on Object catch (error) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: KLocalizedText(
-                'পঠিত হিসেবে সংরক্ষণ করা যায়নি। পরে আবার চেষ্টা হবে।',
-              ),
-            ),
+          showFailureSnack(
+            context,
+            error,
+            'পঠিত হিসেবে সংরক্ষণ করা যায়নি। পরে আবার চেষ্টা হবে।',
           );
         }
       } finally {
@@ -384,12 +383,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
     }
     try {
       await context.push(item.route!);
-    } on Object {
+    } on Object catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: KLocalizedText('আপডেটটির বিস্তারিত এখন খোলা যাচ্ছে না।'),
-          ),
+        showFailureSnack(
+          context,
+          error,
+          'আপডেটটির বিস্তারিত এখন খোলা যাচ্ছে না।',
         );
       }
     }
@@ -400,14 +399,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
     try {
       await ref.read(notificationsRepositoryProvider).markAllRead();
       ref.invalidate(notificationsProvider);
-    } on Object {
+    } on Object catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: KLocalizedText(
-              'সব নোটিফিকেশন পঠিত করা যায়নি। আবার চেষ্টা করুন।',
-            ),
-          ),
+        showFailureSnack(
+          context,
+          error,
+          'সব নোটিফিকেশন পঠিত করা যায়নি। আবার চেষ্টা করুন।',
         );
       }
     } finally {

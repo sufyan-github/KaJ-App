@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/errors/failure_copy.dart';
 import '../../../../core/formatting/kaaj_format.dart';
 import '../../../../core/localization/kaaj_localizations.dart';
 import '../../../../core/location/location_gateway.dart';
@@ -213,7 +214,8 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
           Expanded(
             child: jobs.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) => _Retry(
+              error: (error, _) => _Retry(
+                error: error,
                 label: 'কাজের তালিকা লোড করা যায়নি।',
                 onRetry: () => showOpenJobs
                     ? ref.invalidate(feed)
@@ -317,8 +319,13 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                       .watch(suggestedWorkersProvider(job.id))
                       .when(
                         loading: () => const LinearProgressIndicator(),
-                        error: (_, _) =>
-                            const KLocalizedText('পরামর্শ লোড করা যায়নি।'),
+                        error: (error, _) => Text(
+                          failureText(
+                            context,
+                            error,
+                            'পরামর্শ লোড করা যায়নি।',
+                          ),
+                        ),
                         data: (workers) => workers.isEmpty
                             ? const KLocalizedText(
                                 'এখনো কোনো উপযুক্ত কর্মী পাওয়া যায়নি।',
@@ -391,16 +398,12 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                                             sheetRef.invalidate(
                                               assignmentsProvider,
                                             );
-                                          } on Object {
+                                          } on Object catch (error) {
                                             if (sheetContext.mounted) {
-                                              ScaffoldMessenger.of(
+                                              showFailureSnack(
                                                 sheetContext,
-                                              ).showSnackBar(
-                                                const SnackBar(
-                                                  content: KLocalizedText(
-                                                    'আবেদনটি গ্রহণ করা যায়নি।',
-                                                  ),
-                                                ),
+                                                error,
+                                                'আবেদনটি গ্রহণ করা যায়নি।',
                                               );
                                             }
                                           }
@@ -433,14 +436,12 @@ Future<void> showJobApplyFlow(
   late final ApplicationEligibility eligibility;
   try {
     eligibility = await ref.read(applicationEligibilityProvider.future);
-  } on Object {
+  } on Object catch (error) {
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: KLocalizedText(
-            'আবেদনের যোগ্যতা যাচাই করা যায়নি। আবার চেষ্টা করুন।',
-          ),
-        ),
+      showFailureSnack(
+        context,
+        error,
+        'আবেদনের যোগ্যতা যাচাই করা যায়নি। আবার চেষ্টা করুন।',
       );
     }
     return;
@@ -515,14 +516,12 @@ Future<void> showJobApplyFlow(
                           ),
                         );
                       }
-                    } on Object {
+                    } on Object catch (error) {
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: KLocalizedText(
-                              'কাজের সময় আপডেট করা যায়নি।',
-                            ),
-                          ),
+                        showFailureSnack(
+                          context,
+                          error,
+                          'কাজের সময় আপডেট করা যায়নি।',
                         );
                       }
                     }
@@ -573,14 +572,12 @@ Future<void> showJobApplyFlow(
                         ),
                       );
                     }
-                  } on Object {
+                  } on Object catch (error) {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: KLocalizedText(
-                            'আবেদন পাঠানো যায়নি। সময়টি যাচাই করুন।',
-                          ),
-                        ),
+                      showFailureSnack(
+                        context,
+                        error,
+                        'আবেদন পাঠানো যায়নি। সময়টি যাচাই করুন।',
                       );
                     }
                   }
@@ -1148,12 +1145,12 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
           ),
         );
       }
-    } on Object {
+    } on Object catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: KLocalizedText('কাজ প্রকাশ করা যায়নি। আবার চেষ্টা করুন।'),
-          ),
+        showFailureSnack(
+          context,
+          error,
+          'কাজ প্রকাশ করা যায়নি। আবার চেষ্টা করুন।',
         );
       }
     } finally {
@@ -1172,7 +1169,8 @@ class WorkerDirectoryScreen extends ConsumerWidget {
       appBar: AppBar(title: const KLocalizedText('কর্মী ও সময় খুঁজুন')),
       body: workers.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => _Retry(
+        error: (error, _) => _Retry(
+          error: error,
           label: 'কর্মীর তালিকা লোড হয়নি।',
           onRetry: () => ref.invalidate(workerDirectoryProvider),
         ),
@@ -1328,7 +1326,8 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
         children: [
           profile.when(
             loading: () => const LinearProgressIndicator(),
-            error: (_, _) => const KLocalizedText('প্রোফাইল লোড হয়নি।'),
+            error: (error, _) =>
+                Text(failureText(context, error, 'প্রোফাইল লোড হয়নি।')),
             data: (worker) => ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(
@@ -1395,7 +1394,8 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
           const SizedBox(height: KSpacing.sm),
           slots.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, _) => const KLocalizedText('সময়সূচি লোড করা যায়নি।'),
+            error: (error, _) =>
+                Text(failureText(context, error, 'সময়সূচি লোড করা যায়নি।')),
             data: (items) => items.isEmpty
                 ? const KLocalizedText('এই সময়ে কোনো খালি স্লট নেই।')
                 : Wrap(
@@ -1499,14 +1499,12 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
           ),
         );
       }
-    } on Object {
+    } on Object catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: KLocalizedText(
-              'এই স্লটটি আর খালি নেই বা অনুরোধ পাঠানো যায়নি।',
-            ),
-          ),
+        showFailureSnack(
+          context,
+          error,
+          'এই স্লটটি আর খালি নেই বা অনুরোধ পাঠানো যায়নি।',
         );
       }
     } finally {
@@ -1524,13 +1522,9 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
           .read(jobsRepositoryProvider)
           .setFavorite(widget.workerId, saved: !currentlySaved);
       ref.invalidate(favoriteWorkersProvider);
-    } on Object {
+    } on Object catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: KLocalizedText('পছন্দের তালিকা বদলানো যায়নি।'),
-          ),
-        );
+        showFailureSnack(context, error, 'পছন্দের তালিকা বদলানো যায়নি।');
       }
     }
   }
@@ -1546,7 +1540,8 @@ class AssignmentsScreen extends ConsumerWidget {
       appBar: AppBar(title: const KLocalizedText('বুকিং ও কাজের অবস্থা')),
       body: assignments.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => _Retry(
+        error: (error, _) => _Retry(
+          error: error,
           label: 'বুকিং লোড করা যায়নি।',
           onRetry: () => ref.invalidate(assignmentsProvider),
         ),
@@ -1599,7 +1594,8 @@ class AssignmentDetailScreen extends ConsumerWidget {
       appBar: AppBar(title: const KLocalizedText('কাজের বিস্তারিত ও অগ্রগতি')),
       body: detail.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => _Retry(
+        error: (error, _) => _Retry(
+          error: error,
           label: 'কাজের বিস্তারিত লোড করা যায়নি।',
           onRetry: () => ref.invalidate(assignmentDetailProvider(assignmentId)),
         ),
@@ -1750,7 +1746,8 @@ class _AssignmentDetailBody extends ConsumerWidget {
           const SizedBox(height: KSpacing.sm),
           reviews.when(
             loading: () => const LinearProgressIndicator(),
-            error: (_, _) => const KLocalizedText('রিভিউ তথ্য লোড করা যায়নি।'),
+            error: (error, _) =>
+                Text(failureText(context, error, 'রিভিউ তথ্য লোড করা যায়নি।')),
             data: (state) => _ReviewPanel(
               state: state,
               onReview: state.canReview
@@ -1826,11 +1823,9 @@ class _AssignmentDetailBody extends ConsumerWidget {
           ),
         );
       }
-    } on Object {
+    } on Object catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: KLocalizedText('রিভিউ জমা দেওয়া যায়নি।')),
-        );
+        showFailureSnack(context, error, 'রিভিউ জমা দেওয়া যায়নি।');
       }
     }
   }
@@ -1864,13 +1859,9 @@ class _AssignmentDetailBody extends ConsumerWidget {
           const SnackBar(content: KLocalizedText('নগদ পেমেন্ট রেকর্ড হয়েছে।')),
         );
       }
-    } on Object {
+    } on Object catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: KLocalizedText('পেমেন্ট এখন রেকর্ড করা যায়নি।'),
-          ),
-        );
+        showFailureSnack(context, error, 'পেমেন্ট এখন রেকর্ড করা যায়নি।');
       }
     }
   }
@@ -1894,11 +1885,9 @@ class _AssignmentDetailBody extends ConsumerWidget {
           ),
         );
       }
-    } on Object {
+    } on Object catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: KLocalizedText('আলোচনা এখন খোলা যাচ্ছে না।')),
-        );
+        showFailureSnack(context, error, 'আলোচনা এখন খোলা যাচ্ছে না।');
       }
     }
   }
@@ -1910,14 +1899,12 @@ class _AssignmentDetailBody extends ConsumerWidget {
     try {
       await action();
       onChanged();
-    } on Object {
+    } on Object catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: KLocalizedText(
-              'কাজটি এখন করা যাচ্ছে না। অবস্থা ও সময় যাচাই করুন।',
-            ),
-          ),
+        showFailureSnack(
+          context,
+          error,
+          'কাজটি এখন করা যাচ্ছে না। অবস্থা ও সময় যাচাই করুন।',
         );
       }
     }
@@ -1954,12 +1941,12 @@ class _AssignmentDetailBody extends ConsumerWidget {
           .read(jobsRepositoryProvider)
           .cancelAssignment(id: detail.summary.id, reasonCode: reasonCode);
       onChanged();
-    } on Object {
+    } on Object catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: KLocalizedText('বাতিলের হিসাব বা অনুরোধ সম্পন্ন হয়নি।'),
-          ),
+        showFailureSnack(
+          context,
+          error,
+          'বাতিলের হিসাব বা অনুরোধ সম্পন্ন হয়নি।',
         );
       }
     }
@@ -2112,7 +2099,8 @@ class ReceivedReviewsScreen extends ConsumerWidget {
       appBar: AppBar(title: const KLocalizedText('আমার পাওয়া রিভিউ')),
       body: reviews.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => _Retry(
+        error: (error, _) => _Retry(
+          error: error,
           label: 'রিভিউ লোড করা যায়নি।',
           onRetry: () => ref.invalidate(receivedReviewsProvider),
         ),
@@ -2154,7 +2142,8 @@ class FavoriteWorkersScreen extends ConsumerWidget {
       appBar: AppBar(title: const KLocalizedText('পছন্দের কর্মী')),
       body: favorites.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => _Retry(
+        error: (error, _) => _Retry(
+          error: error,
           label: 'পছন্দের তালিকা লোড করা যায়নি।',
           onRetry: () => ref.invalidate(favoriteWorkersProvider),
         ),
@@ -2232,15 +2221,24 @@ class _DateTimeRow extends StatelessWidget {
 }
 
 class _Retry extends StatelessWidget {
-  const _Retry({required this.label, required this.onRetry});
+  const _Retry({required this.label, required this.onRetry, this.error});
   final String label;
   final VoidCallback onRetry;
+
+  /// The load error, so a known server code (subscription, restriction,
+  /// no internet) is explained instead of the generic [label].
+  final Object? error;
   @override
   Widget build(BuildContext context) => Center(
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        KLocalizedText(label),
+        Text(
+          error == null
+              ? KaajLocalizations.text(context, label)
+              : failureText(context, error!, label),
+          textAlign: TextAlign.center,
+        ),
         const SizedBox(height: KSpacing.sm),
         FilledButton(
           onPressed: onRetry,
@@ -2414,17 +2412,13 @@ Future<bool> publishDraftJob(
       ..invalidate(myJobsProvider)
       ..invalidate(jobFeedProvider);
     return true;
-  } on Object {
+  } on Object catch (error) {
     if (context.mounted) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(
-            content: KLocalizedText(
-              'খসড়াটি প্রকাশ করা যায়নি। আবার চেষ্টা করুন।',
-            ),
-          ),
-        );
+      showFailureSnack(
+        context,
+        error,
+        'খসড়াটি প্রকাশ করা যায়নি। আবার চেষ্টা করুন।',
+      );
     }
     return false;
   }

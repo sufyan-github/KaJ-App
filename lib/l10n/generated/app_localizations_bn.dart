@@ -275,4 +275,45 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get sessionExpiredMessage =>
       'আপনার সেশন শেষ হয়েছে, যেমন অন্য ফোনে সাইন আউট করা বা পাসওয়ার্ড বদলানোর কারণে। চালিয়ে যেতে আবার প্রবেশ করুন।';
+
+  @override
+  String get errorAccountRestricted =>
+      'আপনার অ্যাকাউন্টে কাজের সুবিধা সাময়িকভাবে সীমিত। বিস্তারিত জানতে সহায়তা ও নিরাপত্তা দেখুন।';
+
+  @override
+  String get errorReverificationRequired =>
+      'কাজ চালিয়ে যেতে আবার পরিচয় যাচাই করুন। সেটিংসে গিয়ে পরিচয় ও দক্ষতা যাচাই খুলুন।';
+
+  @override
+  String get errorAccountSuspended =>
+      'এই অ্যাকাউন্ট স্থগিত আছে। ভুল মনে হলে KAAJ সহায়তায় যোগাযোগ করুন।';
+
+  @override
+  String get errorAccountUnavailable =>
+      'এই অ্যাকাউন্ট এখন ব্যবহার করা যাচ্ছে না।';
+
+  @override
+  String get errorSubscriptionRequired =>
+      'আপনার সাবস্ক্রিপশন চালু নেই বা মেয়াদ শেষ। চালিয়ে যেতে সেটিংস থেকে নবায়ন করুন।';
+
+  @override
+  String get errorUserBlocked => 'এই ব্যক্তির সাথে যোগাযোগ করা যাবে না।';
+
+  @override
+  String get errorHiringUnavailable => 'এই কাজে এই কর্মীকে নেওয়া যাবে না।';
+
+  @override
+  String get errorAlreadyApplied => 'আপনি এই কাজে আগেই আবেদন করেছেন।';
+
+  @override
+  String get errorPayloadTooLarge =>
+      'ফাইলটি অনেক বড়। ছোট ছবি বা নথি বেছে নিন।';
+
+  @override
+  String get errorServiceUnavailable =>
+      'KAAJ এখন ব্যস্ত। কয়েক মিনিট পর আবার চেষ্টা করুন।';
+
+  @override
+  String get errorConcurrentUpdate =>
+      'এটি এইমাত্র অন্য কোথাও বদলেছে। হালনাগাদ করে আবার চেষ্টা করুন।';
 }

@@ -565,6 +565,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your session has ended, for example because you signed out on another phone or changed your password. Sign in again to continue.'**
   String get sessionExpiredMessage;
+
+  /// No description provided for @errorAccountRestricted.
+  ///
+  /// In en, this message translates to:
+  /// **'Marketplace actions are temporarily restricted on your account. See Help & safety for details.'**
+  String get errorAccountRestricted;
+
+  /// No description provided for @errorReverificationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your identity again to continue. Open Settings, then Identity and skill verification.'**
+  String get errorReverificationRequired;
+
+  /// No description provided for @errorAccountSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is suspended. Contact KAAJ support if you think this is a mistake.'**
+  String get errorAccountSuspended;
+
+  /// No description provided for @errorAccountUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This account cannot be used right now.'**
+  String get errorAccountUnavailable;
+
+  /// No description provided for @errorSubscriptionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your subscription is inactive or has expired. Renew it in Settings to continue.'**
+  String get errorSubscriptionRequired;
+
+  /// No description provided for @errorUserBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t interact with this person.'**
+  String get errorUserBlocked;
+
+  /// No description provided for @errorHiringUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This worker can\'t be hired for this job.'**
+  String get errorHiringUnavailable;
+
+  /// No description provided for @errorAlreadyApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'You have already applied to this job.'**
+  String get errorAlreadyApplied;
+
+  /// No description provided for @errorPayloadTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'The file is too large. Choose a smaller photo or document.'**
+  String get errorPayloadTooLarge;
+
+  /// No description provided for @errorServiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'KAAJ is busy right now. Please try again in a few minutes.'**
+  String get errorServiceUnavailable;
+
+  /// No description provided for @errorConcurrentUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'This was just changed somewhere else. Refresh and try again.'**
+  String get errorConcurrentUpdate;
 }
 
 class _AppLocalizationsDelegate

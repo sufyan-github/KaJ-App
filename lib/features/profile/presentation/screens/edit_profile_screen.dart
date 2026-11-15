@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/errors/error_mapper.dart';
+import '../../../../core/errors/failure_copy.dart';
 import '../../../../core/localization/kaaj_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_error_state.dart';
@@ -101,8 +102,14 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
           );
       ref.invalidate(myProfileProvider);
       if (mounted) _snack('প্রোফাইল সংরক্ষণ হয়েছে।');
-    } on Object {
-      if (mounted) _snack('সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।');
+    } on Object catch (error) {
+      if (mounted) {
+        showFailureSnack(
+          context,
+          error,
+          'সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।',
+        );
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -122,8 +129,14 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
       await ref.read(trustSafetyRepositoryProvider).uploadProfilePhoto(bytes);
       ref.invalidate(myProfileProvider);
       if (mounted) _snack('প্রোফাইল ছবি আপডেট হয়েছে।');
-    } on Object {
-      if (mounted) _snack('ছবি আপলোড করা যায়নি। আবার চেষ্টা করুন।');
+    } on Object catch (error) {
+      if (mounted) {
+        showFailureSnack(
+          context,
+          error,
+          'ছবি আপলোড করা যায়নি। আবার চেষ্টা করুন।',
+        );
+      }
     } finally {
       if (mounted) setState(() => _uploading = false);
     }

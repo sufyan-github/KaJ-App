@@ -55,7 +55,31 @@ class KErrorMessage extends StatelessWidget {
   }
 }
 
+/// The app's own message for a stable server error code the person can act
+/// on, or null for codes the app has no specific copy for.
+String? serverCodeMessage(AppLocalizations l10n, Failure failure) =>
+    switch (failure.code) {
+      'ACCOUNT_RESTRICTED' => l10n.errorAccountRestricted,
+      'REVERIFICATION_REQUIRED' => l10n.errorReverificationRequired,
+      'ACCOUNT_SUSPENDED' => l10n.errorAccountSuspended,
+      'ACCOUNT_UNAVAILABLE' => l10n.errorAccountUnavailable,
+      'SUBSCRIPTION_REQUIRED' => l10n.errorSubscriptionRequired,
+      'USER_BLOCKED' => l10n.errorUserBlocked,
+      'HIRING_UNAVAILABLE' => l10n.errorHiringUnavailable,
+      'ALREADY_APPLIED' => l10n.errorAlreadyApplied,
+      'PAYLOAD_TOO_LARGE' => l10n.errorPayloadTooLarge,
+      'SERVICE_UNAVAILABLE' => l10n.errorServiceUnavailable,
+      'CONCURRENT_UPDATE' => l10n.errorConcurrentUpdate,
+      'RATE_LIMITED' => l10n.rateLimitedMessage,
+      _ => switch (failure.kind) {
+        FailureKind.network => l10n.offlineMessage,
+        FailureKind.timeout => l10n.timeoutMessage,
+        _ => null,
+      },
+    };
+
 String localizedFailureMessage(AppLocalizations l10n, Failure failure) =>
+    serverCodeMessage(l10n, failure) ??
     switch (failure.code) {
       'AUTH_INVALID_PHONE' => l10n.invalidPhone,
       'AUTH_INVALID_CREDENTIALS' => l10n.passwordInvalidCredentials,
