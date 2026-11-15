@@ -3,7 +3,8 @@ name: backend-admin-ci
 on:
   pull_request:
   push:
-    branches: [main, agent/p1-ui-07-tracker]
+    branches: [main, agent/p1-ui-07-tracker, "backend/**"]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -63,6 +64,12 @@ jobs:
           node-version-file: .nvmrc
       - run: corepack enable
       - run: corepack pnpm install --frozen-lockfile
+      # The BDApps stack suite runs the PHP gateway with `php -S`.
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: curl
+          coverage: none
       - name: Load local-development defaults, then point at the CI services
         run: |
           grep -E '^[A-Z_]+=' .env.example >> "$GITHUB_ENV"
@@ -77,6 +84,9 @@ jobs:
             echo "MODERATION_DATABASE_E2E=1"
             echo "DISPUTE_DATABASE_E2E=1"
             echo "ATTENDANCE_DATABASE_E2E=1"
+            echo "TRAINING_DATABASE_E2E=1"
+            echo "BDAPPS_DATABASE_E2E=1"
+            echo "BDAPPS_STACK_E2E=1"
           } >> "$GITHUB_ENV"
       - run: corepack pnpm --filter @kaj/backend exec prisma generate
       - run: corepack pnpm --filter @kaj/backend exec prisma migrate deploy
@@ -103,3 +113,19 @@ jobs:
       - run: corepack pnpm --filter @kaj/admin e2e
       - name: The e2e run must not modify tracked files
         run: git diff --exit-code
+
+  secret-scan:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # The repository is public. Known false positives are listed by
+      # fingerprint in .gitleaksignore.
+      - name: gitleaks (full history)
+        run: >
+          docker run --rm -v "$GITHUB_WORKSPACE:/repo"
+          ghcr.io/gitleaks/gitleaks:v8.24.3
+          detect --source /repo --redact --no-banner
