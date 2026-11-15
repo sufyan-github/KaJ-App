@@ -156,7 +156,12 @@ void main() {
     tester,
   ) async {
     final gateway = _DeniedPermissionGateway();
-    await _pump(tester, PrivacySettingsScreen(permissionGateway: gateway));
+    await _pump(
+      tester,
+      PrivacySettingsScreen(permissionGateway: gateway),
+      // An older server without privacy controls.
+      overrides: [privacySettingsProvider.overrideWith((ref) async => null)],
+    );
 
     expect(find.text('যা সব সময় ব্যক্তিগত'), findsOneWidget);
     expect(find.text('ফোনের অনুমতি'), findsOneWidget);

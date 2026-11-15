@@ -1056,4 +1056,26 @@ const generatedEnglishTranslations = <String, String>{
   "দক্ষতা ও এলাকার মিল অনুযায়ী সাজানো":
       "Sorted by how well your skills and area match",
   "কোনো বার্তা নেই": "No message",
+  // P0.7: privacy controls.
+  "গোপনীয়তার পছন্দ সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।":
+      "Could not save your privacy choice. Try again.",
+  "গোপনীয়তার পছন্দ লোড করা যায়নি।": "Could not load your privacy choices.",
+  "আপনার গোপনীয়তার পছন্দ": "Your privacy choices",
+  "প্রোফাইল ছবি কে দেখবেন": "Who sees your profile photo",
+  "সবাই": "Everyone",
+  "কাজ নিশ্চিত হলে": "After a hire",
+  "কেউ না": "Nobody",
+  "পুরো নাম দেখান": "Show my full name",
+  "বন্ধ থাকলে কাজ নিশ্চিত হওয়ার আগে নাম ছোট করে দেখানো হয়, যেমন \"রহিমা খ.\"।":
+      "When off, your name is shortened before a hire, for example \"Rahima K.\"",
+  "সঠিক অবস্থান লুকান": "Hide my precise location",
+  "শুধু এলাকার নাম দেখানো হবে, মানচিত্রে বিন্দু নয়।":
+      "Only your area name is shown, not a point on the map.",
+  "কর্মী তালিকায় আমাকে দেখান": "Show me in the worker directory",
+  "বন্ধ থাকলে কর্মী তালিকা ও পরামর্শে আপনাকে দেখানো হবে না।":
+      "When off, you are left out of the worker directory and suggestions.",
+  "কে আপনাকে বার্তা দিতে পারবেন": "Who can message you",
+  "কাজের পোস্ট ও আবেদনের মাধ্যমে যে কেউ":
+      "Anyone, through a job post or application",
+  "শুধু কাজ নিশ্চিত হওয়ার পর": "Only after a hire",
 };

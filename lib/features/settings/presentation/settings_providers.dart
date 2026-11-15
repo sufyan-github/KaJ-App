@@ -18,3 +18,8 @@ final notificationPreferencesProvider =
 final accountSummaryProvider = FutureProvider<AccountSummary>(
   (ref) => ref.watch(settingsRepositoryProvider).accountSummary(),
 );
+
+/// Null when the server has no privacy controls yet.
+final privacySettingsProvider = FutureProvider<PrivacySettings?>(
+  (ref) => ref.watch(settingsRepositoryProvider).privacy(),
+);

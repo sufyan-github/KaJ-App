@@ -45,6 +45,32 @@ class SettingsRepository {
     return AccountSummary.fromJson(Map<String, dynamic>.from(user));
   });
 
+  /// The person's privacy choices, or null when this server does not offer
+  /// privacy controls yet (an older API answers 404).
+  Future<PrivacySettings?> privacy() async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/profiles/me/privacy',
+      );
+      return PrivacySettings.fromJson(_data(response.data));
+    } on DioException catch (error) {
+      if (error.response?.statusCode == 404) return null;
+      throw ErrorMapper.from(error);
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
+  /// Sends only the changed fields and returns what the server stored.
+  Future<PrivacySettings> updatePrivacy(Map<String, Object> changes) =>
+      _guard(() async {
+        final response = await _dio.put<Map<String, dynamic>>(
+          '/profiles/me/privacy',
+          data: changes,
+        );
+        return PrivacySettings.fromJson(_data(response.data));
+      });
+
   Future<void> requestAccountDeletion() => _guard(() async {
     await _dio.delete<Map<String, dynamic>>('/me');
   });

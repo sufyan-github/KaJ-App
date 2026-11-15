@@ -15,6 +15,7 @@ import '../../onboarding/domain/onboarding_state.dart';
 import '../../profile/presentation/controllers/me_provider.dart';
 import '../../profile/presentation/widgets/profile_completeness_card.dart';
 import '../domain/settings_models.dart';
+import 'privacy_controls.dart';
 import 'settings_providers.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -703,6 +704,8 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen>
     body: ListView(
       padding: const EdgeInsets.all(KSpacing.md),
       children: [
+        const PrivacyControls(),
+        const SizedBox(height: KSpacing.md),
         _InfoCard(
           icon: Icons.visibility_outlined,
           title: 'যা অন্যরা দেখতে পারেন',
