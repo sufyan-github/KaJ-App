@@ -21,7 +21,7 @@ export const copy = {
     skip: 'মূল অংশে যান',
     homeLabel: 'KAAJ হোম',
     navLabel: 'প্রধান মেনু',
-    nav: [['how', 'যেভাবে কাজ করে'], ['features', 'সুবিধা'], ['safety', 'নিরাপত্তা'], ['pricing', 'খরচ'], ['faq', 'প্রশ্নোত্তর']],
+    nav: [['pillars', 'KAAJ প্ল্যাটফর্ম'], ['how', 'যেভাবে কাজ করে'], ['features', 'সুবিধা'], ['safety', 'নিরাপত্তা'], ['pricing', 'খরচ'], ['faq', 'প্রশ্নোত্তর']],
     langSwitch: 'English', langSwitchShort: 'EN', langSwitchLabel: 'Switch to English',
     menuOpen: 'মেনু খুলুন', menuClose: 'মেনু বন্ধ করুন',
     headerDownload: 'ডাউনলোড',
@@ -36,6 +36,16 @@ export const copy = {
     heroAlt: 'কাঠের টেবিলে সাজানো হাতুড়ি, রেঞ্চ, প্লায়ার্স ও স্ক্রুড্রাইভারসহ মেরামতের যন্ত্রপাতি',
 
     workTypesTitle: 'যেসব কাজের জন্য KAAJ',
+
+    pillarsKicker: 'এক প্ল্যাটফর্ম, চারটি অংশ',
+    pillarsTitle: 'রাজশাহীর স্থানীয় অর্থনীতির জন্য KAAJ',
+    pillarsBody: 'শুরু হয়েছে এলাকার কাজ দিয়ে। এরপর আসছে দক্ষতা শেখা, ব্যবসা গড়া ও কমিউনিটিতে যুক্ত হওয়ার সুযোগ।',
+    statusLive: 'এখন চালু',
+    priceFree: 'বিনামূল্যে',
+    priceSubscription: 'দৈনিক সাবস্ক্রিপশন',
+    pillarsNote: 'KAAJ শেখা, ব্যবসা ও কমিউনিটি এখনো তৈরি হচ্ছে — বর্তমান অ্যাপে নেই। শেখা ও কমিউনিটি বিনামূল্যে থাকবে; KAAJ কাজ-এর দৈনিক সাবস্ক্রিপশন আগের মতোই থাকবে।',
+    womenSafetyTitle: 'নারীদের নিরাপত্তায় বিশেষ গুরুত্ব',
+    womenSafetyBody: 'নতুন অংশগুলোতে থাকবে নারীদের জন্য ঐচ্ছিক গ্রুপ ও ইভেন্ট, ঘরে বসে বা সুবিধামতো সময়ে কাজ খোঁজার ফিল্টার এবং যেকোনো স্ক্রিন থেকে রিপোর্ট করার সুবিধা। সবকিছুই ঐচ্ছিক, আর কোনো কাজ লিঙ্গের ভিত্তিতে সীমাবদ্ধ নয়।',
 
     howKicker: 'যেভাবে কাজ করে',
     howTitle: 'দুই পক্ষের জন্যই তিনটি সহজ ধাপ',
@@ -130,7 +140,7 @@ export const copy = {
     skip: 'Skip to main content',
     homeLabel: 'KAAJ home',
     navLabel: 'Main navigation',
-    nav: [['how', 'How it works'], ['features', 'Features'], ['safety', 'Safety'], ['pricing', 'Pricing'], ['faq', 'FAQ']],
+    nav: [['pillars', 'Platform'], ['how', 'How it works'], ['features', 'Features'], ['safety', 'Safety'], ['pricing', 'Pricing'], ['faq', 'FAQ']],
     langSwitch: 'বাংলা', langSwitchShort: 'বাং', langSwitchLabel: 'বাংলায় দেখুন',
     menuOpen: 'Open menu', menuClose: 'Close menu',
     headerDownload: 'Download',
@@ -145,6 +155,16 @@ export const copy = {
     heroAlt: 'Hammers, spanners, pliers and screwdrivers laid out on a wooden table',
 
     workTypesTitle: 'Work you can find or hire for',
+
+    pillarsKicker: 'One platform, four parts',
+    pillarsTitle: 'KAAJ for Rajshahi’s local economy',
+    pillarsBody: 'It starts with local work. Next come learning new skills, growing a business and joining your local community.',
+    statusLive: 'Live now',
+    priceFree: 'Free',
+    priceSubscription: 'Daily subscription',
+    pillarsNote: 'KAAJ Learn, Business and Community are still being built and are not in the current app. Learn and Community will be free; KAAJ Work keeps its daily subscription.',
+    womenSafetyTitle: 'Built with women’s safety in mind',
+    womenSafetyBody: 'The new parts will add opt-in women-only groups and events, filters for home-based and flexible-hours work, and reporting from any screen. Everything stays opt-in, and no type of work is restricted by gender.',
 
     howKicker: 'How it works',
     howTitle: 'Three simple steps on either side',
@@ -236,6 +256,31 @@ export const copy = {
   },
 };
 
+// The four platform pillars. Only Work is in the current release; the others must stay
+// labelled "coming soon" until they ship. price: 'subscription' | 'free' | null (not announced).
+export const pillars = [
+  {
+    key: 'work', status: 'live', price: 'subscription', link: 'how',
+    bn: { title: 'KAAJ কাজ', body: 'কাজ পোস্ট করুন, পরিচয় যাচাইকৃত কর্মী বুক করুন, অথবা কাছের কাজ খুঁজে নিজের দামে আবেদন করুন।' },
+    en: { title: 'KAAJ Work', body: 'Post a job, book an identity-verified worker, or find nearby work and apply with your own price.' },
+  },
+  {
+    key: 'learn', status: 'soon', price: 'free',
+    bn: { title: 'KAAJ শেখা', body: 'দক্ষতা প্রশিক্ষণ কোর্স, এলাকার অভিজ্ঞ মেন্টর ও শিক্ষানবিশির সুযোগ — পরিষ্কার শর্তে, শেষে প্রোফাইলে সার্টিফিকেট।' },
+    en: { title: 'KAAJ Learn', body: 'Skill courses, experienced local mentors and apprenticeships on clear terms, with a certificate on your profile when you finish.' },
+  },
+  {
+    key: 'business', status: 'soon', price: null,
+    bn: { title: 'KAAJ ব্যবসা', body: 'উদ্যোক্তাদের জন্য ব্যবসার প্রোফাইল: পণ্য ও সেবা দেখান, কর্মী খুঁজুন এবং পার্টনার বা সহযোগী খুঁজে নিন।' },
+    en: { title: 'KAAJ Business', body: 'Business profiles for local entrepreneurs: show your products and services, hire staff, and find partners to work with.' },
+  },
+  {
+    key: 'community', status: 'soon', price: 'free',
+    bn: { title: 'KAAJ কমিউনিটি', body: 'এলাকার গ্রুপ, ইভেন্ট ও ঘোষণা — একই কাজ বা আগ্রহের মানুষের সঙ্গে যুক্ত হন ও একে অপরকে সাহায্য করুন।' },
+    en: { title: 'KAAJ Community', body: 'Local groups, events and announcements — connect with people who share your work or interests, and help each other.' },
+  },
+];
+
 // Work types follow the app's launch catalogue.
 export const workTypes = [
   ['cleaning', 'পরিষ্কার করা', 'Cleaning'],
@@ -312,7 +357,8 @@ export const faqs = {
     ['কর্মীদের কেন পরিচয় যাচাই করতে হয়?', 'ক্লায়েন্টদের নিরাপত্তার জন্য কোনো কাজে আবেদনের আগে কর্মীদের ফোন নম্বর, NID ও সেলফি দিয়ে পরিচয় যাচাই করতে হয়।'],
     ['APK ইনস্টল হচ্ছে না, কী করব?', 'ফোনের Settings-এ যে অ্যাপ দিয়ে ফাইল খুলছেন (যেমন Chrome বা Files) তার জন্য “Install unknown apps” চালু করুন। ফোনে Android 8.0 বা নতুন ভার্সন এবং যথেষ্ট জায়গা আছে কিনা দেখুন। তারপরও না হলে ফাইলটি আবার ডাউনলোড করুন।'],
     ['OTP আসছে না কেন?', 'মোবাইল নেটওয়ার্ক পরীক্ষা করুন, কয়েক মিনিট অপেক্ষা করুন এবং ৬০ সেকেন্ড পর আবার OTP পাঠান। সাবস্ক্রিপশনের OTP শুধু রবি ও সার্কেল নম্বরে আসে।'],
-    ['বিনামূল্যে প্রশিক্ষণ কোর্স কবে আসবে?', 'জ্ঞান যাচাই পরীক্ষাসহ বিনামূল্যে দক্ষতা প্রশিক্ষণ কোর্স তৈরি হয়েছে, তবে v1.0.3-এ নেই। পরবর্তী আপডেটে যোগ করা হবে।'],
+    ['KAAJ শেখা, ব্যবসা ও কমিউনিটি কী?', 'কাজের পাশাপাশি KAAJ-এর তিনটি নতুন অংশ, যেগুলো এখনো তৈরি হচ্ছে এবং বর্তমান অ্যাপে নেই। শেখা ও কমিউনিটি বিনামূল্যে থাকবে। KAAJ কাজ-এর দৈনিক সাবস্ক্রিপশন আগের মতোই থাকবে। ব্যবসা অংশের বিস্তারিত চালুর আগে জানানো হবে।'],
+    ['বিনামূল্যে প্রশিক্ষণ কোর্স কবে আসবে?', 'জ্ঞান যাচাই পরীক্ষাসহ বিনামূল্যে দক্ষতা প্রশিক্ষণ কোর্স তৈরি হয়েছে, তবে v1.0.3-এ নেই। এগুলো KAAJ শেখা অংশের সঙ্গে পরবর্তী আপডেটে আসবে।'],
     ['আমার তথ্য কি নিরাপদ?', 'KAAJ সেবা চালানো ও সুরক্ষার জন্য আপনার তথ্য ব্যবহার করে। আমরা ব্যক্তিগত তথ্য বিক্রি করি না। বিস্তারিত নিচের গোপনীয়তা অংশে দেখুন।'],
     ['জরুরি অবস্থায় কী করব?', 'KAAJ কোনো জরুরি সেবা নয়। বিপদ বা দুর্ঘটনায় সরাসরি ৯৯৯-এ কল করুন।'],
   ],
@@ -324,7 +370,8 @@ export const faqs = {
     ['Why do workers verify their identity?', 'To protect clients, workers must verify their phone number, NID and a selfie before they can apply to any job.'],
     ['The APK will not install. What should I do?', 'In your phone’s Settings, turn on “Install unknown apps” for the app you are opening the file with (for example Chrome or Files). Check that your phone runs Android 8.0 or newer and has enough free space. If it still fails, download the file again.'],
     ['Why am I not receiving the OTP?', 'Check your mobile network, wait a few minutes, and request another OTP after 60 seconds. Subscription OTPs are sent to Robi and Cirkle numbers only.'],
-    ['When are the free training courses coming?', 'Free skill training courses with knowledge-test certificates have been built but are not in v1.0.3. They will arrive in a later update.'],
+    ['What are KAAJ Learn, Business and Community?', 'Three new parts of KAAJ alongside Work. They are still being built and are not in the current app. Learn and Community will be free. KAAJ Work keeps its daily subscription. We will share the details of Business before it launches.'],
+    ['When are the free training courses coming?', 'Free skill training courses with knowledge-test certificates have been built but are not in v1.0.3. They will arrive with KAAJ Learn in a later update.'],
     ['Is my information kept safe?', 'KAAJ uses your information to provide and protect the service. We do not sell personal data. See the privacy section below for details.'],
     ['What should I do in an emergency?', 'KAAJ is not an emergency service. If you are in danger or there is an accident, call 999 directly.'],
   ],

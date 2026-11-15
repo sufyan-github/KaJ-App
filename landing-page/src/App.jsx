@@ -3,14 +3,14 @@ import {
   AndroidLogo, ArrowRight, Baby, BookOpenText, Briefcase, Broom, CaretDown, Car, ChatCircleText,
   CheckCircle, ClockClockwise, Confetti, CookingPot, DownloadSimple, EnvelopeSimple, Flag, Globe,
   GraduationCap, HandHeart, Info, Keyboard, Lightning, List, MagnifyingGlass, MapPin, Package,
-  Phone, ShieldCheck, Star, Tag, Translate, Truck, UserCircle, Warning, Wrench, X,
+  Phone, ShieldCheck, Star, Storefront, Tag, Translate, Truck, UserCircle, UsersThree, Warning, Wrench, X,
 } from '@phosphor-icons/react';
 import {
   FALLBACK_RELEASE, MIN_ANDROID, PACKAGE_NAME, fetchLatestRelease, formatSizeMB,
 } from './release.js';
 import {
   SMS_SHORTCODE, SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_PHONE_INTL, comingSoonFeature, copy, faqs,
-  features, legal, meta, safetyPoints, steps, workTypes,
+  features, legal, meta, pillars, safetyPoints, steps, workTypes,
 } from './content.js';
 
 const LANG_KEY = 'kaaj-lang';
@@ -27,6 +27,8 @@ const featureIcons = {
   chat: ChatCircleText, checkin: ClockClockwise, reviews: Star, report: Flag, language: Translate,
   training: GraduationCap,
 };
+
+const pillarIcons = { work: Briefcase, learn: GraduationCap, business: Storefront, community: UsersThree };
 
 const srcSet = (name, widths) => widths.map((w) => `./assets/img/${name}-${w}.webp ${w}w`).join(', ');
 
@@ -152,6 +154,7 @@ export function App() {
     formTimer.current = window.setTimeout(() => setFormOpened(false), 8000);
   }
 
+  const navText = (id) => t.nav.find(([navId]) => navId === id)?.[1];
   const installSteps = t.installSteps.map(([title, body]) => [title, body.replace('{size}', sizeMB || '60')]);
 
   return <div className="site">
@@ -220,6 +223,39 @@ export function App() {
               return <li key={key}><Icon aria-hidden="true" />{bn ? bnLabel : enLabel}</li>;
             })}
           </ul>
+        </div>
+      </section>
+
+      <section className="section section-tint" id="pillars" aria-labelledby="pillars-title">
+        <div className="container">
+          <SectionHeader id="pillars-title" kicker={t.pillarsKicker} title={t.pillarsTitle} body={t.pillarsBody} align="center" />
+          <ul className="pillar-grid">
+            {pillars.map((pillar) => {
+              const Icon = pillarIcons[pillar.key];
+              const live = pillar.status === 'live';
+              const text = pillar[lang];
+              return <li className={`pillar-card ${live ? 'is-live' : 'is-soon'}`} key={pillar.key}>
+                <div className="pillar-top">
+                  <span className="icon-tile"><Icon weight="duotone" aria-hidden="true" /></span>
+                  <p className="pillar-tags">
+                    <span className={`pill ${live ? 'pill-live' : 'pill-neutral'}`}>{live ? t.statusLive : t.comingSoon}</span>
+                    {pillar.price === 'free' && <span className="pill pill-free">{t.priceFree}</span>}
+                    {pillar.price === 'subscription' && <span className="pill pill-outline">{t.priceSubscription}</span>}
+                  </p>
+                </div>
+                <h3>{text.title}</h3>
+                <p>{text.body}</p>
+                {pillar.link && <a className="text-link pillar-link" href={`#${pillar.link}`}>{navText(pillar.link)}<ArrowRight aria-hidden="true" /></a>}
+              </li>;
+            })}
+          </ul>
+          <div className="pillar-notes">
+            <p className="pillar-note"><Info weight="fill" aria-hidden="true" /><span>{t.pillarsNote}</span></p>
+            <div className="pillar-safety">
+              <span className="icon-tile icon-tile-sm"><HandHeart weight="duotone" aria-hidden="true" /></span>
+              <div><h3>{t.womenSafetyTitle}</h3><p>{t.womenSafetyBody}</p></div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -456,16 +492,17 @@ export function App() {
         <nav aria-label={t.footerExplore}>
           <h2>{t.footerExplore}</h2>
           <ul>
-            <li><a href="#how">{t.nav[0][1]}</a></li>
-            <li><a href="#features">{t.nav[1][1]}</a></li>
-            <li><a href="#pricing">{t.nav[3][1]}</a></li>
+            <li><a href="#pillars">{navText('pillars')}</a></li>
+            <li><a href="#how">{navText('how')}</a></li>
+            <li><a href="#features">{navText('features')}</a></li>
+            <li><a href="#pricing">{navText('pricing')}</a></li>
             <li><a href="#download">{t.footerDownload}</a></li>
           </ul>
         </nav>
         <nav aria-label={t.footerSupport}>
           <h2>{t.footerSupport}</h2>
           <ul>
-            <li><a href="#faq">{t.nav[4][1]}</a></li>
+            <li><a href="#faq">{navText('faq')}</a></li>
             <li><a href="#terms">{t.termsTitle}</a></li>
             <li><a href="#privacy">{t.privacyTitle}</a></li>
             <li><a href="#contact">{t.footerContact}</a></li>

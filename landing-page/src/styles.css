@@ -206,6 +206,47 @@ html[lang='bn'] .section-header h2 { line-height: 1.35; letter-spacing: 0; }
   .section-header { margin-bottom: 48px; }
 }
 
+/* ---------- Platform pillars ---------- */
+.pillar-grid { display: grid; gap: 16px; }
+.pillar-card {
+  display: flex; flex-direction: column; padding: 22px 20px; background: #fff;
+  border: 1px solid var(--line); border-radius: var(--radius);
+}
+.pillar-card.is-live { border: 2px solid var(--brand-ink); box-shadow: var(--shadow); }
+.pillar-card.is-soon { background: #fbfdfc; border-style: dashed; border-color: var(--line-strong); }
+.pillar-card.is-soon .icon-tile { background: #e9eeeb; color: var(--ink-2); }
+.pillar-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.pillar-tags { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.pill-free { background: var(--brand-soft); color: var(--brand-ink); }
+.pill-live { background: var(--brand-ink); color: #fff; }
+.pill-outline { background: #fff; color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--line-strong); }
+.pillar-card h3 { margin: 16px 0 6px; font-size: 1.1875rem; line-height: 1.4; }
+.pillar-card p:not(.pillar-tags) { color: var(--muted); font-size: .9375rem; }
+.pillar-card .pillar-link { margin-top: auto; padding-top: 10px; align-self: flex-start; color: var(--brand-ink); }
+.pillar-card .pillar-link:hover { color: var(--brand-ink-hover); }
+.pillar-notes { display: grid; gap: 16px; margin-top: 24px; }
+.pillar-note {
+  display: flex; gap: 10px; align-items: flex-start; padding: 14px 16px; border-radius: 12px;
+  background: #fff; border: 1px solid var(--line); color: var(--ink-2); font-size: .9375rem;
+}
+.pillar-note svg { flex: none; width: 20px; height: 20px; margin-top: 2px; color: var(--brand-ink); }
+.pillar-safety {
+  display: grid; grid-template-columns: 44px 1fr; gap: 14px; padding: 18px; border-radius: 12px;
+  background: var(--brand-soft);
+}
+.pillar-safety .icon-tile { background: #fff; }
+.pillar-safety h3 { font-size: 1.0625rem; line-height: 1.4; margin: 2px 0 4px; }
+.pillar-safety p { color: var(--ink-2); font-size: .9375rem; }
+@media (min-width: 600px) {
+  .pillar-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1100px) {
+  .pillar-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .pillar-top { flex-direction: column; }
+  .pillar-tags { justify-content: flex-start; }
+  .pillar-notes { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; gap: 20px; }
+}
+
 /* ---------- How it works ---------- */
 .journey-grid { display: grid; gap: 20px; }
 .journey-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; }
