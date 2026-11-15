@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 
 import { VerificationService } from "./verification.service";
+import { schedulersEnabled } from "../../common/scheduling/schedulers-enabled";
 
 @Injectable()
 export class VerificationPurgeRunner implements OnModuleInit, OnModuleDestroy {
@@ -15,6 +16,7 @@ export class VerificationPurgeRunner implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly verification: VerificationService) {}
 
   onModuleInit() {
+    if (!schedulersEnabled()) return;
     this.run();
     this.timer = setInterval(() => this.run(), 24 * 60 * 60_000);
     this.timer.unref();

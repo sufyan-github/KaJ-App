@@ -2,7 +2,10 @@ import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { AdminRole } from "@prisma/client";
 
-import { adminSessionInvalidError } from "./admin-auth.errors";
+import {
+  adminRoleForbiddenError,
+  adminSessionInvalidError,
+} from "./admin-auth.errors";
 import { AdminAuthService } from "./admin-auth.service";
 import { ADMIN_ROLES_KEY } from "./admin-auth.decorators";
 import { AdminActor } from "./admin-auth.types";
@@ -29,7 +32,7 @@ export class AdminSessionGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
     if (required?.length && !required.includes(actor.role)) {
-      throw adminSessionInvalidError();
+      throw adminRoleForbiddenError();
     }
     request.admin = actor;
     return true;

@@ -12,6 +12,7 @@ describe("JobsService slot confirmation", () => {
   const assignmentUpdateMany = jest.fn();
   const assignmentFindUniqueOrThrow = jest.fn();
   const jobUpdate = jest.fn();
+  const jobUpdateMany = jest.fn();
   const jobFindUniqueOrThrow = jest.fn();
   const historyCreate = jest.fn();
   const executeRaw = jest.fn();
@@ -23,7 +24,11 @@ describe("JobsService slot confirmation", () => {
       updateMany: assignmentUpdateMany,
       findUniqueOrThrow: assignmentFindUniqueOrThrow,
     },
-    job: { update: jobUpdate, findUniqueOrThrow: jobFindUniqueOrThrow },
+    job: {
+      update: jobUpdate,
+      updateMany: jobUpdateMany,
+      findUniqueOrThrow: jobFindUniqueOrThrow,
+    },
     jobStatusHistory: { create: historyCreate },
     configSetting: { findUnique: jest.fn().mockResolvedValue(null) },
     user: { findMany: jest.fn().mockResolvedValue([]) },
@@ -35,6 +40,7 @@ describe("JobsService slot confirmation", () => {
   const prisma = {
     assignment: { findUnique: assignmentFindUnique },
     $transaction: jest.fn((callback) => callback(transactionClient)),
+    ...eligibleWorkerLookups(),
   } as unknown as PrismaService;
   const availability = {
     evaluate: jest.fn(),
@@ -68,6 +74,7 @@ describe("JobsService slot confirmation", () => {
       agreed_ends_at: new Date("2026-09-03T10:00:00Z"),
     });
     jobUpdate.mockResolvedValue({});
+    jobUpdateMany.mockResolvedValue({ count: 1 });
     jobFindUniqueOrThrow.mockResolvedValue({
       id: "job-id",
       status: "CONFIRMATION_PENDING",
@@ -115,6 +122,7 @@ describe("JobsService confirmation deadline", () => {
       workers_filled: 0,
       workers_required: 1,
     });
+    const jobStatusUpdate = jest.fn().mockResolvedValue({ count: 1 });
     const transaction = {
       assignment: { updateMany: assignmentUpdateMany },
       application: { update: applicationUpdate },
@@ -128,6 +136,7 @@ describe("JobsService confirmation deadline", () => {
           workers_required: 1,
         }),
         update: jobUpdate,
+        updateMany: jobStatusUpdate,
       },
       jobStatusHistory: { create: jest.fn().mockResolvedValue({}) },
     };
@@ -166,11 +175,10 @@ describe("JobsService confirmation deadline", () => {
         data: expect.objectContaining({ status: "DECLINED" }),
       }),
     );
-    expect(jobUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: { status: "APPLICATIONS_OPEN" },
-      }),
-    );
+    expect(jobStatusUpdate).toHaveBeenCalledWith({
+      where: { id: "job-id", status: "CONFIRMATION_PENDING" },
+      data: { status: "APPLICATIONS_OPEN" },
+    });
     expect(availability.evaluate).not.toHaveBeenCalled();
   });
 });
@@ -244,16 +252,16 @@ describe("JobsService application identity gate", () => {
       evaluate: jest.fn(),
     } as unknown as AvailabilityService;
     const prisma = {
+      ...eligibleWorkerLookups(TrustLevel.PHONE),
       job: { findFirst: jest.fn().mockResolvedValue(job) },
-      user: {
-        findFirst: jest.fn().mockResolvedValue({
-          status: UserStatus.ACTIVE,
-          reverification_required: false,
-          profile: { trust_level: TrustLevel.PHONE },
-        }),
-      },
     } as unknown as PrismaService;
-    const service = new JobsService(prisma, availability);
+    const service = new JobsService(
+      prisma,
+      availability,
+      undefined,
+      undefined,
+      fixedClock,
+    );
 
     await expect(
       service.apply("worker-id", job.id, input),
@@ -266,16 +274,16 @@ describe("JobsService application identity gate", () => {
       evaluate: jest.fn().mockResolvedValue({ isAvailable: false }),
     } as unknown as AvailabilityService;
     const prisma = {
+      ...eligibleWorkerLookups(TrustLevel.IDENTITY),
       job: { findFirst: jest.fn().mockResolvedValue(job) },
-      user: {
-        findFirst: jest.fn().mockResolvedValue({
-          status: UserStatus.ACTIVE,
-          reverification_required: false,
-          profile: { trust_level: TrustLevel.IDENTITY },
-        }),
-      },
     } as unknown as PrismaService;
-    const service = new JobsService(prisma, availability);
+    const service = new JobsService(
+      prisma,
+      availability,
+      undefined,
+      undefined,
+      fixedClock,
+    );
 
     await expect(
       service.apply("worker-id", job.id, input),
@@ -283,3 +291,28 @@ describe("JobsService application identity gate", () => {
     expect(availability.evaluate).toHaveBeenCalledTimes(1);
   });
 });
+
+/** Before the identity-gate fixtures' slots (7 Sep 2026). */
+const fixedClock = { now: () => new Date("2026-09-01T00:00:00.000Z") };
+
+/** Lookups made by the shared worker-eligibility check. */
+function eligibleWorkerLookups(trustLevel: TrustLevel = TrustLevel.IDENTITY) {
+  return {
+    user: {
+      findFirst: jest.fn().mockResolvedValue({
+        status: UserStatus.ACTIVE,
+        reverification_required: false,
+        role_modes: ["WORKER"],
+        profile: { trust_level: trustLevel, birth_year: null },
+      }),
+    },
+    category: { findUnique: jest.fn().mockResolvedValue(null) },
+    userBlock: { findFirst: jest.fn().mockResolvedValue(null) },
+    job: {
+      findUniqueOrThrow: jest.fn().mockResolvedValue({
+        poster_user_id: "poster-id",
+        category_id: "category-id",
+      }),
+    },
+  };
+}

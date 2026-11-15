@@ -1,11 +1,16 @@
 import { createHash } from "node:crypto";
 
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable, Optional } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AdminRole, Prisma } from "@prisma/client";
 import { compare } from "bcryptjs";
 
+import { RateLimitException } from "../../common/errors/rate-limit.exception";
 import { PrismaService } from "../../infra/prisma/prisma.service";
+import {
+  AUTH_RATE_LIMITER,
+  type AuthRateLimiter,
+} from "../auth/auth-rate-limiter";
 import {
   adminSessionInvalidError,
   invalidAdminChallengeError,
@@ -34,6 +39,9 @@ export class AdminAuthService {
   constructor(
     private readonly prisma: PrismaService,
     config: ConfigService,
+    @Optional()
+    @Inject(AUTH_RATE_LIMITER)
+    private readonly limiter?: AuthRateLimiter,
   ) {
     this.sessionSecret =
       config.get<string>("ADMIN_SESSION_SECRET") ||
@@ -47,11 +55,42 @@ export class AdminAuthService {
         .digest("hex");
   }
 
+  private async limitLogin(
+    scope: "admin-login-email" | "admin-login-ip",
+    value: string,
+    limit: number,
+  ) {
+    if (!this.limiter) return;
+    const result = await this.limiter.consume({
+      scope,
+      key: createHash("sha256").update(value).digest("hex"),
+      limit,
+      windowSeconds: 900,
+    });
+    if (!result.allowed)
+      throw new RateLimitException(
+        {
+          action: null,
+          code: "ADMIN_LOGIN_RATE_LIMITED",
+          details: [],
+          field: null,
+          message: "Too many sign-in attempts. Try again later.",
+          messageKey: "error.admin.login_rate_limited",
+          retryable: true,
+        },
+        result.retryAfterSeconds,
+      );
+  }
+
   async login(
     email: string,
     password: string,
     context: AdminRequestContext,
   ): Promise<{ challengeToken: string; expiresIn: number }> {
+    // Counted before the password check so guesses are limited whether or not
+    // they succeed, per account and per address.
+    await this.limitLogin("admin-login-email", email.trim().toLowerCase(), 5);
+    await this.limitLogin("admin-login-ip", context.ip ?? "unknown", 20);
     const user = await this.prisma.user.findUnique({
       where: { email },
       include: { admin_credential: true },
@@ -123,13 +162,23 @@ export class AdminAuthService {
       !challenge ||
       challenge.consumed_at ||
       challenge.expires_at.getTime() <= Date.now() ||
-      challenge.attempts >= MAX_TOTP_ATTEMPTS ||
       !challenge.user.is_admin ||
       challenge.user.status !== "ACTIVE" ||
       !challenge.user.admin_credential
     ) {
       throw invalidAdminChallengeError();
     }
+    // Reserve an attempt atomically before checking the code. Checking the
+    // count and incrementing later let parallel guesses exceed the limit.
+    const reserved = await this.prisma.adminLoginChallenge.updateMany({
+      where: {
+        id: challenge.id,
+        consumed_at: null,
+        attempts: { lt: MAX_TOTP_ATTEMPTS },
+      },
+      data: { attempts: { increment: 1 } },
+    });
+    if (reserved.count !== 1) throw invalidAdminChallengeError();
     const credential = challenge.user.admin_credential;
     const secret = decryptTotpSecret(
       credential.totp_secret_ciphertext,
@@ -141,10 +190,6 @@ export class AdminAuthService {
       (credential.last_totp_counter ?? -1n) >= BigInt(counter)
     ) {
       await this.prisma.$transaction([
-        this.prisma.adminLoginChallenge.update({
-          where: { id: challenge.id },
-          data: { attempts: { increment: 1 } },
-        }),
         this.prisma.auditLog.create({
           data: this.auditData(
             challenge.user_id,

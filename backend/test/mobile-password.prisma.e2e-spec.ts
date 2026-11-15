@@ -371,6 +371,23 @@ databaseDescribe(
       expect(sms.verifyOtp).toHaveBeenCalledTimes(1);
     });
 
+    it("answers unknown numbers with the same id format and limits as real accounts", async () => {
+      limiter.consume.mockClear();
+      const unknown = await request(app.getHttpServer())
+        .post("/api/v1/auth/password/recovery/request")
+        .send({ phone: "+8801810009193", subscriptionConsent: true })
+        .expect(201);
+      const known = await recovery();
+      // UUID version nibble: real challenges are v7, so the stand-in must be too.
+      expect(unknown.body.data.challengeId.charAt(14)).toBe("7");
+      expect(known.charAt(14)).toBe("7");
+      const scopes = (
+        limiter.consume.mock.calls as unknown as Array<[{ scope: string }]>
+      ).map(([input]) => input.scope);
+      for (const scope of ["otp-phone", "otp-ip", "otp-cooldown"])
+        expect(scopes.filter((item: string) => item === scope)).toHaveLength(2);
+    });
+
     it("returns generic credentials errors, enforces limits and never creates unknown accounts", async () => {
       const unknown = await login(DEVICE, PASSWORD, "+8801810009192").expect(
         401,

@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 
 import { ReviewsService } from "./reviews.service";
+import { schedulersEnabled } from "../../common/scheduling/schedulers-enabled";
 
 @Injectable()
 export class ReputationRunner implements OnModuleInit, OnModuleDestroy {
@@ -15,6 +16,7 @@ export class ReputationRunner implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly reviews: ReviewsService) {}
 
   onModuleInit() {
+    if (!schedulersEnabled()) return;
     this.run();
     this.timer = setInterval(() => this.run(), 24 * 60 * 60_000);
     this.timer.unref();

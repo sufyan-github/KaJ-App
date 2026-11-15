@@ -5,9 +5,22 @@ import { PrismaService } from "../src/infra/prisma/prisma.service";
 import { NotificationsService } from "../src/modules/notifications/notifications.service";
 
 describe("NotificationsService", () => {
+  it("counts every unread notification, not only those in the latest 100", async () => {
+    const count = jest.fn().mockResolvedValue(150);
+    const prisma = {
+      notification: { count, findMany: jest.fn().mockResolvedValue([]) },
+    } as unknown as PrismaService;
+    const result = await new NotificationsService(prisma).list("user-1");
+    expect(result.unreadCount).toBe(150);
+    expect(count).toHaveBeenCalledWith({
+      where: { user_id: "user-1", read_at: null },
+    });
+  });
+
   it("returns bilingual copy, unread count, and an exact destination for legacy rows", async () => {
     const prisma = {
       notification: {
+        count: jest.fn().mockResolvedValue(2),
         findMany: jest.fn().mockResolvedValue([
           {
             id: "notification-1",

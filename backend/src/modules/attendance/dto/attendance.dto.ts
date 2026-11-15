@@ -13,21 +13,24 @@ import {
 
 import { RoundTo } from "../../../common/validation/round-to.decorator";
 
-export class CheckInDto {
-  @RoundTo(7)
-  @IsNumber()
+const FINITE = { allowNaN: false, allowInfinity: false } as const;
+
+/** Fields shared by check-in and check-out (stored as decimal(9,6) / (8,2)). */
+export class AttendanceLocationDto {
+  @RoundTo(6)
+  @IsNumber(FINITE)
   @Min(-90)
   @Max(90)
   lat!: number;
 
-  @RoundTo(7)
-  @IsNumber()
+  @RoundTo(6)
+  @IsNumber(FINITE)
   @Min(-180)
   @Max(180)
   lng!: number;
 
   @RoundTo(2)
-  @IsNumber()
+  @IsNumber(FINITE)
   @Min(0)
   @Max(10_000)
   accuracyM!: number;
@@ -43,56 +46,23 @@ export class CheckInDto {
   @IsOptional()
   @IsDateString()
   capturedAt?: string;
-
-  @IsOptional()
-  @IsUUID()
-  photoDocumentId?: string;
 
   @IsOptional()
   @IsBoolean()
   mockLocation?: boolean;
 }
 
-export class CheckOutDto {
-  @RoundTo(7)
-  @IsNumber()
-  @Min(-90)
-  @Max(90)
-  lat!: number;
-
-  @RoundTo(7)
-  @IsNumber()
-  @Min(-180)
-  @Max(180)
-  lng!: number;
-
-  @RoundTo(2)
-  @IsNumber()
-  @Min(0)
-  @Max(10_000)
-  accuracyM!: number;
-
-  @IsBoolean()
-  consentGranted!: boolean;
-
-  @IsString()
-  @MinLength(3)
-  @MaxLength(80)
-  consentVersion!: string;
-
+export class CheckInDto extends AttendanceLocationDto {
   @IsOptional()
-  @IsDateString()
-  capturedAt?: string;
+  @IsUUID()
+  photoDocumentId?: string;
+}
 
+export class CheckOutDto extends AttendanceLocationDto {
   @IsOptional()
   @IsString()
   @MaxLength(1000)
   notes?: string;
-
-  // Sent by app versions up to 1.0.2; recorded for review like check-in.
-  @IsOptional()
-  @IsBoolean()
-  mockLocation?: boolean;
 }
 
 export class AttendanceOverrideDto {

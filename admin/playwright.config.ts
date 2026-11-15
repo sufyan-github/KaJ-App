@@ -12,7 +12,10 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: "node ./node_modules/next/dist/bin/next dev -p 3200",
+    // A production build: `next dev` rewrites the tracked next-env.d.ts and
+    // tsconfig.json, which made every e2e run leave the worktree dirty.
+    command:
+      "node ./node_modules/next/dist/bin/next build && node ./node_modules/next/dist/bin/next start -p 3200",
     url: "http://127.0.0.1:3200",
     reuseExistingServer: true,
     timeout: 120_000,

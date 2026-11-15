@@ -44,3 +44,13 @@ export const adminSessionInvalidError = () =>
     "Your admin session has expired. Sign in again.",
     HttpStatus.UNAUTHORIZED,
   );
+/**
+ * A valid session whose role doesn't cover this action. 403, not 401: the
+ * console treats 401 as "signed out" and deleted the session cookie.
+ */
+export const adminRoleForbiddenError = () =>
+  error(
+    "ADMIN_ROLE_FORBIDDEN",
+    "Your role does not allow this action.",
+    HttpStatus.FORBIDDEN,
+  );

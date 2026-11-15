@@ -87,8 +87,11 @@ export class JobsController {
 
   @Get("jobs/:id/occurrences")
   @Policy(Policies.authenticated())
-  occurrences(@Param("id", new ParseUUIDPipe()) id: string) {
-    return this.recurrence.list(id);
+  occurrences(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+  ) {
+    return this.recurrence.list(claims.sub, id);
   }
 
   @Get("occurrences/mine")

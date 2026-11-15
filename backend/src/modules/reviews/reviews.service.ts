@@ -18,7 +18,8 @@ import { PrismaService } from "../../infra/prisma/prisma.service";
 import { JobStateMachine } from "../jobs/state-machine/job-state.machine";
 import { NotificationsService } from "../notifications/notifications.service";
 import { CreateReviewDto } from "./dto/create-review.dto";
-import { eligibleBadgeSlugs } from "./badge.rules";
+import { hasTrust } from "../verification/trust-level";
+import { eligibleBadgeSlugs, RULE_BADGE_SLUGS } from "./badge.rules";
 import { rateBps, rawRating, workerReliability } from "./reputation.calculator";
 
 const REVIEW_WINDOW_MS = 7 * 24 * 60 * 60_000;
@@ -295,6 +296,7 @@ export class ReviewsService {
         }),
       );
       for (const [slug, badge] of badgeBySlug) {
+        if (!RULE_BADGE_SLUGS.has(slug)) continue; // staff-granted badges
         const current = user.badges.find((item) => item.badge_id === badge.id);
         const shouldHave = eligible.has(slug);
         if (shouldHave && current?.revoked_at) {

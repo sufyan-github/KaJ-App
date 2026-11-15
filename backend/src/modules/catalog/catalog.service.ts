@@ -5,12 +5,6 @@ import { PrismaService } from "../../infra/prisma/prisma.service";
 import { RedisService } from "../../infra/redis/redis.service";
 import { buildCategoryTree } from "./catalog.tree";
 import {
-  CreateLocationDto,
-  UpdateCategoryDto,
-  UpdateLocationDto,
-  UpdateSkillDto,
-} from "./dto/catalog-admin.dto";
-import {
   CategoryNode,
   CategoryRecord,
   LocationRecord,
@@ -124,61 +118,6 @@ export class CatalogService {
     } catch {
       // A failed cache cannot make a committed admin mutation fail.
     }
-  }
-
-  async updateCategory(id: string, input: UpdateCategoryDto) {
-    const result = await this.prisma.category.update({
-      where: { id },
-      data: {
-        name_en: input.nameEn,
-        name_bn: input.nameBn,
-        icon: input.icon,
-        sort_order: input.sortOrder,
-        is_active: input.isActive,
-      },
-    });
-    await this.invalidateCache();
-    return result;
-  }
-
-  async updateSkill(id: string, input: UpdateSkillDto) {
-    const result = await this.prisma.skill.update({
-      where: { id },
-      data: {
-        name_en: input.nameEn,
-        name_bn: input.nameBn,
-        category_id: input.categoryId,
-        is_active: input.isActive,
-      },
-    });
-    await this.invalidateCache();
-    return result;
-  }
-
-  async createLocation(input: CreateLocationDto) {
-    const result = await this.prisma.location.create({
-      data: {
-        parent_id: input.parentId,
-        type: input.type,
-        name_en: input.nameEn,
-        name_bn: input.nameBn,
-      },
-    });
-    await this.invalidateCache();
-    return result;
-  }
-
-  async updateLocation(id: string, input: UpdateLocationDto) {
-    const result = await this.prisma.location.update({
-      where: { id },
-      data: {
-        name_en: input.nameEn,
-        name_bn: input.nameBn,
-        is_active: input.isActive,
-      },
-    });
-    await this.invalidateCache();
-    return result;
   }
 
   private async loadSkills(

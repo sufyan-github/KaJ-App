@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 
 import { JobsService } from "./jobs.service";
+import { schedulersEnabled } from "../../common/scheduling/schedulers-enabled";
 
 @Injectable()
 export class AssignmentLifecycleRunner
@@ -17,6 +18,7 @@ export class AssignmentLifecycleRunner
   constructor(private readonly jobs: JobsService) {}
 
   onModuleInit() {
+    if (!schedulersEnabled()) return;
     this.run();
     this.timer = setInterval(() => this.run(), 60_000);
     this.timer.unref();

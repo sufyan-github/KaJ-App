@@ -1,9 +1,11 @@
 import { backendRequest, proxyJson } from "@/lib/backend";
 
 export async function POST(request: Request) {
-  const response = await backendRequest("/admin/auth/login", {
-    method: "POST",
-    body: JSON.stringify(await request.json()),
-  });
+  const response = await backendRequest(
+    "/admin/auth/login",
+    { method: "POST", body: JSON.stringify(await request.json()) },
+    undefined,
+    request,
+  );
   return proxyJson(response);
 }

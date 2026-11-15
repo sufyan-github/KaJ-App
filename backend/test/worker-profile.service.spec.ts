@@ -8,12 +8,11 @@ import { UsersService } from "../src/modules/users/users.service";
 describe("worker skills and rates", () => {
   const skillCount = jest.fn();
   const deleteMany = jest.fn();
-  const createMany = jest.fn();
+  const upsert = jest.fn();
   const findMany = jest.fn();
-  const previousFindMany = jest.fn();
   const transaction = {
     skill: { count: skillCount },
-    userSkill: { createMany, deleteMany, findMany: previousFindMany },
+    userSkill: { upsert, deleteMany },
   };
   const prisma = {
     $transaction: jest.fn((callback) => callback(transaction)),
@@ -25,8 +24,7 @@ describe("worker skills and rates", () => {
     jest.clearAllMocks();
     skillCount.mockResolvedValue(1);
     deleteMany.mockResolvedValue({ count: 0 });
-    createMany.mockResolvedValue({ count: 1 });
-    previousFindMany.mockResolvedValue([]);
+    upsert.mockResolvedValue({});
     findMany.mockResolvedValue([
       {
         level: SkillLevel.ADVANCED,
@@ -42,23 +40,25 @@ describe("worker skills and rates", () => {
     ]);
   });
 
-  it("atomically replaces skills and returns both localized names", async () => {
+  it("upserts kept skills, deletes only dropped ones and returns both localized names", async () => {
     const skillId = "018f4f6f-13e8-7d9a-8c2b-6b6a9f62f601";
     const result = await service.updateWorkerSkills("user-id", [
       { skillId, level: SkillLevel.ADVANCED, years: 3.5 },
     ]);
 
-    expect(deleteMany).toHaveBeenCalledWith({ where: { user_id: "user-id" } });
-    expect(createMany).toHaveBeenCalledWith({
-      data: [
-        {
-          user_id: "user-id",
-          skill_id: skillId,
-          level: SkillLevel.ADVANCED,
-          years: 3.5,
-          has_prior_training: false,
-        },
-      ],
+    expect(deleteMany).toHaveBeenCalledWith({
+      where: { user_id: "user-id", skill_id: { notIn: [skillId] } },
+    });
+    expect(upsert).toHaveBeenCalledWith({
+      where: { user_id_skill_id: { user_id: "user-id", skill_id: skillId } },
+      update: { level: SkillLevel.ADVANCED, years: 3.5 },
+      create: {
+        user_id: "user-id",
+        skill_id: skillId,
+        level: SkillLevel.ADVANCED,
+        years: 3.5,
+        has_prior_training: false,
+      },
     });
     expect(result[0]).toMatchObject({
       nameEn: "Electrician",
@@ -69,7 +69,6 @@ describe("worker skills and rates", () => {
   it("keeps a stored prior-training answer when the client omits it", async () => {
     const skillId = "018f4f6f-13e8-7d9a-8c2b-6b6a9f62f601";
     const otherId = "018f4f6f-13e8-7d9a-8c2b-6b6a9f62f602";
-    previousFindMany.mockResolvedValue([{ skill_id: skillId }]);
     skillCount.mockResolvedValue(2);
 
     await service.updateWorkerSkills("user-id", [
@@ -77,10 +76,16 @@ describe("worker skills and rates", () => {
       { skillId: otherId, level: SkillLevel.BEGINNER, hasPriorTraining: true },
     ]);
 
-    expect(createMany.mock.calls[0][0].data).toEqual([
-      expect.objectContaining({ skill_id: skillId, has_prior_training: true }),
-      expect.objectContaining({ skill_id: otherId, has_prior_training: true }),
-    ]);
+    // Omitted: the update leaves the stored answer alone.
+    expect(upsert.mock.calls[0][0].update).not.toHaveProperty(
+      "has_prior_training",
+    );
+    expect(upsert.mock.calls[1][0].update).toMatchObject({
+      has_prior_training: true,
+    });
+    expect(upsert.mock.calls[1][0].create).toMatchObject({
+      has_prior_training: true,
+    });
   });
 
   it("rejects an unknown or inactive skill before replacing the set", async () => {

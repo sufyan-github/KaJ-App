@@ -59,7 +59,31 @@ const transitions = new Map<TransitionKey, readonly JobActorType[]>([
   [key(JobStatus.PAYMENT_RECORDED, JobStatus.REVIEWED), [JobActorType.SYSTEM]],
   [key(JobStatus.PUBLISHED, JobStatus.EXPIRED), [JobActorType.SYSTEM]],
   [key(JobStatus.APPLICATIONS_OPEN, JobStatus.EXPIRED), [JobActorType.SYSTEM]],
+  // Disputes can be opened, or a resolution appealed, from these states. These
+  // were previously written directly by the disputes service.
+  ...[
+    JobStatus.IN_PROGRESS,
+    JobStatus.SUBMITTED,
+    JobStatus.COMPLETED,
+    JobStatus.PAYMENT_RECORDED,
+    JobStatus.REVIEWED,
+    JobStatus.CANCELLED_BY_CUSTOMER,
+    JobStatus.CANCELLED_BY_WORKER,
+  ].map(
+    (from) =>
+      [
+        key(from, JobStatus.DISPUTED),
+        [JobActorType.POSTER, JobActorType.WORKER],
+      ] as const,
+  ),
+  // A customer may close a job whose worker never arrived (service-guarded:
+  // no check-in, after the agreed start plus grace; reviewed by an admin).
+  [
+    key(JobStatus.IN_PROGRESS, JobStatus.CANCELLED_BY_CUSTOMER),
+    [JobActorType.POSTER],
+  ],
   [key(JobStatus.DISPUTED, JobStatus.COMPLETED), [JobActorType.ADMIN]],
+  [key(JobStatus.DISPUTED, JobStatus.PAYMENT_RECORDED), [JobActorType.ADMIN]],
   [
     key(JobStatus.DISPUTED, JobStatus.CANCELLED_BY_CUSTOMER),
     [JobActorType.ADMIN],
@@ -84,6 +108,17 @@ const preProgress = new Set<JobStatus>([
 export class InvalidJobTransitionError extends ConflictException {
   constructor(from: JobStatus, to: JobStatus, actor: JobActorType) {
     super(`Invalid job transition: ${from} -> ${to} by ${actor}.`);
+  }
+}
+
+/** Another request changed the job's status first. */
+export class JobStateChangedError extends ConflictException {
+  constructor() {
+    super({
+      code: "JOB_STATE_CHANGED",
+      message: "This job was just updated. Refresh and try again.",
+      messageKey: "error.job.state_changed",
+    });
   }
 }
 
@@ -146,9 +181,16 @@ export class JobStateMachine {
         );
       }
     }
-    const updated = await transaction.job.update({
-      where: { id: job.id },
+    // Optimistic check: only move the job if it is still in the status the
+    // caller validated. A concurrent request that already moved it makes this
+    // update match nothing, so exactly one of them wins.
+    const { count } = await transaction.job.updateMany({
+      where: { id: job.id, status: job.status },
       data: { status: to },
+    });
+    if (count !== 1) throw new JobStateChangedError();
+    const updated = await transaction.job.findUniqueOrThrow({
+      where: { id: job.id },
     });
     await transaction.jobStatusHistory.create({
       data: {

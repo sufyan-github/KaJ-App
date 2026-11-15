@@ -63,6 +63,11 @@ export class ReportQueueQueryDto {
   @Min(1)
   @Max(100)
   limit = 50;
+
+  /** The last item id of the previous page (see `nextCursor`). */
+  @IsOptional()
+  @IsUUID()
+  cursor?: string;
 }
 
 export class ModerationDecisionDto {

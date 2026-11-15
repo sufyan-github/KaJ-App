@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 
 import { DisputesService } from "./disputes.service";
+import { schedulersEnabled } from "../../common/scheduling/schedulers-enabled";
 
 @Injectable()
 export class DisputeLifecycleRunner implements OnModuleInit, OnModuleDestroy {
@@ -15,6 +16,7 @@ export class DisputeLifecycleRunner implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly disputes: DisputesService) {}
 
   onModuleInit() {
+    if (!schedulersEnabled()) return;
     this.run();
     this.timer = setInterval(() => this.run(), 60_000);
     this.timer.unref();

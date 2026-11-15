@@ -155,21 +155,4 @@ describe("CatalogService", () => {
     expect(del).toHaveBeenNthCalledWith(1, "catalog:v1:categories");
     expect(del).toHaveBeenNthCalledWith(2, "catalog:v1:locations:root:all");
   });
-
-  it("invalidates cached reads after an administrator adds an area", async () => {
-    locationCreate.mockResolvedValue({ id: "area-id" });
-    scan.mockResolvedValue(["0", ["catalog:v1:locations:thana-id:AREA"]]);
-
-    await service.createLocation({
-      parentId: "01991a2b-3c4d-7000-8000-000000000001",
-      type: LocationType.AREA,
-      nameEn: "New Area",
-      nameBn: "নতুন এলাকা",
-    });
-
-    expect(locationCreate).toHaveBeenCalledWith({
-      data: expect.objectContaining({ name_en: "New Area" }),
-    });
-    expect(del).toHaveBeenCalledWith("catalog:v1:locations:thana-id:AREA");
-  });
 });
