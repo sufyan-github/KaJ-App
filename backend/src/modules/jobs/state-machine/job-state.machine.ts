@@ -105,6 +105,54 @@ const preProgress = new Set<JobStatus>([
   JobStatus.CHECKED_IN,
 ]);
 
+// Statuses before any worker was assigned. A job suspended from one of these
+// can also be closed (expired or cancelled) instead of restored.
+const neverAssigned = new Set<JobStatus>([
+  JobStatus.DRAFT,
+  JobStatus.PUBLISHED,
+  JobStatus.APPLICATIONS_OPEN,
+]);
+
+/** Optional facts some admin transitions depend on. */
+export interface JobTransitionContext {
+  /** For a SUSPENDED job: the status it had when it was suspended. */
+  suspendedFrom?: JobStatus | null;
+}
+
+/**
+ * Where an admin may force a job from its current status:
+ * - anything the system itself may do from that status (unsticking a job a
+ *   runner should have moved), or SUSPENDED;
+ * - SUSPENDED is left by restoring the status it was suspended from, or, if
+ *   no worker was ever assigned, by expiring or cancelling it;
+ * - a DISPUTED job is settled through dispute resolution (which also settles
+ *   the assignment and payment), so it can only be suspended here.
+ */
+export function adminForceTargets(
+  from: JobStatus,
+  context: JobTransitionContext = {},
+): JobStatus[] {
+  if (from === JobStatus.SUSPENDED) {
+    const targets = new Set<JobStatus>();
+    const previous = context.suspendedFrom;
+    if (previous && previous !== JobStatus.SUSPENDED) targets.add(previous);
+    if (!previous || neverAssigned.has(previous)) {
+      targets.add(JobStatus.EXPIRED);
+      targets.add(JobStatus.CANCELLED_BY_CUSTOMER);
+    }
+    return [...targets];
+  }
+  if (from === JobStatus.DISPUTED) return [JobStatus.SUSPENDED];
+  const targets = new Set<JobStatus>();
+  for (const [transition, actors] of transitions) {
+    const [source, target] = transition.split("->") as [JobStatus, JobStatus];
+    if (source === from && actors.includes(JobActorType.SYSTEM))
+      targets.add(target);
+  }
+  targets.add(JobStatus.SUSPENDED);
+  return [...targets];
+}
+
 export class InvalidJobTransitionError extends ConflictException {
   constructor(from: JobStatus, to: JobStatus, actor: JobActorType) {
     super(`Invalid job transition: ${from} -> ${to} by ${actor}.`);
@@ -139,8 +187,20 @@ export class JobStateMachine {
     });
   }
 
-  assertAllowed(from: JobStatus, to: JobStatus, actor: JobActorType): void {
+  assertAllowed(
+    from: JobStatus,
+    to: JobStatus,
+    actor: JobActorType,
+    context: JobTransitionContext = {},
+  ): void {
     if (to === JobStatus.SUSPENDED && actor === JobActorType.ADMIN) return;
+    if (
+      actor === JobActorType.ADMIN &&
+      from !== JobStatus.DISPUTED &&
+      adminForceTargets(from, context).includes(to)
+    ) {
+      return;
+    }
     if (
       to === JobStatus.CANCELLED_BY_CUSTOMER &&
       actor === JobActorType.POSTER &&
@@ -166,8 +226,9 @@ export class JobStateMachine {
     to: JobStatus,
     actor: JobTransitionActor,
     reason?: string,
+    context: JobTransitionContext = {},
   ) {
-    this.assertAllowed(job.status, to, actor.type);
+    this.assertAllowed(job.status, to, actor.type, context);
     if (job.workers_filled > job.workers_required) {
       throw new ConflictException("A job cannot overfill its worker slots.");
     }

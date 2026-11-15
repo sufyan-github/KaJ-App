@@ -500,6 +500,7 @@ model RefreshToken {
 
   @@index([user_id, family_id])
   @@index([expires_at])
+  @@index([device_id])
   @@map("refresh_tokens")
 }
 
@@ -772,6 +773,7 @@ model Job {
   @@index([location_id, status])
   @@index([poster_user_id, status])
   @@index([parent_job_id])
+  @@index([subcategory_id])
   @@map("jobs")
 }
 
@@ -1227,6 +1229,7 @@ model Review {
   @@unique([assignment_id, reviewer_user_id])
   @@index([reviewee_user_id, is_visible, created_at(sort: Desc)])
   @@index([job_id])
+  @@index([reviewer_user_id])
   @@map("reviews")
 }
 
@@ -1334,6 +1337,7 @@ model VerificationRequest {
 
   @@index([user_id, kind, status])
   @@index([status, created_at])
+  @@index([reviewer_user_id])
   @@map("verification_requests")
 }
 
@@ -1417,6 +1421,7 @@ model Dispute {
   @@unique([assignment_id])
   @@index([job_id, status])
   @@index([opened_by_user_id])
+  @@index([resolved_by])
   @@map("disputes")
 }
 
@@ -1457,6 +1462,8 @@ model DisputeAppeal {
 
   @@index([status, created_at])
   @@index([assigned_admin_id])
+  @@index([opened_by_user_id])
+  @@index([resolved_by])
   @@map("dispute_appeals")
 }
 
@@ -1483,6 +1490,7 @@ model Report {
   @@index([status, created_at])
   @@index([subject_user_id, status, created_at])
   @@index([reviewer_user_id])
+  @@index([reporter_user_id, created_at(sort: Desc)])
   @@map("reports")
 }
 

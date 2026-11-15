@@ -1,11 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import {
-  JobType,
-  PaymentModel,
-  Prisma,
-  RoleMode,
-  UserStatus,
-} from "@prisma/client";
+import { JobType, PaymentModel, Prisma } from "@prisma/client";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import {
@@ -91,11 +85,12 @@ export class MatchingService {
     const requiredSkillIds = job.skills.map((item) => item.skill_id);
     const excluded = [job.poster_user_id, ...excludeUserIds];
     let workers = await this.workers(
+      job.id,
       excluded,
       requiredSkillIds.length ? requiredSkillIds : undefined,
     );
     if (workers.length === 0 && requiredSkillIds.length)
-      workers = await this.workers(excluded);
+      workers = await this.workers(job.id, excluded);
     const weights = await this.weights();
     return workers
       .filter(
@@ -110,19 +105,66 @@ export class MatchingService {
       .slice(0, 20);
   }
 
-  private workers(excludeUserIds: string[], skillIds?: string[]) {
-    return this.prisma.user.findMany({
-      where: {
-        id: { notIn: excludeUserIds },
-        status: UserStatus.ACTIVE,
-        deleted_at: null,
-        role_modes: { has: RoleMode.WORKER },
-        worker_profile: { isNot: null },
-        skills: skillIds ? { some: { skill_id: { in: skillIds } } } : undefined,
-      },
+  /**
+   * The workers worth scoring, in a deterministic order: nearest to the job
+   * first (the worker's own point, else their area centre, against the job's
+   * pin, else its area centre; unknown distances last), then rating,
+   * completed jobs and id. Previously it took 100 workers in no order, so with
+   * more than 100 workers the suggestions were an arbitrary subset.
+   */
+  private async workers(
+    jobId: string,
+    excludeUserIds: string[],
+    skillIds?: string[],
+  ) {
+    const candidates = await this.prisma.$queryRaw<Array<{ id: string }>>`
+      WITH site AS (
+        SELECT COALESCE(j.lat, l.lat)::float8 AS lat,
+               COALESCE(j.lng, l.lng)::float8 AS lng
+        FROM jobs j
+        JOIN locations l ON l.id = j.location_id
+        WHERE j.id = ${jobId}::uuid
+      )
+      SELECT u.id
+      FROM users u
+      JOIN worker_profiles wp ON wp.user_id = u.id
+      LEFT JOIN profiles p ON p.user_id = u.id
+      LEFT JOIN locations pl ON pl.id = p.primary_location_id
+      LEFT JOIN site ON true
+      WHERE u.status = 'ACTIVE'
+        AND u.deleted_at IS NULL
+        AND 'WORKER' = ANY (u.role_modes::text[])
+        AND NOT (u.id = ANY (${excludeUserIds}::uuid[]))
+        AND (
+          ${skillIds ?? null}::uuid[] IS NULL
+          OR EXISTS (
+            SELECT 1 FROM user_skills us
+            WHERE us.user_id = u.id
+              AND us.skill_id = ANY (${skillIds ?? null}::uuid[])
+          )
+        )
+      ORDER BY
+        CASE
+          WHEN site.lat IS NULL OR COALESCE(p.lat, pl.lat) IS NULL THEN NULL
+          ELSE earth_distance(
+            ll_to_earth(site.lat, site.lng),
+            ll_to_earth(
+              COALESCE(p.lat, pl.lat)::float8,
+              COALESCE(p.lng, pl.lng)::float8
+            )
+          )
+        END ASC NULLS LAST,
+        wp.rating_avg DESC,
+        wp.completed_jobs_count DESC,
+        u.id ASC
+      LIMIT 100`;
+    if (candidates.length === 0) return [];
+    const order = new Map(candidates.map((row, index) => [row.id, index]));
+    const rows = await this.prisma.user.findMany({
+      where: { id: { in: [...order.keys()] } },
       select: workerSelect,
-      take: 100,
     });
+    return rows.sort((a, b) => order.get(a.id)! - order.get(b.id)!);
   }
 
   private async weights() {

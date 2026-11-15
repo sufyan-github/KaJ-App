@@ -1,6 +1,7 @@
 import { JobActorType, JobStatus } from "@prisma/client";
 
 import {
+  adminForceTargets,
   InvalidJobTransitionError,
   JobStateChangedError,
   JobStateMachine,
@@ -159,5 +160,81 @@ describe("JobStateMachine", () => {
         JobActorType.WORKER,
       ),
     ).toThrow(InvalidJobTransitionError);
+  });
+
+  describe("admin force-transition targets", () => {
+    it("offers what the system may do from a stuck status, plus SUSPENDED", () => {
+      expect(adminForceTargets(JobStatus.CONFIRMATION_PENDING).sort()).toEqual(
+        [JobStatus.APPLICATIONS_OPEN, JobStatus.SUSPENDED].sort(),
+      );
+      expect(adminForceTargets(JobStatus.CUSTOMER_REVIEW)).toEqual(
+        expect.arrayContaining([JobStatus.COMPLETED, JobStatus.SUSPENDED]),
+      );
+      // Not a system move: an admin can't jump an open job to IN_PROGRESS.
+      expect(adminForceTargets(JobStatus.APPLICATIONS_OPEN)).not.toContain(
+        JobStatus.IN_PROGRESS,
+      );
+    });
+
+    it("sends disputed jobs to dispute resolution", () => {
+      expect(adminForceTargets(JobStatus.DISPUTED)).toEqual([
+        JobStatus.SUSPENDED,
+      ]);
+      // Dispute resolution itself still settles DISPUTED as ADMIN.
+      expect(() =>
+        machine.assertAllowed(
+          JobStatus.DISPUTED,
+          JobStatus.COMPLETED,
+          JobActorType.ADMIN,
+        ),
+      ).not.toThrow();
+    });
+
+    it("lets a suspended job be restored to where it was", () => {
+      expect(
+        adminForceTargets(JobStatus.SUSPENDED, {
+          suspendedFrom: JobStatus.IN_PROGRESS,
+        }),
+      ).toEqual([JobStatus.IN_PROGRESS]);
+      expect(() =>
+        machine.assertAllowed(
+          JobStatus.SUSPENDED,
+          JobStatus.IN_PROGRESS,
+          JobActorType.ADMIN,
+          { suspendedFrom: JobStatus.IN_PROGRESS },
+        ),
+      ).not.toThrow();
+      // Not somewhere else, and not by anyone but an admin.
+      expect(() =>
+        machine.assertAllowed(
+          JobStatus.SUSPENDED,
+          JobStatus.APPLICATIONS_OPEN,
+          JobActorType.ADMIN,
+          { suspendedFrom: JobStatus.IN_PROGRESS },
+        ),
+      ).toThrow(InvalidJobTransitionError);
+      expect(() =>
+        machine.assertAllowed(
+          JobStatus.SUSPENDED,
+          JobStatus.IN_PROGRESS,
+          JobActorType.SYSTEM,
+          { suspendedFrom: JobStatus.IN_PROGRESS },
+        ),
+      ).toThrow(InvalidJobTransitionError);
+    });
+
+    it("lets a never-assigned suspended job also be closed", () => {
+      expect(
+        adminForceTargets(JobStatus.SUSPENDED, {
+          suspendedFrom: JobStatus.APPLICATIONS_OPEN,
+        }).sort(),
+      ).toEqual(
+        [
+          JobStatus.APPLICATIONS_OPEN,
+          JobStatus.EXPIRED,
+          JobStatus.CANCELLED_BY_CUSTOMER,
+        ].sort(),
+      );
+    });
   });
 });

@@ -94,6 +94,7 @@ test("force-transition a stuck job requires target and reason", async ({
         poster: { name: "Customer" },
         applicationsCount: 2,
         assignmentsCount: 1,
+        allowedTransitions: ["APPLICATIONS_OPEN", "SUSPENDED"],
       },
     ],
   });
@@ -113,6 +114,11 @@ test("force-transition a stuck job requires target and reason", async ({
   await page.goto("/");
   await page.getByRole("button", { name: "Jobs" }).click();
   await page.getByRole("button", { name: "Force transition" }).click();
+  // Only the states the server allows are offered.
+  await expect(page.getByLabel("Target status").locator("option")).toHaveText([
+    "APPLICATIONS_OPEN",
+    "SUSPENDED",
+  ]);
   await page.getByLabel("Target status").selectOption("APPLICATIONS_OPEN");
   await page
     .getByLabel("Required operational reason")

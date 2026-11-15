@@ -87,14 +87,24 @@ jobs:
             echo "TRAINING_DATABASE_E2E=1"
             echo "BDAPPS_DATABASE_E2E=1"
             echo "BDAPPS_STACK_E2E=1"
+            echo "MIGRATIONS_DATABASE_E2E=1"
           } >> "$GITHUB_ENV"
       - run: corepack pnpm --filter @kaj/backend exec prisma generate
       - run: corepack pnpm --filter @kaj/backend exec prisma migrate deploy
+      # Both must report no difference: the migrated database, and the
+      # migration history replayed on a scratch (shadow) database.
       - name: Migrations match the schema (no drift)
-        run: >
-          corepack pnpm --filter @kaj/backend exec prisma migrate diff
-          --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma
-          --exit-code || echo "::warning::Schema drift detected (tracked as KAJ-076)"
+        run: |
+          PGPASSWORD=kaj_ci_only psql -h localhost -U kaj -d kaj_test \
+            -c "CREATE DATABASE kaj_shadow"
+          corepack pnpm --filter @kaj/backend exec prisma migrate diff \
+            --from-url "$DATABASE_URL" \
+            --to-schema-datamodel prisma/schema.prisma --exit-code
+          corepack pnpm --filter @kaj/backend exec prisma migrate diff \
+            --from-migrations prisma/migrations \
+            --to-schema-datamodel prisma/schema.prisma \
+            --shadow-database-url "postgresql://kaj:kaj_ci_only@localhost:5432/kaj_shadow" \
+            --exit-code
       - run: corepack pnpm --filter @kaj/backend exec prisma db seed
       - run: node --test test/*.test.mjs
       - run: corepack pnpm --filter @kaj/backend test:coverage

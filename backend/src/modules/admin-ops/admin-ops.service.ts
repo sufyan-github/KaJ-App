@@ -57,7 +57,10 @@ import {
   trustForVerification,
 } from "../verification/trust-level";
 import { CatalogService } from "../catalog/catalog.service";
-import { JobStateMachine } from "../jobs/state-machine/job-state.machine";
+import {
+  adminForceTargets,
+  JobStateMachine,
+} from "../jobs/state-machine/job-state.machine";
 import { LedgerService } from "../payments/ledger.service";
 import { PaymentsService } from "../payments/payments.service";
 import { planDisputeAllocation } from "../disputes/dispute-ledger";
@@ -394,7 +397,31 @@ export class AdminOpsService {
       },
       context,
     );
-    return { total, items: items.map(serializeJob) };
+    return {
+      total,
+      items: items.map((job) => ({
+        ...serializeJob(job),
+        // The latest history row of a SUSPENDED job is its suspension.
+        allowedTransitions: adminForceTargets(job.status, {
+          suspendedFrom:
+            job.status === JobStatus.SUSPENDED &&
+            job.status_history[0]?.to_status === JobStatus.SUSPENDED
+              ? job.status_history[0].from_status
+              : null,
+        }),
+      })),
+    };
+  }
+
+  /** The status a SUSPENDED job had before its latest suspension. */
+  private async suspendedFrom(job: { id: string; status: JobStatus }) {
+    if (job.status !== JobStatus.SUSPENDED) return null;
+    const suspension = await this.prisma.jobStatusHistory.findFirst({
+      where: { job_id: job.id, to_status: JobStatus.SUSPENDED },
+      orderBy: { created_at: "desc" },
+      select: { from_status: true },
+    });
+    return suspension?.from_status ?? null;
   }
 
   async forceTransition(
@@ -407,21 +434,30 @@ export class AdminOpsService {
     if (!job) throw new NotFoundException();
     if (job.status === input.toStatus)
       throw new ConflictException("Job is already in that status.");
+    const transition = { suspendedFrom: await this.suspendedFrom(job) };
+    const allowed = adminForceTargets(job.status, transition);
+    if (!allowed.includes(input.toStatus)) {
+      throw new ConflictException({
+        code: "JOB_TRANSITION_NOT_ALLOWED",
+        message:
+          job.status === JobStatus.DISPUTED
+            ? "Resolve the dispute instead; a disputed job can only be suspended here."
+            : `A ${job.status} job can be moved to: ${allowed.join(", ")}.`,
+        messageKey: "error.admin.job_transition_not_allowed",
+        details: allowed.map((status) => ({ allowedStatus: status })),
+      });
+    }
     const updated = await this.prisma.$transaction(async (transaction) => {
-      const result = await transaction.job.update({
-        where: { id },
-        data: { status: input.toStatus },
-      });
-      await transaction.jobStatusHistory.create({
-        data: {
-          job_id: id,
-          from_status: job.status,
-          to_status: input.toStatus,
-          actor_user_id: actor.userId,
-          actor_type: JobActorType.ADMIN,
-          reason: input.reason,
-        },
-      });
+      // The state machine writes the status history and refuses the change
+      // if another request moved the job first.
+      const result = await this.states.transitionInTransaction(
+        transaction,
+        job,
+        input.toStatus,
+        { type: JobActorType.ADMIN, userId: actor.userId },
+        input.reason,
+        transition,
+      );
       await transaction.moderationAction.create({
         data: {
           admin_user_id: actor.userId,

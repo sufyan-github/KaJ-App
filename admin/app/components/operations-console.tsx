@@ -1357,7 +1357,7 @@ function Jobs() {
             <td className="actions">
               <button
                 onClick={() => {
-                  setTarget("SUSPENDED");
+                  setTarget(targetsFor(job)[0] ?? "SUSPENDED");
                   setSelected(job);
                 }}
               >
@@ -1393,10 +1393,13 @@ function Jobs() {
                 value={target}
                 onChange={(event) => setTarget(event.target.value)}
               >
-                {JOB_STATUSES.map((status) => (
+                {targetsFor(selected).map((status) => (
                   <option key={status}>{status}</option>
                 ))}
               </select>
+              <small>
+                {tr("Only the next states the job rules allow are listed.")}
+              </small>
             </label>
           }
           onClose={() => setSelected(null)}
@@ -1428,10 +1431,15 @@ const JOB_STATUSES = [
   "CANCELLED_BY_WORKER",
   "SUSPENDED",
 ];
+/** The server's allowed next states; older APIs did not send them. */
+function targetsFor(job: JobItem): string[] {
+  return job.allowedTransitions ?? JOB_STATUSES;
+}
 type JobItem = {
   id: string;
   title: string;
   status: string;
+  allowedTransitions?: string[];
   isFeatured: boolean;
   poster: {
     name: string;

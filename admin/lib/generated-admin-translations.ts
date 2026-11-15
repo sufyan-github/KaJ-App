@@ -276,6 +276,8 @@ export const generatedAdminBangla: Record<string, string> = {
   System: "সিস্টেম",
   THANA: "থানা",
   "Target status": "লক্ষ্য অবস্থা",
+  "Only the next states the job rules allow are listed.":
+    "কাজের নিয়ম অনুযায়ী যে অবস্থাগুলোতে যাওয়া যায়, শুধু সেগুলো দেখানো হয়েছে।",
   "This decision records the risk outcome only. It will not warn, restrict, suspend, or ban the account.":
     "এই সিদ্ধান্ত শুধুমাত্র ঝুঁকির ফলাফল রেকর্ড করে। এটি অ্যাকাউন্টটিকে সতর্ক করবে না, সীমাবদ্ধ করবে না, স্থগিত করবে না বা নিষিদ্ধ করবে না।",
   "This view is time-limited and recorded in the audit trail.":
