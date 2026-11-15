@@ -1030,4 +1030,30 @@ const generatedEnglishTranslations = <String, String>{
   // P0.4: server-backed profile and session.
   "বুকিং অনুরোধের আগে প্রোফাইলে আপনার এলাকা নির্বাচন করুন।":
       "Choose your area in your profile before requesting a booking.",
+  // P0.5: hiring quality.
+  "কর্মীর প্রোফাইল": "Worker profile",
+  "পরিচয় যাচাই করা": "Identity verified",
+  "প্রস্তাবিত মূল্য": "Proposed price",
+  "প্রোফাইল দেখুন": "View profile",
+  "এখনো রেটিং নেই": "No ratings yet",
+  "টি কাজ সম্পন্ন": " jobs done",
+  "সামগ্রিক রেটিং": "Overall rating",
+  "সময়ানুবর্তিতা": "Punctuality",
+  "কাজের মান": "Quality of work",
+  "যোগাযোগ": "Communication",
+  "নির্ভরযোগ্যতা": "Reliability",
+  "কাজটি প্রকাশ করা হয়েছে।": "The job is published.",
+  "এখনই প্রকাশ করুন": "Publish now",
+  "খসড়াটি প্রকাশ করা যায়নি। আবার চেষ্টা করুন।":
+      "Could not publish the draft. Try again.",
+  "কোন কাজের জন্য বুকিং?": "Which work is the booking for?",
+  "এই কর্মী এখনো কোনো দক্ষতা যোগ করেননি, তাই বুকিং করা যাচ্ছে না।":
+      "This worker has not added any skills yet, so they cannot be booked.",
+  "এই দক্ষতার জন্য এখন বুকিং করা যাচ্ছে না। অন্য দক্ষতা বেছে নিন।":
+      "This skill cannot be booked right now. Choose another skill.",
+  "শুধু আপনার খালি সময়ের সঙ্গে মেলা পোস্ট":
+      "Only posts that fit your free time",
+  "দক্ষতা ও এলাকার মিল অনুযায়ী সাজানো":
+      "Sorted by how well your skills and area match",
+  "কোনো বার্তা নেই": "No message",
 };

@@ -321,18 +321,30 @@ String _banglaDigits(int value) => value.toString().replaceAllMapped(
 );
 
 class PublicWorkerProfileScreen extends ConsumerWidget {
-  const PublicWorkerProfileScreen({super.key});
+  const PublicWorkerProfileScreen({this.workerId, super.key});
+
+  /// Another worker's profile (for a poster reviewing an applicant). Null
+  /// shows the signed-in worker's own public profile.
+  final String? workerId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profile = ref.watch(myPublicWorkerProfileProvider);
+    final id = workerId;
+    final provider = id == null
+        ? myPublicWorkerProfileProvider
+        : publicWorkerProfileProvider(id);
+    final profile = ref.watch(provider);
     return Scaffold(
-      appBar: AppBar(title: const KLocalizedText('কর্মীর পাবলিক প্রোফাইল')),
+      appBar: AppBar(
+        title: KLocalizedText(
+          id == null ? 'কর্মীর পাবলিক প্রোফাইল' : 'কর্মীর প্রোফাইল',
+        ),
+      ),
       body: profile.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
           child: FilledButton(
-            onPressed: () => ref.invalidate(myPublicWorkerProfileProvider),
+            onPressed: () => ref.invalidate(provider),
             child: const KLocalizedText('আবার চেষ্টা করুন'),
           ),
         ),

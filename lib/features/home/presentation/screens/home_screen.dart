@@ -9,6 +9,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_error_state.dart';
 import '../../../../core/widgets/k_localized_text.dart';
 import '../../../../core/widgets/k_trust_banner.dart';
+import '../../../catalog/presentation/controllers/catalog_providers.dart';
 import '../../../notifications/presentation/controllers/notifications_providers.dart';
 import '../../../profile/presentation/controllers/me_provider.dart';
 import '../../../profile/presentation/widgets/profile_completeness_card.dart';
@@ -38,6 +39,13 @@ class HomeScreen extends ConsumerWidget {
       );
     }
     final isWorker = me.isWorker;
+    final language = Localizations.localeOf(context).languageCode;
+    final areaId = me.areaId;
+    final areaName = me.area?.nameFor(language);
+    // "Near you" is a real area filter; without an area, set one first.
+    final nearYou = areaId == null || areaName == null
+        ? AppRoutes.editProfile
+        : AppRoutes.jobsInArea(areaId: areaId, areaName: areaName);
     final unreadNotifications = ref
         .watch(notificationsProvider)
         .maybeWhen(data: (inbox) => inbox.unreadCount, orElse: () => 0);
@@ -107,8 +115,10 @@ class HomeScreen extends ConsumerWidget {
                         Expanded(
                           child: _TopAction(
                             icon: Icons.location_on_outlined,
-                            label: 'আপনার এলাকা',
-                            onTap: () => context.push(AppRoutes.categories),
+                            label: areaName ?? 'আপনার এলাকা',
+                            onTap: () => context.push(
+                              isWorker ? nearYou : AppRoutes.editProfile,
+                            ),
                           ),
                         ),
                         const SizedBox(width: KSpacing.sm),
@@ -136,7 +146,7 @@ class HomeScreen extends ConsumerWidget {
                           const SizedBox(width: KSpacing.sm),
                           Expanded(
                             child: TextButton(
-                              onPressed: () => context.push(AppRoutes.jobs),
+                              onPressed: () => context.push(nearYou),
                               style: TextButton.styleFrom(
                                 backgroundColor: KColors.surfaceAlt,
                                 minimumSize: const Size.fromHeight(44),
@@ -173,46 +183,24 @@ class HomeScreen extends ConsumerWidget {
                           _ShortcutRow(
                             icon: Icons.school_outlined,
                             title: 'দক্ষতার সঙ্গে মেলা কাজ',
-                            subtitle: 'এলাকা, সময় ও দক্ষতা অনুযায়ী',
+                            subtitle: 'দক্ষতা ও এলাকার মিল অনুযায়ী সাজানো',
                             onTap: () => context.push(AppRoutes.jobs),
                           ),
                           const SizedBox(height: KSpacing.sm),
                           _ShortcutRow(
                             icon: Icons.event_available_outlined,
                             title: 'আপনার সময়ে মেলা কাজ',
-                            subtitle: 'খালি সময়ের পোস্টগুলো আগে দেখুন',
-                            onTap: () => context.push(AppRoutes.jobs),
+                            subtitle: 'শুধু আপনার খালি সময়ের সঙ্গে মেলা পোস্ট',
+                            onTap: () =>
+                                context.push(AppRoutes.jobsMatchingTime),
                           ),
                         ],
                       )
                     else
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _ServiceShortcut(
-                              icon: Icons.cleaning_services_outlined,
-                              label: 'পরিষ্কার',
-                              onTap: () => context.push(AppRoutes.categories),
-                            ),
-                          ),
-                          const SizedBox(width: KSpacing.sm),
-                          Expanded(
-                            child: _ServiceShortcut(
-                              icon: Icons.handyman_outlined,
-                              label: 'মেরামত',
-                              onTap: () => context.push(AppRoutes.categories),
-                            ),
-                          ),
-                          const SizedBox(width: KSpacing.sm),
-                          Expanded(
-                            child: _ServiceShortcut(
-                              icon: Icons.school_outlined,
-                              label: 'পড়াশোনা',
-                              onTap: () => context.push(AppRoutes.categories),
-                            ),
-                          ),
-                        ],
-                      ),
+                      // Real categories from the catalog, each opening its
+                      // own posts, instead of fixed labels that all opened
+                      // the same list.
+                      _PopularCategories(language: language),
                     const SizedBox(height: KSpacing.md),
                     const KTrustBanner(
                       message: 'পরিচয় যাচাই ও নিরাপদ কাজের রেকর্ড',
@@ -772,3 +760,51 @@ String _banglaNumber(int value) => value.toString().replaceAllMapped(
   RegExp(r'\d'),
   (match) => '০১২৩৪৫৬৭৮৯'[int.parse(match.group(0)!)],
 );
+
+class _PopularCategories extends ConsumerWidget {
+  const _PopularCategories({required this.language});
+
+  final String language;
+
+  static const _icons = <String, IconData>{
+    'cleaning': Icons.cleaning_services_outlined,
+    'home': Icons.home_repair_service_outlined,
+    'repair': Icons.handyman_outlined,
+    'school': Icons.school_outlined,
+    'education': Icons.school_outlined,
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final categories = [...?ref.watch(categoryTreeProvider).valueOrNull]
+      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    if (categories.isEmpty) return const SizedBox.shrink();
+    final top = categories.take(3).toList(growable: false);
+    return Row(
+      children: [
+        for (final (index, category) in top.indexed) ...[
+          if (index > 0) const SizedBox(width: KSpacing.sm),
+          Expanded(
+            child: _ServiceShortcut(
+              icon:
+                  _icons[category.icon] ??
+                  _icons[category.slug] ??
+                  Icons.work_outline,
+              label: category.nameFor(language),
+              onTap: () => context.push(
+                AppRoutes.jobsForType(
+                  categoryId: category.id,
+                  categoryName: category.nameFor(language),
+                ),
+              ),
+            ),
+          ),
+        ],
+        for (var index = top.length; index < 3; index++) ...[
+          const SizedBox(width: KSpacing.sm),
+          const Expanded(child: SizedBox.shrink()),
+        ],
+      ],
+    );
+  }
+}

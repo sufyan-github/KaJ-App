@@ -14,6 +14,7 @@ class JobFeedFilter {
   const JobFeedFilter({
     this.categoryId,
     this.skillId,
+    this.locationId,
     this.availableOnly = false,
     this.forMe = true,
   });
@@ -21,6 +22,9 @@ class JobFeedFilter {
   final bool availableOnly;
   final String? categoryId;
   final bool forMe;
+
+  /// Only jobs in this area (the person's own area for "Near you").
+  final String? locationId;
   final String? skillId;
 
   @override
@@ -28,11 +32,13 @@ class JobFeedFilter {
       other is JobFeedFilter &&
       other.categoryId == categoryId &&
       other.skillId == skillId &&
+      other.locationId == locationId &&
       other.availableOnly == availableOnly &&
       other.forMe == forMe;
 
   @override
-  int get hashCode => Object.hash(categoryId, skillId, availableOnly, forMe);
+  int get hashCode =>
+      Object.hash(categoryId, skillId, locationId, availableOnly, forMe);
 }
 
 final jobFeedProvider = FutureProvider.family<List<JobSummary>, JobFeedFilter>(
@@ -41,6 +47,7 @@ final jobFeedProvider = FutureProvider.family<List<JobSummary>, JobFeedFilter>(
       .getJobs(
         categoryId: filter.categoryId,
         skillId: filter.skillId,
+        locationId: filter.locationId,
         availableOnly: filter.availableOnly,
         forMe: filter.forMe,
       ),

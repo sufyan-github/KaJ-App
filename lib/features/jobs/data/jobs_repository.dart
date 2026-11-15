@@ -15,6 +15,7 @@ class JobsRepository {
     String? skillId,
     bool availableOnly = false,
     bool forMe = true,
+    String? locationId,
   }) async {
     try {
       final response = await _dio.get<Map<String, dynamic>>(
@@ -23,6 +24,7 @@ class JobsRepository {
           'scope': forMe ? 'for-me' : 'all',
           'categoryId': ?categoryId,
           'skillId': ?skillId,
+          'locationId': ?locationId,
           if (availableOnly) 'availableOnly': 'true',
         },
       );
@@ -118,6 +120,15 @@ class JobsRepository {
       throw draftId == null
           ? failure
           : JobDraftPublishFailure(draftId: draftId, cause: failure);
+    }
+  }
+
+  /// Publishes a job that was saved as a draft.
+  Future<void> publishJob(String jobId) async {
+    try {
+      await _dio.post<Map<String, dynamic>>('/jobs/$jobId/publish');
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
     }
   }
 
@@ -301,20 +312,12 @@ class JobsRepository {
 
   Future<void> submitReview({
     required String assignmentId,
-    required int rating,
-    required String comment,
+    required ReviewInput review,
   }) async {
     try {
       await _dio.post<Map<String, dynamic>>(
         '/assignments/$assignmentId/reviews',
-        data: {
-          'rating': rating,
-          'punctuality': rating,
-          'quality': rating,
-          'communication': rating,
-          'reliability': rating,
-          if (comment.trim().isNotEmpty) 'comment': comment.trim(),
-        },
+        data: review.toJson(),
       );
     } on Object catch (error) {
       throw ErrorMapper.from(error);

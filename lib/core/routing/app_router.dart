@@ -50,6 +50,7 @@ abstract final class AppRoutes {
   static const onboardingTour = '/onboarding/tour';
   static const categories = '/categories';
   static const publicWorkerProfile = '/workers/preview';
+  static const workerProfilePath = '/workers/:id/profile';
   static const editWorkerSkills = '/w/profile/skills';
   static const editAvailability = '/w/availability';
   static const settings = '/settings';
@@ -93,6 +94,19 @@ abstract final class AppRoutes {
   static String jobDetail(String id) => '/jobs/$id';
 
   static String workerBooking(String id) => '/workers/$id/book';
+  static String workerProfile(String id) => '/workers/$id/profile';
+
+  /// Open jobs in the person's own area.
+  static String jobsInArea({
+    required String areaId,
+    required String areaName,
+  }) => Uri(
+    path: jobs,
+    queryParameters: {'locationId': areaId, 'locationName': areaName},
+  ).toString();
+
+  /// Open jobs that fit the worker's saved free time.
+  static const jobsMatchingTime = '$jobs?availableOnly=true';
   static String jobsForType({
     required String categoryId,
     required String categoryName,
@@ -256,6 +270,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           categoryName: state.uri.queryParameters['categoryName'],
           skillId: state.uri.queryParameters['skillId'],
           skillName: state.uri.queryParameters['skillName'],
+          locationId: state.uri.queryParameters['locationId'],
+          locationName: state.uri.queryParameters['locationName'],
+          initialAvailableOnly:
+              state.uri.queryParameters['availableOnly'] == 'true',
         ),
       ),
       GoRoute(
@@ -309,6 +327,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             otherUserId: args?.otherUserId,
           );
         },
+      ),
+      GoRoute(
+        path: AppRoutes.workerProfilePath,
+        builder: (context, state) =>
+            PublicWorkerProfileScreen(workerId: state.pathParameters['id']),
       ),
       GoRoute(
         path: AppRoutes.workerBookingPath,

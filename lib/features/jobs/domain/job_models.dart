@@ -415,6 +415,71 @@ class CancellationPreview {
       languageCode == 'en' && summaryEn.isNotEmpty ? summaryEn : summaryBn;
 }
 
+/// Who applied, as the API summarises them for the poster.
+///
+/// Older APIs send no summary; [JobApplicationSummary.applicant] is then null
+/// and the card falls back to the short worker label.
+class ApplicantSummary {
+  const ApplicantSummary({
+    required this.displayName,
+    this.photoUrl,
+    this.ratingAverage,
+    this.ratingCount = 0,
+    this.completedJobsCount,
+    this.trustLevel,
+    this.identityVerified = false,
+  });
+
+  /// Reads the summary under any of the names the API may use for it.
+  static ApplicantSummary? fromApplication(Map<String, dynamic> json) {
+    final raw = json['worker'] ?? json['applicant'] ?? json['workerSummary'];
+    if (raw is! Map) return null;
+    final value = Map<String, dynamic>.from(raw);
+    final name = (value['displayName'] ?? value['name']) as Object?;
+    final trust = value['trustLevel'] as Object?;
+    final rating = _number(
+      value['ratingAverage'] ?? value['averageRating'] ?? value['rating'],
+    );
+    final verifiedFlag =
+        value['identityVerified'] ?? value['isVerified'] ?? value['verified'];
+    return ApplicantSummary(
+      displayName: name is String ? name.trim() : '',
+      photoUrl:
+          value['photoUrl'] is String &&
+              (value['photoUrl'] as String).trim().isNotEmpty
+          ? value['photoUrl'] as String
+          : null,
+      ratingAverage: rating != null && rating > 0 ? rating : null,
+      ratingCount:
+          _number(value['ratingCount'] ?? value['reviewCount'])?.toInt() ?? 0,
+      completedJobsCount: _number(
+        value['completedJobsCount'] ?? value['completedJobs'],
+      )?.toInt(),
+      trustLevel: trust is String ? trust : null,
+      // An explicit flag from the API wins; older shapes only had the level.
+      identityVerified: verifiedFlag is bool
+          ? verifiedFlag
+          : _identityTrust.contains(trust),
+    );
+  }
+
+  static const _identityTrust = {'IDENTITY', 'VERIFIED', 'SKILL', 'BUSINESS'};
+
+  static double? _number(Object? value) => switch (value) {
+    final num number => number.toDouble(),
+    final String text => double.tryParse(text),
+    _ => null,
+  };
+
+  final int? completedJobsCount;
+  final String displayName;
+  final bool identityVerified;
+  final String? photoUrl;
+  final double? ratingAverage;
+  final int ratingCount;
+  final String? trustLevel;
+}
+
 class JobApplicationSummary {
   const JobApplicationSummary({
     required this.id,
@@ -424,6 +489,7 @@ class JobApplicationSummary {
     this.proposedPricePoisha,
     this.startsAt,
     this.endsAt,
+    this.applicant,
   });
 
   factory JobApplicationSummary.fromJson(Map<String, dynamic> json) =>
@@ -435,8 +501,10 @@ class JobApplicationSummary {
         proposedPricePoisha: Money.tryParse(json['proposedPricePoisha']),
         startsAt: DateTime.tryParse(json['proposedStartsAt'] as String? ?? ''),
         endsAt: DateTime.tryParse(json['proposedEndsAt'] as String? ?? ''),
+        applicant: ApplicantSummary.fromApplication(json),
       );
 
+  final ApplicantSummary? applicant;
   final DateTime? endsAt;
   final String id;
   final String? message;
@@ -444,6 +512,38 @@ class JobApplicationSummary {
   final DateTime? startsAt;
   final String status;
   final String workerUserId;
+
+  /// The short label used before the API sent a name.
+  String get fallbackLabel =>
+      workerUserId.length > 8 ? workerUserId.substring(0, 8) : workerUserId;
+}
+
+/// A review with the four sub-scores the poster or worker actually chose.
+class ReviewInput {
+  const ReviewInput({
+    required this.rating,
+    required this.punctuality,
+    required this.quality,
+    required this.communication,
+    required this.reliability,
+    this.comment = '',
+  });
+
+  final int communication;
+  final String comment;
+  final int punctuality;
+  final int quality;
+  final int rating;
+  final int reliability;
+
+  Map<String, dynamic> toJson() => {
+    'rating': rating,
+    'punctuality': punctuality,
+    'quality': quality,
+    'communication': communication,
+    'reliability': reliability,
+    if (comment.trim().isNotEmpty) 'comment': comment.trim(),
+  };
 }
 
 class JobPoster {

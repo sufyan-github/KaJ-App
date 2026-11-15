@@ -27,6 +27,8 @@ import '../../data/jobs_repository.dart';
 import '../../domain/job_alert_errors.dart';
 import '../../domain/job_models.dart';
 import '../controllers/jobs_providers.dart';
+import '../widgets/applicant_card.dart';
+import '../widgets/review_dialog.dart';
 
 class JobFeedScreen extends ConsumerStatefulWidget {
   const JobFeedScreen({
@@ -34,6 +36,9 @@ class JobFeedScreen extends ConsumerStatefulWidget {
     this.categoryName,
     this.skillId,
     this.skillName,
+    this.locationId,
+    this.locationName,
+    this.initialAvailableOnly = false,
     super.key,
   });
 
@@ -42,12 +47,19 @@ class JobFeedScreen extends ConsumerStatefulWidget {
   final String? skillId;
   final String? skillName;
 
+  /// Only jobs in this area, for "Near you".
+  final String? locationId;
+  final String? locationName;
+
+  /// Start with "fits my time" on, for "Jobs matching your availability".
+  final bool initialAvailableOnly;
+
   @override
   ConsumerState<JobFeedScreen> createState() => _JobFeedScreenState();
 }
 
 class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
-  bool _availableOnly = false;
+  late bool _availableOnly = widget.initialAvailableOnly;
   bool _creatingAlert = false;
 
   Future<void> _createAlert() async {
@@ -70,6 +82,11 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
     }
   }
 
+  Future<void> _publishDraft(String jobId) async {
+    final published = await publishDraftJob(context, ref, jobId);
+    if (published && mounted) _feedSnack('কাজটি প্রকাশ করা হয়েছে।');
+  }
+
   void _feedSnack(String message) => ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: KLocalizedText(message)));
@@ -82,6 +99,7 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
     final filter = JobFeedFilter(
       categoryId: widget.categoryId,
       skillId: widget.skillId,
+      locationId: widget.locationId,
       availableOnly: isWorker && _availableOnly,
       forMe: isWorker,
     );
@@ -102,6 +120,7 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
         title: KLocalizedText(
           widget.skillName ??
               widget.categoryName ??
+              widget.locationName ??
               (isWorker ? 'কাজ খুঁজুন' : 'আমার পোস্ট করা কাজ'),
         ),
         actions: [
@@ -227,24 +246,30 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                           mainAxisExtent: _jobGridCardHeight(context),
                         ),
                         itemCount: items.length,
-                        itemBuilder: (context, index) => _JobCard(
-                          job: items[index],
-                          actionLabel: isWorker
-                              ? 'আবেদন'
-                              : browsingType
-                              ? null
-                              : 'আবেদন দেখুন',
-                          onAction: isWorker
-                              ? () =>
-                                    showJobApplyFlow(context, ref, items[index])
-                              : browsingType
-                              ? null
-                              : () => _showApplications(
-                                  context,
-                                  ref,
-                                  items[index],
-                                ),
-                        ),
+                        itemBuilder: (context, index) {
+                          final job = items[index];
+                          final ownDraft =
+                              !isWorker &&
+                              !browsingType &&
+                              job.status == 'DRAFT';
+                          return _JobCard(
+                            job: job,
+                            actionLabel: isWorker
+                                ? 'আবেদন'
+                                : browsingType
+                                ? null
+                                : ownDraft
+                                ? 'প্রকাশ করুন'
+                                : 'আবেদন দেখুন',
+                            onAction: isWorker
+                                ? () => showJobApplyFlow(context, ref, job)
+                                : browsingType
+                                ? null
+                                : ownDraft
+                                ? () => _publishDraft(job.id)
+                                : () => _showApplications(context, ref, job),
+                          );
+                        },
                       ),
               ),
             ),
@@ -343,52 +368,43 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                             child: ListView.separated(
                               shrinkWrap: true,
                               itemCount: items.length,
-                              separatorBuilder: (_, _) => const Divider(),
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(height: KSpacing.sm),
                               itemBuilder: (context, index) {
                                 final item = items[index];
-                                return ListTile(
-                                  contentPadding: EdgeInsets.zero,
-                                  leading: const CircleAvatar(
-                                    child: Icon(Icons.person_outline),
+                                return ApplicantCard(
+                                  application: item,
+                                  statusLabel: _statusBn(item.status),
+                                  onViewProfile: () => context.push(
+                                    AppRoutes.workerProfile(item.workerUserId),
                                   ),
-                                  title: KLocalizedText(
-                                    'কর্মী ${item.workerUserId.substring(0, 8)}',
-                                  ),
-                                  subtitle: Text(
-                                    '${item.startsAt == null ? '' : _dateTime(item.startsAt!)}\n'
-                                    '${item.message?.isNotEmpty == true ? item.message : KaajLocalizations.text(context, 'কোনো বার্তা নেই')}',
-                                  ),
-                                  isThreeLine: true,
-                                  trailing: item.status == 'PENDING'
-                                      ? FilledButton(
-                                          onPressed: () async {
-                                            try {
-                                              await sheetRef
-                                                  .read(jobsRepositoryProvider)
-                                                  .acceptApplication(item.id);
-                                              sheetRef.invalidate(
-                                                jobApplicationsProvider(job.id),
-                                              );
-                                              sheetRef.invalidate(
-                                                assignmentsProvider,
-                                              );
-                                            } on Object {
-                                              if (sheetContext.mounted) {
-                                                ScaffoldMessenger.of(
-                                                  sheetContext,
-                                                ).showSnackBar(
-                                                  const SnackBar(
-                                                    content: KLocalizedText(
-                                                      'আবেদনটি গ্রহণ করা যায়নি।',
-                                                    ),
+                                  onAccept: item.status != 'PENDING'
+                                      ? null
+                                      : () async {
+                                          try {
+                                            await sheetRef
+                                                .read(jobsRepositoryProvider)
+                                                .acceptApplication(item.id);
+                                            sheetRef.invalidate(
+                                              jobApplicationsProvider(job.id),
+                                            );
+                                            sheetRef.invalidate(
+                                              assignmentsProvider,
+                                            );
+                                          } on Object {
+                                            if (sheetContext.mounted) {
+                                              ScaffoldMessenger.of(
+                                                sheetContext,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: KLocalizedText(
+                                                    'আবেদনটি গ্রহণ করা যায়নি।',
                                                   ),
-                                                );
-                                              }
+                                                ),
+                                              );
                                             }
-                                          },
-                                          child: const KLocalizedText('গ্রহণ'),
-                                        )
-                                      : KLocalizedText(_statusBn(item.status)),
+                                          }
+                                        },
                                 );
                               },
                             ),
@@ -1105,15 +1121,29 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
       ref.invalidate(jobFeedProvider);
       ref.invalidate(myJobsProvider);
       if (mounted) context.pop();
-    } on JobDraftPublishFailure {
+    } on JobDraftPublishFailure catch (failure) {
       // The job was saved but not published. Say so, so the poster does not
-      // retype the whole form or assume nothing was created.
+      // retype the whole form or assume nothing was created, and let them
+      // publish it right here or later from My jobs.
       ref.invalidate(myJobsProvider);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: KLocalizedText(
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.showSnackBar(
+          SnackBar(
+            duration: const Duration(seconds: 10),
+            content: const KLocalizedText(
               'কাজটি খসড়া হিসেবে সংরক্ষিত হয়েছে, কিন্তু প্রকাশ করা যায়নি। "আমার কাজ" থেকে আবার প্রকাশ করুন।',
+            ),
+            action: SnackBarAction(
+              label: KaajLocalizations.text(context, 'এখনই প্রকাশ করুন'),
+              onPressed: () async {
+                final published = await publishDraftJob(
+                  context,
+                  ref,
+                  failure.draftId,
+                );
+                if (published && mounted) context.pop();
+              },
             ),
           ),
         );
@@ -1265,6 +1295,7 @@ class WorkerBookingScreen extends ConsumerStatefulWidget {
 
 class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
   WorkerSlot? _selected;
+  String? _skillId;
   bool _saving = false;
 
   @override
@@ -1328,6 +1359,34 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
               ),
             ),
           ),
+          ...switch (profile.value?.skills) {
+            final skills? when skills.length > 1 => [
+              const SizedBox(height: KSpacing.md),
+              KLocalizedText(
+                'কোন কাজের জন্য বুকিং?',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: KSpacing.sm),
+              Wrap(
+                spacing: KSpacing.sm,
+                runSpacing: KSpacing.sm,
+                children: skills
+                    .map(
+                      (skill) => ChoiceChip(
+                        selected: (_skillId ?? skills.first.id) == skill.id,
+                        onSelected: (_) => setState(() => _skillId = skill.id),
+                        label: KLocalizedText(
+                          skill.nameFor(
+                            Localizations.localeOf(context).languageCode,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(growable: false),
+              ),
+            ],
+            _ => const <Widget>[],
+          },
           const SizedBox(height: KSpacing.md),
           KLocalizedText(
             'আগামী ১৪ দিনের খালি সময়',
@@ -1379,21 +1438,39 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
       );
       return;
     }
-    final skill = profile?.skills.firstOrNull;
-    final allSkills =
-        ref.read(catalogSkillsProvider).value ?? const <CatalogSkill>[];
-    final catalogSkill = allSkills
-        .where((item) => item.id == skill?.id)
-        .firstOrNull;
-    if (_selected == null || catalogSkill == null) {
+    final skills = profile?.skills ?? const [];
+    final skill =
+        skills.where((item) => item.id == _skillId).firstOrNull ??
+        skills.firstOrNull;
+    if (skill == null) {
+      _bookingSnack(
+        'এই কর্মী এখনো কোনো দক্ষতা যোগ করেননি, তাই বুকিং করা যাচ্ছে না।',
+      );
       return;
     }
+    List<CatalogSkill> allSkills;
+    try {
+      allSkills = await ref.read(catalogSkillsProvider.future);
+    } on Object {
+      allSkills = const [];
+    }
+    if (!mounted) return;
+    final catalogSkill = allSkills
+        .where((item) => item.id == skill.id)
+        .firstOrNull;
+    if (catalogSkill == null) {
+      _bookingSnack(
+        'এই দক্ষতার জন্য এখন বুকিং করা যাচ্ছে না। অন্য দক্ষতা বেছে নিন।',
+      );
+      return;
+    }
+    if (_selected == null) return;
     final amount = await _askAmount(context);
     if (amount == null) return;
     if (!mounted) return;
     final languageCode = Localizations.localeOf(context).languageCode;
     final bookingTitle =
-        '${skill?.nameFor(languageCode) ?? KaajLocalizations.text(context, 'সেবা')} ${KaajLocalizations.text(context, 'বুকিং')}';
+        '${skill.nameFor(languageCode)} ${KaajLocalizations.text(context, 'বুকিং')}';
     final bookingDescription = KaajLocalizations.text(
       context,
       'KAAJ অ্যাপ থেকে নির্বাচিত সময়ে সেবার বুকিং অনুরোধ।',
@@ -1436,6 +1513,10 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
       if (mounted) setState(() => _saving = false);
     }
   }
+
+  void _bookingSnack(String message) => ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: KLocalizedText(message)));
 
   Future<void> _toggleFavorite(bool currentlySaved) async {
     try {
@@ -1724,19 +1805,15 @@ class _AssignmentDetailBody extends ConsumerWidget {
     WidgetRef ref,
     String assignmentId,
   ) async {
-    final result = await showDialog<({int rating, String comment})>(
+    final result = await showDialog<ReviewInput>(
       context: context,
-      builder: (context) => const _ReviewDialog(),
+      builder: (context) => const ReviewDialog(),
     );
     if (result == null) return;
     try {
       await ref
           .read(jobsRepositoryProvider)
-          .submitReview(
-            assignmentId: assignmentId,
-            rating: result.rating,
-            comment: result.comment,
-          );
+          .submitReview(assignmentId: assignmentId, review: result);
       ref
         ..invalidate(assignmentReviewsProvider(assignmentId))
         ..invalidate(receivedReviewsProvider);
@@ -2022,70 +2099,6 @@ class _ReviewPanel extends StatelessWidget {
   );
 }
 
-class _ReviewDialog extends StatefulWidget {
-  const _ReviewDialog();
-
-  @override
-  State<_ReviewDialog> createState() => _ReviewDialogState();
-}
-
-class _ReviewDialogState extends State<_ReviewDialog> {
-  int rating = 5;
-  final comment = TextEditingController();
-
-  @override
-  void dispose() {
-    comment.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => AlertDialog(
-    title: const KLocalizedText('অভিজ্ঞতা কেমন ছিল?'),
-    content: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(
-            5,
-            (index) => IconButton(
-              onPressed: () => setState(() => rating = index + 1),
-              icon: Icon(
-                index < rating ? Icons.star_rounded : Icons.star_border_rounded,
-                color: Colors.amber.shade700,
-              ),
-            ),
-          ),
-        ),
-        TextField(
-          controller: comment,
-          maxLength: 1000,
-          maxLines: 3,
-          decoration: InputDecoration(
-            labelText: KaajLocalizations.text(context, 'মন্তব্য (ঐচ্ছিক)'),
-            hintText: KaajLocalizations.text(
-              context,
-              'সময়, কাজের মান ও যোগাযোগ সম্পর্কে লিখুন',
-            ),
-          ),
-        ),
-      ],
-    ),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.pop(context),
-        child: const KLocalizedText('ফিরুন'),
-      ),
-      FilledButton(
-        onPressed: () =>
-            Navigator.pop(context, (rating: rating, comment: comment.text)),
-        child: const KLocalizedText('জমা দিন'),
-      ),
-    ],
-  );
-}
-
 String _stars(int rating) =>
     '${List.filled(rating, '★').join()}${List.filled(5 - rating, '☆').join()}';
 
@@ -2258,34 +2271,49 @@ double _workerGridCardHeight(BuildContext context) {
   return 300 + ((scale - 1) * (accessible ? 200 : 96));
 }
 
-Future<int?> _askAmount(BuildContext context) async {
-  final controller = TextEditingController();
-  final result = await showDialog<int>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const KLocalizedText('প্রস্তাবিত পারিশ্রমিক'),
-      content: KTextField(
-        label: 'টাকা',
-        controller: controller,
-        keyboardType: TextInputType.number,
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const KLocalizedText('ফিরুন'),
-        ),
-        FilledButton(
-          onPressed: () {
-            final value = int.tryParse(controller.text);
-            if (value != null && value > 0) Navigator.pop(context, value);
-          },
-          child: const KLocalizedText('অনুরোধ পাঠান'),
-        ),
-      ],
+Future<int?> _askAmount(BuildContext context) =>
+    showDialog<int>(context: context, builder: (_) => const _AmountDialog());
+
+/// Owns its text controller, so the field is not disposed while the dialog
+/// is still animating out.
+class _AmountDialog extends StatefulWidget {
+  const _AmountDialog();
+
+  @override
+  State<_AmountDialog> createState() => _AmountDialogState();
+}
+
+class _AmountDialogState extends State<_AmountDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const KLocalizedText('প্রস্তাবিত পারিশ্রমিক'),
+    content: KTextField(
+      label: 'টাকা',
+      controller: _controller,
+      keyboardType: TextInputType.number,
     ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: const KLocalizedText('ফিরুন'),
+      ),
+      FilledButton(
+        onPressed: () {
+          final value = int.tryParse(_controller.text);
+          if (value != null && value > 0) Navigator.pop(context, value);
+        },
+        child: const KLocalizedText('অনুরোধ পাঠান'),
+      ),
+    ],
   );
-  controller.dispose();
-  return result;
 }
 
 DateTime _combine(DateTime date, TimeOfDay time) =>
@@ -2371,4 +2399,33 @@ void showMissingAreaMessage(BuildContext context, String message) {
         ),
       ),
     );
+}
+
+/// Publishes a saved draft and refreshes the poster's lists. Shows why it
+/// failed and returns false when it could not be published.
+Future<bool> publishDraftJob(
+  BuildContext context,
+  WidgetRef ref,
+  String jobId,
+) async {
+  try {
+    await ref.read(jobsRepositoryProvider).publishJob(jobId);
+    ref
+      ..invalidate(myJobsProvider)
+      ..invalidate(jobFeedProvider);
+    return true;
+  } on Object {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: KLocalizedText(
+              'খসড়াটি প্রকাশ করা যায়নি। আবার চেষ্টা করুন।',
+            ),
+          ),
+        );
+    }
+    return false;
+  }
 }
