@@ -3,10 +3,11 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { RoleMode } from "@prisma/client";
+import { Prisma, RoleMode } from "@prisma/client";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { activateRoleMode } from "./role-modes";
+import { UpdatePrivacyDto } from "./dto/update-privacy.dto";
 import { UpdateProfileDto } from "./dto/update-profile.dto";
 import { UpdateWorkerProfileDto } from "./dto/update-worker-profile.dto";
 import { WorkerSkillInputDto } from "./dto/update-worker-skills.dto";
@@ -270,6 +271,39 @@ export class UsersService {
     };
   }
 
+  async getPrivacy(userId: string) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { user_id: userId },
+      select: privacySelect,
+    });
+    if (!profile) throw new NotFoundException();
+    return serializePrivacy(profile);
+  }
+
+  async updatePrivacy(userId: string, input: UpdatePrivacyDto) {
+    const profile = await this.prisma.profile
+      .update({
+        where: { user_id: userId },
+        data: {
+          photo_visibility: input.photoVisibility,
+          show_full_name: input.showFullName,
+          hide_precise_area: input.hidePreciseArea,
+          allow_messages_from: input.allowMessagesFrom,
+          discoverable: input.discoverable,
+        },
+        select: privacySelect,
+      })
+      .catch((error: unknown) => {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2025"
+        )
+          throw new NotFoundException();
+        throw error;
+      });
+    return serializePrivacy(profile);
+  }
+
   async getWorkerSkills(userId: string) {
     return this.loadWorkerSkills(userId);
   }
@@ -408,4 +442,24 @@ export class UsersService {
       hasPriorTraining: row.has_prior_training,
     }));
   }
+}
+
+const privacySelect = {
+  photo_visibility: true,
+  show_full_name: true,
+  hide_precise_area: true,
+  allow_messages_from: true,
+  discoverable: true,
+} satisfies Prisma.ProfileSelect;
+
+function serializePrivacy(
+  profile: Prisma.ProfileGetPayload<{ select: typeof privacySelect }>,
+) {
+  return {
+    photoVisibility: profile.photo_visibility,
+    showFullName: profile.show_full_name,
+    hidePreciseArea: profile.hide_precise_area,
+    allowMessagesFrom: profile.allow_messages_from,
+    discoverable: profile.discoverable,
+  };
 }

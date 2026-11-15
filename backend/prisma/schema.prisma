@@ -521,26 +521,49 @@ model OtpChallenge {
 }
 
 model Profile {
-  id                  String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  user_id             String     @unique @db.Uuid
+  id                  String            @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id             String            @unique @db.Uuid
   display_name        String
   photo_key           String?
   bio                 String?
   gender              Gender?
   birth_year          Int?
-  primary_location_id String?    @db.Uuid
-  lat                 Decimal?   @db.Decimal(9, 6)
-  lng                 Decimal?   @db.Decimal(9, 6)
-  trust_level         TrustLevel @default(NONE)
-  locale              String     @default("bn")
-  created_at          DateTime   @default(now())
-  updated_at          DateTime   @updatedAt
+  primary_location_id String?           @db.Uuid
+  lat                 Decimal?          @db.Decimal(9, 6)
+  lng                 Decimal?          @db.Decimal(9, 6)
+  trust_level         TrustLevel        @default(NONE)
+  locale              String            @default("bn")
+  /// Privacy (P0.7). Defaults keep the earlier public behaviour: photo
+  /// shown, name masked ("Rahima K."), ~500 m point, listed in the directory.
+  photo_visibility    PhotoVisibility   @default(EVERYONE)
+  show_full_name      Boolean           @default(false)
+  hide_precise_area   Boolean           @default(false)
+  allow_messages_from MessagePermission @default(ANYONE)
+  discoverable        Boolean           @default(true)
+  created_at          DateTime          @default(now())
+  updated_at          DateTime          @updatedAt
   deleted_at          DateTime?
-  user                User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  primary_location    Location?  @relation(fields: [primary_location_id], references: [id], onDelete: SetNull)
+  user                User              @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  primary_location    Location?         @relation(fields: [primary_location_id], references: [id], onDelete: SetNull)
 
   @@index([primary_location_id])
   @@map("profiles")
+}
+
+/// Who may see a person's profile photo.
+enum PhotoVisibility {
+  EVERYONE
+  /// Only people with a confirmed booking or hire with them.
+  AFTER_HIRE
+  NOBODY
+}
+
+/// Who may start a new conversation with a person.
+enum MessagePermission {
+  /// Anyone the job flow already allows (an applicant and the poster).
+  ANYONE
+  /// Only after a hire (an assignment) between the two.
+  ENGAGED_ONLY
 }
 
 model WorkerProfile {

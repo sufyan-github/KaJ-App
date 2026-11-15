@@ -31,7 +31,10 @@ function capture(exception: unknown) {
     },
   };
   const host = {
-    switchToHttp: () => ({ getResponse: () => response }),
+    switchToHttp: () => ({
+      getRequest: () => ({ method: "GET", originalUrl: "/api/v1/x?phone=1" }),
+      getResponse: () => response,
+    }),
   } as unknown as ArgumentsHost;
   filter.catch(exception, host);
   return { status: result.status!, error: result.body!.error };
@@ -175,8 +178,17 @@ describe("HttpExceptionFilter", () => {
     expect(Logger.prototype.error).toHaveBeenCalledTimes(1);
   });
 
-  it("does not log client errors", () => {
+  it("logs client errors once, at info level, without the query string", () => {
+    const info = jest.spyOn(Logger.prototype, "log").mockImplementation();
     capture(new ConflictException("conflict"));
     expect(Logger.prototype.error).not.toHaveBeenCalled();
+    expect(info).toHaveBeenCalledTimes(1);
+    expect(info.mock.calls[0]![0]).toMatchObject({
+      code: "CONFLICT",
+      method: "GET",
+      path: "/api/v1/x",
+      statusCode: 409,
+    });
+    expect(JSON.stringify(info.mock.calls[0])).not.toContain("phone");
   });
 });

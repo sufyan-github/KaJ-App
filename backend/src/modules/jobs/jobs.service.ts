@@ -1751,7 +1751,9 @@ async function siteCoordinates(
 
 const applicantSelect = {
   id: true,
-  profile: { select: { display_name: true, trust_level: true } },
+  profile: {
+    select: { display_name: true, trust_level: true, show_full_name: true },
+  },
   worker_profile: {
     select: {
       rating_avg: true,
@@ -1776,7 +1778,9 @@ function applicantSummary(
   const trustLevel = worker.profile?.trust_level ?? TrustLevel.NONE;
   return {
     userId: worker.id,
-    displayName: maskPublicDisplayName(worker.profile?.display_name ?? ""),
+    displayName: worker.profile?.show_full_name
+      ? worker.profile.display_name
+      : maskPublicDisplayName(worker.profile?.display_name ?? ""),
     trustLevel,
     // Identity checked (NID + selfie), not merely phone-registered.
     isVerified: hasTrust(trustLevel, TrustLevel.IDENTITY),

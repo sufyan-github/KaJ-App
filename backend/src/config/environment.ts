@@ -24,9 +24,15 @@ const environmentSchema = z
     JWT_ACCESS_TTL: z.string().min(1).default("15m"),
     JWT_REFRESH_SECRET: z.string().default(""),
     JWT_REFRESH_TTL: z.string().min(1).default("30d"),
-    NODE_ENV: z
-      .enum(["development", "test", "production"])
-      .default("development"),
+    // Required: every production safeguard (long secrets, no console SMS,
+    // no fixed OTP, no Swagger) is keyed on it, so a deploy that forgot it
+    // used to run silently with development fallbacks.
+    NODE_ENV: z.enum(["development", "test", "production"], {
+      error: (issue) =>
+        issue.input === undefined || issue.input === ""
+          ? "must be set explicitly to development, test or production"
+          : "must be development, test or production",
+    }),
     OTP_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
     OTP_FIXED_CODE: z
       .union([z.literal(""), z.string().regex(/^\d{6}$/)])
@@ -165,7 +171,11 @@ function isLocalUrl(value: string) {
 export function validateEnvironment(
   input: Record<string, unknown>,
 ): Environment {
-  const result = environmentSchema.safeParse(input);
+  const result = environmentSchema.safeParse({
+    ...input,
+    // An empty value is as unset as a missing one.
+    NODE_ENV: input.NODE_ENV === "" ? undefined : input.NODE_ENV,
+  });
 
   if (!result.success) {
     const issues = result.error.issues

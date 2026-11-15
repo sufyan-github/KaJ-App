@@ -33,6 +33,7 @@ HTTP status is unchanged from earlier releases; only `code`, `message` and
 | 403                    | `SUBSCRIPTION_REQUIRED`   | `error.subscription.required`           | Your subscription is inactive or expired. Renew it to continue using this feature. | আপনার সাবস্ক্রিপশন চালু নেই বা মেয়াদ শেষ। চালিয়ে যেতে নবায়ন করুন। |
 | 403 (409 on chat send) | `USER_BLOCKED`            | `error.safety.blocked`                  | You can't interact with this person.                                               | এই ব্যক্তির সাথে যোগাযোগ করা যাবে না।                                |
 | 422                    | `HIRING_UNAVAILABLE`      | `error.job.hiring_unavailable`          | This worker can't be hired for this job.                                           | এই কাজে এই কর্মীকে নেওয়া যাবে না।                                   |
+| 403                    | `MESSAGES_NOT_ALLOWED`    | `error.chat.messages_after_hire_only`   | This person accepts messages only after a hire.                                    | এই ব্যক্তি কাজে নিয়োগের পরেই বার্তা গ্রহণ করেন।                     |
 
 Blocks never say who blocked whom. Where a block hides something (feed,
 job detail, applicant list, suggestions, public profile, directory,
@@ -44,18 +45,19 @@ the same fields plus `httpStatus`.
 
 ## Common
 
-| HTTP | code                                         | messageKey                         | Notes                                                                         |
-| ---- | -------------------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------- |
-| 400  | `VALIDATION_FAILED`                          | `error.validation.failed`          | `field` = first bad field; `details` = `[{field, rules[]}]`                   |
-| 400  | `BAD_REQUEST`                                | `error.common.bad_request`         | `message` carries the specific reason                                         |
-| 401  | `UNAUTHORIZED` / auth codes                  | `error.auth.*`                     | sign in again                                                                 |
-| 403  | `FORBIDDEN`                                  | `error.auth.forbidden`             | generic; `message` may be specific                                            |
-| 404  | `NOT_FOUND`                                  | `error.common.not_found`           |                                                                               |
-| 409  | `CONFLICT`                                   | `error.common.conflict`            | `message` carries the business rule, e.g. "Only draft jobs can be published." |
-| 409  | `ALREADY_APPLIED`                            | `error.jobs.already_applied`       | You have already applied to this job. / আপনি এই কাজে আগেই আবেদন করেছেন।       |
-| 409  | `ALREADY_EXISTS`, `CONCURRENT_UPDATE`        | `error.common.*`                   | `CONCURRENT_UPDATE` is retryable                                              |
-| 413  | `PAYLOAD_TOO_LARGE`                          | `error.common.payload_too_large`   |                                                                               |
-| 422  | `BUSINESS_RULE_VIOLATION` and specific codes |                                    |                                                                               |
-| 429  | `RATE_LIMITED`                               | `error.common.rate_limited`        | `Retry-After` header                                                          |
-| 500  | `INTERNAL_SERVER_ERROR`                      | `error.common.internal`            | retryable                                                                     |
-| 503  | `SERVICE_UNAVAILABLE`                        | `error.common.service_unavailable` | retryable                                                                     |
+| HTTP | code                                         | messageKey                               | Notes                                                                         |
+| ---- | -------------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------- |
+| 400  | `VALIDATION_FAILED`                          | `error.validation.failed`                | `field` = first bad field; `details` = `[{field, rules[]}]`                   |
+| 400  | `BAD_REQUEST`                                | `error.common.bad_request`               | `message` carries the specific reason                                         |
+| 401  | `UNAUTHORIZED` / auth codes                  | `error.auth.*`                           | sign in again                                                                 |
+| 403  | `FORBIDDEN`                                  | `error.auth.forbidden`                   | generic; `message` may be specific                                            |
+| 404  | `NOT_FOUND`                                  | `error.common.not_found`                 |                                                                               |
+| 409  | `CONFLICT`                                   | `error.common.conflict`                  | `message` carries the business rule, e.g. "Only draft jobs can be published." |
+| 409  | `ALREADY_APPLIED`                            | `error.jobs.already_applied`             | You have already applied to this job. / আপনি এই কাজে আগেই আবেদন করেছেন।       |
+| 409  | `JOB_TRANSITION_NOT_ALLOWED`                 | `error.admin.job_transition_not_allowed` | Admin console only; `details` = `[{allowedStatus}]`                           |
+| 409  | `ALREADY_EXISTS`, `CONCURRENT_UPDATE`        | `error.common.*`                         | `CONCURRENT_UPDATE` is retryable                                              |
+| 413  | `PAYLOAD_TOO_LARGE`                          | `error.common.payload_too_large`         |                                                                               |
+| 422  | `BUSINESS_RULE_VIOLATION` and specific codes |                                          |                                                                               |
+| 429  | `RATE_LIMITED`                               | `error.common.rate_limited`              | `Retry-After` header                                                          |
+| 500  | `INTERNAL_SERVER_ERROR`                      | `error.common.internal`                  | retryable                                                                     |
+| 503  | `SERVICE_UNAVAILABLE`                        | `error.common.service_unavailable`       | retryable                                                                     |

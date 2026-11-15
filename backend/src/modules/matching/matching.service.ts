@@ -134,6 +134,7 @@ export class MatchingService {
       WHERE u.status = 'ACTIVE'
         AND u.deleted_at IS NULL
         AND 'WORKER' = ANY (u.role_modes::text[])
+        AND COALESCE(p.discoverable, true)
         AND NOT (u.id = ANY (${excludeUserIds}::uuid[]))
         AND (
           ${skillIds ?? null}::uuid[] IS NULL

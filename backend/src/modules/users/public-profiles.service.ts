@@ -4,10 +4,11 @@ import {
   NotFoundException,
   Optional,
 } from "@nestjs/common";
-import { Prisma, RoleMode, UserStatus } from "@prisma/client";
+import { PhotoVisibility, Prisma, RoleMode, UserStatus } from "@prisma/client";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { STORAGE_PORT, StoragePort } from "../../infra/storage/storage.port";
+import { EngagementService } from "../safety/engagement.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
 import { TrainingCertificatesService } from "../training/training-certificates.service";
 import { createPublicProfileProjection } from "./public-profile.projection";
@@ -21,6 +22,10 @@ const workerPublicSelect = {
       lat: true,
       lng: true,
       trust_level: true,
+      photo_visibility: true,
+      show_full_name: true,
+      hide_precise_area: true,
+      discoverable: true,
       primary_location: { select: { name_en: true, name_bn: true } },
     },
   },
@@ -63,10 +68,15 @@ export class PublicProfilesService {
     @Inject(STORAGE_PORT) private readonly storage: StoragePort,
     @Optional() private readonly certificates?: TrainingCertificatesService,
     @Optional() private readonly userBlocks?: UserBlocksService,
+    @Optional() private readonly engagementService?: EngagementService,
   ) {}
 
   private get blocks() {
     return this.userBlocks ?? new UserBlocksService(this.prisma);
+  }
+
+  private get engagement() {
+    return this.engagementService ?? new EngagementService(this.prisma);
   }
 
   /** `viewerUserId`: the signed-in viewer, when the request carried a token. */
@@ -83,9 +93,22 @@ export class PublicProfilesService {
       select: workerPublicSelect,
     });
     if (!user?.profile || !user.worker_profile) throw new NotFoundException();
+    // A worker who left the directory is still visible to people they are
+    // already dealing with (an applicant's poster opens it from the list).
+    const engaged =
+      viewerUserId !== undefined &&
+      (viewerUserId === userId ||
+        (await this.engagement.engaged(viewerUserId, userId)));
+    if (user.profile.discoverable === false && !engaged)
+      throw new NotFoundException();
+    const hired =
+      viewerUserId !== undefined &&
+      user.profile.photo_visibility === PhotoVisibility.AFTER_HIRE &&
+      (viewerUserId === userId ||
+        (await this.engagement.hired(viewerUserId, userId)));
 
     const [projection, trainings] = await Promise.all([
-      this.project(user),
+      this.project(user, hired),
       this.certificates?.publicTrainings(user.id) ?? [],
     ]);
     return { ...projection, trainings };
@@ -106,15 +129,30 @@ export class PublicProfilesService {
         deleted_at: null,
         role_modes: { has: RoleMode.WORKER },
         worker_profile: { isNot: null },
-        profile: locationId
-          ? { is: { primary_location_id: locationId } }
-          : { isNot: null },
+        // People who turned "discoverable" off are not listed.
+        profile: {
+          is: {
+            discoverable: true,
+            ...(locationId ? { primary_location_id: locationId } : {}),
+          },
+        },
         skills: skillId ? { some: { skill_id: skillId } } : undefined,
       },
       select: workerPublicSelect,
       orderBy: { worker_profile: { rating_avg: "desc" } },
       take: 50,
     });
+    const hiredByViewer = viewerUserId
+      ? await this.engagement.hiredWorkers(
+          viewerUserId,
+          users
+            .filter(
+              (user) =>
+                user.profile?.photo_visibility === PhotoVisibility.AFTER_HIRE,
+            )
+            .map((user) => user.id),
+        )
+      : new Set<string>();
     const items = await Promise.all(
       users
         .filter(
@@ -125,21 +163,28 @@ export class PublicProfilesService {
             worker_profile: NonNullable<PublicWorkerRecord["worker_profile"]>;
           } => Boolean(user.profile && user.worker_profile),
         )
-        .map((user) => this.project(user)),
+        .map((user) => this.project(user, hiredByViewer.has(user.id))),
     );
     return { items };
   }
 
-  private async project(user: PublicWorkerRecord) {
+  /** `hiredByViewer`: the viewer has a hire with this worker (photo rule). */
+  private async project(user: PublicWorkerRecord, hiredByViewer = false) {
     if (!user.profile || !user.worker_profile) throw new NotFoundException();
-    const photoUrl = user.profile.photo_key
-      ? (
-          await this.storage.createDownloadUrl({
-            key: user.profile.photo_key,
-            expiresInSeconds: 5 * 60,
-          })
-        ).downloadUrl
-      : null;
+    const visibility =
+      user.profile.photo_visibility ?? PhotoVisibility.EVERYONE;
+    const photoAllowed =
+      visibility === PhotoVisibility.EVERYONE ||
+      (visibility === PhotoVisibility.AFTER_HIRE && hiredByViewer);
+    const photoUrl =
+      user.profile.photo_key && photoAllowed
+        ? (
+            await this.storage.createDownloadUrl({
+              key: user.profile.photo_key,
+              expiresInSeconds: 5 * 60,
+            })
+          ).downloadUrl
+        : null;
     return {
       ...createPublicProfileProjection({
         id: user.id,
@@ -169,6 +214,10 @@ export class PublicProfilesService {
             rule.start_time.getUTCHours() * 60 +
             rule.start_time.getUTCMinutes(),
         ),
+        privacy: {
+          showFullName: user.profile.show_full_name,
+          hidePreciseArea: user.profile.hide_precise_area,
+        },
       }),
       badges: (user.badges ?? []).map(({ badge }) => ({
         slug: badge.slug,

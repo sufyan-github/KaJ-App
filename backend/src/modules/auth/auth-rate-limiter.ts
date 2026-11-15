@@ -14,7 +14,8 @@ export interface AuthRateLimitRequest {
     | "password-setup"
     | "certificate-ip"
     | "admin-login-email"
-    | "admin-login-ip";
+    | "admin-login-ip"
+    | "slots-viewer";
   windowSeconds: number;
 }
 

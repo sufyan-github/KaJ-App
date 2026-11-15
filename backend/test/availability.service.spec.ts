@@ -27,7 +27,11 @@ describe("AvailabilityService", () => {
     assignment: { findMany: assignmentFindMany },
     user: { findFirst: userFindFirst },
   } as unknown as PrismaService;
-  const service = new AvailabilityService(prisma);
+  // A fixed clock in the same week as the fixtures, so the "upcoming dates
+  // only" rule does not turn these tests into time bombs.
+  const service = new AvailabilityService(prisma, undefined, undefined, {
+    now: () => new Date("2026-09-01T00:00:00Z"),
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();

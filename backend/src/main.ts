@@ -10,7 +10,17 @@ async function bootstrap(): Promise<void> {
     bufferLogs: true,
     rawBody: true,
   });
-  app.useLogger(app.get(Logger));
+  const logger = app.get(Logger);
+  app.useLogger(logger);
+  // Errors outside a request (schedulers, event handlers) were invisible.
+  process.on("unhandledRejection", (reason) => {
+    const error = reason instanceof Error ? reason : new Error(String(reason));
+    logger.error(
+      { err: { name: error.name, message: error.message } },
+      error.stack,
+      "unhandledRejection",
+    );
+  });
   configureApp(app);
   app.enableShutdownHooks();
 

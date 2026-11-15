@@ -1,8 +1,20 @@
 import { validateEnvironment } from "../src/config/environment";
 
 describe("environment validation", () => {
+  it.each([undefined, ""])("refuses to start when NODE_ENV is %p", (value) => {
+    expect(() => validateEnvironment({ NODE_ENV: value })).toThrow(
+      /NODE_ENV: must be set explicitly/,
+    );
+  });
+
+  it("refuses an unknown NODE_ENV", () => {
+    expect(() => validateEnvironment({ NODE_ENV: "staging" })).toThrow(
+      /NODE_ENV: must be development, test or production/,
+    );
+  });
+
   it("applies safe local defaults", () => {
-    const environment = validateEnvironment({});
+    const environment = validateEnvironment({ NODE_ENV: "development" });
 
     expect(environment.NODE_ENV).toBe("development");
     expect(environment.PORT).toBe(3000);
@@ -45,7 +57,10 @@ describe("environment validation", () => {
 
   it("keeps the development fallbacks for localhost and tests", () => {
     expect(() =>
-      validateEnvironment({ API_BASE_URL: "http://127.0.0.1:3100" }),
+      validateEnvironment({
+        NODE_ENV: "development",
+        API_BASE_URL: "http://127.0.0.1:3100",
+      }),
     ).not.toThrow();
     expect(() =>
       validateEnvironment({
@@ -56,20 +71,26 @@ describe("environment validation", () => {
   });
 
   it("parses the trusted proxy hop count", () => {
-    expect(validateEnvironment({}).TRUST_PROXY_HOPS).toBe(0);
     expect(
-      validateEnvironment({ TRUST_PROXY_HOPS: "1" }).TRUST_PROXY_HOPS,
+      validateEnvironment({ NODE_ENV: "development" }).TRUST_PROXY_HOPS,
+    ).toBe(0);
+    expect(
+      validateEnvironment({ NODE_ENV: "development", TRUST_PROXY_HOPS: "1" })
+        .TRUST_PROXY_HOPS,
     ).toBe(1);
-    expect(() => validateEnvironment({ TRUST_PROXY_HOPS: "-1" })).toThrow();
+    expect(() =>
+      validateEnvironment({ NODE_ENV: "development", TRUST_PROXY_HOPS: "-1" }),
+    ).toThrow();
   });
 
   it("accepts a six-digit fixed OTP only outside production", () => {
     expect(
-      validateEnvironment({ OTP_FIXED_CODE: "123456" }).OTP_FIXED_CODE,
+      validateEnvironment({ NODE_ENV: "development", OTP_FIXED_CODE: "123456" })
+        .OTP_FIXED_CODE,
     ).toBe("123456");
-    expect(() => validateEnvironment({ OTP_FIXED_CODE: "12345" })).toThrow(
-      "OTP_FIXED_CODE",
-    );
+    expect(() =>
+      validateEnvironment({ NODE_ENV: "development", OTP_FIXED_CODE: "12345" }),
+    ).toThrow("OTP_FIXED_CODE");
     expect(() =>
       validateEnvironment({
         ADMIN_SESSION_SECRET: "c".repeat(32),
@@ -85,11 +106,12 @@ describe("environment validation", () => {
   });
 
   it("requires the private gateway URL and HMAC key for bdapps", () => {
-    expect(() => validateEnvironment({ SMS_PROVIDER: "bdapps" })).toThrow(
-      "BDAPPS_GATEWAY_URL",
-    );
+    expect(() =>
+      validateEnvironment({ NODE_ENV: "development", SMS_PROVIDER: "bdapps" }),
+    ).toThrow("BDAPPS_GATEWAY_URL");
     expect(() =>
       validateEnvironment({
+        NODE_ENV: "development",
         BDAPPS_GATEWAY_URL: "https://gateway.example/api",
         BDAPPS_INTERNAL_API_KEY: "short",
         SMS_PROVIDER: "bdapps",
@@ -97,6 +119,7 @@ describe("environment validation", () => {
     ).toThrow("BDAPPS_INTERNAL_API_KEY");
     expect(
       validateEnvironment({
+        NODE_ENV: "development",
         BDAPPS_GATEWAY_URL: "http://127.0.0.1:8766/api",
         BDAPPS_INTERNAL_API_KEY: "a".repeat(64),
         OPERATOR_PROVIDER: "bdapps",

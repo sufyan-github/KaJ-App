@@ -1,12 +1,15 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
   Optional,
 } from "@nestjs/common";
 import { AssignmentStatus } from "@prisma/client";
 
+import { CLOCK, Clock } from "../../common/time/clock";
 import { PrismaService } from "../../infra/prisma/prisma.service";
+import { EngagementService } from "../safety/engagement.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
 import {
   AvailabilityRuleInput,
@@ -28,10 +31,20 @@ export class AvailabilityService {
   constructor(
     private readonly prisma: PrismaService,
     @Optional() private readonly userBlocks?: UserBlocksService,
+    @Optional() private readonly engagementService?: EngagementService,
+    @Optional() @Inject(CLOCK) private readonly clock?: Clock,
   ) {}
+
+  private now() {
+    return this.clock?.now() ?? new Date();
+  }
 
   private get blocks() {
     return this.userBlocks ?? new UserBlocksService(this.prisma);
+  }
+
+  private get engagement() {
+    return this.engagementService ?? new EngagementService(this.prisma);
   }
 
   async getAvailability(userId: string) {
@@ -174,12 +187,25 @@ export class AvailabilityService {
     if (to.getTime() - from.getTime() > 31 * 24 * 60 * 60_000) {
       throw new BadRequestException("Slot range cannot exceed 31 days.");
     }
+    // Slots exist to book upcoming work, not to reconstruct someone's past
+    // whereabouts. A day of slack covers clock and timezone differences.
+    if (to.getTime() < this.now().getTime() - 24 * 60 * 60_000) {
+      throw new BadRequestException("Slots are only shown for upcoming dates.");
+    }
 
     const user = await this.prisma.user.findFirst({
       where: { id: userId, deleted_at: null, role_modes: { has: "WORKER" } },
-      select: { id: true },
+      select: { id: true, profile: { select: { discoverable: true } } },
     });
     if (!user) throw new NotFoundException();
+    // A worker hidden from the directory is only bookable by people already
+    // dealing with them.
+    if (
+      user.profile?.discoverable === false &&
+      viewerUserId !== userId &&
+      !(viewerUserId && (await this.engagement.engaged(viewerUserId, userId)))
+    )
+      throw new NotFoundException();
 
     const [rules, exceptions, assignments] = await Promise.all([
       this.prisma.availabilityRule.findMany({

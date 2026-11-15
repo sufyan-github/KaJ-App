@@ -8,7 +8,9 @@ import {
 } from "@nestjs/common";
 import { STATUS_CODES } from "node:http";
 import { Prisma } from "@prisma/client";
-import { Response } from "express";
+import { Request, Response } from "express";
+
+import { pathOnly } from "../../config/logger.config";
 
 import { ApiErrorDescriptor, ApiErrorEnvelope } from "../api/api-envelope";
 import { KajHttpException } from "../errors/kaj-http.exception";
@@ -161,6 +163,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
   constructor(private readonly requestContext: RequestContextStorage) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
+    const request = host.switchToHttp().getRequest<Request | undefined>();
     const response = host.switchToHttp().getResponse<Response>();
     const { status, descriptor } = describeException(exception);
     const requestId = this.requestContext.getRequestId();
@@ -175,9 +178,24 @@ export class HttpExceptionFilter implements ExceptionFilter {
           : new Error("Non-Error value thrown");
       // Only the error itself is logged; request bodies and headers are not.
       this.logger.error(
-        { err: { name: error.name, message: error.message }, requestId },
+        {
+          err: { name: error.name, message: error.message },
+          ...requestFields(request),
+          requestId,
+          statusCode: status,
+        },
         error.stack,
       );
+    } else {
+      // One line per refused request, including guard refusals (401/403),
+      // which never reach the logging interceptor. Code only, no message.
+      this.logger.log({
+        code: descriptor.code,
+        ...requestFields(request),
+        requestId,
+        statusCode: status,
+        msg: "request failed",
+      });
     }
 
     if (exception instanceof RateLimitException) {
@@ -266,4 +284,10 @@ function withThrownDetails(
       ? { retryable: body.retryable }
       : {}),
   };
+}
+
+function requestFields(request: Request | undefined) {
+  return request?.method
+    ? { method: request.method, path: pathOnly(request.originalUrl) }
+    : {};
 }

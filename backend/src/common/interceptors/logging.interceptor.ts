@@ -1,7 +1,6 @@
 import {
   CallHandler,
   ExecutionContext,
-  HttpException,
   Inject,
   Injectable,
   NestInterceptor,
@@ -10,6 +9,7 @@ import { Request, Response } from "express";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { Observable, tap } from "rxjs";
 
+import { pathOnly } from "../../config/logger.config";
 import { RequestContextStorage } from "../context/request-context.storage";
 import { CLOCK, Clock } from "../time/clock";
 
@@ -27,18 +27,10 @@ export class LoggingInterceptor implements NestInterceptor {
     const response = context.switchToHttp().getResponse<Response>();
     const startedAt = this.clock.now().getTime();
 
+    // Failed requests are logged once by HttpExceptionFilter, which also sees
+    // errors thrown by guards (they run before interceptors).
     return next.handle().pipe(
       tap({
-        error: (error: unknown) => {
-          this.writeLog(
-            request,
-            error instanceof HttpException
-              ? error.getStatus()
-              : HttpStatusCode.INTERNAL_SERVER_ERROR,
-            startedAt,
-            "error",
-          );
-        },
         next: () => {
           this.writeLog(request, response.statusCode, startedAt, "info");
         },
@@ -50,12 +42,12 @@ export class LoggingInterceptor implements NestInterceptor {
     request: Request,
     statusCode: number,
     startedAt: number,
-    level: "error" | "info",
+    level: "info",
   ): void {
     const entry = {
       durationMs: Math.max(0, this.clock.now().getTime() - startedAt),
       method: request.method,
-      path: request.originalUrl,
+      path: pathOnly(request.originalUrl),
       requestId: this.requestContext.getRequestId(),
       statusCode,
     };
@@ -63,7 +55,3 @@ export class LoggingInterceptor implements NestInterceptor {
     this.logger[level](entry, "request completed");
   }
 }
-
-const HttpStatusCode = {
-  INTERNAL_SERVER_ERROR: 500,
-} as const;

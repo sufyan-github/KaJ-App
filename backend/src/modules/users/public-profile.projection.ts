@@ -17,16 +17,22 @@ export interface PublicProfileSource {
     isVerified: boolean;
   }>;
   availabilityStartMinutes: readonly number[];
+  /** The person's own privacy choices; omitted = the defaults. */
+  privacy?: { showFullName?: boolean; hidePreciseArea?: boolean };
 }
 
 export function createPublicProfileProjection(source: PublicProfileSource) {
   return {
     id: source.id,
-    displayName: maskPublicDisplayName(source.displayName),
+    displayName: source.privacy?.showFullName
+      ? source.displayName.trim()
+      : maskPublicDisplayName(source.displayName),
     photoUrl: source.photoUrl,
     area: source.area,
     location:
-      source.latitude === null || source.longitude === null
+      source.privacy?.hidePreciseArea ||
+      source.latitude === null ||
+      source.longitude === null
         ? null
         : {
             latitude: roundCoordinateToApprox500m(source.latitude),

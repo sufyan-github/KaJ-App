@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   ParseUUIDPipe,
   Post,
@@ -16,6 +17,8 @@ import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { Roles } from "../../common/decorators/roles.decorator";
 import { Policy } from "../../common/policy/policy.decorator";
 import { Policies } from "../../common/policy/policy.types";
+import { RateLimitException } from "../../common/errors/rate-limit.exception";
+import { AUTH_RATE_LIMITER, AuthRateLimiter } from "../auth/auth-rate-limiter";
 import { AccessTokenClaims } from "../auth/auth-token.service";
 import { AvailabilityService } from "./availability.service";
 import {
@@ -67,18 +70,51 @@ export class AvailabilityController {
   }
 }
 
+// Enough for comparing a few workers while booking; not for sweeping
+// through everyone's schedule.
+const SLOT_LOOKUPS_PER_VIEWER = 60;
+const SLOT_LOOKUP_WINDOW_SECONDS = 60 * 60;
+
 @ApiTags("availability")
 @Controller("workers/:workerId/availability")
 export class PublicAvailabilityController {
-  constructor(private readonly availability: AvailabilityService) {}
+  constructor(
+    private readonly availability: AvailabilityService,
+    @Inject(AUTH_RATE_LIMITER) private readonly rateLimiter: AuthRateLimiter,
+  ) {}
 
+  /**
+   * A worker's free slots, for booking them: only people who can hire
+   * (customer or business), for upcoming dates, not across a block, not for
+   * a hidden worker they have no dealings with, and rate limited per viewer.
+   */
   @Get("slots")
+  @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
   @Policy(Policies.authenticated())
-  getSlots(
+  async getSlots(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("workerId", new ParseUUIDPipe()) workerId: string,
     @Query() query: AvailabilitySlotsQueryDto,
   ) {
+    const limit = await this.rateLimiter.consume({
+      key: claims.sub,
+      limit: SLOT_LOOKUPS_PER_VIEWER,
+      scope: "slots-viewer",
+      windowSeconds: SLOT_LOOKUP_WINDOW_SECONDS,
+    });
+    if (!limit.allowed)
+      throw new RateLimitException(
+        {
+          action: null,
+          code: "RATE_LIMITED",
+          details: [],
+          field: null,
+          message: "Too many requests. Try again later.",
+          messageKey: "error.common.rate_limited",
+          retryable: true,
+        },
+        limit.retryAfterSeconds,
+      );
     return this.availability.getPublicSlots(
       workerId,
       query.from,

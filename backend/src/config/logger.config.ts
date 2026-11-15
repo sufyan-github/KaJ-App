@@ -33,13 +33,19 @@ export function createLoggerConfig(nodeEnvironment: string): Params {
       level: nodeEnvironment === "test" ? "silent" : "info",
       redact: loggerRedaction,
       serializers: {
+        // Path only: query strings carry searches such as phone numbers.
         req: (request) => ({
           id: request.id,
           method: request.method,
-          url: request.url,
+          url: pathOnly(request.url),
         }),
         res: (response) => ({ statusCode: response.statusCode }),
       },
     },
   };
+}
+
+/** Drops the query string (and fragment) from a request URL. */
+export function pathOnly(url: string | undefined): string {
+  return (url ?? "").split(/[?#]/u)[0] ?? "";
 }

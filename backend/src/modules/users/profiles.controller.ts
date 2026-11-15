@@ -17,6 +17,7 @@ import { Roles } from "../../common/decorators/roles.decorator";
 import { Policy } from "../../common/policy/policy.decorator";
 import { Policies } from "../../common/policy/policy.types";
 import { AccessTokenClaims } from "../auth/auth-token.service";
+import { UpdatePrivacyDto } from "./dto/update-privacy.dto";
 import { UpdateProfileDto } from "./dto/update-profile.dto";
 import { UpdateWorkerProfileDto } from "./dto/update-worker-profile.dto";
 import { UpdateWorkerSkillsDto } from "./dto/update-worker-skills.dto";
@@ -97,6 +98,21 @@ export class ProfilesController {
     @Param("id", new ParseUUIDPipe()) id: string,
   ) {
     return this.portfolio.remove(claims.sub, id);
+  }
+
+  @Get("privacy")
+  @Policy(Policies.authenticated())
+  getPrivacy(@CurrentUser() claims: AccessTokenClaims) {
+    return this.users.getPrivacy(claims.sub);
+  }
+
+  @Put("privacy")
+  @Policy(Policies.authenticated())
+  updatePrivacy(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Body() body: UpdatePrivacyDto,
+  ) {
+    return this.users.updatePrivacy(claims.sub, body);
   }
 
   @Put()

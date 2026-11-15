@@ -1,17 +1,19 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
   Optional,
 } from "@nestjs/common";
-import { MessageType, Prisma } from "@prisma/client";
+import { MessagePermission, MessageType, Prisma } from "@prisma/client";
 
 import { CLOCK, Clock } from "../../common/time/clock";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { STORAGE_PORT, StoragePort } from "../../infra/storage/storage.port";
 import { NotificationsService } from "../notifications/notifications.service";
+import { EngagementService } from "../safety/engagement.service";
 import { USER_BLOCKED, UserBlocksService } from "../safety/user-blocks.service";
 import { ChatEvents } from "./chat.events";
 import { needsPaymentSafetyWarning } from "./chat-safety";
@@ -26,10 +28,15 @@ export class ChatService {
     @Inject(STORAGE_PORT) private readonly storage: StoragePort,
     @Inject(CLOCK) private readonly clock: Clock,
     @Optional() private readonly userBlocks?: UserBlocksService,
+    @Optional() private readonly engagementService?: EngagementService,
   ) {}
 
   private get blocks() {
     return this.userBlocks ?? new UserBlocksService(this.prisma);
+  }
+
+  private get engagement() {
+    return this.engagementService ?? new EngagementService(this.prisma);
   }
 
   async list(userId: string) {
@@ -97,6 +104,7 @@ export class ChatService {
       (participantUserId === job.poster_user_id && userId === workerUserId);
     if (!isPair) throw new NotFoundException();
     await this.blocks.assertNotBlocked(userId, participantUserId);
+    await this.assertAcceptsMessagesFrom(participantUserId, userId);
     const eligible = await this.prisma.application.findFirst({
       where: { job_id: jobId, worker_user_id: workerUserId },
       select: { id: true },
@@ -363,6 +371,29 @@ export class ChatService {
     if (input.type === MessageType.IMAGE && !input.attachmentDocumentId) {
       throw new BadRequestException("Image messages need an attachment.");
     }
+  }
+
+  /**
+   * The other person's "who can message me" choice. ENGAGED_ONLY waits for
+   * a hire between the two; existing conversations are not affected.
+   */
+  private async assertAcceptsMessagesFrom(
+    recipientUserId: string,
+    senderUserId: string,
+  ) {
+    const recipient = await this.prisma.profile.findUnique({
+      where: { user_id: recipientUserId },
+      select: { allow_messages_from: true },
+    });
+    if (
+      recipient?.allow_messages_from === MessagePermission.ENGAGED_ONLY &&
+      !(await this.engagement.hired(recipientUserId, senderUserId))
+    )
+      throw new ForbiddenException({
+        code: "MESSAGES_NOT_ALLOWED",
+        message: "This person accepts messages only after a hire.",
+        messageKey: "error.chat.messages_after_hire_only",
+      });
   }
 
   /** Sending keeps its historical 409 status, now with the USER_BLOCKED code. */
