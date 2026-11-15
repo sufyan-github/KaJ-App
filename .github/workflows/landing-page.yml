@@ -1,7 +1,7 @@
 name: Landing page
 
 # Builds the KAAJ landing page and publishes it to GitHub Pages on every push
-# that touches it. The site is static: the PHP contact form is not deployed.
+# that touches it. The site is static.
 on:
   push:
     branches: [codex/production-hardening]
@@ -51,7 +51,6 @@ jobs:
 
       - name: Prepare static site
         run: |
-          rm -f dist/client/contact.php
           cp dist/client/index.html dist/client/404.html
           touch dist/client/.nojekyll
 
