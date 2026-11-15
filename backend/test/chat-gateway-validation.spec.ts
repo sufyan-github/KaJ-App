@@ -96,14 +96,26 @@ describe("chat gateway validation and account rules", () => {
   });
 
   it.each([
-    ["restricted", { moderation_level: ModerationLevel.RESTRICT }],
-    ["required to re-verify", { reverification_required: true }],
-    ["suspended", { status: UserStatus.SUSPENDED }],
-    ["banned", { status: UserStatus.BANNED }],
-  ])("blocks sending when the account is %s", async (_label, change) => {
+    [
+      "restricted",
+      { moderation_level: ModerationLevel.RESTRICT },
+      "ACCOUNT_RESTRICTED",
+    ],
+    [
+      "required to re-verify",
+      { reverification_required: true },
+      "REVERIFICATION_REQUIRED",
+    ],
+    ["suspended", { status: UserStatus.SUSPENDED }, "ACCOUNT_SUSPENDED"],
+    ["banned", { status: UserStatus.BANNED }, "ACCOUNT_UNAVAILABLE"],
+  ])("blocks sending when the account is %s", async (_label, change, code) => {
     const { gateway, send, socket } = setup({ ...active, ...change });
     const error = await wsError(gateway.send(socket, message));
-    expect(error).toMatchObject({ code: "FORBIDDEN" });
+    // The same code and i18n key the HTTP guard returns.
+    expect(error).toMatchObject({
+      code,
+      messageKey: expect.stringMatching(/^error\.account\./),
+    });
     expect(send).not.toHaveBeenCalled();
   });
 
@@ -134,7 +146,7 @@ describe("chat gateway validation and account rules", () => {
         conversationId: CONVERSATION,
       }),
     );
-    expect(error).toMatchObject({ code: "FORBIDDEN" });
+    expect(error).toMatchObject({ code: "ACCOUNT_SUSPENDED" });
     expect(suspended.assertParticipant).not.toHaveBeenCalled();
   });
 

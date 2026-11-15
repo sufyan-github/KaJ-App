@@ -43,6 +43,53 @@ describe("AccountModerationGuard", () => {
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
 
+  it.each([
+    [
+      "restricted",
+      { moderation_level: ModerationLevel.RESTRICT },
+      "ACCOUNT_RESTRICTED",
+      "error.account.restricted",
+    ],
+    [
+      "awaiting re-verification",
+      { reverification_required: true },
+      "REVERIFICATION_REQUIRED",
+      "error.account.reverification_required",
+    ],
+    [
+      "suspended",
+      { status: UserStatus.SUSPENDED },
+      "ACCOUNT_SUSPENDED",
+      "error.account.suspended",
+    ],
+    [
+      "banned",
+      { status: UserStatus.BANNED },
+      "ACCOUNT_UNAVAILABLE",
+      "error.account.unavailable",
+    ],
+  ])(
+    "denies a %s account with a stable code",
+    async (_label, change, code, messageKey) => {
+      findAccount.mockResolvedValue({
+        status: UserStatus.ACTIVE,
+        moderation_level: ModerationLevel.NONE,
+        restriction_ends_at: null,
+        reverification_required: false,
+        deleted_at: null,
+        ...change,
+      });
+      const denied = await guard
+        .canActivate(context("POST", "/api/v1/jobs"))
+        .catch((error: ForbiddenException) => error);
+      expect(denied).toBeInstanceOf(ForbiddenException);
+      expect((denied as ForbiddenException).getResponse()).toMatchObject({
+        code,
+        messageKey,
+      });
+    },
+  );
+
   it("never blocks report or block safety actions", async () => {
     findAccount.mockResolvedValue({
       status: UserStatus.ACTIVE,

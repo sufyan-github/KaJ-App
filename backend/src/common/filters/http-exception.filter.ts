@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Logger,
 } from "@nestjs/common";
+import { STATUS_CODES } from "node:http";
 import { Prisma } from "@prisma/client";
 import { Response } from "express";
 
@@ -68,6 +69,24 @@ const errorByStatus: Partial<Record<HttpStatus, ApiErrorDescriptor>> = {
     message: "The request violates a business rule.",
     messageKey: "error.common.business_rule",
     retryable: false,
+  },
+  [HttpStatus.PAYLOAD_TOO_LARGE]: {
+    action: null,
+    code: "PAYLOAD_TOO_LARGE",
+    details: [],
+    field: null,
+    message: "The request is too large.",
+    messageKey: "error.common.payload_too_large",
+    retryable: false,
+  },
+  [HttpStatus.SERVICE_UNAVAILABLE]: {
+    action: null,
+    code: "SERVICE_UNAVAILABLE",
+    details: [],
+    field: null,
+    message: "The service is temporarily unavailable. Try again shortly.",
+    messageKey: "error.common.service_unavailable",
+    retryable: true,
   },
   [HttpStatus.TOO_MANY_REQUESTS]: {
     action: null,
@@ -143,7 +162,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<Response>();
-    const { status, descriptor } = this.resolve(exception);
+    const { status, descriptor } = describeException(exception);
     const requestId = this.requestContext.getRequestId();
     const envelope: ApiErrorEnvelope = {
       error: { ...descriptor, requestId },
@@ -167,39 +186,44 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     response.status(status).json(envelope);
   }
+}
 
-  private resolve(exception: unknown): {
-    status: number;
-    descriptor: ApiErrorDescriptor;
-  } {
-    if (exception instanceof KajHttpException)
-      return {
-        status: exception.getStatus(),
-        descriptor: exception.descriptor,
-      };
-
-    if (exception instanceof HttpException) {
-      const status = exception.getStatus();
-      const base = errorByStatus[status as HttpStatus] ?? {
-        ...internalError,
-        retryable: status >= 500,
-      };
-      return {
-        status,
-        descriptor: withThrownDetails(base, exception.getResponse()),
-      };
-    }
-
-    if (exception instanceof Prisma.PrismaClientKnownRequestError) {
-      const mapped = prismaErrors[exception.code];
-      if (mapped) return mapped;
-    }
-
+/**
+ * Maps any thrown value to the API error status and descriptor. Shared by
+ * the HTTP filter and the chat gateway, so both transports report the same
+ * code, message and messageKey.
+ */
+export function describeException(exception: unknown): {
+  status: number;
+  descriptor: ApiErrorDescriptor;
+} {
+  if (exception instanceof KajHttpException)
     return {
-      status: HttpStatus.INTERNAL_SERVER_ERROR,
-      descriptor: internalError,
+      status: exception.getStatus(),
+      descriptor: exception.descriptor,
+    };
+
+  if (exception instanceof HttpException) {
+    const status = exception.getStatus();
+    const base = errorByStatus[status as HttpStatus] ?? {
+      ...internalError,
+      retryable: status >= 500,
+    };
+    return {
+      status,
+      descriptor: withThrownDetails(base, exception.getResponse(), status),
     };
   }
+
+  if (exception instanceof Prisma.PrismaClientKnownRequestError) {
+    const mapped = prismaErrors[exception.code];
+    if (mapped) return mapped;
+  }
+
+  return {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    descriptor: internalError,
+  };
 }
 
 /**
@@ -210,10 +234,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
 function withThrownDetails(
   base: ApiErrorDescriptor,
   thrown: string | object,
+  status: number,
 ): ApiErrorDescriptor {
+  // `new ForbiddenException()` carries only the reason phrase ("Forbidden");
+  // the generic descriptor's sentence is more useful to show.
+  const reasonPhrase = STATUS_CODES[status];
   const usable = (value: unknown): value is string =>
     typeof value === "string" &&
     value.trim().length > 0 &&
+    value !== reasonPhrase &&
     !FRAMEWORK_ROUTE_MESSAGE.test(value);
 
   if (typeof thrown === "string")

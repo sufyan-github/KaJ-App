@@ -122,7 +122,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection {
       this.clock.now(),
       { mutation, safetyWrite: false },
     );
-    if (denial) throw new WsException({ code: "FORBIDDEN", message: denial });
+    if (denial) throw new WsException({ ...denial });
   }
 
   private async userId(client: AuthenticatedSocket) {

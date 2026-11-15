@@ -17,13 +17,33 @@ function findFirstField(errors: ValidationError[], parent = ""): string | null {
   return null;
 }
 
+export interface ValidationDetail {
+  field: string;
+  /** class-validator rule names, e.g. ["isUuid"]. Never the submitted value. */
+  rules: string[];
+}
+
+function collectDetails(
+  errors: ValidationError[],
+  parent = "",
+  out: ValidationDetail[] = [],
+): ValidationDetail[] {
+  for (const error of errors) {
+    const field = parent ? `${parent}.${error.property}` : error.property;
+    if (error.constraints && Object.keys(error.constraints).length > 0)
+      out.push({ field, rules: Object.keys(error.constraints) });
+    collectDetails(error.children ?? [], field, out);
+  }
+  return out.slice(0, 50);
+}
+
 export class RequestValidationException extends KajHttpException {
   constructor(errors: ValidationError[]) {
     super(
       {
         action: null,
         code: "VALIDATION_FAILED",
-        details: [],
+        details: collectDetails(errors),
         field: findFirstField(errors),
         message: "Request validation failed.",
         messageKey: "error.validation.failed",

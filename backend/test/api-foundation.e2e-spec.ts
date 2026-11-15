@@ -130,7 +130,7 @@ describe("API foundation", () => {
     expect(response.body.error).toEqual({
       action: null,
       code: "VALIDATION_FAILED",
-      details: [],
+      details: [{ field: "name", rules: expect.arrayContaining(["isString"]) }],
       field: "name",
       message: "Request validation failed.",
       messageKey: "error.validation.failed",

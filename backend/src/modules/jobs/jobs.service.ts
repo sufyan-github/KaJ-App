@@ -432,7 +432,11 @@ export class JobsService {
           error instanceof Prisma.PrismaClientKnownRequestError &&
           error.code === "P2002"
         ) {
-          throw new ConflictException("You have already applied to this job.");
+          throw new ConflictException({
+            code: "ALREADY_APPLIED",
+            message: "You have already applied to this job.",
+            messageKey: "error.jobs.already_applied",
+          });
         }
         throw error;
       });

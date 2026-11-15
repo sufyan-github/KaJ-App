@@ -5,6 +5,8 @@ import {
   HttpStatus,
   Logger,
   NotFoundException,
+  PayloadTooLargeException,
+  ServiceUnavailableException,
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
@@ -110,7 +112,45 @@ describe("HttpExceptionFilter", () => {
     const { error } = capture(new NotFoundException());
     expect(error).toMatchObject({
       code: "NOT_FOUND",
+      message: "Resource not found.",
       messageKey: "error.common.not_found",
+    });
+    expect(capture(new ForbiddenException()).error).toMatchObject({
+      code: "FORBIDDEN",
+      message: "You are not allowed to perform this action.",
+    });
+  });
+
+  it("keeps a moderation denial's code, message and key", () => {
+    const { status, error } = capture(
+      new ForbiddenException({
+        code: "ACCOUNT_RESTRICTED",
+        message: "Marketplace actions are temporarily restricted.",
+        messageKey: "error.account.restricted",
+      }),
+    );
+    expect(status).toBe(HttpStatus.FORBIDDEN);
+    expect(error).toMatchObject({
+      code: "ACCOUNT_RESTRICTED",
+      message: "Marketplace actions are temporarily restricted.",
+      messageKey: "error.account.restricted",
+      retryable: false,
+    });
+  });
+
+  it("maps 503 to a retryable SERVICE_UNAVAILABLE, not an internal error", () => {
+    const { status, error } = capture(new ServiceUnavailableException());
+    expect(status).toBe(HttpStatus.SERVICE_UNAVAILABLE);
+    expect(error).toMatchObject({
+      code: "SERVICE_UNAVAILABLE",
+      messageKey: "error.common.service_unavailable",
+      retryable: true,
+    });
+  });
+
+  it("maps 413 to PAYLOAD_TOO_LARGE", () => {
+    expect(capture(new PayloadTooLargeException()).error).toMatchObject({
+      code: "PAYLOAD_TOO_LARGE",
     });
   });
 

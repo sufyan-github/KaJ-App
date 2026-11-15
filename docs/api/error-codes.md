@@ -1,0 +1,54 @@
+# API error codes
+
+Every error response has the same envelope:
+
+```json
+{
+  "error": {
+    "code": "ACCOUNT_RESTRICTED",
+    "message": "…",
+    "messageKey": "error.account.restricted",
+    "field": null,
+    "details": [],
+    "action": null,
+    "retryable": false,
+    "requestId": "…"
+  }
+}
+```
+
+Clients should branch on `code` (stable), show their own translation for
+`messageKey`, and fall back to `message` (English) for unknown keys. The
+HTTP status is unchanged from earlier releases; only `code`, `message` and
+`messageKey` became more specific.
+
+## Account and access
+
+| HTTP | code                      | messageKey                              | English                                                                            | বাংলা                                                                |
+| ---- | ------------------------- | --------------------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| 403  | `ACCOUNT_RESTRICTED`      | `error.account.restricted`              | Marketplace actions are temporarily restricted.                                    | আপনার অ্যাকাউন্টে কাজের সুবিধা সাময়িকভাবে সীমিত।                    |
+| 403  | `REVERIFICATION_REQUIRED` | `error.account.reverification_required` | Identity re-verification is required before marketplace actions.                   | কাজ চালিয়ে যেতে আবার পরিচয় যাচাই করুন।                             |
+| 403  | `ACCOUNT_SUSPENDED`       | `error.account.suspended`               | This account is suspended.                                                         | এই অ্যাকাউন্ট স্থগিত আছে।                                            |
+| 403  | `ACCOUNT_UNAVAILABLE`     | `error.account.unavailable`             | This account is unavailable.                                                       | এই অ্যাকাউন্ট ব্যবহার করা যাচ্ছে না।                                 |
+| 403  | `SUBSCRIPTION_REQUIRED`   | `error.subscription.required`           | Your subscription is inactive or expired. Renew it to continue using this feature. | আপনার সাবস্ক্রিপশন চালু নেই বা মেয়াদ শেষ। চালিয়ে যেতে নবায়ন করুন। |
+
+The account codes are also sent on the chat socket (`message:send`,
+`conversation:join`) as the `WsException` payload.
+
+## Common
+
+| HTTP | code                                         | messageKey                         | Notes                                                                         |
+| ---- | -------------------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------- |
+| 400  | `VALIDATION_FAILED`                          | `error.validation.failed`          | `field` = first bad field; `details` = `[{field, rules[]}]`                   |
+| 400  | `BAD_REQUEST`                                | `error.common.bad_request`         | `message` carries the specific reason                                         |
+| 401  | `UNAUTHORIZED` / auth codes                  | `error.auth.*`                     | sign in again                                                                 |
+| 403  | `FORBIDDEN`                                  | `error.auth.forbidden`             | generic; `message` may be specific                                            |
+| 404  | `NOT_FOUND`                                  | `error.common.not_found`           |                                                                               |
+| 409  | `CONFLICT`                                   | `error.common.conflict`            | `message` carries the business rule, e.g. "Only draft jobs can be published." |
+| 409  | `ALREADY_APPLIED`                            | `error.jobs.already_applied`       | You have already applied to this job. / আপনি এই কাজে আগেই আবেদন করেছেন।       |
+| 409  | `ALREADY_EXISTS`, `CONCURRENT_UPDATE`        | `error.common.*`                   | `CONCURRENT_UPDATE` is retryable                                              |
+| 413  | `PAYLOAD_TOO_LARGE`                          | `error.common.payload_too_large`   |                                                                               |
+| 422  | `BUSINESS_RULE_VIOLATION` and specific codes |                                    |                                                                               |
+| 429  | `RATE_LIMITED`                               | `error.common.rate_limited`        | `Retry-After` header                                                          |
+| 500  | `INTERNAL_SERVER_ERROR`                      | `error.common.internal`            | retryable                                                                     |
+| 503  | `SERVICE_UNAVAILABLE`                        | `error.common.service_unavailable` | retryable                                                                     |
