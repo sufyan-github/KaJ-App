@@ -480,8 +480,14 @@ export class JobsService {
     const applications = await this.prisma.application.findMany({
       where: { job_id: jobId, worker_user_id: { notIn: hidden } },
       orderBy: { created_at: "desc" },
+      include: { worker: { select: applicantSelect } },
     });
-    return { items: applications.map(serializeApplication) };
+    return {
+      items: applications.map((application) => ({
+        ...serializeApplication(application),
+        applicant: applicantSummary(application.worker),
+      })),
+    };
   }
 
   async listAssignments(userId: string) {
@@ -1741,6 +1747,44 @@ async function siteCoordinates(
   return profile?.lat != null && profile.lng != null
     ? { lat: profile.lat, lng: profile.lng }
     : { lat: null, lng: null };
+}
+
+const applicantSelect = {
+  id: true,
+  profile: { select: { display_name: true, trust_level: true } },
+  worker_profile: {
+    select: {
+      rating_avg: true,
+      rating_count: true,
+      completed_jobs_count: true,
+    },
+  },
+  badges: {
+    where: { revoked_at: null },
+    select: { badge: { select: { slug: true } } },
+  },
+} satisfies Prisma.UserSelect;
+
+/**
+ * What a poster needs to choose between applicants without opening every
+ * profile. The name is masked as on the public profile, which the app opens
+ * from `userId` (GET /users/:id/public).
+ */
+function applicantSummary(
+  worker: Prisma.UserGetPayload<{ select: typeof applicantSelect }>,
+) {
+  const trustLevel = worker.profile?.trust_level ?? TrustLevel.NONE;
+  return {
+    userId: worker.id,
+    displayName: maskPublicDisplayName(worker.profile?.display_name ?? ""),
+    trustLevel,
+    // Identity checked (NID + selfie), not merely phone-registered.
+    isVerified: hasTrust(trustLevel, TrustLevel.IDENTITY),
+    ratingAverage: worker.worker_profile?.rating_avg.toString() ?? "0",
+    ratingCount: worker.worker_profile?.rating_count ?? 0,
+    completedJobsCount: worker.worker_profile?.completed_jobs_count ?? 0,
+    badges: worker.badges.map(({ badge }) => badge.slug),
+  };
 }
 
 function serializeApplication(application: {
