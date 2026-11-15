@@ -139,3 +139,67 @@ jobs:
           docker run --rm -v "$GITHUB_WORKSPACE:/repo"
           ghcr.io/gitleaks/gitleaks:v8.24.3
           detect --source /repo --redact --no-banner
+
+  future-clock:
+    name: Unit tests with the clock three years ahead
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: corepack enable
+      - run: corepack pnpm install --frozen-lockfile
+      - run: corepack pnpm --filter @kaj/backend exec prisma generate
+        env:
+          DATABASE_URL: postgresql://unused:unused@localhost:5432/unused
+      # No database: the DB suites skip; every unit spec must still pass
+      # when "now" is ~3 years later (catches hard-coded-date time bombs).
+      - run: corepack pnpm --filter @kaj/backend test:future-clock
+        env:
+          NODE_ENV: test
+
+  admin-real-backend:
+    name: Admin journey against a real backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: kaj_test
+          POSTGRES_USER: kaj
+          POSTGRES_PASSWORD: kaj_ci_only
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U kaj -d kaj_test"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: corepack enable
+      - run: corepack pnpm install --frozen-lockfile
+      - name: Local-development defaults, pointed at the CI services
+        run: |
+          grep -E '^[A-Z_]+=' .env.example >> "$GITHUB_ENV"
+          {
+            echo "NODE_ENV=test"
+            echo "DATABASE_URL=postgresql://kaj:kaj_ci_only@localhost:5432/kaj_test"
+            echo "REDIS_URL=redis://localhost:6379/1"
+          } >> "$GITHUB_ENV"
+      - run: corepack pnpm --filter @kaj/backend exec prisma generate
+      - run: corepack pnpm --filter @kaj/backend exec prisma migrate deploy
+      - run: corepack pnpm --filter @kaj/backend exec prisma db seed
+      - run: corepack pnpm --filter @kaj/backend build
+      - run: corepack pnpm --filter @kaj/admin e2e:real
+      - name: The e2e run must not modify tracked files
+        run: git diff --exit-code

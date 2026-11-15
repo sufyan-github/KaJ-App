@@ -125,6 +125,96 @@ export class HttpHarness {
       .send(body);
   }
 
+  /** A published one-hour job by `poster`, `days` days from now. */
+  async openJob(
+    poster: Actor,
+    extra: Record<string, unknown> = {},
+    days = 5,
+  ): Promise<string> {
+    const slot = futureSlot(days);
+    const category = await this.db.category.findFirstOrThrow({
+      where: { is_active: true, parent_id: null },
+    });
+    const location = await this.db.location.findFirstOrThrow({
+      where: { is_active: true },
+    });
+    const created = await this.post("jobs", poster, {
+      title: "Synthetic test job",
+      description: "A synthetic job created by the HTTP test harness.",
+      categoryId: category.id,
+      skillIds: [],
+      locationId: location.id,
+      jobType: "ONE_TIME",
+      paymentModel: "FIXED",
+      budgetMinPoisha: "10000",
+      budgetMaxPoisha: "20000",
+      startsAt: slot.startsAt.toISOString(),
+      endsAt: slot.endsAt.toISOString(),
+      ...extra,
+    });
+    if (created.status !== 201)
+      throw new Error(`job create: ${JSON.stringify(created.body)}`);
+    const id = created.body.data.id as string;
+    const published = await this.post(`jobs/${id}/publish`, poster);
+    if (published.status !== 201)
+      throw new Error(`job publish: ${JSON.stringify(published.body)}`);
+    return id;
+  }
+
+  /** `worker` applies to `jobId` with the job's own slot; returns the id. */
+  async apply(jobId: string, worker: Actor): Promise<string> {
+    const job = await this.db.job.findUniqueOrThrow({ where: { id: jobId } });
+    const response = await this.post(`jobs/${jobId}/applications`, worker, {
+      message: "I can do this job on time.",
+      proposedPricePoisha: "15000",
+      proposedStartsAt: job.starts_at!.toISOString(),
+      proposedEndsAt: job.ends_at!.toISOString(),
+    });
+    if (response.status !== 201)
+      throw new Error(`apply: ${JSON.stringify(response.body)}`);
+    return response.body.data.id as string;
+  }
+
+  /**
+   * The real hire flow up to a completed job: publish, apply, accept,
+   * confirm, then (with the slot moved into the past, as elapsed work time)
+   * submit and complete.
+   */
+  async completedAssignment(poster: Actor, worker: Actor) {
+    const jobId = await this.openJob(poster);
+    const applicationId = await this.apply(jobId, worker);
+    const accepted = await this.post(
+      `applications/${applicationId}/accept`,
+      poster,
+    );
+    if (accepted.status !== 201)
+      throw new Error(`accept: ${JSON.stringify(accepted.body)}`);
+    const assignmentId = accepted.body.data.id as string;
+    for (const [path, as] of [
+      [`assignments/${assignmentId}/confirm`, worker],
+    ] as const) {
+      const response = await this.post(path, as);
+      if (response.status !== 201)
+        throw new Error(`${path}: ${JSON.stringify(response.body)}`);
+    }
+    await this.db.assignment.update({
+      where: { id: assignmentId },
+      data: {
+        agreed_starts_at: new Date(Date.now() - 7_200_000),
+        agreed_ends_at: new Date(Date.now() - 3_600_000),
+      },
+    });
+    for (const [path, as] of [
+      [`assignments/${assignmentId}/submit`, worker],
+      [`assignments/${assignmentId}/complete`, poster],
+    ] as const) {
+      const response = await this.post(path, as);
+      if (response.status !== 201)
+        throw new Error(`${path}: ${JSON.stringify(response.body)}`);
+    }
+    return { jobId, applicationId, assignmentId };
+  }
+
   delete(path: string, as: Actor) {
     return request(this.app.getHttpServer())
       .delete(`/api/v1/${path}`)

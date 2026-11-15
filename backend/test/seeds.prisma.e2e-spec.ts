@@ -28,9 +28,10 @@ const LOCATION_COUNT = 1 + thanas.length + AREA_COUNT;
  */
 databaseDescribe("seeds and the reference-data loader", () => {
   const name = `kaj_seed_${randomUUID().replaceAll("-", "").slice(0, 12)}`;
-  const baseUrl = new URL(process.env.DATABASE_URL!);
-  const url = new URL(baseUrl);
-  url.pathname = `/${name}`;
+  // Built lazily: describe bodies run even when the suite is skipped, and
+  // a plain unit run has no DATABASE_URL.
+  let baseUrl: URL;
+  let url: URL;
   let admin: PrismaClient;
   let db: PrismaClient;
 
@@ -66,6 +67,9 @@ databaseDescribe("seeds and the reference-data loader", () => {
   }
 
   beforeAll(async () => {
+    baseUrl = new URL(process.env.DATABASE_URL!);
+    url = new URL(baseUrl);
+    url.pathname = `/${name}`;
     admin = new PrismaClient({ datasourceUrl: baseUrl.toString() });
     await admin.$executeRawUnsafe(`CREATE DATABASE "${name}"`);
     run("prisma", ["migrate", "deploy"]);

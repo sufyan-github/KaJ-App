@@ -39,9 +39,10 @@ function statements(sql: string) {
  */
 databaseDescribe("migration rollback scripts", () => {
   const name = `kaj_rollback_${randomUUID().replaceAll("-", "").slice(0, 12)}`;
-  const baseUrl = new URL(process.env.DATABASE_URL!);
-  const url = new URL(baseUrl);
-  url.pathname = `/${name}`;
+  // Built lazily: describe bodies run even when the suite is skipped, and
+  // a plain unit run has no DATABASE_URL.
+  let baseUrl: URL;
+  let url: URL;
   let admin: PrismaClient;
   let db: PrismaClient;
 
@@ -53,6 +54,9 @@ databaseDescribe("migration rollback scripts", () => {
     });
 
   beforeAll(async () => {
+    baseUrl = new URL(process.env.DATABASE_URL!);
+    url = new URL(baseUrl);
+    url.pathname = `/${name}`;
     admin = new PrismaClient({ datasourceUrl: baseUrl.toString() });
     await admin.$executeRawUnsafe(`CREATE DATABASE "${name}"`);
     db = new PrismaClient({ datasourceUrl: url.toString() });

@@ -6,6 +6,7 @@
     "build": "next build",
     "dev": "next dev -p 3200",
     "e2e": "playwright test",
+    "e2e:real": "playwright test -c playwright.real.config.ts",
     "lint": "tsc --noEmit",
     "start": "next start -p 3200",
     "typecheck": "tsc --noEmit"
