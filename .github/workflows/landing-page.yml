@@ -1,10 +1,17 @@
 name: Landing page
 
-# Builds the KAAJ landing page and publishes it to GitHub Pages on every push
-# that touches it. The site is static.
+# Tests and builds the KAAJ landing page on every push or pull request that
+# touches it. Only pushes to codex/production-hardening publish to GitHub Pages;
+# landing/** branches and pull requests run tests and the build, never a deploy.
+# The site is static.
 on:
   push:
-    branches: [codex/production-hardening]
+    branches: [codex/production-hardening, "landing/**"]
+    paths:
+      - "landing-page/**"
+      - ".github/workflows/landing-page.yml"
+  pull_request:
+    branches: [codex/production-hardening, "landing/**"]
     paths:
       - "landing-page/**"
       - ".github/workflows/landing-page.yml"
@@ -13,18 +20,25 @@ on:
 permissions:
   contents: read
 
+# One run per branch or PR; a newer push cancels the older run on the same ref.
 concurrency:
-  group: landing-page-pages
+  group: landing-page-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.target.outputs.publish }}
     defaults:
       run:
         working-directory: landing-page
     steps:
       - uses: actions/checkout@v4
+
+      - id: target
+        name: Decide whether this run publishes
+        run: echo "publish=${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/codex/production-hardening' }}" >> "$GITHUB_OUTPUT"
 
       - uses: pnpm/action-setup@v4
         with:
@@ -42,6 +56,9 @@ jobs:
       - name: Test release selection
         run: pnpm run test:release
 
+      - name: Test Bangla/English copy parity
+        run: pnpm run test:content
+
       - name: Build
         run: pnpm run build
 
@@ -50,18 +67,22 @@ jobs:
         run: pnpm run test:sites
 
       - name: Prepare static site
+        if: steps.target.outputs.publish == 'true'
         run: |
           cp dist/client/index.html dist/client/404.html
           touch dist/client/.nojekyll
 
-      - uses: actions/configure-pages@v5
+      - if: steps.target.outputs.publish == 'true'
+        uses: actions/configure-pages@v5
 
-      - uses: actions/upload-pages-artifact@v3
+      - if: steps.target.outputs.publish == 'true'
+        uses: actions/upload-pages-artifact@v3
         with:
           path: landing-page/dist/client
 
   deploy:
     needs: build
+    if: needs.build.outputs.publish == 'true'
     runs-on: ubuntu-latest
     permissions:
       pages: write

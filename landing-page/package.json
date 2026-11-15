@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test:sites": "node --test tests/sites-worker.test.mjs",
     "test:release": "node --test tests/release.test.mjs",
+    "test:content": "node --test tests/content-parity.test.mjs",
     "deploy:cloudflare": "pnpm run build && npx -y wrangler@4.160.1 deploy"
   },
   "dependencies": {
