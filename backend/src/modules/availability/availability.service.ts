@@ -2,10 +2,12 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  Optional,
 } from "@nestjs/common";
 import { AssignmentStatus } from "@prisma/client";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
+import { UserBlocksService } from "../safety/user-blocks.service";
 import {
   AvailabilityRuleInput,
   calculateAvailability,
@@ -23,7 +25,14 @@ const BLOCKING_ASSIGNMENT_STATUSES: AssignmentStatus[] = [
 
 @Injectable()
 export class AvailabilityService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly userBlocks?: UserBlocksService,
+  ) {}
+
+  private get blocks() {
+    return this.userBlocks ?? new UserBlocksService(this.prisma);
+  }
 
   async getAvailability(userId: string) {
     const [rules, exceptions] = await Promise.all([
@@ -149,7 +158,14 @@ export class AvailabilityService {
     });
   }
 
-  async getPublicSlots(userId: string, fromInput: string, toInput: string) {
+  async getPublicSlots(
+    userId: string,
+    fromInput: string,
+    toInput: string,
+    viewerUserId?: string,
+  ) {
+    if (viewerUserId && (await this.blocks.between(viewerUserId, userId)))
+      throw new NotFoundException();
     const from = new Date(fromInput);
     const to = new Date(toInput);
     if (to <= from) {

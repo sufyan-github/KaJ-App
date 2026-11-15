@@ -4,6 +4,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  Optional,
 } from "@nestjs/common";
 import { MessageType, Prisma } from "@prisma/client";
 
@@ -11,6 +12,7 @@ import { CLOCK, Clock } from "../../common/time/clock";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { STORAGE_PORT, StoragePort } from "../../infra/storage/storage.port";
 import { NotificationsService } from "../notifications/notifications.service";
+import { USER_BLOCKED, UserBlocksService } from "../safety/user-blocks.service";
 import { ChatEvents } from "./chat.events";
 import { needsPaymentSafetyWarning } from "./chat-safety";
 import { MessagePageQueryDto, SendMessageDto } from "./dto/chat.dto";
@@ -23,7 +25,12 @@ export class ChatService {
     private readonly notifications: NotificationsService,
     @Inject(STORAGE_PORT) private readonly storage: StoragePort,
     @Inject(CLOCK) private readonly clock: Clock,
+    @Optional() private readonly userBlocks?: UserBlocksService,
   ) {}
+
+  private get blocks() {
+    return this.userBlocks ?? new UserBlocksService(this.prisma);
+  }
 
   async list(userId: string) {
     const rows = await this.prisma.conversation.findMany({
@@ -89,6 +96,7 @@ export class ChatService {
       (userId === job.poster_user_id && participantUserId === workerUserId) ||
       (participantUserId === job.poster_user_id && userId === workerUserId);
     if (!isPair) throw new NotFoundException();
+    await this.blocks.assertNotBlocked(userId, participantUserId);
     const eligible = await this.prisma.application.findFirst({
       where: { job_id: jobId, worker_user_id: workerUserId },
       select: { id: true },
@@ -357,17 +365,13 @@ export class ChatService {
     }
   }
 
+  /** Sending keeps its historical 409 status, now with the USER_BLOCKED code. */
   private async assertNotBlocked(firstUserId: string, secondUserId: string) {
-    const blocked = await this.prisma.userBlock.findFirst({
-      where: {
-        OR: [
-          { blocker_user_id: firstUserId, blocked_user_id: secondUserId },
-          { blocker_user_id: secondUserId, blocked_user_id: firstUserId },
-        ],
-      },
-    });
-    if (blocked)
-      throw new ConflictException("Messaging is disabled between these users.");
+    if (await this.blocks.between(firstUserId, secondUserId))
+      throw new ConflictException({
+        ...USER_BLOCKED,
+        message: "Messaging is disabled between these users.",
+      });
   }
 
   private async ownedChatAttachment(userId: string, documentId: string) {

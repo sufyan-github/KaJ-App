@@ -17,6 +17,10 @@ const PASSWORD = "a unique passphrase 123";
 const NEXT_PASSWORD = "a different passphrase 456";
 const DEVICE = randomUUID();
 const CODE = "123456";
+// bcrypt hashing (several per test) takes 3-4 s; under a loaded CI runner
+// the 5 s default made "password reset …" flaky.
+jest.setTimeout(30_000);
+
 const databaseDescribe =
   process.env.AUTH_DATABASE_E2E === "1" ? describe : describe.skip;
 

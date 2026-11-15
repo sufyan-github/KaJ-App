@@ -52,6 +52,7 @@ import { ModerationModule } from "./modules/moderation/moderation.module";
 import { RiskModule } from "./modules/risk/risk.module";
 import { SubscriptionGuard } from "./modules/subscriptions/subscription.guard";
 import { SubscriptionsModule } from "./modules/subscriptions/subscriptions.module";
+import { SafetyModule } from "./modules/safety/safety.module";
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { SubscriptionsModule } from "./modules/subscriptions/subscriptions.modul
     }),
     TimeModule,
     InfrastructureModule,
+    SafetyModule,
     LoggerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

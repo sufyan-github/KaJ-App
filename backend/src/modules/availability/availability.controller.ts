@@ -75,9 +75,15 @@ export class PublicAvailabilityController {
   @Get("slots")
   @Policy(Policies.authenticated())
   getSlots(
+    @CurrentUser() claims: AccessTokenClaims,
     @Param("workerId", new ParseUUIDPipe()) workerId: string,
     @Query() query: AvailabilitySlotsQueryDto,
   ) {
-    return this.availability.getPublicSlots(workerId, query.from, query.to);
+    return this.availability.getPublicSlots(
+      workerId,
+      query.from,
+      query.to,
+      claims.sub,
+    );
   }
 }

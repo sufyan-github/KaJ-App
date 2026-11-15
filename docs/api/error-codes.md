@@ -24,16 +24,23 @@ HTTP status is unchanged from earlier releases; only `code`, `message` and
 
 ## Account and access
 
-| HTTP | code                      | messageKey                              | English                                                                            | বাংলা                                                                |
-| ---- | ------------------------- | --------------------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| 403  | `ACCOUNT_RESTRICTED`      | `error.account.restricted`              | Marketplace actions are temporarily restricted.                                    | আপনার অ্যাকাউন্টে কাজের সুবিধা সাময়িকভাবে সীমিত।                    |
-| 403  | `REVERIFICATION_REQUIRED` | `error.account.reverification_required` | Identity re-verification is required before marketplace actions.                   | কাজ চালিয়ে যেতে আবার পরিচয় যাচাই করুন।                             |
-| 403  | `ACCOUNT_SUSPENDED`       | `error.account.suspended`               | This account is suspended.                                                         | এই অ্যাকাউন্ট স্থগিত আছে।                                            |
-| 403  | `ACCOUNT_UNAVAILABLE`     | `error.account.unavailable`             | This account is unavailable.                                                       | এই অ্যাকাউন্ট ব্যবহার করা যাচ্ছে না।                                 |
-| 403  | `SUBSCRIPTION_REQUIRED`   | `error.subscription.required`           | Your subscription is inactive or expired. Renew it to continue using this feature. | আপনার সাবস্ক্রিপশন চালু নেই বা মেয়াদ শেষ। চালিয়ে যেতে নবায়ন করুন। |
+| HTTP                   | code                      | messageKey                              | English                                                                            | বাংলা                                                                |
+| ---------------------- | ------------------------- | --------------------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| 403                    | `ACCOUNT_RESTRICTED`      | `error.account.restricted`              | Marketplace actions are temporarily restricted.                                    | আপনার অ্যাকাউন্টে কাজের সুবিধা সাময়িকভাবে সীমিত।                    |
+| 403                    | `REVERIFICATION_REQUIRED` | `error.account.reverification_required` | Identity re-verification is required before marketplace actions.                   | কাজ চালিয়ে যেতে আবার পরিচয় যাচাই করুন।                             |
+| 403                    | `ACCOUNT_SUSPENDED`       | `error.account.suspended`               | This account is suspended.                                                         | এই অ্যাকাউন্ট স্থগিত আছে।                                            |
+| 403                    | `ACCOUNT_UNAVAILABLE`     | `error.account.unavailable`             | This account is unavailable.                                                       | এই অ্যাকাউন্ট ব্যবহার করা যাচ্ছে না।                                 |
+| 403                    | `SUBSCRIPTION_REQUIRED`   | `error.subscription.required`           | Your subscription is inactive or expired. Renew it to continue using this feature. | আপনার সাবস্ক্রিপশন চালু নেই বা মেয়াদ শেষ। চালিয়ে যেতে নবায়ন করুন। |
+| 403 (409 on chat send) | `USER_BLOCKED`            | `error.safety.blocked`                  | You can't interact with this person.                                               | এই ব্যক্তির সাথে যোগাযোগ করা যাবে না।                                |
+| 422                    | `HIRING_UNAVAILABLE`      | `error.job.hiring_unavailable`          | This worker can't be hired for this job.                                           | এই কাজে এই কর্মীকে নেওয়া যাবে না।                                   |
 
-The account codes are also sent on the chat socket (`message:send`,
-`conversation:join`) as the `WsException` payload.
+Blocks never say who blocked whom. Where a block hides something (feed,
+job detail, applicant list, suggestions, public profile, directory,
+availability slots) the item is simply absent or 404.
+
+On the chat socket (`message:send`, `conversation:join`) every error,
+including account and block errors, arrives as the `exception` event with
+the same fields plus `httpStatus`.
 
 ## Common
 

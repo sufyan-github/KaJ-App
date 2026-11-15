@@ -8,7 +8,7 @@ import {
   WebSocketServer,
   WsException,
 } from "@nestjs/websockets";
-import { Inject } from "@nestjs/common";
+import { Inject, UseFilters } from "@nestjs/common";
 import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
 import { Server, Socket } from "socket.io";
@@ -21,6 +21,7 @@ import { accountActionDenial } from "../../common/guards/account-moderation.guar
 import { CLOCK, Clock } from "../../common/time/clock";
 import { AuthTokenService } from "../auth/auth-token.service";
 import { ChatEvent, ChatEvents } from "./chat.events";
+import { ChatWsExceptionFilter } from "./chat-ws-exception.filter";
 import { ChatService } from "./chat.service";
 import { JoinConversationDto, SocketSendMessageDto } from "./dto/chat.dto";
 
@@ -33,6 +34,7 @@ interface AuthenticatedSocket extends Socket {
   cors: { origin: false },
   transports: ["websocket", "polling"],
 })
+@UseFilters(new ChatWsExceptionFilter())
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection {
   @WebSocketServer()
   server!: Server;

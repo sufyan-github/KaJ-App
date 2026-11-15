@@ -55,6 +55,7 @@ import {
 import { PaymentsService } from "../payments/payments.service";
 import { JobAlertsService } from "../job-alerts/job-alerts.service";
 import { maskPublicDisplayName } from "../users/public-profile.projection";
+import { UserBlocksService } from "../safety/user-blocks.service";
 
 // Anyone signed in may read these; every other state is private to the
 // poster and the workers who applied or were assigned.
@@ -87,10 +88,15 @@ export class JobsService {
     @Optional() private readonly recurrence?: RecurrenceService,
     @Optional() private readonly payments?: PaymentsService,
     @Optional() private readonly jobAlerts?: JobAlertsService,
+    @Optional() private readonly userBlocks?: UserBlocksService,
   ) {}
 
   private now() {
     return this.clock?.now() ?? new Date();
+  }
+
+  private get blocks() {
+    return this.userBlocks ?? new UserBlocksService(this.prisma);
   }
 
   async create(posterUserId: string, input: CreateJobDto) {
@@ -206,11 +212,13 @@ export class JobsService {
   }
 
   async feed(userId: string, query: JobFeedQueryDto) {
+    // Own jobs and jobs of anyone in a block with the viewer stay out.
+    const hidden = await this.blocks.hiddenFrom(userId);
     const jobs = await this.prisma.job.findMany({
       where: {
         status: JobStatus.APPLICATIONS_OPEN,
         deleted_at: null,
-        poster_user_id: { not: userId },
+        poster_user_id: { notIn: [userId, ...hidden] },
         OR: [{ expires_at: null }, { expires_at: { gt: this.now() } }],
         category_id: query.categoryId,
         location_id: query.locationId,
@@ -285,7 +293,10 @@ export class JobsService {
     });
     if (!job) throw new NotFoundException();
     if (!this.matching) return { items: [] };
-    const ranked = await this.matching.suggestedWorkers(job);
+    const ranked = await this.matching.suggestedWorkers(
+      job,
+      await this.blocks.hiddenFrom(posterUserId),
+    );
     return {
       items: ranked.map(({ worker, match }) => ({
         id: worker.id,
@@ -346,6 +357,13 @@ export class JobsService {
       job.applications.length > 0 ||
       job.assignments.length > 0;
     if (!involved && !PUBLICLY_OPEN_STATUSES.includes(job.status)) {
+      throw new NotFoundException();
+    }
+    // A blocked pair can't see each other's jobs, open or not.
+    if (
+      !viewerIsPoster &&
+      (await this.blocks.between(viewerUserId, job.poster_user_id))
+    ) {
       throw new NotFoundException();
     }
     const { poster, applications, assignments: _assignments, ...rest } = job;
@@ -458,8 +476,9 @@ export class JobsService {
 
   async listApplications(posterUserId: string, jobId: string) {
     await this.ownedJob(posterUserId, jobId);
+    const hidden = await this.blocks.hiddenFrom(posterUserId);
     const applications = await this.prisma.application.findMany({
-      where: { job_id: jobId },
+      where: { job_id: jobId, worker_user_id: { notIn: hidden } },
       orderBy: { created_at: "desc" },
     });
     return { items: applications.map(serializeApplication) };
@@ -780,6 +799,9 @@ export class JobsService {
     }
     if (application.status !== ApplicationStatus.PENDING) {
       throw new ConflictException("Application is no longer pending.");
+    }
+    if (await this.blocks.between(posterUserId, application.worker_user_id)) {
+      throw hiringUnavailable();
     }
     if (!application.proposed_starts_at || !application.proposed_ends_at) {
       throw new BadRequestException("Application has no proposed slot.");
@@ -1346,15 +1368,7 @@ export class JobsService {
         where: { id: categoryId },
         select: CATEGORY_POLICY_SELECT,
       }),
-      this.prisma.userBlock.findFirst({
-        where: {
-          OR: [
-            { blocker_user_id: posterUserId, blocked_user_id: workerUserId },
-            { blocker_user_id: workerUserId, blocked_user_id: posterUserId },
-          ],
-        },
-        select: { blocker_user_id: true },
-      }),
+      this.blocks.between(posterUserId, workerUserId),
     ]);
     if (!worker) throw new NotFoundException();
     const trustLevel = worker.profile?.trust_level ?? TrustLevel.NONE;
@@ -1374,14 +1388,7 @@ export class JobsService {
         messageKey: "error.job.worker_role_required",
       });
     }
-    if (block) {
-      // Deliberately does not say who blocked whom.
-      throw new UnprocessableEntityException({
-        code: "HIRING_UNAVAILABLE",
-        message: "This worker can't be hired for this job.",
-        messageKey: "error.job.hiring_unavailable",
-      });
-    }
+    if (block) throw hiringUnavailable();
     const gaps = category
       ? workerRequirementGaps(
           category,
@@ -1689,6 +1696,15 @@ function integerValue(value: Prisma.JsonValue | undefined): number | undefined {
 // The work-site pin and address are private: attendance reads them from the
 // database, and they are often the poster's home. Never return them.
 const PRIVATE_JOB_FIELDS = new Set(["lat", "lng", "exact_address_encrypted"]);
+
+/** Deliberately does not say who blocked whom. */
+function hiringUnavailable() {
+  return new UnprocessableEntityException({
+    code: "HIRING_UNAVAILABLE",
+    message: "This worker can't be hired for this job.",
+    messageKey: "error.job.hiring_unavailable",
+  });
+}
 
 function serializeJob<T extends Record<string, unknown>>(job: T) {
   return JSON.parse(

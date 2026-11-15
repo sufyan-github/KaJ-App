@@ -8,6 +8,7 @@ import { Prisma, RoleMode, UserStatus } from "@prisma/client";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { STORAGE_PORT, StoragePort } from "../../infra/storage/storage.port";
+import { UserBlocksService } from "../safety/user-blocks.service";
 import { TrainingCertificatesService } from "../training/training-certificates.service";
 import { createPublicProfileProjection } from "./public-profile.projection";
 
@@ -61,9 +62,17 @@ export class PublicProfilesService {
     private readonly prisma: PrismaService,
     @Inject(STORAGE_PORT) private readonly storage: StoragePort,
     @Optional() private readonly certificates?: TrainingCertificatesService,
+    @Optional() private readonly userBlocks?: UserBlocksService,
   ) {}
 
-  async getWorkerProfile(userId: string) {
+  private get blocks() {
+    return this.userBlocks ?? new UserBlocksService(this.prisma);
+  }
+
+  /** `viewerUserId`: the signed-in viewer, when the request carried a token. */
+  async getWorkerProfile(userId: string, viewerUserId?: string) {
+    if (viewerUserId && (await this.blocks.between(viewerUserId, userId)))
+      throw new NotFoundException();
     const user = await this.prisma.user.findFirst({
       where: {
         id: userId,
@@ -82,9 +91,17 @@ export class PublicProfilesService {
     return { ...projection, trainings };
   }
 
-  async listWorkers(skillId?: string, locationId?: string) {
+  async listWorkers(
+    skillId?: string,
+    locationId?: string,
+    viewerUserId?: string,
+  ) {
+    const hidden = viewerUserId
+      ? [viewerUserId, ...(await this.blocks.hiddenFrom(viewerUserId))]
+      : [];
     const users = await this.prisma.user.findMany({
       where: {
+        id: hidden.length ? { notIn: hidden } : undefined,
         status: UserStatus.ACTIVE,
         deleted_at: null,
         role_modes: { has: RoleMode.WORKER },

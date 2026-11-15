@@ -86,13 +86,16 @@ export class MatchingService {
       );
   }
 
-  async suggestedWorkers(job: MatchableJob) {
+  /** `excludeUserIds`: people in a block with the poster never appear. */
+  async suggestedWorkers(job: MatchableJob, excludeUserIds: string[] = []) {
     const requiredSkillIds = job.skills.map((item) => item.skill_id);
+    const excluded = [job.poster_user_id, ...excludeUserIds];
     let workers = await this.workers(
+      excluded,
       requiredSkillIds.length ? requiredSkillIds : undefined,
     );
     if (workers.length === 0 && requiredSkillIds.length)
-      workers = await this.workers();
+      workers = await this.workers(excluded);
     const weights = await this.weights();
     return workers
       .filter(
@@ -107,9 +110,10 @@ export class MatchingService {
       .slice(0, 20);
   }
 
-  private workers(skillIds?: string[]) {
+  private workers(excludeUserIds: string[], skillIds?: string[]) {
     return this.prisma.user.findMany({
       where: {
+        id: { notIn: excludeUserIds },
         status: UserStatus.ACTIVE,
         deleted_at: null,
         role_modes: { has: RoleMode.WORKER },

@@ -202,7 +202,16 @@ describe("JobsService filtered feed", () => {
     const findMany = jest
       .fn()
       .mockResolvedValue([availableJob, unavailableJob]);
-    const prisma = { job: { findMany } } as unknown as PrismaService;
+    const prisma = {
+      job: { findMany },
+      userBlock: {
+        findMany: jest
+          .fn()
+          .mockResolvedValue([
+            { blocker_user_id: "worker-id", blocked_user_id: "blocked-poster" },
+          ]),
+      },
+    } as unknown as PrismaService;
     const availability = {
       evaluate: jest
         .fn()
@@ -223,6 +232,8 @@ describe("JobsService filtered feed", () => {
           skills: {
             some: { skill_id: "01991fab-bd51-72a2-84bb-bd2ee9681301" },
           },
+          // Own jobs and blocked posters' jobs are excluded in the query.
+          poster_user_id: { notIn: ["worker-id", "blocked-poster"] },
         }),
       }),
     );
