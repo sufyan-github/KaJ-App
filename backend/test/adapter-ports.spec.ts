@@ -79,6 +79,9 @@ describe("provider-neutral adapter ports", () => {
   });
 
   it("creates a local S3-compatible signed upload without network access", async () => {
+    // ConfigService prefers process.env, so a local S3_ENDPOINT would leak in.
+    const ambientEndpoint = process.env.S3_ENDPOINT;
+    delete process.env.S3_ENDPOINT;
     const adapter = new S3StorageAdapter(
       new ConfigService({
         S3_BUCKET: "kaj-local",
@@ -96,6 +99,9 @@ describe("provider-neutral adapter ports", () => {
       key: "profile/user-id/photo.jpg",
       sizeBytes: 1024,
     });
+
+    if (ambientEndpoint !== undefined)
+      process.env.S3_ENDPOINT = ambientEndpoint;
 
     expect(signed.key).toBe("profile/user-id/photo.jpg");
     expect(signed.uploadUrl).toContain("localhost:9000/kaj-local/profile");

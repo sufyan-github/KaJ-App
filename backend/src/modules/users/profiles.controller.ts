@@ -36,10 +36,19 @@ export class ProfilesController {
     private readonly overview: ProfileOverviewService,
   ) {}
 
+  /**
+   * The app's profile overview (completeness, certificates, photo) plus the
+   * restore-on-new-install fields (userId, nested profile with area, worker
+   * rates). Both shapes are served from one route; overview keys win.
+   */
   @Get()
   @Policy(Policies.authenticated())
-  me(@CurrentUser() claims: AccessTokenClaims) {
-    return this.overview.get(claims.sub);
+  async me(@CurrentUser() claims: AccessTokenClaims) {
+    const [own, overview] = await Promise.all([
+      this.users.getOwnProfile(claims.sub),
+      this.overview.get(claims.sub),
+    ]);
+    return { ...own, ...overview };
   }
 
   @Get("portfolio")
@@ -88,12 +97,6 @@ export class ProfilesController {
     @Param("id", new ParseUUIDPipe()) id: string,
   ) {
     return this.portfolio.remove(claims.sub, id);
-  }
-
-  @Get()
-  @Policy(Policies.authenticated())
-  getOwnProfile(@CurrentUser() claims: AccessTokenClaims) {
-    return this.users.getOwnProfile(claims.sub);
   }
 
   @Put()

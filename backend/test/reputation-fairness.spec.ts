@@ -1,3 +1,5 @@
+import { TrustLevel } from "@prisma/client";
+
 import {
   eligibleBadgeSlugs,
   RULE_BADGE_SLUGS,
@@ -65,12 +67,13 @@ describe("badges", () => {
   };
 
   it("grants 'verified' only when identity was checked", () => {
-    expect(eligibleBadgeSlugs({ ...base, isVerified: true })).toContain(
-      "verified",
-    );
-    expect(eligibleBadgeSlugs({ ...base, isVerified: false })).not.toContain(
-      "verified",
-    );
+    expect(
+      eligibleBadgeSlugs({ ...base, trustLevel: TrustLevel.IDENTITY }),
+    ).toContain("verified");
+    // Every account starts at PHONE, which is not "verified".
+    expect(
+      eligibleBadgeSlugs({ ...base, trustLevel: TrustLevel.PHONE }),
+    ).not.toContain("verified");
   });
 
   it("leaves staff-granted badges out of the rule reconcile", () => {

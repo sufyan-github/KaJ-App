@@ -59,14 +59,26 @@ export class DisputesService {
     });
     if (!assignment || !isParty(assignment, userId))
       throw new NotFoundException();
-    // Only the poster's chat with this assignment's worker is evidence. A job
-    // has one conversation per applicant, and both parties can read the
+    // Only the poster's chats with this assignment's worker are evidence. A
+    // job has one conversation per applicant, and both parties can read the
     // transcript, so loading every conversation would expose other applicants.
+    const parties = [assignment.worker_user_id, assignment.job.poster_user_id];
     const transcript = await this.prisma.message.findMany({
       where: {
         deleted_at: null,
         conversation: {
-          scope_key: `${assignment.job_id}:${assignment.worker_user_id}`,
+          job_id: assignment.job_id,
+          OR: [
+            // The canonical poster↔worker conversation for this job…
+            { scope_key: `${assignment.job_id}:${assignment.worker_user_id}` },
+            // …or any other conversation whose members are only these two.
+            {
+              participants: {
+                every: { user_id: { in: parties } },
+                some: { user_id: assignment.worker_user_id },
+              },
+            },
+          ],
         },
       },
       orderBy: { created_at: "asc" },

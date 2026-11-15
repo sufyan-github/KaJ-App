@@ -342,8 +342,22 @@ databaseDescribe("job lifecycle under concurrent requests", () => {
     expect(before).toBe(0);
     expect(await rate()).toBe(0);
 
-    const byWorker = await confirmedAssignment(fresh);
-    await post(`assignments/${byWorker.assignmentId}/cancel`, fresh.token, {
+    // A worker cancelling 24 h or more ahead is free under the policy, so it
+    // does not count either.
+    const early = await confirmedAssignment(fresh);
+    await post(`assignments/${early.assignmentId}/cancel`, fresh.token, {
+      reasonCode: "CHANGE_OF_PLAN",
+      confirmed: true,
+    }).expect(201);
+    expect(await rate()).toBe(0);
+
+    // A late, penalised cancellation by the worker counts.
+    const late = await confirmedAssignment(fresh);
+    await db.assignment.update({
+      where: { id: late.assignmentId },
+      data: { agreed_starts_at: new Date(Date.now() + 3_600_000) },
+    });
+    await post(`assignments/${late.assignmentId}/cancel`, fresh.token, {
       reasonCode: "CHANGE_OF_PLAN",
       confirmed: true,
     }).expect(201);

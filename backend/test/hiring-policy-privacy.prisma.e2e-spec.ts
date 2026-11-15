@@ -299,7 +299,11 @@ databaseDescribe("hiring eligibility and job privacy (real HTTP)", () => {
       const draftId = await openJob();
       await call("get", `jobs/${draftId}`, stranger).expect(404);
       const own = await call("get", `jobs/${draftId}`, poster).expect(200);
-      expect(own.body.data).toHaveProperty("exact_address_encrypted");
+      // The work-site pin and address are never returned, not even to the
+      // poster: attendance reads them from the database.
+      expect(own.body.data).not.toHaveProperty("exact_address_encrypted");
+      expect(own.body.data).not.toHaveProperty("lat");
+      expect(own.body.data.viewerIsPoster).toBe(true);
 
       await call("post", `jobs/${draftId}/publish`, poster).expect(201);
       const open = await call("get", `jobs/${draftId}`, stranger).expect(200);
