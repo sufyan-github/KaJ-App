@@ -31,9 +31,14 @@ class ApiClient {
       dio.httpClientAdapter = httpClientAdapter;
       refreshDio.httpClientAdapter = httpClientAdapter;
     }
-    dio.interceptors.add(
-      _SessionInterceptor(dio, refreshDio, tokenStore, this.locale),
+    final interceptor = _SessionInterceptor(
+      dio,
+      refreshDio,
+      tokenStore,
+      this.locale,
     );
+    dio.interceptors.add(interceptor);
+    tokenStore.attachRefresher(interceptor.refreshFromStore);
   }
 
   final ApiLocale locale;
@@ -94,6 +99,9 @@ class _SessionInterceptor extends Interceptor {
 
     final refreshToken = await _tokenStore.readRefreshToken();
     if (refreshToken == null) {
+      // A signed-in request was refused and there is nothing to refresh
+      // with: the session is over, so say so instead of failing quietly.
+      if (_bearerToken(request) != null) await _tokenStore.expireSession();
       handler.next(error);
       return;
     }
@@ -109,7 +117,7 @@ class _SessionInterceptor extends Interceptor {
     } on DioException catch (refreshError) {
       // A timeout, lost connection or 5xx does not invalidate the credential.
       if (refreshError.response?.statusCode == 401) {
-        await _tokenStore.clearSession();
+        await _tokenStore.expireSession();
       }
       handler.next(refreshError);
       return;
@@ -124,9 +132,27 @@ class _SessionInterceptor extends Interceptor {
       handler.resolve(await _client.fetch<dynamic>(request));
     } on DioException catch (replayError) {
       if (replayError.response?.statusCode == 401) {
-        await _tokenStore.clearSession();
+        await _tokenStore.expireSession();
       }
       handler.next(replayError);
+    }
+  }
+
+  /// Rotates the session for callers outside Dio, such as the chat socket.
+  /// Shares the in-flight refresh with HTTP requests. A rejected refresh ends
+  /// the session; a network failure keeps it and returns null.
+  Future<String?> refreshFromStore() async {
+    final refreshToken = await _tokenStore.readRefreshToken();
+    if (refreshToken == null) return null;
+    try {
+      return await _refreshAccessToken(refreshToken);
+    } on DioException catch (error) {
+      if (error.response?.statusCode == 401) {
+        await _tokenStore.expireSession();
+      }
+      return null;
+    } on Object {
+      return null;
     }
   }
 

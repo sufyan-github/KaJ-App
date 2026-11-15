@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
+import '../../../core/session/user_session.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
 import '../../onboarding/data/onboarding_repository.dart';
 import '../../settings/presentation/settings_providers.dart';
@@ -12,9 +13,10 @@ import '../domain/training_models.dart';
 import 'widgets/lesson_video_request.dart';
 import 'widgets/youtube_lesson_player.dart';
 
-final trainingRepositoryProvider = Provider<TrainingRepository>(
-  (ref) => TrainingRepository(ref.watch(dioProvider)),
-);
+final trainingRepositoryProvider = Provider<TrainingRepository>((ref) {
+  ref.watch(sessionEpochProvider);
+  return TrainingRepository(ref.watch(dioProvider));
+});
 
 final trainingCoursesProvider =
     FutureProvider.family<List<CourseSummary>, CourseScope>(

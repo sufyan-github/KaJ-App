@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/session/user_session.dart';
 import '../../../auth/presentation/controllers/auth_providers.dart';
 import '../../data/jobs_repository.dart';
 import '../../domain/job_models.dart';
 
-final jobsRepositoryProvider = Provider<JobsRepository>(
-  (ref) => JobsRepository(ref.watch(dioProvider)),
-);
+final jobsRepositoryProvider = Provider<JobsRepository>((ref) {
+  ref.watch(sessionEpochProvider);
+  return JobsRepository(ref.watch(dioProvider));
+});
 
 class JobFeedFilter {
   const JobFeedFilter({

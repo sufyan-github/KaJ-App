@@ -1,13 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/location/location_gateway.dart';
+import '../../../core/session/user_session.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
 import '../data/trust_safety_repository.dart';
 import '../domain/trust_models.dart';
 
-final trustSafetyRepositoryProvider = Provider<TrustSafetyRepository>(
-  (ref) => TrustSafetyRepository(ref.watch(dioProvider)),
-);
+final trustSafetyRepositoryProvider = Provider<TrustSafetyRepository>((ref) {
+  ref.watch(sessionEpochProvider);
+  return TrustSafetyRepository(ref.watch(dioProvider));
+});
 final locationGatewayProvider = Provider<LocationGateway>(
   (ref) => const LocationGateway(),
 );

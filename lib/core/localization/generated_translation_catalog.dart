@@ -1027,4 +1027,7 @@ const generatedEnglishTranslations = <String, String>{
       "The subscription plan is being set up. Contact support.",
   "সাবস্ক্রিপশন বাতিল করবেন?": "Cancel your subscription?",
   "হ্যাঁ, বাতিল করুন": "Yes, cancel",
+  // P0.4: server-backed profile and session.
+  "বুকিং অনুরোধের আগে প্রোফাইলে আপনার এলাকা নির্বাচন করুন।":
+      "Choose your area in your profile before requesting a booking.",
 };

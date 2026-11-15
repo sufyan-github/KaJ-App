@@ -10,17 +10,51 @@ import '../domain/chat_models.dart';
 /// going deaf.
 enum ChatConnectionState { connecting, connected, reconnecting, offline }
 
+/// Gets the socket a usable token after the server refused one.
+///
+/// The chat server checks the token only during the handshake. When it is
+/// stale it answers `chat:error UNAUTHORIZED` and disconnects, and Socket.IO
+/// does not retry a server-side disconnect. With no HTTP traffic nothing else
+/// rotates the session, so the socket would stay "reconnecting" forever.
+class ChatTokenRecovery {
+  ChatTokenRecovery(this._tokens, {this.maxAttempts = 3});
+
+  final SessionTokenStore _tokens;
+
+  /// Refusals in a row, without a successful handshake, before giving up.
+  final int maxAttempts;
+  int _attempts = 0;
+
+  /// A token to retry with after [rejected] was refused, or null to stop.
+  Future<String?> tokenAfterRejection(String? rejected) async {
+    if (_attempts >= maxAttempts) return null;
+    _attempts++;
+    final current = _tokens.accessToken;
+    // The HTTP layer already rotated the session since the socket was built.
+    if (current != null && current != rejected) return current;
+    final refreshed = await _tokens.refreshAccessToken();
+    return refreshed == null || refreshed == rejected ? null : refreshed;
+  }
+
+  /// The server accepted the token.
+  void accepted() => _attempts = 0;
+}
+
 class ChatRealtimeService {
-  ChatRealtimeService(this._environment, this._tokens);
+  ChatRealtimeService(this._environment, this._tokens)
+    : _recovery = ChatTokenRecovery(_tokens);
 
   final AppEnvironment _environment;
   final SessionTokenStore _tokens;
+  final ChatTokenRecovery _recovery;
   final _messages = StreamController<ChatMessage>.broadcast();
   final _connection = StreamController<ChatConnectionState>.broadcast();
 
   io.Socket? _socket;
   String? _conversationId;
+  String? _socketToken;
   bool _disposed = false;
+  bool _recovering = false;
   ChatConnectionState _state = ChatConnectionState.offline;
 
   Stream<ChatMessage> get messages => _messages.stream;
@@ -32,21 +66,23 @@ class ChatRealtimeService {
   void connect(String conversationId) {
     if (_disposed) return;
     disconnect();
+    _recovery.accepted();
     _conversationId = conversationId;
     _emit(ChatConnectionState.connecting);
-    _open(conversationId);
+    _open(conversationId, _tokens.accessToken);
   }
 
-  void _open(String conversationId) {
+  void _open(String conversationId, String? token) {
     final base = _environment.apiBaseUrl.replaceFirst(
       RegExp(r'/api/v1/?$'),
       '',
     );
+    _socketToken = token;
     final socket = io.io(
       '$base/chat',
       io.OptionBuilder()
           .setTransports(['websocket'])
-          .setAuth({'token': _tokens.accessToken})
+          .setAuth({'token': token})
           .enableReconnection()
           .setReconnectionDelay(500)
           .setReconnectionDelayMax(8000)
@@ -58,22 +94,33 @@ class ChatRealtimeService {
         _emit(ChatConnectionState.connected);
         socket.emit('conversation:join', {'conversationId': conversationId});
       })
+      ..on('chat:ready', (_) => _recovery.accepted())
       ..on('chat:message', (dynamic value) {
         if (value is Map) {
           _messages.add(ChatMessage.fromJson(Map<String, dynamic>.from(value)));
         }
       })
-      // The auth payload is captured when the socket is built. Once the access
-      // token expires the server rejects every reconnection attempt with the
-      // same dead credential, so the token has to be re-read and re-attached
-      // rather than retried unchanged.
-      ..onConnectError((_) => _reauthenticate())
-      ..onError((_) => _reauthenticate())
-      ..onDisconnect((_) => _emit(ChatConnectionState.reconnecting))
+      ..on('chat:error', (dynamic value) {
+        final code = value is Map ? value['code'] : null;
+        if (code == 'UNAUTHORIZED') unawaited(_recoverAuth());
+      })
+      // A transport failure (offline, server restarting): keep Socket.IO's
+      // own retries, but with the newest token the HTTP layer holds.
+      ..onConnectError((_) => _reattachToken())
+      ..onError((_) => _reattachToken())
+      ..onDisconnect((dynamic reason) {
+        // The server hung up on us (it does so after a refused token) and
+        // Socket.IO will not retry that on its own.
+        if (reason == 'io server disconnect') {
+          unawaited(_recoverAuth());
+        } else {
+          _emit(ChatConnectionState.reconnecting);
+        }
+      })
       ..connect();
   }
 
-  void _reauthenticate() {
+  void _reattachToken() {
     if (_disposed) return;
     _emit(ChatConnectionState.reconnecting);
     final socket = _socket;
@@ -82,7 +129,30 @@ class ChatRealtimeService {
       _emit(ChatConnectionState.offline);
       return;
     }
+    _socketToken = token;
     socket.auth = {'token': token};
+  }
+
+  Future<void> _recoverAuth() async {
+    final conversationId = _conversationId;
+    if (_disposed || _recovering || conversationId == null) return;
+    _recovering = true;
+    _emit(ChatConnectionState.reconnecting);
+    try {
+      final token = await _recovery.tokenAfterRejection(_socketToken);
+      if (_disposed || _conversationId != conversationId) return;
+      _socket?.dispose();
+      _socket = null;
+      if (token == null) {
+        // The session could not be renewed. If the server refused it, the
+        // HTTP layer has already ended the session and sign-in follows.
+        _emit(ChatConnectionState.offline);
+        return;
+      }
+      _open(conversationId, token);
+    } finally {
+      _recovering = false;
+    }
   }
 
   /// Re-attaches the current token and reconnects. Call this after the HTTP

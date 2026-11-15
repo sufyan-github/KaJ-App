@@ -7,15 +7,16 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../bootstrap.dart';
 import '../../../../core/connectivity/connectivity_service.dart';
+import '../../../../core/session/user_session.dart';
 import '../../../auth/presentation/controllers/auth_providers.dart';
 import '../../data/chat_realtime_service.dart';
 import '../../data/chat_repository.dart';
 import '../../domain/chat_models.dart';
 
-final chatRepositoryProvider = Provider<ChatRepository>(
-  (ref) =>
-      ChatRepository(ref.watch(dioProvider), Hive.box<dynamic>('kaaj_chat')),
-);
+final chatRepositoryProvider = Provider<ChatRepository>((ref) {
+  ref.watch(sessionEpochProvider);
+  return ChatRepository(ref.watch(dioProvider), Hive.box<dynamic>(chatBoxName));
+});
 
 final conversationsProvider = FutureProvider<List<ConversationSummary>>(
   (ref) => ref.watch(chatRepositoryProvider).conversations(),

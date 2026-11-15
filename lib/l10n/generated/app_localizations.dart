@@ -559,6 +559,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Accept the Terms of Service and Privacy Policy to continue.'**
   String get acceptTerms;
+
+  /// No description provided for @sessionExpiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has ended, for example because you signed out on another phone or changed your password. Sign in again to continue.'**
+  String get sessionExpiredMessage;
 }
 
 class _AppLocalizationsDelegate

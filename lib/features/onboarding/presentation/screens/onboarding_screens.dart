@@ -7,10 +7,12 @@ import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_localized_text.dart';
 import '../../../../core/widgets/k_primary_button.dart';
+import '../../../auth/presentation/controllers/auth_providers.dart';
 import '../../../catalog/domain/entities/catalog_skill.dart';
 import '../../../catalog/domain/entities/service_location.dart';
 import '../../../catalog/presentation/controllers/catalog_providers.dart';
 import '../../../jobs/presentation/controllers/jobs_providers.dart';
+import '../../../profile/presentation/controllers/me_provider.dart';
 import '../../domain/availability_schedule.dart';
 import '../../domain/onboarding_state.dart';
 import '../../domain/worker_skill_input.dart';
@@ -938,7 +940,12 @@ class _OnboardingTourScreenState extends ConsumerState<OnboardingTourScreen> {
 
   Future<void> _finish() async {
     await ref.read(onboardingControllerProvider.notifier).finish();
-    if (mounted) context.go(AppRoutes.home);
+    if (!mounted) return;
+    ref.read(authControllerProvider.notifier).onboardingFinished();
+    // Home reads the role and area from the server, which onboarding just
+    // changed.
+    refreshMe(ref);
+    context.go(AppRoutes.home);
   }
 
   @override

@@ -28,6 +28,8 @@ import 'package:kaaj/features/trust_safety/presentation/verification_screens.dar
 import 'package:kaaj/l10n/generated/app_localizations.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../support/pump_app.dart';
+
 void main() {
   for (final language in ['bn', 'en']) {
     testWidgets('job publishing explains missing area in $language', (
@@ -62,6 +64,8 @@ void main() {
           onboardingControllerProvider.overrideWith(
             (ref) => OnboardingController(onboarding),
           ),
+          // The server profile has no area yet.
+          meAs(KaajRole.customer, areaId: null),
         ],
       );
       final fields = tester
@@ -160,6 +164,7 @@ void main() {
           onboardingControllerProvider.overrideWith(
             (ref) => OnboardingController(onboarding),
           ),
+          meAs(KaajRole.worker),
           authControllerProvider.overrideWith((ref) => AuthController(auth)),
           notificationsProvider.overrideWith(
             (ref) async => const NotificationInbox(items: [], unreadCount: 0),
@@ -237,6 +242,7 @@ void main() {
         onboardingControllerProvider.overrideWith(
           (ref) => OnboardingController(onboarding),
         ),
+        meAs(KaajRole.worker),
         authControllerProvider.overrideWith((ref) => AuthController(auth)),
         notificationsProvider.overrideWith(
           (ref) async => const NotificationInbox(items: [], unreadCount: 0),
@@ -263,6 +269,7 @@ void main() {
         onboardingControllerProvider.overrideWith(
           (ref) => OnboardingController(onboarding),
         ),
+        meAs(KaajRole.worker),
         authControllerProvider.overrideWith((ref) => AuthController(auth)),
         notificationsProvider.overrideWith(
           (ref) async => const NotificationInbox(items: [], unreadCount: 0),
@@ -356,6 +363,7 @@ void main() {
           onboardingControllerProvider.overrideWith(
             (ref) => OnboardingController(onboarding),
           ),
+          meAs(KaajRole.worker),
           jobFeedProvider.overrideWith((ref, filter) async => [job]),
         ],
       );
@@ -382,6 +390,7 @@ void main() {
         onboardingControllerProvider.overrideWith(
           (ref) => OnboardingController(onboarding),
         ),
+        meAs(KaajRole.worker),
         jobFeedProvider.overrideWith((ref, filter) async => [job]),
       ],
     );

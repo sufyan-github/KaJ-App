@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/errors/error_mapper.dart';
 import '../../../../core/localization/kaaj_localizations.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/k_error_state.dart';
 import '../../../../core/widgets/k_localized_text.dart';
 import '../../../../core/widgets/k_trust_banner.dart';
 import '../../../notifications/presentation/controllers/notifications_providers.dart';
-import '../../../onboarding/domain/onboarding_state.dart';
-import '../../../onboarding/presentation/controllers/onboarding_controller.dart';
+import '../../../profile/presentation/controllers/me_provider.dart';
 import '../../../profile/presentation/widgets/profile_completeness_card.dart';
 import '../../../training/presentation/widgets/my_training_card.dart';
 import '../../../training/presentation/widgets/training_offer_gate.dart';
@@ -19,8 +20,24 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final onboarding = ref.watch(onboardingControllerProvider);
-    final isWorker = onboarding.role == KaajRole.worker;
+    // The role comes from the server, so a returning worker on a new phone
+    // gets the worker home even though this phone has no onboarding draft.
+    final meAsync = ref.watch(meProvider);
+    final me = meAsync.valueOrNull;
+    if (me == null) {
+      return Scaffold(
+        body: Center(
+          child: meAsync.hasError
+              ? KErrorState(
+                  failure: ErrorMapper.from(meAsync.error!),
+                  retryLabel: 'আবার চেষ্টা করুন',
+                  onRetry: () => refreshMe(ref),
+                )
+              : const CircularProgressIndicator(),
+        ),
+      );
+    }
+    final isWorker = me.isWorker;
     final unreadNotifications = ref
         .watch(notificationsProvider)
         .maybeWhen(data: (inbox) => inbox.unreadCount, orElse: () => 0);

@@ -14,6 +14,9 @@ import 'package:kaaj/features/onboarding/data/onboarding_repository.dart';
 import 'package:kaaj/features/onboarding/domain/onboarding_state.dart';
 import 'package:kaaj/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:kaaj/features/onboarding/presentation/screens/onboarding_screens.dart';
+import 'package:kaaj/features/profile/domain/me.dart';
+import 'package:kaaj/features/profile/domain/my_profile.dart';
+import 'package:kaaj/features/profile/presentation/controllers/me_provider.dart';
 import 'package:kaaj/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:kaaj/features/training/data/training_offer_store.dart';
 import 'package:kaaj/features/training/presentation/screens/certificates_screen.dart';
@@ -34,6 +37,28 @@ class MockAuthRepository extends Mock implements AuthRepository {}
 AuthController signedInAuth() => AuthController(MockAuthRepository())
   ..passwordLoginSucceeded()
   ..resolveAccess(allowed: true, needsPassword: false);
+
+/// The signed-in person as the server would describe them.
+Me testMe(
+  KaajRole role, {
+  String userId = 'user-1',
+  String? areaId = 'area-1',
+  String displayName = 'Rahim',
+}) => Me(
+  userId: userId,
+  phone: '+8801812345678',
+  roles: role == KaajRole.worker ? const ['WORKER'] : const ['CUSTOMER'],
+  activeRole: role == KaajRole.worker ? 'WORKER' : 'CUSTOMER',
+  displayName: displayName,
+  skills: const [],
+  area: areaId == null
+      ? null
+      : ProfileArea(id: areaId, nameEn: 'Boalia', nameBn: 'বোয়ালিয়া'),
+);
+
+/// Serves [testMe] from the server-backed `me` provider.
+Override meAs(KaajRole role, {String? areaId = 'area-1'}) =>
+    meProvider.overrideWith((ref) async => testMe(role, areaId: areaId));
 
 OnboardingController onboardingFor(
   KaajRole role, {

@@ -9,7 +9,7 @@ import '../../../../core/widgets/k_card.dart';
 import '../../../../core/widgets/k_error_state.dart';
 import '../../../../core/widgets/k_localized_text.dart';
 import '../../../onboarding/domain/onboarding_state.dart';
-import '../../../onboarding/presentation/controllers/onboarding_controller.dart';
+import '../../../profile/presentation/controllers/me_provider.dart';
 import '../../domain/job_models.dart';
 import '../controllers/jobs_providers.dart';
 import 'jobs_screens.dart';
@@ -48,8 +48,7 @@ class _JobDetailBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final job = detail.job;
     final language = Localizations.localeOf(context).languageCode;
-    final isWorker =
-        ref.watch(onboardingControllerProvider).role == KaajRole.worker;
+    final isWorker = ref.watch(meRoleProvider) == KaajRole.worker;
     final subcategory = detail.subcategoryNameFor(language);
     final skills = job.skillsFor(language);
     final pay = KFormat.moneyRange(

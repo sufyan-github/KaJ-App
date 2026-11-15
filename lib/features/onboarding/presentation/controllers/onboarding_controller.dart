@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
+import '../../../../core/session/user_session.dart';
 import '../../../auth/presentation/controllers/auth_providers.dart';
 import '../../data/onboarding_repository.dart';
 import '../../domain/availability_schedule.dart';
@@ -8,6 +9,7 @@ import '../../domain/onboarding_state.dart';
 import '../../domain/worker_skill_input.dart';
 
 final onboardingRepositoryProvider = Provider<OnboardingRepository>((ref) {
+  ref.watch(sessionEpochProvider);
   return OnboardingRepository(
     ref.watch(dioProvider),
     Hive.box<dynamic>(onboardingBoxName),

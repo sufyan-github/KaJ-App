@@ -275,4 +275,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get acceptTerms =>
       'Accept the Terms of Service and Privacy Policy to continue.';
+
+  @override
+  String get sessionExpiredMessage =>
+      'Your session has ended, for example because you signed out on another phone or changed your password. Sign in again to continue.';
 }

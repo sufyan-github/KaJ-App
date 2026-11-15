@@ -447,7 +447,9 @@ String? authRedirect(
           ? null
           : AppRoutes.passwordSetup;
     }
-    if (auth.isNewUser && !onboarding.started) {
+    // The server flag survives an app kill; isNewUser only lives in memory
+    // after an OTP sign-up.
+    if ((auth.isNewUser || auth.onboardingRequired) && !onboarding.started) {
       return location == AppRoutes.onboardingProfile
           ? null
           : AppRoutes.onboardingProfile;

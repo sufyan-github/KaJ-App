@@ -18,6 +18,8 @@ import 'package:kaaj/features/trust_safety/presentation/trust_safety_providers.d
 import 'package:kaaj/l10n/generated/app_localizations.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../support/pump_app.dart';
+
 void main() {
   setUpAll(() => registerFallbackValue(<String, dynamic>{}));
 
@@ -161,6 +163,7 @@ class _Harness {
           onboardingControllerProvider.overrideWith(
             (ref) => OnboardingController(onboarding),
           ),
+          meAs(KaajRole.customer),
           jobsRepositoryProvider.overrideWithValue(repository),
           locationGatewayProvider.overrideWithValue(
             _FakeLocationGateway(() {

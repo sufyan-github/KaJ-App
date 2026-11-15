@@ -1,13 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/session/user_session.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
 import '../data/billing_repository.dart';
 import '../domain/billing_models.dart';
 
-final billingRepositoryProvider = Provider<BillingRepository>(
-  (ref) => BillingRepository(ref.watch(dioProvider)),
-);
+final billingRepositoryProvider = Provider<BillingRepository>((ref) {
+  ref.watch(sessionEpochProvider);
+  return BillingRepository(ref.watch(dioProvider));
+});
 
 final subscriptionOverviewProvider = FutureProvider<SubscriptionOverview>(
   (ref) => ref.watch(billingRepositoryProvider).getSubscription(),

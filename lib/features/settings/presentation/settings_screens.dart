@@ -12,7 +12,7 @@ import '../../../core/widgets/k_localized_text.dart';
 import '../../auth/presentation/controllers/auth_controller.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
 import '../../onboarding/domain/onboarding_state.dart';
-import '../../onboarding/presentation/controllers/onboarding_controller.dart';
+import '../../profile/presentation/controllers/me_provider.dart';
 import '../../profile/presentation/widgets/profile_completeness_card.dart';
 import '../domain/settings_models.dart';
 import 'settings_providers.dart';
@@ -29,8 +29,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final onboarding = ref.watch(onboardingControllerProvider);
-    final role = onboarding.role ?? KaajRole.customer;
+    // The server's active role, not the onboarding draft on this phone.
+    final serverRole = ref.watch(meRoleProvider);
+    final role = serverRole ?? KaajRole.customer;
     final auth = ref.watch(authControllerProvider);
     final locale = ref.watch(localeControllerProvider);
     return Scaffold(
@@ -110,7 +111,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                         ],
                         selected: {role},
-                        onSelectionChanged: _switchingRole
+                        onSelectionChanged: _switchingRole || serverRole == null
                             ? null
                             : (selection) => _switchRole(selection.first),
                       ),
@@ -279,12 +280,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _switchRole(KaajRole role) async {
-    final current = ref.read(onboardingControllerProvider).role;
+    final current = ref.read(meRoleProvider);
     if (current == role) return;
     setState(() => _switchingRole = true);
     try {
-      await ref.read(onboardingControllerProvider.notifier).selectRole(role);
-      ref.invalidate(accountSummaryProvider);
+      await ref.read(activeRoleSwitcherProvider).switchTo(role);
       if (mounted) _snack('কাজের মোড পরিবর্তন হয়েছে।');
     } on Object catch (error) {
       if (mounted) _snack(_settingsMessage(error));

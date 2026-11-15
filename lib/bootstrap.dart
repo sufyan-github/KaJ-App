@@ -9,6 +9,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'app.dart';
 import 'core/config/app_environment.dart';
 import 'core/localization/locale_controller.dart';
+import 'features/chat/data/chat_repository.dart';
 import 'features/onboarding/data/onboarding_repository.dart';
 
 Future<void> bootstrap() async {
@@ -19,7 +20,7 @@ Future<void> bootstrap() async {
   await initializeDateFormatting('en');
   await Hive.initFlutter();
   await Hive.openBox<dynamic>(onboardingBoxName);
-  await Hive.openBox<dynamic>('kaaj_chat');
+  await Hive.openBox<dynamic>(chatBoxName);
   await Hive.openBox<dynamic>(localePreferencesBoxName);
   final environment = AppEnvironment.current();
 

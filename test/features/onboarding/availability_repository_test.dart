@@ -28,7 +28,7 @@ void main() {
   });
 
   test(
-    'reactivates worker mode and retries a forbidden availability load',
+    'never switches the server role on its own after a forbidden load',
     () async {
       final adapter = _AvailabilityAdapter(forbidFirstAvailability: true);
       final repository = OnboardingRepository(
@@ -36,14 +36,12 @@ void main() {
         _UnusedBox(),
       );
 
-      final schedule = await repository.getAvailability();
+      await expectLater(
+        repository.getAvailability(),
+        throwsA(isA<DioException>()),
+      );
 
-      expect(schedule.rules, hasLength(1));
-      expect(adapter.paths, [
-        '/profiles/me/availability',
-        '/me/roles/activate',
-        '/profiles/me/availability',
-      ]);
+      expect(adapter.paths, ['/profiles/me/availability']);
     },
   );
 }

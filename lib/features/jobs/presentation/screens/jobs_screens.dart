@@ -19,6 +19,7 @@ import '../../../chat/presentation/controllers/chat_providers.dart';
 import '../../../onboarding/domain/onboarding_state.dart';
 import '../../../onboarding/presentation/controllers/onboarding_controller.dart';
 import '../../../profile/domain/public_worker_profile.dart';
+import '../../../profile/presentation/controllers/me_provider.dart';
 import '../../../profile/presentation/controllers/public_profile_provider.dart';
 import '../../../trust_safety/domain/trust_models.dart';
 import '../../../trust_safety/presentation/trust_safety_providers.dart';
@@ -75,8 +76,7 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isWorker =
-        ref.watch(onboardingControllerProvider).role == KaajRole.worker;
+    final isWorker = ref.watch(meRoleProvider) == KaajRole.worker;
     final browsingType = widget.categoryId != null || widget.skillId != null;
     final showOpenJobs = isWorker || browsingType;
     final filter = JobFeedFilter(
@@ -1061,14 +1061,14 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
 
   Future<void> _save() async {
     if (!_form.currentState!.validate()) return;
-    final locationId = ref.read(onboardingControllerProvider).locationId;
-    if (locationId == null || locationId.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: KLocalizedText(
-            'কাজ পোস্ট করার আগে প্রোফাইলে আপনার এলাকা নির্বাচন করুন।',
-          ),
-        ),
+    // The area comes from the server profile, so changing it in Edit profile
+    // is what fixes a missing area, on any phone.
+    final locationId = await _serverAreaId(ref);
+    if (!mounted) return;
+    if (locationId == null) {
+      showMissingAreaMessage(
+        context,
+        'কাজ পোস্ট করার আগে প্রোফাইলে আপনার এলাকা নির্বাচন করুন।',
       );
       return;
     }
@@ -1370,16 +1370,22 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
     final profile = ref
         .read(publicWorkerProfileProvider(widget.workerId))
         .value;
-    final onboarding = ref.read(onboardingControllerProvider);
+    final areaId = await _serverAreaId(ref);
+    if (!mounted) return;
+    if (areaId == null) {
+      showMissingAreaMessage(
+        context,
+        'বুকিং অনুরোধের আগে প্রোফাইলে আপনার এলাকা নির্বাচন করুন।',
+      );
+      return;
+    }
     final skill = profile?.skills.firstOrNull;
     final allSkills =
         ref.read(catalogSkillsProvider).value ?? const <CatalogSkill>[];
     final catalogSkill = allSkills
         .where((item) => item.id == skill?.id)
         .firstOrNull;
-    if (_selected == null ||
-        onboarding.locationId == null ||
-        catalogSkill == null) {
+    if (_selected == null || catalogSkill == null) {
       return;
     }
     final amount = await _askAmount(context);
@@ -1402,7 +1408,7 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
             description: bookingDescription,
             categoryId: catalogSkill.categoryId,
             skillId: catalogSkill.id,
-            locationId: onboarding.locationId!,
+            locationId: areaId,
             slot: _selected!,
             offeredPricePoisha: amount * 100,
           );
@@ -2340,3 +2346,29 @@ String _statusBn(String status) => switch (status) {
   'COMPLETED' => 'সম্পন্ন',
   _ => status,
 };
+
+/// The poster's area from the server profile, or null when none is set or
+/// the profile cannot be loaded.
+Future<String?> _serverAreaId(WidgetRef ref) async {
+  try {
+    final me = await ref.read(meProvider.future);
+    return me.areaId;
+  } on Object {
+    return null;
+  }
+}
+
+/// Explains that an area is needed and offers the screen that sets it.
+void showMissingAreaMessage(BuildContext context, String message) {
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        content: KLocalizedText(message),
+        action: SnackBarAction(
+          label: KaajLocalizations.text(context, 'প্রোফাইল সম্পাদনা'),
+          onPressed: () => context.push(AppRoutes.editProfile),
+        ),
+      ),
+    );
+}

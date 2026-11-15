@@ -17,6 +17,8 @@ import 'package:kaaj/features/settings/presentation/settings_providers.dart';
 import 'package:kaaj/features/settings/presentation/settings_screens.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../support/pump_app.dart';
+
 void main() {
   testWidgets('language switch updates the complete visible settings UI', (
     tester,
@@ -35,6 +37,7 @@ void main() {
           onboardingControllerProvider.overrideWith(
             (ref) => OnboardingController(onboarding),
           ),
+          meAs(KaajRole.worker),
           authControllerProvider.overrideWith((ref) => AuthController(auth)),
         ],
         child: Consumer(
@@ -81,6 +84,7 @@ void main() {
         onboardingControllerProvider.overrideWith(
           (ref) => OnboardingController(onboarding),
         ),
+        meAs(KaajRole.worker),
         authControllerProvider.overrideWith((ref) => AuthController(auth)),
       ],
       textScale: 2,

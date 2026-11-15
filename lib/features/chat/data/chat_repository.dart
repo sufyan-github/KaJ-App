@@ -8,6 +8,9 @@ import 'package:uuid/uuid.dart';
 import '../../../core/errors/error_mapper.dart';
 import '../domain/chat_models.dart';
 
+/// Hive box holding this person's unsent chat messages.
+const chatBoxName = 'kaaj_chat';
+
 class ChatRepository {
   const ChatRepository(this._dio, this._queue);
 

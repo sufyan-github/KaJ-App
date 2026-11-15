@@ -80,5 +80,6 @@
   "invalidPhone": "Enter a valid Bangladeshi mobile number.",
   "unsupportedOperatorPhone": "Only Robi (018) and Cirkle (016) numbers can register.",
   "invalidOtp": "Enter the complete 6-digit verification code.",
-  "acceptTerms": "Accept the Terms of Service and Privacy Policy to continue."
+  "acceptTerms": "Accept the Terms of Service and Privacy Policy to continue.",
+  "sessionExpiredMessage": "Your session has ended, for example because you signed out on another phone or changed your password. Sign in again to continue."
 }

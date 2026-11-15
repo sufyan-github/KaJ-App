@@ -13,6 +13,7 @@ import '../../../../core/widgets/k_primary_button.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../billing/presentation/billing_providers.dart';
 import '../../../onboarding/presentation/controllers/onboarding_controller.dart';
+import '../../../profile/presentation/controllers/me_provider.dart';
 import '../../domain/entities/otp_challenge.dart';
 import '../../domain/usecases/auth_validators.dart';
 import '../controllers/auth_providers.dart';
@@ -81,6 +82,25 @@ class _PasswordLoginScreenState extends ConsumerState<PasswordLoginScreen> {
         ),
       ],
       children: [
+        if (ref.watch(authControllerProvider).sessionExpired) ...[
+          Semantics(
+            liveRegion: true,
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.lock_clock_outlined),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(l.sessionExpiredMessage)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
         Text(l.passwordLoginSubtitle),
         const SizedBox(height: 24),
         Form(
@@ -155,15 +175,32 @@ class _AuthAccessScreenState extends ConsumerState<AuthAccessScreen> {
               overview.current?.paymentStatus == 'PAID') ||
           (!overview.operatorStatusRefreshFailed &&
               overview.operatorIdentity?.status == 'VERIFIED');
+      final onboardingRequired = overview.accessActive
+          ? await _serverOnboardingRequired()
+          : null;
+      if (!mounted) return;
       ref
           .read(authControllerProvider.notifier)
           .resolveAccess(
             allowed: overview.accessActive,
             needsPassword: !hasPassword && canSet,
+            onboardingRequired: onboardingRequired,
           );
       context.go(AppRoutes.home);
     } on Object catch (error) {
       if (mounted) setState(() => _failure = ErrorMapper.from(error));
+    }
+  }
+
+  /// Whether the server says this account still needs onboarding. A failure
+  /// here must not lock the person out, so it falls back to "unknown".
+  Future<bool?> _serverOnboardingRequired() async {
+    try {
+      refreshMe(ref);
+      final me = await ref.read(meProvider.future);
+      return me.onboardingRequired;
+    } on Object {
+      return null;
     }
   }
 
@@ -240,7 +277,8 @@ class _PasswordSetupScreenState extends ConsumerState<PasswordSetupScreen> {
       if (!mounted) return;
       _password.clear();
       _confirm.clear();
-      if (ref.read(authControllerProvider).isNewUser) {
+      final auth = ref.read(authControllerProvider);
+      if (auth.isNewUser || auth.onboardingRequired) {
         await ref.read(onboardingControllerProvider.notifier).begin();
         if (!mounted) return;
       }

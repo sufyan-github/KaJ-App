@@ -329,6 +329,7 @@ void main() {
           role == 'WORKER' ? KaajRole.worker : KaajRole.customer,
         ),
       ),
+      meAs(role == 'WORKER' ? KaajRole.worker : KaajRole.customer),
       accountSummaryProvider.overrideWith(
         (ref) async => AccountSummary(
           id: 'user-1',
@@ -436,6 +437,7 @@ void main() {
             onboardingControllerProvider.overrideWith(
               (ref) => onboardingFor(KaajRole.customer, complete: false),
             ),
+            meAs(KaajRole.customer),
           ],
         );
 
@@ -496,6 +498,7 @@ void main() {
           onboardingControllerProvider.overrideWith(
             (ref) => onboardingFor(KaajRole.worker),
           ),
+          meAs(KaajRole.worker),
         ],
       );
 
@@ -522,6 +525,7 @@ void main() {
           onboardingControllerProvider.overrideWith(
             (ref) => onboardingFor(KaajRole.customer),
           ),
+          meAs(KaajRole.customer),
         ],
       );
 

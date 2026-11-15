@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/session/user_session.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
 import '../data/settings_repository.dart';
 import '../domain/settings_models.dart';
 
-final settingsRepositoryProvider = Provider<SettingsRepository>(
-  (ref) => SettingsRepository(ref.watch(dioProvider)),
-);
+final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
+  ref.watch(sessionEpochProvider);
+  return SettingsRepository(ref.watch(dioProvider));
+});
 
 final notificationPreferencesProvider =
     FutureProvider<List<NotificationPreference>>(

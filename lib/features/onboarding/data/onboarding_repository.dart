@@ -50,8 +50,8 @@ class OnboardingRepository {
   /// The skills already saved on the server, with level, years and the
   /// prior-training answer, so saving the form never resets them.
   Future<List<WorkerSkillInput>> getWorkerSkills() async {
-    final response = await _runAsWorker(
-      () => _dio.get<Map<String, dynamic>>('/profiles/me/skills'),
+    final response = await _dio.get<Map<String, dynamic>>(
+      '/profiles/me/skills',
     );
     final data = response.data?['data'];
     final items = data is Map ? data['items'] : data;
@@ -101,8 +101,8 @@ class OnboardingRepository {
   );
 
   Future<AvailabilitySchedule> getAvailability() async {
-    final response = await _runAsWorker(
-      () => _dio.get<Map<String, dynamic>>('/profiles/me/availability'),
+    final response = await _dio.get<Map<String, dynamic>>(
+      '/profiles/me/availability',
     );
     final data = response.data?['data'];
     if (data is! Map) throw const FormatException('Missing availability data');
@@ -110,13 +110,11 @@ class OnboardingRepository {
   }
 
   Future<void> replaceAvailability(List<AvailabilityRule> rules) async {
-    await _runAsWorker(
-      () => _dio.put<Map<String, dynamic>>(
-        '/profiles/me/availability',
-        data: {
-          'rules': rules.map((rule) => rule.toJson()).toList(growable: false),
-        },
-      ),
+    await _dio.put<Map<String, dynamic>>(
+      '/profiles/me/availability',
+      data: {
+        'rules': rules.map((rule) => rule.toJson()).toList(growable: false),
+      },
     );
   }
 
@@ -150,17 +148,5 @@ class OnboardingRepository {
   static int _minutes(String value) {
     final parts = value.split(':');
     return int.parse(parts[0]) * 60 + int.parse(parts[1]);
-  }
-
-  Future<Response<Map<String, dynamic>>> _runAsWorker(
-    Future<Response<Map<String, dynamic>>> Function() request,
-  ) async {
-    try {
-      return await request();
-    } on DioException catch (error) {
-      if (error.response?.statusCode != 403) rethrow;
-      await activateRole(KaajRole.worker);
-      return request();
-    }
   }
 }

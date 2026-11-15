@@ -105,6 +105,7 @@ void main() {
           onboardingControllerProvider.overrideWith(
             (ref) => onboardingFor(KaajRole.worker, repository: repository),
           ),
+          meAs(KaajRole.worker),
           ..._catalogOverrides,
         ],
       );
@@ -166,6 +167,7 @@ void main() {
           onboardingControllerProvider.overrideWith(
             (ref) => onboardingFor(KaajRole.worker, repository: repository),
           ),
+          meAs(KaajRole.worker),
           ..._catalogOverrides,
         ],
       );
@@ -207,6 +209,7 @@ void main() {
           onboardingControllerProvider.overrideWith(
             (ref) => onboardingFor(KaajRole.worker),
           ),
+          meAs(KaajRole.worker),
         ],
       );
 
@@ -245,6 +248,7 @@ void main() {
           onboardingControllerProvider.overrideWith(
             (ref) => onboardingFor(KaajRole.worker),
           ),
+          meAs(KaajRole.worker),
         ],
       );
 
@@ -262,6 +266,7 @@ void main() {
           onboardingControllerProvider.overrideWith(
             (ref) => onboardingFor(KaajRole.worker),
           ),
+          meAs(KaajRole.worker),
         ],
       );
 

@@ -271,4 +271,8 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get acceptTerms => 'এগোতে সেবার শর্ত ও গোপনীয়তা নীতিতে সম্মতি দিন।';
+
+  @override
+  String get sessionExpiredMessage =>
+      'আপনার সেশন শেষ হয়েছে, যেমন অন্য ফোনে সাইন আউট করা বা পাসওয়ার্ড বদলানোর কারণে। চালিয়ে যেতে আবার প্রবেশ করুন।';
 }
