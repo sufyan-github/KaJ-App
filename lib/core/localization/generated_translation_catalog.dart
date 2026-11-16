@@ -1236,4 +1236,7 @@ const generatedEnglishTranslations = <String, String>{
   "আপনি এই শেখার সুযোগে আগেই আবেদন করেছেন।":
       "You have already applied for this way to learn.",
   "মোট আবেদন": "Applications",
+  // P1.6: Home training card.
+  "আপনার দক্ষতায় মেন্টরের সাথে শেখা": "Learn with a mentor in your skills",
+  "আরও শেখার সুযোগ": "More ways to learn",
 };

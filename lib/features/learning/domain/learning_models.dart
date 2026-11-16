@@ -91,6 +91,7 @@ class LearningOpportunity {
     this.viewerApplicationStatus,
     this.isMine = false,
     this.applicationsCount,
+    this.skillIds = const [],
   });
 
   /// Reads both the camelCase learning shape and the snake_case job shape.
@@ -135,6 +136,13 @@ class LearningOpportunity {
       categoryNameEn: nested(category, 'nameEn', 'name_en'),
       areaNameBn: nested(area, 'nameBn', 'name_bn'),
       areaNameEn: nested(area, 'nameEn', 'name_en'),
+      skillIds: skills is List
+          ? skills
+                .whereType<Map>()
+                .map((item) => (item['id'] ?? item['skillId']) as String? ?? '')
+                .where((id) => id.isNotEmpty)
+                .toList(growable: false)
+          : const [],
       skillNames: skills is List
           ? skills
                 .whereType<Map>()
@@ -175,6 +183,7 @@ class LearningOpportunity {
   final LearningMentor? mentor;
   final int? seats;
   final int? seatsLeft;
+  final List<String> skillIds;
   final List<({String bn, String en})> skillNames;
   final DateTime? startsAt;
   final String status;

@@ -8,6 +8,8 @@ import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_card.dart';
 import '../../../../core/widgets/k_localized_text.dart';
+import '../../../learning/presentation/learning_providers.dart';
+import '../../../learning/presentation/learning_widgets.dart';
 import '../../data/training_repository.dart';
 import '../../domain/training_models.dart';
 import '../training_providers.dart';
@@ -85,6 +87,24 @@ class MyTrainingCard extends ConsumerWidget {
               label: const KLocalizedText('চালিয়ে যান'),
             ),
           ],
+          // Learning with a mentor in the same skills, next to the courses.
+          ...switch (ref.watch(learningForMySkillsProvider).valueOrNull) {
+            final items? when items.isNotEmpty => [
+              const SizedBox(height: KSpacing.sm),
+              KLocalizedText(
+                'আপনার দক্ষতায় মেন্টরের সাথে শেখা',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              for (final item in items)
+                LearningOpportunityCard(opportunity: item),
+              TextButton(
+                key: const ValueKey('training-card-explore-learn'),
+                onPressed: () => context.push(AppRoutes.exploreLearn),
+                child: const KLocalizedText('আরও শেখার সুযোগ'),
+              ),
+            ],
+            _ => const <Widget>[],
+          },
           if (certificates != null && certificates > 0)
             TextButton.icon(
               onPressed: () => context.push(AppRoutes.trainingCertificates),
