@@ -18,18 +18,21 @@ import '../../../catalog/domain/entities/catalog_skill.dart';
 import '../../../catalog/presentation/controllers/catalog_providers.dart';
 import '../../../chat/presentation/controllers/chat_providers.dart';
 import '../../../onboarding/domain/onboarding_state.dart';
-import '../../../onboarding/presentation/controllers/onboarding_controller.dart';
 import '../../../profile/domain/public_worker_profile.dart';
 import '../../../profile/presentation/controllers/me_provider.dart';
 import '../../../profile/presentation/controllers/public_profile_provider.dart';
-import '../../../trust_safety/domain/trust_models.dart';
 import '../../../trust_safety/presentation/trust_safety_providers.dart';
 import '../../data/jobs_repository.dart';
 import '../../domain/job_alert_errors.dart';
 import '../../domain/job_models.dart';
 import '../controllers/jobs_providers.dart';
 import '../widgets/applicant_card.dart';
+import '../widgets/apply_flow.dart';
+import '../widgets/opportunity_listing.dart';
 import '../widgets/review_dialog.dart';
+
+// Kept importable from here for existing callers.
+export '../widgets/apply_flow.dart' show showJobApplyFlow;
 
 class JobFeedScreen extends ConsumerStatefulWidget {
   const JobFeedScreen({
@@ -214,7 +217,7 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
           Expanded(
             child: jobs.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => _Retry(
+              error: (error, _) => RetryPanel(
                 error: error,
                 label: 'কাজের তালিকা লোড করা যায়নি।',
                 onRetry: () => showOpenJobs
@@ -242,10 +245,10 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                         padding: const EdgeInsets.all(KSpacing.md),
                         physics: const AlwaysScrollableScrollPhysics(),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: _responsiveGridColumns(context),
+                          crossAxisCount: opportunityGridColumns(context),
                           crossAxisSpacing: KSpacing.md,
                           mainAxisSpacing: KSpacing.md,
-                          mainAxisExtent: _jobGridCardHeight(context),
+                          mainAxisExtent: opportunityCardHeight(context),
                         ),
                         itemCount: items.length,
                         itemBuilder: (context, index) {
@@ -254,7 +257,7 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                               !isWorker &&
                               !browsingType &&
                               job.status == 'DRAFT';
-                          return _JobCard(
+                          return OpportunityCard(
                             job: job,
                             actionLabel: isWorker
                                 ? 'আবেদন'
@@ -421,455 +424,6 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
       ),
     );
   }
-}
-
-/// The apply flow shared by the job feed and the job detail page.
-///
-/// Checks identity eligibility first, then shows the proposal dialog.
-/// [onApplied] runs after the application is accepted by the API.
-Future<void> showJobApplyFlow(
-  BuildContext context,
-  WidgetRef ref,
-  JobSummary job, {
-  VoidCallback? onApplied,
-}) async {
-  late final ApplicationEligibility eligibility;
-  try {
-    // Always ask again: an admin may have approved the identity check since
-    // the last attempt.
-    eligibility = await ref.refresh(applicationEligibilityProvider.future);
-  } on Object catch (error) {
-    if (context.mounted) {
-      showFailureSnack(
-        context,
-        error,
-        'আবেদনের যোগ্যতা যাচাই করা যায়নি। আবার চেষ্টা করুন।',
-      );
-    }
-    return;
-  }
-  if (!context.mounted) return;
-  if (!eligibility.canApply) {
-    final startVerification = await _showApplicationRequirements(
-      context,
-      eligibility,
-    );
-    if (startVerification == true && context.mounted) {
-      await context.push(AppRoutes.verificationCapture('IDENTITY'));
-    }
-    return;
-  }
-  final budget = job.budgetMaxPoisha ?? job.budgetMinPoisha;
-  final amount = TextEditingController(
-    text: budget == null ? '' : budget.wholeTaka.toString(),
-  );
-  final message = TextEditingController();
-  final start = job.startsAt ?? DateTime.now().add(const Duration(days: 1));
-  final end = job.endsAt ?? start.add(const Duration(hours: 1));
-  // A refusal is shown inside the dialog: a snack bar would sit behind it.
-  String? submitError;
-  var submitting = false;
-  await showDialog<void>(
-    context: context,
-    builder: (dialogContext) => StatefulBuilder(
-      builder: (dialogContext, setDialogState) => AlertDialog(
-        title: const KLocalizedText('এই কাজে আবেদন করুন'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: KLocalizedText(
-                  'কাজের সময়: ${KFormat.dateTime(context, start)} – ${KFormat.time(context, end)}',
-                ),
-              ),
-              if (job.isTimeAvailable)
-                const ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.event_available, color: KColors.success),
-                  title: KLocalizedText(
-                    'এই সময়টি আপনার ডিফল্ট সময়ের সঙ্গে মেলে',
-                  ),
-                ),
-              if (job.isTimeUnavailable) ...[
-                const ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.event_busy, color: KColors.warning),
-                  title: KLocalizedText('এই সময়টি আপনার ডিফল্ট সময়ের বাইরে'),
-                  subtitle: KLocalizedText(
-                    'আবেদন করার আগে চাইলে পোস্টের সময়টি আপনার কাজের সময়ে যোগ করুন।',
-                  ),
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () async {
-                      try {
-                        await ref
-                            .read(onboardingRepositoryProvider)
-                            .addAvailabilityWindow(start, end);
-                        ref.invalidate(jobFeedProvider);
-                        if (dialogContext.mounted) Navigator.pop(dialogContext);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: KLocalizedText(
-                                'পোস্টের সময়টি আপনার ডিফল্ট কাজের সময়ে যোগ হয়েছে। এখন আবেদন করতে পারবেন।',
-                              ),
-                            ),
-                          );
-                        }
-                      } on Object catch (error) {
-                        if (context.mounted) {
-                          showFailureSnack(
-                            context,
-                            error,
-                            'কাজের সময় আপডেট করা যায়নি।',
-                          );
-                        }
-                      }
-                    },
-                    icon: const Icon(Icons.playlist_add),
-                    label: const KLocalizedText('এই পোস্টের সময় যোগ করুন'),
-                  ),
-                ),
-              ],
-              const SizedBox(height: KSpacing.md),
-              KTextField(
-                label: 'প্রস্তাবিত টাকা',
-                controller: amount,
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: KSpacing.sm),
-              KTextField(label: 'বার্তা (ঐচ্ছিক)', controller: message),
-              if (submitError case final error?) ...[
-                const SizedBox(height: KSpacing.sm),
-                _InlineError(message: error),
-              ],
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const KLocalizedText('ফিরুন'),
-          ),
-          FilledButton(
-            onPressed: job.isTimeUnavailable || submitting
-                ? null
-                : () async {
-                    final taka = int.tryParse(amount.text);
-                    if (taka == null || taka <= 0) {
-                      setDialogState(
-                        () => submitError = KaajLocalizations.text(
-                          dialogContext,
-                          'প্রস্তাবিত টাকার পরিমাণ লিখুন।',
-                        ),
-                      );
-                      return;
-                    }
-                    setDialogState(() {
-                      submitting = true;
-                      submitError = null;
-                    });
-                    try {
-                      await ref
-                          .read(jobsRepositoryProvider)
-                          .apply(
-                            jobId: job.id,
-                            startsAt: start,
-                            endsAt: end,
-                            proposedPricePoisha: taka * 100,
-                            message: message.text,
-                          );
-                      if (dialogContext.mounted) Navigator.pop(dialogContext);
-                      onApplied?.call();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: KLocalizedText('আবেদন পাঠানো হয়েছে।'),
-                          ),
-                        );
-                      }
-                    } on Object catch (error) {
-                      if (dialogContext.mounted) {
-                        setDialogState(() {
-                          submitting = false;
-                          submitError = failureText(
-                            dialogContext,
-                            error,
-                            'আবেদন পাঠানো যায়নি। সময়টি যাচাই করুন।',
-                          );
-                        });
-                      }
-                    }
-                  },
-            child: const KLocalizedText('আবেদন পাঠান'),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-/// A refusal shown in place, read out by screen readers.
-class _InlineError extends StatelessWidget {
-  const _InlineError({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    liveRegion: true,
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Icon(Icons.error_outline, color: KColors.danger, size: 20),
-        const SizedBox(width: KSpacing.xs),
-        Expanded(
-          child: Text(message, style: const TextStyle(color: KColors.danger)),
-        ),
-      ],
-    ),
-  );
-}
-
-Future<bool?> _showApplicationRequirements(
-  BuildContext context,
-  ApplicationEligibility eligibility,
-) => showDialog<bool>(
-  context: context,
-  builder: (dialogContext) {
-    final pending = eligibility.identityStatus == 'PENDING';
-    final rejected = eligibility.identityStatus == 'REJECTED';
-    return AlertDialog(
-      title: const KLocalizedText('আবেদনের আগে পরিচয় যাচাই করুন'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            KLocalizedText(
-              pending
-                  ? 'আপনার NID ও সেলফি পর্যালোচনাধীন। অনুমোদন হলে আবেদন করতে পারবেন।'
-                  : rejected
-                  ? 'আগের যাচাই অনুমোদিত হয়নি। পরিষ্কার NID ও নতুন সেলফি দিয়ে আবার জমা দিন।'
-                  : 'নিরাপদে কাজ পেতে নিচের আবশ্যিক তথ্য যাচাই সম্পন্ন করুন।',
-            ),
-            const SizedBox(height: KSpacing.md),
-            _EligibilityRow(
-              label: 'ফোন নম্বর',
-              verified: eligibility.phoneVerified,
-            ),
-            _EligibilityRow(
-              label: 'পরিচয় তথ্য',
-              verified: eligibility.identityInformationVerified,
-            ),
-            _EligibilityRow(
-              label: 'জাতীয় পরিচয়পত্র (NID)',
-              verified: eligibility.nidVerified,
-            ),
-            _EligibilityRow(
-              label: 'সেলফি',
-              verified: eligibility.selfieVerified,
-            ),
-            const Divider(height: KSpacing.lg),
-            const _EligibilityRow(label: 'অভিজ্ঞতা', optional: true),
-            const _EligibilityRow(label: 'দক্ষতা / বিশেষজ্ঞতা', optional: true),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(dialogContext, false),
-          child: const KLocalizedText('পরে'),
-        ),
-        if (!pending)
-          FilledButton.icon(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            icon: const Icon(Icons.verified_user_outlined),
-            label: KLocalizedText(
-              rejected ? 'আবার যাচাই করুন' : 'যাচাই শুরু করুন',
-            ),
-          ),
-      ],
-    );
-  },
-);
-
-class _EligibilityRow extends StatelessWidget {
-  const _EligibilityRow({
-    required this.label,
-    this.verified = false,
-    this.optional = false,
-  });
-
-  final String label;
-  final bool verified;
-  final bool optional;
-
-  @override
-  Widget build(BuildContext context) => ListTile(
-    dense: true,
-    contentPadding: EdgeInsets.zero,
-    leading: Icon(
-      optional
-          ? Icons.add_circle_outline
-          : verified
-          ? Icons.check_circle
-          : Icons.radio_button_unchecked,
-      color: optional
-          ? KColors.primary
-          : verified
-          ? KColors.success
-          : KColors.warning,
-    ),
-    title: KLocalizedText(label),
-    trailing: KLocalizedText(
-      optional
-          ? 'ঐচ্ছিক'
-          : verified
-          ? 'সম্পন্ন'
-          : 'আবশ্যিক',
-    ),
-  );
-}
-
-class _JobCard extends StatelessWidget {
-  const _JobCard({
-    required this.job,
-    required this.actionLabel,
-    required this.onAction,
-  });
-
-  final String? actionLabel;
-  final JobSummary job;
-  final VoidCallback? onAction;
-
-  @override
-  Widget build(BuildContext context) => Card(
-    margin: EdgeInsets.zero,
-    clipBehavior: Clip.antiAlias,
-    child: InkWell(
-      onTap: () => context.push(AppRoutes.jobDetail(job.id)),
-      child: Padding(
-        padding: const EdgeInsets.all(KSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: KColors.primary.withValues(alpha: .1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.work_outline, color: KColors.primary),
-                ),
-                if (job.matchScore case final score? when score > 0)
-                  Padding(
-                    padding: const EdgeInsets.only(left: KSpacing.xs),
-                    child: Chip(
-                      visualDensity: VisualDensity.compact,
-                      avatar: const Icon(Icons.auto_awesome, size: 16),
-                      label: KLocalizedText('$score%'),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: KSpacing.sm),
-            Text(
-              job.title,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: KSpacing.xs),
-            KLocalizedText(
-              '${job.categoryNameFor(Localizations.localeOf(context).languageCode)} · ${job.locationNameFor(Localizations.localeOf(context).languageCode)}',
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: KSpacing.xs),
-            Text(
-              job.description,
-              textAlign: TextAlign.center,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-            if (job.matchReasons.isNotEmpty)
-              KLocalizedText(
-                _matchReasonBn(job.matchReasons.first),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: KColors.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            const Spacer(),
-            if (job.startsAt != null)
-              KLocalizedText(
-                'কাজের সময়: ${KFormat.dateTime(context, job.startsAt!)}',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            if (job.isTimeAvailable)
-              const KLocalizedText(
-                '✓ আপনার সময়ে মেলে',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: KColors.success,
-                  fontWeight: FontWeight.w600,
-                ),
-              )
-            else if (job.isTimeUnavailable)
-              const KLocalizedText(
-                'সময় যোগ করলে আবেদন করা যাবে',
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: KColors.warning,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            if (KFormat.moneyRange(
-                  context,
-                  job.budgetMinPoisha,
-                  job.budgetMaxPoisha,
-                )
-                case final amount?)
-              Text(
-                amount,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.w700),
-              ),
-            if (actionLabel != null) ...[
-              const SizedBox(height: KSpacing.sm),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: onAction,
-                  child: KLocalizedText(actionLabel!),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    ),
-  );
 }
 
 class CreateJobScreen extends ConsumerStatefulWidget {
@@ -1221,7 +775,7 @@ class WorkerDirectoryScreen extends ConsumerWidget {
       appBar: AppBar(title: const KLocalizedText('কর্মী ও সময় খুঁজুন')),
       body: workers.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => _Retry(
+        error: (error, _) => RetryPanel(
           error: error,
           label: 'কর্মীর তালিকা লোড হয়নি।',
           onRetry: () => ref.invalidate(workerDirectoryProvider),
@@ -1233,7 +787,7 @@ class WorkerDirectoryScreen extends ConsumerWidget {
             : GridView.builder(
                 padding: const EdgeInsets.all(KSpacing.md),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: _responsiveGridColumns(context),
+                  crossAxisCount: opportunityGridColumns(context),
                   crossAxisSpacing: KSpacing.md,
                   mainAxisSpacing: KSpacing.md,
                   mainAxisExtent: _workerGridCardHeight(context),
@@ -1632,7 +1186,7 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen>
       appBar: AppBar(title: const KLocalizedText('বুকিং ও কাজের অবস্থা')),
       body: assignments.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => _Retry(
+        error: (error, _) => RetryPanel(
           error: error,
           label: 'বুকিং লোড করা যায়নি।',
           onRetry: refreshFromServer,
@@ -1728,7 +1282,7 @@ class _AssignmentDetailScreenState extends ConsumerState<AssignmentDetailScreen>
         skipLoadingOnRefresh: true,
         skipLoadingOnReload: true,
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => _Retry(
+        error: (error, _) => RetryPanel(
           error: error,
           label: 'কাজের বিস্তারিত লোড করা যায়নি।',
           onRetry: refreshFromServer,
@@ -2253,7 +1807,7 @@ class ReceivedReviewsScreen extends ConsumerWidget {
       appBar: AppBar(title: const KLocalizedText('আমার পাওয়া রিভিউ')),
       body: reviews.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => _Retry(
+        error: (error, _) => RetryPanel(
           error: error,
           label: 'রিভিউ লোড করা যায়নি।',
           onRetry: () => ref.invalidate(receivedReviewsProvider),
@@ -2296,7 +1850,7 @@ class FavoriteWorkersScreen extends ConsumerWidget {
       appBar: AppBar(title: const KLocalizedText('পছন্দের কর্মী')),
       body: favorites.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => _Retry(
+        error: (error, _) => RetryPanel(
           error: error,
           label: 'পছন্দের তালিকা লোড করা যায়নি।',
           onRetry: () => ref.invalidate(favoriteWorkersProvider),
@@ -2374,52 +1928,9 @@ class _DateTimeRow extends StatelessWidget {
   );
 }
 
-class _Retry extends StatelessWidget {
-  const _Retry({required this.label, required this.onRetry, this.error});
-  final String label;
-  final VoidCallback onRetry;
-
-  /// The load error, so a known server code (subscription, restriction,
-  /// no internet) is explained instead of the generic [label].
-  final Object? error;
-  @override
-  Widget build(BuildContext context) => Center(
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          error == null
-              ? KaajLocalizations.text(context, label)
-              : failureText(context, error!, label),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: KSpacing.sm),
-        FilledButton(
-          onPressed: onRetry,
-          child: const KLocalizedText('আবার চেষ্টা করুন'),
-        ),
-      ],
-    ),
-  );
-}
-
-int _responsiveGridColumns(BuildContext context) {
-  final width = MediaQuery.sizeOf(context).width;
-  final textScale = MediaQuery.textScalerOf(context).scale(16) / 16;
-  if (width < 400) return 1;
-  if (width < 680 && textScale >= 1.5) return 1;
-  return width >= 680 ? 3 : 2;
-}
-
-double _jobGridCardHeight(BuildContext context) {
-  final scale = (MediaQuery.textScalerOf(context).scale(16) / 16).clamp(1, 2);
-  final accessible = _responsiveGridColumns(context) == 1;
-  return 424 + ((scale - 1) * (accessible ? 356 : 160));
-}
-
 double _workerGridCardHeight(BuildContext context) {
   final scale = (MediaQuery.textScalerOf(context).scale(16) / 16).clamp(1, 2);
-  final accessible = _responsiveGridColumns(context) == 1;
+  final accessible = opportunityGridColumns(context) == 1;
   return 300 + ((scale - 1) * (accessible ? 200 : 96));
 }
 
@@ -2470,16 +1981,6 @@ class _AmountDialogState extends State<_AmountDialog> {
 
 DateTime _combine(DateTime date, TimeOfDay time) =>
     DateTime(date.year, date.month, date.day, time.hour, time.minute);
-String _matchReasonBn(String reason) => switch (reason) {
-  'Skills match' => 'আপনার দক্ষতার সঙ্গে মেলে',
-  'Nearby service area' => 'আপনার কাছাকাছি কাজ',
-  'Available for this time' => 'আপনার খালি সময়ের সঙ্গে মেলে',
-  'Rate fits the budget' => 'পারিশ্রমিক আপনার রেটের সঙ্গে মেলে',
-  'Relevant experience' => 'আপনার অভিজ্ঞতার সঙ্গে মেলে',
-  'Strong worker rating' => 'রেটিং অনুযায়ী ভালো মিল',
-  'Reliable work history' => 'নির্ভরযোগ্যতার সঙ্গে মেলে',
-  _ => reason,
-};
 
 /// Bangla source label for a job, application or assignment status.
 String jobStatusLabel(String status) => _statusBn(status);
