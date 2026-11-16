@@ -60,6 +60,35 @@ export class EngagementService {
     return new Set(rows.map((row) => row.worker_user_id));
   }
 
+  /** Of `otherUserIds`, those with a hire with `userId`, in either role. */
+  async hiredWith(
+    userId: string,
+    otherUserIds: string[],
+  ): Promise<Set<string>> {
+    const others = otherUserIds.filter((id) => id !== userId);
+    if (others.length === 0) return new Set();
+    const rows = await this.prisma.assignment.findMany({
+      where: {
+        status: { in: HIRED_STATUSES },
+        OR: [
+          { worker_user_id: userId, job: { poster_user_id: { in: others } } },
+          { worker_user_id: { in: others }, job: { poster_user_id: userId } },
+        ],
+      },
+      select: {
+        worker_user_id: true,
+        job: { select: { poster_user_id: true } },
+      },
+    });
+    return new Set(
+      rows.map((row) =>
+        row.worker_user_id === userId
+          ? row.job.poster_user_id
+          : row.worker_user_id,
+      ),
+    );
+  }
+
   /**
    * They are already dealing with each other: one applied to, was offered or
    * was hired for a job the other posted.

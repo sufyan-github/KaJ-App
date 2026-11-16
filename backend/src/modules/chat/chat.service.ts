@@ -14,6 +14,7 @@ import { PrismaService } from "../../infra/prisma/prisma.service";
 import { STORAGE_PORT, StoragePort } from "../../infra/storage/storage.port";
 import { NotificationsService } from "../notifications/notifications.service";
 import { EngagementService } from "../safety/engagement.service";
+import { visibleDisplayName } from "../users/public-profile.projection";
 import { USER_BLOCKED, UserBlocksService } from "../safety/user-blocks.service";
 import { ChatEvents } from "./chat.events";
 import { needsPaymentSafetyWarning } from "./chat-safety";
@@ -55,12 +56,23 @@ export class ChatService {
       },
       orderBy: { updated_at: "desc" },
     });
+    // Names follow the same rule as the job page: masked until a confirmed
+    // hire, unless the person chose to show their full name.
+    const hiredWith = await this.engagement.hiredWith(
+      userId,
+      rows.flatMap((row) =>
+        row.participants
+          .map((item) => item.user_id)
+          .filter((id) => id !== userId),
+      ),
+    );
     const items = await Promise.all(
       rows.map(async (row) => {
         const participant = row.participants.find(
           (item) => item.user_id === userId,
         )!;
         const other = row.participants.find((item) => item.user_id !== userId);
+        const otherProfile = other?.user.profile;
         const unreadCount = await this.prisma.message.count({
           where: {
             conversation_id: row.id,
@@ -77,7 +89,12 @@ export class ChatService {
           jobTitle: row.job?.title ?? "কাজের আলোচনা",
           jobStatus: row.job?.status ?? null,
           otherUserId: other?.user_id ?? null,
-          otherName: other?.user.profile?.display_name || "KAAJ ব্যবহারকারী",
+          otherName: otherProfile?.display_name
+            ? visibleDisplayName(otherProfile.display_name, {
+                showFullName: otherProfile.show_full_name,
+                hired: hiredWith.has(other!.user_id),
+              })
+            : "KAAJ ব্যবহারকারী",
           unreadCount,
           lastMessage: row.messages[0]
             ? await this.serializeMessage(row.messages[0], userId)

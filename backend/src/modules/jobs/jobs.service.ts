@@ -54,7 +54,11 @@ import {
 } from "./hiring-policy";
 import { PaymentsService } from "../payments/payments.service";
 import { JobAlertsService } from "../job-alerts/job-alerts.service";
-import { maskPublicDisplayName } from "../users/public-profile.projection";
+import {
+  maskPublicDisplayName,
+  visibleDisplayName,
+} from "../users/public-profile.projection";
+import { EngagementService } from "../safety/engagement.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
 import { disputeEligibility } from "../disputes/dispute-eligibility";
 
@@ -90,7 +94,12 @@ export class JobsService {
     @Optional() private readonly payments?: PaymentsService,
     @Optional() private readonly jobAlerts?: JobAlertsService,
     @Optional() private readonly userBlocks?: UserBlocksService,
+    @Optional() private readonly engagementService?: EngagementService,
   ) {}
+
+  private get engagement() {
+    return this.engagementService ?? new EngagementService(this.prisma);
+  }
 
   private now() {
     return this.clock?.now() ?? new Date();
@@ -332,7 +341,13 @@ export class JobsService {
         poster: {
           select: {
             id: true,
-            profile: { select: { display_name: true, trust_level: true } },
+            profile: {
+              select: {
+                display_name: true,
+                trust_level: true,
+                show_full_name: true,
+              },
+            },
             badges: {
               where: { revoked_at: null },
               select: { badge: { select: { slug: true } } },
@@ -373,9 +388,14 @@ export class JobsService {
       ...serializeJob(rest),
       poster: {
         id: poster.id,
+        // Same rule as the chat list: masked until a confirmed hire,
+        // unless the poster chose to show their full name.
         displayName: viewerIsPoster
           ? displayName
-          : maskPublicDisplayName(displayName),
+          : visibleDisplayName(displayName, {
+              showFullName: poster.profile?.show_full_name ?? false,
+              hired: await this.engagement.hired(viewerUserId, poster.id),
+            }),
         trustLevel: poster.profile?.trust_level ?? TrustLevel.NONE,
         badges: poster.badges.map(({ badge }) => badge.slug),
       },

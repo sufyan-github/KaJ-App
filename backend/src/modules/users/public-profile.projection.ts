@@ -47,6 +47,20 @@ export function createPublicProfileProjection(source: PublicProfileSource) {
   };
 }
 
+/**
+ * The name one person sees for another anywhere outside a public profile
+ * (chat list, job detail): the full name if they chose to show it or the
+ * two have a confirmed hire, otherwise "Rahima K.".
+ */
+export function visibleDisplayName(
+  displayName: string,
+  rule: { showFullName: boolean; hired: boolean },
+): string {
+  return rule.showFullName || rule.hired
+    ? displayName.trim()
+    : maskPublicDisplayName(displayName);
+}
+
 export function maskPublicDisplayName(displayName: string): string {
   const parts = displayName.trim().split(/\s+/).filter(Boolean);
   if (parts.length <= 1) return parts[0] ?? "";
