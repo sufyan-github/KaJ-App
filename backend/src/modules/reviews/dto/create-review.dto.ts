@@ -1,7 +1,10 @@
+import { ReviewSubjectType } from "@prisma/client";
 import {
+  IsEnum,
   IsInt,
   IsOptional,
   IsString,
+  IsUUID,
   Max,
   MaxLength,
   Min,
@@ -41,4 +44,22 @@ export class CreateReviewDto {
   @IsString()
   @MaxLength(1000)
   comment?: string;
+}
+
+/** A review of any subject: POST /reviews. */
+export class CreateSubjectReviewDto extends CreateReviewDto {
+  @IsEnum(ReviewSubjectType)
+  subjectType!: ReviewSubjectType;
+
+  @IsUUID()
+  subjectId!: string;
+}
+
+/** GET /reviews/subject?subjectType=…&subjectId=… */
+export class ReviewSubjectQueryDto {
+  @IsEnum(ReviewSubjectType)
+  subjectType!: ReviewSubjectType;
+
+  @IsUUID()
+  subjectId!: string;
 }

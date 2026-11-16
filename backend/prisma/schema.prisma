@@ -237,6 +237,11 @@ enum PayoutStatus {
   CANCELLED
 }
 
+/// What a review is about. Values are added as modules gain reviews.
+enum ReviewSubjectType {
+  ASSIGNMENT
+}
+
 enum ReviewDirection {
   C2W
   W2C
@@ -1241,11 +1246,15 @@ model Wallet {
 }
 
 model Review {
-  id               String          @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  job_id           String          @db.Uuid
-  assignment_id    String          @db.Uuid
-  reviewer_user_id String          @db.Uuid
-  reviewee_user_id String          @db.Uuid
+  id               String            @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  /// What is being reviewed. ASSIGNMENT rows also set job_id and
+  /// assignment_id (= subject_id); other subjects leave them empty.
+  subject_type     ReviewSubjectType @default(ASSIGNMENT)
+  subject_id       String            @db.Uuid
+  job_id           String?           @db.Uuid
+  assignment_id    String?           @db.Uuid
+  reviewer_user_id String            @db.Uuid
+  reviewee_user_id String            @db.Uuid
   direction        ReviewDirection
   rating           Int
   punctuality      Int?
@@ -1253,14 +1262,15 @@ model Review {
   communication    Int?
   reliability      Int?
   comment          String?
-  is_visible       Boolean         @default(true)
-  created_at       DateTime        @default(now())
-  job              Job             @relation(fields: [job_id], references: [id], onDelete: Restrict)
-  assignment       Assignment      @relation(fields: [assignment_id], references: [id], onDelete: Restrict)
-  reviewer         User            @relation("ReviewWriter", fields: [reviewer_user_id], references: [id], onDelete: Restrict)
-  reviewee         User            @relation("ReviewSubject", fields: [reviewee_user_id], references: [id], onDelete: Restrict)
+  is_visible       Boolean           @default(true)
+  created_at       DateTime          @default(now())
+  job              Job?              @relation(fields: [job_id], references: [id], onDelete: Restrict)
+  assignment       Assignment?       @relation(fields: [assignment_id], references: [id], onDelete: Restrict)
+  reviewer         User              @relation("ReviewWriter", fields: [reviewer_user_id], references: [id], onDelete: Restrict)
+  reviewee         User              @relation("ReviewSubject", fields: [reviewee_user_id], references: [id], onDelete: Restrict)
 
   @@unique([assignment_id, reviewer_user_id])
+  @@unique([subject_type, subject_id, reviewer_user_id])
   @@index([reviewee_user_id, is_visible, created_at(sort: Desc)])
   @@index([job_id])
   @@index([reviewer_user_id])

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -10,6 +11,7 @@ import {
   JobStatus,
   Prisma,
   ReviewDirection,
+  ReviewSubjectType,
   TrustLevel,
 } from "@prisma/client";
 
@@ -17,7 +19,11 @@ import { CLOCK, Clock } from "../../common/time/clock";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { JobStateMachine } from "../jobs/state-machine/job-state.machine";
 import { NotificationsService } from "../notifications/notifications.service";
-import { CreateReviewDto } from "./dto/create-review.dto";
+import {
+  CreateReviewDto,
+  CreateSubjectReviewDto,
+  ReviewSubjectQueryDto,
+} from "./dto/create-review.dto";
 import { hasTrust } from "../verification/trust-level";
 import { eligibleBadgeSlugs, RULE_BADGE_SLUGS } from "./badge.rules";
 import { rateBps, rawRating, workerReliability } from "./reputation.calculator";
@@ -55,6 +61,8 @@ export class ReviewsService {
 
       const review = await transaction.review.create({
         data: {
+          subject_type: ReviewSubjectType.ASSIGNMENT,
+          subject_id: assignmentId,
           assignment_id: assignmentId,
           job_id: assignment.job_id,
           reviewer_user_id: userId,
@@ -131,6 +139,34 @@ export class ReviewsService {
     };
   }
 
+  /**
+   * Reviews of any subject, by type. Each subject type decides who may
+   * review whom and when; ASSIGNMENT is the job flow above. Later modules
+   * (sessions, businesses) add their type here.
+   */
+  async createForSubject(userId: string, input: CreateSubjectReviewDto) {
+    const { subjectType, subjectId, ...review } = input;
+    switch (subjectType) {
+      case ReviewSubjectType.ASSIGNMENT:
+        return this.create(userId, subjectId, review);
+      default:
+        throw unsupportedSubject(subjectType);
+    }
+  }
+
+  async forSubject(userId: string, query: ReviewSubjectQueryDto) {
+    switch (query.subjectType) {
+      case ReviewSubjectType.ASSIGNMENT:
+        return {
+          subjectType: query.subjectType,
+          subjectId: query.subjectId,
+          ...(await this.forAssignment(userId, query.subjectId)),
+        };
+      default:
+        throw unsupportedSubject(query.subjectType);
+    }
+  }
+
   async received(userId: string) {
     const rows = await this.prisma.review.findMany({
       where: { reviewee_user_id: userId, is_visible: true },
@@ -143,11 +179,14 @@ export class ReviewsService {
     const now = this.clock.now();
     return {
       items: rows
-        .filter(
-          (row) =>
-            row.assignment.reviews.filter((review) => review.is_visible)
-              .length === 2 ||
-            now >= this.windowEndsAt(row.assignment.job.completed_at),
+        .filter((row) =>
+          // Assignment reviews stay hidden until both sides reviewed or the
+          // window closed; other subjects define their own reveal later.
+          row.assignment
+            ? row.assignment.reviews.filter((review) => review.is_visible)
+                .length === 2 ||
+              now >= this.windowEndsAt(row.assignment.job.completed_at)
+            : true,
         )
         .map(serializeReview),
     };
@@ -395,7 +434,9 @@ function opposite(direction: ReviewDirection): ReviewDirection {
 
 function serializeReview(review: {
   id: string;
-  assignment_id: string;
+  subject_type: ReviewSubjectType;
+  subject_id: string;
+  assignment_id: string | null;
   reviewer_user_id: string;
   direction: ReviewDirection;
   rating: number;
@@ -409,6 +450,8 @@ function serializeReview(review: {
 }) {
   return {
     id: review.id,
+    subjectType: review.subject_type,
+    subjectId: review.subject_id,
     assignmentId: review.assignment_id,
     reviewerUserId: review.reviewer_user_id,
     reviewerName: review.reviewer.profile?.display_name || "KAAJ ব্যবহারকারী",
@@ -421,4 +464,12 @@ function serializeReview(review: {
     comment: review.comment,
     createdAt: review.created_at.toISOString(),
   };
+}
+
+function unsupportedSubject(subjectType: string) {
+  return new BadRequestException({
+    code: "REVIEW_SUBJECT_UNSUPPORTED",
+    message: `Reviews of ${subjectType} are not available yet.`,
+    messageKey: "error.review.subject_unsupported",
+  });
 }

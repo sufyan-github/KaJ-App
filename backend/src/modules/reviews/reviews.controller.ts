@@ -5,6 +5,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 
@@ -12,7 +13,11 @@ import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { Policy } from "../../common/policy/policy.decorator";
 import { Policies } from "../../common/policy/policy.types";
 import { AccessTokenClaims } from "../auth/auth-token.service";
-import { CreateReviewDto } from "./dto/create-review.dto";
+import {
+  CreateReviewDto,
+  CreateSubjectReviewDto,
+  ReviewSubjectQueryDto,
+} from "./dto/create-review.dto";
 import { ReviewsService } from "./reviews.service";
 
 @ApiTags("reviews")
@@ -37,6 +42,25 @@ export class ReviewsController {
     @Param("id", new ParseUUIDPipe()) assignmentId: string,
   ) {
     return this.reviews.forAssignment(claims.sub, assignmentId);
+  }
+
+  /** A review of any subject (subjectType + subjectId in the body). */
+  @Post("reviews")
+  @Policy(Policies.authenticated())
+  createForSubject(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Body() body: CreateSubjectReviewDto,
+  ) {
+    return this.reviews.createForSubject(claims.sub, body);
+  }
+
+  @Get("reviews/subject")
+  @Policy(Policies.authenticated())
+  subjectReviews(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Query() query: ReviewSubjectQueryDto,
+  ) {
+    return this.reviews.forSubject(claims.sub, query);
   }
 
   @Get("reviews/received")

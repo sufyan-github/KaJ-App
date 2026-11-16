@@ -75,7 +75,7 @@ export class RiskService {
             transaction.review.findMany({
               where: { created_at: { gte: monthAgo }, is_visible: true },
               select: {
-                assignment_id: true,
+                subject_id: true,
                 reviewer_user_id: true,
                 reviewee_user_id: true,
                 rating: true,
@@ -135,7 +135,8 @@ export class RiskService {
           ),
           detectReviewRings(
             reviews.map((item) => ({
-              assignmentId: item.assignment_id,
+              // The reviewed engagement (= assignment id for job reviews).
+              assignmentId: item.subject_id,
               at: item.created_at,
               rating: item.rating,
               revieweeUserId: item.reviewee_user_id,
