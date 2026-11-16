@@ -11,6 +11,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/k_localized_text.dart';
 import '../../../core/widgets/k_primary_button.dart';
 import '../../../core/widgets/k_text_field.dart';
+import '../../auth/presentation/controllers/auth_providers.dart';
 import '../../catalog/domain/entities/catalog_category.dart';
 import '../../catalog/domain/entities/service_location.dart';
 import '../../catalog/presentation/controllers/catalog_providers.dart';
@@ -46,6 +47,14 @@ class _PublishLearningScreenState extends ConsumerState<PublishLearningScreen> {
   late DateTime _endsAt = _nextMorning(8);
   bool _saving = false;
   String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    // Publishing needs MENTOR in the access token, which a token issued
+    // before the approval lacks. A fresh token carries the current roles.
+    ref.read(sessionTokenStoreProvider).refreshAccessToken().ignore();
+  }
 
   static DateTime _nextMorning(int days) {
     final now = DateTime.now();

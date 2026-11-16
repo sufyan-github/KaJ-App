@@ -350,4 +350,19 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get errorMentorAlreadyApproved => 'আপনি ইতিমধ্যে অনুমোদিত মেন্টর।';
+
+  @override
+  String get errorOpportunityClosed =>
+      'এই শেখার সুযোগে আর আবেদন নেওয়া হচ্ছে না।';
+
+  @override
+  String get errorOwnOpportunity =>
+      'এটি আপনার প্রকাশ করা, তাই আবেদন করা যাবে না।';
+
+  @override
+  String get errorLearningTermsInvalid =>
+      'শর্ত মিলিয়ে দেখুন: ফি শুধু \"ফি দিতে হবে\" হলে, ভাতা শুধু \"ভাতা পাবেন\" হলে।';
+
+  @override
+  String get errorNotAWorkJob => 'এটি শেখার সুযোগ, চাকরি নয়।';
 }

@@ -356,4 +356,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorMentorAlreadyApproved =>
       'You are already an approved mentor.';
+
+  @override
+  String get errorOpportunityClosed =>
+      'This way to learn is no longer taking applications.';
+
+  @override
+  String get errorOwnOpportunity =>
+      'You published this, so you cannot apply to it.';
+
+  @override
+  String get errorLearningTermsInvalid =>
+      'Check the terms: a fee is only for \"you pay\", an allowance only for \"you receive\".';
+
+  @override
+  String get errorNotAWorkJob => 'This is a way to learn, not a job.';
 }

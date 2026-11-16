@@ -101,5 +101,9 @@
   "errorMentorSuspended": "আপনার মেন্টর প্রোফাইল স্থগিত আছে।",
   "errorIdentityRequired": "আগে আপনার পরিচয় যাচাই করুন (NID ও সেলফি)।",
   "errorMentorApplicationPending": "আপনার মেন্টর আবেদন পর্যালোচনায় আছে।",
-  "errorMentorAlreadyApproved": "আপনি ইতিমধ্যে অনুমোদিত মেন্টর।"
+  "errorMentorAlreadyApproved": "আপনি ইতিমধ্যে অনুমোদিত মেন্টর।",
+  "errorOpportunityClosed": "এই শেখার সুযোগে আর আবেদন নেওয়া হচ্ছে না।",
+  "errorOwnOpportunity": "এটি আপনার প্রকাশ করা, তাই আবেদন করা যাবে না।",
+  "errorLearningTermsInvalid": "শর্ত মিলিয়ে দেখুন: ফি শুধু \"ফি দিতে হবে\" হলে, ভাতা শুধু \"ভাতা পাবেন\" হলে।",
+  "errorNotAWorkJob": "এটি শেখার সুযোগ, চাকরি নয়।"
 }

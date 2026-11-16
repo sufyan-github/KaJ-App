@@ -101,5 +101,9 @@
   "errorMentorSuspended": "Your mentor profile is suspended.",
   "errorIdentityRequired": "Verify your identity (NID and selfie) first.",
   "errorMentorApplicationPending": "Your mentor application is being reviewed.",
-  "errorMentorAlreadyApproved": "You are already an approved mentor."
+  "errorMentorAlreadyApproved": "You are already an approved mentor.",
+  "errorOpportunityClosed": "This way to learn is no longer taking applications.",
+  "errorOwnOpportunity": "You published this, so you cannot apply to it.",
+  "errorLearningTermsInvalid": "Check the terms: a fee is only for \"you pay\", an allowance only for \"you receive\".",
+  "errorNotAWorkJob": "This is a way to learn, not a job."
 }

@@ -685,6 +685,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You are already an approved mentor.'**
   String get errorMentorAlreadyApproved;
+
+  /// No description provided for @errorOpportunityClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'This way to learn is no longer taking applications.'**
+  String get errorOpportunityClosed;
+
+  /// No description provided for @errorOwnOpportunity.
+  ///
+  /// In en, this message translates to:
+  /// **'You published this, so you cannot apply to it.'**
+  String get errorOwnOpportunity;
+
+  /// No description provided for @errorLearningTermsInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the terms: a fee is only for \"you pay\", an allowance only for \"you receive\".'**
+  String get errorLearningTermsInvalid;
+
+  /// No description provided for @errorNotAWorkJob.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a way to learn, not a job.'**
+  String get errorNotAWorkJob;
 }
 
 class _AppLocalizationsDelegate
