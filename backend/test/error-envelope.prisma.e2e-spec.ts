@@ -143,6 +143,31 @@ databaseDescribe("error envelope over HTTP", () => {
     });
   });
 
+  it("tells a worker whose time is not free SLOT_UNAVAILABLE", async () => {
+    const busy = await api.actor([RoleMode.WORKER]);
+    // Time off over the whole job.
+    await api.db.availabilityException.create({
+      data: {
+        user_id: busy.id,
+        starts_at: new Date(startsAt.getTime() - 3_600_000),
+        ends_at: new Date(endsAt.getTime() + 3_600_000),
+        reason: "Away",
+      },
+    });
+    const response = await api
+      .post(`jobs/${jobId}/applications`, busy, {
+        proposedStartsAt: startsAt.toISOString(),
+        proposedEndsAt: endsAt.toISOString(),
+      })
+      .expect(409);
+    expectEnvelope(response.body);
+    expect(response.body.error).toMatchObject({
+      code: "SLOT_UNAVAILABLE",
+      message: "Worker is not available for this slot.",
+      messageKey: "error.jobs.slot_unavailable",
+    });
+  });
+
   it("keeps a plain business-rule message with the status-level code", async () => {
     // Publishing an already published job is a plain ConflictException.
     const response = await api

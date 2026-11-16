@@ -445,7 +445,7 @@ export class JobsService {
     this.assertFutureSlot(window.startsAt);
     const result = await this.availability.evaluate(workerUserId, window, 1);
     if (!result.isAvailable) {
-      throw new ConflictException("Worker is not available for this slot.");
+      throw slotUnavailable("Worker is not available for this slot.");
     }
     const application = await this.prisma
       .$transaction(async (transaction) => {
@@ -949,7 +949,7 @@ export class JobsService {
     this.assertFutureSlot(window.startsAt);
     const result = await this.availability.evaluate(workerUserId, window, 1);
     if (!result.isAvailable) {
-      throw new ConflictException("Worker is not available for this slot.");
+      throw slotUnavailable("Worker is not available for this slot.");
     }
     const price = BigInt(input.offeredPricePoisha);
     const assignment = await this.prisma.$transaction(async (transaction) => {
@@ -1091,7 +1091,7 @@ export class JobsService {
       1,
     );
     if (!availability.isAvailable) {
-      throw new ConflictException("This slot is no longer available.");
+      throw slotUnavailable("This slot is no longer available.");
     }
     const updated = await this.prisma.$transaction(
       async (transaction) => {
@@ -1117,7 +1117,7 @@ export class JobsService {
           select: { id: true },
         });
         if (conflict) {
-          throw new ConflictException("This slot is no longer available.");
+          throw slotUnavailable("This slot is no longer available.");
         }
         const confirmed = await transaction.assignment.updateMany({
           where: {
@@ -1741,6 +1741,18 @@ function integerValue(value: Prisma.JsonValue | undefined): number | undefined {
 // The work-site pin and address are private: attendance reads them from the
 // database, and they are often the poster's home. Never return them.
 const PRIVATE_JOB_FIELDS = new Set(["lat", "lng", "exact_address_encrypted"]);
+
+/**
+ * The worker's time is taken or outside their availability (apply, direct
+ * booking, confirm). 409 as before, with a code the app can act on.
+ */
+function slotUnavailable(message: string) {
+  return new ConflictException({
+    code: "SLOT_UNAVAILABLE",
+    message,
+    messageKey: "error.jobs.slot_unavailable",
+  });
+}
 
 /** Deliberately does not say who blocked whom. */
 function hiringUnavailable() {
