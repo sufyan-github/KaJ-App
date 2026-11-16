@@ -11,6 +11,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_empty_state.dart';
 import '../../../../core/widgets/k_error_state.dart';
 import '../../../../core/widgets/k_localized_text.dart';
+import '../../../../core/widgets/load_more.dart';
 import '../../../jobs/presentation/controllers/jobs_providers.dart';
 import '../../domain/app_notification.dart';
 import '../controllers/notifications_providers.dart';
@@ -30,6 +31,8 @@ class NotificationsScreen extends ConsumerStatefulWidget {
 
 class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
     with WidgetsBindingObserver {
+  final _more = MorePages<AppNotification>();
+
   final Set<String> _updatingIds = <String>{};
   late Future<KPermissionStatus> _permissionStatus;
   NotificationGroup _selectedGroup = NotificationGroup.all;
@@ -106,7 +109,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
   }
 
   Widget _buildInbox(NotificationInbox inbox) {
-    final visibleItems = inbox.items
+    final allItems = _more.merge(inbox.items);
+    final visibleItems = allItems
         .where(
           (item) =>
               _selectedGroup == NotificationGroup.all ||
@@ -182,9 +186,25 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
         KSpacing.md,
         KSpacing.xl,
       ),
-      itemCount: header.length + rows.length,
+      itemCount: header.length + rows.length + (_more.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index < header.length) return header[index];
+        if (index == header.length + rows.length) {
+          return LoadMoreButton(
+            loading: _more.loading,
+            failed: _more.failed,
+            onPressed: () => _more.loadNext(
+              (cursor) async =>
+                  (await ref
+                          .read(notificationsRepositoryProvider)
+                          .getNotifications(cursor: cursor))
+                      .items,
+              () {
+                if (mounted) setState(() {});
+              },
+            ),
+          );
+        }
         final row = rows[index - header.length];
         return switch (row) {
           _InboxDayRow(:final day, :final isFirst) => Padding(

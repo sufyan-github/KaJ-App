@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../core/errors/error_mapper.dart';
 import '../../../core/errors/failure.dart';
+import '../../../core/network/paged_list.dart';
 import '../domain/job_models.dart';
 
 class JobsRepository {
@@ -16,6 +17,7 @@ class JobsRepository {
     bool availableOnly = false,
     bool forMe = true,
     String? locationId,
+    String? cursor,
   }) async {
     try {
       final response = await _dio.get<Map<String, dynamic>>(
@@ -26,9 +28,15 @@ class JobsRepository {
           'skillId': ?skillId,
           'locationId': ?locationId,
           if (availableOnly) 'availableOnly': 'true',
+          // Only ever a cursor the server handed out: an API that does not
+          // paginate yet rejects unknown query parameters.
+          'cursor': ?cursor,
         },
       );
-      return _items(response.data).map(JobSummary.fromJson).toList();
+      return PagedList(
+        _items(response.data).map(JobSummary.fromJson).toList(),
+        nextCursor: PagedList.cursorFrom(response.data),
+      );
     } on Object catch (error) {
       throw ErrorMapper.from(error);
     }
@@ -239,10 +247,16 @@ class JobsRepository {
     }
   }
 
-  Future<List<AssignmentSummary>> getAssignments() async {
+  Future<List<AssignmentSummary>> getAssignments({String? cursor}) async {
     try {
-      final response = await _dio.get<Map<String, dynamic>>('/assignments');
-      return _items(response.data).map(AssignmentSummary.fromJson).toList();
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/assignments',
+        queryParameters: {'cursor': ?cursor},
+      );
+      return PagedList(
+        _items(response.data).map(AssignmentSummary.fromJson).toList(),
+        nextCursor: PagedList.cursorFrom(response.data),
+      );
     } on Object catch (error) {
       throw ErrorMapper.from(error);
     }

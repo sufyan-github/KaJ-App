@@ -247,9 +247,39 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                 : ListView.builder(
                     controller: scroll,
                     padding: const EdgeInsets.all(KSpacing.md),
-                    itemCount: state.messages.length,
-                    itemBuilder: (context, index) =>
-                        _MessageBubble(message: state.messages[index]),
+                    itemCount:
+                        state.messages.length + (state.hasEarlier ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (state.hasEarlier) {
+                        if (index == 0) {
+                          return Center(
+                            child: state.loadingEarlier
+                                ? const Padding(
+                                    padding: EdgeInsets.all(KSpacing.sm),
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : TextButton.icon(
+                                    key: const ValueKey('chat-load-earlier'),
+                                    onPressed: () => ref
+                                        .read(
+                                          chatThreadProvider(
+                                            widget.conversationId,
+                                          ).notifier,
+                                        )
+                                        .loadEarlier(),
+                                    icon: const Icon(Icons.history),
+                                    label: const KLocalizedText(
+                                      'আগের বার্তা দেখুন',
+                                    ),
+                                  ),
+                          );
+                        }
+                        return _MessageBubble(
+                          message: state.messages[index - 1],
+                        );
+                      }
+                      return _MessageBubble(message: state.messages[index]);
+                    },
                   ),
           ),
           SafeArea(

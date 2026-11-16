@@ -84,10 +84,17 @@ class AppNotification {
 }
 
 class NotificationInbox {
-  const NotificationInbox({required this.items, required this.unreadCount});
+  const NotificationInbox({
+    required this.items,
+    required this.unreadCount,
+    this.nextCursor,
+  });
 
   final List<AppNotification> items;
   final int unreadCount;
+
+  /// Older notifications exist when this is set (servers that paginate).
+  final String? nextCursor;
 }
 
 enum NotificationGroup { all, work, application, payment, message, other }

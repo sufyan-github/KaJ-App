@@ -13,6 +13,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_localized_text.dart';
 import '../../../../core/widgets/k_primary_button.dart';
 import '../../../../core/widgets/k_text_field.dart';
+import '../../../../core/widgets/load_more.dart';
 import '../../../catalog/domain/entities/catalog_category.dart';
 import '../../../catalog/domain/entities/catalog_skill.dart';
 import '../../../catalog/presentation/controllers/catalog_providers.dart';
@@ -65,6 +66,7 @@ class JobFeedScreen extends ConsumerStatefulWidget {
 class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
   late bool _availableOnly = widget.initialAvailableOnly;
   bool _creatingAlert = false;
+  final _more = MorePages<JobSummary>();
 
   Future<void> _createAlert() async {
     setState(() => _creatingAlert = true);
@@ -224,59 +226,86 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                     ? ref.invalidate(feed)
                     : ref.invalidate(myJobsProvider),
               ),
-              data: (items) => RefreshIndicator(
-                onRefresh: refresh,
-                child: items.isEmpty
-                    ? ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: [
-                          const SizedBox(height: 240),
-                          Center(
-                            child: KLocalizedText(
-                              _availableOnly
-                                  ? 'এই ধরনে আপনার সময়ের সঙ্গে মেলা কাজ নেই।'
-                                  : 'এই ধরনে এখনো কোনো কাজ প্রকাশিত হয়নি।',
-                              textAlign: TextAlign.center,
+              data: (firstPage) {
+                // Only the open feed is paginated; "my jobs" is one list.
+                final items = showOpenJobs ? _more.merge(firstPage) : firstPage;
+                final hasMore = showOpenJobs && _more.hasMore;
+                return RefreshIndicator(
+                  onRefresh: refresh,
+                  child: items.isEmpty
+                      ? ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            const SizedBox(height: 240),
+                            Center(
+                              child: KLocalizedText(
+                                _availableOnly
+                                    ? 'এই ধরনে আপনার সময়ের সঙ্গে মেলা কাজ নেই।'
+                                    : 'এই ধরনে এখনো কোনো কাজ প্রকাশিত হয়নি।',
+                                textAlign: TextAlign.center,
+                              ),
                             ),
-                          ),
-                        ],
-                      )
-                    : GridView.builder(
-                        padding: const EdgeInsets.all(KSpacing.md),
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: opportunityGridColumns(context),
-                          crossAxisSpacing: KSpacing.md,
-                          mainAxisSpacing: KSpacing.md,
-                          mainAxisExtent: opportunityCardHeight(context),
+                          ],
+                        )
+                      : GridView.builder(
+                          padding: const EdgeInsets.all(KSpacing.md),
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: opportunityGridColumns(context),
+                                crossAxisSpacing: KSpacing.md,
+                                mainAxisSpacing: KSpacing.md,
+                                mainAxisExtent: opportunityCardHeight(context),
+                              ),
+                          itemCount: items.length + (hasMore ? 1 : 0),
+                          itemBuilder: (context, index) {
+                            if (index == items.length) {
+                              return LoadMoreButton(
+                                loading: _more.loading,
+                                failed: _more.failed,
+                                onPressed: () => _more.loadNext(
+                                  (cursor) => ref
+                                      .read(jobsRepositoryProvider)
+                                      .getJobs(
+                                        categoryId: filter.categoryId,
+                                        skillId: filter.skillId,
+                                        locationId: filter.locationId,
+                                        availableOnly: filter.availableOnly,
+                                        forMe: filter.forMe,
+                                        cursor: cursor,
+                                      ),
+                                  () {
+                                    if (mounted) setState(() {});
+                                  },
+                                ),
+                              );
+                            }
+                            final job = items[index];
+                            final ownDraft =
+                                !isWorker &&
+                                !browsingType &&
+                                job.status == 'DRAFT';
+                            return OpportunityCard(
+                              job: job,
+                              actionLabel: isWorker
+                                  ? 'আবেদন'
+                                  : browsingType
+                                  ? null
+                                  : ownDraft
+                                  ? 'প্রকাশ করুন'
+                                  : 'আবেদন দেখুন',
+                              onAction: isWorker
+                                  ? () => showJobApplyFlow(context, ref, job)
+                                  : browsingType
+                                  ? null
+                                  : ownDraft
+                                  ? () => _publishDraft(job.id)
+                                  : () => _showApplications(context, ref, job),
+                            );
+                          },
                         ),
-                        itemCount: items.length,
-                        itemBuilder: (context, index) {
-                          final job = items[index];
-                          final ownDraft =
-                              !isWorker &&
-                              !browsingType &&
-                              job.status == 'DRAFT';
-                          return OpportunityCard(
-                            job: job,
-                            actionLabel: isWorker
-                                ? 'আবেদন'
-                                : browsingType
-                                ? null
-                                : ownDraft
-                                ? 'প্রকাশ করুন'
-                                : 'আবেদন দেখুন',
-                            onAction: isWorker
-                                ? () => showJobApplyFlow(context, ref, job)
-                                : browsingType
-                                ? null
-                                : ownDraft
-                                ? () => _publishDraft(job.id)
-                                : () => _showApplications(context, ref, job),
-                          );
-                        },
-                      ),
-              ),
+                );
+              },
             ),
           ),
         ],
@@ -1169,8 +1198,17 @@ class AssignmentsScreen extends ConsumerStatefulWidget {
 
 class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen>
     with WidgetsBindingObserver, _RefreshOnResume<AssignmentsScreen> {
+  final _more = MorePages<AssignmentSummary>();
+
   @override
   void refreshFromServer() => ref.invalidate(assignmentsProvider);
+
+  void _loadMore() => _more.loadNext(
+    (cursor) => ref.read(jobsRepositoryProvider).getAssignments(cursor: cursor),
+    () {
+      if (mounted) setState(() {});
+    },
+  );
 
   Future<void> _pullToRefresh() async {
     refreshFromServer();
@@ -1191,61 +1229,71 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen>
           label: 'বুকিং লোড করা যায়নি।',
           onRetry: refreshFromServer,
         ),
-        data: (items) => RefreshIndicator(
-          onRefresh: _pullToRefresh,
-          child: items.isEmpty
-              ? ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: const [
-                    SizedBox(height: 240),
-                    Center(
-                      child: KLocalizedText(
-                        'এখনো কোনো বুকিং বা নির্বাচিত কাজ নেই।',
-                      ),
-                    ),
-                  ],
-                )
-              : ListView.separated(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(KSpacing.md),
-                  itemCount: items.length,
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(height: KSpacing.sm),
-                  itemBuilder: (context, index) {
-                    final item = items[index];
-                    return Card(
-                      child: ListTile(
-                        onTap: () async {
-                          await context.push(
-                            AppRoutes.assignmentDetail(item.id),
-                          );
-                          // Whatever happened on the detail shows here too.
-                          if (mounted) refreshFromServer();
-                        },
-                        leading: Icon(
-                          item.status == 'CONFIRMED'
-                              ? Icons.event_available
-                              : Icons.pending_actions,
-                          color: KColors.primary,
+        data: (firstPage) {
+          final items = _more.merge(firstPage);
+          return RefreshIndicator(
+            onRefresh: _pullToRefresh,
+            child: items.isEmpty
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const [
+                      SizedBox(height: 240),
+                      Center(
+                        child: KLocalizedText(
+                          'এখনো কোনো বুকিং বা নির্বাচিত কাজ নেই।',
                         ),
-                        title: Text(item.title),
-                        // Date and status are localized separately: one
-                        // interpolated line is not in the catalog.
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (item.startsAt != null)
-                              Text(KFormat.dateTime(context, item.startsAt!)),
-                            KLocalizedText(_statusBn(item.displayStatus)),
-                          ],
-                        ),
-                        isThreeLine: true,
-                        trailing: const Icon(Icons.chevron_right),
                       ),
-                    );
-                  },
-                ),
-        ),
+                    ],
+                  )
+                : ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(KSpacing.md),
+                    itemCount: items.length + (_more.hasMore ? 1 : 0),
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(height: KSpacing.sm),
+                    itemBuilder: (context, index) {
+                      if (index == items.length) {
+                        return LoadMoreButton(
+                          loading: _more.loading,
+                          failed: _more.failed,
+                          onPressed: _loadMore,
+                        );
+                      }
+                      final item = items[index];
+                      return Card(
+                        child: ListTile(
+                          onTap: () async {
+                            await context.push(
+                              AppRoutes.assignmentDetail(item.id),
+                            );
+                            // Whatever happened on the detail shows here too.
+                            if (mounted) refreshFromServer();
+                          },
+                          leading: Icon(
+                            item.status == 'CONFIRMED'
+                                ? Icons.event_available
+                                : Icons.pending_actions,
+                            color: KColors.primary,
+                          ),
+                          title: Text(item.title),
+                          // Date and status are localized separately: one
+                          // interpolated line is not in the catalog.
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (item.startsAt != null)
+                                Text(KFormat.dateTime(context, item.startsAt!)),
+                              KLocalizedText(_statusBn(item.displayStatus)),
+                            ],
+                          ),
+                          isThreeLine: true,
+                          trailing: const Icon(Icons.chevron_right),
+                        ),
+                      );
+                    },
+                  ),
+          );
+        },
       ),
     );
   }

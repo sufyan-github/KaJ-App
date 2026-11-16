@@ -37,6 +37,8 @@ class ChatThreadState {
     this.loading = true,
     this.sendingImage = false,
     this.error,
+    this.hasEarlier = false,
+    this.loadingEarlier = false,
   });
 
   final List<ChatMessage> messages;
@@ -44,17 +46,25 @@ class ChatThreadState {
   final bool sendingImage;
   final String? error;
 
+  /// The first page was full, so older messages may exist.
+  final bool hasEarlier;
+  final bool loadingEarlier;
+
   ChatThreadState copyWith({
     List<ChatMessage>? messages,
     bool? loading,
     bool? sendingImage,
     String? error,
     bool clearError = false,
+    bool? hasEarlier,
+    bool? loadingEarlier,
   }) => ChatThreadState(
     messages: messages ?? this.messages,
     loading: loading ?? this.loading,
     sendingImage: sendingImage ?? this.sendingImage,
     error: clearError ? null : error ?? this.error,
+    hasEarlier: hasEarlier ?? this.hasEarlier,
+    loadingEarlier: loadingEarlier ?? this.loadingEarlier,
   );
 }
 
@@ -96,6 +106,7 @@ class ChatThreadController extends StateNotifier<ChatThreadState> {
         messages: _ordered([...remote, ...pending]),
         loading: false,
         clearError: true,
+        hasEarlier: remote.length >= ChatRepository.pageSize,
       );
       await _repository.markRead(conversationId);
       _realtime.connect(conversationId);
@@ -108,6 +119,32 @@ class ChatThreadController extends StateNotifier<ChatThreadState> {
       state = state.copyWith(
         loading: false,
         error: 'বার্তাগুলো লোড করা যায়নি।',
+      );
+    }
+  }
+
+  /// Loads the page of messages before the oldest one shown.
+  Future<void> loadEarlier() async {
+    if (state.loadingEarlier || !state.hasEarlier) return;
+    final oldest = state.messages
+        .where((message) => message.delivery == ChatDelivery.sent)
+        .firstOrNull;
+    if (oldest == null) return;
+    state = state.copyWith(loadingEarlier: true);
+    try {
+      final older = await _repository.messages(
+        conversationId,
+        before: oldest.id,
+      );
+      state = state.copyWith(
+        messages: _ordered([...older, ...state.messages]),
+        hasEarlier: older.length >= ChatRepository.pageSize,
+        loadingEarlier: false,
+      );
+    } on Object {
+      state = state.copyWith(
+        loadingEarlier: false,
+        error: 'আগের বার্তা লোড করা যায়নি।',
       );
     }
   }

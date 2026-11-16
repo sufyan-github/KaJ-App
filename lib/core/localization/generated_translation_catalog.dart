@@ -1106,4 +1106,9 @@ const generatedEnglishTranslations = <String, String>{
   "কাজ পোস্ট করুন বা কর্মী খুঁজুন": "Post a job or find a worker",
   "কাজের বিবরণ দিন, আবেদন দেখুন বা কাছের দক্ষ কর্মী বুক করুন।":
       "Describe the work, review applications or book a skilled worker nearby.",
+  // P1.0: pagination.
+  "আরও লোড করা যায়নি।": "Could not load more.",
+  "আরও দেখুন": "Show more",
+  "আগের বার্তা দেখুন": "Show earlier messages",
+  "আগের বার্তা লোড করা যায়নি।": "Could not load earlier messages.",
 };

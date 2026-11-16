@@ -41,13 +41,19 @@ class ChatRepository {
     }
   }
 
+  /// The page size the thread asks for. A full page means older messages
+  /// may exist.
+  static const pageSize = 100;
+
   Future<List<ChatMessage>> messages(
     String conversationId, {
     String? after,
+    String? before,
   }) async {
     try {
-      final query = <String, dynamic>{'limit': 100};
+      final query = <String, dynamic>{'limit': pageSize};
       if (after != null) query['after'] = after;
+      if (before != null) query['before'] = before;
       final response = await _dio.get<Map<String, dynamic>>(
         '/conversations/$conversationId/messages',
         queryParameters: query,
