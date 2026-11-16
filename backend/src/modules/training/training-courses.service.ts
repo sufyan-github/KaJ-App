@@ -182,6 +182,7 @@ export class TrainingCoursesService {
     // Only a certificate for the current course version counts here.
     const certificateByCourse = new Map<string, CertificateRecord>();
     for (const certificate of certificates) {
+      if (!certificate.course_id) continue;
       const course = courseById.get(certificate.course_id);
       if (
         course &&

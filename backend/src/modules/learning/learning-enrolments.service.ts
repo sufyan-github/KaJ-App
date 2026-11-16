@@ -7,6 +7,7 @@ import {
 import {
   ApplicationStatus,
   AssignmentStatus,
+  EvidenceLevel,
   ParticipantTerms,
   Prisma,
   WorkArrangement,
@@ -17,6 +18,7 @@ import { MentorsService } from "../mentors/mentors.service";
 import { NotificationsService } from "../notifications/notifications.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
 import { visibleDisplayName } from "../users/public-profile.projection";
+import { generateUniqueCertificateCode } from "../training/training.rules";
 import { RecordLearningSessionDto } from "./dto/learning.dto";
 import { termsText } from "./learning-terms";
 import { LEARNING_ONLY } from "./learning.service";
@@ -44,6 +46,15 @@ const enrolmentInclude = {
   },
   contracts: { orderBy: { version: "desc" }, take: 1 },
   learning_sessions: { orderBy: [{ held_at: "asc" }, { id: "asc" }] },
+  completion_record: {
+    select: {
+      id: true,
+      public_code: true,
+      issued_at: true,
+      revoked_at: true,
+      evidence_level: true,
+    },
+  },
   worker: {
     select: {
       id: true,
@@ -321,6 +332,81 @@ export class LearningEnrolmentsService {
     return this.enrolment(mentorUserId, assignmentId);
   }
 
+  /**
+   * P1.4: the mentor confirms the learner completed it. Issues a
+   * PRACTICAL_CHECKED completion record (publicly verifiable, counts for
+   * matching on the opportunity's skill). Needs at least one session the
+   * learner confirmed, so a record can't be issued for nothing.
+   */
+  async complete(mentorUserId: string, assignmentId: string) {
+    await this.mentors.assertApproved(mentorUserId);
+    const assignment = await this.prisma.assignment.findFirst({
+      where: {
+        id: assignmentId,
+        job: { ...LEARNING_ONLY, poster_user_id: mentorUserId },
+      },
+      include: {
+        job: { include: { skills: { take: 1, orderBy: { skill_id: "asc" } } } },
+        completion_record: { select: { id: true } },
+        learning_sessions: {
+          where: { learner_confirmed_at: { not: null } },
+          select: { id: true },
+          take: 1,
+        },
+      },
+    });
+    if (!assignment) throw new NotFoundException();
+    if (assignment.completion_record)
+      return this.enrolment(mentorUserId, assignmentId);
+    if (assignment.status !== AssignmentStatus.CONFIRMED)
+      throw new ConflictException({
+        code: "ENROLMENT_NOT_ACTIVE",
+        message: "Only an active enrolment can be completed.",
+        messageKey: "error.learning.enrolment_not_active",
+      });
+    if (assignment.learning_sessions.length === 0)
+      throw new ConflictException({
+        code: "NO_CONFIRMED_SESSIONS",
+        message:
+          "The learner must confirm at least one session before completion.",
+        messageKey: "error.learning.no_confirmed_sessions",
+      });
+    const now = new Date();
+    await this.prisma.$transaction(async (transaction) => {
+      const code = await generateUniqueCertificateCode(
+        async (candidate) =>
+          (await transaction.trainingCertificate.count({
+            where: { public_code: candidate },
+          })) > 0,
+      );
+      await transaction.trainingCertificate.create({
+        data: {
+          user_id: assignment.worker_user_id,
+          assignment_id: assignmentId,
+          issued_by_user_id: mentorUserId,
+          skill_id: assignment.job.skills[0]?.skill_id ?? null,
+          title: assignment.job.title,
+          evidence_level: EvidenceLevel.PRACTICAL_CHECKED,
+          public_code: code,
+          issued_at: now,
+        },
+      });
+      await transaction.assignment.update({
+        where: { id: assignmentId },
+        data: { status: AssignmentStatus.COMPLETED, submitted_at: now },
+      });
+    });
+    await this.notifications?.create({
+      userId: assignment.worker_user_id,
+      type: "LEARNING_COMPLETED",
+      title: "সমাপ্তির সনদ পেয়েছেন",
+      body: `${assignment.job.title} — মেন্টর আপনার শেখা সম্পন্ন হিসেবে নিশ্চিত করেছেন।`,
+      payload: { route: `/learn/enrolments/${assignmentId}`, assignmentId },
+      dedupeKey: `learning-completed:${assignmentId}`,
+    });
+    return this.enrolment(mentorUserId, assignmentId);
+  }
+
   async confirmSession(learnerUserId: string, sessionId: string) {
     const session = await this.prisma.learningSession.findUnique({
       where: { id: sessionId },
@@ -392,6 +478,16 @@ export class LearningEnrolmentsService {
         minutesTotal: sessions.reduce((sum, item) => sum + item.minutes, 0),
       },
       enrolledAt: row.confirmed_at?.toISOString() ?? null,
+      completionRecord: row.completion_record
+        ? {
+            id: row.completion_record.id,
+            code: row.completion_record.public_code,
+            evidenceLevel: row.completion_record.evidence_level,
+            issuedAt: row.completion_record.issued_at.toISOString(),
+            status: row.completion_record.revoked_at ? "REVOKED" : "VALID",
+            verifyPath: `/api/v1/certificates/${row.completion_record.public_code}`,
+          }
+        : null,
       viewerIsLearner: row.worker_user_id === viewerUserId,
     };
   }

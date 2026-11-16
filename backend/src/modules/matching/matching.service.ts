@@ -36,9 +36,17 @@ export const workerSelect = {
     where: { is_active: true },
     select: { day_of_week: true, start_time: true, end_time: true },
   },
+  // Quiz certificates count for their course's skill; mentor-checked
+  // practical records for the skill they name.
   training_certificates: {
-    where: { revoked_at: null, course: { skill_id: { not: null } } },
-    select: { course: { select: { skill_id: true } } },
+    where: {
+      revoked_at: null,
+      OR: [
+        { course: { skill_id: { not: null } } },
+        { skill_id: { not: null } },
+      ],
+    },
+    select: { skill_id: true, course: { select: { skill_id: true } } },
   },
 } satisfies Prisma.UserSelect;
 
@@ -184,9 +192,10 @@ export class MatchingService {
     const workerSkillIds = new Set(worker.skills.map((item) => item.skill_id));
     const requiredSkillIds = job.skills.map((item) => item.skill_id);
     const certifiedSkillIds = new Set(
-      worker.training_certificates.flatMap((item) =>
-        item.course.skill_id ? [item.course.skill_id] : [],
-      ),
+      worker.training_certificates.flatMap((item) => {
+        const skillId = item.skill_id ?? item.course?.skill_id;
+        return skillId ? [skillId] : [];
+      }),
     );
     const skill = applyTrainingBonus(
       requiredSkillIds.length === 0

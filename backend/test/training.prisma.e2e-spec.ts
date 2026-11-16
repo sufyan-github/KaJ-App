@@ -405,6 +405,10 @@ databaseDescribe("training MVP and quick wins with PostgreSQL", () => {
     ).expect(200);
     expect(response.body.data).toEqual({
       code: certificate.public_code,
+      // A quiz certificate: no mentor, no separate skill (P1.4 fields).
+      kind: "QUIZ",
+      skill: null,
+      issuedByName: null,
       holderName: "Arif H.",
       courseTitleEn: "Fixture cleaning basics",
       courseTitleBn: "নমুনা পরিষ্কারের মৌলিক বিষয়",
@@ -427,6 +431,7 @@ databaseDescribe("training MVP and quick wins with PostgreSQL", () => {
     const response = await get(`users/${worker.id}/public`).expect(200);
     expect(response.body.data.trainings).toEqual([
       {
+        kind: "QUIZ",
         courseTitleEn: "Fixture cleaning basics",
         courseTitleBn: "নমুনা পরিষ্কারের মৌলিক বিষয়",
         skillSlug: "cleaning",

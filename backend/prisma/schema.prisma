@@ -463,6 +463,7 @@ model User {
   training_attempts                 TrainingAttempt[]
   training_certificates             TrainingCertificate[]
   recorded_learning_sessions        LearningSession[]         @relation("LearningSessionRecorder")
+  issued_certificates               TrainingCertificate[]     @relation("CertificateIssuer")
 
   @@index([status, deleted_at])
   @@map("users")
@@ -717,18 +718,19 @@ model Category {
 }
 
 model Skill {
-  id               String           @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  slug             String           @unique
-  name_en          String
-  name_bn          String
-  category_id      String           @db.Uuid
-  is_active        Boolean          @default(true)
-  created_at       DateTime         @default(now())
-  updated_at       DateTime         @updatedAt
-  category         Category         @relation(fields: [category_id], references: [id], onDelete: Restrict)
-  user_skills      UserSkill[]
-  job_skills       JobSkill[]
-  training_courses TrainingCourse[]
+  id                 String                @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  slug               String                @unique
+  name_en            String
+  name_bn            String
+  category_id        String                @db.Uuid
+  is_active          Boolean               @default(true)
+  created_at         DateTime              @default(now())
+  updated_at         DateTime              @updatedAt
+  category           Category              @relation(fields: [category_id], references: [id], onDelete: Restrict)
+  user_skills        UserSkill[]
+  job_skills         JobSkill[]
+  training_courses   TrainingCourse[]
+  completion_records TrainingCertificate[]
 
   @@index([category_id, is_active])
   @@map("skills")
@@ -960,14 +962,14 @@ model Application {
 }
 
 model Assignment {
-  id                       String            @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  job_id                   String            @db.Uuid
-  worker_user_id           String            @db.Uuid
-  application_id           String            @db.Uuid
+  id                       String               @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  job_id                   String               @db.Uuid
+  worker_user_id           String               @db.Uuid
+  application_id           String               @db.Uuid
   agreed_price_poisha      BigInt
   agreed_starts_at         DateTime?
   agreed_ends_at           DateTime?
-  status                   AssignmentStatus  @default(PENDING_CONFIRMATION)
+  status                   AssignmentStatus     @default(PENDING_CONFIRMATION)
   confirmed_at             DateTime?
   confirmation_deadline_at DateTime?
   submitted_at             DateTime?
@@ -976,13 +978,13 @@ model Assignment {
   cancel_reason            String?
   /// Who cancelled. Only cancellations the policy penalised (worker cancelled
   /// late, not an emergency) count against the worker's completion rate.
-  cancelled_by_user_id     String?           @db.Uuid
-  cancellation_penalised   Boolean           @default(false)
-  created_at               DateTime          @default(now())
-  updated_at               DateTime          @updatedAt
-  job                      Job               @relation(fields: [job_id], references: [id], onDelete: Restrict)
-  worker                   User              @relation(fields: [worker_user_id], references: [id], onDelete: Restrict)
-  application              Application       @relation(fields: [application_id], references: [id], onDelete: Restrict)
+  cancelled_by_user_id     String?              @db.Uuid
+  cancellation_penalised   Boolean              @default(false)
+  created_at               DateTime             @default(now())
+  updated_at               DateTime             @updatedAt
+  job                      Job                  @relation(fields: [job_id], references: [id], onDelete: Restrict)
+  worker                   User                 @relation(fields: [worker_user_id], references: [id], onDelete: Restrict)
+  application              Application          @relation(fields: [application_id], references: [id], onDelete: Restrict)
   contracts                Contract[]
   work_sessions            WorkSession[]
   payments                 Payment[]
@@ -990,6 +992,7 @@ model Assignment {
   disputes                 Dispute[]
   occurrences              JobOccurrence[]
   learning_sessions        LearningSession[]
+  completion_record        TrainingCertificate?
 
   @@unique([job_id, worker_user_id])
   @@index([worker_user_id, status])
@@ -1899,22 +1902,36 @@ model TrainingAttempt {
 }
 
 model TrainingCertificate {
-  id             String          @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  user_id        String          @db.Uuid
-  course_id      String          @db.Uuid
-  attempt_id     String          @unique @db.Uuid
-  course_version Int
-  evidence_level EvidenceLevel
-  score_pct      Int
-  public_code    String          @unique
-  issued_at      DateTime        @default(now())
-  revoked_at     DateTime?
-  user           User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  course         TrainingCourse  @relation(fields: [course_id], references: [id], onDelete: Restrict)
-  attempt        TrainingAttempt @relation(fields: [attempt_id], references: [id], onDelete: Cascade)
+  /// A completion record. Exactly one source: a passed quiz (attempt_id,
+  /// course_id, course_version, score_pct) or a mentor-checked learning
+  /// enrolment (assignment_id, issued_by_user_id, PRACTICAL_CHECKED).
+  id                String           @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id           String           @db.Uuid
+  course_id         String?          @db.Uuid
+  attempt_id        String?          @unique @db.Uuid
+  course_version    Int?
+  assignment_id     String?          @unique @db.Uuid
+  issued_by_user_id String?          @db.Uuid
+  skill_id          String?          @db.Uuid
+  /// What was completed, for practical records (the opportunity's title).
+  title             String?
+  evidence_level    EvidenceLevel
+  score_pct         Int?
+  public_code       String           @unique
+  issued_at         DateTime         @default(now())
+  revoked_at        DateTime?
+  revoked_reason    String?
+  user              User             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  course            TrainingCourse?  @relation(fields: [course_id], references: [id], onDelete: Restrict)
+  attempt           TrainingAttempt? @relation(fields: [attempt_id], references: [id], onDelete: Cascade)
+  assignment        Assignment?      @relation(fields: [assignment_id], references: [id], onDelete: Restrict)
+  issued_by         User?            @relation("CertificateIssuer", fields: [issued_by_user_id], references: [id], onDelete: SetNull)
+  skill             Skill?           @relation(fields: [skill_id], references: [id], onDelete: SetNull)
 
   @@index([user_id, revoked_at])
   @@index([course_id])
+  @@index([issued_by_user_id])
+  @@index([skill_id])
   @@map("training_certificates")
 }
 

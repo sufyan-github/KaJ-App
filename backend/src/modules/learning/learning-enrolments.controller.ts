@@ -82,6 +82,16 @@ export class LearningEnrolmentsController {
     return this.enrolments.recordSession(claims.sub, id, body);
   }
 
+  @Post("learning-enrolments/:id/complete")
+  @Roles(RoleMode.MENTOR)
+  @Policy(Policies.jobPoster({ source: "assignment" }))
+  complete(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+  ) {
+    return this.enrolments.complete(claims.sub, id);
+  }
+
   @Post("learning-sessions/:id/confirm")
   @Policy(Policies.authenticated())
   confirmSession(
