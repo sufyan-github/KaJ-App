@@ -26,3 +26,15 @@ export class AdminCertificateQueryDto extends CursorQueryDto {
   @MaxLength(80)
   search?: string;
 }
+
+export class AdminOpportunityQueryDto extends CursorQueryDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  status?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  search?: string;
+}

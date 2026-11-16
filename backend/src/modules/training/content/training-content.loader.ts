@@ -44,7 +44,8 @@ const lessonSchema = z.object({
   isSafety: z.boolean().default(false),
 });
 
-const courseSchema = z.object({
+/** One course document: the seed file's format and the admin editor's. */
+export const courseSchema = z.object({
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   skillSlug: z.string().min(1).nullable(),
   titleEn: text,
@@ -71,7 +72,7 @@ export const trainingContentSchema = z
   );
 
 export type TrainingContent = z.infer<typeof trainingContentSchema>;
-type CourseContent = TrainingContent["courses"][number];
+export type CourseContent = TrainingContent["courses"][number];
 
 export interface TrainingContentResult {
   created: string[];
@@ -131,7 +132,11 @@ export async function loadTrainingContent(
   return result;
 }
 
-async function upsertCourse(
+/**
+ * Creates or updates one course. Content changes (lessons, questions) bump
+ * the version; `publish` only ever turns publishing on.
+ */
+export async function upsertCourse(
   transaction: Prisma.TransactionClient,
   course: CourseContent,
   skillId: string | null,

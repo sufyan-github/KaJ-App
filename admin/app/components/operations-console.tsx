@@ -31,6 +31,7 @@ type ModuleKey =
   | "jobPayments"
   | "notifications"
   | "analytics"
+  | "learn"
   | "audit";
 const modules: Array<[ModuleKey, string, string]> = [
   ["dashboard", "Dashboard", "Live marketplace health"],
@@ -49,6 +50,7 @@ const modules: Array<[ModuleKey, string, string]> = [
   ["jobPayments", "Job payments", "Offline cash payment oversight"],
   ["notifications", "Notifications", "Campaign dry-runs"],
   ["analytics", "Analytics", "Marketplace health"],
+  ["learn", "Learn", "Mentors, learning and courses"],
   ["audit", "Audit trail", "Who changed what"],
 ];
 export function OperationsConsole({
@@ -157,6 +159,7 @@ function ModuleView({ active }: { active: ModuleKey }) {
   if (active === "jobPayments") return <JobPayments />;
   if (active === "notifications") return <Notifications />;
   if (active === "analytics") return <Analytics />;
+  if (active === "learn") return <Learn />;
   return <AuditTrail />;
 }
 function useData<T>(path: string) {
@@ -1611,6 +1614,514 @@ type VerificationItem = {
     mime: string;
   }>;
 };
+type LearnTab = "mentors" | "opportunities" | "courses" | "certificates";
+const LEARN_TABS: Array<[LearnTab, string]> = [
+  ["mentors", "Mentor applications"],
+  ["opportunities", "Learning opportunities"],
+  ["courses", "Courses"],
+  ["certificates", "Completion records"],
+];
+function Learn() {
+  const [tab, setTab] = useState<LearnTab>("mentors");
+  return (
+    <>
+      <div className="learn-tabs" role="tablist" aria-label={tr("Learn")}>
+        {LEARN_TABS.map(([key, label]) => (
+          <button
+            key={key}
+            role="tab"
+            aria-selected={tab === key}
+            className={tab === key ? "active" : ""}
+            onClick={() => setTab(key)}
+          >
+            {tr(label)}
+          </button>
+        ))}
+      </div>
+      {tab === "mentors" && <MentorApplications />}
+      {tab === "opportunities" && <LearningOpportunities />}
+      {tab === "courses" && <Courses />}
+      {tab === "certificates" && <CompletionRecords />}
+    </>
+  );
+}
+type SkillName = { skillId: string; nameEn: string; nameBn: string };
+type MentorApplicationItem = VerificationItem & {
+  mentorApplication: {
+    bio: string | null;
+    yearsExperience: number | null;
+    skills: Array<SkillName & { level: string }>;
+  } | null;
+};
+function skillName(skill: { nameEn: string; nameBn: string }) {
+  return getActiveAdminLocale() === "bn" ? skill.nameBn : skill.nameEn;
+}
+function MentorApplications() {
+  const { data, loading, error, reload } = useData<{
+    items: MentorApplicationItem[];
+  }>("verification-requests?kind=MENTOR&limit=100");
+  const [decision, setDecision] = useState<{
+    item: MentorApplicationItem;
+    status: "APPROVED" | "REJECTED";
+  } | null>(null);
+  return (
+    <State loading={loading} error={error}>
+      <Summary count={data?.items.length ?? 0} label="mentor applications" />
+      <DataTable
+        headers={["Person", "Teaches", "Experience", "Documents", "Decision"]}
+      >
+        {(data?.items ?? []).map((item) => (
+          <tr key={item.id}>
+            <td>
+              <strong>{item.user.name}</strong>
+              <small>{item.user.trustLevel}</small>
+            </td>
+            <td>
+              {(item.mentorApplication?.skills ?? [])
+                .map(
+                  (skill) => `${skillName(skill)} (${humanize(skill.level)})`,
+                )
+                .join(", ")}
+            </td>
+            <td>
+              <strong>
+                {item.mentorApplication?.yearsExperience ?? 0} {tr("years")}
+              </strong>
+              <small>{item.mentorApplication?.bio}</small>
+            </td>
+            <td className="actions">
+              {item.documents.map((document) => (
+                <button
+                  key={document.id}
+                  onClick={async () => {
+                    const view = await adminApi<{ downloadUrl: string }>(
+                      `verification-documents/${document.id}`,
+                    );
+                    window.open(view.downloadUrl, "_blank", "noopener");
+                  }}
+                >
+                  {tr("View")} {humanize(document.kind)}
+                </button>
+              ))}
+            </td>
+            <td className="actions">
+              <button onClick={() => setDecision({ item, status: "APPROVED" })}>
+                {tr("Approve")}
+              </button>
+              <button onClick={() => setDecision({ item, status: "REJECTED" })}>
+                {tr("Reject")}
+              </button>
+            </td>
+          </tr>
+        ))}
+      </DataTable>
+      {decision && (
+        <ReasonDialog
+          title={`${humanize(decision.status)} ${decision.item.kind} verification`}
+          confirmLabel={`Confirm ${humanize(decision.status)}`}
+          onClose={() => setDecision(null)}
+          onConfirm={async (reason) => {
+            await adminApi(
+              `verification-requests/${decision.item.id}/decision`,
+              json("POST", { status: decision.status, reason }),
+            );
+            setDecision(null);
+            await reload();
+          }}
+        />
+      )}
+    </State>
+  );
+}
+type OpportunityItem = {
+  id: string;
+  title: string;
+  opportunityType: string;
+  status: string;
+  termsText: { en: string; bn: string };
+  seats: number;
+  seatsFilled: number;
+  applications: number;
+  mentor: { userId: string; name: string; mentorStatus: string };
+  actions: Array<"suspend" | "restore">;
+};
+function LearningOpportunities() {
+  const { data, loading, error, reload } = useData<{
+    items: OpportunityItem[];
+  }>("learning-opportunities?limit=100");
+  const [pending, setPending] = useState<{
+    title: string;
+    path: string;
+    label: string;
+  } | null>(null);
+  return (
+    <State loading={loading} error={error}>
+      <Summary count={data?.items.length ?? 0} label="learning opportunities" />
+      <DataTable
+        headers={[
+          "Opportunity",
+          "Mentor",
+          "Terms",
+          "Seats",
+          "Status",
+          "Actions",
+        ]}
+      >
+        {(data?.items ?? []).map((item) => (
+          <tr key={item.id}>
+            <td>
+              <strong>{item.title}</strong>
+              <small>{humanize(item.opportunityType)}</small>
+            </td>
+            <td>
+              <strong>{item.mentor.name}</strong>
+              <small>{humanize(item.mentor.mentorStatus)}</small>
+            </td>
+            <td>
+              {getActiveAdminLocale() === "bn"
+                ? item.termsText.bn
+                : item.termsText.en}
+            </td>
+            <td>
+              {item.seatsFilled} / {item.seats}
+              <small>
+                {item.applications} {tr("applications")}
+              </small>
+            </td>
+            <td>
+              <Badge value={item.status} />
+            </td>
+            <td className="actions">
+              {item.actions.map((action) => (
+                <button
+                  key={action}
+                  onClick={() =>
+                    setPending({
+                      title: `${tr(humanize(action))}: ${item.title}`,
+                      path: `learning-opportunities/${item.id}/${action}`,
+                      label: humanize(action),
+                    })
+                  }
+                >
+                  {tr(humanize(action))}
+                </button>
+              ))}
+              {item.mentor.mentorStatus === "APPROVED" && (
+                <button
+                  onClick={() =>
+                    setPending({
+                      title: `${tr("Suspend mentor")}: ${item.mentor.name}`,
+                      path: `mentors/${item.mentor.userId}/suspend`,
+                      label: "Suspend mentor",
+                    })
+                  }
+                >
+                  {tr("Suspend mentor")}
+                </button>
+              )}
+              {item.mentor.mentorStatus === "SUSPENDED" && (
+                <button
+                  onClick={() =>
+                    setPending({
+                      title: `${tr("Reinstate mentor")}: ${item.mentor.name}`,
+                      path: `mentors/${item.mentor.userId}/reinstate`,
+                      label: "Reinstate mentor",
+                    })
+                  }
+                >
+                  {tr("Reinstate mentor")}
+                </button>
+              )}
+            </td>
+          </tr>
+        ))}
+      </DataTable>
+      {pending && (
+        <ReasonDialog
+          title={pending.title}
+          confirmLabel={pending.label}
+          onClose={() => setPending(null)}
+          onConfirm={async (reason) => {
+            await adminApi(pending.path, json("POST", { reason }));
+            setPending(null);
+            await reload();
+          }}
+        />
+      )}
+    </State>
+  );
+}
+type CourseItem = {
+  id: string;
+  slug: string;
+  titleEn: string;
+  titleBn: string;
+  isPublished: boolean;
+  version: number;
+  lessons: number;
+  activeQuestions: number;
+};
+const NEW_COURSE_TEMPLATE = {
+  slug: "new-course",
+  skillSlug: null,
+  titleEn: "",
+  titleBn: "",
+  summaryEn: "",
+  summaryBn: "",
+  minutes: 10,
+  estDataMb: 5,
+  passMarkPct: 70,
+  questionCount: 5,
+  isSafetyCritical: false,
+  sortOrder: 0,
+  lessons: [],
+  questions: [],
+};
+function Courses() {
+  const { data, loading, error, reload } = useData<{ items: CourseItem[] }>(
+    "training/courses",
+  );
+  const [editing, setEditing] = useState<{
+    id: string | null;
+    text: string;
+  } | null>(null);
+  const [publishing, setPublishing] = useState<{
+    item: CourseItem;
+    publish: boolean;
+  } | null>(null);
+  const [message, setMessage] = useState("");
+  return (
+    <State loading={loading} error={error}>
+      <div className="actions">
+        <button
+          className="primary"
+          onClick={() =>
+            setEditing({
+              id: null,
+              text: JSON.stringify(NEW_COURSE_TEMPLATE, null, 2),
+            })
+          }
+        >
+          {tr("New course")}
+        </button>
+        {message && <span role="status">{message}</span>}
+      </div>
+      <DataTable
+        headers={["Course", "Version", "Content", "Status", "Actions"]}
+      >
+        {(data?.items ?? []).map((item) => (
+          <tr key={item.id}>
+            <td>
+              <strong>
+                {getActiveAdminLocale() === "bn" ? item.titleBn : item.titleEn}
+              </strong>
+              <small>{item.slug}</small>
+            </td>
+            <td>v{item.version}</td>
+            <td>
+              {item.lessons} {tr("lessons")} {tr("·")} {item.activeQuestions}{" "}
+              {tr("questions")}
+            </td>
+            <td>
+              <Badge value={item.isPublished ? "PUBLISHED" : "DRAFT"} />
+            </td>
+            <td className="actions">
+              <button
+                onClick={async () => {
+                  const course = await adminApi<{ document: unknown }>(
+                    `training/courses/${item.id}`,
+                  );
+                  setEditing({
+                    id: item.id,
+                    text: JSON.stringify(course.document, null, 2),
+                  });
+                }}
+              >
+                {tr("Edit")}
+              </button>
+              <button
+                onClick={() =>
+                  setPublishing({ item, publish: !item.isPublished })
+                }
+              >
+                {tr(item.isPublished ? "Unpublish" : "Publish")}
+              </button>
+            </td>
+          </tr>
+        ))}
+      </DataTable>
+      {editing && (
+        <CourseEditor
+          initial={editing.text}
+          isNew={editing.id === null}
+          onClose={() => setEditing(null)}
+          onSave={async (document) => {
+            const saved = editing.id
+              ? await adminApi<{ outcome: string; version: number }>(
+                  `training/courses/${editing.id}`,
+                  json("PUT", { document }),
+                )
+              : await adminApi<{ version: number }>(
+                  "training/courses",
+                  json("POST", { document }),
+                );
+            setMessage(
+              `${tr("Saved")}: v${saved.version}${
+                "outcome" in saved
+                  ? ` (${humanize(String(saved.outcome))})`
+                  : ""
+              }`,
+            );
+            setEditing(null);
+            await reload();
+          }}
+        />
+      )}
+      {publishing && (
+        <ReasonDialog
+          title={`${tr(publishing.publish ? "Publish" : "Unpublish")}: ${publishing.item.titleEn}`}
+          confirmLabel={publishing.publish ? "Publish" : "Unpublish"}
+          onClose={() => setPublishing(null)}
+          onConfirm={async (reason) => {
+            await adminApi(
+              `training/courses/${publishing.item.id}/${
+                publishing.publish ? "publish" : "unpublish"
+              }`,
+              json("POST", { reason }),
+            );
+            setPublishing(null);
+            await reload();
+          }}
+        />
+      )}
+    </State>
+  );
+}
+function CourseEditor({
+  initial,
+  isNew,
+  onClose,
+  onSave,
+}: {
+  initial: string;
+  isNew: boolean;
+  onClose: () => void;
+  onSave: (document: unknown) => Promise<void>;
+}) {
+  const [text, setText] = useState(initial);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  return (
+    <Dialog title={tr(isNew ? "New course" : "Edit course")} onClose={onClose}>
+      <form
+        onSubmit={async (event) => {
+          event.preventDefault();
+          let document: unknown;
+          try {
+            document = JSON.parse(text);
+          } catch {
+            setError(tr("The course document is not valid JSON."));
+            return;
+          }
+          setBusy(true);
+          try {
+            await onSave(document);
+          } catch (caught) {
+            setError(friendlyAdminError(caught));
+            setBusy(false);
+          }
+        }}
+      >
+        <p>
+          {tr(
+            "Changing lessons or questions creates a new version; earlier certificates stop counting for it.",
+          )}
+        </p>
+        <label>
+          {tr("Course document (JSON)")}
+          <textarea
+            className="code-editor"
+            rows={20}
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            spellCheck={false}
+          />
+        </label>
+        {error && (
+          <p className="error" role="alert">
+            {error}
+          </p>
+        )}
+        <button className="primary" disabled={busy}>
+          {tr(busy ? "Applying…" : "Save course")}
+        </button>
+      </form>
+    </Dialog>
+  );
+}
+type CertificateItem = {
+  id: string;
+  kind: string;
+  code: string;
+  title: string | null;
+  holder: { name: string };
+  issuedBy: { name: string } | null;
+  status: string;
+};
+function CompletionRecords() {
+  const { data, loading, error, reload } = useData<{
+    items: CertificateItem[];
+  }>("certificates?limit=100");
+  const [revoking, setRevoking] = useState<CertificateItem | null>(null);
+  return (
+    <State loading={loading} error={error}>
+      <DataTable headers={["Code", "Holder", "Record", "Status", "Actions"]}>
+        {(data?.items ?? []).map((item) => (
+          <tr key={item.id}>
+            <td>
+              <strong>{item.code}</strong>
+              <small>{humanize(item.kind)}</small>
+            </td>
+            <td>{item.holder.name}</td>
+            <td>
+              <strong>{item.title}</strong>
+              {item.issuedBy && (
+                <small>
+                  {tr("Checked by")} {item.issuedBy.name}
+                </small>
+              )}
+            </td>
+            <td>
+              <Badge value={item.status} />
+            </td>
+            <td className="actions">
+              {item.status === "VALID" && (
+                <button onClick={() => setRevoking(item)}>
+                  {tr("Revoke")}
+                </button>
+              )}
+            </td>
+          </tr>
+        ))}
+      </DataTable>
+      {revoking && (
+        <ReasonDialog
+          title={`${tr("Revoke")}: ${revoking.code}`}
+          confirmLabel="Revoke"
+          onClose={() => setRevoking(null)}
+          onConfirm={async (reason) => {
+            await adminApi(
+              `certificates/${revoking.id}/revoke`,
+              json("POST", { reason }),
+            );
+            setRevoking(null);
+            await reload();
+          }}
+        />
+      )}
+    </State>
+  );
+}
 function Categories() {
   const { data, loading, error, reload } = useData<{
     items: CategoryItem[];

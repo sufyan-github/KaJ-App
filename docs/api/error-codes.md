@@ -85,3 +85,5 @@ the same fields plus `httpStatus`.
 | 409  | `ENROLMENT_NOT_ACTIVE`       | `error.learning.enrolment_not_active`  | Sessions can be recorded only for an active enrolment.             | শুধু চলমান ভর্তির জন্য ক্লাস নথিভুক্ত করা যায়।                        |
 | 409  | `SESSION_IN_FUTURE`          | `error.learning.session_in_future`     | Record a session after it has happened.                            | ক্লাস হয়ে যাওয়ার পরে নথিভুক্ত করুন।                                  |
 | 409  | `NO_CONFIRMED_SESSIONS`      | `error.learning.no_confirmed_sessions` | The learner must confirm at least one session before completion.   | সমাপ্তির আগে শিক্ষার্থীকে অন্তত একটি ক্লাসে উপস্থিতি নিশ্চিত করতে হবে। |
+| 409  | `COURSE_SLUG_TAKEN`          | `error.training.slug_taken`            | A course with this slug already exists. (admin)                    | এই স্লাগে আগেই একটি কোর্স আছে।                                         |
+| 400  | `COURSE_SLUG_IMMUTABLE`      | `error.training.slug_immutable`        | A course's slug can't change. (admin)                              | কোর্সের স্লাগ বদলানো যায় না।                                          |

@@ -1008,3 +1008,29 @@ textarea {
     padding: 11px;
   }
 }
+
+/* Learn module (P1.5) */
+.learn-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.learn-tabs button {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 8px 14px;
+}
+.learn-tabs button.active {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+textarea.code-editor {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  min-height: 320px;
+  white-space: pre;
+}
