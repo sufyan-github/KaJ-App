@@ -12,6 +12,7 @@ import '../../../auth/presentation/controllers/auth_providers.dart';
 import '../../../catalog/domain/entities/catalog_skill.dart';
 import '../../../catalog/domain/entities/service_location.dart';
 import '../../../catalog/presentation/controllers/catalog_providers.dart';
+import '../../../catalog/presentation/widgets/area_picker.dart';
 import '../../../jobs/presentation/controllers/jobs_providers.dart';
 import '../../../profile/presentation/controllers/me_provider.dart';
 import '../../domain/availability_schedule.dart';
@@ -143,9 +144,22 @@ class LocationSelectionScreen extends ConsumerStatefulWidget {
 
 class _LocationSelectionScreenState
     extends ConsumerState<LocationSelectionScreen> {
-  String _query = '';
-  String? _selected;
+  // Restored from the draft: a choice made before the app went to the
+  // background must still be the one confirmed.
+  late String? _selected = ref.read(onboardingControllerProvider).locationId;
+  String? _selectedName;
   bool _saving = false;
+
+  Future<void> _pick(ServiceLocation place) async {
+    final language = Localizations.localeOf(context).languageCode;
+    setState(() {
+      _selected = place.id;
+      _selectedName = place.nameFor(language);
+    });
+    await ref
+        .read(onboardingControllerProvider.notifier)
+        .stageLocation(place.id);
+  }
 
   Future<void> _submit() async {
     if (_selected == null) return;
@@ -170,20 +184,12 @@ class _LocationSelectionScreenState
 
   @override
   Widget build(BuildContext context) {
-    final locations = ref.watch(_rootLocationsProvider);
     return _OnboardingScaffold(
       step: 3,
       title: 'আপনার এলাকা বেছে নিন',
       subtitle: 'এতে কাছাকাছি কাজ ও মানুষ দেখাতে পারব।',
       child: Column(
         children: [
-          TextField(
-            decoration: InputDecoration(
-              labelText: KaajLocalizations.text(context, 'এলাকা খুঁজুন'),
-              prefixIcon: Icon(Icons.search),
-            ),
-            onChanged: (value) => setState(() => _query = value.trim()),
-          ),
           const SizedBox(height: KSpacing.sm),
           OutlinedButton.icon(
             onPressed: () => showModalBottomSheet<void>(
@@ -199,41 +205,14 @@ class _LocationSelectionScreenState
             label: const KLocalizedText('আমার বর্তমান অবস্থান ব্যবহার করুন'),
           ),
           const SizedBox(height: KSpacing.md),
-          locations.when(
-            loading: () => const CircularProgressIndicator(),
-            error: (error, _) => Text(
-              failureText(context, error, 'এলাকার তালিকা লোড করা যায়নি।'),
+          AreaPicker(selectedId: _selected, onSelected: _pick),
+          if (_selectedName case final name?) ...[
+            const SizedBox(height: KSpacing.sm),
+            Text(
+              '${KaajLocalizations.text(context, 'বেছে নেওয়া এলাকা')}: $name',
+              style: Theme.of(context).textTheme.titleSmall,
             ),
-            data: (items) {
-              final filtered = items
-                  .where(
-                    (item) =>
-                        item.nameBn.contains(_query) ||
-                        item.nameEn.toLowerCase().contains(
-                          _query.toLowerCase(),
-                        ),
-                  )
-                  .toList(growable: false);
-              return RadioGroup<String>(
-                groupValue: _selected,
-                onChanged: (value) => setState(() => _selected = value),
-                child: Column(
-                  children: filtered
-                      .map(
-                        (item) => RadioListTile<String>(
-                          value: item.id,
-                          title: KLocalizedText(
-                            item.nameFor(
-                              Localizations.localeOf(context).languageCode,
-                            ),
-                          ),
-                        ),
-                      )
-                      .toList(growable: false),
-                ),
-              );
-            },
-          ),
+          ],
           const SizedBox(height: KSpacing.md),
           KPrimaryButton(
             label: 'এলাকা নিশ্চিত করুন',
@@ -245,10 +224,6 @@ class _LocationSelectionScreenState
     );
   }
 }
-
-final _rootLocationsProvider = FutureProvider<List<ServiceLocation>>((ref) {
-  return ref.watch(catalogRepositoryProvider).getLocations();
-});
 
 class WorkerSkillsScreen extends ConsumerStatefulWidget {
   const WorkerSkillsScreen({this.isEditing = false, super.key});

@@ -13,8 +13,7 @@ import '../../../../core/widgets/k_localized_text.dart';
 import '../../../../core/widgets/k_network_image.dart';
 import '../../../../core/widgets/k_primary_button.dart';
 import '../../../../core/widgets/k_text_field.dart';
-import '../../../catalog/domain/entities/service_location.dart';
-import '../../../catalog/presentation/controllers/catalog_providers.dart';
+import '../../../catalog/presentation/widgets/area_picker.dart';
 import '../../../trust_safety/presentation/trust_safety_providers.dart';
 import '../../domain/my_profile.dart';
 import '../controllers/my_profile_provider.dart';
@@ -80,6 +79,23 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
     _name = TextEditingController(text: widget.profile.displayName);
     _bio = TextEditingController(text: widget.profile.bio);
     _locationId = widget.profile.primaryLocation?.id;
+    _locationName = widget.profile.primaryLocation;
+  }
+
+  /// The chosen area's names, for showing it in either language.
+  ProfileArea? _locationName;
+
+  Future<void> _pickArea() async {
+    final place = await showAreaPickerSheet(context, selectedId: _locationId);
+    if (place == null || !mounted) return;
+    setState(() {
+      _locationId = place.id;
+      _locationName = ProfileArea(
+        id: place.id,
+        nameEn: place.nameEn,
+        nameBn: place.nameBn,
+      );
+    });
   }
 
   @override
@@ -149,12 +165,7 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
   @override
   Widget build(BuildContext context) {
     final language = Localizations.localeOf(context).languageCode;
-    final locations = ref
-        .watch(catalogLocationsProvider)
-        .maybeWhen(data: (items) => items, orElse: () => null);
     final photoUrl = widget.profile.photoUrl;
-    final knownLocation =
-        locations?.any((item) => item.id == _locationId) ?? false;
     return Form(
       key: _formKey,
       child: ListView(
@@ -220,25 +231,20 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
                 : null,
           ),
           const SizedBox(height: KSpacing.md),
-          DropdownButtonFormField<String>(
-            key: const ValueKey('profile-area'),
-            initialValue: knownLocation ? _locationId : null,
-            isExpanded: true,
-            decoration: InputDecoration(
-              labelText: KaajLocalizations.text(context, 'এলাকা'),
-              helperText:
-                  !knownLocation && widget.profile.primaryLocation != null
-                  ? widget.profile.primaryLocation!.nameFor(language)
-                  : null,
+          // City → thana → area, so the area can be more precise than
+          // the city.
+          Card(
+            margin: EdgeInsets.zero,
+            child: ListTile(
+              key: const ValueKey('profile-area'),
+              leading: const Icon(Icons.location_on_outlined),
+              title: const KLocalizedText('এলাকা'),
+              subtitle: _locationName == null
+                  ? const KLocalizedText('এখনো বেছে নেওয়া হয়নি')
+                  : Text(_locationName!.nameFor(language)),
+              trailing: const KLocalizedText('বদলান'),
+              onTap: _saving ? null : _pickArea,
             ),
-            items: [
-              for (final location in locations ?? const <ServiceLocation>[])
-                DropdownMenuItem(
-                  value: location.id,
-                  child: Text(location.nameFor(language)),
-                ),
-            ],
-            onChanged: (value) => setState(() => _locationId = value),
           ),
           const SizedBox(height: KSpacing.lg),
           KPrimaryButton(

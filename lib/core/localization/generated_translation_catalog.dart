@@ -1082,4 +1082,12 @@ const generatedEnglishTranslations = <String, String>{
   "প্রস্তাবিত টাকার পরিমাণ লিখুন।": "Enter the amount you propose.",
   "বিরোধ খোলা যায়নি। আবার চেষ্টা করুন।":
       "Could not open the dispute. Try again.",
+  "সব শহর": "All cities",
+  "পুরো থানা": "whole thana",
+  "এখানে কোনো এলাকা যোগ করা নেই।": "No areas are listed here.",
+  "থানা দেখুন": "See thanas",
+  "এলাকা দেখুন": "See areas",
+  "বেছে নেওয়া এলাকা": "Chosen area",
+  "এখনো বেছে নেওয়া হয়নি": "Not chosen yet",
+  "বদলান": "Change",
 };

@@ -27,3 +27,11 @@ final catalogSkillsProvider = FutureProvider<List<CatalogSkill>>((ref) {
 final catalogLocationsProvider = FutureProvider<List<ServiceLocation>>((ref) {
   return ref.watch(catalogRepositoryProvider).getLocations();
 });
+
+/// One level of the place tree: the cities (null parent), a city's thanas,
+/// or a thana's areas.
+final locationChildrenProvider =
+    FutureProvider.family<List<ServiceLocation>, String?>(
+      (ref, parentId) =>
+          ref.watch(catalogRepositoryProvider).getLocations(parentId: parentId),
+    );

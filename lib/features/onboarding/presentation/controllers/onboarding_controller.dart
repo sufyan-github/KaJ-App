@@ -45,6 +45,11 @@ class OnboardingController extends StateNotifier<OnboardingState> {
     await _save(state.copyWith(role: role, step: 2));
   }
 
+  /// Remembers the tapped area before it is confirmed, so the choice
+  /// survives the app going to the background and the screen rebuilding.
+  Future<void> stageLocation(String locationId) =>
+      _save(state.copyWith(locationId: locationId));
+
   Future<void> selectLocation(String locationId) async {
     final next = state.copyWith(locationId: locationId, step: 3);
     await _repository.updateProfile(next);
