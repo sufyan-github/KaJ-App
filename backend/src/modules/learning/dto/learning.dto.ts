@@ -126,3 +126,25 @@ export class ApplyToLearningDto {
   @MaxLength(1000)
   message?: string;
 }
+
+export class RecordLearningSessionDto {
+  @IsDateString()
+  heldAt!: string;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(1440)
+  minutes!: number;
+
+  /** What was taught, e.g. "Replacing a charging port". */
+  @IsString()
+  @MinLength(3)
+  @MaxLength(200)
+  topic!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  notes?: string;
+}

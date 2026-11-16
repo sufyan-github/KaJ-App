@@ -77,9 +77,12 @@ databaseDescribe("cursor pagination (real HTTP)", () => {
     const created = new Set<string>();
     for (let index = 0; index < 5; index += 1)
       created.add(await api.openJob(poster));
+    // The shared test database holds every earlier run's jobs, so page in
+    // bigger steps; the check is still "no repeats, nothing missing".
     const walked = await walk(
-      (cursor) => `jobs?limit=2${cursor ? `&cursor=${cursor}` : ""}`,
+      (cursor) => `jobs?limit=7${cursor ? `&cursor=${cursor}` : ""}`,
       worker,
+      2_000,
     );
     expect(new Set(walked).size).toBe(walked.length);
     for (const id of created) expect(walked).toContain(id);

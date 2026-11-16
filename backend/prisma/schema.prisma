@@ -462,6 +462,7 @@ model User {
   training_lesson_opens             TrainingLessonOpen[]
   training_attempts                 TrainingAttempt[]
   training_certificates             TrainingCertificate[]
+  recorded_learning_sessions        LearningSession[]         @relation("LearningSessionRecorder")
 
   @@index([status, deleted_at])
   @@map("users")
@@ -959,14 +960,14 @@ model Application {
 }
 
 model Assignment {
-  id                       String           @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  job_id                   String           @db.Uuid
-  worker_user_id           String           @db.Uuid
-  application_id           String           @db.Uuid
+  id                       String            @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  job_id                   String            @db.Uuid
+  worker_user_id           String            @db.Uuid
+  application_id           String            @db.Uuid
   agreed_price_poisha      BigInt
   agreed_starts_at         DateTime?
   agreed_ends_at           DateTime?
-  status                   AssignmentStatus @default(PENDING_CONFIRMATION)
+  status                   AssignmentStatus  @default(PENDING_CONFIRMATION)
   confirmed_at             DateTime?
   confirmation_deadline_at DateTime?
   submitted_at             DateTime?
@@ -975,19 +976,20 @@ model Assignment {
   cancel_reason            String?
   /// Who cancelled. Only cancellations the policy penalised (worker cancelled
   /// late, not an emergency) count against the worker's completion rate.
-  cancelled_by_user_id     String?          @db.Uuid
-  cancellation_penalised   Boolean          @default(false)
-  created_at               DateTime         @default(now())
-  updated_at               DateTime         @updatedAt
-  job                      Job              @relation(fields: [job_id], references: [id], onDelete: Restrict)
-  worker                   User             @relation(fields: [worker_user_id], references: [id], onDelete: Restrict)
-  application              Application      @relation(fields: [application_id], references: [id], onDelete: Restrict)
+  cancelled_by_user_id     String?           @db.Uuid
+  cancellation_penalised   Boolean           @default(false)
+  created_at               DateTime          @default(now())
+  updated_at               DateTime          @updatedAt
+  job                      Job               @relation(fields: [job_id], references: [id], onDelete: Restrict)
+  worker                   User              @relation(fields: [worker_user_id], references: [id], onDelete: Restrict)
+  application              Application       @relation(fields: [application_id], references: [id], onDelete: Restrict)
   contracts                Contract[]
   work_sessions            WorkSession[]
   payments                 Payment[]
   reviews                  Review[]
   disputes                 Dispute[]
   occurrences              JobOccurrence[]
+  learning_sessions        LearningSession[]
 
   @@unique([job_id, worker_user_id])
   @@index([worker_user_id, status])
@@ -1914,4 +1916,24 @@ model TrainingCertificate {
   @@index([user_id, revoked_at])
   @@index([course_id])
   @@map("training_certificates")
+}
+
+/// One taught session of a learning enrolment (P1.3): the mentor records it,
+/// the learner confirms they attended. Progress = these rows.
+model LearningSession {
+  id                   String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  assignment_id        String     @db.Uuid
+  held_at              DateTime
+  minutes              Int
+  topic                String
+  notes                String?
+  recorded_by_user_id  String     @db.Uuid
+  learner_confirmed_at DateTime?
+  created_at           DateTime   @default(now())
+  assignment           Assignment @relation(fields: [assignment_id], references: [id], onDelete: Cascade)
+  recorded_by          User       @relation("LearningSessionRecorder", fields: [recorded_by_user_id], references: [id], onDelete: Restrict)
+
+  @@index([assignment_id, held_at])
+  @@index([recorded_by_user_id])
+  @@map("learning_sessions")
 }

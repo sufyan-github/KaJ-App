@@ -1,0 +1,398 @@
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  Optional,
+} from "@nestjs/common";
+import {
+  ApplicationStatus,
+  AssignmentStatus,
+  ParticipantTerms,
+  Prisma,
+  WorkArrangement,
+} from "@prisma/client";
+
+import { PrismaService } from "../../infra/prisma/prisma.service";
+import { MentorsService } from "../mentors/mentors.service";
+import { NotificationsService } from "../notifications/notifications.service";
+import { UserBlocksService } from "../safety/user-blocks.service";
+import { visibleDisplayName } from "../users/public-profile.projection";
+import { RecordLearningSessionDto } from "./dto/learning.dto";
+import { termsText } from "./learning-terms";
+import { LEARNING_ONLY } from "./learning.service";
+
+/** How a learning opportunity is delivered, as the learner reads it. */
+const DELIVERY_MODE: Record<
+  WorkArrangement,
+  { code: string; en: string; bn: string }
+> = {
+  ON_SITE: { code: "IN_PERSON", en: "In person", bn: "সরাসরি উপস্থিত হয়ে" },
+  HOME_BASED: { code: "AT_HOME", en: "From home", bn: "বাড়ি থেকে" },
+  REMOTE: { code: "ONLINE", en: "Online", bn: "অনলাইনে" },
+  HYBRID: {
+    code: "HYBRID",
+    en: "In person and online",
+    bn: "সরাসরি ও অনলাইনে",
+  },
+};
+
+const enrolmentInclude = {
+  job: {
+    include: {
+      location: { select: { id: true, name_en: true, name_bn: true } },
+    },
+  },
+  contracts: { orderBy: { version: "desc" }, take: 1 },
+  learning_sessions: { orderBy: [{ held_at: "asc" }, { id: "asc" }] },
+  worker: {
+    select: {
+      id: true,
+      profile: { select: { display_name: true, show_full_name: true } },
+    },
+  },
+} satisfies Prisma.AssignmentInclude;
+
+/**
+ * P1.3: the mentor accepts or declines learners; acceptance enrols the
+ * learner (an assignment) with a contract snapshot of the terms, schedule
+ * and delivery mode; taught sessions are recorded as progress.
+ */
+@Injectable()
+export class LearningEnrolmentsService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mentors: MentorsService,
+    @Optional() private readonly notifications?: NotificationsService,
+    @Optional() private readonly userBlocks?: UserBlocksService,
+  ) {}
+
+  private get blocks() {
+    return this.userBlocks ?? new UserBlocksService(this.prisma);
+  }
+
+  /** The mentor's applicant list (people in a block with them hidden). */
+  async applications(mentorUserId: string, opportunityId: string) {
+    await this.ownedOpportunity(mentorUserId, opportunityId);
+    const hidden = await this.blocks.hiddenFrom(mentorUserId);
+    const rows = await this.prisma.application.findMany({
+      where: { job_id: opportunityId, worker_user_id: { notIn: hidden } },
+      include: {
+        worker: {
+          select: {
+            id: true,
+            profile: {
+              select: {
+                display_name: true,
+                show_full_name: true,
+                trust_level: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: [{ created_at: "asc" }, { id: "asc" }],
+    });
+    return {
+      items: rows.map((row) => ({
+        id: row.id,
+        status: row.status,
+        message: row.message,
+        appliedAt: row.created_at.toISOString(),
+        learner: {
+          userId: row.worker.id,
+          displayName: visibleDisplayName(
+            row.worker.profile?.display_name ?? "",
+            {
+              showFullName: row.worker.profile?.show_full_name ?? false,
+              hired: false,
+            },
+          ),
+          trustLevel: row.worker.profile?.trust_level ?? "NONE",
+        },
+      })),
+    };
+  }
+
+  async accept(mentorUserId: string, applicationId: string) {
+    await this.mentors.assertApproved(mentorUserId);
+    const application = await this.prisma.application.findUnique({
+      where: { id: applicationId },
+      include: { job: true },
+    });
+    if (
+      !application ||
+      application.job.poster_user_id !== mentorUserId ||
+      application.job.opportunity_type === "WORK"
+    )
+      throw new NotFoundException();
+    if (application.status !== ApplicationStatus.PENDING)
+      throw new ConflictException("Application is no longer pending.");
+    await this.blocks.assertNotBlocked(
+      mentorUserId,
+      application.worker_user_id,
+    );
+    const job = application.job;
+    const now = new Date();
+    const fee = job.participant_fee_poisha;
+    const stipend =
+      job.participant_terms === ParticipantTerms.STIPEND
+        ? job.budget_min_poisha
+        : null;
+
+    const assignmentId = await this.prisma.$transaction(async (transaction) => {
+      // Seats are taken race-safely: only while one is still free.
+      const seat = await transaction.$executeRaw`
+        UPDATE jobs SET workers_filled = workers_filled + 1
+        WHERE id = ${job.id}::uuid AND workers_filled < workers_required`;
+      if (seat !== 1)
+        throw new ConflictException({
+          code: "SEATS_FULL",
+          message: "Every seat is taken.",
+          messageKey: "error.learning.seats_full",
+        });
+      const updated = await transaction.application.updateMany({
+        where: { id: applicationId, status: ApplicationStatus.PENDING },
+        data: { status: ApplicationStatus.ACCEPTED },
+      });
+      if (updated.count !== 1)
+        throw new ConflictException("Application is no longer pending.");
+      const assignment = await transaction.assignment.create({
+        data: {
+          job_id: job.id,
+          application_id: applicationId,
+          worker_user_id: application.worker_user_id,
+          // What changes hands between the two (no platform fee on Learn).
+          agreed_price_poisha: fee ?? stipend ?? 0n,
+          agreed_starts_at: job.starts_at,
+          agreed_ends_at: job.ends_at,
+          status: AssignmentStatus.CONFIRMED,
+          confirmed_at: now,
+        },
+      });
+      const terms = job.participant_terms!;
+      await transaction.contract.create({
+        data: {
+          assignment_id: assignment.id,
+          version: 1,
+          platform_fee_poisha: 0n,
+          worker_earning_poisha: stipend ?? 0n,
+          cancellation_policy_json: {},
+          snapshot_json: {
+            kind: "LEARNING",
+            opportunityType: job.opportunity_type,
+            title: job.title,
+            terms,
+            termsText: termsText({
+              terms,
+              feePoisha: fee,
+              stipendPoisha: stipend,
+            }),
+            participantFeePoisha: fee?.toString() ?? null,
+            stipendPoisha: stipend?.toString() ?? null,
+            schedule: {
+              startsAt: job.starts_at?.toISOString() ?? null,
+              endsAt: job.ends_at?.toISOString() ?? null,
+              flexibleHours: job.flexible_hours,
+            },
+            deliveryMode: DELIVERY_MODE[job.work_arrangement],
+            locationId: job.location_id,
+            mentorUserId,
+            learnerUserId: application.worker_user_id,
+            acceptedAt: now.toISOString(),
+          },
+        },
+      });
+      return assignment.id;
+    });
+    await this.notifications?.create({
+      userId: application.worker_user_id,
+      type: "LEARNING_ACCEPTED",
+      title: "আবেদন গৃহীত হয়েছে",
+      body: `${job.title} — আপনি ভর্তি হয়েছেন। শর্ত ও সময়সূচি দেখুন।`,
+      payload: { route: `/learn/enrolments/${assignmentId}`, assignmentId },
+      dedupeKey: `learning-accepted:${assignmentId}`,
+    });
+    return this.enrolment(mentorUserId, assignmentId);
+  }
+
+  async decline(mentorUserId: string, applicationId: string) {
+    const application = await this.prisma.application.findUnique({
+      where: { id: applicationId },
+      include: { job: true },
+    });
+    if (
+      !application ||
+      application.job.poster_user_id !== mentorUserId ||
+      application.job.opportunity_type === "WORK"
+    )
+      throw new NotFoundException();
+    const updated = await this.prisma.application.updateMany({
+      where: { id: applicationId, status: ApplicationStatus.PENDING },
+      data: { status: ApplicationStatus.REJECTED },
+    });
+    if (updated.count !== 1)
+      throw new ConflictException("Application is no longer pending.");
+    await this.notifications?.create({
+      userId: application.worker_user_id,
+      type: "LEARNING_DECLINED",
+      title: "আবেদনের ফল",
+      body: `${application.job.title} — এবার আসন দেওয়া যায়নি।`,
+      payload: { route: `/learn/opportunities/${application.job_id}` },
+      dedupeKey: `learning-declined:${applicationId}`,
+    });
+    return { id: applicationId, status: ApplicationStatus.REJECTED };
+  }
+
+  /** One enrolment, for its mentor or its learner. */
+  async enrolment(userId: string, assignmentId: string) {
+    const row = await this.prisma.assignment.findFirst({
+      where: {
+        id: assignmentId,
+        job: LEARNING_ONLY,
+        OR: [{ worker_user_id: userId }, { job: { poster_user_id: userId } }],
+      },
+      include: enrolmentInclude,
+    });
+    if (!row) throw new NotFoundException();
+    return this.serialize(row, userId);
+  }
+
+  /** The user's enrolments, as learner and as mentor. */
+  async enrolments(userId: string) {
+    const rows = await this.prisma.assignment.findMany({
+      where: {
+        job: LEARNING_ONLY,
+        OR: [{ worker_user_id: userId }, { job: { poster_user_id: userId } }],
+      },
+      include: enrolmentInclude,
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
+      take: 100,
+    });
+    return {
+      items: rows.map((row) => this.serialize(row, userId)),
+    };
+  }
+
+  async recordSession(
+    mentorUserId: string,
+    assignmentId: string,
+    input: RecordLearningSessionDto,
+  ) {
+    await this.mentors.assertApproved(mentorUserId);
+    const assignment = await this.prisma.assignment.findFirst({
+      where: {
+        id: assignmentId,
+        job: { ...LEARNING_ONLY, poster_user_id: mentorUserId },
+      },
+      include: { job: { select: { title: true } } },
+    });
+    if (!assignment) throw new NotFoundException();
+    if (assignment.status !== AssignmentStatus.CONFIRMED)
+      throw new ConflictException({
+        code: "ENROLMENT_NOT_ACTIVE",
+        message: "Sessions can be recorded only for an active enrolment.",
+        messageKey: "error.learning.enrolment_not_active",
+      });
+    const heldAt = new Date(input.heldAt);
+    if (heldAt.getTime() > Date.now() + 5 * 60_000)
+      throw new ConflictException({
+        code: "SESSION_IN_FUTURE",
+        message: "Record a session after it has happened.",
+        messageKey: "error.learning.session_in_future",
+      });
+    const session = await this.prisma.learningSession.create({
+      data: {
+        assignment_id: assignmentId,
+        held_at: heldAt,
+        minutes: input.minutes,
+        topic: input.topic.trim(),
+        notes: input.notes?.trim() || null,
+        recorded_by_user_id: mentorUserId,
+      },
+    });
+    await this.notifications?.create({
+      userId: assignment.worker_user_id,
+      type: "LEARNING_SESSION_RECORDED",
+      title: "নতুন ক্লাস নথিভুক্ত",
+      body: `${assignment.job.title}: "${session.topic}" — উপস্থিতি নিশ্চিত করুন।`,
+      payload: { route: `/learn/enrolments/${assignmentId}`, assignmentId },
+      dedupeKey: `learning-session:${session.id}`,
+    });
+    return this.enrolment(mentorUserId, assignmentId);
+  }
+
+  async confirmSession(learnerUserId: string, sessionId: string) {
+    const session = await this.prisma.learningSession.findUnique({
+      where: { id: sessionId },
+      include: { assignment: true },
+    });
+    if (!session || session.assignment.worker_user_id !== learnerUserId)
+      throw new NotFoundException();
+    if (!session.learner_confirmed_at)
+      await this.prisma.learningSession.update({
+        where: { id: sessionId },
+        data: { learner_confirmed_at: new Date() },
+      });
+    return this.enrolment(learnerUserId, session.assignment_id);
+  }
+
+  private async ownedOpportunity(mentorUserId: string, id: string) {
+    const job = await this.prisma.job.findFirst({
+      where: { ...LEARNING_ONLY, id, poster_user_id: mentorUserId },
+    });
+    if (!job) throw new NotFoundException();
+    return job;
+  }
+
+  private serialize(
+    row: Prisma.AssignmentGetPayload<{ include: typeof enrolmentInclude }>,
+    viewerUserId: string,
+  ) {
+    const isMentor = row.job.poster_user_id === viewerUserId;
+    const sessions = row.learning_sessions;
+    const learnerProfile = row.worker.profile;
+    return {
+      id: row.id,
+      role: isMentor ? "MENTOR" : "LEARNER",
+      status: row.status,
+      opportunity: {
+        id: row.job.id,
+        title: row.job.title,
+        opportunityType: row.job.opportunity_type,
+        location: row.job.location,
+      },
+      learner: {
+        userId: row.worker_user_id,
+        displayName: visibleDisplayName(learnerProfile?.display_name ?? "", {
+          showFullName: learnerProfile?.show_full_name ?? false,
+          // An enrolment is a confirmed engagement.
+          hired: true,
+        }),
+      },
+      mentorUserId: row.job.poster_user_id,
+      // What the learner agreed to, frozen at acceptance.
+      contract: row.contracts[0]
+        ? {
+            version: row.contracts[0].version,
+            ...(row.contracts[0].snapshot_json as Record<string, unknown>),
+          }
+        : null,
+      sessions: sessions.map((item) => ({
+        id: item.id,
+        heldAt: item.held_at.toISOString(),
+        minutes: item.minutes,
+        topic: item.topic,
+        notes: item.notes,
+        learnerConfirmedAt: item.learner_confirmed_at?.toISOString() ?? null,
+      })),
+      progress: {
+        sessionsRecorded: sessions.length,
+        sessionsConfirmed: sessions.filter((item) => item.learner_confirmed_at)
+          .length,
+        minutesTotal: sessions.reduce((sum, item) => sum + item.minutes, 0),
+      },
+      enrolledAt: row.confirmed_at?.toISOString() ?? null,
+      viewerIsLearner: row.worker_user_id === viewerUserId,
+    };
+  }
+}

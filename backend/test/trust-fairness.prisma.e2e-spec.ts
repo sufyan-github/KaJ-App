@@ -188,7 +188,8 @@ databaseDescribe("trust and fairness fixes with PostgreSQL", () => {
     expect(profile.completed_jobs_count).toBe(1);
     expect(profile.completion_rate_bps).toBe(5000);
     expect(profile.cancellation_rate_bps).toBe(5000);
-  });
+    // recomputeAllReputation walks every worker in the shared test database.
+  }, 30_000);
 
   it("refuses to cancel a declined assignment", async () => {
     const poster = await user("declined-poster", RoleMode.CUSTOMER);
