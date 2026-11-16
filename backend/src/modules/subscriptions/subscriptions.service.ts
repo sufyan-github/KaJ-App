@@ -159,9 +159,19 @@ export class SubscriptionsService {
     ]);
     const current = active ?? latest;
     const remoteBilling = this.operatorPort.managesRemoteBilling === true;
+    const accessActive = !gateEnabled || active !== null;
     return {
-      accessActive: !gateEnabled || active !== null,
+      accessActive,
       gateEnabled,
+      // Modules that never need a subscription (owner decision: Learn and
+      // Community are free), and per-module access for the app's paywall.
+      freeModules: [...FREE_MODULES],
+      moduleAccess: {
+        WORK: accessActive,
+        BUSINESS: accessActive,
+        LEARN: true,
+        COMMUNITY: true,
+      },
       operator: identity ? serializeIdentity(identity) : null,
       current: current ? serializeSubscription(current) : null,
       plans: plans.map(serializePlan),

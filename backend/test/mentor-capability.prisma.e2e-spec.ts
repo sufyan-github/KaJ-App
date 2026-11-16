@@ -207,6 +207,38 @@ databaseDescribe("mentor capability (real HTTP)", () => {
     ).toEqual([]);
   });
 
+  it("accepts the app's shorthand (skillIds, accepting) and shows the mentor status on the profile", async () => {
+    const applicant = await api.actor([RoleMode.WORKER]);
+    const applied = await api
+      .post("me/mentor/application", applicant, {
+        skillIds: [skillId],
+        bio: "I teach phone repair to young people in my neighbourhood.",
+        yearsExperience: 6,
+        accepting: true,
+        documentIds: await evidence(applicant),
+      })
+      .expect(201);
+    expect(applied.body.data).toMatchObject({
+      status: "PENDING",
+      rejectionReason: null,
+      skills: [{ skillId, level: "ADVANCED" }],
+    });
+    const profile = await api.get("profiles/me", applicant).expect(200);
+    expect(profile.body.data.mentorStatus).toBe("PENDING");
+    const noSkills = await api.actor([RoleMode.WORKER]);
+    const none = await api
+      .post("me/mentor/application", noSkills, {
+        bio: "No skills chosen in this application at all.",
+        yearsExperience: 1,
+        documentIds: await evidence(noSkills),
+      })
+      .expect(400);
+    expect(none.body.error).toMatchObject({
+      code: "VALIDATION_FAILED",
+      field: "skills",
+    });
+  });
+
   it("withdraws the offered skills on rejection and allows a new application", async () => {
     const applicant = await api.actor([RoleMode.WORKER]);
     const applied = await api
@@ -219,6 +251,7 @@ databaseDescribe("mentor capability (real HTTP)", () => {
     const after = await api.get("me/mentor", applicant).expect(200);
     expect(after.body.data).toMatchObject({
       status: "REJECTED",
+      rejectionReason: "Mentor evidence reviewed by the test.",
       skills: [],
       application: { status: "REJECTED" },
     });

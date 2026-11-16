@@ -114,6 +114,21 @@ databaseDescribe("module entitlements", () => {
     });
   });
 
+  it("tells the app which modules are free", async () => {
+    const actor = await api.tokenFor(unsubscribed, [RoleMode.WORKER]);
+    const me = await api.get("subscriptions/me", actor).expect(200);
+    expect(me.body.data).toMatchObject({
+      accessActive: false,
+      freeModules: ["LEARN", "COMMUNITY"],
+      moduleAccess: {
+        WORK: false,
+        BUSINESS: false,
+        LEARN: true,
+        COMMUNITY: true,
+      },
+    });
+  });
+
   it("has no subscription gate on any training route", () => {
     const prototype = TrainingController.prototype as unknown as Record<
       string,

@@ -29,6 +29,7 @@ export class ProfileOverviewService {
               birth_year: true,
               photo_key: true,
               trust_level: true,
+              mentor_status: true,
               primary_location: {
                 select: { id: true, name_en: true, name_bn: true },
               },
@@ -74,6 +75,8 @@ export class ProfileOverviewService {
         : null,
       photoUrl,
       trustLevel,
+      // NONE | PENDING | APPROVED | REJECTED | SUSPENDED (P1.1).
+      mentorStatus: profile?.mentor_status ?? "NONE",
       roles: user.role_modes,
       activeRole: user.active_role,
       skills: user.skills.map((row) => ({

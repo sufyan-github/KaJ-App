@@ -31,12 +31,31 @@ export class MentorSkillDto {
 }
 
 export class MentorApplicationDto {
+  /** Skills to teach, with levels. Send this or `skillIds`. */
+  @IsOptional()
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(10)
   @ValidateNested({ each: true })
   @Type(() => MentorSkillDto)
-  skills!: MentorSkillDto[];
+  skills?: MentorSkillDto[];
+
+  /** Shorthand for `skills` when levels don't matter (default ADVANCED). */
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(10)
+  @ArrayUnique()
+  @IsUUID("all", { each: true })
+  skillIds?: string[];
+
+  /**
+   * Accepted for app convenience and ignored: an approved mentor starts out
+   * accepting learners and can pause with PUT /me/mentor.
+   */
+  @IsOptional()
+  @IsBoolean()
+  accepting?: boolean;
 
   /** What and how they teach, in their own words. */
   @IsString()

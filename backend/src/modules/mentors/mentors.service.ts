@@ -70,6 +70,10 @@ export class MentorsService {
         nameBn: row.skill.name_bn,
         level: row.level,
       })),
+      rejectionReason:
+        request?.status === VerificationStatus.REJECTED
+          ? request.rejection_reason
+          : null,
       application: request
         ? {
             verificationRequestId: request.id,
@@ -95,11 +99,21 @@ export class MentorsService {
     if (!hasTrust(profile?.trust_level ?? TrustLevel.NONE, TrustLevel.IDENTITY))
       throw mentorErrors.identityRequired();
 
-    const skillIds = [...new Set(input.skills.map((item) => item.skillId))];
+    const offered =
+      input.skills ??
+      (input.skillIds ?? []).map((skillId) => ({ skillId, level: undefined }));
+    if (offered.length === 0)
+      throw new BadRequestException({
+        code: "VALIDATION_FAILED",
+        message: "Choose at least one skill to teach.",
+        messageKey: "error.validation.failed",
+        field: "skills",
+      });
+    const skillIds = [...new Set(offered.map((item) => item.skillId))];
     const active = await this.prisma.skill.count({
       where: { id: { in: skillIds }, is_active: true },
     });
-    if (active !== skillIds.length || skillIds.length !== input.skills.length)
+    if (active !== skillIds.length || skillIds.length !== offered.length)
       throw new BadRequestException(
         "Every skill must be active, known and listed once.",
       );
@@ -129,7 +143,7 @@ export class MentorsService {
         where: { user_id: userId, skill_id: { notIn: skillIds } },
         data: { can_mentor: false },
       });
-      for (const item of input.skills)
+      for (const item of offered)
         await transaction.userSkill.upsert({
           where: {
             user_id_skill_id: { user_id: userId, skill_id: item.skillId },
