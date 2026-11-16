@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../formatting/latin_digits_formatter.dart';
+
 import '../localization/kaaj_localizations.dart';
 
 class KTextField extends StatelessWidget {
@@ -34,6 +36,11 @@ class KTextField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final FormFieldValidator<String>? validator;
 
+  bool get _numeric =>
+      keyboardType == TextInputType.number ||
+      keyboardType == TextInputType.phone ||
+      (keyboardType?.index == TextInputType.number.index);
+
   @override
   Widget build(BuildContext context) {
     final localizedLabel = KaajLocalizations.text(context, label);
@@ -44,6 +51,8 @@ class KTextField extends StatelessWidget {
         controller: controller,
         enabled: enabled,
         keyboardType: keyboardType,
+        // Amounts and numbers typed on a Bangla keyboard still parse.
+        inputFormatters: _numeric ? const [LatinDigitsFormatter()] : null,
         maxLines: maxLines,
         minLines: minLines,
         textInputAction: textInputAction,

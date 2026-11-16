@@ -481,7 +481,7 @@ Future<void> showJobApplyFlow(
               Align(
                 alignment: Alignment.centerLeft,
                 child: KLocalizedText(
-                  'কাজের সময়: ${_dateTime(start)} – ${_time(end)}',
+                  'কাজের সময়: ${KFormat.dateTime(context, start)} – ${KFormat.time(context, end)}',
                 ),
               ),
               if (job.isTimeAvailable)
@@ -820,7 +820,7 @@ class _JobCard extends StatelessWidget {
             const Spacer(),
             if (job.startsAt != null)
               KLocalizedText(
-                'কাজের সময়: ${_dateTime(job.startsAt!)}',
+                'কাজের সময়: ${KFormat.dateTime(context, job.startsAt!)}',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
@@ -1459,7 +1459,7 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
                             selected: _selected == slot,
                             onSelected: (_) => setState(() => _selected = slot),
                             label: KLocalizedText(
-                              '${_dateTime(slot.startsAt)}–${_time(slot.endsAt)}',
+                              '${KFormat.dateTime(context, slot.startsAt)}–${KFormat.time(context, slot.endsAt)}',
                             ),
                           ),
                         )
@@ -1789,9 +1789,9 @@ class _AssignmentDetailBody extends ConsumerWidget {
           Card(
             child: ListTile(
               leading: const Icon(Icons.event_available),
-              title: KLocalizedText(_dateTime(item.startsAt!)),
+              title: KLocalizedText(KFormat.dateTime(context, item.startsAt!)),
               subtitle: KLocalizedText(
-                'শেষ ${item.endsAt == null ? '' : _time(item.endsAt!)} · চুক্তি v${detail.contractVersion ?? '-'}',
+                'শেষ ${item.endsAt == null ? '' : KFormat.time(context, item.endsAt!)} · চুক্তি v${detail.contractVersion ?? '-'}',
               ),
             ),
           ),
@@ -1836,7 +1836,7 @@ class _AssignmentDetailBody extends ConsumerWidget {
               child: Icon(Icons.check, size: 16, color: Colors.white),
             ),
             title: KLocalizedText(_statusBn(step.status)),
-            subtitle: KLocalizedText(_dateTime(step.at)),
+            subtitle: KLocalizedText(KFormat.dateTime(context, step.at)),
           ),
         ),
         if (detail.payment != null || item.status == 'COMPLETED') ...[
@@ -2470,18 +2470,6 @@ class _AmountDialogState extends State<_AmountDialog> {
 
 DateTime _combine(DateTime date, TimeOfDay time) =>
     DateTime(date.year, date.month, date.day, time.hour, time.minute);
-String _dateTime(DateTime value) {
-  final local = value.toLocal();
-  return '${local.day}/${local.month} ${_time(local)}';
-}
-
-String _time(DateTime value) {
-  final local = value.toLocal();
-  final hour = local.hour.toString().padLeft(2, '0');
-  final minute = local.minute.toString().padLeft(2, '0');
-  return '$hour:$minute';
-}
-
 String _matchReasonBn(String reason) => switch (reason) {
   'Skills match' => 'আপনার দক্ষতার সঙ্গে মেলে',
   'Nearby service area' => 'আপনার কাছাকাছি কাজ',

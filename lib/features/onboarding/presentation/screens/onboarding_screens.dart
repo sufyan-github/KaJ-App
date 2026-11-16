@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/failure_copy.dart';
+import '../../../../core/formatting/kaaj_format.dart';
 import '../../../../core/localization/kaaj_localizations.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -934,12 +935,22 @@ class _OnboardingTourScreenState extends ConsumerState<OnboardingTourScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const cards = [
-      (
-        Icons.manage_search,
-        'কাছের কাজ খুঁজুন',
-        'দক্ষতা, এলাকা ও সময় অনুযায়ী কাজ দেখুন।',
-      ),
+    // The first page speaks to the role just chosen: a client is not told
+    // to "find nearby work".
+    final isWorker =
+        ref.read(onboardingControllerProvider).role == KaajRole.worker;
+    final cards = [
+      isWorker
+          ? (
+              Icons.manage_search,
+              'কাছের কাজ খুঁজুন',
+              'দক্ষতা, এলাকা ও সময় অনুযায়ী কাজ দেখুন।',
+            )
+          : (
+              Icons.post_add_rounded,
+              'কাজ পোস্ট করুন বা কর্মী খুঁজুন',
+              'কাজের বিবরণ দিন, আবেদন দেখুন বা কাছের দক্ষ কর্মী বুক করুন।',
+            ),
       (
         Icons.verified_user_outlined,
         'বিশ্বাসের তথ্য দেখুন',
@@ -1024,7 +1035,12 @@ class _OnboardingScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: KLocalizedText(standaloneTitle ?? 'ধাপ $step / ৫')),
+    appBar: AppBar(
+      title: KLocalizedText(
+        // The step number in Bangla digits too, not "ধাপ 1 / ৫".
+        standaloneTitle ?? 'ধাপ ${KFormat.count(context, step)} / ৫',
+      ),
+    ),
     body: SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(

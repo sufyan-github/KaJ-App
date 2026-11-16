@@ -1097,4 +1097,13 @@ const generatedEnglishTranslations = <String, String>{
   "কাজ শেষ হয়েছে নিশ্চিত করুন": "Confirm the work has ended",
   "কাজ শেষ নিশ্চিত হয়েছে। এখন কাজটি পর্যালোচনা করে সম্পন্ন করুন।":
       "The end of the work is confirmed. Now review the job and mark it complete.",
+  "কে ব্লক করবেন?": "\u2014 block this person?",
+  "ব্লক করলে আপনারা একে অপরকে বার্তা পাঠাতে, কাজ দেখতে বা আবেদন করতে পারবেন না। সেটিংসের \"ব্লক করা ব্যবহারকারী\" থেকে পরে আনব্লক করা যাবে।":
+      "Once blocked, neither of you can message, see the other's jobs or apply. You can unblock later in Settings, Blocked users.",
+  "ব্লক করুন": "Block",
+  "ব্লক করা হয়েছে। সেটিংস থেকে আনব্লক করতে পারবেন।":
+      "Blocked. You can unblock them in Settings.",
+  "কাজ পোস্ট করুন বা কর্মী খুঁজুন": "Post a job or find a worker",
+  "কাজের বিবরণ দিন, আবেদন দেখুন বা কাছের দক্ষ কর্মী বুক করুন।":
+      "Describe the work, review applications or book a skilled worker nearby.",
 };

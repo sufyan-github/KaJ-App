@@ -331,9 +331,47 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
 
   Future<void> _menu(String action) async {
     if (action == 'block' && widget.otherUserId != null) {
+      final name =
+          widget.otherName ??
+          KaajLocalizations.text(context, 'KAAJ ব্যবহারকারী');
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(
+            KaajLocalizations.isEnglish(dialogContext)
+                ? 'Block $name?'
+                : '$nameকে ব্লক করবেন?',
+          ),
+          content: const KLocalizedText(
+            'ব্লক করলে আপনারা একে অপরকে বার্তা পাঠাতে, কাজ দেখতে বা আবেদন করতে পারবেন না। সেটিংসের "ব্লক করা ব্যবহারকারী" থেকে পরে আনব্লক করা যাবে।',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const KLocalizedText('বাতিল'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: KColors.danger),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const KLocalizedText('ব্লক করুন'),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || !mounted) return;
       try {
         await ref.read(chatRepositoryProvider).blockUser(widget.otherUserId!);
-        if (mounted) context.pop();
+        ref.invalidate(conversationsProvider);
+        if (!mounted) return;
+        // Said on the screen the person returns to, so it is not lost
+        // when this thread closes.
+        final messenger = ScaffoldMessenger.of(context);
+        final done = KaajLocalizations.text(
+          context,
+          'ব্লক করা হয়েছে। সেটিংস থেকে আনব্লক করতে পারবেন।',
+        );
+        context.pop();
+        messenger.showSnackBar(SnackBar(content: Text(done)));
       } on Object catch (error) {
         if (mounted) {
           showFailureSnack(

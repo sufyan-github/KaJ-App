@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/formatting/latin_digits_formatter.dart';
 import '../../../../core/localization/kaaj_localizations.dart';
 import '../../../../core/localization/locale_controller.dart';
 import '../../../../core/routing/app_router.dart';
@@ -110,6 +111,7 @@ class _PhoneEntryScreenState extends ConsumerState<PhoneEntryScreen> {
                       textInputAction: TextInputAction.done,
                       autofillHints: const [AutofillHints.telephoneNumber],
                       inputFormatters: [
+                        const LatinDigitsFormatter(),
                         FilteringTextInputFormatter.allow(
                           RegExp(r'[0-9+\- ()]'),
                         ),

@@ -128,7 +128,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backToPhone => 'Back to phone number';
 
   @override
-  String codeExpiresInMinutes(int minutes) {
+  String codeExpiresInMinutes(String minutes) {
     return 'The code expires in $minutes minutes.';
   }
 
@@ -184,7 +184,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resendCode => 'Send a new code';
 
   @override
-  String resendInSeconds(int seconds) {
+  String resendInSeconds(String seconds) {
     return 'Send a new code in ${seconds}s';
   }
 

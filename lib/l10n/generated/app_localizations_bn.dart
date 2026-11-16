@@ -129,7 +129,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get backToPhone => 'ফোন নম্বরে ফিরে যান';
 
   @override
-  String codeExpiresInMinutes(int minutes) {
+  String codeExpiresInMinutes(String minutes) {
     return 'কোডটি $minutes মিনিটে শেষ হবে।';
   }
 
@@ -183,7 +183,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get resendCode => 'নতুন কোড পাঠান';
 
   @override
-  String resendInSeconds(int seconds) {
+  String resendInSeconds(String seconds) {
     return '$seconds সেকেন্ড পরে নতুন কোড পাঠান';
   }
 

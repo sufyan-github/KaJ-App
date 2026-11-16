@@ -314,11 +314,11 @@ abstract class AppLocalizations {
   /// **'Back to phone number'**
   String get backToPhone;
 
-  /// No description provided for @codeExpiresInMinutes.
+  /// minutes is already written in the reader's digits
   ///
   /// In en, this message translates to:
   /// **'The code expires in {minutes} minutes.'**
-  String codeExpiresInMinutes(int minutes);
+  String codeExpiresInMinutes(String minutes);
 
   /// No description provided for @offlineBanner.
   ///
@@ -410,11 +410,11 @@ abstract class AppLocalizations {
   /// **'Send a new code'**
   String get resendCode;
 
-  /// No description provided for @resendInSeconds.
+  /// seconds is already written in the reader's digits
   ///
   /// In en, this message translates to:
   /// **'Send a new code in {seconds}s'**
-  String resendInSeconds(int seconds);
+  String resendInSeconds(String seconds);
 
   /// No description provided for @codeExpired.
   ///

@@ -653,7 +653,10 @@ class _DashboardTile extends StatelessWidget {
     return Semantics(
       button: true,
       label: badgeCount > 0 ? '$localizedTitle, $unreadLabel' : localizedTitle,
+      // No card margin: the grid already spaces the tiles, and the margin
+      // left a dead strip round each tile where a tap did nothing.
       child: Card(
+        margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,

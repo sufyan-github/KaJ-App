@@ -145,6 +145,8 @@ const _reviewedBangla = <String, String>{
 };
 
 const _reviewedEnglish = <String, String>{
+  // "পরে" on a button means "later", not "after".
+  'পরে': 'Later',
   'কাজ পোস্ট করার আগে প্রোফাইলে আপনার এলাকা নির্বাচন করুন।':
       'Choose your area in your profile before posting a job.',
   'হোম': 'Home',

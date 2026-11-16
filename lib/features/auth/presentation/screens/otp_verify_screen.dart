@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/formatting/kaaj_format.dart';
+import '../../../../core/formatting/latin_digits_formatter.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_error_message.dart';
@@ -162,6 +164,8 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
                       textInputAction: TextInputAction.done,
                       autofillHints: const [AutofillHints.oneTimeCode],
                       inputFormatters: [
+                        // A Bangla keyboard types ০–৯; keep them as digits.
+                        const LatinDigitsFormatter(),
                         FilteringTextInputFormatter.digitsOnly,
                         LengthLimitingTextInputFormatter(6),
                       ],
@@ -176,8 +180,12 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
                         labelText: l10n.otpLabel,
                         helperText: _remainingSeconds == 0
                             ? l10n.codeExpired
+                            // Bangla digits in Bangla text, not "কোডটি 5 মিনিটে".
                             : l10n.codeExpiresInMinutes(
-                                (_remainingSeconds / 60).ceil(),
+                                KFormat.count(
+                                  context,
+                                  (_remainingSeconds / 60).ceil(),
+                                ),
                               ),
                       ),
                       validator: (value) {
@@ -232,7 +240,9 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
                             : _resend,
                         child: Text(
                           _resendSeconds > 0
-                              ? l10n.resendInSeconds(_resendSeconds)
+                              ? l10n.resendInSeconds(
+                                  KFormat.count(context, _resendSeconds),
+                                )
                               : l10n.resendCode,
                         ),
                       ),
