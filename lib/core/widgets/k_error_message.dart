@@ -71,6 +71,14 @@ String? serverCodeMessage(AppLocalizations l10n, Failure failure) =>
       'SERVICE_UNAVAILABLE' => l10n.errorServiceUnavailable,
       'CONCURRENT_UPDATE' => l10n.errorConcurrentUpdate,
       'RATE_LIMITED' => l10n.rateLimitedMessage,
+      'SLOT_UNAVAILABLE' => l10n.errorSlotUnavailable,
+      'DISPUTE_NOT_ELIGIBLE' => l10n.errorDisputeNotEligible,
+      'DISPUTE_WINDOW_CLOSED' => l10n.errorDisputeWindowClosed,
+      'DISPUTE_EXISTS' => l10n.errorDisputeExists,
+      // Until the server sends SLOT_UNAVAILABLE it sends a plain CONFLICT
+      // with this reason.
+      'CONFLICT' when failure.message.contains('not available for this slot') =>
+        l10n.errorSlotUnavailable,
       _ => switch (failure.kind) {
         FailureKind.network => l10n.offlineMessage,
         FailureKind.timeout => l10n.timeoutMessage,

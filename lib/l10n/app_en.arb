@@ -92,5 +92,9 @@
   "errorAlreadyApplied": "You have already applied to this job.",
   "errorPayloadTooLarge": "The file is too large. Choose a smaller photo or document.",
   "errorServiceUnavailable": "KAAJ is busy right now. Please try again in a few minutes.",
-  "errorConcurrentUpdate": "This was just changed somewhere else. Refresh and try again."
+  "errorConcurrentUpdate": "This was just changed somewhere else. Refresh and try again.",
+  "errorSlotUnavailable": "You are not free at this time, or the slot is already taken. Check your availability or choose another time.",
+  "errorDisputeNotEligible": "A dispute can't be opened for this job at this stage.",
+  "errorDisputeWindowClosed": "The seven-day period for opening a dispute has ended.",
+  "errorDisputeExists": "A dispute is already open for this job. Follow it in Disputes."
 }

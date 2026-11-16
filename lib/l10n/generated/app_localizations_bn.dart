@@ -316,4 +316,20 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get errorConcurrentUpdate =>
       'এটি এইমাত্র অন্য কোথাও বদলেছে। হালনাগাদ করে আবার চেষ্টা করুন।';
+
+  @override
+  String get errorSlotUnavailable =>
+      'এই সময়ে আপনি খালি নেই, অথবা সময়টি আর খালি নেই। আপনার কাজের সময় দেখুন বা অন্য সময় বেছে নিন।';
+
+  @override
+  String get errorDisputeNotEligible =>
+      'এই পর্যায়ে এই কাজের জন্য বিরোধ খোলা যাবে না।';
+
+  @override
+  String get errorDisputeWindowClosed =>
+      'বিরোধ খোলার সাত দিনের সময় শেষ হয়ে গেছে।';
+
+  @override
+  String get errorDisputeExists =>
+      'এই কাজের জন্য আগেই একটি বিরোধ খোলা আছে। বিরোধ অংশে অনুসরণ করুন।';
 }

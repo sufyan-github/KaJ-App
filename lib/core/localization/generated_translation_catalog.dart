@@ -1078,4 +1078,8 @@ const generatedEnglishTranslations = <String, String>{
   "কাজের পোস্ট ও আবেদনের মাধ্যমে যে কেউ":
       "Anyone, through a job post or application",
   "শুধু কাজ নিশ্চিত হওয়ার পর": "Only after a hire",
+  // P0.10: phone-test fixes.
+  "প্রস্তাবিত টাকার পরিমাণ লিখুন।": "Enter the amount you propose.",
+  "বিরোধ খোলা যায়নি। আবার চেষ্টা করুন।":
+      "Could not open the dispute. Try again.",
 };

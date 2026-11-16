@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/errors/failure.dart';
+import '../../../core/errors/failure_copy.dart';
 import '../../../core/localization/kaaj_localizations.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/theme/app_theme.dart';
@@ -92,6 +93,7 @@ class _OpenDisputeScreenState extends ConsumerState<OpenDisputeScreen> {
   final _description = TextEditingController();
   String _reason = disputeReasons.keys.first;
   bool _loading = false;
+  String? _submitError;
   @override
   void dispose() {
     _description.dispose();
@@ -152,6 +154,13 @@ class _OpenDisputeScreenState extends ConsumerState<OpenDisputeScreen> {
           'চুক্তি, KAAJ চ্যাট ও উপস্থিতির রেকর্ড স্বয়ংক্রিয়ভাবে প্রমাণে যুক্ত হবে।',
         ),
         const SizedBox(height: KSpacing.lg),
+        if (_submitError case final error?) ...[
+          Semantics(
+            liveRegion: true,
+            child: Text(error, style: const TextStyle(color: KColors.danger)),
+          ),
+          const SizedBox(height: KSpacing.sm),
+        ],
         KPrimaryButton(
           label: 'বিরোধ খুলুন ও পেমেন্ট স্থগিত করুন',
           isLoading: _loading,
@@ -174,7 +183,19 @@ class _OpenDisputeScreenState extends ConsumerState<OpenDisputeScreen> {
       ref.invalidate(disputesProvider);
       if (mounted) context.go(AppRoutes.dispute(id));
     } on Object catch (error) {
-      if (mounted) _snack(_message(error));
+      if (mounted) {
+        final text = failureText(
+          context,
+          error,
+          'বিরোধ খোলা যায়নি। আবার চেষ্টা করুন।',
+        );
+        // Shown on the form as well: a snack bar is easy to miss with the
+        // keyboard open.
+        setState(() => _submitError = text);
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(text)));
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }

@@ -321,4 +321,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorConcurrentUpdate =>
       'This was just changed somewhere else. Refresh and try again.';
+
+  @override
+  String get errorSlotUnavailable =>
+      'You are not free at this time, or the slot is already taken. Check your availability or choose another time.';
+
+  @override
+  String get errorDisputeNotEligible =>
+      'A dispute can\'t be opened for this job at this stage.';
+
+  @override
+  String get errorDisputeWindowClosed =>
+      'The seven-day period for opening a dispute has ended.';
+
+  @override
+  String get errorDisputeExists =>
+      'A dispute is already open for this job. Follow it in Disputes.';
 }

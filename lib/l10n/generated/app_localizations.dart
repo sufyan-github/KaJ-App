@@ -631,6 +631,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This was just changed somewhere else. Refresh and try again.'**
   String get errorConcurrentUpdate;
+
+  /// No description provided for @errorSlotUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not free at this time, or the slot is already taken. Check your availability or choose another time.'**
+  String get errorSlotUnavailable;
+
+  /// No description provided for @errorDisputeNotEligible.
+  ///
+  /// In en, this message translates to:
+  /// **'A dispute can\'t be opened for this job at this stage.'**
+  String get errorDisputeNotEligible;
+
+  /// No description provided for @errorDisputeWindowClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'The seven-day period for opening a dispute has ended.'**
+  String get errorDisputeWindowClosed;
+
+  /// No description provided for @errorDisputeExists.
+  ///
+  /// In en, this message translates to:
+  /// **'A dispute is already open for this job. Follow it in Disputes.'**
+  String get errorDisputeExists;
 }
 
 class _AppLocalizationsDelegate

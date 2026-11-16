@@ -435,7 +435,9 @@ Future<void> showJobApplyFlow(
 }) async {
   late final ApplicationEligibility eligibility;
   try {
-    eligibility = await ref.read(applicationEligibilityProvider.future);
+    // Always ask again: an admin may have approved the identity check since
+    // the last attempt.
+    eligibility = await ref.refresh(applicationEligibilityProvider.future);
   } on Object catch (error) {
     if (context.mounted) {
       showFailureSnack(
@@ -464,125 +466,171 @@ Future<void> showJobApplyFlow(
   final message = TextEditingController();
   final start = job.startsAt ?? DateTime.now().add(const Duration(days: 1));
   final end = job.endsAt ?? start.add(const Duration(hours: 1));
+  // A refusal is shown inside the dialog: a snack bar would sit behind it.
+  String? submitError;
+  var submitting = false;
   await showDialog<void>(
     context: context,
-    builder: (dialogContext) => AlertDialog(
-      title: const KLocalizedText('এই কাজে আবেদন করুন'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: KLocalizedText(
-                'কাজের সময়: ${_dateTime(start)} – ${_time(end)}',
-              ),
-            ),
-            if (job.isTimeAvailable)
-              const ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.event_available, color: KColors.success),
-                title: KLocalizedText(
-                  'এই সময়টি আপনার ডিফল্ট সময়ের সঙ্গে মেলে',
+    builder: (dialogContext) => StatefulBuilder(
+      builder: (dialogContext, setDialogState) => AlertDialog(
+        title: const KLocalizedText('এই কাজে আবেদন করুন'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: KLocalizedText(
+                  'কাজের সময়: ${_dateTime(start)} – ${_time(end)}',
                 ),
               ),
-            if (job.isTimeUnavailable) ...[
-              const ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.event_busy, color: KColors.warning),
-                title: KLocalizedText('এই সময়টি আপনার ডিফল্ট সময়ের বাইরে'),
-                subtitle: KLocalizedText(
-                  'আবেদন করার আগে চাইলে পোস্টের সময়টি আপনার কাজের সময়ে যোগ করুন।',
+              if (job.isTimeAvailable)
+                const ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.event_available, color: KColors.success),
+                  title: KLocalizedText(
+                    'এই সময়টি আপনার ডিফল্ট সময়ের সঙ্গে মেলে',
+                  ),
                 ),
+              if (job.isTimeUnavailable) ...[
+                const ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.event_busy, color: KColors.warning),
+                  title: KLocalizedText('এই সময়টি আপনার ডিফল্ট সময়ের বাইরে'),
+                  subtitle: KLocalizedText(
+                    'আবেদন করার আগে চাইলে পোস্টের সময়টি আপনার কাজের সময়ে যোগ করুন।',
+                  ),
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      try {
+                        await ref
+                            .read(onboardingRepositoryProvider)
+                            .addAvailabilityWindow(start, end);
+                        ref.invalidate(jobFeedProvider);
+                        if (dialogContext.mounted) Navigator.pop(dialogContext);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: KLocalizedText(
+                                'পোস্টের সময়টি আপনার ডিফল্ট কাজের সময়ে যোগ হয়েছে। এখন আবেদন করতে পারবেন।',
+                              ),
+                            ),
+                          );
+                        }
+                      } on Object catch (error) {
+                        if (context.mounted) {
+                          showFailureSnack(
+                            context,
+                            error,
+                            'কাজের সময় আপডেট করা যায়নি।',
+                          );
+                        }
+                      }
+                    },
+                    icon: const Icon(Icons.playlist_add),
+                    label: const KLocalizedText('এই পোস্টের সময় যোগ করুন'),
+                  ),
+                ),
+              ],
+              const SizedBox(height: KSpacing.md),
+              KTextField(
+                label: 'প্রস্তাবিত টাকা',
+                controller: amount,
+                keyboardType: TextInputType.number,
               ),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () async {
+              const SizedBox(height: KSpacing.sm),
+              KTextField(label: 'বার্তা (ঐচ্ছিক)', controller: message),
+              if (submitError case final error?) ...[
+                const SizedBox(height: KSpacing.sm),
+                _InlineError(message: error),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const KLocalizedText('ফিরুন'),
+          ),
+          FilledButton(
+            onPressed: job.isTimeUnavailable || submitting
+                ? null
+                : () async {
+                    final taka = int.tryParse(amount.text);
+                    if (taka == null || taka <= 0) {
+                      setDialogState(
+                        () => submitError = KaajLocalizations.text(
+                          dialogContext,
+                          'প্রস্তাবিত টাকার পরিমাণ লিখুন।',
+                        ),
+                      );
+                      return;
+                    }
+                    setDialogState(() {
+                      submitting = true;
+                      submitError = null;
+                    });
                     try {
                       await ref
-                          .read(onboardingRepositoryProvider)
-                          .addAvailabilityWindow(start, end);
-                      ref.invalidate(jobFeedProvider);
+                          .read(jobsRepositoryProvider)
+                          .apply(
+                            jobId: job.id,
+                            startsAt: start,
+                            endsAt: end,
+                            proposedPricePoisha: taka * 100,
+                            message: message.text,
+                          );
                       if (dialogContext.mounted) Navigator.pop(dialogContext);
+                      onApplied?.call();
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: KLocalizedText(
-                              'পোস্টের সময়টি আপনার ডিফল্ট কাজের সময়ে যোগ হয়েছে। এখন আবেদন করতে পারবেন।',
-                            ),
+                            content: KLocalizedText('আবেদন পাঠানো হয়েছে।'),
                           ),
                         );
                       }
                     } on Object catch (error) {
-                      if (context.mounted) {
-                        showFailureSnack(
-                          context,
-                          error,
-                          'কাজের সময় আপডেট করা যায়নি।',
-                        );
+                      if (dialogContext.mounted) {
+                        setDialogState(() {
+                          submitting = false;
+                          submitError = failureText(
+                            dialogContext,
+                            error,
+                            'আবেদন পাঠানো যায়নি। সময়টি যাচাই করুন।',
+                          );
+                        });
                       }
                     }
                   },
-                  icon: const Icon(Icons.playlist_add),
-                  label: const KLocalizedText('এই পোস্টের সময় যোগ করুন'),
-                ),
-              ),
-            ],
-            const SizedBox(height: KSpacing.md),
-            KTextField(
-              label: 'প্রস্তাবিত টাকা',
-              controller: amount,
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: KSpacing.sm),
-            KTextField(label: 'বার্তা (ঐচ্ছিক)', controller: message),
-          ],
-        ),
+            child: const KLocalizedText('আবেদন পাঠান'),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(dialogContext),
-          child: const KLocalizedText('ফিরুন'),
-        ),
-        FilledButton(
-          onPressed: job.isTimeUnavailable
-              ? null
-              : () async {
-                  final taka = int.tryParse(amount.text);
-                  if (taka == null || taka <= 0) return;
-                  try {
-                    await ref
-                        .read(jobsRepositoryProvider)
-                        .apply(
-                          jobId: job.id,
-                          startsAt: start,
-                          endsAt: end,
-                          proposedPricePoisha: taka * 100,
-                          message: message.text,
-                        );
-                    if (dialogContext.mounted) Navigator.pop(dialogContext);
-                    onApplied?.call();
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: KLocalizedText('আবেদন পাঠানো হয়েছে।'),
-                        ),
-                      );
-                    }
-                  } on Object catch (error) {
-                    if (context.mounted) {
-                      showFailureSnack(
-                        context,
-                        error,
-                        'আবেদন পাঠানো যায়নি। সময়টি যাচাই করুন।',
-                      );
-                    }
-                  }
-                },
-          child: const KLocalizedText('আবেদন পাঠান'),
+    ),
+  );
+}
+
+/// A refusal shown in place, read out by screen readers.
+class _InlineError extends StatelessWidget {
+  const _InlineError({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    liveRegion: true,
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(Icons.error_outline, color: KColors.danger, size: 20),
+        const SizedBox(width: KSpacing.xs),
+        Expanded(
+          child: Text(message, style: const TextStyle(color: KColors.danger)),
         ),
       ],
     ),
