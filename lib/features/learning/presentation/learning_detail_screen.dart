@@ -11,6 +11,7 @@ import '../../../core/widgets/k_localized_text.dart';
 import '../../../core/widgets/k_primary_button.dart';
 import '../../jobs/presentation/screens/jobs_screens.dart' show jobStatusLabel;
 import '../domain/learning_models.dart';
+import 'enrolment_screens.dart';
 import 'learning_providers.dart';
 import 'learning_widgets.dart';
 
@@ -161,12 +162,14 @@ class _Body extends ConsumerWidget {
         const SizedBox(height: KSpacing.sm),
         Text(item.description),
         const SizedBox(height: KSpacing.lg),
-        if (item.isMine)
+        if (item.isMine) ...[
           const KLocalizedText(
             'এটি আপনার প্রকাশ করা শেখার সুযোগ।',
             style: TextStyle(color: KColors.textSecondary),
-          )
-        else if (item.hasApplied)
+          ),
+          const SizedBox(height: KSpacing.md),
+          MentorApplicationsPanel(opportunityId: item.id),
+        ] else if (item.hasApplied)
           Card(
             key: const ValueKey('learning-applied'),
             color: KColors.success.withValues(alpha: .08),

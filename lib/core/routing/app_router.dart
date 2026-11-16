@@ -18,6 +18,7 @@ import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/jobs/presentation/screens/job_alerts_screen.dart';
 import '../../features/jobs/presentation/screens/job_detail_screen.dart';
 import '../../features/jobs/presentation/screens/jobs_screens.dart';
+import '../../features/learning/presentation/enrolment_screens.dart';
 import '../../features/learning/presentation/learning_detail_screen.dart';
 import '../../features/learning/presentation/publish_learning_screen.dart';
 import '../../features/mentor/presentation/mentor_screen.dart';
@@ -101,6 +102,8 @@ abstract final class AppRoutes {
   static const learningOpportunityPath = '/learn/opportunities/:id';
   static const publishLearning = '/learn/new';
   static String learningOpportunity(String id) => '/learn/opportunities/$id';
+  static const learningEnrolmentPath = '/learn/enrolments/:id';
+  static String learningEnrolment(String id) => '/learn/enrolments/$id';
 
   static String trainingCourse(String id) => '/training/courses/$id';
   static String trainingTest(String id) => '/training/courses/$id/test';
@@ -446,6 +449,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.learningOpportunityPath,
         builder: (context, state) =>
             LearningDetailScreen(opportunityId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.learningEnrolmentPath,
+        builder: (context, state) =>
+            EnrolmentScreen(enrolmentId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: AppRoutes.mentor,

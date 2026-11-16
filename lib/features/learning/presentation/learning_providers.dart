@@ -47,7 +47,7 @@ final myLearningOpportunitiesProvider =
       (ref) => ref.watch(learningRepositoryProvider).mine(),
     );
 
-/// Open learning opportunities in the skills on the person's profile, for
+/// Open learning opportunities in the skills on the persons profile, for
 /// the Home training card. Empty when they have no skills yet.
 final learningForMySkillsProvider =
     FutureProvider.autoDispose<List<LearningOpportunity>>((ref) async {
@@ -60,3 +60,18 @@ final learningForMySkillsProvider =
           .take(2)
           .toList(growable: false);
     });
+
+final learningApplicationsProvider = FutureProvider.autoDispose
+    .family<List<LearningApplication>, String>(
+      (ref, id) => ref.watch(learningRepositoryProvider).applications(id),
+    );
+
+final learningEnrolmentsProvider =
+    FutureProvider.autoDispose<List<LearningEnrolment>>(
+      (ref) => ref.watch(learningRepositoryProvider).enrolments(),
+    );
+
+final learningEnrolmentProvider = FutureProvider.autoDispose
+    .family<LearningEnrolment, String>(
+      (ref, id) => ref.watch(learningRepositoryProvider).enrolment(id),
+    );

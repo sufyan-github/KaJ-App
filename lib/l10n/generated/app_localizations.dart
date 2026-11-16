@@ -709,6 +709,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This is a way to learn, not a job.'**
   String get errorNotAWorkJob;
+
+  /// No description provided for @errorSeatsFull.
+  ///
+  /// In en, this message translates to:
+  /// **'All seats are taken.'**
+  String get errorSeatsFull;
+
+  /// No description provided for @errorSessionInFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'A session can only be recorded after it has happened.'**
+  String get errorSessionInFuture;
+
+  /// No description provided for @errorEnrolmentNotActive.
+  ///
+  /// In en, this message translates to:
+  /// **'This learning is no longer active.'**
+  String get errorEnrolmentNotActive;
+
+  /// No description provided for @errorNoConfirmedSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'The learner must confirm at least one session first.'**
+  String get errorNoConfirmedSessions;
 }
 
 class _AppLocalizationsDelegate

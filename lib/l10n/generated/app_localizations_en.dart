@@ -371,4 +371,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorNotAWorkJob => 'This is a way to learn, not a job.';
+
+  @override
+  String get errorSeatsFull => 'All seats are taken.';
+
+  @override
+  String get errorSessionInFuture =>
+      'A session can only be recorded after it has happened.';
+
+  @override
+  String get errorEnrolmentNotActive => 'This learning is no longer active.';
+
+  @override
+  String get errorNoConfirmedSessions =>
+      'The learner must confirm at least one session first.';
 }

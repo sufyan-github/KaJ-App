@@ -256,3 +256,228 @@ class LearningDraft {
     'flexibleHours': flexibleHours,
   };
 }
+
+/// Someone asking to join a mentors training or apprenticeship.
+class LearningApplication {
+  const LearningApplication({
+    required this.id,
+    required this.status,
+    required this.learnerName,
+    this.message,
+    this.appliedAt,
+    this.trustLevel,
+  });
+
+  factory LearningApplication.fromJson(Map<String, dynamic> json) {
+    final learner = json['learner'];
+    return LearningApplication(
+      id: json['id'] as String? ?? '',
+      status: json['status'] as String? ?? '',
+      message: json['message'] as String?,
+      appliedAt: DateTime.tryParse(json['appliedAt'] as String? ?? ''),
+      learnerName: learner is Map
+          ? learner['displayName'] as String? ?? ''
+          : '',
+      trustLevel: learner is Map ? learner['trustLevel'] as String? : null,
+    );
+  }
+
+  final DateTime? appliedAt;
+  final String id;
+  final String learnerName;
+  final String? message;
+  final String status;
+  final String? trustLevel;
+
+  bool get isPending => status == 'PENDING';
+}
+
+/// One learning session the mentor recorded.
+class LearningSession {
+  const LearningSession({
+    required this.id,
+    required this.heldAt,
+    required this.minutes,
+    required this.topic,
+    this.notes,
+    this.learnerConfirmedAt,
+  });
+
+  factory LearningSession.fromJson(Map<String, dynamic> json) =>
+      LearningSession(
+        id: json['id'] as String? ?? '',
+        heldAt:
+            DateTime.tryParse(json['heldAt'] as String? ?? '') ??
+            DateTime.now(),
+        minutes: (json['minutes'] as num?)?.toInt() ?? 0,
+        topic: json['topic'] as String? ?? '',
+        notes: json['notes'] as String?,
+        learnerConfirmedAt: DateTime.tryParse(
+          json['learnerConfirmedAt'] as String? ?? '',
+        ),
+      );
+
+  final DateTime heldAt;
+  final String id;
+  final DateTime? learnerConfirmedAt;
+  final int minutes;
+  final String? notes;
+  final String topic;
+
+  bool get confirmed => learnerConfirmedAt != null;
+}
+
+/// The practical certificate a mentor issues when the learning is done.
+class CompletionRecord {
+  const CompletionRecord({
+    required this.code,
+    required this.issuedAt,
+    required this.valid,
+    required this.verifyPath,
+  });
+
+  static CompletionRecord? maybe(Object? value) => value is Map
+      ? CompletionRecord(
+          code: value['code'] as String? ?? '',
+          issuedAt:
+              DateTime.tryParse(value['issuedAt'] as String? ?? '') ??
+              DateTime.now(),
+          valid: value['status'] != 'REVOKED',
+          verifyPath: value['verifyPath'] as String? ?? '',
+        )
+      : null;
+
+  final String code;
+  final DateTime issuedAt;
+  final bool valid;
+  final String verifyPath;
+}
+
+/// The terms the learner agreed to, frozen when the mentor accepted.
+class LearningContract {
+  const LearningContract({
+    required this.terms,
+    this.version,
+    this.feePoisha,
+    this.stipendPoisha,
+    this.startsAt,
+    this.endsAt,
+    this.flexibleHours = false,
+    this.deliveryEn = '',
+    this.deliveryBn = '',
+    this.acceptedAt,
+  });
+
+  static LearningContract? maybe(Object? value) {
+    if (value is! Map) return null;
+    final schedule = value['schedule'];
+    final delivery = value['deliveryMode'];
+    return LearningContract(
+      version: (value['version'] as num?)?.toInt(),
+      terms: ParticipantTerms.parse(value['terms']),
+      feePoisha: Money.tryParse(value['participantFeePoisha']),
+      stipendPoisha: Money.tryParse(value['stipendPoisha']),
+      startsAt: schedule is Map
+          ? DateTime.tryParse(schedule['startsAt'] as String? ?? '')
+          : null,
+      endsAt: schedule is Map
+          ? DateTime.tryParse(schedule['endsAt'] as String? ?? '')
+          : null,
+      flexibleHours: schedule is Map && schedule['flexibleHours'] == true,
+      deliveryEn: delivery is Map ? delivery['en'] as String? ?? '' : '',
+      deliveryBn: delivery is Map ? delivery['bn'] as String? ?? '' : '',
+      acceptedAt: DateTime.tryParse(value['acceptedAt'] as String? ?? ''),
+    );
+  }
+
+  final DateTime? acceptedAt;
+  final String deliveryBn;
+  final String deliveryEn;
+  final DateTime? endsAt;
+  final Money? feePoisha;
+  final bool flexibleHours;
+  final DateTime? startsAt;
+  final Money? stipendPoisha;
+  final ParticipantTerms terms;
+  final int? version;
+
+  String deliveryFor(String language) =>
+      language == 'en' && deliveryEn.isNotEmpty ? deliveryEn : deliveryBn;
+}
+
+/// A learner taken on by a mentor, seen from either side.
+class LearningEnrolment {
+  const LearningEnrolment({
+    required this.id,
+    required this.isMentor,
+    required this.status,
+    required this.opportunityId,
+    required this.title,
+    required this.kind,
+    required this.learnerName,
+    this.contract,
+    this.sessions = const [],
+    this.sessionsRecorded = 0,
+    this.sessionsConfirmed = 0,
+    this.minutesTotal = 0,
+    this.completion,
+  });
+
+  factory LearningEnrolment.fromJson(Map<String, dynamic> json) {
+    final opportunity = json['opportunity'];
+    final learner = json['learner'];
+    final progress = json['progress'];
+    int count(String key) =>
+        progress is Map ? (progress[key] as num?)?.toInt() ?? 0 : 0;
+    final sessions =
+        (json['sessions'] as List?)
+            ?.whereType<Map>()
+            .map((item) => LearningSession.fromJson(Map.from(item)))
+            .toList(growable: false) ??
+        const <LearningSession>[];
+    return LearningEnrolment(
+      id: json['id'] as String? ?? '',
+      isMentor: json['role'] == 'MENTOR',
+      status: json['status'] as String? ?? '',
+      opportunityId: opportunity is Map
+          ? opportunity['id'] as String? ?? ''
+          : '',
+      title: opportunity is Map ? opportunity['title'] as String? ?? '' : '',
+      kind: LearningKind.parse(
+        opportunity is Map ? opportunity['opportunityType'] : null,
+      ),
+      learnerName: learner is Map
+          ? learner['displayName'] as String? ?? ''
+          : '',
+      contract: LearningContract.maybe(json['contract']),
+      sessions: sessions,
+      sessionsRecorded: progress is Map
+          ? count('sessionsRecorded')
+          : sessions.length,
+      sessionsConfirmed: progress is Map
+          ? count('sessionsConfirmed')
+          : sessions.where((item) => item.confirmed).length,
+      minutesTotal: progress is Map
+          ? count('minutesTotal')
+          : sessions.fold(0, (sum, item) => sum + item.minutes),
+      completion: CompletionRecord.maybe(json['completionRecord']),
+    );
+  }
+
+  final CompletionRecord? completion;
+  final LearningContract? contract;
+  final String id;
+  final bool isMentor;
+  final LearningKind kind;
+  final String learnerName;
+  final int minutesTotal;
+  final String opportunityId;
+  final List<LearningSession> sessions;
+  final int sessionsConfirmed;
+  final int sessionsRecorded;
+  final String status;
+  final String title;
+
+  bool get isActive => status == 'CONFIRMED';
+  bool get isCompleted => status == 'COMPLETED' || completion != null;
+}

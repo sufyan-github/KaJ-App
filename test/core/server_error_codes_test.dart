@@ -42,6 +42,10 @@ void main() {
     'OWN_OPPORTUNITY',
     'LEARNING_TERMS_INVALID',
     'NOT_A_WORK_JOB',
+    'SEATS_FULL',
+    'SESSION_IN_FUTURE',
+    'ENROLMENT_NOT_ACTIVE',
+    'NO_CONFIRMED_SESSIONS',
   ];
 
   for (final language in ['en', 'bn']) {

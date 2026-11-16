@@ -8,6 +8,8 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/k_empty_state.dart';
 import '../../core/widgets/k_localized_text.dart';
 import '../jobs/presentation/screens/jobs_screens.dart';
+import '../learning/presentation/enrolment_screens.dart';
+import '../learning/presentation/learning_providers.dart';
 import '../training/data/training_repository.dart';
 import '../training/presentation/screens/training_catalog_screen.dart';
 import '../training/presentation/training_providers.dart';
@@ -78,7 +80,8 @@ class MyLearningSection extends ConsumerWidget {
     Future<void> refresh() async {
       ref
         ..invalidate(trainingCoursesProvider(CourseScope.mine))
-        ..invalidate(myCertificatesProvider);
+        ..invalidate(myCertificatesProvider)
+        ..invalidate(learningEnrolmentsProvider);
       await ref
           .read(trainingCoursesProvider(CourseScope.mine).future)
           .then<void>((_) {}, onError: (_) {});
@@ -109,6 +112,8 @@ class MyLearningSection extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: KSpacing.md),
+          // Learning with a mentor, as learner or mentor.
+          const MyEnrolmentsSection(),
           ...courses.when(
             loading: () => const [
               Padding(

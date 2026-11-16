@@ -72,10 +72,19 @@ class CertificateSummary {
     required this.isSafetyCritical,
     required this.verifyPath,
     this.skill,
+    this.isPractical = false,
+    this.title,
+    this.issuedByName,
   });
 
   factory CertificateSummary.fromJson(Map<String, dynamic> json) =>
       CertificateSummary(
+        isPractical: json['kind'] == 'PRACTICAL',
+        title: json['title'] as String?,
+        issuedByName: switch (json['issuedBy']) {
+          final Map issuer => issuer['displayName'] as String?,
+          _ => null,
+        },
         id: _string(json['id']),
         code: _string(json['code']),
         courseId: _string(json['courseId']),
@@ -111,8 +120,21 @@ class CertificateSummary {
 
   bool get isValid => status == CertificateStatus.valid;
 
-  String titleFor(String languageCode) =>
-      pickLanguage(languageCode, courseTitleEn, courseTitleBn);
+  /// A practical certificate a mentor issued after real sessions, as
+  /// opposed to a passed knowledge test (QUIZ).
+  final bool isPractical;
+
+  /// The learning title for practical certificates.
+  final String? title;
+
+  /// The mentor who issued a practical certificate.
+  final String? issuedByName;
+
+  String titleFor(String languageCode) {
+    final own = title?.trim() ?? '';
+    if (own.isNotEmpty) return own;
+    return pickLanguage(languageCode, courseTitleEn, courseTitleBn);
+  }
 }
 
 enum CourseRelevance { mySkill, general, other }

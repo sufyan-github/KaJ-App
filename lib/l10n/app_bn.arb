@@ -105,5 +105,9 @@
   "errorOpportunityClosed": "এই শেখার সুযোগে আর আবেদন নেওয়া হচ্ছে না।",
   "errorOwnOpportunity": "এটি আপনার প্রকাশ করা, তাই আবেদন করা যাবে না।",
   "errorLearningTermsInvalid": "শর্ত মিলিয়ে দেখুন: ফি শুধু \"ফি দিতে হবে\" হলে, ভাতা শুধু \"ভাতা পাবেন\" হলে।",
-  "errorNotAWorkJob": "এটি শেখার সুযোগ, চাকরি নয়।"
+  "errorNotAWorkJob": "এটি শেখার সুযোগ, চাকরি নয়।",
+  "errorSeatsFull": "সব আসন পূর্ণ হয়ে গেছে।",
+  "errorSessionInFuture": "সেশন হয়ে যাওয়ার পরই রেকর্ড করা যায়।",
+  "errorEnrolmentNotActive": "এই শেখা আর চালু নেই।",
+  "errorNoConfirmedSessions": "আগে শিক্ষার্থীকে অন্তত একটি সেশন নিশ্চিত করতে হবে।"
 }

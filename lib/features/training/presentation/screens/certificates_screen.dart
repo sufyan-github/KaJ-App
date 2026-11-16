@@ -62,6 +62,11 @@ class CertificatesScreen extends ConsumerWidget {
 
 String certificateShareText(BuildContext context, CertificateSummary item) {
   final title = item.titleFor(languageOf(context));
+  if (item.isPractical) {
+    return KaajLocalizations.isEnglish(context)
+        ? 'I completed practical learning in $title with a KAAJ mentor. Certificate code: ${item.code}'
+        : 'আমি KAAJ মেন্টরের সাথে $title হাতে-কলমে শিখেছি। সার্টিফিকেট কোড: ${item.code}';
+  }
   return KaajLocalizations.isEnglish(context)
       ? 'I passed the Kaaj knowledge test for $title. Certificate code: ${item.code}'
       : 'আমি $title কোর্সের Kaaj জ্ঞান পরীক্ষায় পাস করেছি। সার্টিফিকেট কোড: ${item.code}';
@@ -105,13 +110,25 @@ class CertificateCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: KSpacing.xs),
-            const KLocalizedText(knowledgeTestedWording),
-            Text(
-              english
-                  ? 'Issued $date · score $score%'
-                  : 'তারিখ $date · নম্বর $score%',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+            if (certificate.isPractical) ...[
+              const KLocalizedText('মেন্টরের যাচাই করা হাতে-কলমে শেখা'),
+              Text(
+                [
+                  date,
+                  if (certificate.issuedByName?.isNotEmpty ?? false)
+                    '${KaajLocalizations.text(context, 'মেন্টর')}: ${certificate.issuedByName}',
+                ].join(' · '),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ] else ...[
+              const KLocalizedText(knowledgeTestedWording),
+              Text(
+                english
+                    ? 'Issued $date · score $score%'
+                    : 'তারিখ $date · নম্বর $score%',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
             const SizedBox(height: KSpacing.xs),
             SelectableText(
               english

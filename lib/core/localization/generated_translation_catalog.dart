@@ -1239,4 +1239,41 @@ const generatedEnglishTranslations = <String, String>{
   // P1.6: Home training card.
   "আপনার দক্ষতায় মেন্টরের সাথে শেখা": "Learn with a mentor in your skills",
   "আরও শেখার সুযোগ": "More ways to learn",
+  // P1.3–P1.4: enrolments, sessions, practical certificates.
+  "শেখার অগ্রগতি": "Learning progress",
+  "আপনি মেন্টর": "You are the mentor",
+  "আপনি শিক্ষার্থী": "You are the learner",
+  "গ্রহণের সময় সম্মত শর্ত": "Terms agreed at acceptance",
+  "অগ্রগতি": "Progress",
+  "এখনো কোনো সেশন রেকর্ড করেননি।": "No sessions recorded yet.",
+  "মেন্টর সেশন রেকর্ড করলে এখানে দেখা যাবে।":
+      "Sessions show here once the mentor records them.",
+  "নিশ্চিত": "Confirmed",
+  "সেশন যোগ করুন": "Add a session",
+  "শেখা সম্পন্ন করুন ও সার্টিফিকেট দিন": "Complete and issue the certificate",
+  "সেশন নিশ্চিত করা যায়নি।": "Could not confirm the session.",
+  "শেখা সম্পন্ন করবেন?": "Mark the learning complete?",
+  "শিক্ষার্থী একটি অনুশীলনের সার্টিফিকেট পাবেন, যা আপনার নামে যাচাই করা যাবে। শিক্ষার্থী অন্তত একটি সেশন নিশ্চিত করার পরই এটি দেওয়া যায়।":
+      "The learner gets a practical certificate that can be checked under your name. It can be issued only after the learner confirmed at least one session.",
+  "সম্পন্ন করুন": "Complete",
+  "শেখা সম্পন্ন করা যায়নি।": "Could not complete the learning.",
+  "অনুশীলনের সার্টিফিকেট (মেন্টরের যাচাই)":
+      "Practical certificate (checked by the mentor)",
+  "সেশন রেকর্ড করা যায়নি।": "Could not record the session.",
+  "কী শেখানো হলো": "What was taught",
+  "কত মিনিট": "How many minutes",
+  "সঠিক মিনিট লিখুন।": "Enter a valid number of minutes.",
+  "নোট (ঐচ্ছিক)": "Notes (optional)",
+  "শেখার তালিকা লোড করা যায়নি।": "Could not load your learning.",
+  "মেন্টরের সাথে শেখা": "Learning with a mentor",
+  "শিক্ষার্থী নেওয়া হয়েছে। আমার কার্যক্রমে অগ্রগতি রাখুন।":
+      "Learner accepted. Keep track of progress in My activity.",
+  "সিদ্ধান্ত সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।":
+      "Could not save the decision. Try again.",
+  "আবেদনকারী শিক্ষার্থী": "Learners who applied",
+  "মেন্টরের যাচাই করা হাতে-কলমে শেখা": "Hands-on learning checked by a mentor",
+  "সেশন": "Sessions",
+  "মোট মিনিট": "Total minutes",
+  "শিক্ষার্থী": "Learner",
+  "কোড": "Code",
 };

@@ -105,5 +105,9 @@
   "errorOpportunityClosed": "This way to learn is no longer taking applications.",
   "errorOwnOpportunity": "You published this, so you cannot apply to it.",
   "errorLearningTermsInvalid": "Check the terms: a fee is only for \"you pay\", an allowance only for \"you receive\".",
-  "errorNotAWorkJob": "This is a way to learn, not a job."
+  "errorNotAWorkJob": "This is a way to learn, not a job.",
+  "errorSeatsFull": "All seats are taken.",
+  "errorSessionInFuture": "A session can only be recorded after it has happened.",
+  "errorEnrolmentNotActive": "This learning is no longer active.",
+  "errorNoConfirmedSessions": "The learner must confirm at least one session first."
 }

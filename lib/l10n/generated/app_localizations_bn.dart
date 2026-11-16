@@ -365,4 +365,17 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get errorNotAWorkJob => 'এটি শেখার সুযোগ, চাকরি নয়।';
+
+  @override
+  String get errorSeatsFull => 'সব আসন পূর্ণ হয়ে গেছে।';
+
+  @override
+  String get errorSessionInFuture => 'সেশন হয়ে যাওয়ার পরই রেকর্ড করা যায়।';
+
+  @override
+  String get errorEnrolmentNotActive => 'এই শেখা আর চালু নেই।';
+
+  @override
+  String get errorNoConfirmedSessions =>
+      'আগে শিক্ষার্থীকে অন্তত একটি সেশন নিশ্চিত করতে হবে।';
 }

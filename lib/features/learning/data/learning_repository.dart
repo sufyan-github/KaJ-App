@@ -87,6 +87,97 @@ class LearningRepository {
     );
   });
 
+  // ---- P1.3: applications, enrolments and sessions ----
+
+  Future<List<LearningApplication>> applications(String opportunityId) =>
+      _guard(() async {
+        final response = await _dio.get<Map<String, dynamic>>(
+          '/learning-opportunities/$opportunityId/applications',
+        );
+        final items = _data(response.data)['items'];
+        return items is List
+            ? items
+                  .whereType<Map>()
+                  .map(
+                    (item) => LearningApplication.fromJson(
+                      Map<String, dynamic>.from(item),
+                    ),
+                  )
+                  .toList(growable: false)
+            : const [];
+      });
+
+  Future<void> acceptApplication(String applicationId) => _guard(() async {
+    await _dio.post<Map<String, dynamic>>(
+      '/learning-applications/$applicationId/accept',
+    );
+  });
+
+  Future<void> declineApplication(String applicationId) => _guard(() async {
+    await _dio.post<Map<String, dynamic>>(
+      '/learning-applications/$applicationId/decline',
+    );
+  });
+
+  Future<List<LearningEnrolment>> enrolments() => _guard(() async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      '/learning-enrolments',
+    );
+    final items = _data(response.data)['items'];
+    return items is List
+        ? items
+              .whereType<Map>()
+              .map(
+                (item) =>
+                    LearningEnrolment.fromJson(Map<String, dynamic>.from(item)),
+              )
+              .toList(growable: false)
+        : const [];
+  });
+
+  Future<LearningEnrolment> enrolment(String id) => _guard(() async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      '/learning-enrolments/$id',
+    );
+    return LearningEnrolment.fromJson(_data(response.data));
+  });
+
+  Future<LearningEnrolment> recordSession(
+    String enrolmentId, {
+    required DateTime heldAt,
+    required int minutes,
+    required String topic,
+    String? notes,
+  }) => _guard(() async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/learning-enrolments/$enrolmentId/sessions',
+      data: {
+        'heldAt': heldAt.toUtc().toIso8601String(),
+        'minutes': minutes,
+        'topic': topic.trim(),
+        if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+      },
+    );
+    return LearningEnrolment.fromJson(_data(response.data));
+  });
+
+  Future<LearningEnrolment> confirmSession(String sessionId) =>
+      _guard(() async {
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/learning-sessions/$sessionId/confirm',
+        );
+        return LearningEnrolment.fromJson(_data(response.data));
+      });
+
+  /// P1.4: the mentor marks the learning complete and issues the practical
+  /// certificate.
+  Future<LearningEnrolment> complete(String enrolmentId) => _guard(() async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/learning-enrolments/$enrolmentId/complete',
+    );
+    return LearningEnrolment.fromJson(_data(response.data));
+  });
+
   Future<T> _guard<T>(Future<T> Function() work) async {
     try {
       return await work();
