@@ -18,6 +18,7 @@ import {
 import { CLOCK, Clock } from "../../common/time/clock";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { JobStateMachine } from "../jobs/state-machine/job-state.machine";
+import { WORK_ONLY } from "../jobs/opportunity";
 import { NotificationsService } from "../notifications/notifications.service";
 import {
   CreateReviewDto,
@@ -266,8 +267,13 @@ export class ReviewsService {
           userId,
           ReviewDirection.C2W,
         );
+        // Reliability is about paid work; learning doesn't count.
         const completed = await transaction.assignment.count({
-          where: { worker_user_id: userId, status: AssignmentStatus.COMPLETED },
+          where: {
+            worker_user_id: userId,
+            status: AssignmentStatus.COMPLETED,
+            job: WORK_ONLY,
+          },
         });
         // Only cancellations the worker caused and the policy penalised count.
         // Customer, emergency and early cancellations are outside their control.
@@ -277,6 +283,7 @@ export class ReviewsService {
             status: AssignmentStatus.CANCELLED,
             cancelled_by_user_id: userId,
             cancellation_penalised: true,
+            job: WORK_ONLY,
           },
         });
         const facts = {
@@ -386,6 +393,7 @@ export class ReviewsService {
         direction,
         is_visible: true,
         assignment: {
+          job: WORK_ONLY,
           reviews: {
             some: { direction: opposite(direction), is_visible: true },
           },

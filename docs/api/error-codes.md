@@ -77,3 +77,7 @@ the same fields plus `httpStatus`.
 | 409  | `MENTOR_ALREADY_APPROVED`    | `error.mentor.already_approved`    | You are already an approved mentor.                                | আপনি ইতিমধ্যে অনুমোদিত মেন্টর।                                     |
 | 400  | `USE_MENTOR_APPLICATION`     | `error.mentor.use_application`     | Apply to become a mentor with POST /me/mentor/application.         | মেন্টর হতে মেন্টর আবেদন ফর্ম ব্যবহার করুন।                         |
 | 400  | `REVIEW_SUBJECT_UNSUPPORTED` | `error.review.subject_unsupported` | Reviews of this kind are not available yet.                        | এই ধরনের রিভিউ এখনো চালু হয়নি।                                    |
+| 409  | `NOT_A_WORK_JOB`             | `error.job.not_work`               | This is a learning opportunity. Use the learning routes instead.   | এটি একটি শেখার সুযোগ। শেখার অংশ থেকে ব্যবহার করুন।                 |
+| 400  | `LEARNING_TERMS_INVALID`     | `error.learning.terms_invalid`     | The fee or stipend doesn't match the terms (`field` says which).   | শর্তের সাথে ফি বা ভাতা মিলছে না।                                   |
+| 409  | `OPPORTUNITY_CLOSED`         | `error.learning.closed`            | This opportunity is not taking applications.                       | এই সুযোগে এখন আবেদন নেওয়া হচ্ছে না।                               |
+| 409  | `OWN_OPPORTUNITY`            | `error.learning.own_opportunity`   | You can't apply to your own opportunity.                           | নিজের সুযোগে আবেদন করা যায় না।                                    |

@@ -108,6 +108,25 @@ export class HttpHarness {
     return { id: user.id, token };
   }
 
+  /** A fresh access token for an existing user with these roles. */
+  async tokenFor(userId: string, roles: RoleMode[]): Promise<Actor> {
+    const user = await this.db.user.findUniqueOrThrow({
+      where: { id: userId },
+    });
+    const token = await this.app.get(AuthTokenService).createAccessToken(
+      {
+        id: user.id,
+        phoneE164: user.phone_e164!,
+        status: UserStatus.ACTIVE,
+        roles,
+        activeRole: roles[0]!,
+        isAdmin: false,
+      },
+      randomUUID(),
+    );
+    return { id: userId, token };
+  }
+
   get(path: string, as?: Actor) {
     const call = request(this.app.getHttpServer()).get(`/api/v1/${path}`);
     return as ? call.auth(as.token, { type: "bearer" }) : call;

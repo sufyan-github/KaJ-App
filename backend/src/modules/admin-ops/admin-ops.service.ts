@@ -25,6 +25,7 @@ import {
 
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
 import { applyMentorDecision } from "../mentors/mentor-decision";
+import { isWork } from "../jobs/opportunity";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { STORAGE_PORT, StoragePort } from "../../infra/storage/storage.port";
 import { CLOCK, Clock } from "../../common/time/clock";
@@ -1436,7 +1437,7 @@ export class AdminOpsService {
           where: { id: assignment.job_id },
           data: { completed_at: now },
         });
-      if (jobStatus === JobStatus.COMPLETED)
+      if (jobStatus === JobStatus.COMPLETED && isWork(assignment.job))
         await this.payments?.ensureCashPending(transaction, assignment);
     } else if (cancelled && assignment.status !== AssignmentStatus.CANCELLED) {
       await transaction.assignment.update({

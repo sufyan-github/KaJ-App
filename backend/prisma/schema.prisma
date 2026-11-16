@@ -617,30 +617,31 @@ enum MessagePermission {
 }
 
 model WorkerProfile {
-  id                    String    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  user_id               String    @unique @db.Uuid
-  headline              String?
-  service_radius_km     Decimal?  @db.Decimal(6, 2)
-  hourly_rate_poisha    BigInt?
-  daily_rate_poisha     BigInt?
-  monthly_rate_poisha   BigInt?
-  experience_years      Int?
-  education             String?
-  transport_mode        String?
-  is_available_now      Boolean   @default(false)
-  accepts_urgent        Boolean   @default(false)
-  completed_jobs_count  Int       @default(0)
-  rating_avg            Decimal   @default(0) @db.Decimal(3, 2)
-  rating_count          Int       @default(0)
-  response_rate_bps     Int       @default(0)
-  completion_rate_bps   Int       @default(0)
-  cancellation_rate_bps Int       @default(0)
-  no_show_count         Int       @default(0)
-  reliability_score     Decimal   @default(0) @db.Decimal(5, 4)
-  last_active_at        DateTime?
-  created_at            DateTime  @default(now())
-  updated_at            DateTime  @updatedAt
-  user                  User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id                     String            @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id                String            @unique @db.Uuid
+  headline               String?
+  service_radius_km      Decimal?          @db.Decimal(6, 2)
+  hourly_rate_poisha     BigInt?
+  daily_rate_poisha      BigInt?
+  monthly_rate_poisha    BigInt?
+  experience_years       Int?
+  education              String?
+  transport_mode         String?
+  is_available_now       Boolean           @default(false)
+  accepts_urgent         Boolean           @default(false)
+  completed_jobs_count   Int               @default(0)
+  rating_avg             Decimal           @default(0) @db.Decimal(3, 2)
+  rating_count           Int               @default(0)
+  response_rate_bps      Int               @default(0)
+  completion_rate_bps    Int               @default(0)
+  cancellation_rate_bps  Int               @default(0)
+  no_show_count          Int               @default(0)
+  reliability_score      Decimal           @default(0) @db.Decimal(5, 4)
+  last_active_at         DateTime?
+  preferred_arrangements WorkArrangement[] @default([])
+  created_at             DateTime          @default(now())
+  updated_at             DateTime          @updatedAt
+  user                   User              @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([is_available_now, last_active_at])
   @@map("worker_profiles")
@@ -671,6 +672,7 @@ model BusinessProfile {
   verification_status VerificationStatus @default(NOT_SUBMITTED)
   contact_person      String
   employees_count     Int?
+  jobs                Job[]
   created_at          DateTime           @default(now())
   updated_at          DateTime           @updatedAt
   user                User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -822,6 +824,17 @@ model Job {
   views_count             Int                @default(0)
   is_featured             Boolean            @default(false)
   recurrence_rule         Json?
+  /// WORK = the paid-work marketplace (the default every work query uses).
+  /// TRAINING / APPRENTICESHIP = a learning opportunity by an approved mentor.
+  opportunity_type        OpportunityType    @default(WORK)
+  /// Required for learning opportunities, empty for WORK.
+  participant_terms       ParticipantTerms?
+  /// What the participant pays (PAID_BY_PARTICIPANT only).
+  participant_fee_poisha  BigInt?
+  training_course_id      String?            @db.Uuid
+  business_profile_id     String?            @db.Uuid
+  work_arrangement        WorkArrangement    @default(ON_SITE)
+  flexible_hours          Boolean            @default(false)
   parent_job_id           String?            @db.Uuid
   created_at              DateTime           @default(now())
   updated_at              DateTime           @updatedAt
@@ -830,6 +843,8 @@ model Job {
   category                Category           @relation("JobCategory", fields: [category_id], references: [id], onDelete: Restrict)
   subcategory             Category?          @relation("JobSubcategory", fields: [subcategory_id], references: [id], onDelete: Restrict)
   location                Location           @relation(fields: [location_id], references: [id], onDelete: Restrict)
+  training_course         TrainingCourse?    @relation(fields: [training_course_id], references: [id], onDelete: SetNull)
+  business_profile        BusinessProfile?   @relation(fields: [business_profile_id], references: [id], onDelete: SetNull)
   parent_job              Job?               @relation("RecurringJobs", fields: [parent_job_id], references: [id], onDelete: SetNull)
   child_jobs              Job[]              @relation("RecurringJobs")
   skills                  JobSkill[]
@@ -843,6 +858,9 @@ model Job {
   disputes                Dispute[]
   occurrences             JobOccurrence[]
 
+  @@index([opportunity_type, status, published_at(sort: Desc)])
+  @@index([training_course_id])
+  @@index([business_profile_id])
   @@index([status, published_at(sort: Desc)])
   @@index([category_id, status])
   @@index([location_id, status])
@@ -1796,6 +1814,7 @@ model TrainingCourse {
   is_published       Boolean               @default(false)
   version            Int                   @default(1)
   sort_order         Int                   @default(0)
+  jobs               Job[]
   created_at         DateTime              @default(now())
   updated_at         DateTime              @updatedAt
   skill              Skill?                @relation(fields: [skill_id], references: [id], onDelete: SetNull)

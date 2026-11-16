@@ -57,6 +57,7 @@ describe("JobsService slot confirmation", () => {
       agreed_price_poisha: 10000n,
       agreed_starts_at: new Date("2026-09-03T08:00:00Z"),
       agreed_ends_at: new Date("2026-09-03T10:00:00Z"),
+      job: { opportunity_type: "WORK" },
     });
     (availability.evaluate as jest.Mock).mockResolvedValue({
       isAvailable: true,
@@ -149,6 +150,7 @@ describe("JobsService confirmation deadline", () => {
           worker_user_id: "worker-id",
           status: "PENDING_CONFIRMATION",
           confirmation_deadline_at: new Date("2026-09-02T09:00:00Z"),
+          job: { opportunity_type: "WORK" },
         }),
       },
       $transaction: jest.fn((callback) => callback(transaction)),
@@ -251,6 +253,7 @@ describe("JobsService application identity gate", () => {
     id: "job-id",
     poster_user_id: "poster-id",
     title: "Test job",
+    opportunity_type: "WORK",
   };
   const input = {
     proposedPricePoisha: "10000",

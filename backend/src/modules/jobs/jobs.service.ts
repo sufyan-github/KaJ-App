@@ -61,6 +61,7 @@ import {
 import { EngagementService } from "../safety/engagement.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
+import { assertWork, isWork, WORK_ONLY } from "./opportunity";
 import { CursorQueryDto } from "../../common/api/cursor-query.dto";
 import { disputeEligibility } from "../disputes/dispute-eligibility";
 
@@ -177,6 +178,7 @@ export class JobsService {
 
   async publish(posterUserId: string, jobId: string) {
     const job = await this.ownedJob(posterUserId, jobId);
+    assertWork(job);
     if (job.status !== JobStatus.DRAFT) {
       throw new ConflictException("Only draft jobs can be published.");
     }
@@ -228,6 +230,7 @@ export class JobsService {
     const hidden = await this.blocks.hiddenFrom(userId);
     const jobs = await this.prisma.job.findMany({
       where: {
+        ...WORK_ONLY,
         status: JobStatus.APPLICATIONS_OPEN,
         deleted_at: null,
         poster_user_id: { notIn: [userId, ...hidden] },
@@ -309,7 +312,12 @@ export class JobsService {
 
   async suggestedWorkers(posterUserId: string, jobId: string) {
     const job = await this.prisma.job.findFirst({
-      where: { id: jobId, poster_user_id: posterUserId, deleted_at: null },
+      where: {
+        ...WORK_ONLY,
+        id: jobId,
+        poster_user_id: posterUserId,
+        deleted_at: null,
+      },
       include: { skills: true },
     });
     if (!job) throw new NotFoundException();
@@ -336,7 +344,8 @@ export class JobsService {
 
   async mine(posterUserId: string) {
     const jobs = await this.prisma.job.findMany({
-      where: { poster_user_id: posterUserId, deleted_at: null },
+      // Learning opportunities have their own list (/learning-opportunities/mine).
+      where: { ...WORK_ONLY, poster_user_id: posterUserId, deleted_at: null },
       include: jobInclude,
       orderBy: { created_at: "desc" },
       take: 100,
@@ -435,6 +444,7 @@ export class JobsService {
     ]);
     if (!job) throw new NotFoundException();
     if (!worker) throw new NotFoundException();
+    assertWork(job);
     if (job.poster_user_id === workerUserId) {
       throw new ForbiddenException(
         "A job poster cannot apply to their own job.",
@@ -626,6 +636,7 @@ export class JobsService {
     );
     if (assignment.worker_user_id !== workerUserId)
       throw new NotFoundException();
+    assertWork(assignment.job);
     if (assignment.status !== AssignmentStatus.CONFIRMED) {
       throw new ConflictException("Only confirmed work can be submitted.");
     }
@@ -692,6 +703,7 @@ export class JobsService {
     );
     if (assignment.job.poster_user_id !== posterUserId)
       throw new NotFoundException();
+    assertWork(assignment.job);
     return this.finishAssignment(
       assignmentId,
       JobActorType.POSTER,
@@ -705,6 +717,7 @@ export class JobsService {
     input: CancelAssignmentDto,
   ) {
     const assignment = await this.participantAssignment(userId, assignmentId);
+    assertWork(assignment.job);
     const actor = this.cancellationActor(userId, assignment);
     const policy = await this.cancellationPolicy();
     return calculateCancellation({
@@ -726,6 +739,7 @@ export class JobsService {
       throw new BadRequestException("Preview and confirm cancellation first.");
     }
     const assignment = await this.participantAssignment(userId, assignmentId);
+    assertWork(assignment.job);
     // Only live assignments can be cancelled. A DECLINED assignment belongs to
     // a job that has already reopened for other applicants.
     if (
@@ -856,6 +870,7 @@ export class JobsService {
     if (!application || application.job.poster_user_id !== posterUserId) {
       throw new NotFoundException();
     }
+    assertWork(application.job);
     if (application.status !== ApplicationStatus.PENDING) {
       throw new ConflictException("Application is no longer pending.");
     }
@@ -1065,10 +1080,12 @@ export class JobsService {
   async confirmAssignment(workerUserId: string, assignmentId: string) {
     const assignment = await this.prisma.assignment.findUnique({
       where: { id: assignmentId },
+      include: { job: { select: { opportunity_type: true } } },
     });
     if (!assignment || assignment.worker_user_id !== workerUserId) {
       throw new NotFoundException();
     }
+    assertWork(assignment.job);
     if (assignment.status !== AssignmentStatus.PENDING_CONFIRMATION) {
       throw new ConflictException(
         "Assignment is no longer awaiting confirmation.",
@@ -1207,10 +1224,12 @@ export class JobsService {
   async declineAssignment(workerUserId: string, assignmentId: string) {
     const assignment = await this.prisma.assignment.findUnique({
       where: { id: assignmentId },
+      include: { job: { select: { opportunity_type: true } } },
     });
     if (!assignment || assignment.worker_user_id !== workerUserId) {
       throw new NotFoundException();
     }
+    assertWork(assignment.job);
     if (assignment.status !== AssignmentStatus.PENDING_CONFIRMATION) {
       throw new ConflictException(
         "Assignment is no longer awaiting confirmation.",
@@ -1686,8 +1705,10 @@ async function createContractSnapshot(
   const version = (latestContract?.version ?? 0) + 1;
   const feeConfig = asRecord(feeSetting?.value_json);
   const feeBps = integerValue(feeConfig?.feeBps) ?? 800;
-  const platformFee =
-    (input.agreedPricePoisha * BigInt(feeBps) + 5_000n) / 10_000n;
+  // No platform fee on learning opportunities.
+  const platformFee = isWork(input.job)
+    ? (input.agreedPricePoisha * BigInt(feeBps) + 5_000n) / 10_000n
+    : 0n;
   const cancellationPolicy =
     cancellationSetting?.value_json ?? ({ tiers: [] } as Prisma.JsonObject);
   const identity = (id: string) => {

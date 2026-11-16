@@ -34,9 +34,12 @@ export class PolicyResourceResolver {
         case "job": {
           const job = await this.prisma.job.findFirst({
             where: { id, deleted_at: null },
-            select: { poster_user_id: true },
+            select: { poster_user_id: true, opportunity_type: true },
           });
-          if (job) context.jobPosterId = job.poster_user_id;
+          if (job) {
+            context.jobPosterId = job.poster_user_id;
+            context.opportunityType = job.opportunity_type;
+          }
           break;
         }
         case "application": {

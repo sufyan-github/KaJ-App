@@ -7,6 +7,8 @@ export interface PolicyResourceContext {
   assignedWorkerId?: string;
   conversationParticipantIds?: readonly string[];
   jobPosterId?: string;
+  /** The job's opportunity type (WORK, TRAINING, APPRENTICESHIP). */
+  opportunityType?: string;
 }
 
 @Injectable()
@@ -43,6 +45,13 @@ export class AbilityFactory {
         return actor !== undefined && resource?.jobPosterId === actor.sub;
       case "assigned-worker":
         return actor !== undefined && resource?.assignedWorkerId === actor.sub;
+      case "mentor-owner":
+        return (
+          actor !== undefined &&
+          resource?.jobPosterId === actor.sub &&
+          resource.opportunityType !== undefined &&
+          resource.opportunityType !== "WORK"
+        );
       case "conversation-participant":
         return (
           actor !== undefined &&

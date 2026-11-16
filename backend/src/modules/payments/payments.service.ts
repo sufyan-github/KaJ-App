@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { assertWork } from "../jobs/opportunity";
 
 import {
   ConflictException,
@@ -130,6 +131,7 @@ export class PaymentsService {
       });
       if (!assignment || assignment.job.poster_user_id !== posterUserId)
         throw new NotFoundException("Assignment not found.");
+      assertWork(assignment.job);
       if (assignment.status !== AssignmentStatus.COMPLETED)
         throw new ConflictException(
           "Complete the work before recording payment.",
@@ -216,6 +218,12 @@ export class PaymentsService {
       job: { poster_user_id: string };
     },
   ) {
+    // Payments (and the platform fee) exist only for paid work.
+    const job = await transaction.job.findUniqueOrThrow({
+      where: { id: assignment.job_id },
+      select: { opportunity_type: true },
+    });
+    assertWork(job);
     const existing = await transaction.payment.findUnique({
       where: { assignment_id: assignment.id },
     });

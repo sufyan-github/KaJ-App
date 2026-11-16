@@ -9,7 +9,8 @@ export type PolicyKind =
   | "admin"
   | "job-poster"
   | "assigned-worker"
-  | "conversation-participant";
+  | "conversation-participant"
+  | "mentor-owner";
 
 /** Which record a route parameter names, for ownership rules. */
 export type PolicyResourceSource =
@@ -50,6 +51,12 @@ export const Policies = {
     source: "assignment",
     param: options.param ?? "id",
   }),
+  /** The mentor who published the learning opportunity the route names. */
+  mentorOwner: (options: { param?: string } = {}): PolicyRule => ({
+    kind: "mentor-owner",
+    source: "job",
+    param: options.param ?? "id",
+  }),
   conversationParticipant: (options: { param?: string } = {}): PolicyRule => ({
     kind: "conversation-participant",
     source: "conversation",
@@ -68,6 +75,7 @@ export function containsPrivateResourcePolicy(
     (rule) =>
       rule.kind === "job-poster" ||
       rule.kind === "assigned-worker" ||
-      rule.kind === "conversation-participant",
+      rule.kind === "conversation-participant" ||
+      rule.kind === "mentor-owner",
   );
 }

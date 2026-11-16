@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { JobStatus, Prisma, RiskReviewStatus } from "@prisma/client";
+import { WORK_ONLY } from "../jobs/opportunity";
 
 import { CLOCK, Clock } from "../../common/time/clock";
 import { PrismaService } from "../../infra/prisma/prisma.service";
@@ -69,7 +70,7 @@ export class RiskService {
               },
             }),
             transaction.application.findMany({
-              where: { created_at: { gte: dayAgo } },
+              where: { created_at: { gte: dayAgo }, job: WORK_ONLY },
               select: { id: true, worker_user_id: true, created_at: true },
             }),
             transaction.review.findMany({
@@ -84,6 +85,7 @@ export class RiskService {
             }),
             transaction.job.findMany({
               where: {
+                ...WORK_ONLY,
                 budget_max_poisha: { not: null },
                 created_at: { gte: quarterAgo },
                 deleted_at: null,
