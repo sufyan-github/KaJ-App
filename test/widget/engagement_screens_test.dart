@@ -253,6 +253,12 @@ void main() {
               _assignment(status: 'PENDING_CONFIRMATION', worker: true),
             ],
           }),
+        )
+        ..on(
+          'GET /assignments/asg-1',
+          FakeResponse.data(
+            _assignment(status: 'PENDING_CONFIRMATION', worker: true),
+          ),
         );
       await pumpRouted(
         tester,
@@ -263,7 +269,8 @@ void main() {
       expect(find.text('Fix the kitchen tap'), findsOneWidget);
       await tester.tap(find.text('Fix the kitchen tap'));
       await tester.pumpAndSettle();
-      expect(find.text('route:/assignments/asg-1'), findsOneWidget);
+      expect(find.text('কাজের বিস্তারিত ও অগ্রগতি'), findsOneWidget);
+      expect(api.called('GET /assignments/asg-1'), hasLength(1));
     });
 
     Future<FakeApi> pumpDetail(

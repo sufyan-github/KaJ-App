@@ -10,6 +10,7 @@ import 'package:kaaj/features/auth/presentation/controllers/auth_providers.dart'
 import 'package:kaaj/features/help/presentation/help_centre_screen.dart';
 import 'package:kaaj/features/jobs/presentation/screens/job_alerts_screen.dart';
 import 'package:kaaj/features/jobs/presentation/screens/job_detail_screen.dart';
+import 'package:kaaj/features/jobs/presentation/screens/jobs_screens.dart';
 import 'package:kaaj/features/onboarding/data/onboarding_repository.dart';
 import 'package:kaaj/features/onboarding/domain/onboarding_state.dart';
 import 'package:kaaj/features/onboarding/presentation/controllers/onboarding_controller.dart';
@@ -110,6 +111,11 @@ List<RouteBase> testRoutes({Widget? home}) => [
     builder: (_, _) => const EditProfileScreen(),
   ),
   GoRoute(path: AppRoutes.help, builder: (_, _) => const HelpCentreScreen()),
+  GoRoute(
+    path: AppRoutes.assignmentDetailPath,
+    builder: (_, state) =>
+        AssignmentDetailScreen(assignmentId: state.pathParameters['id']!),
+  ),
   GoRoute(
     path: AppRoutes.editWorkerSkills,
     builder: (_, _) => const WorkerSkillsScreen(isEditing: true),

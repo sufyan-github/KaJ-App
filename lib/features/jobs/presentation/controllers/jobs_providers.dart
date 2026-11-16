@@ -76,17 +76,34 @@ final suggestedWorkersProvider =
           ref.watch(jobsRepositoryProvider).getSuggestedWorkers(jobId),
     );
 
-final assignmentsProvider = FutureProvider<List<AssignmentSummary>>(
+// Assignments change on the other person's phone (check-in, submit,
+// complete), so they are never kept once no screen shows them: opening the
+// list or a detail again always asks the server.
+final assignmentsProvider = FutureProvider.autoDispose<List<AssignmentSummary>>(
   (ref) => ref.watch(jobsRepositoryProvider).getAssignments(),
 );
 
-final assignmentDetailProvider =
-    FutureProvider.family<AssignmentDetail, String>(
+final assignmentDetailProvider = FutureProvider.autoDispose
+    .family<AssignmentDetail, String>(
       (ref, id) => ref.watch(jobsRepositoryProvider).getAssignment(id),
     );
 
-final assignmentReviewsProvider =
-    FutureProvider.family<AssignmentReviewState, String>(
+/// Re-reads one assignment (or all of them) from the server.
+void refreshAssignments(WidgetRef ref, [String? id]) {
+  ref.invalidate(assignmentsProvider);
+  if (id == null) {
+    ref
+      ..invalidate(assignmentDetailProvider)
+      ..invalidate(assignmentReviewsProvider);
+  } else {
+    ref
+      ..invalidate(assignmentDetailProvider(id))
+      ..invalidate(assignmentReviewsProvider(id));
+  }
+}
+
+final assignmentReviewsProvider = FutureProvider.autoDispose
+    .family<AssignmentReviewState, String>(
       (ref, id) => ref.watch(jobsRepositoryProvider).getAssignmentReviews(id),
     );
 

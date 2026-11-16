@@ -196,6 +196,7 @@ class AssignmentSummary {
     this.workerUserId,
     this.posterUserId,
     this.jobId,
+    this.canDispute,
   });
 
   factory AssignmentSummary.fromJson(Map<String, dynamic> json) =>
@@ -218,11 +219,25 @@ class AssignmentSummary {
         workerUserId: json['workerUserId'] as String?,
         posterUserId: json['posterUserId'] as String?,
         jobId: json['jobId'] as String?,
+        canDispute: json['canDispute'] is bool
+            ? json['canDispute'] as bool
+            : null,
       );
 
+  /// From the server when it says whether a dispute can be opened; null on
+  /// older servers, which fall back to the job-status rule.
+  final bool? canDispute;
   final DateTime? endsAt;
   final DateTime? completionDueAt;
   final DateTime? confirmationDeadlineAt;
+
+  /// What the list should say: once the booking is confirmed, the job's own
+  /// progress (in progress, in review, completed) is the news, not
+  /// "confirmed".
+  String get displayStatus =>
+      status == 'CONFIRMED' && (jobStatus?.isNotEmpty ?? false)
+      ? jobStatus!
+      : status;
   final String id;
   final bool isPoster;
   final bool isWorker;

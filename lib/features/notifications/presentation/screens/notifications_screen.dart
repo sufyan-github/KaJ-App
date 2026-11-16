@@ -11,6 +11,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_empty_state.dart';
 import '../../../../core/widgets/k_error_state.dart';
 import '../../../../core/widgets/k_localized_text.dart';
+import '../../../jobs/presentation/controllers/jobs_providers.dart';
 import '../../domain/app_notification.dart';
 import '../controllers/notifications_providers.dart';
 
@@ -382,6 +383,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
       return;
     }
     try {
+      // A notification about an assignment means it just changed: never
+      // open it from a cached copy.
+      if (item.route!.startsWith('/assignments')) refreshAssignments(ref);
       await context.push(item.route!);
     } on Object catch (error) {
       if (mounted) {

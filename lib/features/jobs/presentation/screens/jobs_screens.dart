@@ -1530,11 +1530,51 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
   }
 }
 
-class AssignmentsScreen extends ConsumerWidget {
+/// Re-reads assignments when the app comes back to the foreground: the other
+/// person may have checked in, submitted or completed in the meantime.
+mixin _RefreshOnResume<T extends ConsumerStatefulWidget>
+    on ConsumerState<T>, WidgetsBindingObserver {
+  void refreshFromServer();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) refreshFromServer();
+  }
+}
+
+class AssignmentsScreen extends ConsumerStatefulWidget {
   const AssignmentsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AssignmentsScreen> createState() => _AssignmentsScreenState();
+}
+
+class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen>
+    with WidgetsBindingObserver, _RefreshOnResume<AssignmentsScreen> {
+  @override
+  void refreshFromServer() => ref.invalidate(assignmentsProvider);
+
+  Future<void> _pullToRefresh() async {
+    refreshFromServer();
+    await ref
+        .read(assignmentsProvider.future)
+        .catchError((_) => const <AssignmentSummary>[]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final assignments = ref.watch(assignmentsProvider);
     return Scaffold(
       appBar: AppBar(title: const KLocalizedText('বুকিং ও কাজের অবস্থা')),
@@ -1543,69 +1583,110 @@ class AssignmentsScreen extends ConsumerWidget {
         error: (error, _) => _Retry(
           error: error,
           label: 'বুকিং লোড করা যায়নি।',
-          onRetry: () => ref.invalidate(assignmentsProvider),
+          onRetry: refreshFromServer,
         ),
-        data: (items) => items.isEmpty
-            ? const Center(
-                child: KLocalizedText('এখনো কোনো বুকিং বা নির্বাচিত কাজ নেই।'),
-              )
-            : ListView.separated(
-                padding: const EdgeInsets.all(KSpacing.md),
-                itemCount: items.length,
-                separatorBuilder: (_, _) => const SizedBox(height: KSpacing.sm),
-                itemBuilder: (context, index) {
-                  final item = items[index];
-                  return Card(
-                    child: ListTile(
-                      onTap: () =>
-                          context.push(AppRoutes.assignmentDetail(item.id)),
-                      leading: Icon(
-                        item.status == 'CONFIRMED'
-                            ? Icons.event_available
-                            : Icons.pending_actions,
-                        color: KColors.primary,
+        data: (items) => RefreshIndicator(
+          onRefresh: _pullToRefresh,
+          child: items.isEmpty
+              ? ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: const [
+                    SizedBox(height: 240),
+                    Center(
+                      child: KLocalizedText(
+                        'এখনো কোনো বুকিং বা নির্বাচিত কাজ নেই।',
                       ),
-                      title: Text(item.title),
-                      subtitle: KLocalizedText(
-                        '${item.startsAt == null ? '' : _dateTime(item.startsAt!)}\n${_statusBn(item.status)}',
-                      ),
-                      isThreeLine: true,
-                      trailing:
-                          item.isWorker && item.status == 'PENDING_CONFIRMATION'
-                          ? const Icon(Icons.chevron_right)
-                          : const Icon(Icons.chevron_right),
                     ),
-                  );
-                },
-              ),
+                  ],
+                )
+              : ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(KSpacing.md),
+                  itemCount: items.length,
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: KSpacing.sm),
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    return Card(
+                      child: ListTile(
+                        onTap: () async {
+                          await context.push(
+                            AppRoutes.assignmentDetail(item.id),
+                          );
+                          // Whatever happened on the detail shows here too.
+                          if (mounted) refreshFromServer();
+                        },
+                        leading: Icon(
+                          item.status == 'CONFIRMED'
+                              ? Icons.event_available
+                              : Icons.pending_actions,
+                          color: KColors.primary,
+                        ),
+                        title: Text(item.title),
+                        // Date and status are localized separately: one
+                        // interpolated line is not in the catalog.
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (item.startsAt != null)
+                              Text(KFormat.dateTime(context, item.startsAt!)),
+                            KLocalizedText(_statusBn(item.displayStatus)),
+                          ],
+                        ),
+                        isThreeLine: true,
+                        trailing: const Icon(Icons.chevron_right),
+                      ),
+                    );
+                  },
+                ),
+        ),
       ),
     );
   }
 }
 
-class AssignmentDetailScreen extends ConsumerWidget {
+class AssignmentDetailScreen extends ConsumerStatefulWidget {
   const AssignmentDetailScreen({required this.assignmentId, super.key});
   final String assignmentId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final detail = ref.watch(assignmentDetailProvider(assignmentId));
+  ConsumerState<AssignmentDetailScreen> createState() =>
+      _AssignmentDetailScreenState();
+}
+
+class _AssignmentDetailScreenState extends ConsumerState<AssignmentDetailScreen>
+    with WidgetsBindingObserver, _RefreshOnResume<AssignmentDetailScreen> {
+  @override
+  void refreshFromServer() => refreshAssignments(ref, widget.assignmentId);
+
+  Future<void> _pullToRefresh() async {
+    refreshFromServer();
+    await ref
+        .read(assignmentDetailProvider(widget.assignmentId).future)
+        .then<void>((_) {}, onError: (_) {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final detail = ref.watch(assignmentDetailProvider(widget.assignmentId));
     return Scaffold(
       appBar: AppBar(title: const KLocalizedText('কাজের বিস্তারিত ও অগ্রগতি')),
       body: detail.when(
+        // Keep showing the last answer while a refresh is in flight.
+        skipLoadingOnRefresh: true,
+        skipLoadingOnReload: true,
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => _Retry(
           error: error,
           label: 'কাজের বিস্তারিত লোড করা যায়নি।',
-          onRetry: () => ref.invalidate(assignmentDetailProvider(assignmentId)),
+          onRetry: refreshFromServer,
         ),
-        data: (item) => _AssignmentDetailBody(
-          detail: item,
-          onChanged: () {
-            ref
-              ..invalidate(assignmentDetailProvider(assignmentId))
-              ..invalidate(assignmentsProvider);
-          },
+        data: (item) => RefreshIndicator(
+          onRefresh: _pullToRefresh,
+          child: _AssignmentDetailBody(
+            detail: item,
+            onChanged: refreshFromServer,
+          ),
         ),
       ),
     );
@@ -1624,12 +1705,20 @@ class _AssignmentDetailBody extends ConsumerWidget {
         ? ref.watch(assignmentReviewsProvider(item.id))
         : null;
     return ListView(
+      // Pull-to-refresh works even when the content is short.
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(KSpacing.lg),
       children: [
         Text(item.title, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: KSpacing.xs),
-        KLocalizedText(
-          '${detail.locationName} · ${_statusBn(item.jobStatus ?? item.status)}',
+        Text(
+          [
+            if (detail.locationName.isNotEmpty) detail.locationName,
+            KaajLocalizations.text(
+              context,
+              _statusBn(item.jobStatus ?? item.status),
+            ),
+          ].join(' · '),
         ),
         const SizedBox(height: KSpacing.md),
         Text(detail.description),
@@ -1663,10 +1752,17 @@ class _AssignmentDetailBody extends ConsumerWidget {
             }.contains(item.jobStatus)) ...[
           const SizedBox(height: KSpacing.sm),
           OutlinedButton.icon(
-            onPressed: () => context.push(
-              AppRoutes.attendance(item.id),
-              extra: AttendanceArgs(title: item.title, isPoster: item.isPoster),
-            ),
+            onPressed: () async {
+              await context.push(
+                AppRoutes.attendance(item.id),
+                extra: AttendanceArgs(
+                  title: item.title,
+                  isPoster: item.isPoster,
+                ),
+              );
+              // Check-in and check-out change the job; show it on return.
+              onChanged();
+            },
             icon: const Icon(Icons.location_on_outlined),
             label: KLocalizedText(
               item.isWorker ? 'চেক-ইন / চেক-আউট' : 'উপস্থিতি দেখুন',
@@ -1773,15 +1869,21 @@ class _AssignmentDetailBody extends ConsumerWidget {
             label: const KLocalizedText('কাজটি বাতিল করুন'),
           ),
         ],
-        if ({
-          'SUBMITTED',
-          'CUSTOMER_REVIEW',
-          'COMPLETED',
-          'PAYMENT_RECORDED',
-        }.contains(item.jobStatus)) ...[
+        // The server decides when a dispute is allowed; older servers do
+        // not say, so the job-status rule stays as the fallback.
+        if (item.canDispute ??
+            {
+              'SUBMITTED',
+              'CUSTOMER_REVIEW',
+              'COMPLETED',
+              'PAYMENT_RECORDED',
+            }.contains(item.jobStatus)) ...[
           const SizedBox(height: KSpacing.sm),
           OutlinedButton.icon(
-            onPressed: () => context.push(AppRoutes.openDispute(item.id)),
+            onPressed: () async {
+              await context.push(AppRoutes.openDispute(item.id));
+              onChanged();
+            },
             icon: const Icon(Icons.gavel_outlined),
             label: const KLocalizedText('বিরোধ খুলুন'),
           ),
