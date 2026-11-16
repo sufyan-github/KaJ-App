@@ -178,6 +178,17 @@ class TrustSafetyRepository {
         );
       });
 
+  /// The poster confirms the work ended when the worker cannot check out
+  /// (no site pin, no signal, phone lost). The job moves to customer review.
+  Future<void> checkoutOverride(String assignmentId, String reason) async =>
+      _guard(() async {
+        await _dio.post<Map<String, dynamic>>(
+          '/assignments/$assignmentId/checkout-override',
+          options: Options(headers: {'idempotency-key': const Uuid().v4()}),
+          data: {'reason': reason.trim()},
+        );
+      });
+
   Future<List<DisputeSummary>> disputes() async => _guard(() async {
     final response = await _dio.get<Map<String, dynamic>>('/disputes');
     return _items(response.data).map(DisputeSummary.fromJson).toList();

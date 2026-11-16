@@ -9,6 +9,7 @@ import '../../../core/permissions/permission_gateway.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/k_localized_text.dart';
 import '../../../core/widgets/k_primary_button.dart';
+import '../../jobs/presentation/controllers/jobs_providers.dart';
 import '../domain/trust_models.dart';
 import 'trust_safety_providers.dart';
 
@@ -65,6 +66,16 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
   Widget _body(AttendanceState state) {
     final checkedIn = state.checkinAt != null;
     final checkedOut = state.checkoutAt != null;
+    // The assignment says who is opening this screen; the route argument is
+    // only a hint (a cold deep link has none).
+    final isPoster =
+        ref
+            .watch(assignmentDetailProvider(widget.assignmentId))
+            .valueOrNull
+            ?.summary
+            .isPoster ??
+        widget.isPoster;
+    if (isPoster) return _posterBody(state, checkedIn, checkedOut);
     return ListView(
       padding: const EdgeInsets.all(KSpacing.lg),
       children: [
@@ -131,14 +142,6 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
             ),
           ),
         const SizedBox(height: KSpacing.sm),
-        OutlinedButton.icon(
-          onPressed: widget.isPoster && !checkedIn ? _override : null,
-          icon: const Icon(Icons.fact_check_outlined),
-          label: const KLocalizedText(
-            'লোকেশন ব্যর্থ হলে উপস্থিতি নিশ্চিত করুন',
-          ),
-        ),
-        const SizedBox(height: KSpacing.sm),
         KLocalizedText(
           'ইন্টারনেট ছাড়া উপস্থিতি জমা হয় না। দূরত্ব ও সময় সার্ভার যাচাই করে; ফোনের দেখানো সময় চূড়ান্ত নয়।',
           style: Theme.of(
@@ -148,6 +151,54 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
       ],
     );
   }
+
+  /// The poster never checks in or out: the worker does that on their own
+  /// phone. The poster can confirm the start or the end when location fails
+  /// or the job has no site pin.
+  Widget _posterBody(
+    AttendanceState state,
+    bool checkedIn,
+    bool checkedOut,
+  ) => ListView(
+    padding: const EdgeInsets.all(KSpacing.lg),
+    children: [
+      Text(
+        widget.title ?? KaajLocalizations.text(context, 'কাজের উপস্থিতি'),
+        style: Theme.of(context).textTheme.headlineSmall,
+      ),
+      const SizedBox(height: KSpacing.md),
+      _StatusCard(state: state),
+      const SizedBox(height: KSpacing.md),
+      const KLocalizedText(
+        'কর্মী নিজের ফোন থেকে চেক-ইন ও চেক-আউট করবেন। লোকেশন কাজ না করলে বা কাজের জায়গা পিন করা না থাকলে আপনি এখানে নিশ্চিত করতে পারবেন।',
+      ),
+      const SizedBox(height: KSpacing.md),
+      if (!checkedIn)
+        OutlinedButton.icon(
+          key: const ValueKey('attendance-confirm-start'),
+          onPressed: () => _override(checkout: false),
+          icon: const Icon(Icons.fact_check_outlined),
+          label: const KLocalizedText(
+            'লোকেশন ব্যর্থ হলে উপস্থিতি নিশ্চিত করুন',
+          ),
+        )
+      else if (!checkedOut)
+        FilledButton.icon(
+          key: const ValueKey('attendance-confirm-end'),
+          onPressed: () => _override(checkout: true),
+          icon: const Icon(Icons.task_alt),
+          label: const KLocalizedText('কাজ শেষ হয়েছে নিশ্চিত করুন'),
+        )
+      else
+        Card(
+          color: KColors.success.withValues(alpha: .08),
+          child: const ListTile(
+            leading: Icon(Icons.task_alt, color: KColors.success),
+            title: KLocalizedText('উপস্থিতি সম্পন্ন'),
+          ),
+        ),
+    ],
+  );
 
   Future<void> _confirmCheckout(AttendanceState state) async {
     final notes = TextEditingController();
@@ -240,12 +291,16 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     }
   }
 
-  Future<void> _override() async {
+  Future<void> _override({required bool checkout}) async {
     final controller = TextEditingController();
     final accepted = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const KLocalizedText('কর্মীর উপস্থিতি নিশ্চিত করুন'),
+        title: KLocalizedText(
+          checkout
+              ? 'কাজ শেষ হয়েছে নিশ্চিত করুন'
+              : 'কর্মীর উপস্থিতি নিশ্চিত করুন',
+        ),
         content: TextField(
           controller: controller,
           minLines: 2,
@@ -275,11 +330,23 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     );
     if (accepted != true || controller.text.trim().length < 10) return;
     try {
-      await ref
-          .read(trustSafetyRepositoryProvider)
-          .attendanceOverride(widget.assignmentId, controller.text);
+      final repository = ref.read(trustSafetyRepositoryProvider);
+      if (checkout) {
+        await repository.checkoutOverride(widget.assignmentId, controller.text);
+      } else {
+        await repository.attendanceOverride(
+          widget.assignmentId,
+          controller.text,
+        );
+      }
       ref.invalidate(attendanceProvider(widget.assignmentId));
-      if (mounted) _snack('উপস্থিতি নিশ্চিত করা হয়েছে।');
+      if (mounted) {
+        _snack(
+          checkout
+              ? 'কাজ শেষ নিশ্চিত হয়েছে। এখন কাজটি পর্যালোচনা করে সম্পন্ন করুন।'
+              : 'উপস্থিতি নিশ্চিত করা হয়েছে।',
+        );
+      }
     } on Object catch (error) {
       if (mounted) _snack(_message(error));
     }

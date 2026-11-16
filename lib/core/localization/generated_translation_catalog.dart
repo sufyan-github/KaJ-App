@@ -1090,4 +1090,11 @@ const generatedEnglishTranslations = <String, String>{
   "বেছে নেওয়া এলাকা": "Chosen area",
   "এখনো বেছে নেওয়া হয়নি": "Not chosen yet",
   "বদলান": "Change",
+  "পিন না করলে কর্মীর পৌঁছানো ও কাজ শেষ হওয়া আপনাকেই \"উপস্থিতি\" থেকে নিশ্চিত করতে হবে। কাজের জায়গায় থাকলে এখনই পিন করুন।":
+      "Without a pin you will confirm the worker's arrival and the end of the work yourself, from Attendance. Pin the site now if you are there.",
+  "কর্মী নিজের ফোন থেকে চেক-ইন ও চেক-আউট করবেন। লোকেশন কাজ না করলে বা কাজের জায়গা পিন করা না থাকলে আপনি এখানে নিশ্চিত করতে পারবেন।":
+      "The worker checks in and out on their own phone. If location fails or the site was not pinned, you can confirm it here.",
+  "কাজ শেষ হয়েছে নিশ্চিত করুন": "Confirm the work has ended",
+  "কাজ শেষ নিশ্চিত হয়েছে। এখন কাজটি পর্যালোচনা করে সম্পন্ন করুন।":
+      "The end of the work is confirmed. Now review the job and mark it complete.",
 };

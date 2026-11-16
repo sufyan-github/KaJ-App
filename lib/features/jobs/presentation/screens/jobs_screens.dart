@@ -1037,8 +1037,12 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
                       ? 'কাজের জায়গা পিন করুন'
                       : 'কাজের জায়গা পিন করা হয়েছে',
                 ),
-                subtitle: const KLocalizedText(
-                  'কর্মী এই জায়গায় পৌঁছে চেক-ইন করবেন। এখন কাজের জায়গায় থাকলে তবেই পিন করুন।',
+                subtitle: KLocalizedText(
+                  _site == null
+                      // Without a pin nothing can measure the arrival of the
+                      // worker, so the poster confirms start and end.
+                      ? 'পিন না করলে কর্মীর পৌঁছানো ও কাজ শেষ হওয়া আপনাকেই "উপস্থিতি" থেকে নিশ্চিত করতে হবে। কাজের জায়গায় থাকলে এখনই পিন করুন।'
+                      : 'কর্মী এই জায়গায় পৌঁছে চেক-ইন করবেন। এখন কাজের জায়গায় থাকলে তবেই পিন করুন।',
                 ),
                 trailing: _pinning
                     ? const SizedBox.square(
