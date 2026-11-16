@@ -39,7 +39,7 @@ export class AttendanceController {
 
   @Post("assignments/:id/checkin")
   @Roles(RoleMode.WORKER)
-  @Policy(Policies.authenticated())
+  @Policy(Policies.assignedWorker())
   checkIn(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("id", new ParseUUIDPipe()) id: string,
@@ -56,7 +56,7 @@ export class AttendanceController {
 
   @Post("assignments/:id/checkout")
   @Roles(RoleMode.WORKER)
-  @Policy(Policies.authenticated())
+  @Policy(Policies.assignedWorker())
   checkOut(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("id", new ParseUUIDPipe()) id: string,
@@ -73,7 +73,7 @@ export class AttendanceController {
 
   @Post("assignments/:id/checkin-override")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
-  @Policy(Policies.authenticated())
+  @Policy(Policies.jobPoster({ source: "assignment" }))
   override(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("id", new ParseUUIDPipe()) id: string,
@@ -91,7 +91,7 @@ export class AttendanceController {
   /** The poster records the end of the work when the worker can't check out. */
   @Post("assignments/:id/checkout-override")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
-  @Policy(Policies.authenticated())
+  @Policy(Policies.jobPoster({ source: "assignment" }))
   checkoutOverride(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("id", new ParseUUIDPipe()) id: string,

@@ -51,7 +51,7 @@ export class JobsController {
 
   @Post("jobs/:id/publish")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
-  @Policy(Policies.authenticated())
+  @Policy(Policies.jobPoster())
   @SubscriptionFeature(SubscriptionFeatures.jobPosting)
   publish(
     @CurrentUser() claims: AccessTokenClaims,
@@ -134,7 +134,7 @@ export class JobsController {
 
   @Get("jobs/:id/suggested-workers")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
-  @Policy(Policies.authenticated())
+  @Policy(Policies.jobPoster())
   @SubscriptionFeature(SubscriptionFeatures.workerDiscovery)
   suggestedWorkers(
     @CurrentUser() claims: AccessTokenClaims,
@@ -157,7 +157,7 @@ export class JobsController {
 
   @Get("jobs/:id/applications")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
-  @Policy(Policies.authenticated())
+  @Policy(Policies.jobPoster())
   applications(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("id", new ParseUUIDPipe()) id: string,
@@ -173,7 +173,7 @@ export class JobsController {
 
   @Post("applications/:id/accept")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
-  @Policy(Policies.authenticated())
+  @Policy(Policies.jobPoster({ source: "application" }))
   @SubscriptionFeature(SubscriptionFeatures.workerHiring)
   accept(
     @CurrentUser() claims: AccessTokenClaims,
@@ -197,7 +197,7 @@ export class JobsController {
 
   @Post("assignments/:id/confirm")
   @Roles(RoleMode.WORKER)
-  @Policy(Policies.authenticated())
+  @Policy(Policies.assignedWorker())
   confirm(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("id", new ParseUUIDPipe()) id: string,
@@ -236,7 +236,7 @@ export class JobsController {
 
   @Post("assignments/:id/complete")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
-  @Policy(Policies.authenticated())
+  @Policy(Policies.jobPoster({ source: "assignment" }))
   complete(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("id", new ParseUUIDPipe()) id: string,

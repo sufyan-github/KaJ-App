@@ -49,7 +49,7 @@ export class ChatController {
   }
 
   @Get("conversations/:id/messages")
-  @Policy(Policies.authenticated())
+  @Policy(Policies.conversationParticipant())
   messages(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("id", new ParseUUIDPipe()) id: string,
@@ -59,7 +59,7 @@ export class ChatController {
   }
 
   @Post("conversations/:id/messages")
-  @Policy(Policies.authenticated())
+  @Policy(Policies.conversationParticipant())
   send(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("id", new ParseUUIDPipe()) id: string,
@@ -69,7 +69,7 @@ export class ChatController {
   }
 
   @Post("conversations/:id/read")
-  @Policy(Policies.authenticated())
+  @Policy(Policies.conversationParticipant())
   read(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("id", new ParseUUIDPipe()) id: string,

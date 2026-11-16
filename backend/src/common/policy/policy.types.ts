@@ -11,9 +11,22 @@ export type PolicyKind =
   | "assigned-worker"
   | "conversation-participant";
 
+/** Which record a route parameter names, for ownership rules. */
+export type PolicyResourceSource =
+  "job" | "assignment" | "application" | "conversation";
+
 export interface PolicyRule {
   kind: PolicyKind;
   role?: RoleMode;
+  /** For ownership rules: the record the route param identifies. */
+  source?: PolicyResourceSource;
+  /** The route parameter holding that record's id (default "id"). */
+  param?: string;
+}
+
+interface ResourceOptions {
+  source?: PolicyResourceSource;
+  param?: string;
 }
 
 export interface PolicyDefinition {
@@ -25,10 +38,22 @@ export const Policies = {
   authenticated: (): PolicyRule => ({ kind: "authenticated" }),
   role: (role: RoleMode): PolicyRule => ({ kind: "role", role }),
   admin: (): PolicyRule => ({ kind: "admin" }),
-  jobPoster: (): PolicyRule => ({ kind: "job-poster" }),
-  assignedWorker: (): PolicyRule => ({ kind: "assigned-worker" }),
-  conversationParticipant: (): PolicyRule => ({
+  /** The poster of the job the route names (job, or via assignment/application). */
+  jobPoster: (options: ResourceOptions = {}): PolicyRule => ({
+    kind: "job-poster",
+    source: options.source ?? "job",
+    param: options.param ?? "id",
+  }),
+  /** The worker of the assignment the route names. */
+  assignedWorker: (options: { param?: string } = {}): PolicyRule => ({
+    kind: "assigned-worker",
+    source: "assignment",
+    param: options.param ?? "id",
+  }),
+  conversationParticipant: (options: { param?: string } = {}): PolicyRule => ({
     kind: "conversation-participant",
+    source: "conversation",
+    param: options.param ?? "id",
   }),
 } as const;
 

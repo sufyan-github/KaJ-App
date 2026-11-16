@@ -57,13 +57,13 @@ export function roleRequiredError(requiredRole: RoleMode): KajHttpException {
   );
 }
 
+/**
+ * Same envelope as any other 404 (NOT_FOUND), so moving an ownership check
+ * from a service into a route policy changes nothing the app sees.
+ */
 export function privateResourceNotFoundError(): KajHttpException {
   return new KajHttpException(
-    descriptor(
-      "RESOURCE_NOT_FOUND",
-      "error.common.not_found",
-      "Resource not found.",
-    ),
+    descriptor("NOT_FOUND", "error.common.not_found", "Resource not found."),
     HttpStatus.NOT_FOUND,
   );
 }

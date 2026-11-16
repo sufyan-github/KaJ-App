@@ -26,6 +26,7 @@ import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
 import { ResponseInterceptor } from "./common/interceptors/response.interceptor";
 import { AbilityFactory } from "./common/policy/ability.factory";
 import { PolicyGuard } from "./common/policy/policy.guard";
+import { PolicyResourceResolver } from "./common/policy/policy-resource.resolver";
 import { TimeModule } from "./common/time/time.module";
 import { validateEnvironment } from "./config/environment";
 import { createLoggerConfig } from "./config/logger.config";
@@ -94,6 +95,7 @@ import { SafetyModule } from "./modules/safety/safety.module";
   ],
   providers: [
     AbilityFactory,
+    PolicyResourceResolver,
     RequestContextMiddleware,
     RequestContextStorage,
     PrismaAccountModerationReader,

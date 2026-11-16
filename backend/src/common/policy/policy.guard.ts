@@ -1,4 +1,10 @@
-import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  Optional,
+} from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 
 import {
@@ -8,6 +14,7 @@ import {
 } from "../errors/authorization.errors";
 import { AuthenticatedRequest } from "../guards/jwt.guard";
 import { AbilityFactory, PolicyResourceContext } from "./ability.factory";
+import { PolicyResourceResolver } from "./policy-resource.resolver";
 import {
   containsPrivateResourcePolicy,
   POLICY_METADATA_KEY,
@@ -23,9 +30,10 @@ export class PolicyGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly ability: AbilityFactory,
+    @Optional() private readonly resources?: PolicyResourceResolver,
   ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const policy = this.reflector.getAllAndOverride<PolicyDefinition>(
       POLICY_METADATA_KEY,
       [context.getHandler(), context.getClass()],
@@ -35,6 +43,20 @@ export class PolicyGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<PolicyRequest>();
+    if (
+      containsPrivateResourcePolicy(policy) &&
+      request.policyResource === undefined &&
+      this.resources
+    ) {
+      const resolved = await this.resources.resolve(
+        policy.anyOf,
+        (request.params ?? {}) as Record<string, string | undefined>,
+      );
+      // A malformed id: the same 400 the route's ParseUUIDPipe gives.
+      if (resolved === undefined)
+        throw new BadRequestException("Validation failed (uuid is expected)");
+      request.policyResource = resolved;
+    }
     if (
       this.ability.canAny(request.auth, policy.anyOf, request.policyResource)
     ) {
