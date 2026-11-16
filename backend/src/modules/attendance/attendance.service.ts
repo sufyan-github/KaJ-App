@@ -224,7 +224,6 @@ export class AttendanceService {
       async (transaction) => {
         const settings = await this.assertEnabled(transaction);
         this.assertConsent(input, settings);
-        this.assertAccuracy(input.accuracyM, settings);
         const receivedAt = this.clock.now();
         const capturedAt = this.eventTime(
           input.capturedAt,
@@ -245,6 +244,12 @@ export class AttendanceService {
         ) {
           throw new NotFoundException();
         }
+        // A job posted without a pin, in an area without a centre, has
+        // nothing to measure against. Check-out still has to be possible (the
+        // job was otherwise stuck IN_PROGRESS for ever): the point is stored,
+        // the distance is left empty and the session is flagged unverified.
+        const location = this.jobLocationOrNull(assignment.job, settings);
+        if (location) this.assertAccuracy(input.accuracyM, settings);
         const session = assignment.work_sessions[0];
         if (!session?.checkin_at) {
           throw new ConflictException("Check-in is required before check-out.");
@@ -262,42 +267,25 @@ export class AttendanceService {
         if (assignment.job.status !== JobStatus.IN_PROGRESS) {
           throw new ConflictException("This job cannot be checked out now.");
         }
-        const location = this.jobLocation(assignment.job, settings);
-        const distanceM = distanceMetres(location, {
-          lat: input.lat,
-          lng: input.lng,
-        });
-        this.assertInside(distanceM, location.radiusM);
+        const distanceM = location
+          ? distanceMetres(location, { lat: input.lat, lng: input.lng })
+          : null;
+        if (location && distanceM !== null)
+          this.assertInside(distanceM, location.radiusM);
         const minutesWorked = Math.max(
           0,
           Math.floor(
             (capturedAt.getTime() - session.checkin_at.getTime()) / 60_000,
           ),
         );
-        const submitted = await this.states.transitionInTransaction(
+        await this.submitWork(
           transaction,
           assignment.job,
-          JobStatus.SUBMITTED,
+          assignmentId,
           { type: JobActorType.WORKER, userId: workerUserId },
           "Worker checked out",
+          capturedAt,
         );
-        await this.states.transitionInTransaction(
-          transaction,
-          submitted,
-          JobStatus.CUSTOMER_REVIEW,
-          { type: JobActorType.SYSTEM },
-        );
-        const assignmentSettings = await this.assignmentSettings(transaction);
-        await transaction.assignment.update({
-          where: { id: assignmentId },
-          data: {
-            submitted_at: capturedAt,
-            completion_due_at: new Date(
-              capturedAt.getTime() +
-                assignmentSettings.autoConfirmHours * 3_600_000,
-            ),
-          },
-        });
         const updated = await transaction.workSession.update({
           where: { id: session.id },
           data: {
@@ -307,7 +295,9 @@ export class AttendanceService {
             checkout_lat: input.lat,
             checkout_lng: input.lng,
             checkout_accuracy_m: input.accuracyM,
-            checkout_distance_m: Math.round(distanceM),
+            checkout_distance_m:
+              distanceM === null ? null : Math.round(distanceM),
+            checkout_location_unverified: location === null,
             checkout_notes: input.notes?.trim() || null,
             minutes_worked: minutesWorked,
           },
@@ -345,6 +335,186 @@ export class AttendanceService {
       });
     }
     return result;
+  }
+
+  checkoutOverrideByPoster(
+    posterUserId: string,
+    assignmentId: string,
+    input: AttendanceOverrideDto,
+    idempotencyKey: string,
+  ) {
+    return this.checkoutOverride(
+      { type: JobActorType.POSTER, userId: posterUserId },
+      assignmentId,
+      input,
+      idempotencyKey,
+      null,
+    );
+  }
+
+  checkoutOverrideByAdmin(
+    actor: AdminActor,
+    assignmentId: string,
+    input: AttendanceOverrideDto,
+    idempotencyKey: string,
+    context: AdminRequestContext,
+  ) {
+    return this.checkoutOverride(
+      { type: JobActorType.ADMIN, userId: actor.userId },
+      assignmentId,
+      input,
+      idempotencyKey,
+      context,
+    );
+  }
+
+  /**
+   * The poster (or an admin) records the end of the work when the worker
+   * can't check out — the mirror of the check-in override. A reason is
+   * required and audited; the job then goes to the poster's review exactly
+   * as after a worker check-out.
+   */
+  private async checkoutOverride(
+    actor: { type: JobActorType; userId: string },
+    assignmentId: string,
+    input: AttendanceOverrideDto,
+    idempotencyKey: string,
+    context: AdminRequestContext | null,
+  ) {
+    const result = await this.idempotent(
+      actor.userId,
+      idempotencyKey,
+      `attendance.checkout-override:${assignmentId}`,
+      input,
+      async (transaction) => {
+        const settings = await this.assertEnabled(transaction);
+        const now = this.clock.now();
+        const assignment = await transaction.assignment.findUnique({
+          where: { id: assignmentId },
+          include: { job: true, work_sessions: true },
+        });
+        if (!assignment || assignment.status !== AssignmentStatus.CONFIRMED) {
+          throw new NotFoundException();
+        }
+        if (
+          actor.type === JobActorType.POSTER &&
+          assignment.job.poster_user_id !== actor.userId
+        ) {
+          throw new NotFoundException();
+        }
+        const session = assignment.work_sessions[0];
+        if (!session?.checkin_at) {
+          throw new ConflictException("Check-in is required before check-out.");
+        }
+        if (session.checkout_at) {
+          throw new ConflictException(
+            "This assignment is already checked out.",
+          );
+        }
+        if (assignment.job.status !== JobStatus.IN_PROGRESS) {
+          throw new ConflictException("This job cannot be checked out now.");
+        }
+        const reason = input.reason.trim();
+        await this.submitWork(
+          transaction,
+          assignment.job,
+          assignmentId,
+          actor,
+          "Manual check-out override",
+          now,
+        );
+        const updated = await transaction.workSession.update({
+          where: { id: session.id },
+          data: {
+            checkout_at: now,
+            checkout_captured_at: now,
+            checkout_received_at: now,
+            minutes_worked: Math.max(
+              0,
+              Math.floor(
+                (now.getTime() - session.checkin_at.getTime()) / 60_000,
+              ),
+            ),
+            checkout_override_reason: reason,
+            checkout_overridden_by_user_id: actor.userId,
+            checkout_overridden_by_actor_type: actor.type,
+            checkout_overridden_at: now,
+          },
+        });
+        await transaction.auditLog.create({
+          data: {
+            actor_user_id: actor.userId,
+            action: "ATTENDANCE_CHECKOUT_OVERRIDDEN",
+            entity: "WORK_SESSION",
+            entity_id: session.id,
+            before_json: Prisma.JsonNull,
+            after_json: { assignmentId, actorType: actor.type, reason },
+            ip: context?.ip ?? null,
+            ua: context?.ua ?? null,
+          },
+        });
+        return this.sessionResponse(updated, settings);
+      },
+    );
+    const assignment = await this.prisma.assignment.findUnique({
+      where: { id: assignmentId },
+      include: { job: true },
+    });
+    if (assignment) {
+      await this.notifications.create({
+        userId: assignment.worker_user_id,
+        type: "WORK_SUBMITTED",
+        title: "কাজ শেষ হিসেবে নথিভুক্ত হয়েছে",
+        body: `${assignment.job.title} কাজটির চেক-আউট কাজদাতা নথিভুক্ত করেছেন।`,
+        payload: { route: "/assignments", assignmentId },
+        dedupeKey: `assignment:${assignmentId}:checkout-override`,
+      });
+      if (actor.type === JobActorType.ADMIN)
+        await this.notifications.create({
+          userId: assignment.job.poster_user_id,
+          type: "WORK_SUBMITTED",
+          title: "কাজ জমা হয়েছে",
+          body: `${assignment.job.title} কাজটি পর্যালোচনা করে নিশ্চিত করুন।`,
+          payload: { route: "/assignments", assignmentId },
+          dedupeKey: `assignment:${assignmentId}:submitted`,
+        });
+    }
+    return result;
+  }
+
+  /** IN_PROGRESS → SUBMITTED → CUSTOMER_REVIEW, with the review deadline. */
+  private async submitWork(
+    transaction: Prisma.TransactionClient,
+    job: Job,
+    assignmentId: string,
+    actor: { type: JobActorType; userId: string },
+    reason: string,
+    submittedAt: Date,
+  ) {
+    const submitted = await this.states.transitionInTransaction(
+      transaction,
+      job,
+      JobStatus.SUBMITTED,
+      actor,
+      reason,
+    );
+    await this.states.transitionInTransaction(
+      transaction,
+      submitted,
+      JobStatus.CUSTOMER_REVIEW,
+      { type: JobActorType.SYSTEM },
+    );
+    const assignmentSettings = await this.assignmentSettings(transaction);
+    await transaction.assignment.update({
+      where: { id: assignmentId },
+      data: {
+        submitted_at: submittedAt,
+        completion_due_at: new Date(
+          submittedAt.getTime() +
+            assignmentSettings.autoConfirmHours * 3_600_000,
+        ),
+      },
+    });
   }
 
   overrideByPoster(
@@ -647,6 +817,18 @@ export class AttendanceService {
    * Area centres come from owner-validated reference data; until an area has
    * coordinates, check-in still needs a manual override.
    */
+  private jobLocationOrNull(
+    job: Parameters<AttendanceService["jobLocation"]>[0],
+    settings: AttendanceSettings,
+  ) {
+    try {
+      return this.jobLocation(job, settings);
+    } catch (error) {
+      if (error instanceof UnprocessableEntityException) return null;
+      throw error;
+    }
+  }
+
   private jobLocation(
     job: {
       lat: Prisma.Decimal | null;
@@ -761,6 +943,9 @@ export class AttendanceService {
       verified_by: WorkVerification | null;
       override_reason: string | null;
       overridden_by_actor_type: JobActorType | null;
+      checkout_location_unverified?: boolean;
+      checkout_override_reason?: string | null;
+      checkout_overridden_by_actor_type?: JobActorType | null;
     },
     settings: AttendanceSettings,
   ) {
@@ -785,6 +970,10 @@ export class AttendanceService {
       verifiedBy: session.verified_by,
       overrideReason: session.override_reason,
       overriddenByActorType: session.overridden_by_actor_type,
+      checkoutLocationUnverified: session.checkout_location_unverified ?? false,
+      checkoutOverrideReason: session.checkout_override_reason ?? null,
+      checkoutOverriddenByActorType:
+        session.checkout_overridden_by_actor_type ?? null,
       settings: this.publicSettings(settings),
     };
   }

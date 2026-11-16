@@ -357,69 +357,70 @@ model User {
   reverification_requested_at DateTime?
   moderation_reason           String?
 
-  devices                     UserDevice[]
-  refresh_tokens              RefreshToken[]
-  profile                     Profile?
-  worker_profile              WorkerProfile?
-  customer_profile            CustomerProfile?
-  business_profiles           BusinessProfile[]
-  skills                      UserSkill[]
-  service_areas               ServiceArea[]
-  posted_jobs                 Job[]                     @relation("JobPoster")
-  job_status_changes          JobStatusHistory[]        @relation("JobStatusActor")
-  applications                Application[]
-  assignments                 Assignment[]
-  availability_rules          AvailabilityRule[]
-  availability_exceptions     AvailabilityException[]
-  payments                    Payment[]                 @relation("PaymentPayer")
-  cash_payments_recorded      Payment[]                 @relation("CashPaymentRecorder")
-  payouts                     Payout[]
-  wallet                      Wallet?
-  reviews_written             Review[]                  @relation("ReviewWriter")
-  reviews_received            Review[]                  @relation("ReviewSubject")
-  conversation_participations ConversationParticipant[]
-  sent_messages               Message[]
-  notifications               Notification[]
-  notification_preferences    NotificationPreference[]
-  verification_requests       VerificationRequest[]     @relation("VerificationOwner")
-  verification_reviews        VerificationRequest[]     @relation("VerificationReviewer")
-  documents                   Document[]
-  portfolio_items             PortfolioItem[]
-  disputes_opened             Dispute[]                 @relation("DisputeOpener")
-  disputes_resolved           Dispute[]                 @relation("DisputeResolver")
-  dispute_evidence            DisputeEvidence[]
-  dispute_appeals_opened      DisputeAppeal[]           @relation("DisputeAppealOpener")
-  dispute_appeals_assigned    DisputeAppeal[]           @relation("DisputeAppealAssignee")
-  dispute_appeals_resolved    DisputeAppeal[]           @relation("DisputeAppealResolver")
-  overridden_work_sessions    WorkSession[]             @relation("WorkSessionOverrideActor")
-  reports_filed               Report[]                  @relation("ReportReporter")
-  reports_received            Report[]                  @relation("ReportSubject")
-  reports_reviewed            Report[]                  @relation("ReportReviewer")
-  moderation_actions          ModerationAction[]        @relation("ModerationAdmin")
-  risk_identity_observations  RiskIdentityObservation[]
-  risk_items                  RiskReviewItem[]          @relation("RiskSubject")
-  risk_items_reviewed         RiskReviewItem[]          @relation("RiskReviewer")
-  badges                      UserBadge[]
-  saved_searches              SavedSearch[]
-  favorites                   Favorite[]                @relation("FavoriteOwner")
-  favorited_by                Favorite[]                @relation("FavoriteTarget")
-  users_blocked               UserBlock[]               @relation("Blocker")
-  blocked_by                  UserBlock[]               @relation("BlockedUser")
-  updated_config_settings     ConfigSetting[]
-  audit_logs                  AuditLog[]
-  admin_credential            AdminCredential?
-  admin_login_challenges      AdminLoginChallenge[]
-  admin_sessions              AdminSession[]
-  config_revisions            ConfigRevision[]
-  notification_campaigns      NotificationCampaign[]
-  fee_rules                   FeeRule[]
-  idempotency_records         IdempotencyRecord[]
-  operator_identity           UserOperatorIdentity?
-  subscriptions               Subscription[]
-  subscription_payments       SubscriptionPayment[]
-  training_lesson_opens       TrainingLessonOpen[]
-  training_attempts           TrainingAttempt[]
-  training_certificates       TrainingCertificate[]
+  devices                           UserDevice[]
+  refresh_tokens                    RefreshToken[]
+  profile                           Profile?
+  worker_profile                    WorkerProfile?
+  customer_profile                  CustomerProfile?
+  business_profiles                 BusinessProfile[]
+  skills                            UserSkill[]
+  service_areas                     ServiceArea[]
+  posted_jobs                       Job[]                     @relation("JobPoster")
+  job_status_changes                JobStatusHistory[]        @relation("JobStatusActor")
+  applications                      Application[]
+  assignments                       Assignment[]
+  availability_rules                AvailabilityRule[]
+  availability_exceptions           AvailabilityException[]
+  payments                          Payment[]                 @relation("PaymentPayer")
+  cash_payments_recorded            Payment[]                 @relation("CashPaymentRecorder")
+  payouts                           Payout[]
+  wallet                            Wallet?
+  reviews_written                   Review[]                  @relation("ReviewWriter")
+  reviews_received                  Review[]                  @relation("ReviewSubject")
+  conversation_participations       ConversationParticipant[]
+  sent_messages                     Message[]
+  notifications                     Notification[]
+  notification_preferences          NotificationPreference[]
+  verification_requests             VerificationRequest[]     @relation("VerificationOwner")
+  verification_reviews              VerificationRequest[]     @relation("VerificationReviewer")
+  documents                         Document[]
+  portfolio_items                   PortfolioItem[]
+  disputes_opened                   Dispute[]                 @relation("DisputeOpener")
+  disputes_resolved                 Dispute[]                 @relation("DisputeResolver")
+  dispute_evidence                  DisputeEvidence[]
+  dispute_appeals_opened            DisputeAppeal[]           @relation("DisputeAppealOpener")
+  dispute_appeals_assigned          DisputeAppeal[]           @relation("DisputeAppealAssignee")
+  dispute_appeals_resolved          DisputeAppeal[]           @relation("DisputeAppealResolver")
+  overridden_work_sessions          WorkSession[]             @relation("WorkSessionOverrideActor")
+  checkout_overridden_work_sessions WorkSession[]             @relation("WorkSessionCheckoutOverrideActor")
+  reports_filed                     Report[]                  @relation("ReportReporter")
+  reports_received                  Report[]                  @relation("ReportSubject")
+  reports_reviewed                  Report[]                  @relation("ReportReviewer")
+  moderation_actions                ModerationAction[]        @relation("ModerationAdmin")
+  risk_identity_observations        RiskIdentityObservation[]
+  risk_items                        RiskReviewItem[]          @relation("RiskSubject")
+  risk_items_reviewed               RiskReviewItem[]          @relation("RiskReviewer")
+  badges                            UserBadge[]
+  saved_searches                    SavedSearch[]
+  favorites                         Favorite[]                @relation("FavoriteOwner")
+  favorited_by                      Favorite[]                @relation("FavoriteTarget")
+  users_blocked                     UserBlock[]               @relation("Blocker")
+  blocked_by                        UserBlock[]               @relation("BlockedUser")
+  updated_config_settings           ConfigSetting[]
+  audit_logs                        AuditLog[]
+  admin_credential                  AdminCredential?
+  admin_login_challenges            AdminLoginChallenge[]
+  admin_sessions                    AdminSession[]
+  config_revisions                  ConfigRevision[]
+  notification_campaigns            NotificationCampaign[]
+  fee_rules                         FeeRule[]
+  idempotency_records               IdempotencyRecord[]
+  operator_identity                 UserOperatorIdentity?
+  subscriptions                     Subscription[]
+  subscription_payments             SubscriptionPayment[]
+  training_lesson_opens             TrainingLessonOpen[]
+  training_attempts                 TrainingAttempt[]
+  training_certificates             TrainingCertificate[]
 
   @@index([status, deleted_at])
   @@map("users")
@@ -969,36 +970,46 @@ model AvailabilityException {
 }
 
 model WorkSession {
-  id                       String            @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  assignment_id            String            @unique @db.Uuid
-  checkin_at               DateTime?
-  checkin_captured_at      DateTime?
-  checkin_received_at      DateTime?
-  checkin_lat              Decimal?          @db.Decimal(9, 6)
-  checkin_lng              Decimal?          @db.Decimal(9, 6)
-  checkin_accuracy_m       Decimal?          @db.Decimal(8, 2)
-  checkin_distance_m       Int?
-  checkin_photo_key        String?
-  checkin_consent_version  String?
-  checkin_mock_location    Boolean           @default(false)
-  checkout_at              DateTime?
-  checkout_captured_at     DateTime?
-  checkout_received_at     DateTime?
-  checkout_lat             Decimal?          @db.Decimal(9, 6)
-  checkout_lng             Decimal?          @db.Decimal(9, 6)
-  checkout_accuracy_m      Decimal?          @db.Decimal(8, 2)
-  checkout_distance_m      Int?
-  checkout_notes           String?
-  minutes_worked           Int?
-  verified_by              WorkVerification?
-  override_reason          String?
-  overridden_by_user_id    String?           @db.Uuid
-  overridden_by_actor_type JobActorType?
-  overridden_at            DateTime?
-  assignment               Assignment        @relation(fields: [assignment_id], references: [id], onDelete: Cascade)
-  overridden_by            User?             @relation("WorkSessionOverrideActor", fields: [overridden_by_user_id], references: [id], onDelete: SetNull)
+  id                                String            @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  assignment_id                     String            @unique @db.Uuid
+  checkin_at                        DateTime?
+  checkin_captured_at               DateTime?
+  checkin_received_at               DateTime?
+  checkin_lat                       Decimal?          @db.Decimal(9, 6)
+  checkin_lng                       Decimal?          @db.Decimal(9, 6)
+  checkin_accuracy_m                Decimal?          @db.Decimal(8, 2)
+  checkin_distance_m                Int?
+  checkin_photo_key                 String?
+  checkin_consent_version           String?
+  checkin_mock_location             Boolean           @default(false)
+  checkout_at                       DateTime?
+  checkout_captured_at              DateTime?
+  checkout_received_at              DateTime?
+  checkout_lat                      Decimal?          @db.Decimal(9, 6)
+  checkout_lng                      Decimal?          @db.Decimal(9, 6)
+  checkout_accuracy_m               Decimal?          @db.Decimal(8, 2)
+  checkout_distance_m               Int?
+  checkout_notes                    String?
+  minutes_worked                    Int?
+  verified_by                       WorkVerification?
+  override_reason                   String?
+  overridden_by_user_id             String?           @db.Uuid
+  overridden_by_actor_type          JobActorType?
+  overridden_at                     DateTime?
+  /// Check-out on a job with no coordinates (no pin, no area centre): the
+  /// worker's point is stored but no distance could be checked.
+  checkout_location_unverified      Boolean           @default(false)
+  /// Check-out recorded by the poster or an admin instead of the worker.
+  checkout_override_reason          String?
+  checkout_overridden_by_user_id    String?           @db.Uuid
+  checkout_overridden_by_actor_type JobActorType?
+  checkout_overridden_at            DateTime?
+  assignment                        Assignment        @relation(fields: [assignment_id], references: [id], onDelete: Cascade)
+  overridden_by                     User?             @relation("WorkSessionOverrideActor", fields: [overridden_by_user_id], references: [id], onDelete: SetNull)
+  checkout_overridden_by            User?             @relation("WorkSessionCheckoutOverrideActor", fields: [checkout_overridden_by_user_id], references: [id], onDelete: SetNull)
 
   @@index([overridden_by_user_id])
+  @@index([checkout_overridden_by_user_id])
   @@map("work_sessions")
 }
 

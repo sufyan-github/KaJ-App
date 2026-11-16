@@ -87,4 +87,22 @@ export class AttendanceController {
       requiredAttendanceKey(key),
     );
   }
+
+  /** The poster records the end of the work when the worker can't check out. */
+  @Post("assignments/:id/checkout-override")
+  @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
+  @Policy(Policies.authenticated())
+  checkoutOverride(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @Headers("idempotency-key") key: string | undefined,
+    @Body() body: AttendanceOverrideDto,
+  ) {
+    return this.attendance.checkoutOverrideByPoster(
+      claims.sub,
+      id,
+      body,
+      requiredAttendanceKey(key),
+    );
+  }
 }

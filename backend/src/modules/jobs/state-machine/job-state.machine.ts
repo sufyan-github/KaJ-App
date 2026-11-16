@@ -40,7 +40,11 @@ const transitions = new Map<TransitionKey, readonly JobActorType[]>([
     key(JobStatus.CHECKED_IN, JobStatus.IN_PROGRESS),
     [JobActorType.WORKER, JobActorType.SYSTEM],
   ],
-  [key(JobStatus.IN_PROGRESS, JobStatus.SUBMITTED), [JobActorType.WORKER]],
+  // POSTER/ADMIN: the check-out override, when the worker can't check out.
+  [
+    key(JobStatus.IN_PROGRESS, JobStatus.SUBMITTED),
+    [JobActorType.WORKER, JobActorType.POSTER, JobActorType.ADMIN],
+  ],
   [key(JobStatus.SUBMITTED, JobStatus.CUSTOMER_REVIEW), [JobActorType.SYSTEM]],
   [
     key(JobStatus.CUSTOMER_REVIEW, JobStatus.COMPLETED),

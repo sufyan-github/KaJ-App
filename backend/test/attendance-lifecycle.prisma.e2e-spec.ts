@@ -383,6 +383,177 @@ databaseDescribe("attendance lifecycle with PostgreSQL", () => {
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
+  describe("a job with no coordinates can always finish (N1)", () => {
+    async function overriddenIn(label: string) {
+      const item = await fixture(label, now, { pinned: false });
+      await attendance.overrideByPoster(
+        item.posterId,
+        item.assignmentId,
+        { reason: "The job was posted without a site pin." },
+        `${label}-in`,
+      );
+      now = new Date(now.getTime() + 90 * 60_000);
+      return item;
+    }
+
+    it("lets the worker check out, unverified, instead of a dead end", async () => {
+      const item = await overriddenIn("pinless-checkout");
+      const response = await attendance.checkOut(
+        item.workerId,
+        item.assignmentId,
+        // Poor accuracy is fine too: there is nothing to measure against.
+        { ...checkinInput(pointNorth(5_000)), accuracyM: 900 },
+        "pinless-checkout-out",
+      );
+      expect(response).toMatchObject({
+        checkoutDistanceM: null,
+        checkoutLocationUnverified: true,
+        minutesWorked: 90,
+      });
+      const job = await prisma.job.findUniqueOrThrow({
+        where: { id: item.jobId },
+      });
+      expect(job.status).toBe(JobStatus.CUSTOMER_REVIEW);
+      const assignment = await prisma.assignment.findUniqueOrThrow({
+        where: { id: item.assignmentId },
+      });
+      expect(assignment.submitted_at).not.toBeNull();
+      expect(assignment.completion_due_at).not.toBeNull();
+    });
+
+    it("still measures distance when the job has a pin", async () => {
+      const item = await fixture("pinned-checkout");
+      await attendance.checkIn(
+        item.workerId,
+        item.assignmentId,
+        checkinInput(pointNorth(10)),
+        "pinned-checkout-in",
+      );
+      now = new Date(now.getTime() + 30 * 60_000);
+      await expect(
+        attendance.checkOut(
+          item.workerId,
+          item.assignmentId,
+          checkinInput(pointNorth(5_000)),
+          "pinned-checkout-far",
+        ),
+      ).rejects.toThrow("request an override");
+      const ok = await attendance.checkOut(
+        item.workerId,
+        item.assignmentId,
+        checkinInput(pointNorth(20)),
+        "pinned-checkout-near",
+      );
+      expect(ok).toMatchObject({
+        checkoutDistanceM: 20,
+        checkoutLocationUnverified: false,
+      });
+    });
+
+    it("lets the poster record the check-out with a reason, audited", async () => {
+      const item = await overriddenIn("poster-checkout");
+      const response = await attendance.checkoutOverrideByPoster(
+        item.posterId,
+        item.assignmentId,
+        { reason: "The worker's phone has no GPS; work finished at 5 pm." },
+        "poster-checkout-out",
+      );
+      expect(response).toMatchObject({
+        checkoutOverrideReason:
+          "The worker's phone has no GPS; work finished at 5 pm.",
+        checkoutOverriddenByActorType: "POSTER",
+        minutesWorked: 90,
+      });
+      // Idempotent retry returns the same result.
+      await expect(
+        attendance.checkoutOverrideByPoster(
+          item.posterId,
+          item.assignmentId,
+          { reason: "The worker's phone has no GPS; work finished at 5 pm." },
+          "poster-checkout-out",
+        ),
+      ).resolves.toEqual(response);
+      expect(
+        (await prisma.job.findUniqueOrThrow({ where: { id: item.jobId } }))
+          .status,
+      ).toBe(JobStatus.CUSTOMER_REVIEW);
+      const history = await prisma.jobStatusHistory.findFirstOrThrow({
+        where: { job_id: item.jobId, to_status: JobStatus.SUBMITTED },
+      });
+      expect(history).toMatchObject({
+        actor_type: "POSTER",
+        actor_user_id: item.posterId,
+      });
+      expect(
+        await prisma.auditLog.count({
+          where: {
+            actor_user_id: item.posterId,
+            action: "ATTENDANCE_CHECKOUT_OVERRIDDEN",
+          },
+        }),
+      ).toBe(1);
+      // The worker can no longer check out over it.
+      await expect(
+        attendance.checkOut(
+          item.workerId,
+          item.assignmentId,
+          checkinInput(pointNorth(10)),
+          "poster-checkout-worker",
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it("refuses a stranger and a job that was never checked in", async () => {
+      const item = await overriddenIn("checkout-stranger");
+      const other = await fixture("checkout-other", now, { pinned: false });
+      await expect(
+        attendance.checkoutOverrideByPoster(
+          other.posterId,
+          item.assignmentId,
+          { reason: "Someone else's job, not mine to close." },
+          "checkout-stranger-key",
+        ),
+      ).rejects.toThrow();
+      await expect(
+        attendance.checkoutOverrideByPoster(
+          other.posterId,
+          other.assignmentId,
+          { reason: "Trying to close before any check-in." },
+          "checkout-not-started",
+        ),
+      ).rejects.toThrow("Check-in is required before check-out.");
+    });
+
+    it("lets an admin record the check-out", async () => {
+      const item = await overriddenIn("admin-checkout");
+      const admin = await prisma.user.create({
+        data: {
+          email: `checkout-admin-${Date.now()}@kaj.test`,
+          is_admin: true,
+          role_modes: [RoleMode.CUSTOMER],
+        },
+      });
+      createdUserIds.push(admin.id);
+      const response = await attendance.checkoutOverrideByAdmin(
+        {
+          email: admin.email!,
+          role: AdminRole.SUPPORT,
+          sessionId: "checkout-admin-session",
+          userId: admin.id,
+        },
+        item.assignmentId,
+        { reason: "Support confirmed the work ended with both parties." },
+        "admin-checkout-key",
+        { ip: "127.0.0.1", ua: "attendance-test" },
+      );
+      expect(response.checkoutOverriddenByActorType).toBe("ADMIN");
+      expect(
+        (await prisma.job.findUniqueOrThrow({ where: { id: item.jobId } }))
+          .status,
+      ).toBe(JobStatus.CUSTOMER_REVIEW);
+    });
+  });
+
   async function fixture(
     label: string,
     startsAt = now,

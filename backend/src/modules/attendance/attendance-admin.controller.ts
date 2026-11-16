@@ -46,4 +46,26 @@ export class AttendanceAdminController {
       },
     );
   }
+
+  @Post(":id/checkout-override")
+  @Policy(Policies.public())
+  @AdminRoles(AdminRole.ADMIN, AdminRole.MODERATOR, AdminRole.SUPPORT)
+  checkoutOverride(
+    @CurrentAdmin() actor: AdminActor,
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @Headers("idempotency-key") key: string | undefined,
+    @Body() body: AttendanceOverrideDto,
+    @Req() request: Request,
+  ) {
+    return this.attendance.checkoutOverrideByAdmin(
+      actor,
+      id,
+      body,
+      requiredAttendanceKey(key),
+      {
+        ip: request.ip ?? null,
+        ua: request.get("user-agent") ?? null,
+      },
+    );
+  }
 }
