@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/activity/my_activity_screen.dart';
 import '../../features/auth/domain/entities/otp_challenge.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/controllers/auth_providers.dart';
@@ -11,6 +12,7 @@ import '../../features/auth/presentation/screens/phone_entry_screen.dart';
 import '../../features/billing/presentation/billing_screens.dart';
 import '../../features/bootstrap/presentation/screens/splash_screen.dart';
 import '../../features/chat/presentation/screens/chat_screens.dart';
+import '../../features/explore/explore_screen.dart';
 import '../../features/help/presentation/help_centre_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/jobs/presentation/screens/job_alerts_screen.dart';
@@ -88,6 +90,10 @@ abstract final class AppRoutes {
   static const editProfile = '/profile/edit';
   static const jobAlerts = '/settings/job-alerts';
   static const help = '/help';
+  static const explore = '/explore';
+  static const exploreLearn = '/explore?section=learn';
+  static const activity = '/activity';
+  static const activityLearning = '/activity?section=learning';
 
   static String trainingCourse(String id) => '/training/courses/$id';
   static String trainingTest(String id) => '/training/courses/$id/test';
@@ -417,6 +423,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.jobAlerts,
         builder: (context, state) => const JobAlertsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.explore,
+        builder: (context, state) => ExploreScreen(
+          initial: ExploreSection.parse(state.uri.queryParameters['section']),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.activity,
+        builder: (context, state) => MyActivityScreen(
+          initialSection: state.uri.queryParameters['section'] == 'learning'
+              ? 1
+              : 0,
+        ),
       ),
       GoRoute(
         path: AppRoutes.help,

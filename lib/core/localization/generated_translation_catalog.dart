@@ -1111,4 +1111,18 @@ const generatedEnglishTranslations = <String, String>{
   "আরও দেখুন": "Show more",
   "আগের বার্তা দেখুন": "Show earlier messages",
   "আগের বার্তা লোড করা যায়নি।": "Could not load earlier messages.",
+  // P1.0: Explore and My activity.
+  "খুঁজুন ও জানুন": "Explore",
+  "কাজ, দক্ষতা, কোর্স বা এলাকা লিখুন": "Type a job, skill, course or area",
+  "খোঁজা মুছুন": "Clear search",
+  "কাজের সুযোগ": "Work",
+  "শেখা": "Learn",
+  "খোঁজার সঙ্গে কিছু মেলেনি।": "Nothing matches your search.",
+  "আমার কার্যক্রম": "My activity",
+  "কাজ ও বুকিং": "Jobs and bookings",
+  "শেখার সুযোগ খুঁজুন": "Find ways to learn",
+  "কোর্সের তালিকা লোড করা যায়নি।": "Could not load the courses.",
+  "এখনো কিছু শেখা শুরু করেননি": "You have not started learning yet",
+  "শেখার সুযোগ থেকে একটি কোর্স বেছে নিন।":
+      "Pick a course from the ways to learn.",
 };

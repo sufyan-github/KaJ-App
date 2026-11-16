@@ -178,8 +178,8 @@ void main() {
       expect(
         labels,
         language == 'en'
-            ? ['Home', 'Search', 'My work', 'Messages', 'Profile']
-            : ['হোম', 'খুঁজুন', 'আমার কাজ', 'বার্তা', 'প্রোফাইল'],
+            ? ['Home', 'Search', 'My activity', 'Messages', 'Profile']
+            : ['হোম', 'খুঁজুন', 'আমার কার্যক্রম', 'বার্তা', 'প্রোফাইল'],
       );
       expect(tester.takeException(), isNull);
     });

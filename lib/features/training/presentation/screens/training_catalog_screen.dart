@@ -9,28 +9,41 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_empty_state.dart';
 import '../../../../core/widgets/k_error_state.dart';
 import '../../../../core/widgets/k_localized_text.dart';
+import '../../../jobs/presentation/widgets/opportunity_listing.dart';
 import '../../data/training_repository.dart';
 import '../../domain/training_models.dart';
 import '../training_providers.dart';
 import '../widgets/training_ui.dart';
 
 class TrainingCatalogScreen extends ConsumerWidget {
-  const TrainingCatalogScreen({super.key});
+  const TrainingCatalogScreen({
+    this.embedded = false,
+    this.searchQuery = '',
+    super.key,
+  });
+
+  /// Shown inside Explore → Learn: no app bar of its own.
+  final bool embedded;
+
+  /// Filters courses by title and skill, in either language.
+  final String searchQuery;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final courses = ref.watch(trainingCoursesProvider(CourseScope.all));
     return Scaffold(
-      appBar: AppBar(
-        title: const KLocalizedText('প্রশিক্ষণ'),
-        actions: [
-          IconButton(
-            tooltip: KaajLocalizations.text(context, 'সার্টিফিকেট'),
-            onPressed: () => context.push(AppRoutes.trainingCertificates),
-            icon: const Icon(Icons.workspace_premium_outlined),
-          ),
-        ],
-      ),
+      appBar: embedded
+          ? null
+          : AppBar(
+              title: const KLocalizedText('প্রশিক্ষণ'),
+              actions: [
+                IconButton(
+                  tooltip: KaajLocalizations.text(context, 'সার্টিফিকেট'),
+                  onPressed: () => context.push(AppRoutes.trainingCertificates),
+                  icon: const Icon(Icons.workspace_premium_outlined),
+                ),
+              ],
+            ),
       body: courses.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
@@ -41,7 +54,18 @@ class TrainingCatalogScreen extends ConsumerWidget {
                 ref.invalidate(trainingCoursesProvider(CourseScope.all)),
           ),
         ),
-        data: (items) {
+        data: (all) {
+          final items = all
+              .where(
+                (course) => matchesSearch(searchQuery, [
+                  course.titleFor('bn'),
+                  course.titleFor('en'),
+                  course.skill?.nameFor('bn'),
+                  course.skill?.nameFor('en'),
+                ]),
+              )
+              .toList(growable: false);
+          if (items.isEmpty && all.isNotEmpty) return const NoSearchMatches();
           if (items.isEmpty) {
             return const Center(
               child: KEmptyState(

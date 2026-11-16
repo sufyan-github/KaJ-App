@@ -227,3 +227,25 @@ String matchReasonBn(String reason) => switch (reason) {
   'Reliable work history' => 'নির্ভরযোগ্যতার সঙ্গে মেলে',
   _ => reason,
 };
+
+/// Whether any of [fields] contains [query], ignoring case. An empty query
+/// matches everything. Searches Bangla and English names alike.
+bool matchesSearch(String query, Iterable<String?> fields) {
+  final needle = query.trim().toLowerCase();
+  if (needle.isEmpty) return true;
+  return fields.any((field) => field?.toLowerCase().contains(needle) ?? false);
+}
+
+/// Shown when a search filters every item out.
+class NoSearchMatches extends StatelessWidget {
+  const NoSearchMatches({super.key});
+
+  @override
+  Widget build(BuildContext context) => ListView(
+    physics: const AlwaysScrollableScrollPhysics(),
+    children: const [
+      SizedBox(height: 160),
+      Center(child: KLocalizedText('খোঁজার সঙ্গে কিছু মেলেনি।')),
+    ],
+  );
+}

@@ -44,8 +44,16 @@ class JobFeedScreen extends ConsumerStatefulWidget {
     this.locationId,
     this.locationName,
     this.initialAvailableOnly = false,
+    this.embedded = false,
+    this.searchQuery = '',
     super.key,
   });
+
+  /// Shown inside Explore: no app bar of its own.
+  final bool embedded;
+
+  /// Filters the loaded posts by title, description, type and area.
+  final String searchQuery;
 
   final String? categoryId;
   final String? categoryName;
@@ -122,30 +130,32 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: KLocalizedText(
-          widget.skillName ??
-              widget.categoryName ??
-              widget.locationName ??
-              (isWorker ? 'কাজ খুঁজুন' : 'আমার পোস্ট করা কাজ'),
-        ),
-        actions: [
-          if (isWorker)
-            IconButton(
-              tooltip: KaajLocalizations.text(context, 'কাজের সতর্কতা'),
-              onPressed: () => context.push(AppRoutes.jobAlerts),
-              icon: const Icon(Icons.notifications_active_outlined),
+      appBar: widget.embedded
+          ? null
+          : AppBar(
+              title: KLocalizedText(
+                widget.skillName ??
+                    widget.categoryName ??
+                    widget.locationName ??
+                    (isWorker ? 'কাজ খুঁজুন' : 'আমার পোস্ট করা কাজ'),
+              ),
+              actions: [
+                if (isWorker)
+                  IconButton(
+                    tooltip: KaajLocalizations.text(context, 'কাজের সতর্কতা'),
+                    onPressed: () => context.push(AppRoutes.jobAlerts),
+                    icon: const Icon(Icons.notifications_active_outlined),
+                  ),
+                IconButton(
+                  tooltip: KaajLocalizations.text(
+                    context,
+                    'কাজের তালিকা হালনাগাদ করুন',
+                  ),
+                  onPressed: refresh,
+                  icon: const Icon(Icons.refresh_rounded),
+                ),
+              ],
             ),
-          IconButton(
-            tooltip: KaajLocalizations.text(
-              context,
-              'কাজের তালিকা হালনাগাদ করুন',
-            ),
-            onPressed: refresh,
-            icon: const Icon(Icons.refresh_rounded),
-          ),
-        ],
-      ),
       floatingActionButton: isWorker || browsingType
           ? null
           : FloatingActionButton.extended(
@@ -228,7 +238,24 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
               ),
               data: (firstPage) {
                 // Only the open feed is paginated; "my jobs" is one list.
-                final items = showOpenJobs ? _more.merge(firstPage) : firstPage;
+                final loaded = showOpenJobs
+                    ? _more.merge(firstPage)
+                    : firstPage;
+                final items = loaded
+                    .where(
+                      (job) => matchesSearch(widget.searchQuery, [
+                        job.title,
+                        job.description,
+                        job.categoryName,
+                        job.categoryNameEn,
+                        job.locationName,
+                        job.locationNameEn,
+                      ]),
+                    )
+                    .toList(growable: false);
+                if (items.isEmpty && loaded.isNotEmpty) {
+                  return const NoSearchMatches();
+                }
                 final hasMore = showOpenJobs && _more.hasMore;
                 return RefreshIndicator(
                   onRefresh: refresh,
@@ -795,13 +822,25 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
 }
 
 class WorkerDirectoryScreen extends ConsumerWidget {
-  const WorkerDirectoryScreen({super.key});
+  const WorkerDirectoryScreen({
+    this.embedded = false,
+    this.searchQuery = '',
+    super.key,
+  });
+
+  /// Shown inside Explore: no app bar of its own.
+  final bool embedded;
+
+  /// Filters workers by name and skill, in either language.
+  final String searchQuery;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final workers = ref.watch(workerDirectoryProvider);
     return Scaffold(
-      appBar: AppBar(title: const KLocalizedText('কর্মী ও সময় খুঁজুন')),
+      appBar: embedded
+          ? null
+          : AppBar(title: const KLocalizedText('কর্মী ও সময় খুঁজুন')),
       body: workers.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => RetryPanel(
@@ -809,25 +848,39 @@ class WorkerDirectoryScreen extends ConsumerWidget {
           label: 'কর্মীর তালিকা লোড হয়নি।',
           onRetry: () => ref.invalidate(workerDirectoryProvider),
         ),
-        data: (items) => items.isEmpty
-            ? const Center(
-                child: KLocalizedText('এখনো কোনো কর্মী পাওয়া যায়নি।'),
+        data: (all) {
+          final items = all
+              .where(
+                (worker) => matchesSearch(searchQuery, [
+                  worker.displayName,
+                  for (final skill in worker.skills) ...[
+                    skill.nameBn,
+                    skill.nameEn,
+                  ],
+                ]),
               )
-            : GridView.builder(
-                padding: const EdgeInsets.all(KSpacing.md),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: opportunityGridColumns(context),
-                  crossAxisSpacing: KSpacing.md,
-                  mainAxisSpacing: KSpacing.md,
-                  mainAxisExtent: _workerGridCardHeight(context),
-                ),
-                itemCount: items.length,
-                itemBuilder: (context, index) => _WorkerCard(
-                  worker: items[index],
-                  onTap: () =>
-                      context.push(AppRoutes.workerBooking(items[index].id)),
-                ),
-              ),
+              .toList(growable: false);
+          if (items.isEmpty && all.isNotEmpty) return const NoSearchMatches();
+          return items.isEmpty
+              ? const Center(
+                  child: KLocalizedText('এখনো কোনো কর্মী পাওয়া যায়নি।'),
+                )
+              : GridView.builder(
+                  padding: const EdgeInsets.all(KSpacing.md),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: opportunityGridColumns(context),
+                    crossAxisSpacing: KSpacing.md,
+                    mainAxisSpacing: KSpacing.md,
+                    mainAxisExtent: _workerGridCardHeight(context),
+                  ),
+                  itemCount: items.length,
+                  itemBuilder: (context, index) => _WorkerCard(
+                    worker: items[index],
+                    onTap: () =>
+                        context.push(AppRoutes.workerBooking(items[index].id)),
+                  ),
+                );
+        },
       ),
     );
   }
@@ -1190,7 +1243,10 @@ mixin _RefreshOnResume<T extends ConsumerStatefulWidget>
 }
 
 class AssignmentsScreen extends ConsumerStatefulWidget {
-  const AssignmentsScreen({super.key});
+  const AssignmentsScreen({this.embedded = false, super.key});
+
+  /// Shown inside My activity: no app bar of its own.
+  final bool embedded;
 
   @override
   ConsumerState<AssignmentsScreen> createState() => _AssignmentsScreenState();
@@ -1221,7 +1277,9 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen>
   Widget build(BuildContext context) {
     final assignments = ref.watch(assignmentsProvider);
     return Scaffold(
-      appBar: AppBar(title: const KLocalizedText('বুকিং ও কাজের অবস্থা')),
+      appBar: widget.embedded
+          ? null
+          : AppBar(title: const KLocalizedText('বুকিং ও কাজের অবস্থা')),
       body: assignments.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => RetryPanel(
@@ -1979,7 +2037,8 @@ class _DateTimeRow extends StatelessWidget {
 double _workerGridCardHeight(BuildContext context) {
   final scale = (MediaQuery.textScalerOf(context).scale(16) / 16).clamp(1, 2);
   final accessible = opportunityGridColumns(context) == 1;
-  return 300 + ((scale - 1) * (accessible ? 200 : 96));
+  // Room for Bangla line height, which is taller than English.
+  return 320 + ((scale - 1) * (accessible ? 200 : 96));
 }
 
 Future<int?> _askAmount(BuildContext context) =>

@@ -724,9 +724,9 @@ class _HomeNavigation extends StatelessWidget {
     onDestinationSelected: (index) {
       switch (index) {
         case 1:
-          context.push(isWorker ? AppRoutes.jobs : AppRoutes.workers);
+          context.push(AppRoutes.explore);
         case 2:
-          context.push(AppRoutes.assignments);
+          context.push(AppRoutes.activity);
         case 3:
           context.push(AppRoutes.conversations);
         case 4:
@@ -740,12 +740,12 @@ class _HomeNavigation extends StatelessWidget {
         label: KaajLocalizations.text(context, 'হোম'),
       ),
       NavigationDestination(
-        icon: const Icon(Icons.search_rounded),
+        icon: const Icon(Icons.travel_explore),
         label: KaajLocalizations.text(context, 'খুঁজুন'),
       ),
       NavigationDestination(
         icon: const Icon(Icons.handshake_outlined),
-        label: KaajLocalizations.text(context, 'আমার কাজ'),
+        label: KaajLocalizations.text(context, 'আমার কার্যক্রম'),
       ),
       NavigationDestination(
         icon: const Icon(Icons.chat_bubble_outline),
