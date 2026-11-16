@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { NotificationChannel, Prisma } from "@prisma/client";
+import { pageArgs, pageResult } from "../../common/api/cursor-page";
+import { CursorQueryDto } from "../../common/api/cursor-query.dto";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { NotificationPreferenceDto } from "./dto/notification-preference.dto";
@@ -124,21 +126,24 @@ export class NotificationsService {
     return result.count;
   }
 
-  async list(userId: string) {
-    const [items, unreadCount] = await Promise.all([
+  async list(userId: string, query: CursorQueryDto = {}) {
+    const limit = query.limit ?? 100;
+    const [rows, unreadCount] = await Promise.all([
       this.prisma.notification.findMany({
         where: { user_id: userId },
-        orderBy: { created_at: "desc" },
-        take: 100,
+        orderBy: [{ created_at: "desc" }, { id: "desc" }],
+        ...pageArgs({ limit, cursor: query.cursor }),
       }),
       // Counted separately: counting within the latest 100 capped the badge.
       this.prisma.notification.count({
         where: { user_id: userId, read_at: null },
       }),
     ]);
+    const { items, nextCursor } = pageResult(rows, limit);
     return {
       unreadCount,
       items: items.map(serializeNotification),
+      nextCursor,
     };
   }
 

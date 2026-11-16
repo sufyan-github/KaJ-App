@@ -20,6 +20,7 @@ import {
   ValidateNested,
 } from "class-validator";
 
+import { CursorQueryDto } from "../../../common/api/cursor-query.dto";
 import { RoundTo } from "../../../common/validation/round-to.decorator";
 
 const MONEY_PATTERN = /^\d{1,15}$/;
@@ -179,7 +180,7 @@ export class CancelOccurrenceDto {
   reason!: string;
 }
 
-export class JobFeedQueryDto {
+export class JobFeedQueryDto extends CursorQueryDto {
   @IsOptional()
   @IsIn(["all", "for-me"])
   scope?: "all" | "for-me";

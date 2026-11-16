@@ -11,6 +11,7 @@ import {
 import { RoleMode } from "@prisma/client";
 import { ApiTags } from "@nestjs/swagger";
 
+import { CursorQueryDto } from "../../common/api/cursor-query.dto";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { Roles } from "../../common/decorators/roles.decorator";
 import { Policy } from "../../common/policy/policy.decorator";
@@ -167,8 +168,11 @@ export class JobsController {
 
   @Get("assignments")
   @Policy(Policies.authenticated())
-  assignments(@CurrentUser() claims: AccessTokenClaims) {
-    return this.jobs.listAssignments(claims.sub);
+  assignments(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Query() query: CursorQueryDto,
+  ) {
+    return this.jobs.listAssignments(claims.sub, query);
   }
 
   @Post("applications/:id/accept")

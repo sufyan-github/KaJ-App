@@ -213,13 +213,20 @@ export class ChatService {
         { created_at: after ? "asc" : "desc" },
         { id: after ? "asc" : "desc" },
       ],
-      take: query.limit ?? 50,
+      take: (query.limit ?? 50) + 1,
     });
-    const ordered = after ? rows : rows.reverse();
+    // One extra row says whether another page exists in this direction.
+    const hasMore = rows.length > (query.limit ?? 50);
+    const page = rows.slice(0, query.limit ?? 50);
+    // The furthest message in the paging direction (before reversing).
+    const nextCursor = hasMore ? (page.at(-1)?.id ?? null) : null;
+    const ordered = after ? page : [...page].reverse();
     return {
       items: await Promise.all(
         ordered.map((row) => this.serializeMessage(row, userId)),
       ),
+      // Pass as `before` (or `after` when paging forward) for the next page.
+      nextCursor,
     };
   }
 

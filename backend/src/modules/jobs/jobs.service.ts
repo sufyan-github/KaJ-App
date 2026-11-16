@@ -60,6 +60,8 @@ import {
 } from "../users/public-profile.projection";
 import { EngagementService } from "../safety/engagement.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
+import { pageArgs, pageResult } from "../../common/api/cursor-page";
+import { CursorQueryDto } from "../../common/api/cursor-query.dto";
 import { disputeEligibility } from "../disputes/dispute-eligibility";
 
 // Anyone signed in may read these; every other state is private to the
@@ -237,9 +239,16 @@ export class JobsService {
           : undefined,
       },
       include: jobInclude,
-      orderBy: [{ is_featured: "desc" }, { published_at: "desc" }],
-      take: 50,
+      // id breaks ties so cursor pages never overlap or skip.
+      orderBy: [
+        { is_featured: "desc" },
+        { published_at: "desc" },
+        { id: "desc" },
+      ],
+      ...pageArgs({ limit: query.limit ?? 50, cursor: query.cursor }),
     });
+    const page = pageResult(jobs, query.limit ?? 50);
+    jobs.splice(page.items.length);
     const availabilityByJob = new Map<
       string,
       { timeCompatibility: string; availabilityCoverage: number | null }
@@ -286,6 +295,7 @@ export class JobsService {
           matchReasons: match.reasons,
           matchComponents: match.components,
         })),
+        nextCursor: page.nextCursor,
       };
     }
     return {
@@ -293,6 +303,7 @@ export class JobsService {
         ...serializeJob(job),
         ...availabilityByJob.get(job.id),
       })),
+      nextCursor: page.nextCursor,
     };
   }
 
@@ -511,9 +522,10 @@ export class JobsService {
     };
   }
 
-  async listAssignments(userId: string) {
+  async listAssignments(userId: string, query: CursorQueryDto = {}) {
     await this.reconcileDueAssignments(userId);
-    const assignments = await this.prisma.assignment.findMany({
+    const limit = query.limit ?? 100;
+    const rows = await this.prisma.assignment.findMany({
       where: {
         OR: [{ worker_user_id: userId }, { job: { poster_user_id: userId } }],
       },
@@ -521,10 +533,12 @@ export class JobsService {
         job: { select: { title: true, poster_user_id: true, status: true } },
         payments: { orderBy: { created_at: "desc" }, take: 1 },
       },
-      orderBy: { created_at: "desc" },
-      take: 100,
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
+      ...pageArgs({ limit, cursor: query.cursor }),
     });
+    const { items: assignments, nextCursor } = pageResult(rows, limit);
     return {
+      nextCursor,
       items: assignments.map((assignment) => ({
         ...serializeAssignment(assignment),
         title: assignment.job.title,

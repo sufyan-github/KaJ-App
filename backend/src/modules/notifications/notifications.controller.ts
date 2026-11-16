@@ -6,9 +6,11 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 
+import { CursorQueryDto } from "../../common/api/cursor-query.dto";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { Policy } from "../../common/policy/policy.decorator";
 import { Policies } from "../../common/policy/policy.types";
@@ -23,8 +25,11 @@ export class NotificationsController {
 
   @Get()
   @Policy(Policies.authenticated())
-  list(@CurrentUser() claims: AccessTokenClaims) {
-    return this.notifications.list(claims.sub);
+  list(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Query() query: CursorQueryDto,
+  ) {
+    return this.notifications.list(claims.sub, query);
   }
 
   @Post(":id/read")
