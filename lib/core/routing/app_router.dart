@@ -480,7 +480,13 @@ String? authRedirect(
       return location == AppRoutes.accessCheck ? null : AppRoutes.accessCheck;
     }
     if (!auth.subscriptionAccess) {
-      return location == AppRoutes.subscription ? null : AppRoutes.subscription;
+      if (location == AppRoutes.subscription) return null;
+      // Learning is free: without a subscription the learning screens stay
+      // open; everything else asks for the subscription as before.
+      if (auth.freeModules.contains('LEARN') && isLearningRoute(location)) {
+        return null;
+      }
+      return AppRoutes.subscription;
     }
     if (auth.needsPasswordSetup) {
       return {
@@ -513,6 +519,13 @@ String? authRedirect(
   }
   return null;
 }
+
+/// Screens that belong to the Learn module.
+bool isLearningRoute(String location) =>
+    location == AppRoutes.explore ||
+    location == AppRoutes.activity ||
+    location == AppRoutes.training ||
+    location.startsWith('${AppRoutes.training}/');
 
 String onboardingRouteForStep(OnboardingState state) => switch (state.step) {
   0 => AppRoutes.onboardingProfile,

@@ -185,6 +185,7 @@ class _AuthAccessScreenState extends ConsumerState<AuthAccessScreen> {
             allowed: overview.accessActive,
             needsPassword: !hasPassword && canSet,
             onboardingRequired: onboardingRequired,
+            freeModules: overview.freeModules,
           );
       context.go(AppRoutes.home);
     } on Object catch (error) {

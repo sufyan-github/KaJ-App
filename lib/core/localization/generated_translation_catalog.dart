@@ -1125,4 +1125,7 @@ const generatedEnglishTranslations = <String, String>{
   "এখনো কিছু শেখা শুরু করেননি": "You have not started learning yet",
   "শেখার সুযোগ থেকে একটি কোর্স বেছে নিন।":
       "Pick a course from the ways to learn.",
+  "শেখা বিনামূল্যে": "Learning is free",
+  "কোর্স ও শেখার সুযোগ সাবস্ক্রিপশন ছাড়াই ব্যবহার করা যায়।":
+      "Courses and ways to learn work without a subscription.",
 };

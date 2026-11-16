@@ -18,6 +18,7 @@ class AuthState {
     this.needsPasswordSetup = false,
     this.onboardingRequired = false,
     this.sessionExpired = false,
+    this.freeModules = const {},
   });
 
   final AuthStatus status;
@@ -37,6 +38,10 @@ class AuthState {
   /// the person signed out. The sign-in screen explains that.
   final bool sessionExpired;
 
+  /// Modules usable without a subscription (for example LEARN), from the
+  /// server. Empty means the whole app is behind the subscription.
+  final Set<String> freeModules;
+
   AuthState copyWith({
     AuthStatus? status,
     OtpChallenge? challenge,
@@ -47,6 +52,7 @@ class AuthState {
     bool? subscriptionAccess,
     bool? needsPasswordSetup,
     bool? onboardingRequired,
+    Set<String>? freeModules,
   }) {
     return AuthState(
       status: status ?? this.status,
@@ -57,6 +63,7 @@ class AuthState {
       subscriptionAccess: subscriptionAccess ?? this.subscriptionAccess,
       needsPasswordSetup: needsPasswordSetup ?? this.needsPasswordSetup,
       onboardingRequired: onboardingRequired ?? this.onboardingRequired,
+      freeModules: freeModules ?? this.freeModules,
     );
   }
 }
@@ -168,12 +175,14 @@ class AuthController extends StateNotifier<AuthState> {
     required bool allowed,
     required bool needsPassword,
     bool? onboardingRequired,
+    Set<String>? freeModules,
   }) {
     state = state.copyWith(
       accessChecked: true,
       subscriptionAccess: allowed,
       needsPasswordSetup: needsPassword,
       onboardingRequired: onboardingRequired,
+      freeModules: freeModules,
     );
   }
 

@@ -105,6 +105,26 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 ),
                 const SizedBox(height: KSpacing.md),
               ],
+              // Learning never needs a subscription.
+              if (!auth.subscriptionAccess &&
+                  auth.freeModules.contains('LEARN')) ...[
+                Card(
+                  key: const ValueKey('free-learning'),
+                  child: ListTile(
+                    leading: const Icon(
+                      Icons.school_outlined,
+                      color: KColors.primary,
+                    ),
+                    title: const KLocalizedText('শেখা বিনামূল্যে'),
+                    subtitle: const KLocalizedText(
+                      'কোর্স ও শেখার সুযোগ সাবস্ক্রিপশন ছাড়াই ব্যবহার করা যায়।',
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push(AppRoutes.exploreLearn),
+                  ),
+                ),
+                const SizedBox(height: KSpacing.md),
+              ],
               if (!auth.subscriptionAccess)
                 TextButton(
                   onPressed: () =>

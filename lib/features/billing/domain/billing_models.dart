@@ -208,12 +208,14 @@ class SubscriptionOverview {
     this.carrierStatus,
     this.cancelInstructions = const CancelInstructions(),
     this.operatorPlanMissing = false,
+    this.freeModules = const {},
   });
 
   factory SubscriptionOverview.fromJson(
     Map<String, dynamic> json,
   ) => SubscriptionOverview(
     accessActive: json['accessActive'] == true,
+    freeModules: _parseFreeModules(json),
     gateEnabled: json['gateEnabled'] == true,
     onlinePaymentsEnabled: json['onlinePaymentsEnabled'] == true,
     operatorStatusRefreshFailed: json['operatorStatusRefreshFailed'] == true,
@@ -257,6 +259,10 @@ class SubscriptionOverview {
   );
 
   final bool accessActive;
+
+  /// See [_parseFreeModules]. LEARN here means courses and learning
+  /// opportunities stay open without a subscription.
+  final Set<String> freeModules;
   final CancelInstructions cancelInstructions;
   final CarrierStatus? carrierStatus;
   final SubscriptionRecord? current;
@@ -313,4 +319,23 @@ class JobPaymentRecord {
   final String method;
   final String role;
   final String status;
+}
+
+/// Modules that never need a subscription, from `freeModules: [..]` or
+/// `moduleAccess: {MODULE: true}`. Empty on servers that send neither,
+/// which keeps the whole-app paywall as before.
+Set<String> _parseFreeModules(Map<String, dynamic> json) {
+  final list = json['freeModules'];
+  if (list is List) {
+    return list.whereType<String>().map((m) => m.toUpperCase()).toSet();
+  }
+  final access = json['moduleAccess'];
+  if (access is Map) {
+    return {
+      for (final entry in access.entries)
+        if (entry.value == true && entry.key is String)
+          (entry.key as String).toUpperCase(),
+    };
+  }
+  return const {};
 }
