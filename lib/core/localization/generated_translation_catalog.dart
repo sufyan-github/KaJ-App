@@ -1128,4 +1128,44 @@ const generatedEnglishTranslations = <String, String>{
   "শেখা বিনামূল্যে": "Learning is free",
   "কোর্স ও শেখার সুযোগ সাবস্ক্রিপশন ছাড়াই ব্যবহার করা যায়।":
       "Courses and ways to learn work without a subscription.",
+  // P1.1: mentor capability.
+  "মেন্টর": "Mentor",
+  "আবেদন পর্যালোচনায় আছে": "Your application is being reviewed",
+  "KAAJ আপনার দক্ষতা যাচাই করছে। সিদ্ধান্ত হলে নোটিফিকেশন পাবেন।":
+      "KAAJ is checking your skills. You will get a notification when it is decided.",
+  "মেন্টর প্রোফাইল স্থগিত": "Mentor profile suspended",
+  "এখন শেখার সুযোগ প্রকাশ বা শিক্ষার্থী নেওয়া যাবে না। বিস্তারিত জানতে সহায়তা কেন্দ্রে যোগাযোগ করুন।":
+      "You cannot publish ways to learn or take learners right now. Contact the help centre for details.",
+  "পরিবর্তন সংরক্ষণ করা যায়নি।": "Could not save the change.",
+  "আপনি KAAJ মেন্টর": "You are a KAAJ mentor",
+  "আপনার যাচাই করা দক্ষতায় শেখার সুযোগ প্রকাশ করতে পারবেন।":
+      "You can publish ways to learn in your verified skills.",
+  "নতুন শিক্ষার্থী নিচ্ছি": "Taking new learners",
+  "বন্ধ করলে আপনার শেখার সুযোগে নতুন আবেদন আসবে না।":
+      "When off, your ways to learn get no new applications.",
+  "অন্তত একটি দক্ষতা বেছে নিন যা শেখাতে পারবেন।":
+      "Choose at least one skill you can teach.",
+  "আবেদন পাঠানো যায়নি। আবার চেষ্টা করুন।":
+      "Could not send the application. Try again.",
+  "আগের আবেদন গ্রহণ করা হয়নি": "Your last application was not accepted",
+  "প্রয়োজনীয় তথ্য যোগ করে আবার আবেদন করতে পারেন।":
+      "Add the missing details and apply again.",
+  "মেন্টর হোন": "Become a mentor",
+  "আপনি যে কাজে দক্ষ, তা অন্যদের শেখান: প্রশিক্ষণ বা শিক্ষানবিশি দিন। KAAJ আপনার পরিচয় ও দক্ষতা যাচাই করে অনুমোদন দেবে।":
+      "Teach others the work you are good at, through training or an apprenticeship. KAAJ checks your identity and skills before approving.",
+  "যে দক্ষতা শেখাতে পারবেন (সর্বোচ্চ ৫টি)": "Skills you can teach (up to 5)",
+  "দক্ষতা খুঁজুন": "Search skills",
+  "অভিজ্ঞতা (বছর)": "Experience (years)",
+  "সঠিক বছর লিখুন।": "Enter a valid number of years.",
+  "কীভাবে শেখাবেন, সংক্ষেপে": "How you will teach, in short",
+  "কমপক্ষে ২০ অক্ষরে লিখুন।": "Write at least 20 characters.",
+  "অনুমোদনের পর শিক্ষার্থী নেব": "Take learners once approved",
+  "মেন্টর প্রোফাইল": "Mentor profile",
+  "শিক্ষার্থী নেওয়া চালু বা বন্ধ করুন": "Turn taking learners on or off",
+  "আপনার দক্ষতা অন্যদের শেখান": "Teach others your skills",
+  "দক্ষতার প্রমাণ হিসেবে অন্তত একটি ছবি দিন।":
+      "Add at least one photo as proof of your skill.",
+  "দক্ষতার প্রমাণ (১–৫টি ছবি)": "Proof of skill (1–5 photos)",
+  "সার্টিফিকেট, প্রশিক্ষণের কাগজ বা আপনার কাজের ছবি। শুধু KAAJ-এর যাচাইকারী দেখবেন।":
+      "A certificate, training papers or photos of your work. Only KAAJ reviewers see them.",
 };

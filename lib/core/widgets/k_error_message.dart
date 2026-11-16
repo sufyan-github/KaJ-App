@@ -75,6 +75,11 @@ String? serverCodeMessage(AppLocalizations l10n, Failure failure) =>
       'DISPUTE_NOT_ELIGIBLE' => l10n.errorDisputeNotEligible,
       'DISPUTE_WINDOW_CLOSED' => l10n.errorDisputeWindowClosed,
       'DISPUTE_EXISTS' => l10n.errorDisputeExists,
+      'MENTOR_APPROVAL_REQUIRED' => l10n.errorMentorApprovalRequired,
+      'MENTOR_SUSPENDED' => l10n.errorMentorSuspended,
+      'IDENTITY_REQUIRED' => l10n.errorIdentityRequired,
+      'MENTOR_APPLICATION_PENDING' => l10n.errorMentorApplicationPending,
+      'MENTOR_ALREADY_APPROVED' => l10n.errorMentorAlreadyApproved,
       // Until the server sends SLOT_UNAVAILABLE it sends a plain CONFLICT
       // with this reason.
       'CONFLICT' when failure.message.contains('not available for this slot') =>

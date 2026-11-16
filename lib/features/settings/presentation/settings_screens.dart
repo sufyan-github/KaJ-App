@@ -33,6 +33,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     // The server's active role, not the onboarding draft on this phone.
     final serverRole = ref.watch(meRoleProvider);
     final role = serverRole ?? KaajRole.customer;
+    final isMentor =
+        ref.watch(meProvider).valueOrNull?.hasCapability('MENTOR') ?? false;
     final auth = ref.watch(authControllerProvider);
     final locale = ref.watch(localeControllerProvider);
     return Scaffold(
@@ -124,6 +126,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ],
                   ),
                 ),
+              ),
+              // Mentor is a capability next to the home mode: approval
+              // adds it, it never replaces client or worker.
+              _SettingsTile(
+                key: const ValueKey('settings-mentor'),
+                icon: Icons.school_outlined,
+                title: isMentor ? 'মেন্টর প্রোফাইল' : 'মেন্টর হোন',
+                subtitle: isMentor
+                    ? 'শিক্ষার্থী নেওয়া চালু বা বন্ধ করুন'
+                    : 'আপনার দক্ষতা অন্যদের শেখান',
+                onTap: () => context.push(AppRoutes.mentor),
               ),
               if (role == KaajRole.worker)
                 _SettingsTile(
@@ -962,6 +975,7 @@ class _SettingsTile extends StatelessWidget {
     required this.title,
     required this.onTap,
     this.subtitle,
+    super.key,
   });
 
   final IconData icon;

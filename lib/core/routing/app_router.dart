@@ -18,6 +18,7 @@ import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/jobs/presentation/screens/job_alerts_screen.dart';
 import '../../features/jobs/presentation/screens/job_detail_screen.dart';
 import '../../features/jobs/presentation/screens/jobs_screens.dart';
+import '../../features/mentor/presentation/mentor_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/onboarding/domain/onboarding_state.dart';
 import '../../features/onboarding/presentation/controllers/onboarding_controller.dart';
@@ -94,6 +95,7 @@ abstract final class AppRoutes {
   static const exploreLearn = '/explore?section=learn';
   static const activity = '/activity';
   static const activityLearning = '/activity?section=learning';
+  static const mentor = '/mentor';
 
   static String trainingCourse(String id) => '/training/courses/$id';
   static String trainingTest(String id) => '/training/courses/$id/test';
@@ -429,6 +431,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => ExploreScreen(
           initial: ExploreSection.parse(state.uri.queryParameters['section']),
         ),
+      ),
+      GoRoute(
+        path: AppRoutes.mentor,
+        builder: (context, state) => const MentorScreen(),
       ),
       GoRoute(
         path: AppRoutes.activity,

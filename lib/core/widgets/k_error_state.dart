@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../errors/failure.dart';
 import '../localization/kaaj_localizations.dart';
 import '../theme/app_theme.dart';
+import 'k_error_message.dart';
 import 'k_localized_text.dart';
 import 'k_primary_button.dart';
 
@@ -65,6 +67,11 @@ class KErrorState extends StatelessWidget {
 }
 
 String _displayMessage(BuildContext context, Failure failure) {
+  // A stable server code the app has its own words for comes first.
+  final known = failure.code == null
+      ? null
+      : serverCodeMessage(AppLocalizations.of(context), failure);
+  if (known != null) return known;
   if (KaajLocalizations.isEnglish(context) ||
       RegExp(r'[\u0980-\u09FF]').hasMatch(failure.message)) {
     return failure.message;

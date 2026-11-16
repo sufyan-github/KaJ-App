@@ -332,4 +332,22 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get errorDisputeExists =>
       'এই কাজের জন্য আগেই একটি বিরোধ খোলা আছে। বিরোধ অংশে অনুসরণ করুন।';
+
+  @override
+  String get errorMentorApprovalRequired =>
+      'শুধু অনুমোদিত মেন্টর এটি করতে পারেন। আগে মেন্টর হওয়ার আবেদন করুন।';
+
+  @override
+  String get errorMentorSuspended => 'আপনার মেন্টর প্রোফাইল স্থগিত আছে।';
+
+  @override
+  String get errorIdentityRequired =>
+      'আগে আপনার পরিচয় যাচাই করুন (NID ও সেলফি)।';
+
+  @override
+  String get errorMentorApplicationPending =>
+      'আপনার মেন্টর আবেদন পর্যালোচনায় আছে।';
+
+  @override
+  String get errorMentorAlreadyApproved => 'আপনি ইতিমধ্যে অনুমোদিত মেন্টর।';
 }

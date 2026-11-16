@@ -655,6 +655,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A dispute is already open for this job. Follow it in Disputes.'**
   String get errorDisputeExists;
+
+  /// No description provided for @errorMentorApprovalRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Only approved mentors can do this. Apply to become a mentor first.'**
+  String get errorMentorApprovalRequired;
+
+  /// No description provided for @errorMentorSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Your mentor profile is suspended.'**
+  String get errorMentorSuspended;
+
+  /// No description provided for @errorIdentityRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your identity (NID and selfie) first.'**
+  String get errorIdentityRequired;
+
+  /// No description provided for @errorMentorApplicationPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Your mentor application is being reviewed.'**
+  String get errorMentorApplicationPending;
+
+  /// No description provided for @errorMentorAlreadyApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'You are already an approved mentor.'**
+  String get errorMentorAlreadyApproved;
 }
 
 class _AppLocalizationsDelegate

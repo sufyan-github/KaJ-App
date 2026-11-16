@@ -96,5 +96,10 @@
   "errorSlotUnavailable": "এই সময়ে আপনি খালি নেই, অথবা সময়টি আর খালি নেই। আপনার কাজের সময় দেখুন বা অন্য সময় বেছে নিন।",
   "errorDisputeNotEligible": "এই পর্যায়ে এই কাজের জন্য বিরোধ খোলা যাবে না।",
   "errorDisputeWindowClosed": "বিরোধ খোলার সাত দিনের সময় শেষ হয়ে গেছে।",
-  "errorDisputeExists": "এই কাজের জন্য আগেই একটি বিরোধ খোলা আছে। বিরোধ অংশে অনুসরণ করুন।"
+  "errorDisputeExists": "এই কাজের জন্য আগেই একটি বিরোধ খোলা আছে। বিরোধ অংশে অনুসরণ করুন।",
+  "errorMentorApprovalRequired": "শুধু অনুমোদিত মেন্টর এটি করতে পারেন। আগে মেন্টর হওয়ার আবেদন করুন।",
+  "errorMentorSuspended": "আপনার মেন্টর প্রোফাইল স্থগিত আছে।",
+  "errorIdentityRequired": "আগে আপনার পরিচয় যাচাই করুন (NID ও সেলফি)।",
+  "errorMentorApplicationPending": "আপনার মেন্টর আবেদন পর্যালোচনায় আছে।",
+  "errorMentorAlreadyApproved": "আপনি ইতিমধ্যে অনুমোদিত মেন্টর।"
 }

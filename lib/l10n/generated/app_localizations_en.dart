@@ -337,4 +337,23 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorDisputeExists =>
       'A dispute is already open for this job. Follow it in Disputes.';
+
+  @override
+  String get errorMentorApprovalRequired =>
+      'Only approved mentors can do this. Apply to become a mentor first.';
+
+  @override
+  String get errorMentorSuspended => 'Your mentor profile is suspended.';
+
+  @override
+  String get errorIdentityRequired =>
+      'Verify your identity (NID and selfie) first.';
+
+  @override
+  String get errorMentorApplicationPending =>
+      'Your mentor application is being reviewed.';
+
+  @override
+  String get errorMentorAlreadyApproved =>
+      'You are already an approved mentor.';
 }
