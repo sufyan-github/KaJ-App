@@ -35,6 +35,7 @@ const featureFlags = [
   "worker_rates_customer",
   "disputes_enabled",
   "referral_enabled",
+  "module_entitlements_enabled",
 ] as const;
 
 const configSettings = [

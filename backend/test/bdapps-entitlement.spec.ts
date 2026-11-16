@@ -300,10 +300,13 @@ describe("carrier-driven entitlement", () => {
 
   it("re-checks the carrier from the feature gate when no subscription is active", async () => {
     const { operator, prisma, service } = harness();
-    prisma.featureFlag.findUnique.mockResolvedValue({
-      is_enabled: true,
-      rollout_percent: 100,
-    });
+    // Only the subscription gate is on (not module entitlements).
+    prisma.featureFlag.findUnique.mockImplementation(
+      async ({ where }: { where: { key: string } }) =>
+        where.key === "subscriptions_enabled"
+          ? { is_enabled: true, rollout_percent: 100 }
+          : null,
+    );
     operator.checkEligibility.mockResolvedValue({
       carrierStatus: "REGISTERED",
       operatorCode: "ROBI",
@@ -333,10 +336,13 @@ describe("carrier-driven entitlement", () => {
 
   it("does not poll the carrier from the gate within the 60 s throttle", async () => {
     const { operator, prisma, service } = harness();
-    prisma.featureFlag.findUnique.mockResolvedValue({
-      is_enabled: true,
-      rollout_percent: 100,
-    });
+    // Only the subscription gate is on (not module entitlements).
+    prisma.featureFlag.findUnique.mockImplementation(
+      async ({ where }: { where: { key: string } }) =>
+        where.key === "subscriptions_enabled"
+          ? { is_enabled: true, rollout_percent: 100 }
+          : null,
+    );
     prisma.userOperatorIdentity.findUnique.mockResolvedValue({
       last_checked_at: new Date(),
       operator: { code: "ROBI" },

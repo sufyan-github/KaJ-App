@@ -47,7 +47,11 @@ import {
   UpdateSubscriptionDto,
   UpdateSubscriptionPlanDto,
 } from "./dto/subscriptions.dto";
-import { SubscriptionFeatures } from "./subscription-feature";
+import {
+  FREE_MODULES,
+  moduleForFeature,
+  SubscriptionFeatures,
+} from "./subscription-feature";
 
 const subscriptionInclude = {
   plan: true,
@@ -366,6 +370,9 @@ export class SubscriptionsService {
   }
 
   async accessFor(userId: string, featureKey: string) {
+    // Learn and Community are free whatever the flags or rules say.
+    if (FREE_MODULES.includes(moduleForFeature(featureKey)))
+      return { allowed: true, gated: false };
     if (!(await this.gateEnabled())) return { allowed: true, gated: false };
     const rule = await this.prisma.subscriptionAccessRule.findUnique({
       where: { feature_key: featureKey },
@@ -373,8 +380,12 @@ export class SubscriptionsService {
     if (!rule?.is_active || !rule.requires_active_subscription)
       return { allowed: true, gated: false };
     await this.expireSubscriptions(userId);
-    if ((await this.activeSubscription(userId)) !== null)
-      return { allowed: true, gated: true };
+    const active = await this.activeSubscription(userId);
+    if (active !== null)
+      return {
+        allowed: await this.planCovers(active.plan_id, featureKey),
+        gated: true,
+      };
     if (!this.operatorPort.managesRemoteBilling)
       return { allowed: false, gated: true };
     // Daily carrier renewals are only visible through status: re-check (throttled)
@@ -387,10 +398,38 @@ export class SubscriptionsService {
       await this.ensureOperatorHint(userId, user.phone_e164);
       await this.refreshOperatorStatus(userId, user.phone_e164);
     }
+    const refreshed = await this.activeSubscription(userId);
     return {
-      allowed: (await this.activeSubscription(userId)) !== null,
+      allowed:
+        refreshed !== null &&
+        (await this.planCovers(refreshed.plan_id, featureKey)),
       gated: true,
     };
+  }
+
+  /**
+   * With module_entitlements_enabled on, a plan unlocks only the features in
+   * its feature_keys (an empty list still means "every feature", as for the
+   * plans created before). Off — the default — any active plan unlocks
+   * everything, as before.
+   */
+  private async planCovers(planId: string, featureKey: string) {
+    if (!(await this.moduleEntitlementsEnabled())) return true;
+    const plan = await this.prisma.subscriptionPlan.findUnique({
+      where: { id: planId },
+      select: { feature_keys: true },
+    });
+    return (
+      plan !== null &&
+      (plan.feature_keys.length === 0 || plan.feature_keys.includes(featureKey))
+    );
+  }
+
+  private async moduleEntitlementsEnabled() {
+    const flag = await this.prisma.featureFlag.findUnique({
+      where: { key: "module_entitlements_enabled" },
+    });
+    return flag?.is_enabled === true && flag.rollout_percent === 100;
   }
 
   async adminOverview() {
