@@ -18,6 +18,8 @@ import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/jobs/presentation/screens/job_alerts_screen.dart';
 import '../../features/jobs/presentation/screens/job_detail_screen.dart';
 import '../../features/jobs/presentation/screens/jobs_screens.dart';
+import '../../features/learning/presentation/learning_detail_screen.dart';
+import '../../features/learning/presentation/publish_learning_screen.dart';
 import '../../features/mentor/presentation/mentor_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/onboarding/domain/onboarding_state.dart';
@@ -96,6 +98,9 @@ abstract final class AppRoutes {
   static const activity = '/activity';
   static const activityLearning = '/activity?section=learning';
   static const mentor = '/mentor';
+  static const learningOpportunityPath = '/learn/opportunities/:id';
+  static const publishLearning = '/learn/new';
+  static String learningOpportunity(String id) => '/learn/opportunities/$id';
 
   static String trainingCourse(String id) => '/training/courses/$id';
   static String trainingTest(String id) => '/training/courses/$id/test';
@@ -431,6 +436,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => ExploreScreen(
           initial: ExploreSection.parse(state.uri.queryParameters['section']),
         ),
+      ),
+      // Declared before the detail path so "new" is not read as an id.
+      GoRoute(
+        path: AppRoutes.publishLearning,
+        builder: (context, state) => const PublishLearningScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.learningOpportunityPath,
+        builder: (context, state) =>
+            LearningDetailScreen(opportunityId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: AppRoutes.mentor,

@@ -5,9 +5,9 @@ import '../../core/localization/kaaj_localizations.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/k_localized_text.dart';
 import '../jobs/presentation/screens/jobs_screens.dart';
+import '../learning/presentation/learn_explore.dart';
 import '../onboarding/domain/onboarding_state.dart';
 import '../profile/presentation/controllers/me_provider.dart';
-import '../training/presentation/screens/training_catalog_screen.dart';
 
 /// The kinds of things Explore can show. More (people, experts, ideas,
 /// businesses, events) are added as those domains arrive.
@@ -121,10 +121,8 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
           isWorker
               ? JobFeedScreen(embedded: true, searchQuery: _query)
               : WorkerDirectoryScreen(embedded: true, searchQuery: _query),
-        ExploreSection.learn => TrainingCatalogScreen(
-          embedded: true,
-          searchQuery: _query,
-        ),
+        // Learning with a mentor, then online courses.
+        ExploreSection.learn => LearnExploreBody(searchQuery: _query),
       },
     );
   }

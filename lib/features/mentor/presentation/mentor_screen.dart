@@ -17,6 +17,7 @@ import '../../../core/widgets/k_primary_button.dart';
 import '../../../core/widgets/k_text_field.dart';
 import '../../catalog/domain/entities/catalog_skill.dart';
 import '../../catalog/presentation/controllers/catalog_providers.dart';
+import '../../learning/presentation/publish_learning_screen.dart';
 import '../../profile/presentation/controllers/me_provider.dart';
 import '../domain/mentor_models.dart';
 import 'mentor_providers.dart';
@@ -164,6 +165,9 @@ class _ApprovedPanelState extends ConsumerState<_ApprovedPanel> {
           ),
         ],
         const SizedBox(height: KSpacing.sm),
+        const SizedBox(height: KSpacing.md),
+        const MyLearningOpportunities(),
+        const SizedBox(height: KSpacing.md),
         SwitchListTile(
           key: const ValueKey('mentor-accepting'),
           title: const KLocalizedText('নতুন শিক্ষার্থী নিচ্ছি'),

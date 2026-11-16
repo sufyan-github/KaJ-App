@@ -1168,4 +1168,72 @@ const generatedEnglishTranslations = <String, String>{
   "দক্ষতার প্রমাণ (১–৫টি ছবি)": "Proof of skill (1–5 photos)",
   "সার্টিফিকেট, প্রশিক্ষণের কাগজ বা আপনার কাজের ছবি। শুধু KAAJ-এর যাচাইকারী দেখবেন।":
       "A certificate, training papers or photos of your work. Only KAAJ reviewers see them.",
+  // P1.2: learning opportunities.
+  "মেন্টরের সাথে": "With a mentor",
+  "অনলাইন কোর্স": "Online courses",
+  "শেখার সুযোগ লোড করা যায়নি।": "Could not load the ways to learn.",
+  "এখনো কোনো শেখার সুযোগ নেই": "No ways to learn yet",
+  "মেন্টররা প্রশিক্ষণ বা শিক্ষানবিশি প্রকাশ করলে এখানে দেখা যাবে।":
+      "Trainings and apprenticeships from mentors will show here.",
+  "কোন ধরনের কাজ শেখাবেন, তা বেছে নিন।":
+      "Choose the type of work you will teach.",
+  "অন্তত একটি দক্ষতা বেছে নিন।": "Choose at least one skill.",
+  "কোথায় শেখাবেন, সেই এলাকা বেছে নিন।":
+      "Choose the area where you will teach.",
+  "শেষের সময় শুরুর পরে হতে হবে।": "The end must be after the start.",
+  "শেখার সুযোগ প্রকাশ করা যায়নি। আবার চেষ্টা করুন।":
+      "Could not publish. Try again.",
+  "শেখার সুযোগ প্রকাশ করুন": "Publish a way to learn",
+  "নির্দিষ্ট সময়ে কয়েকটি সেশনে শেখানো।":
+      "Teaching in a few sessions at set times.",
+  "আপনার সাথে কাজ করতে করতে শেখা। এটি চাকরি নয়।":
+      "Learning by working alongside you. It is not a job.",
+  "শিরোনাম": "Title",
+  "কমপক্ষে ৩ অক্ষর লিখুন।": "Write at least 3 characters.",
+  "কী শেখাবেন ও কীভাবে": "What you will teach and how",
+  "কমপক্ষে ১০ অক্ষর লিখুন।": "Write at least 10 characters.",
+  "শর্ত": "Terms",
+  "শিক্ষার্থী মোট ভাতা পাবেন (টাকা)":
+      "Total allowance the learner receives (Taka)",
+  "শিক্ষার্থী মোট ফি দেবেন (টাকা)": "Total fee the learner pays (Taka)",
+  "সঠিক টাকার পরিমাণ লিখুন।": "Enter a valid amount.",
+  "কোথায় শেখাবেন": "Where you will teach",
+  "সময় মানিয়ে নেওয়া যায়": "Flexible hours",
+  "কতজন শিক্ষার্থী নেবেন": "How many learners you will take",
+  "১ থেকে ১০০ জনের মধ্যে লিখুন।": "Enter a number from 1 to 100.",
+  "শিক্ষানবিশি": "Apprenticeship",
+  "নির্দিষ্ট জায়গায়": "At a set place",
+  "বাড়ি থেকে": "From home",
+  "অনলাইনে": "Online",
+  "জায়গায় ও অনলাইনে": "In person and online",
+  "বিনামূল্যে": "Free",
+  "ফি দিতে হবে": "You pay a fee",
+  "ভাতা পাবেন": "You receive an allowance",
+  "ভাতা নেই": "No allowance",
+  "শেখার সুযোগ": "Way to learn",
+  "খালি আসন": "Seats left",
+  "এটি আপনার প্রকাশ করা শেখার সুযোগ।": "You published this.",
+  "আবেদন করেছেন": "You have applied",
+  "সব আসন পূর্ণ হয়ে গেছে।": "All seats are taken.",
+  "এই সুযোগে এখন আবেদন নেওয়া হচ্ছে না।": "Applications are closed for now.",
+  "শর্ত দেখে আবেদন করুন": "See the terms and apply",
+  "আবেদন পাঠানো হয়েছে। মেন্টর গ্রহণ করলে জানানো হবে।":
+      "Application sent. You will be told when the mentor accepts.",
+  "আবেদনের আগে শর্ত দেখুন": "Check the terms before applying",
+  "আমি শর্তগুলো বুঝেছি": "I understand the terms",
+  "মেন্টরকে বার্তা (ঐচ্ছিক)": "Message to the mentor (optional)",
+  "আমার শেখার সুযোগ": "My ways to learn",
+  "এখনো কিছু প্রকাশ করেননি। \"নতুন\" চেপে প্রথম প্রশিক্ষণ বা শিক্ষানবিশি দিন।":
+      "Nothing published yet. Tap \"New\" to offer your first training or apprenticeship.",
+  "এই শেখার জন্য আপনাকে কোনো টাকা দিতে হবে না, আর আপনি কোনো ভাতাও পাবেন না।":
+      "You pay nothing for this, and you receive no allowance.",
+  "এই শেখার জন্য আপনাকে মেন্টরকে ফি দিতে হবে। টাকা দেওয়ার আগে শর্ত মিলিয়ে নিন।":
+      "You pay the mentor a fee for this. Check the terms before paying.",
+  "শেখার সময় মেন্টর আপনাকে ভাতা দেবেন। এটি চাকরি বা বেতন নয়।":
+      "The mentor pays you an allowance while you learn. It is not a job or a wage.",
+  "এখানে কাজ করে শিখবেন, কিন্তু কোনো ভাতা বা বেতন নেই। এটি চাকরি নয়।":
+      "You learn by doing the work, with no allowance or wage. It is not a job.",
+  "আপনি এই শেখার সুযোগে আগেই আবেদন করেছেন।":
+      "You have already applied for this way to learn.",
+  "মোট আবেদন": "Applications",
 };

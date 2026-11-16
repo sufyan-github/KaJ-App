@@ -33,6 +33,7 @@ Map<String, dynamic> _worker(String id, String name) => {
 };
 
 FakeApi _api() => FakeApi()
+  ..on('GET /learning-opportunities', FakeResponse.data({'items': <Object>[]}))
   ..on(
     'GET /jobs',
     FakeResponse.data({
@@ -84,6 +85,10 @@ void main() {
 
       await tester.tap(find.byKey(const ValueKey('explore-learn')));
       await tester.pumpAndSettle();
+      // Learning with a mentor comes first; the courses are next to it.
+      expect(find.text('With a mentor'), findsOneWidget);
+      await tester.tap(find.text('Online courses'));
+      await tester.pumpAndSettle();
       expect(find.text('Nothing matches your search.'), findsOneWidget);
 
       await tester.enterText(
@@ -123,6 +128,9 @@ void main() {
         home: const ExploreScreen(initial: ExploreSection.learn),
         overrides: [meAs(KaajRole.customer)],
       );
+      expect(find.text('No ways to learn yet'), findsOneWidget);
+      await tester.tap(find.text('Online courses'));
+      await tester.pumpAndSettle();
       expect(find.text('Safe home cleaning'), findsOneWidget);
     });
 

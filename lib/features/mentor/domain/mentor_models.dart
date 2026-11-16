@@ -36,7 +36,7 @@ class MentorSkill {
       languageCode == 'en' && nameEn.isNotEmpty ? nameEn : nameBn;
 }
 
-/// The person's mentor application and settings.
+/// The persons mentor application and settings.
 class MentorProfile {
   const MentorProfile({
     this.status = MentorStatus.none,

@@ -10,7 +10,7 @@ class MentorRepository {
 
   final Dio _dio;
 
-  /// The person's mentor state. A server without `/me/mentor` yet answers
+  /// The persons mentor state. A server without `/me/mentor` yet answers
   /// 404; the status then comes from the profile and roles instead.
   Future<MentorProfile> mine() async {
     try {
