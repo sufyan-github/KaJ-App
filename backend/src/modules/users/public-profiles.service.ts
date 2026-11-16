@@ -4,7 +4,13 @@ import {
   NotFoundException,
   Optional,
 } from "@nestjs/common";
-import { PhotoVisibility, Prisma, RoleMode, UserStatus } from "@prisma/client";
+import {
+  MentorStatus,
+  PhotoVisibility,
+  Prisma,
+  RoleMode,
+  UserStatus,
+} from "@prisma/client";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { STORAGE_PORT, StoragePort } from "../../infra/storage/storage.port";
@@ -26,6 +32,10 @@ const workerPublicSelect = {
       show_full_name: true,
       hide_precise_area: true,
       discoverable: true,
+      mentor_status: true,
+      mentor_accepting: true,
+      mentor_bio: true,
+      mentor_years_experience: true,
       primary_location: { select: { name_en: true, name_bn: true } },
     },
   },
@@ -40,6 +50,7 @@ const workerPublicSelect = {
     select: {
       level: true,
       is_verified: true,
+      can_mentor: true,
       skill: { select: { id: true, name_en: true, name_bn: true } },
     },
   },
@@ -219,6 +230,18 @@ export class PublicProfilesService {
           hidePreciseArea: user.profile.hide_precise_area,
         },
       }),
+      // Approved mentors also show what they teach (P1.1).
+      mentor:
+        user.profile.mentor_status === MentorStatus.APPROVED
+          ? {
+              accepting: user.profile.mentor_accepting,
+              bio: user.profile.mentor_bio,
+              yearsExperience: user.profile.mentor_years_experience,
+              skillIds: user.skills
+                .filter((item) => item.can_mentor)
+                .map((item) => item.skill.id),
+            }
+          : null,
       badges: (user.badges ?? []).map(({ badge }) => ({
         slug: badge.slug,
         nameEn: badge.name_en,

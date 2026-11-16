@@ -65,3 +65,15 @@ the same fields plus `httpStatus`.
 | 429  | `RATE_LIMITED`                               | `error.common.rate_limited`              | `Retry-After` header                                                                                                                                         |
 | 500  | `INTERNAL_SERVER_ERROR`                      | `error.common.internal`                  | retryable                                                                                                                                                    |
 | 503  | `SERVICE_UNAVAILABLE`                        | `error.common.service_unavailable`       | retryable                                                                                                                                                    |
+
+## Learn (P1)
+
+| HTTP | code                         | messageKey                         | English                                                            | বাংলা                                                              |
+| ---- | ---------------------------- | ---------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| 403  | `MENTOR_APPROVAL_REQUIRED`   | `error.mentor.approval_required`   | Only approved mentors can do this. Apply to become a mentor first. | শুধু অনুমোদিত মেন্টর এটি করতে পারেন। আগে মেন্টর হওয়ার আবেদন করুন। |
+| 403  | `MENTOR_SUSPENDED`           | `error.mentor.suspended`           | Your mentor profile is suspended.                                  | আপনার মেন্টর প্রোফাইল স্থগিত আছে।                                  |
+| 409  | `IDENTITY_REQUIRED`          | `error.mentor.identity_required`   | Verify your identity (NID and selfie) before applying to mentor.   | মেন্টর হওয়ার আবেদনের আগে পরিচয় (এনআইডি ও সেলফি) যাচাই করুন।      |
+| 409  | `MENTOR_APPLICATION_PENDING` | `error.mentor.application_pending` | Your mentor application is being reviewed.                         | আপনার মেন্টর আবেদন যাচাই করা হচ্ছে।                                |
+| 409  | `MENTOR_ALREADY_APPROVED`    | `error.mentor.already_approved`    | You are already an approved mentor.                                | আপনি ইতিমধ্যে অনুমোদিত মেন্টর।                                     |
+| 400  | `USE_MENTOR_APPLICATION`     | `error.mentor.use_application`     | Apply to become a mentor with POST /me/mentor/application.         | মেন্টর হতে মেন্টর আবেদন ফর্ম ব্যবহার করুন।                         |
+| 400  | `REVIEW_SUBJECT_UNSUPPORTED` | `error.review.subject_unsupported` | Reviews of this kind are not available yet.                        | এই ধরনের রিভিউ এখনো চালু হয়নি।                                    |

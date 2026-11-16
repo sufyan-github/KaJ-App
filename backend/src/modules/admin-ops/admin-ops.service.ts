@@ -24,6 +24,7 @@ import {
 } from "@prisma/client";
 
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
+import { applyMentorDecision } from "../mentors/mentor-decision";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { STORAGE_PORT, StoragePort } from "../../infra/storage/storage.port";
 import { CLOCK, Clock } from "../../common/time/clock";
@@ -610,6 +611,7 @@ export class AdminOpsService {
       // Actionable by default: oldest-first with no filter let 100 decided
       // requests hide every new one.
       status: query.status ?? VerificationStatus.PENDING,
+      ...(query.kind ? { kind: query.kind } : {}),
       ...(query.search
         ? {
             user: {
@@ -626,7 +628,14 @@ export class AdminOpsService {
       orderBy: [{ created_at: "asc" }, { id: "asc" }],
       include: {
         user: {
-          include: { profile: true },
+          include: {
+            profile: true,
+            // What a mentor applicant offers to teach.
+            skills: {
+              where: { can_mentor: true },
+              include: { skill: true },
+            },
+          },
         },
         documents: {
           where: { purged_at: null, document: { deleted_at: null } },
@@ -662,6 +671,20 @@ export class AdminOpsService {
           name: item.user.profile?.display_name ?? "Unknown",
           trustLevel: item.user.profile?.trust_level ?? TrustLevel.NONE,
         },
+        mentorApplication:
+          item.kind === VerificationKind.MENTOR
+            ? {
+                bio: item.user.profile?.mentor_bio ?? null,
+                yearsExperience:
+                  item.user.profile?.mentor_years_experience ?? null,
+                skills: item.user.skills.map((row) => ({
+                  skillId: row.skill_id,
+                  nameEn: row.skill.name_en,
+                  nameBn: row.skill.name_bn,
+                  level: row.level,
+                })),
+              }
+            : null,
         documents: item.documents.map(({ document }) => ({
           id: document.id,
           kind: document.kind,
@@ -757,6 +780,13 @@ export class AdminOpsService {
           where: { user_id: request.user_id },
           data: { trust_level: trustLevel },
         });
+      if (request.kind === VerificationKind.MENTOR)
+        await applyMentorDecision(
+          transaction,
+          request.user_id,
+          input.status === VerificationStatus.APPROVED,
+          decidedAt,
+        );
       if (
         candidateTrust &&
         request.kind === VerificationKind.IDENTITY &&

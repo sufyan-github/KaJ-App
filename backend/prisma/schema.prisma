@@ -18,6 +18,40 @@ enum RoleMode {
   CUSTOMER
   WORKER
   BUSINESS
+  /// Granted by an admin approving a mentor application, never self-activated.
+  MENTOR
+}
+
+/// Mentor application lifecycle on profiles.mentor_status.
+enum MentorStatus {
+  NONE
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+/// What a jobs row offers. WORK is paid work (the marketplace); the others
+/// are learning opportunities published by approved mentors.
+enum OpportunityType {
+  WORK
+  TRAINING
+  APPRENTICESHIP
+}
+
+/// Money terms of a learning opportunity, for the participant.
+enum ParticipantTerms {
+  FREE
+  PAID_BY_PARTICIPANT
+  STIPEND
+  UNPAID
+}
+
+enum WorkArrangement {
+  ON_SITE
+  HOME_BASED
+  REMOTE
+  HYBRID
 }
 
 enum TrustLevel {
@@ -265,6 +299,8 @@ enum VerificationKind {
   IDENTITY
   SKILL
   BUSINESS
+  /// A mentor application: skill evidence for the skills they will teach.
+  MENTOR
 }
 
 enum DisputeStatus {
@@ -527,32 +563,40 @@ model OtpChallenge {
 }
 
 model Profile {
-  id                  String            @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  user_id             String            @unique @db.Uuid
-  display_name        String
-  photo_key           String?
-  bio                 String?
-  gender              Gender?
-  birth_year          Int?
-  primary_location_id String?           @db.Uuid
-  lat                 Decimal?          @db.Decimal(9, 6)
-  lng                 Decimal?          @db.Decimal(9, 6)
-  trust_level         TrustLevel        @default(NONE)
-  locale              String            @default("bn")
+  id                      String            @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id                 String            @unique @db.Uuid
+  display_name            String
+  photo_key               String?
+  bio                     String?
+  gender                  Gender?
+  birth_year              Int?
+  primary_location_id     String?           @db.Uuid
+  lat                     Decimal?          @db.Decimal(9, 6)
+  lng                     Decimal?          @db.Decimal(9, 6)
+  trust_level             TrustLevel        @default(NONE)
+  locale                  String            @default("bn")
   /// Privacy (P0.7). Defaults keep the earlier public behaviour: photo
   /// shown, name masked ("Rahima K."), ~500 m point, listed in the directory.
-  photo_visibility    PhotoVisibility   @default(EVERYONE)
-  show_full_name      Boolean           @default(false)
-  hide_precise_area   Boolean           @default(false)
-  allow_messages_from MessagePermission @default(ANYONE)
-  discoverable        Boolean           @default(true)
-  created_at          DateTime          @default(now())
-  updated_at          DateTime          @updatedAt
-  deleted_at          DateTime?
-  user                User              @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  primary_location    Location?         @relation(fields: [primary_location_id], references: [id], onDelete: SetNull)
+  photo_visibility        PhotoVisibility   @default(EVERYONE)
+  show_full_name          Boolean           @default(false)
+  hide_precise_area       Boolean           @default(false)
+  allow_messages_from     MessagePermission @default(ANYONE)
+  discoverable            Boolean           @default(true)
+  /// Mentor capability (P1.1). APPROVED + accepting = takes learners.
+  mentor_status           MentorStatus      @default(NONE)
+  mentor_accepting        Boolean           @default(false)
+  mentor_bio              String?
+  mentor_years_experience Int?
+  mentor_applied_at       DateTime?
+  mentor_approved_at      DateTime?
+  created_at              DateTime          @default(now())
+  updated_at              DateTime          @updatedAt
+  deleted_at              DateTime?
+  user                    User              @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  primary_location        Location?         @relation(fields: [primary_location_id], references: [id], onDelete: SetNull)
 
   @@index([primary_location_id])
+  @@index([mentor_status, mentor_accepting])
   @@map("profiles")
 }
 
@@ -695,6 +739,8 @@ model UserSkill {
   is_verified        Boolean    @default(false)
   verified_at        DateTime?
   has_prior_training Boolean    @default(false)
+  /// The person offers to teach this skill (approved mentors only).
+  can_mentor         Boolean    @default(false)
   created_at         DateTime   @default(now())
   updated_at         DateTime   @updatedAt
   user               User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -1523,6 +1569,8 @@ model Report {
   reviewer_user_id   String?            @db.Uuid
   resolution         String?
   reviewed_at        DateTime?
+  /// Safety triage: higher first (0 = normal).
+  priority           Int                @default(0) @db.SmallInt
   created_at         DateTime           @default(now())
   updated_at         DateTime           @updatedAt
   reporter           User               @relation("ReportReporter", fields: [reporter_user_id], references: [id], onDelete: Restrict)
@@ -1535,6 +1583,7 @@ model Report {
   @@index([subject_user_id, status, created_at])
   @@index([reviewer_user_id])
   @@index([reporter_user_id, created_at(sort: Desc)])
+  @@index([status, priority, created_at])
   @@map("reports")
 }
 

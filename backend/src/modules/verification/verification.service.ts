@@ -26,7 +26,21 @@ export class VerificationService {
     @Inject(CLOCK) private readonly clock: Clock,
   ) {}
 
-  async submit(userId: string, input: SubmitVerificationDto) {
+  /**
+   * `viaMentorApplication`: MENTOR requests are only created by the mentor
+   * application (which also records the skills and expertise reviewed).
+   */
+  async submit(
+    userId: string,
+    input: SubmitVerificationDto,
+    options: { viaMentorApplication?: boolean } = {},
+  ) {
+    if (input.kind === VerificationKind.MENTOR && !options.viaMentorApplication)
+      throw new BadRequestException({
+        code: "USE_MENTOR_APPLICATION",
+        message: "Apply to become a mentor with POST /me/mentor/application.",
+        messageKey: "error.mentor.use_application",
+      });
     if (input.kind === VerificationKind.PHONE)
       throw new ConflictException(
         "Phone trust is established through OTP authentication.",
@@ -82,9 +96,11 @@ export class VerificationService {
       throw new ConflictException(
         "Identity verification is required to restore marketplace access.",
       );
+    const granted = trustForVerification(input.kind);
     if (
       !user?.reverification_required &&
-      hasTrust(currentTrust, trustForVerification(input.kind))
+      granted !== null &&
+      hasTrust(currentTrust, granted)
     )
       throw new ConflictException(
         `${input.kind} verification is already active.`,

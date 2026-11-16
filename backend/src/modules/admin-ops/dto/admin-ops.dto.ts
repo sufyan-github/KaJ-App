@@ -21,6 +21,7 @@ import {
   JobStatus,
   LocationType,
   UserStatus,
+  VerificationKind,
   VerificationStatus,
 } from "@prisma/client";
 
@@ -65,6 +66,11 @@ export class VerificationQueryDto extends PageQueryDto {
   @IsOptional()
   @IsEnum(VerificationStatus)
   status?: VerificationStatus;
+
+  /** e.g. MENTOR for the mentor approval queue. */
+  @IsOptional()
+  @IsEnum(VerificationKind)
+  kind?: VerificationKind;
 }
 
 export class ReasonDto {

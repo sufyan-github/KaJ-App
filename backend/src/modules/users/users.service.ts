@@ -7,6 +7,7 @@ import { Prisma, RoleMode } from "@prisma/client";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { activateRoleMode } from "./role-modes";
+import { mentorErrors } from "../mentors/mentor.errors";
 import { UpdatePrivacyDto } from "./dto/update-privacy.dto";
 import { UpdateProfileDto } from "./dto/update-profile.dto";
 import { UpdateWorkerProfileDto } from "./dto/update-worker-profile.dto";
@@ -32,6 +33,10 @@ export class UsersService {
         },
       });
       if (!current) throw new NotFoundException();
+      // MENTOR comes only from an approved mentor application; once granted
+      // it can be the active mode like any other.
+      if (role === RoleMode.MENTOR && !current.role_modes.includes(role))
+        throw mentorErrors.approvalRequired();
 
       const roles = activateRoleMode(current.role_modes, role);
       await transaction.user.update({
@@ -54,7 +59,7 @@ export class UsersService {
           update: {},
           create: { user_id: userId },
         });
-      } else {
+      } else if (role !== RoleMode.MENTOR) {
         await transaction.customerProfile.upsert({
           where: { user_id: userId },
           update: {},
@@ -65,7 +70,12 @@ export class UsersService {
       return {
         activeRole: role,
         roles,
-        home: role === RoleMode.WORKER ? "worker" : "customer",
+        home:
+          role === RoleMode.WORKER
+            ? "worker"
+            : role === RoleMode.MENTOR
+              ? "mentor"
+              : "customer",
         onboardingRequired: !(current.profile?.display_name ?? "").trim(),
       };
     });
