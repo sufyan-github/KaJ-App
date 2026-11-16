@@ -56,6 +56,7 @@ import { PaymentsService } from "../payments/payments.service";
 import { JobAlertsService } from "../job-alerts/job-alerts.service";
 import { maskPublicDisplayName } from "../users/public-profile.projection";
 import { UserBlocksService } from "../safety/user-blocks.service";
+import { disputeEligibility } from "../disputes/dispute-eligibility";
 
 // Anyone signed in may read these; every other state is private to the
 // poster and the workers who applied or were assigned.
@@ -538,11 +539,29 @@ export class JobsService {
         },
         contracts: { orderBy: { version: "desc" } },
         payments: { orderBy: { created_at: "desc" }, take: 1 },
+        disputes: {
+          select: { id: true, status: true },
+          orderBy: { created_at: "desc" },
+          take: 1,
+        },
       },
     });
     if (!assignment) throw new NotFoundException();
+    const dispute = disputeEligibility({
+      jobStatus: assignment.job.status,
+      jobCompletedAt: assignment.job.completed_at,
+      submittedAt: assignment.submitted_at,
+      jobUpdatedAt: assignment.job.updated_at,
+      hasDispute: assignment.disputes.length > 0,
+      now: this.now(),
+    });
     return {
       ...serializeAssignment(assignment),
+      // The app shows "Open dispute" only when the server will accept it.
+      canDispute: dispute.canDispute,
+      disputeWindowEndsAt: dispute.disputeWindowEndsAt?.toISOString() ?? null,
+      disputeUnavailableReason: dispute.reason,
+      dispute: assignment.disputes[0] ?? null,
       title: assignment.job.title,
       description: assignment.job.description,
       locationName: assignment.job.location.name_bn,

@@ -18,23 +18,13 @@ import { CLOCK, Clock } from "../../common/time/clock";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { STORAGE_PORT, StoragePort } from "../../infra/storage/storage.port";
 import { JobStateMachine } from "../jobs/state-machine/job-state.machine";
+import { disputeEligibility, disputeRefusal } from "./dispute-eligibility";
 import { NotificationsService } from "../notifications/notifications.service";
 import {
   AddDisputeEvidenceDto,
   AppealDisputeDto,
   OpenDisputeDto,
 } from "./dto/disputes.dto";
-
-const ELIGIBLE_STATUSES: JobStatus[] = [
-  // IN_PROGRESS lets either side raise a no-show or stalled job, which had no
-  // way out once the clock advanced it.
-  JobStatus.IN_PROGRESS,
-  JobStatus.SUBMITTED,
-  JobStatus.CUSTOMER_REVIEW,
-  JobStatus.COMPLETED,
-  JobStatus.PAYMENT_RECORDED,
-];
-const DAY_MS = 24 * 60 * 60_000;
 
 @Injectable()
 export class DisputesService {
@@ -90,16 +80,16 @@ export class DisputesService {
         created_at: true,
       },
     });
-    if (!ELIGIBLE_STATUSES.includes(assignment.job.status))
-      throw new ConflictException(
-        "This assignment is not eligible for dispute.",
-      );
-    const windowStart =
-      assignment.job.completed_at ??
-      assignment.submitted_at ??
-      assignment.job.updated_at;
-    if (now.getTime() > windowStart.getTime() + 7 * DAY_MS)
-      throw new ConflictException("The seven-day dispute window has closed.");
+    const eligibility = disputeEligibility({
+      jobStatus: assignment.job.status,
+      jobCompletedAt: assignment.job.completed_at,
+      submittedAt: assignment.submitted_at,
+      jobUpdatedAt: assignment.job.updated_at,
+      hasDispute: false, // checked race-safely inside the transaction
+      now,
+    });
+    if (!eligibility.canDispute)
+      throw new ConflictException(disputeRefusal(eligibility.reason!));
 
     const otherUserId =
       userId === assignment.worker_user_id
@@ -111,7 +101,7 @@ export class DisputesService {
         where: { assignment_id: assignmentId },
       });
       if (existing)
-        throw new ConflictException("This assignment already has a dispute.");
+        throw new ConflictException(disputeRefusal("DISPUTE_EXISTS"));
       const created = await transaction.dispute.create({
         data: {
           job_id: assignment.job_id,
