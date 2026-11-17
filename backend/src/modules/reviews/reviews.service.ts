@@ -13,6 +13,9 @@ import {
   Prisma,
   ReviewDirection,
   ReviewSubjectType,
+  SessionParticipantRole,
+  SessionParticipantStatus,
+  SessionStatus,
   TrustLevel,
 } from "@prisma/client";
 
@@ -188,6 +191,8 @@ export class ReviewsService {
       case ReviewSubjectType.ASSIGNMENT:
       case ReviewSubjectType.LEARNING_ENROLMENT:
         return this.create(userId, subjectId, review, subjectType);
+      case ReviewSubjectType.SESSION:
+        return this.createSessionFeedback(userId, subjectId, review);
       default:
         throw unsupportedSubject(subjectType);
     }
@@ -206,9 +211,131 @@ export class ReviewsService {
             query.subjectType,
           )),
         };
+      case ReviewSubjectType.SESSION:
+        return {
+          subjectType: query.subjectType,
+          subjectId: query.subjectId,
+          ...(await this.forSession(userId, query.subjectId)),
+        };
       default:
         throw unsupportedSubject(query.subjectType);
     }
+  }
+
+  /**
+   * P3.2: feedback on a session — a participant who attended rates the
+   * host, within 7 days of completion. One-way, so shown at once.
+   */
+  private async createSessionFeedback(
+    userId: string,
+    sessionId: string,
+    input: CreateReviewDto,
+  ) {
+    const { session, windowEndsAt, attended } = await this.sessionForReview(
+      userId,
+      sessionId,
+    );
+    if (!attended || session.status !== SessionStatus.COMPLETED)
+      throw new ConflictException({
+        code: "REVIEW_NOT_ALLOWED",
+        message:
+          "Feedback opens for people who attended, once the session is completed.",
+        messageKey: "error.review.not_allowed",
+      });
+    if (!windowEndsAt || this.clock.now() > windowEndsAt)
+      throw new ConflictException("The seven-day review window has closed.");
+    const review = await this.prisma.review
+      .create({
+        data: {
+          subject_type: ReviewSubjectType.SESSION,
+          subject_id: sessionId,
+          reviewer_user_id: userId,
+          reviewee_user_id: session.host_user_id,
+          direction: ReviewDirection.C2W,
+          rating: input.rating,
+          punctuality: input.punctuality,
+          quality: input.quality,
+          communication: input.communication,
+          reliability: input.reliability,
+          comment: input.comment?.trim() || null,
+        },
+      })
+      .catch((error: unknown) => {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2002"
+        )
+          throw new ConflictException("Review already submitted.");
+        throw error;
+      });
+    await this.notifications.create({
+      userId: session.host_user_id,
+      type: "REVIEW_RECEIVED",
+      title: "নতুন মতামত",
+      body: `${session.title} — একজন অংশগ্রহণকারী মতামত দিয়েছেন।`,
+      payload: {
+        sessionId,
+        subjectType: "SESSION",
+        route: `/sessions/${sessionId}`,
+      },
+      dedupeKey: `review:${review.id}`,
+    });
+    return { submitted: true, revealed: true };
+  }
+
+  private async forSession(userId: string, sessionId: string) {
+    const { session, windowEndsAt, attended, isHost } =
+      await this.sessionForReview(userId, sessionId);
+    const reviews = await this.prisma.review.findMany({
+      where: {
+        subject_type: ReviewSubjectType.SESSION,
+        subject_id: sessionId,
+        is_visible: true,
+        ...(isHost ? {} : { reviewer_user_id: userId }),
+      },
+      include: { reviewer: { include: { profile: true } } },
+      orderBy: { created_at: "asc" },
+    });
+    const own = reviews.find((review) => review.reviewer_user_id === userId);
+    return {
+      canReview:
+        attended &&
+        !own &&
+        session.status === SessionStatus.COMPLETED &&
+        windowEndsAt !== null &&
+        this.clock.now() <= windowEndsAt,
+      revealed: true,
+      windowEndsAt: windowEndsAt?.toISOString() ?? null,
+      myReview: own ? serializeReview(own) : null,
+      receivedReviews: isHost ? reviews.map(serializeReview) : [],
+    };
+  }
+
+  /** The host or a participant only (404 otherwise, as everywhere for sessions). */
+  private async sessionForReview(userId: string, sessionId: string) {
+    const session = await this.prisma.session.findUnique({
+      where: { id: sessionId },
+      include: { participants: { where: { user_id: userId } } },
+    });
+    const isHost = session?.host_user_id === userId;
+    if (
+      !session ||
+      (!isHost && (session.hidden_at || !session.participants.length))
+    )
+      throw new NotFoundException();
+    const attended = session.participants.some(
+      (row) =>
+        row.role === SessionParticipantRole.PARTICIPANT &&
+        row.status === SessionParticipantStatus.ATTENDED,
+    );
+    return {
+      session,
+      isHost,
+      attended,
+      windowEndsAt: session.completed_at
+        ? new Date(session.completed_at.getTime() + REVIEW_WINDOW_MS)
+        : null,
+    };
   }
 
   async received(userId: string) {

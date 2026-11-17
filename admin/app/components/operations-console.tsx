@@ -1024,6 +1024,7 @@ const CONTENT_TARGETS = new Set([
   "IDEA_ROLE",
   "COLLABORATION_REQUEST",
   "INTRODUCTION",
+  "SESSION",
 ]);
 type ReportItem = {
   id: string;

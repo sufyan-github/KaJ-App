@@ -28,6 +28,7 @@ export const REPORT_TARGET_TYPES = [
   "IDEA_ROLE",
   // P3: Experts & Community.
   "INTRODUCTION",
+  "SESSION",
 ] as const;
 export type ReportTargetType = (typeof REPORT_TARGET_TYPES)[number];
 

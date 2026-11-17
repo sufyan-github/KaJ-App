@@ -207,6 +207,22 @@ export class AvailabilityService {
     )
       throw new NotFoundException();
 
+    const slots = await this.freeSlots(userId, from, to);
+    return { userId, from: from.toISOString(), to: to.toISOString(), slots };
+  }
+
+  /**
+   * Free windows from a person's weekly availability rules, minus their
+   * exceptions, their booked assignments and any `extraBlocked` windows
+   * (e.g. an expert's scheduled sessions). Used for booking a worker and,
+   * P3.2, a consultation with an expert.
+   */
+  async freeSlots(
+    userId: string,
+    from: Date,
+    to: Date,
+    extraBlocked: Array<{ startsAt: Date; endsAt: Date }> = [],
+  ): Promise<Array<{ startsAt: string; endsAt: string }>> {
     const [rules, exceptions, assignments] = await Promise.all([
       this.prisma.availabilityRule.findMany({
         where: { user_id: userId, is_active: true },
@@ -231,6 +247,7 @@ export class AvailabilityService {
     ]);
 
     const blocked = [
+      ...extraBlocked,
       ...exceptions.map((item) => ({
         startsAt: item.starts_at,
         endsAt: item.ends_at,
@@ -267,7 +284,7 @@ export class AvailabilityService {
       }
       cursor.setUTCDate(cursor.getUTCDate() + 1);
     }
-    return { userId, from: from.toISOString(), to: to.toISOString(), slots };
+    return slots;
   }
 }
 

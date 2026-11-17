@@ -796,6 +796,21 @@ export class ModerationService {
       }
       return owners[0]?.user_id ?? business.user_id;
     }
+    if (targetType === "SESSION") {
+      const session = await this.prisma.session.findFirst({
+        where: {
+          id: targetId,
+          hidden_at: null,
+          OR: [
+            { host_user_id: reporterUserId },
+            { participants: { some: { user_id: reporterUserId } } },
+          ],
+        },
+        select: { host_user_id: true },
+      });
+      if (!session) throw new NotFoundException();
+      return session.host_user_id;
+    }
     if (targetType === "INTRODUCTION") {
       const introduction = await this.prisma.introductionRequest.findFirst({
         where: {
