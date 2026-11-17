@@ -58,6 +58,9 @@ const environmentSchema = z
     // "false" on every instance except one when the API runs on several.
     RUN_SCHEDULERS: z.enum(["true", "false"]).default("true"),
     REDIS_URL: z.string().min(1).default("redis://localhost:6379"),
+    // "true" when more than one API instance serves the chat socket: socket.io
+    // then shares rooms and messages through Redis (REDIS_URL).
+    SOCKET_REDIS_ADAPTER: z.enum(["true", "false"]).default("false"),
     S3_BUCKET: z.string().default("kaj-local"),
     S3_ENDPOINT: z.string().default("http://localhost:9000"),
     S3_KEY: z.string().default("kaj_minio"),

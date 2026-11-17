@@ -12,6 +12,7 @@ import { PrismaService } from "../../infra/prisma/prisma.service";
 import { businessErrors } from "../business/business.errors";
 import { BusinessesService } from "../business/businesses.service";
 import { COLLABORATION_NOTICE } from "../business/collaboration.service";
+import { ChatService } from "../chat/chat.service";
 import { NotificationsService } from "../notifications/notifications.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
 import { AddIdeaMemberDto, ConvertIdeaDto } from "./dto/idea.dto";
@@ -35,6 +36,7 @@ export class IdeaTeamService {
     private readonly businesses: BusinessesService,
     @Optional() private readonly notifications?: NotificationsService,
     @Optional() private readonly userBlocks?: UserBlocksService,
+    @Optional() private readonly chat?: ChatService,
   ) {}
 
   private get blocks() {
@@ -89,6 +91,42 @@ export class IdeaTeamService {
     };
   }
 
+  /**
+   * P3.3: the idea room — a group conversation of the owner and the team
+   * (members follow the team). Team only; anyone else gets 404.
+   */
+  async room(viewerUserId: string, ideaId: string) {
+    const relation = await this.ideas.relationOr404(viewerUserId, ideaId);
+    if (!isTeam(relation)) throw ideaErrors.notFound();
+    const conversationId = await this.syncRoom(ideaId, true);
+    return { ideaId, conversationId };
+  }
+
+  private async syncRoom(ideaId: string, create = false) {
+    if (!this.chat) return null;
+    const idea = await this.prisma.businessIdea.findUniqueOrThrow({
+      where: { id: ideaId },
+      select: {
+        title: true,
+        owner_user_id: true,
+        members: { select: { user_id: true } },
+      },
+    });
+    const input = {
+      scopeKey: `idea-room:${ideaId}`,
+      title: idea.title,
+      subjectType: "IDEA_ROOM",
+      subjectId: ideaId,
+      memberIds: [
+        idea.owner_user_id,
+        ...idea.members.map((row) => row.user_id),
+      ],
+    };
+    if (create) return this.chat.syncGroup(input);
+    await this.chat.syncGroupIfExists(input);
+    return null;
+  }
+
   /** The owner adds someone they reached an AGREED collaboration with. */
   async add(ownerUserId: string, ideaId: string, input: AddIdeaMemberDto) {
     const request = await this.prisma.collaborationRequest.findFirst({
@@ -126,6 +164,7 @@ export class IdeaTeamService {
           data: { status: IdeaRoleStatus.FILLED },
         });
     });
+    await this.syncRoom(ideaId);
     await this.ideas.audit(ownerUserId, "IDEA_MEMBER_ADDED", ideaId, {
       userId: request.requester_user_id,
       collaborationRequestId: request.id,
@@ -153,6 +192,7 @@ export class IdeaTeamService {
     });
     if (!member) throw ideaErrors.notFound();
     await this.prisma.ideaMember.delete({ where: { id: member.id } });
+    await this.syncRoom(ideaId);
     await this.ideas.audit(actorUserId, "IDEA_MEMBER_REMOVED", ideaId, {
       userId: memberUserId,
     });

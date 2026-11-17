@@ -16,6 +16,7 @@ import {
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { AvailabilityService } from "../availability/availability.service";
+import { ChatService } from "../chat/chat.service";
 import { MentorsService } from "../mentors/mentors.service";
 import { NotificationsService } from "../notifications/notifications.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
@@ -78,6 +79,7 @@ export class SessionsService {
     private readonly mentors: MentorsService,
     @Optional() private readonly notifications?: NotificationsService,
     @Optional() private readonly userBlocks?: UserBlocksService,
+    @Optional() private readonly chat?: ChatService,
   ) {}
 
   private get blocks() {
@@ -488,6 +490,7 @@ export class SessionsService {
         data: { status: SessionParticipantStatus.ACCEPTED, responded_at: now },
       });
     });
+    await this.resyncChat(id);
     return this.get(userId, id);
   }
 
@@ -521,6 +524,7 @@ export class SessionsService {
         responded_at: new Date(),
       },
     });
+    await this.resyncChat(id);
     return this.get(userId, id);
   }
 
@@ -643,6 +647,44 @@ export class SessionsService {
 
   async get(userId: string, id: string) {
     return this.serialize(await this.visible(userId, id), userId);
+  }
+
+  /**
+   * P3.3: the session chat — a group conversation of the host and the
+   * confirmed participants (members follow the session). Others get 404.
+   */
+  async chatRoom(userId: string, id: string) {
+    const row = await this.visible(userId, id);
+    const mine = row.participants.find((item) => item.user_id === userId);
+    if (
+      row.host_user_id !== userId &&
+      !(mine && CONFIRMED.includes(mine.status))
+    )
+      throw sessionErrors.notFound();
+    return { sessionId: id, conversationId: await this.syncChat(row, true) };
+  }
+
+  private async syncChat(row: Row, create = false) {
+    if (!this.chat) return null;
+    const input = {
+      scopeKey: `session:${row.id}`,
+      title: row.title,
+      subjectType: "SESSION",
+      subjectId: row.id,
+      memberIds: [row.host_user_id, ...this.confirmedIds(row)],
+    };
+    if (create) return this.chat.syncGroup(input);
+    await this.chat.syncGroupIfExists(input);
+    return null;
+  }
+
+  /** After a membership change, keep an existing session chat in step. */
+  private async resyncChat(id: string) {
+    const row = await this.prisma.session.findUnique({
+      where: { id },
+      include,
+    });
+    if (row) await this.syncChat(row);
   }
 
   async list(userId: string, query: SessionListQueryDto) {

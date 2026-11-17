@@ -92,6 +92,16 @@ export class SessionsController {
     return this.sessions.update(claims.sub, id, body);
   }
 
+  /** P3.3: the session chat (group conversation): returns its id. */
+  @Post("sessions/:id/chat")
+  @Policy(Policies.authenticated())
+  chat(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", uuid()) id: string,
+  ) {
+    return this.sessions.chatRoom(claims.sub, id);
+  }
+
   @Post("sessions/:id/publish")
   @Policy(Policies.authenticated())
   publish(

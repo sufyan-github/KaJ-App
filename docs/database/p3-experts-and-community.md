@@ -37,3 +37,16 @@ migration 8 (never created).
   scheduled; FREE has no price, CASH a positive one; cash ≥ 0.
 - `ReviewSubjectType.SESSION` (feedback; enum value stays on rollback).
 - A runner (schedulers enabled) sends reminders an hour ahead, once.
+
+## 20261119110000_group_conversations (P3.3)
+
+- `conversations.kind` (DIRECT default | GROUP), `title`, `subject_type`
+  (IDEA_ROOM | SESSION | COMMUNITY_GROUP) + `subject_id`, indexed. CHECK: a
+  GROUP has a subject, a DIRECT conversation has none. Existing rows → DIRECT.
+- Group members are kept equal to the subject's members by the API (idea
+  owner + team; session host + confirmed participants).
+- Blocks in a group: the two people don't see each other's messages (REST
+  paging, socket delivery, notifications); the group goes on for others.
+- Realtime: `SOCKET_REDIS_ADAPTER=true` (with `REDIS_URL`) puts socket.io on
+  the Redis adapter (`@socket.io/redis-adapter` 8.3.0) so several API
+  instances share rooms and deliveries. Off by default.

@@ -303,6 +303,11 @@ enum BusinessStage {
   REGISTERED
 }
 
+enum ConversationKind {
+  DIRECT
+  GROUP
+}
+
 enum SessionKind {
   CONSULTATION
   GROUP_DISCUSSION
@@ -1920,6 +1925,12 @@ model Review {
 model Conversation {
   id            String                    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   job_id        String?                   @db.Uuid
+  /// P3.3: DIRECT (two people) or GROUP (many: idea rooms, session chats,
+  /// community groups). A group's members follow its subject.
+  kind          ConversationKind          @default(DIRECT)
+  title         String?
+  subject_type  String?
+  subject_id    String?                   @db.Uuid
   scope_key     String                    @unique
   created_at    DateTime                  @default(now())
   updated_at    DateTime                  @updatedAt
@@ -1931,6 +1942,7 @@ model Conversation {
   introduction  IntroductionRequest?
 
   @@index([job_id])
+  @@index([subject_type, subject_id])
   @@map("conversations")
 }
 

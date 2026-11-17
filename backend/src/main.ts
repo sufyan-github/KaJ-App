@@ -4,6 +4,7 @@ import { Logger } from "nestjs-pino";
 
 import { configureApp } from "./app.bootstrap";
 import { AppModule } from "./app.module";
+import { configureRealtime } from "./infra/realtime/redis-io.adapter";
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, {
@@ -22,6 +23,7 @@ async function bootstrap(): Promise<void> {
     );
   });
   configureApp(app);
+  await configureRealtime(app);
   app.enableShutdownHooks();
 
   const config = app.get(ConfigService);

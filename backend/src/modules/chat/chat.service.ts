@@ -7,7 +7,12 @@ import {
   NotFoundException,
   Optional,
 } from "@nestjs/common";
-import { MessagePermission, MessageType, Prisma } from "@prisma/client";
+import {
+  ConversationKind,
+  MessagePermission,
+  MessageType,
+  Prisma,
+} from "@prisma/client";
 
 import { CLOCK, Clock } from "../../common/time/clock";
 import { PrismaService } from "../../infra/prisma/prisma.service";
@@ -51,11 +56,12 @@ export class ChatService {
         messages: {
           where: { deleted_at: null },
           orderBy: [{ created_at: "desc" }, { id: "desc" }],
-          take: 1,
+          take: 10,
         },
       },
       orderBy: { updated_at: "desc" },
     });
+    const hidden = new Set(await this.blocks.hiddenFrom(userId));
     // Names follow the same rule as the job page: masked until a confirmed
     // hire, unless the person chose to show their full name.
     const hiredWith = await this.engagement.hiredWith(
@@ -71,12 +77,24 @@ export class ChatService {
         const participant = row.participants.find(
           (item) => item.user_id === userId,
         )!;
-        const other = row.participants.find((item) => item.user_id !== userId);
+        const group = row.kind === ConversationKind.GROUP;
+        const other = group
+          ? undefined
+          : row.participants.find((item) => item.user_id !== userId);
         const otherProfile = other?.user.profile;
+        // In a group, people in a block with you are muted for you.
+        const visible = row.messages.filter(
+          (message) =>
+            !group ||
+            !message.sender_user_id ||
+            !hidden.has(message.sender_user_id),
+        );
         const unreadCount = await this.prisma.message.count({
           where: {
             conversation_id: row.id,
-            sender_user_id: { not: userId },
+            sender_user_id: group
+              ? { not: userId, notIn: [...hidden] }
+              : { not: userId },
             deleted_at: null,
             ...(participant.last_read_at
               ? { created_at: { gt: participant.last_read_at } }
@@ -85,19 +103,28 @@ export class ChatService {
         });
         return {
           id: row.id,
+          kind: row.kind,
+          title: row.title,
+          subject: row.subject_type
+            ? { type: row.subject_type, id: row.subject_id }
+            : null,
+          participantCount: row.participants.length,
           jobId: row.job?.id ?? null,
-          jobTitle: row.job?.title ?? "কাজের আলোচনা",
+          jobTitle:
+            row.job?.title ?? (group ? (row.title ?? "") : "কাজের আলোচনা"),
           jobStatus: row.job?.status ?? null,
           otherUserId: other?.user_id ?? null,
-          otherName: otherProfile?.display_name
-            ? visibleDisplayName(otherProfile.display_name, {
-                showFullName: otherProfile.show_full_name,
-                hired: hiredWith.has(other!.user_id),
-              })
-            : "KAAJ ব্যবহারকারী",
+          otherName: group
+            ? (row.title ?? "")
+            : otherProfile?.display_name
+              ? visibleDisplayName(otherProfile.display_name, {
+                  showFullName: otherProfile.show_full_name,
+                  hired: hiredWith.has(other!.user_id),
+                })
+              : "KAAJ ব্যবহারকারী",
           unreadCount,
-          lastMessage: row.messages[0]
-            ? await this.serializeMessage(row.messages[0], userId)
+          lastMessage: visible[0]
+            ? await this.serializeMessage(visible[0], userId)
             : null,
           updatedAt: row.updated_at.toISOString(),
         };
@@ -176,7 +203,11 @@ export class ChatService {
     conversationId: string,
     query: MessagePageQueryDto,
   ) {
-    await this.assertParticipant(userId, conversationId);
+    const conversation = await this.assertParticipant(userId, conversationId);
+    const muted =
+      conversation.kind === ConversationKind.GROUP
+        ? await this.blocks.hiddenFrom(userId)
+        : [];
     if (query.before && query.after) {
       throw new BadRequestException("Use either before or after cursor.");
     }
@@ -193,6 +224,19 @@ export class ChatService {
       where: {
         conversation_id: conversationId,
         deleted_at: null,
+        // AND, so it combines with the cursor's OR below.
+        ...(muted.length
+          ? {
+              AND: [
+                {
+                  OR: [
+                    { sender_user_id: null },
+                    { sender_user_id: { notIn: muted } },
+                  ],
+                },
+              ],
+            }
+          : {}),
         ...(cursor
           ? {
               OR: [
@@ -232,11 +276,19 @@ export class ChatService {
 
   async send(userId: string, conversationId: string, input: SendMessageDto) {
     const conversation = await this.assertParticipant(userId, conversationId);
+    const group = conversation.kind === ConversationKind.GROUP;
     const other = conversation.participants.find(
       (item) => item.user_id !== userId,
     );
-    if (!other) throw new ConflictException("Conversation has no recipient.");
-    await this.assertNotBlocked(userId, other.user_id);
+    if (!other && !group)
+      throw new ConflictException("Conversation has no recipient.");
+    // A block stops a direct conversation; in a group, the two simply don't
+    // see each other's messages (the group goes on for everyone else).
+    if (!group) await this.assertNotBlocked(userId, other!.user_id);
+    const hidden = group ? new Set(await this.blocks.hiddenFrom(userId)) : null;
+    const recipients = conversation.participants
+      .map((item) => item.user_id)
+      .filter((id) => id !== userId && !hidden?.has(id));
     this.validateMessage(input);
     const attachmentKey = input.attachmentDocumentId
       ? await this.ownedChatAttachment(userId, input.attachmentDocumentId)
@@ -289,17 +341,34 @@ export class ChatService {
     const serialized = await this.serializeMessage(message, userId);
     this.events.messages.next({
       conversationId,
-      participantUserIds: conversation.participants.map((item) => item.user_id),
+      participantUserIds: [userId, ...recipients],
       message: serialized,
     });
-    await this.notifications.create({
-      userId: other.user_id,
-      type: "CHAT_MESSAGE",
-      title: "নতুন বার্তা",
-      body: "একটি কাজের আলোচনায় নতুন বার্তা এসেছে।",
-      payload: { conversationId, route: `/conversations/${conversationId}` },
-      dedupeKey: `message:${message.id}`,
-    });
+    if (!group)
+      await this.notifications.create({
+        userId: other!.user_id,
+        type: "CHAT_MESSAGE",
+        title: "নতুন বার্তা",
+        body: "একটি কাজের আলোচনায় নতুন বার্তা এসেছে।",
+        payload: { conversationId, route: `/conversations/${conversationId}` },
+        dedupeKey: `message:${message.id}`,
+      });
+    else {
+      // At most one group-chat notification per person per hour.
+      const hour = Math.floor(this.clock.now().getTime() / 3_600_000);
+      for (const recipient of recipients)
+        await this.notifications.create({
+          userId: recipient,
+          type: "GROUP_CHAT_MESSAGE",
+          title: "দলের আলোচনায় নতুন বার্তা",
+          body: `${conversation.title ?? "দল"} — নতুন বার্তা এসেছে।`,
+          payload: {
+            conversationId,
+            route: `/conversations/${conversationId}`,
+          },
+          dedupeKey: `group-message:${conversationId}:${recipient}:${hour}`,
+        });
+    }
     return serialized;
   }
 
@@ -356,9 +425,12 @@ export class ChatService {
 
   async report(userId: string, conversationId: string, description: string) {
     const conversation = await this.assertParticipant(userId, conversationId);
-    const subjectUserId = conversation.participants.find(
-      (item) => item.user_id !== userId,
-    )?.user_id;
+    // A group has no single other person; report a message to name one.
+    const subjectUserId =
+      conversation.kind === ConversationKind.GROUP
+        ? null
+        : conversation.participants.find((item) => item.user_id !== userId)
+            ?.user_id;
     const report = await this.prisma.report.create({
       data: {
         reporter_user_id: userId,
@@ -370,6 +442,58 @@ export class ChatService {
       },
     });
     return { reportId: report.id, status: report.status };
+  }
+
+  /**
+   * P3.3: create or update the group conversation for a subject (an idea
+   * room, a session chat, a community group) so its participants are
+   * exactly `memberIds`. Returns the conversation id.
+   */
+  async syncGroup(input: {
+    scopeKey: string;
+    title: string;
+    subjectType: string;
+    subjectId: string;
+    memberIds: string[];
+  }) {
+    const members = [...new Set(input.memberIds)];
+    return this.prisma.$transaction(async (transaction) => {
+      const conversation = await transaction.conversation.upsert({
+        where: { scope_key: input.scopeKey },
+        create: {
+          scope_key: input.scopeKey,
+          kind: ConversationKind.GROUP,
+          title: input.title,
+          subject_type: input.subjectType,
+          subject_id: input.subjectId,
+        },
+        update: { title: input.title, deleted_at: null },
+        select: { id: true },
+      });
+      await transaction.conversationParticipant.deleteMany({
+        where: {
+          conversation_id: conversation.id,
+          user_id: { notIn: members },
+        },
+      });
+      if (members.length)
+        await transaction.conversationParticipant.createMany({
+          data: members.map((user_id) => ({
+            conversation_id: conversation.id,
+            user_id,
+          })),
+          skipDuplicates: true,
+        });
+      return conversation.id;
+    });
+  }
+
+  /** Re-syncs a group's members if its conversation exists already. */
+  async syncGroupIfExists(input: Parameters<ChatService["syncGroup"]>[0]) {
+    const exists = await this.prisma.conversation.count({
+      where: { scope_key: input.scopeKey },
+    });
+    if (exists) await this.syncGroup(input);
   }
 
   async assertParticipant(userId: string, conversationId: string) {

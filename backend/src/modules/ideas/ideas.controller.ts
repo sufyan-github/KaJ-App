@@ -246,6 +246,16 @@ export class IdeasController {
     return this.team.remove(claims.sub, id, userId);
   }
 
+  /** P3.3: the idea room (team group chat): returns its conversation id. */
+  @Post("ideas/:id/room")
+  @Policy(Policies.authenticated())
+  room(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", uuid()) id: string,
+  ) {
+    return this.team.room(claims.sub, id);
+  }
+
   @Post("ideas/:id/convert")
   @Policy(Policies.ideaOwner())
   convert(

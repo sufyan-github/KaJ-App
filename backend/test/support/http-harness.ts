@@ -11,6 +11,7 @@ import {
 } from "@prisma/client";
 import request from "supertest";
 
+import { configureRealtime } from "../../src/infra/realtime/redis-io.adapter";
 import { configureApp } from "../../src/app.bootstrap";
 import { AppModule } from "../../src/app.module";
 import { PrismaService } from "../../src/infra/prisma/prisma.service";
@@ -48,12 +49,15 @@ export class HttpHarness {
 
   static async start(
     configure?: (builder: ReturnType<typeof Test.createTestingModule>) => void,
+    options: { redisSocketAdapter?: boolean } = {},
   ): Promise<HttpHarness> {
     const builder = Test.createTestingModule({ imports: [AppModule] });
     configure?.(builder);
     const module = await builder.compile();
     const app = module.createNestApplication({ logger: false });
     configureApp(app);
+    if (options.redisSocketAdapter)
+      await configureRealtime(app, { force: true });
     await app.listen(0, "127.0.0.1");
     return new HttpHarness(app, app.get(PrismaService));
   }
