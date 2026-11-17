@@ -42,3 +42,18 @@ SELECT count(*) FROM business_profiles WHERE verification_status = 'APPROVED';
 `jobs.business_profile_id` already existed (P1 work_learn_job_extensions). The
 API now sets it only for an accepted OWNER or MANAGER of an active business,
 re-checked at publish.
+
+## 20261118120000_collaboration_requests (P2.5; plan migrations 6 and 11)
+
+- `collaboration_requests`: requester, recipient (the subject's owner when
+  sent), `subject_type` (IDEA | BUSINESS) + `subject_id` (no FK: either table),
+  `idea_role_id` (P2.8; FK added with `idea_roles`), optional
+  `from_business_profile_id`, `message`, `status` (PROPOSED | ACCEPTED |
+  DECLINED | WITHDRAWN | AGREED | ENDED), `conversation_id` (unique, opened on
+  accept), `agreement_summary`, both sides' `*_agreed_at`, `decided_at`,
+  `agreed_at`, `closed_at`, `hidden_at` (moderation).
+- Partial unique index: one open (PROPOSED/ACCEPTED/AGREED) request per
+  requester and subject. CHECKs: requester ≠ recipient; AGREED/ENDED only with
+  both confirmations and `agreed_at`.
+- `collaboration_request_events`: the audit history (from → to, actor, note).
+- Rollback leaves the linked conversations as plain conversations.

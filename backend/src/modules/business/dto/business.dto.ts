@@ -13,6 +13,8 @@ import {
   MinLength,
 } from "class-validator";
 
+import { CursorQueryDto } from "../../../common/api/cursor-query.dto";
+
 /** POST /businesses */
 export class CreateBusinessDto {
   @IsString()
@@ -139,4 +141,27 @@ export class InviteBusinessMemberDto {
 export class UpdateBusinessMemberDto {
   @IsEnum(BusinessMemberRole)
   role!: BusinessMemberRole;
+}
+
+/** GET /partners — public businesses that are looking for partners. */
+export class PartnerDirectoryQueryDto extends CursorQueryDto {
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
+
+  /** An area, thana or the city: includes what lies inside it. */
+  @IsOptional()
+  @IsUUID()
+  locationId?: string;
+
+  @IsOptional()
+  @IsEnum(BusinessStage)
+  stage?: BusinessStage;
+
+  /** Words in the name or description. */
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  @MaxLength(60)
+  q?: string;
 }

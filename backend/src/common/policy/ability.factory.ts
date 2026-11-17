@@ -11,6 +11,8 @@ export interface PolicyResourceContext {
   opportunityType?: string;
   /** Accepted members of the business the route names, with their role. */
   businessMembers?: ReadonlyArray<{ userId: string; role: string }>;
+  /** Requester and recipient of a collaboration request. */
+  collaborationParticipantIds?: readonly string[];
 }
 
 @Injectable()
@@ -63,6 +65,11 @@ export class AbilityFactory {
               (!rule.businessRoles ||
                 rule.businessRoles.some((role) => role === member.role)),
           ) === true
+        );
+      case "collaboration-participant":
+        return (
+          actor !== undefined &&
+          resource?.collaborationParticipantIds?.includes(actor.sub) === true
         );
       case "conversation-participant":
         return (

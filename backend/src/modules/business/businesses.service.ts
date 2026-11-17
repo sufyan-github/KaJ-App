@@ -8,6 +8,7 @@ import {
   VerificationStatus,
 } from "@prisma/client";
 
+import { pageArgs, pageResult } from "../../common/api/cursor-page";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { WORK_ONLY } from "../jobs/opportunity";
 import { NotificationsService } from "../notifications/notifications.service";
@@ -22,6 +23,7 @@ import {
 import {
   CreateBusinessDto,
   InviteBusinessMemberDto,
+  PartnerDirectoryQueryDto,
   UpdateBusinessDto,
 } from "./dto/business.dto";
 
@@ -486,6 +488,77 @@ export class BusinessesService {
         accepted_at: { not: null },
       },
     });
+  }
+
+  /**
+   * P2.4: the partner directory — public, active businesses that are
+   * looking for partners, by sector and area. Leaves out the viewer's own
+   * businesses, businesses whose owner is in a block with the viewer, and
+   * those whose owner chose not to be discoverable.
+   */
+  async partners(viewerUserId: string, query: PartnerDirectoryQueryDto) {
+    const limit = query.limit ?? 20;
+    const hidden = await this.blocks.hiddenFrom(viewerUserId);
+    const q = query.q?.trim();
+    const rows = await this.prisma.businessProfile.findMany({
+      where: {
+        ...PUBLIC_BUSINESS,
+        seeking_partners: true,
+        ...(query.categoryId
+          ? {
+              OR: [
+                { category_id: query.categoryId },
+                { category: { parent_id: query.categoryId } },
+              ],
+            }
+          : {}),
+        ...(query.stage ? { stage: query.stage } : {}),
+        ...(query.locationId
+          ? {
+              location: {
+                OR: [
+                  { id: query.locationId },
+                  { parent_id: query.locationId },
+                  { parent: { parent_id: query.locationId } },
+                ],
+              },
+            }
+          : {}),
+        ...(q
+          ? {
+              AND: [
+                {
+                  OR: [
+                    { business_name: { contains: q, mode: "insensitive" } },
+                    { description: { contains: q, mode: "insensitive" } },
+                  ],
+                },
+              ],
+            }
+          : {}),
+        members: { none: { user_id: viewerUserId } },
+        NOT: {
+          members: {
+            some: {
+              role: BusinessMemberRole.OWNER,
+              OR: [
+                { user_id: { in: hidden } },
+                { user: { profile: { discoverable: false } } },
+                { user: { status: { not: UserStatus.ACTIVE } } },
+              ],
+            },
+          },
+        },
+      },
+      include: businessInclude,
+      orderBy: [{ updated_at: "desc" }, { id: "desc" }],
+      ...pageArgs({ limit, cursor: query.cursor }),
+    });
+    const page = pageResult(rows, limit);
+    return {
+      items: page.items.map((row) => publicBusiness(row)),
+      nextCursor: page.nextCursor,
+    };
   }
 
   /** Throws unless members may change the business (not deleted/suspended). */

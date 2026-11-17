@@ -302,6 +302,20 @@ enum BusinessStage {
   REGISTERED
 }
 
+enum CollaborationSubjectType {
+  IDEA
+  BUSINESS
+}
+
+enum CollaborationStatus {
+  PROPOSED
+  ACCEPTED
+  DECLINED
+  WITHDRAWN
+  AGREED
+  ENDED
+}
+
 enum OfferingKind {
   PRODUCT
   SERVICE
@@ -423,51 +437,54 @@ model User {
   worker_profile                    WorkerProfile?
   customer_profile                  CustomerProfile?
   business_profiles                 BusinessProfile[]
-  business_memberships              BusinessMember[]          @relation("BusinessMembership")
-  business_member_invites           BusinessMember[]          @relation("BusinessMemberInviter")
+  business_memberships              BusinessMember[]            @relation("BusinessMembership")
+  collaboration_sent                CollaborationRequest[]      @relation("CollaborationRequester")
+  collaboration_received            CollaborationRequest[]      @relation("CollaborationRecipient")
+  collaboration_events              CollaborationRequestEvent[] @relation("CollaborationEventActor")
+  business_member_invites           BusinessMember[]            @relation("BusinessMemberInviter")
   skills                            UserSkill[]
   service_areas                     ServiceArea[]
-  posted_jobs                       Job[]                     @relation("JobPoster")
-  job_status_changes                JobStatusHistory[]        @relation("JobStatusActor")
+  posted_jobs                       Job[]                       @relation("JobPoster")
+  job_status_changes                JobStatusHistory[]          @relation("JobStatusActor")
   applications                      Application[]
   assignments                       Assignment[]
   availability_rules                AvailabilityRule[]
   availability_exceptions           AvailabilityException[]
-  payments                          Payment[]                 @relation("PaymentPayer")
-  cash_payments_recorded            Payment[]                 @relation("CashPaymentRecorder")
+  payments                          Payment[]                   @relation("PaymentPayer")
+  cash_payments_recorded            Payment[]                   @relation("CashPaymentRecorder")
   payouts                           Payout[]
   wallet                            Wallet?
-  reviews_written                   Review[]                  @relation("ReviewWriter")
-  reviews_received                  Review[]                  @relation("ReviewSubject")
+  reviews_written                   Review[]                    @relation("ReviewWriter")
+  reviews_received                  Review[]                    @relation("ReviewSubject")
   conversation_participations       ConversationParticipant[]
   sent_messages                     Message[]
   notifications                     Notification[]
   notification_preferences          NotificationPreference[]
-  verification_requests             VerificationRequest[]     @relation("VerificationOwner")
-  verification_reviews              VerificationRequest[]     @relation("VerificationReviewer")
+  verification_requests             VerificationRequest[]       @relation("VerificationOwner")
+  verification_reviews              VerificationRequest[]       @relation("VerificationReviewer")
   documents                         Document[]
   portfolio_items                   PortfolioItem[]
-  disputes_opened                   Dispute[]                 @relation("DisputeOpener")
-  disputes_resolved                 Dispute[]                 @relation("DisputeResolver")
+  disputes_opened                   Dispute[]                   @relation("DisputeOpener")
+  disputes_resolved                 Dispute[]                   @relation("DisputeResolver")
   dispute_evidence                  DisputeEvidence[]
-  dispute_appeals_opened            DisputeAppeal[]           @relation("DisputeAppealOpener")
-  dispute_appeals_assigned          DisputeAppeal[]           @relation("DisputeAppealAssignee")
-  dispute_appeals_resolved          DisputeAppeal[]           @relation("DisputeAppealResolver")
-  overridden_work_sessions          WorkSession[]             @relation("WorkSessionOverrideActor")
-  checkout_overridden_work_sessions WorkSession[]             @relation("WorkSessionCheckoutOverrideActor")
-  reports_filed                     Report[]                  @relation("ReportReporter")
-  reports_received                  Report[]                  @relation("ReportSubject")
-  reports_reviewed                  Report[]                  @relation("ReportReviewer")
-  moderation_actions                ModerationAction[]        @relation("ModerationAdmin")
+  dispute_appeals_opened            DisputeAppeal[]             @relation("DisputeAppealOpener")
+  dispute_appeals_assigned          DisputeAppeal[]             @relation("DisputeAppealAssignee")
+  dispute_appeals_resolved          DisputeAppeal[]             @relation("DisputeAppealResolver")
+  overridden_work_sessions          WorkSession[]               @relation("WorkSessionOverrideActor")
+  checkout_overridden_work_sessions WorkSession[]               @relation("WorkSessionCheckoutOverrideActor")
+  reports_filed                     Report[]                    @relation("ReportReporter")
+  reports_received                  Report[]                    @relation("ReportSubject")
+  reports_reviewed                  Report[]                    @relation("ReportReviewer")
+  moderation_actions                ModerationAction[]          @relation("ModerationAdmin")
   risk_identity_observations        RiskIdentityObservation[]
-  risk_items                        RiskReviewItem[]          @relation("RiskSubject")
-  risk_items_reviewed               RiskReviewItem[]          @relation("RiskReviewer")
+  risk_items                        RiskReviewItem[]            @relation("RiskSubject")
+  risk_items_reviewed               RiskReviewItem[]            @relation("RiskReviewer")
   badges                            UserBadge[]
   saved_searches                    SavedSearch[]
-  favorites                         Favorite[]                @relation("FavoriteOwner")
-  favorited_by                      Favorite[]                @relation("FavoriteTarget")
-  users_blocked                     UserBlock[]               @relation("Blocker")
-  blocked_by                        UserBlock[]               @relation("BlockedUser")
+  favorites                         Favorite[]                  @relation("FavoriteOwner")
+  favorited_by                      Favorite[]                  @relation("FavoriteTarget")
+  users_blocked                     UserBlock[]                 @relation("Blocker")
+  blocked_by                        UserBlock[]                 @relation("BlockedUser")
   updated_config_settings           ConfigSetting[]
   audit_logs                        AuditLog[]
   admin_credential                  AdminCredential?
@@ -483,8 +500,8 @@ model User {
   training_lesson_opens             TrainingLessonOpen[]
   training_attempts                 TrainingAttempt[]
   training_certificates             TrainingCertificate[]
-  recorded_learning_sessions        LearningSession[]         @relation("LearningSessionRecorder")
-  issued_certificates               TrainingCertificate[]     @relation("CertificateIssuer")
+  recorded_learning_sessions        LearningSession[]           @relation("LearningSessionRecorder")
+  issued_certificates               TrainingCertificate[]       @relation("CertificateIssuer")
 
   @@index([status, deleted_at])
   @@map("users")
@@ -689,33 +706,34 @@ model CustomerProfile {
 /// may act for it is business_members. Only a REGISTERED business can be
 /// VERIFIED (CHECK business_profiles_verified_stage_check).
 model BusinessProfile {
-  id                    String                @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  user_id               String                @db.Uuid
-  business_name         String
-  trade_licence_no      String?
-  address               String?
-  location_id           String?               @db.Uuid
-  verification_status   VerificationStatus    @default(NOT_SUBMITTED)
-  contact_person        String?
-  employees_count       Int?
-  stage                 BusinessStage         @default(INFORMAL)
-  description           String?
-  category_id           String?               @db.Uuid
-  is_public             Boolean               @default(false)
-  seeking_partners      Boolean               @default(false)
+  id                     String                 @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id                String                 @db.Uuid
+  business_name          String
+  trade_licence_no       String?
+  address                String?
+  location_id            String?                @db.Uuid
+  verification_status    VerificationStatus     @default(NOT_SUBMITTED)
+  contact_person         String?
+  employees_count        Int?
+  stage                  BusinessStage          @default(INFORMAL)
+  description            String?
+  category_id            String?                @db.Uuid
+  is_public              Boolean                @default(false)
+  seeking_partners       Boolean                @default(false)
   /// Set by moderation: hidden from everyone but its members.
-  suspended_at          DateTime?
-  suspension_reason     String?
-  deleted_at            DateTime?
-  jobs                  Job[]
-  created_at            DateTime              @default(now())
-  updated_at            DateTime              @updatedAt
-  user                  User                  @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  location              Location?             @relation(fields: [location_id], references: [id], onDelete: Restrict)
-  category              BusinessCategory?     @relation(fields: [category_id], references: [id], onDelete: Restrict)
-  members               BusinessMember[]
-  verification_requests VerificationRequest[]
-  offerings             BusinessOffering[]
+  suspended_at           DateTime?
+  suspension_reason      String?
+  deleted_at             DateTime?
+  jobs                   Job[]
+  created_at             DateTime               @default(now())
+  updated_at             DateTime               @updatedAt
+  user                   User                   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  location               Location?              @relation(fields: [location_id], references: [id], onDelete: Restrict)
+  category               BusinessCategory?      @relation(fields: [category_id], references: [id], onDelete: Restrict)
+  members                BusinessMember[]
+  verification_requests  VerificationRequest[]
+  offerings              BusinessOffering[]
+  collaboration_requests CollaborationRequest[]
 
   @@index([user_id])
   @@index([location_id])
@@ -748,6 +766,62 @@ model BusinessOffering {
 
   @@index([business_profile_id, is_active])
   @@map("business_offerings")
+}
+
+/// P2.5: a proposal to work together on an idea or a business (plan
+/// migrations 6 and 11). The recipient is the subject's owner when sent.
+/// Connecting never creates ownership, equity or a legal partnership.
+model CollaborationRequest {
+  id                       String                      @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  requester_user_id        String                      @db.Uuid
+  recipient_user_id        String                      @db.Uuid
+  subject_type             CollaborationSubjectType
+  subject_id               String                      @db.Uuid
+  /// P2.8: "I'm interested in this role" (an idea_roles id; FK added with that table).
+  idea_role_id             String?                     @db.Uuid
+  /// The requester's own business, as context (optional).
+  from_business_profile_id String?                     @db.Uuid
+  message                  String
+  status                   CollaborationStatus         @default(PROPOSED)
+  conversation_id          String?                     @unique @db.Uuid
+  agreement_summary        String?
+  requester_agreed_at      DateTime?
+  recipient_agreed_at      DateTime?
+  decided_at               DateTime?
+  agreed_at                DateTime?
+  closed_at                DateTime?
+  /// Set by moderation.
+  hidden_at                DateTime?
+  created_at               DateTime                    @default(now())
+  updated_at               DateTime                    @updatedAt
+  requester                User                        @relation("CollaborationRequester", fields: [requester_user_id], references: [id], onDelete: Cascade)
+  recipient                User                        @relation("CollaborationRecipient", fields: [recipient_user_id], references: [id], onDelete: Cascade)
+  from_business            BusinessProfile?            @relation(fields: [from_business_profile_id], references: [id], onDelete: SetNull)
+  conversation             Conversation?               @relation(fields: [conversation_id], references: [id], onDelete: SetNull)
+  events                   CollaborationRequestEvent[]
+
+  @@index([requester_user_id, created_at(sort: Desc)])
+  @@index([recipient_user_id, status])
+  @@index([subject_type, subject_id])
+  @@index([from_business_profile_id])
+  @@map("collaboration_requests")
+}
+
+/// P2.5: the audit history of a collaboration request's status changes.
+model CollaborationRequestEvent {
+  id            String               @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  request_id    String               @db.Uuid
+  actor_user_id String?              @db.Uuid
+  from_status   CollaborationStatus?
+  to_status     CollaborationStatus
+  note          String?
+  created_at    DateTime             @default(now())
+  request       CollaborationRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+  actor         User?                @relation("CollaborationEventActor", fields: [actor_user_id], references: [id], onDelete: SetNull)
+
+  @@index([request_id, created_at])
+  @@index([actor_user_id])
+  @@map("collaboration_request_events")
 }
 
 /// P2.1: who acts for a business. accepted_at null = invited, not yet a member.
@@ -1452,15 +1526,16 @@ model Review {
 }
 
 model Conversation {
-  id           String                    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  job_id       String?                   @db.Uuid
-  scope_key    String                    @unique
-  created_at   DateTime                  @default(now())
-  updated_at   DateTime                  @updatedAt
-  deleted_at   DateTime?
-  job          Job?                      @relation(fields: [job_id], references: [id], onDelete: SetNull)
-  participants ConversationParticipant[]
-  messages     Message[]
+  id            String                    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  job_id        String?                   @db.Uuid
+  scope_key     String                    @unique
+  created_at    DateTime                  @default(now())
+  updated_at    DateTime                  @updatedAt
+  deleted_at    DateTime?
+  job           Job?                      @relation(fields: [job_id], references: [id], onDelete: SetNull)
+  participants  ConversationParticipant[]
+  messages      Message[]
+  collaboration CollaborationRequest?
 
   @@index([job_id])
   @@map("conversations")

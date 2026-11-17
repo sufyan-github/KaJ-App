@@ -81,6 +81,18 @@ export class PolicyResourceResolver {
             }));
           break;
         }
+        case "collaboration": {
+          const request = await this.prisma.collaborationRequest.findFirst({
+            where: { id, hidden_at: null },
+            select: { requester_user_id: true, recipient_user_id: true },
+          });
+          if (request)
+            context.collaborationParticipantIds = [
+              request.requester_user_id,
+              request.recipient_user_id,
+            ];
+          break;
+        }
         case "conversation": {
           const conversation = await this.prisma.conversation.findFirst({
             where: { id, deleted_at: null },
