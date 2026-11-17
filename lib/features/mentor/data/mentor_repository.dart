@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../../core/errors/error_mapper.dart';
+import '../../../core/network/paged_list.dart';
 import '../domain/mentor_models.dart';
 
 /// The mentor capability: apply, see the decision, open or close to
@@ -57,6 +58,35 @@ class MentorRepository {
         data: {'accepting': accepting},
       );
       return _profileOr(response.data, MentorStatus.approved);
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
+  /// Approved mentors taking learners (blocks and privacy applied by the
+  /// server).
+  Future<List<PublicMentor>> directory({
+    String? skillId,
+    String? cursor,
+  }) async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/mentors',
+        queryParameters: {'skillId': ?skillId, 'cursor': ?cursor},
+      );
+      final items = _data(response.data)['items'];
+      return PagedList(
+        items is List
+            ? items
+                  .whereType<Map>()
+                  .map(
+                    (item) =>
+                        PublicMentor.fromJson(Map<String, dynamic>.from(item)),
+                  )
+                  .toList(growable: false)
+            : const <PublicMentor>[],
+        nextCursor: PagedList.cursorFrom(response.data),
+      );
     } on Object catch (error) {
       throw ErrorMapper.from(error);
     }

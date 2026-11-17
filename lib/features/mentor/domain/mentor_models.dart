@@ -82,3 +82,50 @@ class MentorProfile {
   bool get canApply =>
       status == MentorStatus.none || status == MentorStatus.rejected;
 }
+
+/// An approved mentor taking learners, as the public directory lists them.
+class PublicMentor {
+  const PublicMentor({
+    required this.id,
+    required this.displayName,
+    this.trustLevel,
+    this.bio,
+    this.yearsExperience,
+    this.areaNameBn = '',
+    this.areaNameEn = '',
+    this.skills = const [],
+  });
+
+  factory PublicMentor.fromJson(Map<String, dynamic> json) {
+    final area = json['area'];
+    return PublicMentor(
+      id: json['id'] as String? ?? '',
+      displayName: json['displayName'] as String? ?? '',
+      trustLevel: json['trustLevel'] as String?,
+      bio: json['bio'] as String?,
+      yearsExperience: (json['yearsExperience'] as num?)?.toInt(),
+      areaNameBn: area is Map ? area['nameBn'] as String? ?? '' : '',
+      areaNameEn: area is Map ? area['nameEn'] as String? ?? '' : '',
+      skills:
+          (json['skills'] as List?)
+              ?.whereType<Map>()
+              .map(
+                (item) => MentorSkill.fromJson(Map<String, dynamic>.from(item)),
+              )
+              .toList(growable: false) ??
+          const [],
+    );
+  }
+
+  final String areaNameBn;
+  final String areaNameEn;
+  final String? bio;
+  final String displayName;
+  final String id;
+  final List<MentorSkill> skills;
+  final String? trustLevel;
+  final int? yearsExperience;
+
+  String areaFor(String language) =>
+      language == 'en' && areaNameEn.isNotEmpty ? areaNameEn : areaNameBn;
+}

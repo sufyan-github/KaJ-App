@@ -1276,4 +1276,12 @@ const generatedEnglishTranslations = <String, String>{
   "মোট মিনিট": "Total minutes",
   "শিক্ষার্থী": "Learner",
   "কোড": "Code",
+  // P2.0: People in Explore.
+  "মানুষ": "People",
+  "মেন্টরের তালিকা লোড করা যায়নি।": "Could not load the mentors.",
+  "এখনো কোনো মেন্টর নেই": "No mentors yet",
+  "অনুমোদিত মেন্টররা শিক্ষার্থী নিলে এখানে দেখা যাবে।":
+      "Approved mentors taking learners will show here.",
+  "শেখার সুযোগ দেখুন": "See ways to learn",
+  "বছরের অভিজ্ঞতা": "years of experience",
 };

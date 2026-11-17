@@ -33,3 +33,8 @@ final mentorEvidenceUploaderProvider =
       final repository = ref.watch(trustSafetyRepositoryProvider);
       return (bytes) => repository.uploadImage('VERIFICATION_DOCUMENT', bytes);
     });
+
+/// The public mentor directory for Explore → People.
+final mentorDirectoryProvider = FutureProvider.autoDispose<List<PublicMentor>>(
+  (ref) => ref.watch(mentorRepositoryProvider).directory(),
+);

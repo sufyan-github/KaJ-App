@@ -938,6 +938,8 @@ class _WorkerCard extends StatelessWidget {
             KLocalizedText(
               '★ ${worker.ratingAverage} · ${worker.completedJobsCount} কাজ',
               textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
             const Spacer(),
             KLocalizedText(
@@ -954,13 +956,20 @@ class _WorkerCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: KSpacing.sm),
-            const Wrap(
-              alignment: WrapAlignment.center,
-              crossAxisAlignment: WrapCrossAlignment.center,
+            // One line each, so a narrow card never overflows in a
+            // longer language or at a larger text size.
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.schedule, size: 18),
                 SizedBox(width: 4),
-                KLocalizedText('সময় ও বুকিং'),
+                Flexible(
+                  child: KLocalizedText(
+                    'সময় ও বুকিং',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ],
             ),
           ],

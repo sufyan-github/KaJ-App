@@ -8,12 +8,14 @@ import '../jobs/presentation/screens/jobs_screens.dart';
 import '../learning/presentation/learn_explore.dart';
 import '../onboarding/domain/onboarding_state.dart';
 import '../profile/presentation/controllers/me_provider.dart';
+import 'people_explore.dart';
 
 /// The kinds of things Explore can show. More (people, experts, ideas,
 /// businesses, events) are added as those domains arrive.
 enum ExploreSection {
   work,
-  learn;
+  learn,
+  people;
 
   static ExploreSection parse(String? value) => ExploreSection.values
       .firstWhere((item) => item.name == value, orElse: () => work);
@@ -85,10 +87,10 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                   onChanged: (value) => setState(() => _query = value),
                 ),
                 const SizedBox(height: KSpacing.sm),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Wrap(
-                    spacing: KSpacing.sm,
+                // Scrolls sideways: more kinds (businesses, ideas) join here.
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
                     children: [
                       _SectionChip(
                         key: const ValueKey('explore-work'),
@@ -97,6 +99,14 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                         selected: _section == ExploreSection.work,
                         onSelected: () =>
                             setState(() => _section = ExploreSection.work),
+                      ),
+                      _SectionChip(
+                        key: const ValueKey('explore-people'),
+                        icon: Icons.groups_outlined,
+                        label: 'মানুষ',
+                        selected: _section == ExploreSection.people,
+                        onSelected: () =>
+                            setState(() => _section = ExploreSection.people),
                       ),
                       _SectionChip(
                         key: const ValueKey('explore-learn'),
@@ -123,6 +133,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
               : WorkerDirectoryScreen(embedded: true, searchQuery: _query),
         // Learning with a mentor, then online courses.
         ExploreSection.learn => LearnExploreBody(searchQuery: _query),
+        ExploreSection.people => PeopleExploreBody(searchQuery: _query),
       },
     );
   }
@@ -143,10 +154,13 @@ class _SectionChip extends StatelessWidget {
   final VoidCallback onSelected;
 
   @override
-  Widget build(BuildContext context) => ChoiceChip(
-    avatar: Icon(icon, size: 18),
-    label: KLocalizedText(label),
-    selected: selected,
-    onSelected: (_) => onSelected(),
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(right: KSpacing.sm),
+    child: ChoiceChip(
+      avatar: Icon(icon, size: 18),
+      label: KLocalizedText(label),
+      selected: selected,
+      onSelected: (_) => onSelected(),
+    ),
   );
 }
