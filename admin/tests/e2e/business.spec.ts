@@ -15,11 +15,13 @@ async function respond(page: Page, path: string, data: unknown) {
   );
 }
 
-/** Records the JSON body of the first request to `path`. */
+/** Records the JSON body of the write request to `path`. */
 async function capture(page: Page, path: string, data: unknown = {}) {
   const seen: { body: Record<string, unknown> | null } = { body: null };
   await page.route(`**/api/admin/ops/${path}`, async (route) => {
-    seen.body = route.request().postDataJSON();
+    // Only writes: a list reload (GET) on the same path must not erase it.
+    if (route.request().method() !== "GET")
+      seen.body = route.request().postDataJSON();
     await route.fulfill({
       status: 200,
       contentType: "application/json",
