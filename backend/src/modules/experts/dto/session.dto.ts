@@ -16,6 +16,7 @@ import {
   IsEnum,
   IsIn,
   IsInt,
+  IsNumber,
   IsOptional,
   IsString,
   IsUrl,
@@ -264,4 +265,22 @@ export class ExpertSlotsQueryDto {
 
   @IsDateString()
   to!: string;
+}
+
+/** POST /community/groups/:id/sessions — moderators and ambassadors. */
+export class CreateGroupSessionDto extends CreateSessionDto {
+  /** In person: the venue pin, used only for check-in (never shown). */
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(-90)
+  @Max(90)
+  venueLat?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(-180)
+  @Max(180)
+  venueLng?: number;
 }

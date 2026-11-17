@@ -368,6 +368,8 @@ enum SessionParticipantStatus {
   DECLINED
   ATTENDED
   NO_SHOW
+  /// P3.5: RSVP'd to a full session; promoted in order when a place frees.
+  WAITLISTED
 }
 
 enum IntroductionContextType {
@@ -946,6 +948,7 @@ model CommunityGroup {
   location              Location?              @relation(fields: [location_id], references: [id], onDelete: Restrict)
   category              Category?              @relation(fields: [category_id], references: [id], onDelete: Restrict)
   members               CommunityGroupMember[]
+  sessions              Session[]
   user                  User?                  @relation(fields: [userId], references: [id])
   userId                String?                @db.Uuid
   introductionRequest   IntroductionRequest?   @relation(fields: [introductionRequestId], references: [id])
@@ -1009,6 +1012,11 @@ model Session {
   home_based_friendly Boolean              @default(false)
   /// The accepted introduction a consultation came from, if any.
   introduction_id     String?              @db.Uuid
+  /// P3.5: a session of a community group (members only).
+  group_id            String?              @db.Uuid
+  /// P3.5: the venue pin for check-in. Never returned by the API.
+  venue_lat           Decimal?             @db.Decimal(9, 6)
+  venue_lng           Decimal?             @db.Decimal(9, 6)
   reminder_sent_at    DateTime?
   cancelled_at        DateTime?
   cancel_reason       String?
@@ -1022,6 +1030,7 @@ model Session {
   expert              User?                @relation("SessionExpert", fields: [expert_user_id], references: [id], onDelete: SetNull)
   location            Location?            @relation(fields: [location_id], references: [id], onDelete: Restrict)
   introduction        IntroductionRequest? @relation(fields: [introduction_id], references: [id], onDelete: SetNull)
+  group               CommunityGroup?      @relation(fields: [group_id], references: [id], onDelete: Cascade)
   participants        SessionParticipant[]
 
   @@index([host_user_id, starts_at])
@@ -1030,28 +1039,35 @@ model Session {
   @@index([subject_type, subject_id])
   @@index([location_id])
   @@index([introduction_id])
+  @@index([group_id, starts_at])
   @@map("sessions")
 }
 
 model SessionParticipant {
-  id                   String                   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  session_id           String                   @db.Uuid
-  user_id              String                   @db.Uuid
-  role                 SessionParticipantRole   @default(PARTICIPANT)
-  status               SessionParticipantStatus @default(INVITED)
-  invited_by_user_id   String?                  @db.Uuid
-  responded_at         DateTime?
-  attendance_marked_at DateTime?
+  id                      String                   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  session_id              String                   @db.Uuid
+  user_id                 String                   @db.Uuid
+  role                    SessionParticipantRole   @default(PARTICIPANT)
+  status                  SessionParticipantStatus @default(INVITED)
+  invited_by_user_id      String?                  @db.Uuid
+  responded_at            DateTime?
+  attendance_marked_at    DateTime?
   /// CASH sessions: what the host recorded receiving from this participant.
-  cash_amount_poisha   BigInt?
-  cash_recorded_at     DateTime?
-  cash_recorded_by     String?                  @db.Uuid
-  created_at           DateTime                 @default(now())
-  updated_at           DateTime                 @updatedAt
-  session              Session                  @relation(fields: [session_id], references: [id], onDelete: Cascade)
-  user                 User                     @relation("SessionParticipation", fields: [user_id], references: [id], onDelete: Cascade)
-  invited_by           User?                    @relation("SessionInviter", fields: [invited_by_user_id], references: [id], onDelete: SetNull)
-  cash_recorder        User?                    @relation("SessionCashRecorder", fields: [cash_recorded_by], references: [id], onDelete: SetNull)
+  cash_amount_poisha      BigInt?
+  cash_recorded_at        DateTime?
+  cash_recorded_by        String?                  @db.Uuid
+  /// P3.5: location check-in (consent and the distance only, no coordinates).
+  checked_in_at           DateTime?
+  checkin_distance_m      Int?
+  checkin_accuracy_m      Decimal?                 @db.Decimal(8, 2)
+  checkin_consent_version String?
+  waitlisted_at           DateTime?
+  created_at              DateTime                 @default(now())
+  updated_at              DateTime                 @updatedAt
+  session                 Session                  @relation(fields: [session_id], references: [id], onDelete: Cascade)
+  user                    User                     @relation("SessionParticipation", fields: [user_id], references: [id], onDelete: Cascade)
+  invited_by              User?                    @relation("SessionInviter", fields: [invited_by_user_id], references: [id], onDelete: SetNull)
+  cash_recorder           User?                    @relation("SessionCashRecorder", fields: [cash_recorded_by], references: [id], onDelete: SetNull)
 
   @@unique([session_id, user_id])
   @@index([user_id, status])

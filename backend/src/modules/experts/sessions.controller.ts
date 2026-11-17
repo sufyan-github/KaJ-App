@@ -13,6 +13,7 @@ import { ApiTags } from "@nestjs/swagger";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { Policy } from "../../common/policy/policy.decorator";
 import { Policies } from "../../common/policy/policy.types";
+import { AttendanceLocationDto } from "../attendance/dto/attendance.dto";
 import { AccessTokenClaims } from "../auth/auth-token.service";
 import {
   BookConsultationDto,
@@ -100,6 +101,27 @@ export class SessionsController {
     @Param("id", uuid()) id: string,
   ) {
     return this.sessions.chatRoom(claims.sub, id);
+  }
+
+  /** P3.5: RSVP to a group session (a place, or the waitlist). */
+  @Post("sessions/:id/rsvp")
+  @Policy(Policies.authenticated())
+  rsvp(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", uuid()) id: string,
+  ) {
+    return this.sessions.rsvp(claims.sub, id);
+  }
+
+  /** P3.5: location check-in at an in-person session (explicit consent). */
+  @Post("sessions/:id/check-in")
+  @Policy(Policies.authenticated())
+  checkIn(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", uuid()) id: string,
+    @Body() body: AttendanceLocationDto,
+  ) {
+    return this.sessions.checkIn(claims.sub, id, body);
   }
 
   @Post("sessions/:id/publish")

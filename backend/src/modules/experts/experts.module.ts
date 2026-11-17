@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 
+import { AttendanceModule } from "../attendance/attendance.module";
 import { AvailabilityModule } from "../availability/availability.module";
 import { ChatModule } from "../chat/chat.module";
 import { MentorsModule } from "../mentors/mentors.module";
@@ -13,7 +14,13 @@ import { SessionsService } from "./sessions.service";
 
 /** P3: experts — introductions and sessions. */
 @Module({
-  imports: [AvailabilityModule, ChatModule, MentorsModule, NotificationsModule],
+  imports: [
+    AttendanceModule,
+    AvailabilityModule,
+    ChatModule,
+    MentorsModule,
+    NotificationsModule,
+  ],
   controllers: [IntroductionsController, SessionsController],
   providers: [
     IntroductionsService,

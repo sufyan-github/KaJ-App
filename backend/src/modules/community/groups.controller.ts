@@ -15,6 +15,8 @@ import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { Policy } from "../../common/policy/policy.decorator";
 import { Policies } from "../../common/policy/policy.types";
 import { AccessTokenClaims } from "../auth/auth-token.service";
+import { CreateGroupSessionDto } from "../experts/dto/session.dto";
+import { SessionsService } from "../experts/sessions.service";
 import {
   CreateGroupDto,
   GroupMemberRoleDto,
@@ -31,7 +33,10 @@ const uuid = () => new ParseUUIDPipe();
 @ApiTags("community")
 @Controller()
 export class GroupsController {
-  constructor(private readonly groups: GroupsService) {}
+  constructor(
+    private readonly groups: GroupsService,
+    private readonly sessions: SessionsService,
+  ) {}
 
   @Post("community/groups")
   @Policy(Policies.authenticated())
@@ -144,6 +149,27 @@ export class GroupsController {
     @Param("userId", uuid()) userId: string,
   ) {
     return this.groups.remove(claims.sub, id, userId);
+  }
+
+  /** P3.5: the group's sessions and events (members only). */
+  @Get("community/groups/:id/sessions")
+  @Policy(Policies.authenticated())
+  sessionsOf(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", uuid()) id: string,
+  ) {
+    return this.sessions.groupSessions(claims.sub, id);
+  }
+
+  /** P3.5: a moderator or ambassador creates one (DRAFT; publish announces it). */
+  @Post("community/groups/:id/sessions")
+  @Policy(Policies.authenticated())
+  createSession(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", uuid()) id: string,
+    @Body() body: CreateGroupSessionDto,
+  ) {
+    return this.sessions.createForGroup(claims.sub, id, body);
   }
 
   @Post("community/groups/:id/chat")

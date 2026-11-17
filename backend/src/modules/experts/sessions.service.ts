@@ -1,6 +1,9 @@
 import { BadRequestException, Injectable, Optional } from "@nestjs/common";
 import {
   Gender,
+  GroupMemberRole,
+  GroupMemberStatus,
+  SessionSubjectType,
   IntroductionStatus,
   MentorStatus,
   Prisma,
@@ -15,6 +18,8 @@ import {
 
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
 import { PrismaService } from "../../infra/prisma/prisma.service";
+import { AttendanceLocationDto } from "../attendance/dto/attendance.dto";
+import { AttendanceService } from "../attendance/attendance.service";
 import { AvailabilityService } from "../availability/availability.service";
 import { ChatService } from "../chat/chat.service";
 import { MentorsService } from "../mentors/mentors.service";
@@ -24,6 +29,7 @@ import { visibleDisplayName } from "../users/public-profile.projection";
 import {
   BookConsultationDto,
   CancelSessionDto,
+  CreateGroupSessionDto,
   CreateSessionDto,
   InviteSessionDto,
   RespondSessionDto,
@@ -80,6 +86,7 @@ export class SessionsService {
     @Optional() private readonly notifications?: NotificationsService,
     @Optional() private readonly userBlocks?: UserBlocksService,
     @Optional() private readonly chat?: ChatService,
+    @Optional() private readonly attendanceService?: AttendanceService,
   ) {}
 
   private get blocks() {
@@ -292,6 +299,7 @@ export class SessionsService {
         home_based_friendly: input.homeBasedFriendly,
       },
     });
+    if (capacity > row.capacity) await this.promoteWaitlist(id);
     if (input.startsAt || input.mode || input.locationId !== undefined)
       await this.notify(
         this.confirmedIds(row).filter((user) => user !== userId),
@@ -326,6 +334,26 @@ export class SessionsService {
       where: { id },
       data: { status: SessionStatus.SCHEDULED },
     });
+    if (row.group_id) {
+      const hidden = await this.blocks.hiddenFrom(row.host_user_id);
+      const members = await this.prisma.communityGroupMember.findMany({
+        where: {
+          group_id: row.group_id,
+          status: GroupMemberStatus.ACTIVE,
+          user_id: { notIn: [row.host_user_id, ...hidden] },
+        },
+        select: { user_id: true },
+      });
+      await this.notify(
+        members.map((member) => member.user_id),
+        id,
+        "SESSION_ANNOUNCED",
+        {
+          title: "দলে নতুন আয়োজন",
+          body: `${row.title} — যোগ দিতে RSVP করুন।`,
+        },
+      );
+    }
     await this.notify(
       row.participants
         .filter((item) => item.status === SessionParticipantStatus.INVITED)
@@ -506,6 +534,7 @@ export class SessionsService {
         [
           SessionParticipantStatus.ACCEPTED,
           SessionParticipantStatus.INVITED,
+          SessionParticipantStatus.WAITLISTED,
         ] as SessionParticipantStatus[]
       ).includes(mine.status)
     )
@@ -524,6 +553,9 @@ export class SessionsService {
         responded_at: new Date(),
       },
     });
+    // A freed place goes to the next person on the waitlist.
+    if (mine.status === SessionParticipantStatus.ACCEPTED)
+      await this.promoteWaitlist(id);
     await this.resyncChat(id);
     return this.get(userId, id);
   }
@@ -650,6 +682,265 @@ export class SessionsService {
   }
 
   /**
+   * P3.5: a session or event of a community group, hosted by one of its
+   * moderators or ambassadors (DRAFT; publishing announces it to members).
+   */
+  async createForGroup(
+    userId: string,
+    groupId: string,
+    input: CreateGroupSessionDto,
+  ) {
+    const membership = await this.prisma.communityGroupMember.findFirst({
+      where: {
+        group_id: groupId,
+        user_id: userId,
+        status: GroupMemberStatus.ACTIVE,
+        role: { in: [GroupMemberRole.MODERATOR, GroupMemberRole.AMBASSADOR] },
+        group: { deleted_at: null, hidden_at: null },
+      },
+      include: { group: { select: { women_only: true } } },
+    });
+    if (!membership) throw sessionErrors.notFound();
+    await this.assertPlace(input.mode, input.locationId);
+    if ((input.venueLat === undefined) !== (input.venueLng === undefined))
+      throw sessionErrors.invalid(
+        "venueLat",
+        "Give both venueLat and venueLng, or neither.",
+      );
+    const price = this.price(input.priceModel, input.pricePoisha);
+    const womenOnly = membership.group.women_only || (input.womenOnly ?? false);
+    if (womenOnly) await this.assertWoman(userId);
+    const startsAt = new Date(input.startsAt);
+    if (startsAt.getTime() < Date.now())
+      throw sessionErrors.invalid(
+        "startsAt",
+        "A session must start in the future.",
+      );
+    const session = await this.prisma.session.create({
+      data: {
+        host_user_id: userId,
+        kind: input.kind,
+        title: input.title.trim(),
+        description: input.description?.trim() || null,
+        subject_type: SessionSubjectType.GROUP,
+        subject_id: groupId,
+        group_id: groupId,
+        starts_at: startsAt,
+        duration_minutes: input.durationMinutes,
+        mode: input.mode,
+        location_id:
+          input.mode === SessionMode.IN_PERSON ? input.locationId! : null,
+        online_link:
+          input.mode === SessionMode.ONLINE ? (input.onlineLink ?? null) : null,
+        venue_lat:
+          input.mode === SessionMode.IN_PERSON
+            ? (input.venueLat ?? null)
+            : null,
+        venue_lng:
+          input.mode === SessionMode.IN_PERSON
+            ? (input.venueLng ?? null)
+            : null,
+        capacity: input.capacity,
+        ...price,
+        women_only: womenOnly,
+        home_based_friendly: input.homeBasedFriendly ?? false,
+        participants: {
+          create: {
+            user_id: userId,
+            role: SessionParticipantRole.HOST,
+            status: SessionParticipantStatus.ACCEPTED,
+            responded_at: new Date(),
+          },
+        },
+      },
+      select: { id: true },
+    });
+    return this.get(userId, session.id);
+  }
+
+  /** P3.5: a group's upcoming and past published sessions (members only). */
+  async groupSessions(userId: string, groupId: string) {
+    if (!(await this.activeGroupMember(userId, groupId)))
+      throw sessionErrors.notFound();
+    const hidden = await this.blocks.hiddenFrom(userId);
+    const rows = await this.prisma.session.findMany({
+      where: {
+        group_id: groupId,
+        hidden_at: null,
+        status: { not: SessionStatus.DRAFT },
+        host_user_id: { notIn: hidden },
+      },
+      include,
+      orderBy: [{ starts_at: "asc" }, { id: "asc" }],
+      take: 100,
+    });
+    return { items: rows.map((row) => this.serialize(row, userId)) };
+  }
+
+  /**
+   * P3.5: RSVP to a group session: a place if one is free, otherwise the
+   * waitlist (promoted in order when a place frees).
+   */
+  async rsvp(userId: string, id: string) {
+    const row = await this.visible(userId, id);
+    if (
+      !row.group_id ||
+      row.status !== SessionStatus.SCHEDULED ||
+      row.host_user_id === userId
+    )
+      throw sessionErrors.transition(row.status);
+    if (row.women_only) await this.assertWoman(userId);
+    const mine = row.participants.find((item) => item.user_id === userId);
+    if (
+      mine &&
+      !(
+        [
+          SessionParticipantStatus.DECLINED,
+          SessionParticipantStatus.INVITED,
+        ] as SessionParticipantStatus[]
+      ).includes(mine.status)
+    )
+      return this.get(userId, id);
+    const now = new Date();
+    let waitlisted = false;
+    await this.prisma.$transaction(async (transaction) => {
+      await transaction.$executeRaw`SELECT id FROM sessions WHERE id = ${id}::uuid FOR UPDATE`;
+      const taken = await transaction.sessionParticipant.count({
+        where: {
+          session_id: id,
+          role: SessionParticipantRole.PARTICIPANT,
+          status: { in: TAKING_A_PLACE },
+        },
+      });
+      waitlisted = taken >= row.capacity;
+      const data = {
+        status: waitlisted
+          ? SessionParticipantStatus.WAITLISTED
+          : SessionParticipantStatus.ACCEPTED,
+        responded_at: now,
+        waitlisted_at: waitlisted ? now : null,
+      };
+      await transaction.sessionParticipant.upsert({
+        where: { session_id_user_id: { session_id: id, user_id: userId } },
+        create: {
+          session_id: id,
+          user_id: userId,
+          role: SessionParticipantRole.PARTICIPANT,
+          ...data,
+        },
+        update: data,
+      });
+    });
+    if (!waitlisted) await this.resyncChat(id);
+    return this.get(userId, id);
+  }
+
+  /**
+   * P3.5: check in at an in-person session, by the job check-in rules
+   * (flag, consent, accuracy, geofence round the venue pin or the area).
+   * From an hour before the start until the end; marks ATTENDED. Only the
+   * distance is kept, never the coordinates.
+   */
+  async checkIn(userId: string, id: string, input: AttendanceLocationDto) {
+    const row = await this.visible(userId, id);
+    const mine = row.participants.find((item) => item.user_id === userId);
+    if (
+      row.mode !== SessionMode.IN_PERSON ||
+      row.status !== SessionStatus.SCHEDULED ||
+      !mine ||
+      mine.role !== SessionParticipantRole.PARTICIPANT ||
+      mine.status !== SessionParticipantStatus.ACCEPTED
+    )
+      throw sessionErrors.transition(row.status);
+    const now = Date.now();
+    const endsAt = row.starts_at.getTime() + row.duration_minutes * MINUTE;
+    if (now < row.starts_at.getTime() - 60 * MINUTE || now > endsAt)
+      throw sessionErrors.invalid(
+        "capturedAt",
+        "Check in from an hour before the start until the end.",
+      );
+    if (!this.attendanceService)
+      throw new Error("AttendanceService is not available.");
+    const place = await this.prisma.session.findUniqueOrThrow({
+      where: { id },
+      select: {
+        venue_lat: true,
+        venue_lng: true,
+        location: { select: { lat: true, lng: true, radius_km: true } },
+      },
+    });
+    const presence = await this.attendanceService.verifyPresence(input, {
+      lat: place.venue_lat,
+      lng: place.venue_lng,
+      location: place.location,
+    });
+    await this.prisma.sessionParticipant.update({
+      where: { id: mine.id },
+      data: {
+        status: SessionParticipantStatus.ATTENDED,
+        checked_in_at: new Date(),
+        attendance_marked_at: new Date(),
+        checkin_distance_m: presence.distanceM,
+        checkin_accuracy_m: presence.accuracyM,
+        checkin_consent_version: presence.consentVersion,
+      },
+    });
+    return this.get(userId, id);
+  }
+
+  /** Fills free places from the waitlist, earliest first. */
+  private async promoteWaitlist(id: string) {
+    const promoted: string[] = [];
+    await this.prisma.$transaction(async (transaction) => {
+      await transaction.$executeRaw`SELECT id FROM sessions WHERE id = ${id}::uuid FOR UPDATE`;
+      const session = await transaction.session.findUniqueOrThrow({
+        where: { id },
+        select: { capacity: true, status: true },
+      });
+      if (!OPEN.includes(session.status)) return;
+      const taken = await transaction.sessionParticipant.count({
+        where: {
+          session_id: id,
+          role: SessionParticipantRole.PARTICIPANT,
+          status: { in: TAKING_A_PLACE },
+        },
+      });
+      const waiting = await transaction.sessionParticipant.findMany({
+        where: { session_id: id, status: SessionParticipantStatus.WAITLISTED },
+        orderBy: [{ waitlisted_at: "asc" }, { id: "asc" }],
+        take: Math.max(0, session.capacity - taken),
+      });
+      for (const row of waiting) {
+        await transaction.sessionParticipant.update({
+          where: { id: row.id },
+          data: {
+            status: SessionParticipantStatus.ACCEPTED,
+            responded_at: new Date(),
+          },
+        });
+        promoted.push(row.user_id);
+      }
+    });
+    if (promoted.length)
+      await this.notify(promoted, id, "SESSION_WAITLIST_PROMOTED", {
+        title: "জায়গা পেয়েছেন",
+        body: "অপেক্ষমাণ তালিকা থেকে আপনি এখন সেশনে জায়গা পেয়েছেন।",
+      });
+  }
+
+  private async activeGroupMember(userId: string, groupId: string) {
+    const count = await this.prisma.communityGroupMember.count({
+      where: {
+        group_id: groupId,
+        user_id: userId,
+        status: GroupMemberStatus.ACTIVE,
+        group: { deleted_at: null, hidden_at: null },
+      },
+    });
+    return count > 0;
+  }
+
+  /**
    * P3.3: the session chat — a group conversation of the host and the
    * confirmed participants (members follow the session). Others get 404.
    */
@@ -754,8 +1045,14 @@ export class SessionsService {
     const isHost = row.host_user_id === userId;
     if (!isHost) {
       if (row.hidden_at) throw sessionErrors.notFound();
-      if (!row.participants.some((item) => item.user_id === userId))
-        throw sessionErrors.notFound();
+      const onIt = row.participants.some((item) => item.user_id === userId);
+      // P3.5: a group's published sessions are visible to its active members.
+      const groupMember =
+        !onIt &&
+        row.group_id !== null &&
+        row.status !== SessionStatus.DRAFT &&
+        (await this.activeGroupMember(userId, row.group_id));
+      if (!onIt && !groupMember) throw sessionErrors.notFound();
       if (await this.blocks.between(userId, row.host_user_id))
         throw sessionErrors.notFound();
     }
@@ -819,6 +1116,17 @@ export class SessionsService {
       host: name(row.host, confirmed),
       expert: row.expert ? name(row.expert, confirmed) : null,
       introductionId: row.introduction_id,
+      groupId: row.group_id,
+      myCheckedInAt: mine?.checked_in_at?.toISOString() ?? null,
+      waitlistPosition:
+        mine?.status === SessionParticipantStatus.WAITLISTED
+          ? row.participants.filter(
+              (item) =>
+                item.status === SessionParticipantStatus.WAITLISTED &&
+                (item.waitlisted_at?.getTime() ?? 0) <=
+                  (mine.waitlisted_at?.getTime() ?? 0),
+            ).length
+          : null,
       myRole: isHost ? "HOST" : (mine?.role ?? null),
       myStatus: mine?.status ?? null,
       cancelReason: row.cancel_reason,

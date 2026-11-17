@@ -62,3 +62,16 @@ migration 8 (never created).
   group + user.
 - Each group's chat is a GROUP conversation (subject COMMUNITY_GROUP) kept
   equal to its ACTIVE members.
+
+## 20261119130000_group_sessions (P3.5)
+
+- `sessions.group_id` → `community_groups` (cascade), with subject GROUP
+  (CHECK uses IS NOT DISTINCT FROM so a NULL subject fails); `venue_lat` /
+  `venue_lng` (both or neither): a private venue pin used only for check-in,
+  never returned by the API.
+- `session_participants`: `checked_in_at`, `checkin_distance_m`,
+  `checkin_accuracy_m`, `checkin_consent_version` (no coordinates are
+  stored), `waitlisted_at`; status value WAITLISTED (stays on rollback).
+- Check-in reuses the job attendance rules (`checkin_enabled` flag, current
+  consent version, accuracy, geofence round the venue pin or the area's
+  centre and radius), from an hour before the start until the end.

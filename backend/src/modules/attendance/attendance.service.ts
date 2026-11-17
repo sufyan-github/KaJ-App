@@ -27,6 +27,7 @@ import { NotificationsService } from "../notifications/notifications.service";
 import { JobStateMachine } from "../jobs/state-machine/job-state.machine";
 import {
   AttendanceOverrideDto,
+  AttendanceLocationDto,
   CheckInDto,
   CheckOutDto,
 } from "./dto/attendance.dto";
@@ -697,6 +698,42 @@ export class AttendanceService {
       }
       return result;
     });
+  }
+
+  /**
+   * P3.5: presence at an in-person session or event, by the same rules as
+   * job check-in: the check-in flag, explicit current consent, accuracy and
+   * the geofence (the venue pin, else the area's centre). Returns what the
+   * caller may store — the distance, never the coordinates.
+   */
+  async verifyPresence(
+    input: AttendanceLocationDto,
+    place: {
+      lat: Prisma.Decimal | null;
+      lng: Prisma.Decimal | null;
+      location: {
+        lat: Prisma.Decimal | null;
+        lng: Prisma.Decimal | null;
+        radius_km: Prisma.Decimal | null;
+      } | null;
+    },
+  ) {
+    const settings = await this.prisma.$transaction((transaction) =>
+      this.assertEnabled(transaction),
+    );
+    this.assertConsent(input, settings);
+    this.assertAccuracy(input.accuracyM, settings);
+    const location = this.jobLocation(place, settings);
+    const distanceM = distanceMetres(location, {
+      lat: input.lat,
+      lng: input.lng,
+    });
+    this.assertInside(distanceM, location.radiusM);
+    return {
+      distanceM: Math.round(distanceM),
+      accuracyM: input.accuracyM,
+      consentVersion: settings.consentVersion,
+    };
   }
 
   private async assertEnabled(transaction: Prisma.TransactionClient) {
