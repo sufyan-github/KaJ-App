@@ -14,7 +14,10 @@ import { Roles } from "../../common/decorators/roles.decorator";
 import { Policy } from "../../common/policy/policy.decorator";
 import { Policies } from "../../common/policy/policy.types";
 import { AccessTokenClaims } from "../auth/auth-token.service";
-import { RecordLearningSessionDto } from "./dto/learning.dto";
+import {
+  RecordLearningSessionDto,
+  WithdrawLearningDto,
+} from "./dto/learning.dto";
 import { LearningEnrolmentsService } from "./learning-enrolments.service";
 
 /** P1.3: accepting learners, enrolments (terms) and session progress. */
@@ -51,6 +54,27 @@ export class LearningEnrolmentsController {
     @Param("id", new ParseUUIDPipe()) id: string,
   ) {
     return this.enrolments.decline(claims.sub, id);
+  }
+
+  /** The learner withdraws (before or after acceptance). */
+  @Post("learning-applications/:id/withdraw")
+  @Policy(Policies.authenticated())
+  withdrawApplication(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @Body() body: WithdrawLearningDto,
+  ) {
+    return this.enrolments.withdrawApplication(claims.sub, id, body);
+  }
+
+  @Post("learning-enrolments/:id/withdraw")
+  @Policy(Policies.assignedWorker())
+  withdrawEnrolment(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @Body() body: WithdrawLearningDto,
+  ) {
+    return this.enrolments.withdrawEnrolment(claims.sub, id, body);
   }
 
   @Get("learning-enrolments")

@@ -281,40 +281,73 @@ export class LearningService {
         message: "This opportunity is not taking applications.",
         messageKey: "error.learning.closed",
       });
-    const application = await this.prisma.application
-      .create({
-        data: {
-          job_id: id,
-          worker_user_id: learnerUserId,
-          status: ApplicationStatus.PENDING,
-          message: input.message?.trim() || null,
-          proposed_starts_at: job.starts_at,
-          proposed_ends_at: job.ends_at,
-        },
-      })
-      .catch((error: unknown) => {
-        if (
-          error instanceof Prisma.PrismaClientKnownRequestError &&
-          error.code === "P2002"
-        )
-          throw new ConflictException({
-            code: "ALREADY_APPLIED",
-            message: "You have already applied.",
-            messageKey: "error.jobs.already_applied",
-          });
-        throw error;
-      });
-    await this.prisma.job.update({
-      where: { id },
-      data: { applications_count: { increment: 1 } },
+    // Someone who withdrew before acceptance may apply again: the same row
+    // goes back to PENDING (one application per learner and opportunity).
+    const previous = await this.prisma.application.findUnique({
+      where: {
+        job_id_worker_user_id: { job_id: id, worker_user_id: learnerUserId },
+      },
+      include: { _count: { select: { assignments: true } } },
     });
+    if (
+      previous?.status === ApplicationStatus.WITHDRAWN &&
+      previous._count.assignments > 0
+    )
+      throw new ConflictException({
+        code: "REAPPLY_NOT_ALLOWED",
+        message: "You left this opportunity after being accepted.",
+        messageKey: "error.learning.reapply_not_allowed",
+      });
+    const revived =
+      previous?.status === ApplicationStatus.WITHDRAWN
+        ? await this.prisma.application.update({
+            where: { id: previous.id },
+            data: {
+              status: ApplicationStatus.PENDING,
+              withdrawn_at: null,
+              message: input.message?.trim() || null,
+            },
+          })
+        : null;
+    const application =
+      revived ??
+      (await this.prisma.application
+        .create({
+          data: {
+            job_id: id,
+            worker_user_id: learnerUserId,
+            status: ApplicationStatus.PENDING,
+            message: input.message?.trim() || null,
+            proposed_starts_at: job.starts_at,
+            proposed_ends_at: job.ends_at,
+          },
+        })
+        .catch((error: unknown) => {
+          if (
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2002"
+          )
+            throw new ConflictException({
+              code: "ALREADY_APPLIED",
+              message: "You have already applied.",
+              messageKey: "error.jobs.already_applied",
+            });
+          throw error;
+        }));
+    if (!revived)
+      await this.prisma.job.update({
+        where: { id },
+        data: { applications_count: { increment: 1 } },
+      });
     await this.notifications?.create({
       userId: job.poster_user_id,
       type: "LEARNING_APPLICATION",
       title: "নতুন শিক্ষার্থী আবেদন",
       body: `${job.title} — একজন শিক্ষার্থী আবেদন করেছেন।`,
       payload: { route: `/learn/opportunities/${id}`, opportunityId: id },
-      dedupeKey: `learning-application:${application.id}`,
+      dedupeKey: revived
+        ? `learning-application:${application.id}:${Date.now()}`
+        : `learning-application:${application.id}`,
     });
     return {
       id: application.id,

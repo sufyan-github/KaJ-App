@@ -19,7 +19,10 @@ import { NotificationsService } from "../notifications/notifications.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
 import { visibleDisplayName } from "../users/public-profile.projection";
 import { generateUniqueCertificateCode } from "../training/training.rules";
-import { RecordLearningSessionDto } from "./dto/learning.dto";
+import {
+  RecordLearningSessionDto,
+  WithdrawLearningDto,
+} from "./dto/learning.dto";
 import { termsText } from "./learning-terms";
 import { LEARNING_ONLY } from "./learning.service";
 
@@ -254,6 +257,160 @@ export class LearningEnrolmentsService {
     return { id: applicationId, status: ApplicationStatus.REJECTED };
   }
 
+  /**
+   * The learner withdraws an application. Before acceptance it just becomes
+   * WITHDRAWN; an accepted one withdraws the enrolment too. Learning has no
+   * cancellation penalty, and withdrawing twice changes nothing.
+   */
+  async withdrawApplication(
+    learnerUserId: string,
+    applicationId: string,
+    input: WithdrawLearningDto = {},
+  ) {
+    const application = await this.prisma.application.findUnique({
+      where: { id: applicationId },
+      include: {
+        job: true,
+        assignments: {
+          orderBy: { created_at: "desc" },
+          take: 1,
+          select: { id: true },
+        },
+      },
+    });
+    if (
+      !application ||
+      application.worker_user_id !== learnerUserId ||
+      application.job.opportunity_type === "WORK"
+    )
+      throw new NotFoundException();
+    const enrolmentId = application.assignments[0]?.id ?? null;
+    if (application.status === ApplicationStatus.ACCEPTED && enrolmentId) {
+      const enrolment = await this.withdrawEnrolment(
+        learnerUserId,
+        enrolmentId,
+        input,
+      );
+      return {
+        id: applicationId,
+        status: ApplicationStatus.WITHDRAWN,
+        enrolment,
+      };
+    }
+    if (application.status !== ApplicationStatus.WITHDRAWN) {
+      const updated = await this.prisma.application.updateMany({
+        where: {
+          id: applicationId,
+          status: {
+            in: [ApplicationStatus.PENDING, ApplicationStatus.SHORTLISTED],
+          },
+        },
+        data: { status: ApplicationStatus.WITHDRAWN, withdrawn_at: new Date() },
+      });
+      if (updated.count !== 1)
+        throw new ConflictException({
+          code: "APPLICATION_NOT_WITHDRAWABLE",
+          message: "This application can no longer be withdrawn.",
+          messageKey: "error.learning.application_not_withdrawable",
+        });
+      await this.notifyWithdrawal(application.job, {
+        dedupeKey: `learning-withdrawn:application:${applicationId}:${Date.now()}`,
+        route: `/learn/opportunities/${application.job_id}`,
+        enrolled: false,
+      });
+    }
+    return {
+      id: applicationId,
+      status: ApplicationStatus.WITHDRAWN,
+      enrolment: enrolmentId
+        ? await this.enrolment(learnerUserId, enrolmentId)
+        : null,
+    };
+  }
+
+  /**
+   * The learner leaves an active enrolment: the enrolment is CANCELLED by
+   * them with no penalty (cancellation_penalised false, and learning never
+   * counts in reliability), the seat is freed and the mentor is told.
+   */
+  async withdrawEnrolment(
+    learnerUserId: string,
+    assignmentId: string,
+    input: WithdrawLearningDto = {},
+  ) {
+    const assignment = await this.prisma.assignment.findFirst({
+      where: {
+        id: assignmentId,
+        worker_user_id: learnerUserId,
+        job: LEARNING_ONLY,
+      },
+      include: { job: true },
+    });
+    if (!assignment) throw new NotFoundException();
+    if (
+      assignment.status === AssignmentStatus.CANCELLED &&
+      assignment.cancelled_by_user_id === learnerUserId
+    )
+      return this.enrolment(learnerUserId, assignmentId);
+    if (assignment.status !== AssignmentStatus.CONFIRMED)
+      throw new ConflictException({
+        code: "ENROLMENT_NOT_ACTIVE",
+        message: "Only an active enrolment can be withdrawn from.",
+        messageKey: "error.learning.enrolment_not_active",
+      });
+    const now = new Date();
+    await this.prisma.$transaction(async (transaction) => {
+      const updated = await transaction.assignment.updateMany({
+        where: { id: assignmentId, status: AssignmentStatus.CONFIRMED },
+        data: {
+          status: AssignmentStatus.CANCELLED,
+          cancelled_at: now,
+          cancelled_by_user_id: learnerUserId,
+          cancellation_penalised: false,
+          cancel_reason: input.reason?.trim() || "LEARNER_WITHDREW",
+        },
+      });
+      if (updated.count !== 1)
+        throw new ConflictException({
+          code: "ENROLMENT_NOT_ACTIVE",
+          message: "Only an active enrolment can be withdrawn from.",
+          messageKey: "error.learning.enrolment_not_active",
+        });
+      await transaction.application.update({
+        where: { id: assignment.application_id },
+        data: { status: ApplicationStatus.WITHDRAWN, withdrawn_at: now },
+      });
+      // The seat goes back to the mentor's pool.
+      await transaction.$executeRaw`
+        UPDATE jobs SET workers_filled = GREATEST(workers_filled - 1, 0)
+        WHERE id = ${assignment.job_id}::uuid`;
+    });
+    await this.notifyWithdrawal(assignment.job, {
+      dedupeKey: `learning-withdrawn:enrolment:${assignmentId}`,
+      route: `/learn/enrolments/${assignmentId}`,
+      enrolled: true,
+    });
+    return this.enrolment(learnerUserId, assignmentId);
+  }
+
+  private notifyWithdrawal(
+    job: { id: string; title: string; poster_user_id: string },
+    options: { dedupeKey: string; route: string; enrolled: boolean },
+  ) {
+    return this.notifications?.create({
+      userId: job.poster_user_id,
+      type: "LEARNING_WITHDRAWN",
+      title: options.enrolled
+        ? "একজন শিক্ষার্থী সরে গেছেন"
+        : "একজন শিক্ষার্থী আবেদন প্রত্যাহার করেছেন",
+      body: options.enrolled
+        ? `${job.title} — একজন শিক্ষার্থী ভর্তি থেকে সরে গেছেন। একটি আসন খালি হয়েছে।`
+        : `${job.title} — একজন শিক্ষার্থী আবেদন প্রত্যাহার করেছেন।`,
+      payload: { route: options.route, opportunityId: job.id },
+      dedupeKey: options.dedupeKey,
+    });
+  }
+
   /** One enrolment, for its mentor or its learner. */
   async enrolment(userId: string, assignmentId: string) {
     const row = await this.prisma.assignment.findFirst({
@@ -478,6 +635,12 @@ export class LearningEnrolmentsService {
         minutesTotal: sessions.reduce((sum, item) => sum + item.minutes, 0),
       },
       enrolledAt: row.confirmed_at?.toISOString() ?? null,
+      withdrawnAt:
+        row.status === AssignmentStatus.CANCELLED &&
+        row.cancelled_by_user_id === row.worker_user_id
+          ? (row.cancelled_at?.toISOString() ?? null)
+          : null,
+      completedAt: row.completion_record?.issued_at.toISOString() ?? null,
       completionRecord: row.completion_record
         ? {
             id: row.completion_record.id,

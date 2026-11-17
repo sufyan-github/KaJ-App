@@ -1,0 +1,4 @@
+-- Rollback of 20261118090000_review_subject_learning. PostgreSQL can't drop an
+-- enum value: ReviewSubjectType.LEARNING_ENROLMENT stays, unused (roll the app
+-- back first, and delete any LEARNING_ENROLMENT reviews if wanted). Then
+-- delete the migration's row from _prisma_migrations.

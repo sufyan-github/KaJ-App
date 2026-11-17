@@ -148,3 +148,11 @@ export class RecordLearningSessionDto {
   @MaxLength(1000)
   notes?: string;
 }
+
+/** POST learning-applications/:id/withdraw, learning-enrolments/:id/withdraw */
+export class WithdrawLearningDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string;
+}

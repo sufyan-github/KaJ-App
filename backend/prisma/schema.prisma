@@ -274,6 +274,7 @@ enum PayoutStatus {
 /// What a review is about. Values are added as modules gain reviews.
 enum ReviewSubjectType {
   ASSIGNMENT
+  LEARNING_ENROLMENT
 }
 
 enum ReviewDirection {

@@ -9,6 +9,7 @@ import {
   AssignmentStatus,
   JobActorType,
   JobStatus,
+  OpportunityType,
   Prisma,
   ReviewDirection,
   ReviewSubjectType,
@@ -18,7 +19,7 @@ import {
 import { CLOCK, Clock } from "../../common/time/clock";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { JobStateMachine } from "../jobs/state-machine/job-state.machine";
-import { WORK_ONLY } from "../jobs/opportunity";
+import { assertWork, isWork, WORK_ONLY } from "../jobs/opportunity";
 import { NotificationsService } from "../notifications/notifications.service";
 import {
   CreateReviewDto,
@@ -41,9 +42,19 @@ export class ReviewsService {
     @Inject(CLOCK) private readonly clock: Clock,
   ) {}
 
-  async create(userId: string, assignmentId: string, input: CreateReviewDto) {
-    const assignment = await this.participantAssignment(userId, assignmentId);
+  async create(
+    userId: string,
+    assignmentId: string,
+    input: CreateReviewDto,
+    subjectType: ReviewSubjectType = ReviewSubjectType.ASSIGNMENT,
+  ) {
+    const assignment = await this.participantAssignment(
+      userId,
+      assignmentId,
+      subjectType,
+    );
     this.assertReviewable(assignment);
+    const work = isWork(assignment.job);
     const isCustomer = assignment.job.poster_user_id === userId;
     const revieweeUserId = isCustomer
       ? assignment.worker_user_id
@@ -62,7 +73,7 @@ export class ReviewsService {
 
       const review = await transaction.review.create({
         data: {
-          subject_type: ReviewSubjectType.ASSIGNMENT,
+          subject_type: subjectType,
           subject_id: assignmentId,
           assignment_id: assignmentId,
           job_id: assignment.job_id,
@@ -80,7 +91,9 @@ export class ReviewsService {
       const pairCount = await transaction.review.count({
         where: { assignment_id: assignmentId, is_visible: true },
       });
-      if (pairCount === 2) {
+      // Learning reviews are shown on the enrolment but never feed the work
+      // rating, reliability or job state.
+      if (pairCount === 2 && work) {
         await this.recomputeProfiles(transaction, [
           assignment.worker_user_id,
           assignment.job.poster_user_id,
@@ -108,20 +121,44 @@ export class ReviewsService {
       body: result.revealed
         ? "দুজনের রিভিউ এখন দেখা যাচ্ছে।"
         : "রিভিউ জমা হয়েছে। আপনার রিভিউ দেওয়ার পর এটি দেখা যাবে।",
-      payload: { assignmentId, route: "/reviews" },
+      payload: work
+        ? { assignmentId, route: "/reviews" }
+        : {
+            assignmentId,
+            subjectType,
+            route: `/learn/enrolments/${assignmentId}`,
+          },
       dedupeKey: `review:${result.review.id}`,
     });
     return { submitted: true, revealed: result.revealed };
   }
 
-  async forAssignment(userId: string, assignmentId: string) {
-    const assignment = await this.participantAssignment(userId, assignmentId);
+  async forAssignment(
+    userId: string,
+    assignmentId: string,
+    subjectType: ReviewSubjectType = ReviewSubjectType.ASSIGNMENT,
+  ) {
+    const assignment = await this.participantAssignment(
+      userId,
+      assignmentId,
+      subjectType,
+    );
+    const completedAt = completionTime(assignment);
+    // A learning enrolment not completed yet: nothing to review so far.
+    if (!completedAt && !isWork(assignment.job))
+      return {
+        canReview: false,
+        revealed: false,
+        windowEndsAt: null,
+        myReview: null,
+        receivedReview: null,
+      };
     const reviews = await this.prisma.review.findMany({
       where: { assignment_id: assignmentId, is_visible: true },
       include: { reviewer: { include: { profile: true } } },
       orderBy: { created_at: "asc" },
     });
-    const windowEndsAt = this.windowEndsAt(assignment.job.completed_at);
+    const windowEndsAt = this.windowEndsAt(completedAt);
     const revealed = reviews.length === 2 || this.clock.now() >= windowEndsAt;
     const own = reviews.find((review) => review.reviewer_user_id === userId);
     const counterpart = reviews.find(
@@ -149,7 +186,8 @@ export class ReviewsService {
     const { subjectType, subjectId, ...review } = input;
     switch (subjectType) {
       case ReviewSubjectType.ASSIGNMENT:
-        return this.create(userId, subjectId, review);
+      case ReviewSubjectType.LEARNING_ENROLMENT:
+        return this.create(userId, subjectId, review, subjectType);
       default:
         throw unsupportedSubject(subjectType);
     }
@@ -158,10 +196,15 @@ export class ReviewsService {
   async forSubject(userId: string, query: ReviewSubjectQueryDto) {
     switch (query.subjectType) {
       case ReviewSubjectType.ASSIGNMENT:
+      case ReviewSubjectType.LEARNING_ENROLMENT:
         return {
           subjectType: query.subjectType,
           subjectId: query.subjectId,
-          ...(await this.forAssignment(userId, query.subjectId)),
+          ...(await this.forAssignment(
+            userId,
+            query.subjectId,
+            query.subjectType,
+          )),
         };
       default:
         throw unsupportedSubject(query.subjectType);
@@ -186,7 +229,7 @@ export class ReviewsService {
           row.assignment
             ? row.assignment.reviews.filter((review) => review.is_visible)
                 .length === 2 ||
-              now >= this.windowEndsAt(row.assignment.job.completed_at)
+              now >= this.windowEndsAt(completionTime(row.assignment))
             : true,
         )
         .map(serializeReview),
@@ -404,14 +447,27 @@ export class ReviewsService {
     return reviews.map((review) => review.rating);
   }
 
-  private participantAssignment(userId: string, assignmentId: string) {
-    return this.prisma.assignment.findFirstOrThrow({
+  /**
+   * The assignment behind a review subject, for one of its two sides.
+   * ASSIGNMENT is paid work only (a learning row is refused with
+   * NOT_A_WORK_JOB); LEARNING_ENROLMENT is a learning enrolment only.
+   */
+  private async participantAssignment(
+    userId: string,
+    assignmentId: string,
+    subjectType: ReviewSubjectType = ReviewSubjectType.ASSIGNMENT,
+  ) {
+    const assignment = await this.prisma.assignment.findFirstOrThrow({
       where: {
         id: assignmentId,
         OR: [{ worker_user_id: userId }, { job: { poster_user_id: userId } }],
       },
       include: { job: true },
     });
+    if (subjectType === ReviewSubjectType.ASSIGNMENT)
+      assertWork(assignment.job);
+    else if (isWork(assignment.job)) throw new NotFoundException();
+    return assignment;
   }
 
   private assertReviewable(
@@ -422,7 +478,7 @@ export class ReviewsService {
         "Reviews unlock after assignment completion.",
       );
     }
-    if (this.clock.now() > this.windowEndsAt(assignment.job.completed_at)) {
+    if (this.clock.now() > this.windowEndsAt(completionTime(assignment))) {
       throw new ConflictException("The seven-day review window has closed.");
     }
   }
@@ -432,6 +488,20 @@ export class ReviewsService {
       throw new ConflictException("Completion time is missing.");
     return new Date(completedAt.getTime() + REVIEW_WINDOW_MS);
   }
+}
+
+/**
+ * When the review window opens: the job's completion for work, the mentor's
+ * completion (assignment.submitted_at, set with the completion record) for
+ * learning, where the opportunity stays open for other learners.
+ */
+function completionTime(assignment: {
+  submitted_at: Date | null;
+  job: { opportunity_type: OpportunityType; completed_at: Date | null };
+}): Date | null {
+  return isWork(assignment.job)
+    ? assignment.job.completed_at
+    : assignment.submitted_at;
 }
 
 function opposite(direction: ReviewDirection): ReviewDirection {
