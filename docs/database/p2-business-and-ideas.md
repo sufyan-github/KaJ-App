@@ -65,3 +65,26 @@ A BUSINESS request now needs IDENTITY trust (was SKILL) and verifies one
 business: approval sets `business_profiles.verification_status`, not the
 owner's trust level (it no longer grants TrustLevel.BUSINESS, which sits above
 SKILL on the ladder). Existing users who already hold TrustLevel.BUSINESS keep it.
+
+## 20261118130000_ideas (P2.7–P2.9; plan migration 10)
+
+- `business_ideas`: owner, title, `summary` (the one public line, ≤160),
+  private `problem` / `solution` / `details`, sector (`business_categories`),
+  area, `stage` (CONCEPT | VALIDATING | PILOT | CONVERTED), `visibility`
+  (PRIVATE default | SUMMARY_PUBLIC | MEMBERS), `ai_consent`,
+  `converted_business_id` / `converted_at`, `hidden_at` / `hidden_reason`,
+  `deleted_at`. Index (visibility, stage, category_id, location_id).
+  CHECKs: non-blank title and 1–160-character summary; CONVERTED ⇔ converted_at.
+- `idea_roles` (+ `idea_role_skills`): role type (10 kinds), title,
+  description, time commitment, arrangement (PAID | EQUITY_TO_DISCUSS |
+  VOLUNTEER | UNDECIDED), status (OPEN | FILLED | CLOSED), moderation hide.
+- `idea_access`: per idea + user; REQUESTED | APPROVED | DECLINED | REVOKED;
+  `confidentiality_accepted_at` (required), `approved_by_user_id` +
+  `approved_at` (CHECK: required when APPROVED), `revoked_at`.
+- `idea_detail_views`: every view of the private details by someone other
+  than the owner (`basis` ACCESS or MEMBER).
+- `idea_members`: the team, `agreed_in_principle_at`, linked to the AGREED
+  collaboration request (unique) and the role.
+- FK `collaboration_requests.idea_role_id` → `idea_roles` (SET NULL).
+- Report targets IDEA and IDEA_ROLE (and BUSINESS, BUSINESS_OFFERING,
+  COLLABORATION_REQUEST) are API-level: `reports.target_type` is text.

@@ -93,6 +93,14 @@ export class PolicyResourceResolver {
             ];
           break;
         }
+        case "idea": {
+          const idea = await this.prisma.businessIdea.findFirst({
+            where: { id, deleted_at: null },
+            select: { owner_user_id: true },
+          });
+          if (idea) context.ideaOwnerId = idea.owner_user_id;
+          break;
+        }
         case "conversation": {
           const conversation = await this.prisma.conversation.findFirst({
             where: { id, deleted_at: null },

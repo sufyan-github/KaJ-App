@@ -302,6 +302,62 @@ enum BusinessStage {
   REGISTERED
 }
 
+enum IdeaStage {
+  CONCEPT
+  VALIDATING
+  PILOT
+  CONVERTED
+}
+
+/// PRIVATE: owner, team and approved people only, not searchable.
+/// SUMMARY_PUBLIC: the one-line summary is searchable; details as PRIVATE.
+/// MEMBERS: team only — approved access is paused, nothing is searchable.
+enum IdeaVisibility {
+  PRIVATE
+  SUMMARY_PUBLIC
+  MEMBERS
+}
+
+enum IdeaAccessStatus {
+  REQUESTED
+  APPROVED
+  DECLINED
+  REVOKED
+}
+
+enum IdeaRoleType {
+  CO_FOUNDER
+  TECHNICAL
+  MARKETING
+  OPERATIONS
+  INDUSTRY_EXPERT
+  MENTOR
+  SUPPLIER
+  DISTRIBUTION
+  PRODUCTION
+  RESEARCH
+}
+
+enum IdeaTimeCommitment {
+  FEW_HOURS_A_WEEK
+  PART_TIME
+  FULL_TIME
+  FLEXIBLE
+}
+
+enum IdeaArrangement {
+  PAID
+  EQUITY_TO_DISCUSS
+  VOLUNTEER
+  UNDECIDED
+}
+
+enum IdeaRoleStatus {
+  OPEN
+  FILLED
+  CLOSED
+}
+
 enum CollaborationSubjectType {
   IDEA
   BUSINESS
@@ -441,6 +497,11 @@ model User {
   collaboration_sent                CollaborationRequest[]      @relation("CollaborationRequester")
   collaboration_received            CollaborationRequest[]      @relation("CollaborationRecipient")
   collaboration_events              CollaborationRequestEvent[] @relation("CollaborationEventActor")
+  ideas                             BusinessIdea[]              @relation("IdeaOwner")
+  idea_access                       IdeaAccess[]                @relation("IdeaAccessHolder")
+  idea_access_approvals             IdeaAccess[]                @relation("IdeaAccessApprover")
+  idea_detail_views                 IdeaDetailView[]            @relation("IdeaDetailViewer")
+  idea_memberships                  IdeaMember[]                @relation("IdeaMembership")
   business_member_invites           BusinessMember[]            @relation("BusinessMemberInviter")
   skills                            UserSkill[]
   service_areas                     ServiceArea[]
@@ -734,6 +795,7 @@ model BusinessProfile {
   verification_requests  VerificationRequest[]
   offerings              BusinessOffering[]
   collaboration_requests CollaborationRequest[]
+  converted_from_idea    BusinessIdea?
 
   @@index([user_id])
   @@index([location_id])
@@ -768,6 +830,148 @@ model BusinessOffering {
   @@map("business_offerings")
 }
 
+/// P2.7: an idea. Private by default; at most a one-line summary is ever
+/// public. Problem, solution and details are private details: only the
+/// owner, the team and people the owner approved (idea_access) see them,
+/// and every such view by someone else is logged (idea_detail_views).
+model BusinessIdea {
+  id                    String           @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  owner_user_id         String           @db.Uuid
+  title                 String
+  /// The one line anyone may see when the idea is SUMMARY_PUBLIC.
+  summary               String
+  problem               String
+  solution              String
+  details               String?
+  category_id           String           @db.Uuid
+  location_id           String?          @db.Uuid
+  stage                 IdeaStage        @default(CONCEPT)
+  visibility            IdeaVisibility   @default(PRIVATE)
+  /// The owner allows AI analysis of the idea (no AI runs yet).
+  ai_consent            Boolean          @default(false)
+  converted_business_id String?          @unique @db.Uuid
+  converted_at          DateTime?
+  /// Set by moderation: hidden from everyone but the owner.
+  hidden_at             DateTime?
+  hidden_reason         String?
+  deleted_at            DateTime?
+  created_at            DateTime         @default(now())
+  updated_at            DateTime         @updatedAt
+  owner                 User             @relation("IdeaOwner", fields: [owner_user_id], references: [id], onDelete: Cascade)
+  category              BusinessCategory @relation(fields: [category_id], references: [id], onDelete: Restrict)
+  location              Location?        @relation(fields: [location_id], references: [id], onDelete: Restrict)
+  converted_business    BusinessProfile? @relation(fields: [converted_business_id], references: [id], onDelete: SetNull)
+  roles                 IdeaRole[]
+  access                IdeaAccess[]
+  members               IdeaMember[]
+  detail_views          IdeaDetailView[]
+
+  @@index([owner_user_id])
+  @@index([visibility, stage, category_id, location_id])
+  @@index([category_id])
+  @@index([location_id])
+  @@map("business_ideas")
+}
+
+/// P2.8: a role an idea seeks, with the skills, time and arrangement.
+model IdeaRole {
+  id                     String                 @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  idea_id                String                 @db.Uuid
+  role_type              IdeaRoleType
+  title                  String?
+  description            String?
+  time_commitment        IdeaTimeCommitment
+  arrangement            IdeaArrangement        @default(UNDECIDED)
+  status                 IdeaRoleStatus         @default(OPEN)
+  sort_order             Int                    @default(0)
+  /// Set by moderation.
+  hidden_at              DateTime?
+  created_at             DateTime               @default(now())
+  updated_at             DateTime               @updatedAt
+  idea                   BusinessIdea           @relation(fields: [idea_id], references: [id], onDelete: Cascade)
+  skills                 IdeaRoleSkill[]
+  members                IdeaMember[]
+  collaboration_requests CollaborationRequest[]
+
+  @@index([idea_id, status])
+  @@map("idea_roles")
+}
+
+model IdeaRoleSkill {
+  role_id  String   @db.Uuid
+  skill_id String   @db.Uuid
+  role     IdeaRole @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  skill    Skill    @relation(fields: [skill_id], references: [id], onDelete: Cascade)
+
+  @@id([role_id, skill_id])
+  @@index([skill_id])
+  @@map("idea_role_skills")
+}
+
+/// P2.7: who may see an idea's private details. Requested with the
+/// confidentiality notice accepted; the owner approves (stamped) or
+/// declines, and can revoke at any time.
+model IdeaAccess {
+  id                          String           @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  idea_id                     String           @db.Uuid
+  user_id                     String           @db.Uuid
+  status                      IdeaAccessStatus @default(REQUESTED)
+  message                     String?
+  confidentiality_accepted_at DateTime
+  approved_by_user_id         String?          @db.Uuid
+  approved_at                 DateTime?
+  decided_at                  DateTime?
+  revoked_at                  DateTime?
+  created_at                  DateTime         @default(now())
+  updated_at                  DateTime         @updatedAt
+  idea                        BusinessIdea     @relation(fields: [idea_id], references: [id], onDelete: Cascade)
+  user                        User             @relation("IdeaAccessHolder", fields: [user_id], references: [id], onDelete: Cascade)
+  approved_by                 User?            @relation("IdeaAccessApprover", fields: [approved_by_user_id], references: [id], onDelete: SetNull)
+
+  @@unique([idea_id, user_id])
+  @@index([user_id, status])
+  @@index([approved_by_user_id])
+  @@map("idea_access")
+}
+
+/// P2.7: every view of an idea's private details by someone other than the owner.
+model IdeaDetailView {
+  id             String       @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  idea_id        String       @db.Uuid
+  viewer_user_id String       @db.Uuid
+  /// Why they could see it: ACCESS (approved) or MEMBER (team).
+  basis          String
+  viewed_at      DateTime     @default(now())
+  idea           BusinessIdea @relation(fields: [idea_id], references: [id], onDelete: Cascade)
+  viewer         User         @relation("IdeaDetailViewer", fields: [viewer_user_id], references: [id], onDelete: Cascade)
+
+  @@index([idea_id, viewed_at(sort: Desc)])
+  @@index([viewer_user_id])
+  @@map("idea_detail_views")
+}
+
+/// P2.9: the team, "agreed in principle" (not ownership, equity or a
+/// legal partnership), usually from an AGREED collaboration request.
+model IdeaMember {
+  id                       String                @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  idea_id                  String                @db.Uuid
+  user_id                  String                @db.Uuid
+  role_id                  String?               @db.Uuid
+  role_label               String?
+  collaboration_request_id String?               @unique @db.Uuid
+  agreed_in_principle_at   DateTime
+  created_at               DateTime              @default(now())
+  idea                     BusinessIdea          @relation(fields: [idea_id], references: [id], onDelete: Cascade)
+  user                     User                  @relation("IdeaMembership", fields: [user_id], references: [id], onDelete: Cascade)
+  role                     IdeaRole?             @relation(fields: [role_id], references: [id], onDelete: SetNull)
+  collaboration_request    CollaborationRequest? @relation(fields: [collaboration_request_id], references: [id], onDelete: SetNull)
+
+  @@unique([idea_id, user_id])
+  @@index([user_id])
+  @@index([role_id])
+  @@map("idea_members")
+}
+
 /// P2.5: a proposal to work together on an idea or a business (plan
 /// migrations 6 and 11). The recipient is the subject's owner when sent.
 /// Connecting never creates ownership, equity or a legal partnership.
@@ -799,6 +1003,8 @@ model CollaborationRequest {
   from_business            BusinessProfile?            @relation(fields: [from_business_profile_id], references: [id], onDelete: SetNull)
   conversation             Conversation?               @relation(fields: [conversation_id], references: [id], onDelete: SetNull)
   events                   CollaborationRequestEvent[]
+  idea_role                IdeaRole?                   @relation(fields: [idea_role_id], references: [id], onDelete: SetNull)
+  idea_member              IdeaMember?
 
   @@index([requester_user_id, created_at(sort: Desc)])
   @@index([recipient_user_id, status])
@@ -859,6 +1065,7 @@ model BusinessCategory {
   parent     BusinessCategory?  @relation("BusinessCategoryTree", fields: [parent_id], references: [id], onDelete: Restrict)
   children   BusinessCategory[] @relation("BusinessCategoryTree")
   businesses BusinessProfile[]
+  ideas      BusinessIdea[]
 
   @@index([parent_id])
   @@map("business_categories")
@@ -910,6 +1117,7 @@ model Skill {
   job_skills         JobSkill[]
   training_courses   TrainingCourse[]
   completion_records TrainingCertificate[]
+  idea_role_skills   IdeaRoleSkill[]
 
   @@index([category_id, is_active])
   @@map("skills")
@@ -951,6 +1159,7 @@ model Location {
   children          Location[]        @relation("LocationTree")
   profiles          Profile[]
   business_profiles BusinessProfile[]
+  business_ideas    BusinessIdea[]
   service_areas     ServiceArea[]
   jobs              Job[]
 

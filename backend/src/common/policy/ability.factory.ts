@@ -13,6 +13,8 @@ export interface PolicyResourceContext {
   businessMembers?: ReadonlyArray<{ userId: string; role: string }>;
   /** Requester and recipient of a collaboration request. */
   collaborationParticipantIds?: readonly string[];
+  /** The owner of an idea. */
+  ideaOwnerId?: string;
 }
 
 @Injectable()
@@ -71,6 +73,8 @@ export class AbilityFactory {
           actor !== undefined &&
           resource?.collaborationParticipantIds?.includes(actor.sub) === true
         );
+      case "idea-owner":
+        return actor !== undefined && resource?.ideaOwnerId === actor.sub;
       case "conversation-participant":
         return (
           actor !== undefined &&

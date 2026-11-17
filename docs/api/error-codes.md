@@ -112,3 +112,21 @@ the same fields plus `httpStatus`.
 | 409  | `BUSINESS_NOT_REGISTERED`              | `error.business.not_registered`              | Only a registered business with a trade licence number can be verified.          | শুধু ট্রেড লাইসেন্স নম্বরসহ নিবন্ধিত ব্যবসা যাচাই করা যায়।     |
 | 409  | `BUSINESS_ALREADY_VERIFIED`            | `error.business.already_verified`            | This business is already verified.                                               | এই ব্যবসাটি ইতিমধ্যে যাচাই করা।                                 |
 | 409  | `BUSINESS_CATEGORY_SLUG_TAKEN`         | `error.business.category_slug_taken`         | A sector with this slug already exists. (admin)                                  | এই স্লাগে আগেই একটি খাত আছে।                                    |
+
+## Ideas (P2)
+
+Anyone without a right to see an idea gets `404 NOT_FOUND` on every idea endpoint.
+
+| HTTP | Code                                 | messageKey                                 | English                                                             | Bangla                                                             |
+| ---- | ------------------------------------ | ------------------------------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| 409  | `IDENTITY_REQUIRED`                  | `error.idea.identity_required`             | Verify your identity (NID and selfie) before making an idea public. | আইডিয়া সবার জন্য প্রকাশের আগে পরিচয় (এনআইডি ও সেলফি) যাচাই করুন। |
+| 409  | `IDEA_LIMIT_REACHED`                 | `error.idea.limit_reached`                 | You can have at most 20 ideas.                                      | আপনি সর্বোচ্চ ২০টি আইডিয়া রাখতে পারেন।                            |
+| 400  | `CONFIDENTIALITY_NOT_ACCEPTED`       | `error.idea.confidentiality_required`      | Accept the confidentiality notice to ask for the details.           | বিস্তারিত চাইতে গোপনীয়তার শর্ত মেনে নিন।                          |
+| 409  | `IDEA_ACCESS_ALREADY_GRANTED`        | `error.idea.access_already_granted`        | You can already see this idea's details.                            | আপনি ইতিমধ্যে এই আইডিয়ার বিস্তারিত দেখতে পারেন।                   |
+| 409  | `IDEA_ACCESS_ALREADY_REQUESTED`      | `error.idea.access_already_requested`      | You already asked; the owner hasn't answered yet.                   | আপনি আগেই অনুরোধ করেছেন; মালিক এখনো উত্তর দেননি।                   |
+| 409  | `IDEA_ACCESS_TRANSITION_NOT_ALLOWED` | `error.idea.access_transition_not_allowed` | That access request can't be changed this way.                      | এই অনুরোধটি এভাবে বদলানো যায় না।                                  |
+| 409  | `IDEA_ROLE_LIMIT_REACHED`            | `error.idea.role_limit`                    | An idea can seek at most 10 roles.                                  | একটি আইডিয়ায় সর্বোচ্চ ১০টি ভূমিকা চাওয়া যায়।                   |
+| 409  | `IDEA_ROLE_NOT_OPEN`                 | `error.idea.role_not_open`                 | This role is no longer open.                                        | এই ভূমিকাটি আর খোলা নেই।                                           |
+| 409  | `COLLABORATION_NOT_AGREED`           | `error.idea.collaboration_not_agreed`      | Add a team member from a collaboration request you both agreed.     | দুজনে সম্মত হওয়া প্রস্তাব থেকে দলের সদস্য যোগ করুন।               |
+| 409  | `IDEA_ALREADY_CONVERTED`             | `error.idea.already_converted`             | This idea is already a business.                                    | এই আইডিয়া ইতিমধ্যে একটি ব্যবসা।                                   |
+| 429  | `RATE_LIMITED`                       | `error.idea.daily_limit`                   | You can ask about 10 ideas a day. Try again later.                  | দিনে ১০টি আইডিয়ার বিস্তারিত চাওয়া যায়। পরে আবার চেষ্টা করুন।    |

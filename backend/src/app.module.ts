@@ -57,6 +57,7 @@ import { SafetyModule } from "./modules/safety/safety.module";
 import { MentorsModule } from "./modules/mentors/mentors.module";
 import { LearningModule } from "./modules/learning/learning.module";
 import { BusinessModule } from "./modules/business/business.module";
+import { IdeasModule } from "./modules/ideas/ideas.module";
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { BusinessModule } from "./modules/business/business.module";
     MentorsModule,
     LearningModule,
     BusinessModule,
+    IdeasModule,
     LoggerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

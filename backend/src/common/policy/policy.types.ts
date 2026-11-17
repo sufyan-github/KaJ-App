@@ -12,7 +12,8 @@ export type PolicyKind =
   | "conversation-participant"
   | "mentor-owner"
   | "business-member"
-  | "collaboration-participant";
+  | "collaboration-participant"
+  | "idea-owner";
 
 /** Which record a route parameter names, for ownership rules. */
 export type PolicyResourceSource =
@@ -21,7 +22,8 @@ export type PolicyResourceSource =
   | "application"
   | "conversation"
   | "business"
-  | "collaboration";
+  | "collaboration"
+  | "idea";
 
 export interface PolicyRule {
   kind: PolicyKind;
@@ -81,6 +83,12 @@ export const Policies = {
     source: "collaboration",
     param: options.param ?? "id",
   }),
+  /** The owner of the idea the route names (P2.7). */
+  ideaOwner: (options: { param?: string } = {}): PolicyRule => ({
+    kind: "idea-owner",
+    source: "idea",
+    param: options.param ?? "id",
+  }),
   conversationParticipant: (options: { param?: string } = {}): PolicyRule => ({
     kind: "conversation-participant",
     source: "conversation",
@@ -102,6 +110,7 @@ export function containsPrivateResourcePolicy(
       rule.kind === "conversation-participant" ||
       rule.kind === "mentor-owner" ||
       rule.kind === "business-member" ||
-      rule.kind === "collaboration-participant",
+      rule.kind === "collaboration-participant" ||
+      rule.kind === "idea-owner",
   );
 }

@@ -15,6 +15,8 @@ import {
 
 import { CLOCK, Clock } from "../../common/time/clock";
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
+import { ideaRelation, isTeam } from "../ideas/idea-visibility";
+import { UserBlocksService } from "../safety/user-blocks.service";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import {
   AdminActor,
@@ -680,6 +682,95 @@ export class ModerationService {
       return assignment.worker_user_id === reporterUserId
         ? assignment.job.poster_user_id
         : assignment.worker_user_id;
+    }
+    if (targetType === "IDEA" || targetType === "IDEA_ROLE") {
+      // Only what the reporter may see can be reported; otherwise 404, the
+      // same answer as every other idea endpoint.
+      const ideaId =
+        targetType === "IDEA"
+          ? targetId
+          : (
+              await this.prisma.ideaRole.findUnique({
+                where: { id: targetId },
+                select: { idea_id: true, status: true, hidden_at: true },
+              })
+            )?.idea_id;
+      const relation = ideaId
+        ? await ideaRelation(this.prisma, reporterUserId, ideaId)
+        : null;
+      if (!ideaId || !relation) throw new NotFoundException();
+      if (targetType === "IDEA_ROLE" && !isTeam(relation)) {
+        const role = await this.prisma.ideaRole.findUniqueOrThrow({
+          where: { id: targetId },
+          select: { status: true, hidden_at: true },
+        });
+        if (role.status !== "OPEN" || role.hidden_at)
+          throw new NotFoundException();
+      }
+      const idea = await this.prisma.businessIdea.findUniqueOrThrow({
+        where: { id: ideaId },
+        select: { owner_user_id: true },
+      });
+      return idea.owner_user_id;
+    }
+    if (targetType === "BUSINESS" || targetType === "BUSINESS_OFFERING") {
+      const businessId =
+        targetType === "BUSINESS"
+          ? targetId
+          : (
+              await this.prisma.businessOffering.findFirst({
+                where: {
+                  id: targetId,
+                  deleted_at: null,
+                  is_active: true,
+                  hidden_at: null,
+                },
+                select: { business_profile_id: true },
+              })
+            )?.business_profile_id;
+      const business = businessId
+        ? await this.prisma.businessProfile.findFirst({
+            where: { id: businessId, deleted_at: null },
+            include: {
+              members: {
+                where: { accepted_at: { not: null } },
+                orderBy: [{ created_at: "asc" }, { id: "asc" }],
+                select: { user_id: true, role: true },
+              },
+            },
+          })
+        : null;
+      if (!business) throw new NotFoundException();
+      const member = business.members.some(
+        (item) => item.user_id === reporterUserId,
+      );
+      const owners = business.members.filter((item) => item.role === "OWNER");
+      if (!member) {
+        if (!business.is_public || business.suspended_at)
+          throw new NotFoundException();
+        const hidden = new Set(
+          await new UserBlocksService(this.prisma).hiddenFrom(reporterUserId),
+        );
+        if (owners.some((owner) => hidden.has(owner.user_id)))
+          throw new NotFoundException();
+      }
+      return owners[0]?.user_id ?? business.user_id;
+    }
+    if (targetType === "COLLABORATION_REQUEST") {
+      const request = await this.prisma.collaborationRequest.findFirst({
+        where: {
+          id: targetId,
+          OR: [
+            { requester_user_id: reporterUserId },
+            { recipient_user_id: reporterUserId },
+          ],
+        },
+        select: { requester_user_id: true, recipient_user_id: true },
+      });
+      if (!request) throw new NotFoundException();
+      return request.requester_user_id === reporterUserId
+        ? request.recipient_user_id
+        : request.requester_user_id;
     }
     const message = await this.prisma.message.findFirst({
       where: {

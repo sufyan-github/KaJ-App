@@ -20,6 +20,12 @@ export const REPORT_TARGET_TYPES = [
   "CONVERSATION",
   "ASSIGNMENT",
   "MESSAGE",
+  // P2: Business & Ideas.
+  "BUSINESS",
+  "BUSINESS_OFFERING",
+  "COLLABORATION_REQUEST",
+  "IDEA",
+  "IDEA_ROLE",
 ] as const;
 export type ReportTargetType = (typeof REPORT_TARGET_TYPES)[number];
 
