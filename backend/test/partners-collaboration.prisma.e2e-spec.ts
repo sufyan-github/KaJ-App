@@ -151,6 +151,10 @@ databaseDescribe(
       });
 
       it("pages with a cursor", async () => {
+        // Two more of its own, so there are always at least two pages.
+        const seller = await api.actor([RoleMode.BUSINESS]);
+        await publicBusiness(seller, "Paging one");
+        await publicBusiness(seller, "Paging two");
         const first = await api.get("partners?limit=1", partner).expect(200);
         expect(first.body.data.items).toHaveLength(1);
         expect(first.body.data.nextCursor).toEqual(expect.any(String));
