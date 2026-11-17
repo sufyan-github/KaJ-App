@@ -9,6 +9,7 @@ import {
   AdminRole,
   ApplicationStatus,
   AssignmentStatus,
+  BusinessStage,
   DisputeAppealStatus,
   DisputeDecision,
   DisputeStatus,
@@ -642,6 +643,12 @@ export class AdminOpsService {
           where: { purged_at: null, document: { deleted_at: null } },
           include: { document: true },
         },
+        business_profile: {
+          include: {
+            category: { select: { slug: true, name_en: true, name_bn: true } },
+            location: { select: { name_en: true, name_bn: true } },
+          },
+        },
       },
     });
     await this.audit(
@@ -686,6 +693,19 @@ export class AdminOpsService {
                 })),
               }
             : null,
+        // P2.6: the business a BUSINESS request verifies.
+        business: item.business_profile
+          ? {
+              id: item.business_profile.id,
+              name: item.business_profile.business_name,
+              stage: item.business_profile.stage,
+              tradeLicenceNo: item.business_profile.trade_licence_no,
+              address: item.business_profile.address,
+              category: item.business_profile.category,
+              area: item.business_profile.location,
+              verificationStatus: item.business_profile.verification_status,
+            }
+          : null,
         documents: item.documents.map(({ document }) => ({
           id: document.id,
           kind: document.kind,
@@ -744,13 +764,31 @@ export class AdminOpsService {
       throw new ConflictException("Decision must approve or reject.");
     const request = await this.prisma.verificationRequest.findUnique({
       where: { id },
-      include: { user: { include: { profile: true } }, documents: true },
+      include: {
+        user: { include: { profile: true } },
+        documents: true,
+        business_profile: { select: { stage: true, deleted_at: true } },
+      },
     });
     if (!request) throw new NotFoundException();
     if (request.status !== VerificationStatus.PENDING)
       throw new ConflictException(
         "Only a pending verification can be decided.",
       );
+    // P2.6: only a registered business can carry the verified badge.
+    if (
+      input.status === VerificationStatus.APPROVED &&
+      request.kind === VerificationKind.BUSINESS &&
+      (!request.business_profile ||
+        request.business_profile.deleted_at ||
+        request.business_profile.stage !== BusinessStage.REGISTERED)
+    )
+      throw new ConflictException({
+        code: "BUSINESS_NOT_REGISTERED",
+        message:
+          "Only a registered business (stage REGISTERED) can be verified.",
+        messageKey: "error.business.not_registered",
+      });
     const candidateTrust =
       input.status === VerificationStatus.APPROVED
         ? trustForVerification(request.kind)
@@ -780,6 +818,11 @@ export class AdminOpsService {
         await transaction.profile.update({
           where: { user_id: request.user_id },
           data: { trust_level: trustLevel },
+        });
+      if (request.business_profile_id)
+        await transaction.businessProfile.update({
+          where: { id: request.business_profile_id },
+          data: { verification_status: input.status },
         });
       if (request.kind === VerificationKind.MENTOR)
         await applyMentorDecision(
@@ -838,6 +881,7 @@ export class AdminOpsService {
             requestId: id,
             kind: request.kind,
             status: input.status,
+            businessProfileId: request.business_profile_id,
           },
         },
       });

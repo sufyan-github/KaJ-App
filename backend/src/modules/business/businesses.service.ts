@@ -5,6 +5,7 @@ import {
   JobStatus,
   Prisma,
   UserStatus,
+  VerificationKind,
   VerificationStatus,
 } from "@prisma/client";
 
@@ -14,6 +15,7 @@ import { WORK_ONLY } from "../jobs/opportunity";
 import { NotificationsService } from "../notifications/notifications.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
 import { visibleDisplayName } from "../users/public-profile.projection";
+import { VerificationService } from "../verification/verification.service";
 import { businessErrors } from "./business.errors";
 import {
   isVerifiedBusiness,
@@ -24,6 +26,7 @@ import {
   CreateBusinessDto,
   InviteBusinessMemberDto,
   PartnerDirectoryQueryDto,
+  SubmitBusinessVerificationDto,
   UpdateBusinessDto,
 } from "./dto/business.dto";
 
@@ -119,6 +122,7 @@ export class BusinessesService {
     private readonly prisma: PrismaService,
     @Optional() private readonly notifications?: NotificationsService,
     @Optional() private readonly userBlocks?: UserBlocksService,
+    @Optional() private readonly verification?: VerificationService,
   ) {}
 
   private get blocks() {
@@ -558,6 +562,71 @@ export class BusinessesService {
     return {
       items: page.items.map((row) => publicBusiness(row)),
       nextCursor: page.nextCursor,
+    };
+  }
+
+  /**
+   * P2.6: an owner asks KAAJ to verify a registered business (trade licence
+   * and other documents). Needs identity verification (the trust ladder);
+   * an IDEA or INFORMAL business can't be verified.
+   */
+  async submitVerification(
+    userId: string,
+    id: string,
+    input: SubmitBusinessVerificationDto,
+  ) {
+    const business = await this.activeBusiness(id);
+    if (
+      business.stage !== BusinessStage.REGISTERED ||
+      !business.trade_licence_no
+    )
+      throw businessErrors.notRegistered();
+    if (business.verification_status === VerificationStatus.APPROVED)
+      throw businessErrors.alreadyVerified();
+    if (!this.verification)
+      throw new Error("VerificationService is not available.");
+    await this.verification.submit(
+      userId,
+      { kind: VerificationKind.BUSINESS, documentIds: input.documentIds },
+      { businessProfileId: id },
+    );
+    return this.verificationStatus(id);
+  }
+
+  /** The business's verification state and its latest request. */
+  async verificationStatus(id: string) {
+    const [business, latest] = await Promise.all([
+      this.prisma.businessProfile.findUniqueOrThrow({
+        where: { id },
+        select: {
+          stage: true,
+          verification_status: true,
+          trade_licence_no: true,
+        },
+      }),
+      this.prisma.verificationRequest.findFirst({
+        where: { business_profile_id: id, kind: VerificationKind.BUSINESS },
+        orderBy: [{ created_at: "desc" }, { id: "desc" }],
+      }),
+    ]);
+    return {
+      businessId: id,
+      verificationStatus: business.verification_status,
+      verified: isVerifiedBusiness(business),
+      canSubmit:
+        business.stage === BusinessStage.REGISTERED &&
+        Boolean(business.trade_licence_no) &&
+        business.verification_status !== VerificationStatus.APPROVED &&
+        business.verification_status !== VerificationStatus.PENDING,
+      latestRequest: latest
+        ? {
+            id: latest.id,
+            status: latest.status,
+            rejectionReason: latest.rejection_reason,
+            submittedAt: latest.created_at.toISOString(),
+            reviewedAt: latest.reviewed_at?.toISOString() ?? null,
+          }
+        : null,
     };
   }
 

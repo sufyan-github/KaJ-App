@@ -1,6 +1,9 @@
 import { BusinessMemberRole, BusinessStage } from "@prisma/client";
 import { Type } from "class-transformer";
 import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
   IsBoolean,
   IsEnum,
   IsInt,
@@ -164,4 +167,13 @@ export class PartnerDirectoryQueryDto extends CursorQueryDto {
   @MinLength(2)
   @MaxLength(60)
   q?: string;
+}
+
+/** POST /businesses/:id/verification — trade licence and other evidence. */
+export class SubmitBusinessVerificationDto {
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(5)
+  @IsUUID("all", { each: true })
+  documentIds!: string[];
 }

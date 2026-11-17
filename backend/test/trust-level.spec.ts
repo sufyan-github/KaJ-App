@@ -14,7 +14,11 @@ describe("verification trust progression", () => {
     );
     expect(prerequisiteFor(VerificationKind.IDENTITY)).toBe(TrustLevel.PHONE);
     expect(prerequisiteFor(VerificationKind.SKILL)).toBe(TrustLevel.IDENTITY);
-    expect(prerequisiteFor(VerificationKind.BUSINESS)).toBe(TrustLevel.SKILL);
+    expect(prerequisiteFor(VerificationKind.BUSINESS)).toBe(
+      TrustLevel.IDENTITY,
+    );
+    // A business approval verifies the business, not the person's skills.
+    expect(trustForVerification(VerificationKind.BUSINESS)).toBeNull();
   });
 
   it("never downgrades an existing trust level", () => {

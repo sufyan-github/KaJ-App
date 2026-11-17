@@ -76,4 +76,18 @@ export const businessErrors = {
       message: "A business can list at most 100 offerings.",
       messageKey: "error.business.offering_limit",
     }),
+  notRegistered: () =>
+    new ConflictException({
+      code: "BUSINESS_NOT_REGISTERED",
+      message:
+        "Only a registered business with a trade licence number can be verified.",
+      messageKey: "error.business.not_registered",
+      field: "stage",
+    }),
+  alreadyVerified: () =>
+    new ConflictException({
+      code: "BUSINESS_ALREADY_VERIFIED",
+      message: "This business is already verified.",
+      messageKey: "error.business.already_verified",
+    }),
 };

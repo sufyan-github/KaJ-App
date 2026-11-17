@@ -19,6 +19,7 @@ import { BusinessesService } from "./businesses.service";
 import {
   CreateBusinessDto,
   InviteBusinessMemberDto,
+  SubmitBusinessVerificationDto,
   UpdateBusinessDto,
   UpdateBusinessMemberDto,
 } from "./dto/business.dto";
@@ -117,6 +118,23 @@ export class BusinessesController {
     @Param("userId", new ParseUUIDPipe()) userId: string,
   ) {
     return this.businesses.removeMember(claims.sub, id, userId);
+  }
+
+  /** P2.6: verification of a registered business (owner submits). */
+  @Get("businesses/:id/verification")
+  @Policy(Policies.businessMember())
+  verification(@Param("id", new ParseUUIDPipe()) id: string) {
+    return this.businesses.verificationStatus(id);
+  }
+
+  @Post("businesses/:id/verification")
+  @Policy(Policies.businessMember({ roles: OWNER }))
+  submitVerification(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @Body() body: SubmitBusinessVerificationDto,
+  ) {
+    return this.businesses.submitVerification(claims.sub, id, body);
   }
 
   /** The invitee accepts; DELETE leaves (or declines an invitation). */

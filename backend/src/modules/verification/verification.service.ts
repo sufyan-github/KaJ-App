@@ -33,8 +33,19 @@ export class VerificationService {
   async submit(
     userId: string,
     input: SubmitVerificationDto,
-    options: { viaMentorApplication?: boolean } = {},
+    options: {
+      viaMentorApplication?: boolean;
+      businessProfileId?: string;
+    } = {},
   ) {
+    // P2.6: a BUSINESS request verifies one business, from its page.
+    if (input.kind === VerificationKind.BUSINESS && !options.businessProfileId)
+      throw new BadRequestException({
+        code: "USE_BUSINESS_VERIFICATION",
+        message:
+          "Verify a business with POST /businesses/:id/verification (owner only).",
+        messageKey: "error.business.use_verification",
+      });
     if (input.kind === VerificationKind.MENTOR && !options.viaMentorApplication)
       throw new BadRequestException({
         code: "USE_MENTOR_APPLICATION",
@@ -109,7 +120,10 @@ export class VerificationService {
     const [existing, documents] = await Promise.all([
       this.prisma.verificationRequest.findFirst({
         where: {
-          user_id: userId,
+          // One pending request per business, or per person and kind.
+          ...(options.businessProfileId
+            ? { business_profile_id: options.businessProfileId }
+            : { user_id: userId }),
           kind: input.kind,
           status: VerificationStatus.PENDING,
         },
@@ -138,6 +152,7 @@ export class VerificationService {
           user_id: userId,
           kind: input.kind,
           status: VerificationStatus.PENDING,
+          business_profile_id: options.businessProfileId ?? null,
           documents_json: {
             documentIds: uniqueDocumentIds,
             ...(input.kind === VerificationKind.IDENTITY
@@ -156,6 +171,11 @@ export class VerificationService {
           },
         },
       });
+      if (options.businessProfileId)
+        await transaction.businessProfile.update({
+          where: { id: options.businessProfileId },
+          data: { verification_status: VerificationStatus.PENDING },
+        });
       await transaction.auditLog.create({
         data: {
           actor_user_id: userId,
@@ -167,6 +187,7 @@ export class VerificationService {
             kind: input.kind,
             documentCount: uniqueDocumentIds.length,
             status: VerificationStatus.PENDING,
+            businessProfileId: options.businessProfileId ?? null,
           },
         },
       });
@@ -180,7 +201,9 @@ export class VerificationService {
           payload_json: {
             requestId: created.id,
             kind: input.kind,
-            route: "/verification",
+            route: options.businessProfileId
+              ? `/businesses/${options.businessProfileId}`
+              : "/verification",
           },
         },
       });

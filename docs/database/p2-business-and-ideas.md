@@ -57,3 +57,11 @@ re-checked at publish.
   both confirmations and `agreed_at`.
 - `collaboration_request_events`: the audit history (from → to, actor, note).
 - Rollback leaves the linked conversations as plain conversations.
+
+## P2.6 business verification (no migration)
+
+Uses `verification_requests.business_profile_id` (added in business_profile_v2).
+A BUSINESS request now needs IDENTITY trust (was SKILL) and verifies one
+business: approval sets `business_profiles.verification_status`, not the
+owner's trust level (it no longer grants TrustLevel.BUSINESS, which sits above
+SKILL on the ladder). Existing users who already hold TrustLevel.BUSINESS keep it.
