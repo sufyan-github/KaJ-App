@@ -59,6 +59,7 @@ import { LearningModule } from "./modules/learning/learning.module";
 import { BusinessModule } from "./modules/business/business.module";
 import { IdeasModule } from "./modules/ideas/ideas.module";
 import { ExpertsModule } from "./modules/experts/experts.module";
+import { CommunityModule } from "./modules/community/community.module";
 
 @Module({
   imports: [
@@ -75,6 +76,7 @@ import { ExpertsModule } from "./modules/experts/experts.module";
     BusinessModule,
     IdeasModule,
     ExpertsModule,
+    CommunityModule,
     LoggerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

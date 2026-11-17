@@ -50,3 +50,15 @@ migration 8 (never created).
 - Realtime: `SOCKET_REDIS_ADAPTER=true` (with `REDIS_URL`) puts socket.io on
   the Redis adapter (`@socket.io/redis-adapter` 8.3.0) so several API
   instances share rooms and deliveries. Off by default.
+
+## 20261119120000_community_groups (P3.4; plan migration 8, groups half)
+
+- `community_groups`: creator, name (CHECK 3–80 characters), description,
+  `visibility` (PUBLIC | PRIVATE), `women_only` (opt-in), area
+  (`location_id`), work category (`category_id`), moderation hide, soft delete.
+- `community_group_members`: role (MEMBER | MODERATOR | AMBASSADOR), status
+  (PENDING | ACTIVE | REMOVED), `invited_by_user_id` (set = invitation, null =
+  join request), `joined_at` / `removed_at` (CHECK with status). Unique per
+  group + user.
+- Each group's chat is a GROUP conversation (subject COMMUNITY_GROUP) kept
+  equal to its ACTIVE members.

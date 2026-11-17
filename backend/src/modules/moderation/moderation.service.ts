@@ -796,6 +796,27 @@ export class ModerationService {
       }
       return owners[0]?.user_id ?? business.user_id;
     }
+    if (targetType === "GROUP") {
+      // Public groups, or ones the reporter belongs to (private: 404 otherwise).
+      const group = await this.prisma.communityGroup.findFirst({
+        where: {
+          id: targetId,
+          deleted_at: null,
+          hidden_at: null,
+          OR: [
+            { visibility: "PUBLIC" },
+            {
+              members: {
+                some: { user_id: reporterUserId, status: "ACTIVE" },
+              },
+            },
+          ],
+        },
+        select: { created_by_user_id: true },
+      });
+      if (!group) throw new NotFoundException();
+      return group.created_by_user_id;
+    }
     if (targetType === "SESSION") {
       const session = await this.prisma.session.findFirst({
         where: {

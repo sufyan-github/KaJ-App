@@ -10,6 +10,7 @@ export const CONTENT_TARGET_TYPES = [
   "COLLABORATION_REQUEST",
   "INTRODUCTION",
   "SESSION",
+  "GROUP",
 ] as const;
 export type ContentTargetType = (typeof CONTENT_TARGET_TYPES)[number];
 
@@ -98,6 +99,16 @@ export async function setContentHidden(
         .catch(notFound);
       return { ownerUserId: request.requester_user_id, title: "" };
     }
+    case "GROUP": {
+      const group = await transaction.communityGroup
+        .update({
+          where: { id },
+          data: { hidden_at: at, hidden_reason: why },
+          select: { created_by_user_id: true, name: true },
+        })
+        .catch(notFound);
+      return { ownerUserId: group.created_by_user_id, title: group.name };
+    }
     case "SESSION": {
       const session = await transaction.session
         .update({
@@ -132,6 +143,7 @@ export async function describeContent(
     | "collaborationRequest"
     | "introductionRequest"
     | "session"
+    | "communityGroup"
   >,
   type: ContentTargetType,
   id: string,
@@ -211,6 +223,22 @@ export async function describeContent(
         ? {
             title: row.message.slice(0, 80),
             status: row.hidden_at ? "HIDDEN" : "VISIBLE",
+          }
+        : null;
+    }
+    case "GROUP": {
+      const row = await prisma.communityGroup.findUnique({
+        where: { id },
+        select: { name: true, hidden_at: true, deleted_at: true },
+      });
+      return row
+        ? {
+            title: row.name,
+            status: row.deleted_at
+              ? "DELETED"
+              : row.hidden_at
+                ? "HIDDEN"
+                : "VISIBLE",
           }
         : null;
     }
