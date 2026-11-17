@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseEnumPipe,
   ParseUUIDPipe,
   Post,
   Query,
@@ -26,7 +27,12 @@ import {
   ModerationReasonDto,
   ReportQueueQueryDto,
 } from "./dto/moderation.dto";
+import { CONTENT_TARGET_TYPES, ContentTargetType } from "./content-moderation";
 import { ModerationService } from "./moderation.service";
+
+const CONTENT_TARGET_ENUM = Object.fromEntries(
+  CONTENT_TARGET_TYPES.map((type) => [type, type]),
+);
 
 @Controller("admin")
 @UseGuards(AdminSessionGuard)
@@ -65,6 +71,49 @@ export class ModerationAdminController {
     @Req() request: Request,
   ) {
     return this.moderation.decide(id, body, actor, this.context(request));
+  }
+
+  /** P2: hide or restore a business, offering, idea, idea role or request. */
+  @Post("content/:targetType/:id/hide")
+  @Policy(Policies.public())
+  @AdminRoles(AdminRole.ADMIN, AdminRole.MODERATOR)
+  hideContent(
+    @Param("targetType", new ParseEnumPipe(CONTENT_TARGET_ENUM))
+    targetType: ContentTargetType,
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @Body() body: ModerationReasonDto,
+    @CurrentAdmin() actor: AdminActor,
+    @Req() request: Request,
+  ) {
+    return this.moderation.setContentHidden(
+      targetType,
+      id,
+      true,
+      body.reason,
+      actor,
+      this.context(request),
+    );
+  }
+
+  @Post("content/:targetType/:id/restore")
+  @Policy(Policies.public())
+  @AdminRoles(AdminRole.ADMIN, AdminRole.MODERATOR)
+  restoreContent(
+    @Param("targetType", new ParseEnumPipe(CONTENT_TARGET_ENUM))
+    targetType: ContentTargetType,
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @Body() body: ModerationReasonDto,
+    @CurrentAdmin() actor: AdminActor,
+    @Req() request: Request,
+  ) {
+    return this.moderation.setContentHidden(
+      targetType,
+      id,
+      false,
+      body.reason,
+      actor,
+      this.context(request),
+    );
   }
 
   @Post("users/:id/moderation")

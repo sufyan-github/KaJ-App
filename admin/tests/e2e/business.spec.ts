@@ -1,0 +1,194 @@
+import { expect, Page, test } from "@playwright/test";
+
+const envelope = (data: unknown) => ({
+  data,
+  meta: { requestId: "e2e", serverTime: new Date().toISOString() },
+});
+
+async function respond(page: Page, path: string, data: unknown) {
+  await page.route(`**/api/admin/ops/${path}`, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(envelope(data)),
+    }),
+  );
+}
+
+/** Records the JSON body of the first request to `path`. */
+async function capture(page: Page, path: string, data: unknown = {}) {
+  const seen: { body: Record<string, unknown> | null } = { body: null };
+  await page.route(`**/api/admin/ops/${path}`, async (route) => {
+    seen.body = route.request().postDataJSON();
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(envelope(data)),
+    });
+  });
+  return seen;
+}
+
+test.beforeEach(async ({ page }) => {
+  await page.route("**/api/admin/session", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(
+        envelope({ email: "ops@kaj.test", role: "ADMIN", userId: "admin-1" }),
+      ),
+    }),
+  );
+  await respond(page, "dashboard", { counts: {}, stuckJobs: [] });
+});
+
+async function openModule(page: Page, name: RegExp) {
+  await page.goto("/");
+  await page.getByRole("button", { name }).first().click();
+}
+
+test("verifies a registered business, showing its licence", async ({
+  page,
+}) => {
+  await respond(page, "verification-requests?kind=BUSINESS&limit=100", {
+    items: [
+      {
+        id: "request-b1",
+        kind: "BUSINESS",
+        status: "PENDING",
+        user: { name: "Monira Sultana", trustLevel: "IDENTITY" },
+        documents: [],
+        business: {
+          id: "business-1",
+          name: "Padma Agro Traders",
+          stage: "REGISTERED",
+          tradeLicenceNo: "RAJ-2026-04567",
+          address: null,
+        },
+      },
+    ],
+  });
+  const decision = await capture(
+    page,
+    "verification-requests/request-b1/decision",
+  );
+  await openModule(page, /^\d+ Business$/);
+  const row = page.getByRole("row", { name: /Monira Sultana/ });
+  await expect(row).toContainText("Padma Agro Traders");
+  await expect(row).toContainText("RAJ-2026-04567");
+  await row.getByRole("button", { name: "Approve" }).click();
+  await page
+    .getByLabel("Required operational reason")
+    .fill("Trade licence matches the city corporation register.");
+  await page.getByRole("button", { name: "Confirm Approved" }).click();
+  await expect.poll(() => decision.body).toMatchObject({ status: "APPROVED" });
+});
+
+test("adds a sub-sector to the taxonomy", async ({ page }) => {
+  await respond(page, "business-categories", {
+    items: [
+      {
+        id: "sector-1",
+        parentId: null,
+        slug: "agriculture",
+        nameEn: "Agriculture and farming",
+        nameBn: "কৃষি ও খামার",
+        icon: "agriculture",
+        sortOrder: 0,
+        isActive: true,
+      },
+    ],
+  });
+  await openModule(page, /^\d+ Business$/);
+  await page.getByRole("tab", { name: "Sectors" }).click();
+  await expect(
+    page.getByRole("row", { name: /Agriculture and farming/ }),
+  ).toContainText("agriculture");
+  const created = await capture(page, "business-categories", { id: "x" });
+  await page.getByRole("button", { name: "Add sector" }).click();
+  await page.getByLabel("Slug").fill("fisheries");
+  await page.getByLabel("Name (English)").fill("Fisheries");
+  await page.getByLabel("Name (Bangla)").fill("মৎস্য");
+  await page.getByLabel("Parent sector").selectOption("sector-1");
+  await page.getByRole("button", { name: "Save sector" }).click();
+  await expect
+    .poll(() => created.body)
+    .toMatchObject({
+      slug: "fisheries",
+      nameEn: "Fisheries",
+      nameBn: "মৎস্য",
+      parentId: "sector-1",
+      isActive: true,
+    });
+});
+
+test("hides a reported idea without touching the account, and restores it", async ({
+  page,
+}) => {
+  await respond(page, "reports?limit=100", {
+    total: 2,
+    items: [
+      {
+        id: "report-1",
+        targetType: "IDEA",
+        targetId: "idea-1",
+        content: { title: "Investment club", status: "VISIBLE" },
+        reasonCode: "SCAM",
+        description: "Promises to double money monthly.",
+        status: "UNDER_REVIEW",
+        createdAt: new Date().toISOString(),
+        reporter: { id: "user-2", name: "Reporter" },
+        subject: {
+          id: "user-1",
+          name: "Owner",
+          status: "ACTIVE",
+          moderationLevel: "NONE",
+          reverificationRequired: false,
+        },
+      },
+      {
+        id: "report-2",
+        targetType: "BUSINESS",
+        targetId: "business-9",
+        content: { title: "Too Good Traders", status: "HIDDEN" },
+        reasonCode: "SCAM",
+        description: "Already handled.",
+        status: "ACTIONED",
+        createdAt: new Date().toISOString(),
+        reporter: { id: "user-2", name: "Reporter" },
+        subject: null,
+      },
+    ],
+  });
+  const decision = await capture(page, "reports/report-1/decision");
+  const restore = await capture(page, "content/BUSINESS/business-9/restore");
+  await openModule(page, /^\d+ Safety reports$/);
+  const ideaRow = page.getByRole("row", { name: /Promises to double/ });
+  await expect(ideaRow).toContainText("Investment club");
+  await ideaRow.getByRole("button", { name: "Decide" }).click();
+  await expect(page.getByLabel("Hide the reported content")).toBeChecked();
+  await expect(
+    page.getByLabel("Also apply a moderation step to the person"),
+  ).not.toBeChecked();
+  await page
+    .getByLabel("Required decision reason")
+    .fill("Advance-fee scam pattern confirmed.");
+  await page.getByRole("button", { name: "Confirm decision" }).click();
+  await expect
+    .poll(() => decision.body)
+    .toEqual({
+      status: "ACTIONED",
+      reason: "Advance-fee scam pattern confirmed.",
+      hideContent: true,
+    });
+
+  const hiddenRow = page.getByRole("row", { name: /Already handled/ });
+  await hiddenRow.getByRole("button", { name: "Restore content" }).click();
+  await page
+    .getByLabel("Required operational reason")
+    .fill("Owner corrected the listing.");
+  await page.getByRole("button", { name: "Restore content" }).last().click();
+  await expect
+    .poll(() => restore.body)
+    .toEqual({ reason: "Owner corrected the listing." });
+});

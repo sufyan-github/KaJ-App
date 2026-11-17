@@ -16,6 +16,12 @@ import {
 import { CLOCK, Clock } from "../../common/time/clock";
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
 import { ideaRelation, isTeam } from "../ideas/idea-visibility";
+import {
+  ContentTargetType,
+  describeContent,
+  isContentTarget,
+  setContentHidden,
+} from "./content-moderation";
 import { UserBlocksService } from "../safety/user-blocks.service";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import {
@@ -174,13 +180,22 @@ export class ModerationService {
       context,
     );
     const { items, nextCursor } = pageResult(page, query.limit);
+    // P2 targets: what was reported, and whether it is hidden now.
+    const contents = await Promise.all(
+      items.map((item) =>
+        isContentTarget(item.target_type)
+          ? describeContent(this.prisma, item.target_type, item.target_id)
+          : Promise.resolve(null),
+      ),
+    );
     return {
       total,
       nextCursor,
-      items: items.map((item) => ({
+      items: items.map((item, index) => ({
         id: item.id,
         targetType: item.target_type,
         targetId: item.target_id,
+        content: contents[index] ?? null,
         reasonCode: item.reason_code,
         description: item.description,
         status: item.status,
@@ -310,9 +325,34 @@ export class ModerationService {
       });
       return { id: reportId, status: ReportStatus.DISMISSED };
     }
-    if (!input.action || input.action === ModerationLevel.NONE) {
+    if (input.hideContent && !isContentTarget(report.target_type))
       throw new BadRequestException(
-        "An actioned report requires a moderation level.",
+        "Only businesses, offerings, ideas, idea roles and collaboration requests can be hidden.",
+      );
+    const level =
+      input.action && input.action !== ModerationLevel.NONE
+        ? input.action
+        : null;
+    if (input.hideContent && isContentTarget(report.target_type)) {
+      await this.setContentHidden(
+        report.target_type,
+        report.target_id,
+        true,
+        input.reason,
+        actor,
+        context,
+        { report, closeReport: !level },
+      );
+      if (!level)
+        return {
+          id: reportId,
+          status: ReportStatus.ACTIONED,
+          contentHidden: true,
+        };
+    }
+    if (!level) {
+      throw new BadRequestException(
+        "An actioned report requires a moderation level or hideContent.",
       );
     }
     if (!report.subject_user_id) {
@@ -321,7 +361,7 @@ export class ModerationService {
     return this.applyLevel(
       report.subject_user_id,
       {
-        action: input.action,
+        action: level,
         reason: input.reason,
         durationDays: input.durationDays,
         requireReverification: input.requireReverification,
@@ -805,6 +845,93 @@ export class ModerationService {
         context,
       ),
     });
+  }
+
+  /**
+   * P2: hide or restore reported content (a business is suspended). Logged
+   * as a moderation action and audited; the owner is told. With
+   * `closeReport`, the report becomes ACTIONED in the same transaction.
+   */
+  async setContentHidden(
+    type: ContentTargetType,
+    id: string,
+    hidden: boolean,
+    reason: string,
+    actor: AdminActor,
+    context: AdminRequestContext,
+    options: {
+      report?: { id: string; status: ReportStatus };
+      closeReport?: boolean;
+    } = {},
+  ) {
+    const now = this.clock.now();
+    await this.prisma.$transaction(async (transaction) => {
+      const target = await setContentHidden(
+        transaction,
+        type,
+        id,
+        hidden,
+        reason.trim(),
+      );
+      if (options.report && options.closeReport) {
+        const decided = await transaction.report.updateMany({
+          where: {
+            id: options.report.id,
+            status: { in: [ReportStatus.OPEN, ReportStatus.UNDER_REVIEW] },
+          },
+          data: {
+            status: ReportStatus.ACTIONED,
+            reviewer_user_id: actor.userId,
+            resolution: reason.trim(),
+            reviewed_at: now,
+          },
+        });
+        if (decided.count !== 1)
+          throw new ConflictException("This report already has a decision.");
+      }
+      await transaction.moderationAction.create({
+        data: {
+          admin_user_id: actor.userId,
+          report_id: options.report?.id ?? null,
+          target_type: type,
+          target_id: id,
+          action: hidden ? "HIDE_CONTENT" : "RESTORE_CONTENT",
+          reason: reason.trim(),
+          created_at: now,
+        },
+      });
+      await transaction.auditLog.create({
+        data: this.auditData(
+          actor,
+          hidden ? "ADMIN_CONTENT_HIDDEN" : "ADMIN_CONTENT_RESTORED",
+          type,
+          id,
+          null,
+          { reason: reason.trim(), reportId: options.report?.id ?? null },
+          context,
+        ),
+      });
+      if (target.ownerUserId)
+        await transaction.notification.create({
+          data: {
+            user_id: target.ownerUserId,
+            type: hidden ? "CONTENT_HIDDEN" : "CONTENT_RESTORED",
+            title_key: hidden
+              ? "moderation.content_hidden.title"
+              : "moderation.content_restored.title",
+            body_key: hidden
+              ? "moderation.content_hidden.body"
+              : "moderation.content_restored.body",
+            payload_json: {
+              targetType: type,
+              targetId: id,
+              title: target.title,
+              reason: hidden ? reason.trim() : null,
+            },
+          },
+        });
+    });
+    return { targetType: type, targetId: id, hidden };
   }
 
   private auditData(

@@ -88,3 +88,14 @@ SKILL on the ladder). Existing users who already hold TrustLevel.BUSINESS keep i
 - FK `collaboration_requests.idea_role_id` → `idea_roles` (SET NULL).
 - Report targets IDEA and IDEA_ROLE (and BUSINESS, BUSINESS_OFFERING,
   COLLABORATION_REQUEST) are API-level: `reports.target_type` is text.
+
+## P2 admin moderation (no migration)
+
+Reports on BUSINESS, BUSINESS_OFFERING, IDEA, IDEA_ROLE and
+COLLABORATION_REQUEST show the reported content (title, VISIBLE | HIDDEN |
+DELETED) in the admin queue. Deciding ACTIONED with `hideContent: true` hides
+it (a business is suspended; the others get `hidden_at`), with or without a
+user moderation level; `POST /admin/content/:targetType/:id/hide|restore
+{reason}` does it directly. Each is a `moderation_actions` row
+(HIDE_CONTENT / RESTORE_CONTENT), an audit entry and a CONTENT_HIDDEN /
+CONTENT_RESTORED notification to the owner.

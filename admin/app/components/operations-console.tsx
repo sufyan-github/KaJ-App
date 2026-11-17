@@ -32,6 +32,7 @@ type ModuleKey =
   | "notifications"
   | "analytics"
   | "learn"
+  | "business"
   | "audit";
 const modules: Array<[ModuleKey, string, string]> = [
   ["dashboard", "Dashboard", "Live marketplace health"],
@@ -51,6 +52,7 @@ const modules: Array<[ModuleKey, string, string]> = [
   ["notifications", "Notifications", "Campaign dry-runs"],
   ["analytics", "Analytics", "Marketplace health"],
   ["learn", "Learn", "Mentors, learning and courses"],
+  ["business", "Business", "Sectors, business verification and content"],
   ["audit", "Audit trail", "Who changed what"],
 ];
 export function OperationsConsole({
@@ -160,6 +162,7 @@ function ModuleView({ active }: { active: ModuleKey }) {
   if (active === "notifications") return <Notifications />;
   if (active === "analytics") return <Analytics />;
   if (active === "learn") return <Learn />;
+  if (active === "business") return <Business />;
   return <AuditTrail />;
 }
 function useData<T>(path: string) {
@@ -919,6 +922,7 @@ function Reports() {
     total: number;
   }>("reports?limit=100");
   const [selected, setSelected] = useState<ReportItem | null>(null);
+  const [restoring, setRestoring] = useState<ReportItem | null>(null);
   return (
     <State loading={loading} error={error}>
       <Summary count={data?.total ?? 0} label={tr("safety reports")} />
@@ -933,6 +937,12 @@ function Reports() {
                 {humanize(item.targetType)} {tr("\u00B7")}{" "}
                 {formatDate(item.createdAt)}
               </small>
+              {item.content && (
+                <small>
+                  {item.content.title || tr("(no title)")}{" "}
+                  <Badge value={item.content.status} />
+                </small>
+              )}
             </td>
             <td>
               <strong>{item.subject?.name ?? tr("No user subject")}</strong>
@@ -969,10 +979,30 @@ function Reports() {
                   {tr("Decide")}
                 </button>
               )}
+              {item.content?.status === "HIDDEN" && (
+                <button onClick={() => setRestoring(item)}>
+                  {tr("Restore content")}
+                </button>
+              )}
             </td>
           </tr>
         ))}
       </DataTable>
+      {restoring && (
+        <ReasonDialog
+          title={tr("Restore hidden content")}
+          confirmLabel={tr("Restore content")}
+          onClose={() => setRestoring(null)}
+          onConfirm={async (reason) => {
+            await adminApi(
+              `content/${restoring.targetType}/${restoring.targetId}/restore`,
+              json("POST", { reason }),
+            );
+            setRestoring(null);
+            await reload();
+          }}
+        />
+      )}
       {selected && (
         <ReportDecisionDialog
           report={selected}
@@ -986,10 +1016,19 @@ function Reports() {
     </State>
   );
 }
+/** P2 content a report can hide (a business is suspended). */
+const CONTENT_TARGETS = new Set([
+  "BUSINESS",
+  "BUSINESS_OFFERING",
+  "IDEA",
+  "IDEA_ROLE",
+  "COLLABORATION_REQUEST",
+]);
 type ReportItem = {
   id: string;
   targetType: string;
   targetId: string;
+  content?: { title: string; status: string } | null;
   reasonCode: string;
   description: string | null;
   status: string;
@@ -1235,6 +1274,10 @@ function ReportDecisionDialog({
   const [reason, setReason] = useState("");
   const [durationDays, setDurationDays] = useState("7");
   const [requireReverification, setRequireReverification] = useState(false);
+  const isContent = CONTENT_TARGETS.has(report.targetType);
+  const [hideContent, setHideContent] = useState(isContent);
+  // For content, a user moderation step is optional.
+  const [applyLevel, setApplyLevel] = useState(!isContent);
   const [error, setError] = useState("");
   return (
     <Dialog title={tr("Resolve safety report")} onClose={onClose}>
@@ -1248,12 +1291,15 @@ function ReportDecisionDialog({
               json("POST", {
                 status,
                 reason,
-                ...(status === "ACTIONED"
+                ...(status === "ACTIONED" && applyLevel
                   ? {
                       action,
                       durationDays: Number(durationDays),
                       requireReverification,
                     }
+                  : {}),
+                ...(status === "ACTIONED" && isContent && hideContent
+                  ? { hideContent: true }
                   : {}),
               }),
             );
@@ -1273,7 +1319,27 @@ function ReportDecisionDialog({
             <option value="DISMISSED">{tr("Dismiss report")}</option>
           </select>
         </label>
-        {status === "ACTIONED" && (
+        {status === "ACTIONED" && isContent && (
+          <>
+            <label>
+              <input
+                type="checkbox"
+                checked={hideContent}
+                onChange={(event) => setHideContent(event.target.checked)}
+              />
+              {tr("Hide the reported content")}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={applyLevel}
+                onChange={(event) => setApplyLevel(event.target.checked)}
+              />
+              {tr("Also apply a moderation step to the person")}
+            </label>
+          </>
+        )}
+        {status === "ACTIONED" && applyLevel && (
           <>
             <label>
               {tr("Next moderation step")}
@@ -1324,7 +1390,13 @@ function ReportDecisionDialog({
           <button type="button" onClick={onClose}>
             {tr("Cancel")}
           </button>
-          <button type="submit" disabled={status === "ACTIONED" && !action}>
+          <button
+            type="submit"
+            disabled={
+              status === "ACTIONED" &&
+              (applyLevel ? !action : !(isContent && hideContent))
+            }
+          >
             {tr("Confirm decision")}
           </button>
         </div>
@@ -1503,10 +1575,14 @@ function Applications() {
     </State>
   );
 }
-function Verification() {
+function Verification({ kind }: { kind?: string } = {}) {
   const { data, loading, error, reload } = useData<{
     items: VerificationItem[];
-  }>("verification-requests?limit=100");
+  }>(
+    kind
+      ? `verification-requests?kind=${kind}&limit=100`
+      : "verification-requests?limit=100",
+  );
   const [decision, setDecision] = useState<{
     item: VerificationItem;
     status: "APPROVED" | "REJECTED";
@@ -1526,6 +1602,14 @@ function Verification() {
             <td>
               <strong>{item.user.name}</strong>
               <small>{item.user.trustLevel}</small>
+              {item.business && (
+                <small>
+                  {item.business.name} {tr("\u00B7")}{" "}
+                  {humanize(item.business.stage)} {tr("\u00B7")}{" "}
+                  {tr("Trade licence")}{" "}
+                  {item.business.tradeLicenceNo ?? tr("None")}
+                </small>
+              )}
             </td>
             <td>{humanize(item.kind)}</td>
             <td className="actions">
@@ -1604,6 +1688,13 @@ type VerificationItem = {
   id: string;
   kind: string;
   status: string;
+  business?: {
+    id: string;
+    name: string;
+    stage: string;
+    tradeLicenceNo: string | null;
+    address: string | null;
+  } | null;
   user: {
     name: string;
     trustLevel: string;
@@ -1643,6 +1734,227 @@ function Learn() {
       {tab === "courses" && <Courses />}
       {tab === "certificates" && <CompletionRecords />}
     </>
+  );
+}
+type BusinessTab = "verification" | "sectors";
+const BUSINESS_TABS: Array<[BusinessTab, string]> = [
+  ["verification", "Business verification"],
+  ["sectors", "Sectors"],
+];
+/** P2 admin: business verification queue and the sector taxonomy. */
+function Business() {
+  const [tab, setTab] = useState<BusinessTab>("verification");
+  return (
+    <>
+      <div className="learn-tabs" role="tablist" aria-label={tr("Business")}>
+        {BUSINESS_TABS.map(([key, label]) => (
+          <button
+            key={key}
+            role="tab"
+            aria-selected={tab === key}
+            className={tab === key ? "active" : ""}
+            onClick={() => setTab(key)}
+          >
+            {tr(label)}
+          </button>
+        ))}
+      </div>
+      <p className="muted">
+        {tr(
+          "Reported businesses, offerings, ideas and collaboration requests are handled in Safety reports.",
+        )}
+      </p>
+      {tab === "verification" && <Verification kind="BUSINESS" />}
+      {tab === "sectors" && <Sectors />}
+    </>
+  );
+}
+type SectorItem = {
+  id: string;
+  parentId: string | null;
+  slug: string;
+  nameEn: string;
+  nameBn: string;
+  icon: string | null;
+  sortOrder: number;
+  isActive: boolean;
+};
+function Sectors() {
+  const { data, loading, error, reload } = useData<{ items: SectorItem[] }>(
+    "business-categories",
+  );
+  const [editing, setEditing] = useState<SectorItem | "new" | null>(null);
+  const items = data?.items ?? [];
+  const name = (item: SectorItem) =>
+    getActiveAdminLocale() === "bn" ? item.nameBn : item.nameEn;
+  return (
+    <State loading={loading} error={error}>
+      <div className="dialog-actions">
+        <button onClick={() => setEditing("new")}>{tr("Add sector")}</button>
+      </div>
+      <DataTable headers={["Sector", "Parent", "Order", "Active", "Actions"]}>
+        {items.map((item) => (
+          <tr key={item.id}>
+            <td>
+              <strong>{name(item)}</strong>
+              <small>
+                {getActiveAdminLocale() === "bn" ? item.nameEn : item.nameBn}{" "}
+                {tr("\u00B7")} {item.slug}
+              </small>
+            </td>
+            <td>
+              {(() => {
+                const parent = items.find((row) => row.id === item.parentId);
+                return parent ? name(parent) : tr("Top level");
+              })()}
+            </td>
+            <td>{item.sortOrder}</td>
+            <td>
+              <Badge value={item.isActive ? "ACTIVE" : "INACTIVE"} />
+            </td>
+            <td className="actions">
+              <button onClick={() => setEditing(item)}>{tr("Edit")}</button>
+            </td>
+          </tr>
+        ))}
+      </DataTable>
+      {editing && (
+        <SectorDialog
+          sector={editing === "new" ? null : editing}
+          parents={items.filter(
+            (item) =>
+              !item.parentId && (editing === "new" || item.id !== editing.id),
+          )}
+          onClose={() => setEditing(null)}
+          onSaved={async () => {
+            setEditing(null);
+            await reload();
+          }}
+        />
+      )}
+    </State>
+  );
+}
+function SectorDialog({
+  sector,
+  parents,
+  onClose,
+  onSaved,
+}: {
+  sector: SectorItem | null;
+  parents: SectorItem[];
+  onClose: () => void;
+  onSaved: () => Promise<void>;
+}) {
+  const [form, setForm] = useState({
+    slug: sector?.slug ?? "",
+    nameEn: sector?.nameEn ?? "",
+    nameBn: sector?.nameBn ?? "",
+    parentId: sector?.parentId ?? "",
+    icon: sector?.icon ?? "",
+    sortOrder: String(sector?.sortOrder ?? 0),
+    isActive: sector?.isActive ?? true,
+  });
+  const [error, setError] = useState("");
+  const set = (key: keyof typeof form, value: string | boolean) =>
+    setForm((current) => ({ ...current, [key]: value }));
+  return (
+    <Dialog
+      title={sector ? tr("Edit sector") : tr("Add sector")}
+      onClose={onClose}
+    >
+      <form
+        onSubmit={async (event: FormEvent) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await adminApi(
+              sector
+                ? `business-categories/${sector.id}`
+                : "business-categories",
+              json(sector ? "PUT" : "POST", {
+                slug: form.slug.trim(),
+                nameEn: form.nameEn.trim(),
+                nameBn: form.nameBn.trim(),
+                parentId: form.parentId || null,
+                icon: form.icon.trim() || null,
+                sortOrder: Number(form.sortOrder) || 0,
+                isActive: form.isActive,
+              }),
+            );
+            await onSaved();
+          } catch (caught) {
+            setError(friendlyAdminError(caught));
+          }
+        }}
+      >
+        <label>
+          {tr("Slug")}
+          <input
+            required
+            pattern="[a-z0-9]+(-[a-z0-9]+)*"
+            value={form.slug}
+            onChange={(event) => set("slug", event.target.value)}
+          />
+        </label>
+        <label>
+          {tr("Name (English)")}
+          <input
+            required
+            minLength={2}
+            value={form.nameEn}
+            onChange={(event) => set("nameEn", event.target.value)}
+          />
+        </label>
+        <label>
+          {tr("Name (Bangla)")}
+          <input
+            required
+            minLength={2}
+            value={form.nameBn}
+            onChange={(event) => set("nameBn", event.target.value)}
+          />
+        </label>
+        <label>
+          {tr("Parent sector")}
+          <select
+            value={form.parentId}
+            onChange={(event) => set("parentId", event.target.value)}
+          >
+            <option value="">{tr("Top level")}</option>
+            {parents.map((parent) => (
+              <option key={parent.id} value={parent.id}>
+                {localizedEntityName(parent.nameEn, parent.nameBn)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          {tr("Order")}
+          <input
+            type="number"
+            min="0"
+            value={form.sortOrder}
+            onChange={(event) => set("sortOrder", event.target.value)}
+          />
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={form.isActive}
+            onChange={(event) => set("isActive", event.target.checked)}
+          />
+          {tr("Active")}
+        </label>
+        {error && <p role="alert">{error}</p>}
+        <div className="dialog-actions">
+          <button type="button" onClick={onClose}>
+            {tr("Cancel")}
+          </button>
+          <button type="submit">{tr("Save sector")}</button>
+        </div>
+      </form>
+    </Dialog>
   );
 }
 type SkillName = { skillId: string; nameEn: string; nameBn: string };

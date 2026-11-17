@@ -100,6 +100,15 @@ export class ModerationDecisionDto {
   @Transform(({ value }) => value === true || value === "true")
   @IsBoolean()
   requireReverification?: boolean;
+
+  /**
+   * P2: hide the reported business, offering, idea, idea role or
+   * collaboration request (with or without a user moderation level).
+   */
+  @IsOptional()
+  @Transform(({ value }) => value === true || value === "true")
+  @IsBoolean()
+  hideContent?: boolean;
 }
 
 export class DirectModerationDto {
