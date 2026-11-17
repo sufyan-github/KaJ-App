@@ -99,3 +99,14 @@ migration 8 (never created).
 - Index `jobs(opportunity_type, status, work_arrangement)` for the feed filter.
 - Job posts are checked for gender restrictions (bn/en phrasings); there is no
   gender field on jobs.
+
+## P3 admin (no migration)
+
+- Report targets INTRODUCTION, SESSION and GROUP go through the report queue;
+  a decision can hide them (`hideContent`), or `/admin/content/:type/:id/hide`
+  and `/restore` act directly (moderation action, audit, owner notified).
+- Admin views (audit-logged; no online links, venue pins or private text):
+  `GET /admin/community/groups?status&q`, `GET /admin/sessions?status&kind&hidden`,
+  `GET /admin/community/ambassadors`; `POST
+/admin/community/groups/:id/members/:userId/role {role, reason}` (never the
+  last moderator; the ambassador badge follows).

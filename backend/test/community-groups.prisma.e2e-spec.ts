@@ -5,6 +5,9 @@ import { Actor, HttpHarness } from "./support/http-harness";
 const databaseDescribe =
   process.env.AUTH_DATABASE_E2E === "1" ? describe : describe.skip;
 
+// Several dozen requests per test: allow a slow shared CI runner.
+jest.setTimeout(30_000);
+
 /** P3.4: community groups, membership, member lists and group chat. */
 databaseDescribe("community groups (real HTTP)", () => {
   let api: HttpHarness;

@@ -33,6 +33,7 @@ type ModuleKey =
   | "analytics"
   | "learn"
   | "business"
+  | "community"
   | "audit";
 const modules: Array<[ModuleKey, string, string]> = [
   ["dashboard", "Dashboard", "Live marketplace health"],
@@ -53,6 +54,7 @@ const modules: Array<[ModuleKey, string, string]> = [
   ["analytics", "Analytics", "Marketplace health"],
   ["learn", "Learn", "Mentors, learning and courses"],
   ["business", "Business", "Sectors, business verification and content"],
+  ["community", "Community", "Groups, sessions, events and ambassadors"],
   ["audit", "Audit trail", "Who changed what"],
 ];
 export function OperationsConsole({
@@ -163,6 +165,7 @@ function ModuleView({ active }: { active: ModuleKey }) {
   if (active === "analytics") return <Analytics />;
   if (active === "learn") return <Learn />;
   if (active === "business") return <Business />;
+  if (active === "community") return <Community />;
   return <AuditTrail />;
 }
 function useData<T>(path: string) {
@@ -1765,6 +1768,269 @@ function Learn() {
       {tab === "courses" && <Courses />}
       {tab === "certificates" && <CompletionRecords />}
     </>
+  );
+}
+type CommunityTab = "groups" | "sessions" | "ambassadors";
+const COMMUNITY_TABS: Array<[CommunityTab, string]> = [
+  ["groups", "Groups"],
+  ["sessions", "Sessions and events"],
+  ["ambassadors", "Ambassadors"],
+];
+/** P3 admin: community groups, sessions/events and ambassadors. */
+function Community() {
+  const [tab, setTab] = useState<CommunityTab>("groups");
+  return (
+    <>
+      <div className="learn-tabs" role="tablist" aria-label={tr("Community")}>
+        {COMMUNITY_TABS.map(([key, label]) => (
+          <button
+            key={key}
+            role="tab"
+            aria-selected={tab === key}
+            className={tab === key ? "active" : ""}
+            onClick={() => setTab(key)}
+          >
+            {tr(label)}
+          </button>
+        ))}
+      </div>
+      <p className="muted">
+        {tr(
+          "Reports on groups, sessions and introductions are decided in Safety reports; hiding here is for content found another way.",
+        )}
+      </p>
+      {tab === "groups" && <CommunityGroups />}
+      {tab === "sessions" && <CommunitySessions />}
+      {tab === "ambassadors" && <Ambassadors />}
+    </>
+  );
+}
+type AdminPerson = { userId: string; name: string };
+type CommunityGroupItem = {
+  id: string;
+  name: string;
+  visibility: string;
+  womenOnly: boolean;
+  memberCount: number;
+  moderators: AdminPerson[];
+  ambassadors: AdminPerson[];
+  openReports: number;
+  status: string;
+  hiddenReason: string | null;
+};
+/** Hide or restore a GROUP / SESSION with a reason. */
+function useContentToggle(reload: () => Promise<void>) {
+  const [target, setTarget] = useState<{
+    type: string;
+    id: string;
+    hide: boolean;
+  } | null>(null);
+  const dialog = target && (
+    <ReasonDialog
+      title={target.hide ? tr("Hide content") : tr("Restore content")}
+      confirmLabel={target.hide ? tr("Hide content") : tr("Restore content")}
+      onClose={() => setTarget(null)}
+      onConfirm={async (reason) => {
+        await adminApi(
+          `content/${target.type}/${target.id}/${target.hide ? "hide" : "restore"}`,
+          json("POST", { reason }),
+        );
+        setTarget(null);
+        await reload();
+      }}
+    />
+  );
+  return { setTarget, dialog };
+}
+function CommunityGroups() {
+  const { data, loading, error, reload } = useData<{
+    items: CommunityGroupItem[];
+  }>("community/groups?limit=100");
+  const { setTarget, dialog } = useContentToggle(reload);
+  return (
+    <State loading={loading} error={error}>
+      <DataTable
+        headers={[
+          "Group",
+          "Moderators",
+          "Members",
+          "Reports",
+          "Status",
+          "Actions",
+        ]}
+      >
+        {(data?.items ?? []).map((item) => (
+          <tr key={item.id}>
+            <td>
+              <strong>{item.name}</strong>
+              <small>
+                {humanize(item.visibility)}
+                {item.womenOnly ? ` ${tr("\u00B7")} ${tr("Women only")}` : ""}
+              </small>
+            </td>
+            <td>
+              {item.moderators.map((person) => person.name).join(", ")}
+              {item.ambassadors.length > 0 && (
+                <small>
+                  {tr("Ambassadors")}:{" "}
+                  {item.ambassadors.map((person) => person.name).join(", ")}
+                </small>
+              )}
+            </td>
+            <td>{item.memberCount}</td>
+            <td>{item.openReports}</td>
+            <td>
+              <Badge value={item.status} />
+              {item.hiddenReason && <small>{item.hiddenReason}</small>}
+            </td>
+            <td className="actions">
+              <button
+                onClick={() =>
+                  setTarget({
+                    type: "GROUP",
+                    id: item.id,
+                    hide: item.status !== "HIDDEN",
+                  })
+                }
+              >
+                {item.status === "HIDDEN"
+                  ? tr("Restore content")
+                  : tr("Hide content")}
+              </button>
+            </td>
+          </tr>
+        ))}
+      </DataTable>
+      {dialog}
+    </State>
+  );
+}
+type AdminSessionItem = {
+  id: string;
+  kind: string;
+  title: string;
+  status: string;
+  startsAt: string;
+  mode: string;
+  capacity: number;
+  accepted: number;
+  waitlisted: number;
+  attended: number;
+  womenOnly: boolean;
+  host: AdminPerson;
+  group: { id: string; name: string } | null;
+  openReports: number;
+  visibility: string;
+  hiddenReason: string | null;
+};
+function CommunitySessions() {
+  const { data, loading, error, reload } = useData<{
+    items: AdminSessionItem[];
+  }>("sessions?limit=100");
+  const { setTarget, dialog } = useContentToggle(reload);
+  return (
+    <State loading={loading} error={error}>
+      <DataTable
+        headers={["Session", "Host", "Places", "Reports", "Status", "Actions"]}
+      >
+        {(data?.items ?? []).map((item) => (
+          <tr key={item.id}>
+            <td>
+              <strong>{item.title}</strong>
+              <small>
+                {humanize(item.kind)} {tr("\u00B7")} {humanize(item.mode)}{" "}
+                {tr("\u00B7")} {formatDate(item.startsAt)}
+              </small>
+              {item.group && <small>{item.group.name}</small>}
+            </td>
+            <td>{item.host.name}</td>
+            <td>
+              {item.accepted}/{item.capacity}
+              {item.waitlisted > 0 && (
+                <small>
+                  {tr("Waitlist")}: {item.waitlisted}
+                </small>
+              )}
+            </td>
+            <td>{item.openReports}</td>
+            <td>
+              <Badge value={item.status} />
+              {item.visibility === "HIDDEN" && <Badge value="HIDDEN" />}
+            </td>
+            <td className="actions">
+              <button
+                onClick={() =>
+                  setTarget({
+                    type: "SESSION",
+                    id: item.id,
+                    hide: item.visibility !== "HIDDEN",
+                  })
+                }
+              >
+                {item.visibility === "HIDDEN"
+                  ? tr("Restore content")
+                  : tr("Hide content")}
+              </button>
+            </td>
+          </tr>
+        ))}
+      </DataTable>
+      {dialog}
+    </State>
+  );
+}
+type AmbassadorItem = {
+  userId: string;
+  name: string;
+  groups: Array<{ id: string; name: string; hidden: boolean }>;
+};
+function Ambassadors() {
+  const { data, loading, error, reload } = useData<{ items: AmbassadorItem[] }>(
+    "community/ambassadors",
+  );
+  const [removing, setRemoving] = useState<{
+    userId: string;
+    groupId: string;
+  } | null>(null);
+  return (
+    <State loading={loading} error={error}>
+      <DataTable headers={["Ambassador", "Groups", "Actions"]}>
+        {(data?.items ?? []).flatMap((item) =>
+          item.groups.map((group) => (
+            <tr key={`${item.userId}-${group.id}`}>
+              <td>
+                <strong>{item.name}</strong>
+              </td>
+              <td>{group.name}</td>
+              <td className="actions">
+                <button
+                  onClick={() =>
+                    setRemoving({ userId: item.userId, groupId: group.id })
+                  }
+                >
+                  {tr("Remove ambassador role")}
+                </button>
+              </td>
+            </tr>
+          )),
+        )}
+      </DataTable>
+      {removing && (
+        <ReasonDialog
+          title={tr("Remove ambassador role")}
+          confirmLabel={tr("Remove ambassador role")}
+          onClose={() => setRemoving(null)}
+          onConfirm={async (reason) => {
+            await adminApi(
+              `community/groups/${removing.groupId}/members/${removing.userId}/role`,
+              json("POST", { role: "MEMBER", reason }),
+            );
+            setRemoving(null);
+            await reload();
+          }}
+        />
+      )}
+    </State>
   );
 }
 type BusinessTab = "verification" | "sectors";

@@ -236,3 +236,87 @@ test("shows the priority safety queue with time to first action", async ({
   await expect(row).toContainText("Waiting 2 h");
   await expect(row).toContainText("Overdue");
 });
+
+test("community admin: hides a group, shows sessions, removes an ambassador", async ({
+  page,
+}) => {
+  await respond(page, "community/groups?limit=100", {
+    items: [
+      {
+        id: "group-1",
+        name: "Boalia electricians",
+        visibility: "PUBLIC",
+        womenOnly: false,
+        memberCount: 42,
+        moderators: [{ userId: "u1", name: "Rehana Parvin" }],
+        ambassadors: [{ userId: "u2", name: "Tuhin Ahmed" }],
+        openReports: 2,
+        status: "ACTIVE",
+        hiddenReason: null,
+      },
+    ],
+  });
+  await respond(page, "sessions?limit=100", {
+    items: [
+      {
+        id: "session-1",
+        kind: "EVENT",
+        title: "Tailors' meetup",
+        status: "SCHEDULED",
+        startsAt: new Date(Date.now() + 86_400_000).toISOString(),
+        mode: "IN_PERSON",
+        capacity: 20,
+        accepted: 20,
+        waitlisted: 3,
+        attended: 0,
+        womenOnly: false,
+        host: { userId: "u1", name: "Rehana Parvin" },
+        group: { id: "group-1", name: "Boalia electricians" },
+        openReports: 0,
+        visibility: "VISIBLE",
+        hiddenReason: null,
+      },
+    ],
+  });
+  await respond(page, "community/ambassadors", {
+    items: [
+      {
+        userId: "u2",
+        name: "Tuhin Ahmed",
+        groups: [{ id: "group-1", name: "Boalia electricians", hidden: false }],
+      },
+    ],
+  });
+  const hide = await capture(page, "content/GROUP/group-1/hide");
+  const role = await capture(page, "community/groups/group-1/members/u2/role");
+  await openModule(page, /^\d+ Community$/);
+  const row = page.getByRole("row", { name: /Boalia electricians/ });
+  await expect(row).toContainText("Rehana Parvin");
+  await expect(row).toContainText("Tuhin Ahmed");
+  await row.getByRole("button", { name: "Hide content" }).click();
+  await page
+    .getByLabel("Required operational reason")
+    .fill("Fee collection outside KAAJ.");
+  await page.getByRole("button", { name: "Hide content" }).last().click();
+  await expect
+    .poll(() => hide.body)
+    .toEqual({ reason: "Fee collection outside KAAJ." });
+
+  await page.getByRole("tab", { name: "Sessions and events" }).click();
+  const session = page.getByRole("row", { name: /Tailors' meetup/ });
+  await expect(session).toContainText("20/20");
+  await expect(session).toContainText("Waitlist: 3");
+
+  await page.getByRole("tab", { name: "Ambassadors" }).click();
+  await page.getByRole("button", { name: "Remove ambassador role" }).click();
+  await page
+    .getByLabel("Required operational reason")
+    .fill("Stepped down from organising.");
+  await page
+    .getByRole("button", { name: "Remove ambassador role" })
+    .last()
+    .click();
+  await expect
+    .poll(() => role.body)
+    .toEqual({ role: "MEMBER", reason: "Stepped down from organising." });
+});
