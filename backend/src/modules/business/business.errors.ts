@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   NotFoundException,
@@ -54,5 +55,25 @@ export const businessErrors = {
       code: "BUSINESS_OWNER_REQUIRED",
       message: "Only an owner can do this.",
       messageKey: "error.business.owner_required",
+    }),
+  offeringTitleRequired: () =>
+    new BadRequestException({
+      code: "OFFERING_TITLE_REQUIRED",
+      message: "Give the offering a title in Bangla or English.",
+      messageKey: "error.business.offering_title_required",
+      field: "titleBn",
+    }),
+  offeringPriceInvalid: () =>
+    new BadRequestException({
+      code: "OFFERING_PRICE_INVALID",
+      message: "The lowest price can't be more than the highest.",
+      messageKey: "error.business.offering_price_invalid",
+      field: "priceMinPoisha",
+    }),
+  offeringLimit: () =>
+    new ConflictException({
+      code: "OFFERING_LIMIT_REACHED",
+      message: "A business can list at most 100 offerings.",
+      messageKey: "error.business.offering_limit",
     }),
 };

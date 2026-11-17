@@ -27,4 +27,3 @@ Implemented and verified locally on 2 September 2026.
 
 The engineering portion of the Phase 2 exit gate is green. The ≤90-second onboarding acceptance
 criterion still requires a timed human usability run and must not be inferred from automated tests.
-

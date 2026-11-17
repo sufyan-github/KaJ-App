@@ -20,9 +20,14 @@ import {
   TrustLevel,
   UserStatus,
   type Job,
+  BusinessMemberRole,
+  BusinessStage,
+  VerificationStatus,
 } from "@prisma/client";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
+import { businessErrors } from "../business/business.errors";
+import { isVerifiedBusiness } from "../business/business-labels";
 import { CLOCK, type Clock } from "../../common/time/clock";
 import { AvailabilityService } from "../availability/availability.service";
 import { MatchingService } from "../matching/matching.service";
@@ -80,6 +85,16 @@ const jobInclude = {
     include: { skill: { select: { id: true, name_bn: true, name_en: true } } },
   },
   schedules: true,
+  business_profile: {
+    select: {
+      id: true,
+      business_name: true,
+      stage: true,
+      verification_status: true,
+      suspended_at: true,
+      deleted_at: true,
+    },
+  },
 } satisfies Prisma.JobInclude;
 
 @Injectable()
@@ -126,6 +141,12 @@ export class JobsService {
     if (input.recurrenceRule) await this.recurrence?.assertEnabled();
     assertSingleWorker(input.workersRequired ?? 1);
     await this.assertActiveReferences(input.categoryId, input.locationId);
+    if (input.businessProfileId)
+      await assertCanPostForBusiness(
+        this.prisma,
+        posterUserId,
+        input.businessProfileId,
+      );
     const window = parseWindow(input.startsAt, input.endsAt);
     const job = await this.prisma.$transaction(async (transaction) => {
       // A poster's rating lives on the customer profile; a business-only
@@ -143,6 +164,7 @@ export class JobsService {
           description: input.description.trim(),
           category_id: input.categoryId,
           subcategory_id: input.subcategoryId,
+          business_profile_id: input.businessProfileId ?? null,
           lat: site.lat,
           lng: site.lng,
           job_type: input.jobType,
@@ -191,6 +213,13 @@ export class JobsService {
     }
     validatePublishable(job);
     await this.assertPosterEligible(posterUserId, job.category_id);
+    // Still allowed to post for that business (not removed, not suspended).
+    if (job.business_profile_id)
+      await assertCanPostForBusiness(
+        this.prisma,
+        posterUserId,
+        job.business_profile_id,
+      );
     if (job.job_type === JobType.RECURRING) {
       if (!job.recurrence_rule) {
         throw new BadRequestException(
@@ -1797,6 +1826,32 @@ function slotUnavailable(message: string) {
 }
 
 /** Deliberately does not say who blocked whom. */
+/** P2.3: only an OWNER or MANAGER may post jobs for an active business. */
+async function assertCanPostForBusiness(
+  prisma: PrismaService,
+  userId: string,
+  businessId: string,
+) {
+  const membership = await prisma.businessMember.findFirst({
+    where: {
+      business_profile_id: businessId,
+      user_id: userId,
+      accepted_at: { not: null },
+      role: { in: [BusinessMemberRole.OWNER, BusinessMemberRole.MANAGER] },
+      business: { deleted_at: null },
+    },
+    include: { business: { select: { suspended_at: true } } },
+  });
+  if (!membership)
+    throw new NotFoundException({
+      code: "NOT_FOUND",
+      message: "Business not found.",
+      messageKey: "error.not_found",
+      field: "businessProfileId",
+    });
+  if (membership.business.suspended_at) throw businessErrors.suspended();
+}
+
 function hiringUnavailable() {
   return new UnprocessableEntityException({
     code: "HIRING_UNAVAILABLE",
@@ -1806,8 +1861,35 @@ function hiringUnavailable() {
 }
 
 function serializeJob<T extends Record<string, unknown>>(job: T) {
+  // P2.3: the business a job is posted for, as the app shows it (hidden
+  // once the business is suspended or deleted).
+  const { business_profile: business, ...rest } = job as T & {
+    business_profile?: {
+      id: string;
+      business_name: string;
+      stage: BusinessStage;
+      verification_status: VerificationStatus;
+      suspended_at: Date | null;
+      deleted_at: Date | null;
+    } | null;
+  };
+  const shaped =
+    business === undefined
+      ? rest
+      : {
+          ...rest,
+          business:
+            business && !business.suspended_at && !business.deleted_at
+              ? {
+                  id: business.id,
+                  name: business.business_name,
+                  stage: business.stage,
+                  verified: isVerifiedBusiness(business),
+                }
+              : null,
+        };
   return JSON.parse(
-    JSON.stringify(job, (key, value: unknown) =>
+    JSON.stringify(shaped, (key, value: unknown) =>
       PRIVATE_JOB_FIELDS.has(key)
         ? undefined
         : typeof value === "bigint"

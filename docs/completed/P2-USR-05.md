@@ -35,4 +35,3 @@ Implemented and verified locally on 1 September 2026.
 The checkout's dependency metadata referenced a Windows pnpm store. pnpm 10.34.5 was bootstrapped
 outside the repository, dependencies were recreated against a Linux-local store, and Sharp 0.34.3
 was then installed without changing the repository's enforced package-manager policy.
-

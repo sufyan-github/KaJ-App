@@ -92,11 +92,14 @@ the same fields plus `httpStatus`.
 
 ## Business (P2)
 
-| HTTP | Code                          | messageKey                          | English                                                                          | Bangla                                                         |
-| ---- | ----------------------------- | ----------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| 409  | `BUSINESS_PROFILE_INCOMPLETE` | `error.business.profile_incomplete` | Add a sector and an area before making the business public (`field` says which). | ব্যবসা সবার জন্য প্রকাশের আগে খাত ও এলাকা যোগ করুন।            |
-| 409  | `BUSINESS_SUSPENDED`          | `error.business.suspended`          | This business is suspended by KAAJ moderation.                                   | এই ব্যবসাটি KAAJ মডারেশন স্থগিত করেছে।                         |
-| 409  | `BUSINESS_LIMIT_REACHED`      | `error.business.limit_reached`      | You can own at most 5 businesses.                                                | আপনি সর্বোচ্চ ৫টি ব্যবসার মালিক হতে পারেন।                     |
-| 409  | `ALREADY_MEMBER`              | `error.business.already_member`     | This person is already a member or invited.                                      | এই ব্যক্তি ইতিমধ্যে সদস্য বা আমন্ত্রিত।                        |
-| 409  | `LAST_OWNER`                  | `error.business.last_owner`         | A business needs at least one owner. Add another owner first.                    | ব্যবসার অন্তত একজন মালিক থাকতে হবে। আগে আরেকজন মালিক যোগ করুন। |
-| 409  | `MEMBER_LIMIT_REACHED`        | `error.business.member_limit`       | A business can have at most 50 members.                                          | একটি ব্যবসায় সর্বোচ্চ ৫০ জন সদস্য থাকতে পারে।                 |
+| HTTP | Code                          | messageKey                               | English                                                                          | Bangla                                                         |
+| ---- | ----------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| 409  | `BUSINESS_PROFILE_INCOMPLETE` | `error.business.profile_incomplete`      | Add a sector and an area before making the business public (`field` says which). | ব্যবসা সবার জন্য প্রকাশের আগে খাত ও এলাকা যোগ করুন।            |
+| 409  | `BUSINESS_SUSPENDED`          | `error.business.suspended`               | This business is suspended by KAAJ moderation.                                   | এই ব্যবসাটি KAAJ মডারেশন স্থগিত করেছে।                         |
+| 409  | `BUSINESS_LIMIT_REACHED`      | `error.business.limit_reached`           | You can own at most 5 businesses.                                                | আপনি সর্বোচ্চ ৫টি ব্যবসার মালিক হতে পারেন।                     |
+| 409  | `ALREADY_MEMBER`              | `error.business.already_member`          | This person is already a member or invited.                                      | এই ব্যক্তি ইতিমধ্যে সদস্য বা আমন্ত্রিত।                        |
+| 409  | `LAST_OWNER`                  | `error.business.last_owner`              | A business needs at least one owner. Add another owner first.                    | ব্যবসার অন্তত একজন মালিক থাকতে হবে। আগে আরেকজন মালিক যোগ করুন। |
+| 409  | `MEMBER_LIMIT_REACHED`        | `error.business.member_limit`            | A business can have at most 50 members.                                          | একটি ব্যবসায় সর্বোচ্চ ৫০ জন সদস্য থাকতে পারে।                 |
+| 400  | `OFFERING_TITLE_REQUIRED`     | `error.business.offering_title_required` | Give the offering a title in Bangla or English.                                  | অফারের একটি বাংলা বা ইংরেজি নাম দিন।                           |
+| 400  | `OFFERING_PRICE_INVALID`      | `error.business.offering_price_invalid`  | The lowest price can't be more than the highest.                                 | সর্বনিম্ন দাম সর্বোচ্চ দামের চেয়ে বেশি হতে পারে না।           |
+| 409  | `OFFERING_LIMIT_REACHED`      | `error.business.offering_limit`          | A business can list at most 100 offerings.                                       | একটি ব্যবসা সর্বোচ্চ ১০০টি অফার রাখতে পারে।                    |

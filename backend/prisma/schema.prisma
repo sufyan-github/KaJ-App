@@ -302,6 +302,11 @@ enum BusinessStage {
   REGISTERED
 }
 
+enum OfferingKind {
+  PRODUCT
+  SERVICE
+}
+
 enum BusinessMemberRole {
   OWNER
   MANAGER
@@ -710,12 +715,39 @@ model BusinessProfile {
   category              BusinessCategory?     @relation(fields: [category_id], references: [id], onDelete: Restrict)
   members               BusinessMember[]
   verification_requests VerificationRequest[]
+  offerings             BusinessOffering[]
 
   @@index([user_id])
   @@index([location_id])
   @@index([category_id])
   @@index([is_public, seeking_partners, category_id, location_id])
   @@map("business_profiles")
+}
+
+/// P2.2: a product or service a business offers. At least one title (bn or
+/// en); an optional price range in poisha. hidden_at = hidden by moderation.
+model BusinessOffering {
+  id                  String          @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  business_profile_id String          @db.Uuid
+  kind                OfferingKind
+  title_en            String?
+  title_bn            String?
+  description         String?
+  price_min_poisha    BigInt?
+  price_max_poisha    BigInt?
+  /// What the price is for, e.g. "per kg", "per hour".
+  price_unit          String?
+  is_active           Boolean         @default(true)
+  sort_order          Int             @default(0)
+  hidden_at           DateTime?
+  hidden_reason       String?
+  deleted_at          DateTime?
+  created_at          DateTime        @default(now())
+  updated_at          DateTime        @updatedAt
+  business            BusinessProfile @relation(fields: [business_profile_id], references: [id], onDelete: Cascade)
+
+  @@index([business_profile_id, is_active])
+  @@map("business_offerings")
 }
 
 /// P2.1: who acts for a business. accepted_at null = invited, not yet a member.

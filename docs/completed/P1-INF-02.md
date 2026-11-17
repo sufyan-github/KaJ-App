@@ -76,15 +76,15 @@ keys if another caller attempts to log them.
 
 ## Acceptance results
 
-| Acceptance item | Result | Evidence |
-|---|---|---|
-| `GET /health` returns HTTP 200 | PASS | Supertest receives the exact E1 success envelope and matching request-ID header. |
-| Unknown route returns E1 error shape | PASS | Exact deep-equality assertion for every error-envelope field. |
-| Validation failure returns 400 with `field` | PASS | Invalid type and non-whitelisted mass-assignment tests populate `name` and `role`. |
-| Logs contain no redacted values | PASS | Pino stream test proves authorization, password, code, token, and phone values are absent. |
-| Unexpected errors do not leak internals | PASS | HTTP 500 test proves the thrown internal message is absent. |
-| Swagger at `/docs` only outside production | PASS | Non-production integration test serves Swagger; bootstrap condition excludes production. |
-| Every controller success/failure matches E1 | PASS | Global interceptor/filter plus exact success, 400, 404, and 500 integration assertions. |
+| Acceptance item                             | Result | Evidence                                                                                   |
+| ------------------------------------------- | ------ | ------------------------------------------------------------------------------------------ |
+| `GET /health` returns HTTP 200              | PASS   | Supertest receives the exact E1 success envelope and matching request-ID header.           |
+| Unknown route returns E1 error shape        | PASS   | Exact deep-equality assertion for every error-envelope field.                              |
+| Validation failure returns 400 with `field` | PASS   | Invalid type and non-whitelisted mass-assignment tests populate `name` and `role`.         |
+| Logs contain no redacted values             | PASS   | Pino stream test proves authorization, password, code, token, and phone values are absent. |
+| Unexpected errors do not leak internals     | PASS   | HTTP 500 test proves the thrown internal message is absent.                                |
+| Swagger at `/docs` only outside production  | PASS   | Non-production integration test serves Swagger; bootstrap condition excludes production.   |
+| Every controller success/failure matches E1 | PASS   | Global interceptor/filter plus exact success, 400, 404, and 500 integration assertions.    |
 
 ## Decisions and limitations
 

@@ -63,16 +63,16 @@ The matrix contains 22 required capability rows, seven comparator products, and 
 
 ## Acceptance results
 
-| Acceptance item | Result | Evidence |
-|---|---|---|
-| Exact comparator columns | PASS | InstaHire, ProGo, Shomvob, Sheba, TaskRabbit, Instawork, Thumbtack, and KAJ planned. |
-| All prescribed capabilities | PASS | Parser reports 22/22, with no missing or extra rows. |
-| Allowed scoring vocabulary only | PASS | Parser reports zero invalid values. |
-| Scores grounded in P0-RES-01 evidence | PASS | Evidence trace points to the directly sourced competitor field tables. |
-| Unknown distinct from No | PASS | Rubric explicitly defines the distinction and sparse evidence remains Unknown. |
-| KAJ scope distinct from implementation | PASS | Rubric and notes state that later gated phases are planned, not built. |
-| Product decisions deferred to validation | PASS | Notes defer desirability/prioritization to P0-RES-03 and P0-RES-04. |
-| Phase 0 code gate preserved | PASS | No product code, environment, package, infrastructure, or database change. |
+| Acceptance item                          | Result | Evidence                                                                             |
+| ---------------------------------------- | ------ | ------------------------------------------------------------------------------------ |
+| Exact comparator columns                 | PASS   | InstaHire, ProGo, Shomvob, Sheba, TaskRabbit, Instawork, Thumbtack, and KAJ planned. |
+| All prescribed capabilities              | PASS   | Parser reports 22/22, with no missing or extra rows.                                 |
+| Allowed scoring vocabulary only          | PASS   | Parser reports zero invalid values.                                                  |
+| Scores grounded in P0-RES-01 evidence    | PASS   | Evidence trace points to the directly sourced competitor field tables.               |
+| Unknown distinct from No                 | PASS   | Rubric explicitly defines the distinction and sparse evidence remains Unknown.       |
+| KAJ scope distinct from implementation   | PASS   | Rubric and notes state that later gated phases are planned, not built.               |
+| Product decisions deferred to validation | PASS   | Notes defer desirability/prioritization to P0-RES-03 and P0-RES-04.                  |
+| Phase 0 code gate preserved              | PASS   | No product code, environment, package, infrastructure, or database change.           |
 
 ## Decisions and limitations
 

@@ -2,12 +2,14 @@ import { BadRequestException, Injectable, Optional } from "@nestjs/common";
 import {
   BusinessMemberRole,
   BusinessStage,
+  JobStatus,
   Prisma,
   UserStatus,
   VerificationStatus,
 } from "@prisma/client";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
+import { WORK_ONLY } from "../jobs/opportunity";
 import { NotificationsService } from "../notifications/notifications.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
 import { visibleDisplayName } from "../users/public-profile.projection";
@@ -24,6 +26,11 @@ import {
 } from "./dto/business.dto";
 
 const MAX_OWNED = 5;
+/** Job statuses anyone may see (mirrors the job detail rule). */
+const PUBLICLY_OPEN_JOB_STATUSES = [
+  JobStatus.PUBLISHED,
+  JobStatus.APPLICATIONS_OPEN,
+];
 const MAX_MEMBERS = 50;
 
 export const businessInclude = {
@@ -479,6 +486,48 @@ export class BusinessesService {
         accepted_at: { not: null },
       },
     });
+  }
+
+  /** Throws unless members may change the business (not deleted/suspended). */
+  async assertEditable(id: string) {
+    await this.activeBusiness(id);
+  }
+
+  /**
+   * P2.3: the staff jobs a business posted (paid work only). Members see
+   * every one; others the open ones of a business they may see.
+   */
+  async jobs(viewerUserId: string, id: string) {
+    const business = await this.get(viewerUserId, id);
+    const member = business.myRole !== null;
+    const rows = await this.prisma.job.findMany({
+      where: {
+        ...WORK_ONLY,
+        business_profile_id: id,
+        deleted_at: null,
+        ...(member ? {} : { status: { in: [...PUBLICLY_OPEN_JOB_STATUSES] } }),
+      },
+      include: {
+        category: { select: { id: true, name_en: true, name_bn: true } },
+        location: { select: { id: true, name_en: true, name_bn: true } },
+      },
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
+      take: 100,
+    });
+    return {
+      items: rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        status: row.status,
+        category: row.category,
+        location: row.location,
+        budgetMinPoisha: row.budget_min_poisha?.toString() ?? null,
+        budgetMaxPoisha: row.budget_max_poisha?.toString() ?? null,
+        startsAt: row.starts_at?.toISOString() ?? null,
+        publishedAt: row.published_at?.toISOString() ?? null,
+        postedByUserId: member ? row.poster_user_id : undefined,
+      })),
+    };
   }
 
   /** A business its members may change: not deleted, not suspended. */

@@ -97,6 +97,11 @@ export class CreateJobDto {
   @IsUUID()
   subcategoryId?: string;
 
+  /** P2.3: post as a business you are an OWNER or MANAGER of. */
+  @IsOptional()
+  @IsUUID()
+  businessProfileId?: string;
+
   @IsArray()
   @ArrayMaxSize(20)
   @IsUUID(undefined, { each: true })

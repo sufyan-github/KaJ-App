@@ -68,18 +68,18 @@ This task did not conduct or invent interviews, walk counts, transactions, willi
 
 ## Acceptance results
 
-| Acceptance item | Result | Evidence |
-|---|---|---|
-| Population and student pools sourced | PASS | City and six named institution/channel rows with direct sources and qualification. |
-| All target areas mapped | PASS | Thirteen required area references grouped into five research clusters. |
-| Three-zone business sample | PASS WITH LIMITATION | Reproducible OSM counts; physical walk-count is explicitly handed to field validation. |
-| Shop hiring behaviour | PASS WITH INFERENCE | Current Rajshahi listings establish visible channels; personal-network sequence is labelled for interview testing. |
-| Student earning behaviour | PASS WITH INFERENCE | Rajshahi tutor media/listings and design channels are sourced; prevalence remains unknown. |
-| Six price categories | PASS | Every category has a range and sample size; national comparators are labelled. |
-| Payment reality | PASS WITH LIMITATION | Current MFS rails and scale are sourced; Rajshahi cash/MFS shares remain unknown. |
-| Connectivity and devices | PASS | Current BBS/BTRC/GSMA evidence and a Rajshahi signal study are documented. |
-| Seasonality | PASS | Academic, Ramadan/Eid, wedding, and monsoon evidence with inference labels. |
-| No-code gate preserved | PASS | Only research, tracking, changelog, and completion-record files changed. |
+| Acceptance item                      | Result               | Evidence                                                                                                           |
+| ------------------------------------ | -------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Population and student pools sourced | PASS                 | City and six named institution/channel rows with direct sources and qualification.                                 |
+| All target areas mapped              | PASS                 | Thirteen required area references grouped into five research clusters.                                             |
+| Three-zone business sample           | PASS WITH LIMITATION | Reproducible OSM counts; physical walk-count is explicitly handed to field validation.                             |
+| Shop hiring behaviour                | PASS WITH INFERENCE  | Current Rajshahi listings establish visible channels; personal-network sequence is labelled for interview testing. |
+| Student earning behaviour            | PASS WITH INFERENCE  | Rajshahi tutor media/listings and design channels are sourced; prevalence remains unknown.                         |
+| Six price categories                 | PASS                 | Every category has a range and sample size; national comparators are labelled.                                     |
+| Payment reality                      | PASS WITH LIMITATION | Current MFS rails and scale are sourced; Rajshahi cash/MFS shares remain unknown.                                  |
+| Connectivity and devices             | PASS                 | Current BBS/BTRC/GSMA evidence and a Rajshahi signal study are documented.                                         |
+| Seasonality                          | PASS                 | Academic, Ramadan/Eid, wedding, and monsoon evidence with inference labels.                                        |
+| No-code gate preserved               | PASS                 | Only research, tracking, changelog, and completion-record files changed.                                           |
 
 ## Decisions and limitations
 

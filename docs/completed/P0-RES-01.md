@@ -71,19 +71,19 @@ The research document is a traceable input to later planning:
 
 ## Acceptance results
 
-| Acceptance item | Result | Evidence |
-|---|---|---|
-| All prescribed Bangladesh competitors covered | PASS | 13 named tables, including an explicit low-confidence no-result record for Kaj Ki Kaj. |
-| Informal Rajshahi alternatives covered | PASS | Facebook/groups, RUET/RU networks, tutor boards/media, and local staffing-broker archetype. |
-| All prescribed international comparators covered | PASS | 11 tables, with Airbnb limited to trust and Uber limited to dispatch. |
-| One exact table per competitor/channel | PASS | 28 four-column tables. |
-| All 27 exact fields in every table | PASS | Structural parser reports 756/756 rows and no malformed section. |
-| URL in every row | PASS | Row validator reports zero missing direct URLs. |
-| Confidence in every row | PASS | Only `H`, `M`, or `L`; no invalid values. |
-| Unverified inference marked | PASS | Explicit `ASSUMPTION` and `Unknown` conventions are documented and applied. |
-| No invented commission | PASS | Only published amounts/rates are stated; unclear, historical, or variable economics are labelled. |
-| Gap matrix deferred | PASS | P0-RES-02 is named as the next task and no capability scoring was added. |
-| Human review gate preserved | PASS | Deliverable remains `Status: draft — owner review required`; the Phase 0 code gate stays closed. |
+| Acceptance item                                  | Result | Evidence                                                                                          |
+| ------------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------- |
+| All prescribed Bangladesh competitors covered    | PASS   | 13 named tables, including an explicit low-confidence no-result record for Kaj Ki Kaj.            |
+| Informal Rajshahi alternatives covered           | PASS   | Facebook/groups, RUET/RU networks, tutor boards/media, and local staffing-broker archetype.       |
+| All prescribed international comparators covered | PASS   | 11 tables, with Airbnb limited to trust and Uber limited to dispatch.                             |
+| One exact table per competitor/channel           | PASS   | 28 four-column tables.                                                                            |
+| All 27 exact fields in every table               | PASS   | Structural parser reports 756/756 rows and no malformed section.                                  |
+| URL in every row                                 | PASS   | Row validator reports zero missing direct URLs.                                                   |
+| Confidence in every row                          | PASS   | Only `H`, `M`, or `L`; no invalid values.                                                         |
+| Unverified inference marked                      | PASS   | Explicit `ASSUMPTION` and `Unknown` conventions are documented and applied.                       |
+| No invented commission                           | PASS   | Only published amounts/rates are stated; unclear, historical, or variable economics are labelled. |
+| Gap matrix deferred                              | PASS   | P0-RES-02 is named as the next task and no capability scoring was added.                          |
+| Human review gate preserved                      | PASS   | Deliverable remains `Status: draft — owner review required`; the Phase 0 code gate stays closed.  |
 
 ## Decisions and limitations
 

@@ -29,3 +29,16 @@ Pre-check on production (expected empty — the table was unused):
 SELECT count(*) FROM business_profiles;
 SELECT count(*) FROM business_profiles WHERE verification_status = 'APPROVED';
 ```
+
+## 20261118110000_business_offerings (P2.2; plan migration 6, first half)
+
+- `business_offerings`: `kind` (PRODUCT | SERVICE), `title_en` / `title_bn`,
+  `description`, `price_min_poisha` / `price_max_poisha`, `price_unit`,
+  `is_active`, `sort_order`, `hidden_at` / `hidden_reason` (moderation),
+  `deleted_at`. CHECKs: at least one non-blank title; prices ≥ 0 and min ≤ max.
+
+## P2.3 staff jobs (no migration)
+
+`jobs.business_profile_id` already existed (P1 work_learn_job_extensions). The
+API now sets it only for an accepted OWNER or MANAGER of an active business,
+re-checked at publish.

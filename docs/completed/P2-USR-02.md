@@ -21,4 +21,3 @@ Implemented and verified locally on 1 September 2026.
 - backend TypeScript typecheck: clean
 - backend Jest: 77 passed, 2 intentionally skipped
 - backend Nest build: successful
-

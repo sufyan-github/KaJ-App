@@ -68,13 +68,13 @@ listens on `PORT` and returns `{ "status": "ok" }` from `GET /health`.
 
 ## Acceptance results
 
-| Acceptance item | Result | Evidence |
-|---|---|---|
-| Required monorepo files and shared package exist | PASS | Root contract tests and workspace install. |
-| Compose runs PostgreSQL 16, Redis 7, MinIO, MailHog | PASS | Compose config check and four running/healthy services. |
-| Root `dev`, `test`, `lint`, `typecheck`, `migrate`, `seed` scripts exist | PASS | Contract test plus executed test/lint/typecheck/build/migrate scripts. |
-| `docker compose up -d && pnpm migrate` succeeds | PASS WITH LOCAL PORT OVERRIDE | Port 5432 was already owned by PID 7208, so runtime verification used `POSTGRES_PORT=55432` and the matching `DATABASE_URL`; committed defaults remain 5432. |
-| Running API reachable in no more than three documented commands | PASS | README contains exactly three clean-clone commands; HTTP integration reached `/health`. |
+| Acceptance item                                                          | Result                        | Evidence                                                                                                                                                     |
+| ------------------------------------------------------------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Required monorepo files and shared package exist                         | PASS                          | Root contract tests and workspace install.                                                                                                                   |
+| Compose runs PostgreSQL 16, Redis 7, MinIO, MailHog                      | PASS                          | Compose config check and four running/healthy services.                                                                                                      |
+| Root `dev`, `test`, `lint`, `typecheck`, `migrate`, `seed` scripts exist | PASS                          | Contract test plus executed test/lint/typecheck/build/migrate scripts.                                                                                       |
+| `docker compose up -d && pnpm migrate` succeeds                          | PASS WITH LOCAL PORT OVERRIDE | Port 5432 was already owned by PID 7208, so runtime verification used `POSTGRES_PORT=55432` and the matching `DATABASE_URL`; committed defaults remain 5432. |
+| Running API reachable in no more than three documented commands          | PASS                          | README contains exactly three clean-clone commands; HTTP integration reached `/health`.                                                                      |
 
 ## Decisions and limitations
 
