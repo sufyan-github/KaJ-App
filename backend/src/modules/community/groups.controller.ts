@@ -19,6 +19,7 @@ import { CreateGroupSessionDto } from "../experts/dto/session.dto";
 import { SessionsService } from "../experts/sessions.service";
 import {
   CreateGroupDto,
+  GroupAnnouncementDto,
   GroupMemberRoleDto,
   GroupMembersQueryDto,
   GroupSearchQueryDto,
@@ -170,6 +171,26 @@ export class GroupsController {
     @Body() body: CreateGroupSessionDto,
   ) {
     return this.sessions.createForGroup(claims.sub, id, body);
+  }
+
+  /** P3.6: group announcements (post: moderators and ambassadors). */
+  @Get("community/groups/:id/announcements")
+  @Policy(Policies.authenticated())
+  announcements(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", uuid()) id: string,
+  ) {
+    return this.groups.announcements(claims.sub, id);
+  }
+
+  @Post("community/groups/:id/announcements")
+  @Policy(Policies.authenticated())
+  announce(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", uuid()) id: string,
+    @Body() body: GroupAnnouncementDto,
+  ) {
+    return this.groups.announce(claims.sub, id, body.body);
   }
 
   @Post("community/groups/:id/chat")

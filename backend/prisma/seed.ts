@@ -119,6 +119,13 @@ const configSettings = [
 const badges = [
   ["verified", "Verified", "যাচাইকৃত", "verified", { trust: true }],
   [
+    "community-ambassador",
+    "Community ambassador",
+    "কমিউনিটি অ্যাম্বাসেডর",
+    "campaign",
+    { communityRole: "AMBASSADOR" },
+  ],
+  [
     "business-verified",
     "Business verified",
     "ব্যবসা যাচাইকৃত",

@@ -75,3 +75,14 @@ migration 8 (never created).
 - Check-in reuses the job attendance rules (`checkin_enabled` flag, current
   consent version, accuracy, geofence round the venue pin or the area's
   centre and radius), from an hour before the start until the end.
+
+## P3.6 announcements and ambassadors (no migration)
+
+- Group announcements are SYSTEM messages in the group's chat, attributed to
+  the moderator or ambassador who posted them (`sender_user_id`), plus a
+  COMMUNITY_ANNOUNCEMENT notification to members not in a block with them.
+- The "community-ambassador" badge (created on first use, also in the dev
+  seed) is held while the person is an ACTIVE AMBASSADOR of a visible group.
+- Platform announcements use the existing notification campaigns; segments
+  now also take `role: MENTOR`, `locationId` (area and what lies inside it,
+  by the profile's area) and `communityGroupId` (active members).

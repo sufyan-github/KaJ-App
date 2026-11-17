@@ -2008,11 +2008,42 @@ function campaignWhere(
       ? (segment.status as UserStatus)
       : UserStatus.ACTIVE;
   const role = typeof segment.role === "string" ? segment.role : undefined;
+  const uuid = (value: unknown) =>
+    typeof value === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu.test(
+      value,
+    )
+      ? value
+      : undefined;
+  // P3.6 platform announcements: by area (incl. what lies inside it) or to
+  // a community group's active members.
+  const locationId = uuid(segment.locationId);
+  const communityGroupId = uuid(segment.communityGroupId);
   return {
     status,
     deleted_at: null,
-    ...(role && ["CUSTOMER", "WORKER", "BUSINESS"].includes(role)
+    ...(role && ["CUSTOMER", "WORKER", "BUSINESS", "MENTOR"].includes(role)
       ? { role_modes: { has: role as any } }
+      : {}),
+    ...(locationId
+      ? {
+          profile: {
+            primary_location: {
+              OR: [
+                { id: locationId },
+                { parent_id: locationId },
+                { parent: { parent_id: locationId } },
+              ],
+            },
+          },
+        }
+      : {}),
+    ...(communityGroupId
+      ? {
+          community_memberships: {
+            some: { group_id: communityGroupId, status: "ACTIVE" },
+          },
+        }
       : {}),
   };
 }

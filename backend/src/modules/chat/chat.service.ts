@@ -488,6 +488,47 @@ export class ChatService {
     });
   }
 
+  /**
+   * P3.6: a group announcement — a SYSTEM message attributed to its poster,
+   * delivered to members not in a block with the poster.
+   */
+  async postAnnouncement(
+    conversationId: string,
+    posterUserId: string,
+    body: string,
+  ) {
+    const conversation = await this.assertParticipant(
+      posterUserId,
+      conversationId,
+    );
+    const hidden = new Set(await this.blocks.hiddenFrom(posterUserId));
+    const message = await this.prisma.message.create({
+      data: {
+        conversation_id: conversationId,
+        sender_user_id: posterUserId,
+        type: MessageType.SYSTEM,
+        body,
+      },
+    });
+    await this.prisma.conversation.update({
+      where: { id: conversationId },
+      data: { updated_at: this.clock.now() },
+    });
+    const serialized = await this.serializeMessage(message, posterUserId);
+    const recipients = conversation.participants
+      .map((item) => item.user_id)
+      .filter((id) => !hidden.has(id));
+    this.events.messages.next({
+      conversationId,
+      participantUserIds: recipients,
+      message: serialized,
+    });
+    return {
+      message: serialized,
+      recipients: recipients.filter((id) => id !== posterUserId),
+    };
+  }
+
   /** Re-syncs a group's members if its conversation exists already. */
   async syncGroupIfExists(input: Parameters<ChatService["syncGroup"]>[0]) {
     const exists = await this.prisma.conversation.count({

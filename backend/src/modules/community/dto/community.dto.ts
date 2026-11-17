@@ -113,6 +113,14 @@ export class InviteGroupMembersDto {
   userIds!: string[];
 }
 
+/** POST /community/groups/:id/announcements */
+export class GroupAnnouncementDto {
+  @IsString()
+  @MinLength(3)
+  @MaxLength(1000)
+  body!: string;
+}
+
 export class GroupMemberRoleDto {
   @IsEnum(GroupMemberRole)
   role!: GroupMemberRole;

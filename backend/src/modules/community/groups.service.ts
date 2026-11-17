@@ -27,6 +27,12 @@ import {
 } from "./dto/community.dto";
 
 const MAX_CREATED = 5;
+export const AMBASSADOR_BADGE = {
+  slug: "community-ambassador",
+  name_en: "Community ambassador",
+  name_bn: "কমিউনিটি অ্যাম্বাসেডর",
+  icon: "campaign",
+} as const;
 
 const groupInclude = {
   location: { select: { id: true, name_en: true, name_bn: true } },
@@ -266,6 +272,7 @@ export class GroupsService {
     await this.prisma.communityGroupMember.delete({
       where: { id: membership.id },
     });
+    await this.syncAmbassadorBadge(userId);
     await this.syncChat(id);
     return { groupId: id, left: true };
   }
@@ -417,6 +424,7 @@ export class GroupsService {
       where: { id: row.id },
       data: { role: input.role },
     });
+    await this.syncAmbassadorBadge(memberUserId);
     await this.audit(userId, "COMMUNITY_MEMBER_ROLE_CHANGED", id, {
       userId: memberUserId,
       from: row.role,
@@ -449,11 +457,98 @@ export class GroupsService {
           role: GroupMemberRole.MEMBER,
         },
       });
+    await this.syncAmbassadorBadge(memberUserId);
     await this.audit(userId, "COMMUNITY_MEMBER_REMOVED", id, {
       userId: memberUserId,
     });
     await this.syncChat(id);
     return { groupId: id, userId: memberUserId, removed: true };
+  }
+
+  /**
+   * P3.6: a moderator or ambassador posts an announcement: a SYSTEM message
+   * in the group chat, attributed to them, and a notification to members.
+   */
+  async announce(userId: string, id: string, body: string) {
+    const { group, membership } = await this.visible(userId, id);
+    if (
+      membership?.status !== GroupMemberStatus.ACTIVE ||
+      (membership.role !== GroupMemberRole.MODERATOR &&
+        membership.role !== GroupMemberRole.AMBASSADOR)
+    )
+      throw communityErrors.notFound();
+    if (!this.chat) throw new Error("ChatService is not available.");
+    const conversationId = (await this.syncChat(id, true))!;
+    const posted = await this.chat.postAnnouncement(
+      conversationId,
+      userId,
+      body.trim(),
+    );
+    const at = Date.now();
+    for (const recipient of posted.recipients)
+      await this.notifications?.create({
+        userId: recipient,
+        type: "COMMUNITY_ANNOUNCEMENT",
+        title: `${group.name} — ঘোষণা`,
+        body: body.trim().slice(0, 140),
+        payload: {
+          route: `/community/groups/${id}/announcements`,
+          groupId: id,
+          conversationId,
+        },
+        dedupeKey: `community-announcement:${posted.message.id}:${recipient}:${at}`,
+      });
+    await this.audit(userId, "COMMUNITY_ANNOUNCEMENT_POSTED", id, {
+      messageId: posted.message.id,
+    });
+    return this.announcements(userId, id);
+  }
+
+  /** The group's announcements, newest first (members only). */
+  async announcements(userId: string, id: string) {
+    const { membership } = await this.visible(userId, id);
+    if (membership?.status !== GroupMemberStatus.ACTIVE)
+      throw communityErrors.notFound();
+    const conversation = await this.prisma.conversation.findUnique({
+      where: { scope_key: `community-group:${id}` },
+      select: { id: true },
+    });
+    if (!conversation) return { items: [] };
+    const hidden = await this.blocks.hiddenFrom(userId);
+    const rows = await this.prisma.message.findMany({
+      where: {
+        conversation_id: conversation.id,
+        type: "SYSTEM",
+        deleted_at: null,
+        sender_user_id: { not: null, notIn: hidden },
+      },
+      include: {
+        sender: {
+          select: {
+            profile: { select: { display_name: true, show_full_name: true } },
+          },
+        },
+      },
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
+      take: 50,
+    });
+    return {
+      items: rows.map((row) => ({
+        id: row.id,
+        body: row.body,
+        postedBy: {
+          userId: row.sender_user_id,
+          displayName: visibleDisplayName(
+            row.sender?.profile?.display_name ?? "",
+            {
+              showFullName: row.sender?.profile?.show_full_name ?? false,
+              hired: false,
+            },
+          ),
+        },
+        createdAt: row.created_at.toISOString(),
+      })),
+    };
   }
 
   /** The group chat for active members. */
@@ -537,6 +632,45 @@ export class GroupsService {
       status: row.hidden_at ? "HIDDEN" : "ACTIVE",
       createdAt: row.created_at.toISOString(),
     };
+  }
+
+  /**
+   * P3.6: the "Community ambassador" badge follows the role: held while
+   * the person is an AMBASSADOR of at least one active, visible group.
+   */
+  async syncAmbassadorBadge(userId: string) {
+    const badge = await this.prisma.badge.upsert({
+      where: { slug: AMBASSADOR_BADGE.slug },
+      update: {},
+      create: {
+        ...AMBASSADOR_BADGE,
+        rule_json: { communityRole: "AMBASSADOR" },
+      },
+      select: { id: true },
+    });
+    const ambassador = await this.prisma.communityGroupMember.count({
+      where: {
+        user_id: userId,
+        role: GroupMemberRole.AMBASSADOR,
+        status: GroupMemberStatus.ACTIVE,
+        group: { deleted_at: null, hidden_at: null },
+      },
+    });
+    const current = await this.prisma.userBadge.findUnique({
+      where: { user_id_badge_id: { user_id: userId, badge_id: badge.id } },
+    });
+    if (ambassador && (!current || current.revoked_at)) {
+      await this.prisma.userBadge.upsert({
+        where: { user_id_badge_id: { user_id: userId, badge_id: badge.id } },
+        create: { user_id: userId, badge_id: badge.id },
+        update: { revoked_at: null, granted_at: new Date() },
+      });
+    } else if (!ambassador && current && !current.revoked_at) {
+      await this.prisma.userBadge.update({
+        where: { user_id_badge_id: { user_id: userId, badge_id: badge.id } },
+        data: { revoked_at: new Date() },
+      });
+    }
   }
 
   /** Keeps the group chat's members equal to the active members. */
