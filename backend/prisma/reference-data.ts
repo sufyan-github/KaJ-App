@@ -1,7 +1,7 @@
 import { LocationType, Prisma, PrismaClient } from "@prisma/client";
 
 /**
- * Reference data: the catalogue (categories, skills) and the Rajshahi pilot
+ * Reference data: the catalogue (categories, skills), the business sectors and the Rajshahi pilot
  * locations (city → thanas → areas), in Bangla and English. The single
  * source for the development seed and the production-safe loader
  * (reference-data-load.ts). It contains no accounts, credentials, flags or
@@ -119,9 +119,88 @@ export const pilotAreas: Record<
   ],
 };
 
+/**
+ * P2: the sector taxonomy for businesses and ideas (business_categories).
+ * Admins can rename, reorder, deactivate or add sub-sectors; the loader
+ * only adds missing slugs.
+ */
+export const businessCategories = [
+  {
+    slug: "agriculture",
+    name_en: "Agriculture and farming",
+    name_bn: "কৃষি ও খামার",
+    icon: "agriculture",
+  },
+  {
+    slug: "technology",
+    name_en: "Technology",
+    name_bn: "প্রযুক্তি",
+    icon: "computer",
+  },
+  {
+    slug: "manufacturing",
+    name_en: "Manufacturing and crafts",
+    name_bn: "উৎপাদন ও হস্তশিল্প",
+    icon: "factory",
+  },
+  {
+    slug: "retail",
+    name_en: "Retail and trade",
+    name_bn: "খুচরা ও ব্যবসা-বাণিজ্য",
+    icon: "storefront",
+  },
+  {
+    slug: "education",
+    name_en: "Education and training",
+    name_bn: "শিক্ষা ও প্রশিক্ষণ",
+    icon: "school",
+  },
+  {
+    slug: "food",
+    name_en: "Food and catering",
+    name_bn: "খাবার ও ক্যাটারিং",
+    icon: "restaurant",
+  },
+  { slug: "services", name_en: "Services", name_bn: "সেবা", icon: "handshake" },
+  {
+    slug: "construction",
+    name_en: "Construction",
+    name_bn: "নির্মাণ",
+    icon: "construction",
+  },
+  {
+    slug: "creative",
+    name_en: "Creative and media",
+    name_bn: "সৃজনশীল ও মিডিয়া",
+    icon: "palette",
+  },
+  {
+    slug: "tourism",
+    name_en: "Tourism and hospitality",
+    name_bn: "পর্যটন ও আতিথেয়তা",
+    icon: "travel",
+  },
+  {
+    slug: "logistics",
+    name_en: "Transport and logistics",
+    name_bn: "পরিবহন ও লজিস্টিকস",
+    icon: "local_shipping",
+  },
+] as const;
+
 export interface ReferenceDataReport {
-  created: { categories: number; skills: number; locations: number };
-  existing: { categories: number; skills: number; locations: number };
+  created: {
+    categories: number;
+    skills: number;
+    locations: number;
+    businessCategories: number;
+  };
+  existing: {
+    categories: number;
+    skills: number;
+    locations: number;
+    businessCategories: number;
+  };
 }
 
 type Client = PrismaClient | Prisma.TransactionClient;
@@ -139,8 +218,8 @@ export async function loadReferenceData(
 ): Promise<ReferenceDataReport> {
   const write = !options.dryRun;
   const report: ReferenceDataReport = {
-    created: { categories: 0, skills: 0, locations: 0 },
-    existing: { categories: 0, skills: 0, locations: 0 },
+    created: { categories: 0, skills: 0, locations: 0, businessCategories: 0 },
+    existing: { categories: 0, skills: 0, locations: 0, businessCategories: 0 },
   };
 
   const categoryIds = new Map<string, string | null>();
@@ -245,6 +324,20 @@ export async function loadReferenceData(
     );
     for (const [name_en, name_bn] of pilotAreas[thanaName])
       await ensureChild(thanaId, LocationType.AREA, name_en, name_bn);
+  }
+
+  for (const [sort_order, sector] of businessCategories.entries()) {
+    const found = await prisma.businessCategory.findUnique({
+      where: { slug: sector.slug },
+      select: { id: true },
+    });
+    if (found) {
+      report.existing.businessCategories += 1;
+      continue;
+    }
+    report.created.businessCategories += 1;
+    if (write)
+      await prisma.businessCategory.create({ data: { ...sector, sort_order } });
   }
 
   return report;

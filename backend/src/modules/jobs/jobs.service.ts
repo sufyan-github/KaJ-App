@@ -128,6 +128,13 @@ export class JobsService {
     await this.assertActiveReferences(input.categoryId, input.locationId);
     const window = parseWindow(input.startsAt, input.endsAt);
     const job = await this.prisma.$transaction(async (transaction) => {
+      // A poster's rating lives on the customer profile; a business-only
+      // account gets one with its first job (activation no longer adds it).
+      await transaction.customerProfile.upsert({
+        where: { user_id: posterUserId },
+        update: {},
+        create: { user_id: posterUserId },
+      });
       const site = await siteCoordinates(transaction, posterUserId, input);
       const created = await transaction.job.create({
         data: {

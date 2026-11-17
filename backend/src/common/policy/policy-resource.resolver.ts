@@ -64,6 +64,23 @@ export class PolicyResourceResolver {
           }
           break;
         }
+        case "business": {
+          const business = await this.prisma.businessProfile.findFirst({
+            where: { id, deleted_at: null },
+            select: {
+              members: {
+                where: { accepted_at: { not: null } },
+                select: { user_id: true, role: true },
+              },
+            },
+          });
+          if (business)
+            context.businessMembers = business.members.map((member) => ({
+              userId: member.user_id,
+              role: member.role,
+            }));
+          break;
+        }
         case "conversation": {
           const conversation = await this.prisma.conversation.findFirst({
             where: { id, deleted_at: null },

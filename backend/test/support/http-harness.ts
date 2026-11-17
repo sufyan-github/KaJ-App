@@ -234,6 +234,13 @@ export class HttpHarness {
     return { jobId, applicationId, assignmentId };
   }
 
+  patch(path: string, as: Actor, body: object = {}) {
+    return request(this.app.getHttpServer())
+      .patch(`/api/v1/${path}`)
+      .auth(as.token, { type: "bearer" })
+      .send(body);
+  }
+
   delete(path: string, as: Actor) {
     return request(this.app.getHttpServer())
       .delete(`/api/v1/${path}`)

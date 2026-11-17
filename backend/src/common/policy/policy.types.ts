@@ -1,4 +1,4 @@
-import { RoleMode } from "@prisma/client";
+import { BusinessMemberRole, RoleMode } from "@prisma/client";
 
 export const POLICY_METADATA_KEY = "kaj.authorization.policy";
 
@@ -10,11 +10,12 @@ export type PolicyKind =
   | "job-poster"
   | "assigned-worker"
   | "conversation-participant"
-  | "mentor-owner";
+  | "mentor-owner"
+  | "business-member";
 
 /** Which record a route parameter names, for ownership rules. */
 export type PolicyResourceSource =
-  "job" | "assignment" | "application" | "conversation";
+  "job" | "assignment" | "application" | "conversation" | "business";
 
 export interface PolicyRule {
   kind: PolicyKind;
@@ -23,6 +24,8 @@ export interface PolicyRule {
   source?: PolicyResourceSource;
   /** The route parameter holding that record's id (default "id"). */
   param?: string;
+  /** business-member: the member roles allowed (default: any member). */
+  businessRoles?: readonly BusinessMemberRole[];
 }
 
 interface ResourceOptions {
@@ -57,6 +60,15 @@ export const Policies = {
     source: "job",
     param: options.param ?? "id",
   }),
+  /** An accepted member of the business the route names (optionally by role). */
+  businessMember: (
+    options: { param?: string; roles?: readonly BusinessMemberRole[] } = {},
+  ): PolicyRule => ({
+    kind: "business-member",
+    source: "business",
+    param: options.param ?? "id",
+    businessRoles: options.roles,
+  }),
   conversationParticipant: (options: { param?: string } = {}): PolicyRule => ({
     kind: "conversation-participant",
     source: "conversation",
@@ -76,6 +88,7 @@ export function containsPrivateResourcePolicy(
       rule.kind === "job-poster" ||
       rule.kind === "assigned-worker" ||
       rule.kind === "conversation-participant" ||
-      rule.kind === "mentor-owner",
+      rule.kind === "mentor-owner" ||
+      rule.kind === "business-member",
   );
 }

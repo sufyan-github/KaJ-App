@@ -295,6 +295,19 @@ enum NotificationChannel {
   EMAIL
 }
 
+/// P2.1: how far a business has come. Only REGISTERED can be verified.
+enum BusinessStage {
+  IDEA
+  INFORMAL
+  REGISTERED
+}
+
+enum BusinessMemberRole {
+  OWNER
+  MANAGER
+  STAFF
+}
+
 enum VerificationKind {
   PHONE
   IDENTITY
@@ -405,6 +418,8 @@ model User {
   worker_profile                    WorkerProfile?
   customer_profile                  CustomerProfile?
   business_profiles                 BusinessProfile[]
+  business_memberships              BusinessMember[]          @relation("BusinessMembership")
+  business_member_invites           BusinessMember[]          @relation("BusinessMemberInviter")
   skills                            UserSkill[]
   service_areas                     ServiceArea[]
   posted_jobs                       Job[]                     @relation("JobPoster")
@@ -665,25 +680,82 @@ model CustomerProfile {
   @@map("customer_profiles")
 }
 
+/// P2.1: a business or venture. user_id is the person who created it; who
+/// may act for it is business_members. Only a REGISTERED business can be
+/// VERIFIED (CHECK business_profiles_verified_stage_check).
 model BusinessProfile {
-  id                  String             @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  user_id             String             @db.Uuid
-  business_name       String
-  trade_licence_no    String?
-  address             String
-  location_id         String             @db.Uuid
-  verification_status VerificationStatus @default(NOT_SUBMITTED)
-  contact_person      String
-  employees_count     Int?
-  jobs                Job[]
-  created_at          DateTime           @default(now())
-  updated_at          DateTime           @updatedAt
-  user                User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  location            Location           @relation(fields: [location_id], references: [id], onDelete: Restrict)
+  id                    String                @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id               String                @db.Uuid
+  business_name         String
+  trade_licence_no      String?
+  address               String?
+  location_id           String?               @db.Uuid
+  verification_status   VerificationStatus    @default(NOT_SUBMITTED)
+  contact_person        String?
+  employees_count       Int?
+  stage                 BusinessStage         @default(INFORMAL)
+  description           String?
+  category_id           String?               @db.Uuid
+  is_public             Boolean               @default(false)
+  seeking_partners      Boolean               @default(false)
+  /// Set by moderation: hidden from everyone but its members.
+  suspended_at          DateTime?
+  suspension_reason     String?
+  deleted_at            DateTime?
+  jobs                  Job[]
+  created_at            DateTime              @default(now())
+  updated_at            DateTime              @updatedAt
+  user                  User                  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  location              Location?             @relation(fields: [location_id], references: [id], onDelete: Restrict)
+  category              BusinessCategory?     @relation(fields: [category_id], references: [id], onDelete: Restrict)
+  members               BusinessMember[]
+  verification_requests VerificationRequest[]
 
   @@index([user_id])
   @@index([location_id])
+  @@index([category_id])
+  @@index([is_public, seeking_partners, category_id, location_id])
   @@map("business_profiles")
+}
+
+/// P2.1: who acts for a business. accepted_at null = invited, not yet a member.
+model BusinessMember {
+  id                  String             @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  business_profile_id String             @db.Uuid
+  user_id             String             @db.Uuid
+  role                BusinessMemberRole
+  invited_by_user_id  String?            @db.Uuid
+  accepted_at         DateTime?
+  created_at          DateTime           @default(now())
+  updated_at          DateTime           @updatedAt
+  business            BusinessProfile    @relation(fields: [business_profile_id], references: [id], onDelete: Cascade)
+  user                User               @relation("BusinessMembership", fields: [user_id], references: [id], onDelete: Cascade)
+  invited_by          User?              @relation("BusinessMemberInviter", fields: [invited_by_user_id], references: [id], onDelete: SetNull)
+
+  @@unique([business_profile_id, user_id])
+  @@index([user_id])
+  @@index([invited_by_user_id])
+  @@map("business_members")
+}
+
+/// P2: the sector taxonomy for businesses and ideas (admin-configurable).
+model BusinessCategory {
+  id         String             @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  parent_id  String?            @db.Uuid
+  slug       String             @unique
+  name_en    String
+  name_bn    String
+  icon       String?
+  sort_order Int                @default(0)
+  is_active  Boolean            @default(true)
+  created_at DateTime           @default(now())
+  updated_at DateTime           @updatedAt
+  parent     BusinessCategory?  @relation("BusinessCategoryTree", fields: [parent_id], references: [id], onDelete: Restrict)
+  children   BusinessCategory[] @relation("BusinessCategoryTree")
+  businesses BusinessProfile[]
+
+  @@index([parent_id])
+  @@map("business_categories")
 }
 
 model Category {
@@ -1435,23 +1507,27 @@ model NotificationPreference {
 }
 
 model VerificationRequest {
-  id               String                 @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  user_id          String                 @db.Uuid
-  kind             VerificationKind
-  status           VerificationStatus     @default(NOT_SUBMITTED)
-  documents_json   Json?
-  reviewer_user_id String?                @db.Uuid
-  reviewed_at      DateTime?
-  rejection_reason String?
-  created_at       DateTime               @default(now())
-  updated_at       DateTime               @updatedAt
-  user             User                   @relation("VerificationOwner", fields: [user_id], references: [id], onDelete: Cascade)
-  reviewer         User?                  @relation("VerificationReviewer", fields: [reviewer_user_id], references: [id], onDelete: SetNull)
-  documents        VerificationDocument[]
+  id                  String                 @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id             String                 @db.Uuid
+  kind                VerificationKind
+  status              VerificationStatus     @default(NOT_SUBMITTED)
+  documents_json      Json?
+  reviewer_user_id    String?                @db.Uuid
+  reviewed_at         DateTime?
+  rejection_reason    String?
+  created_at          DateTime               @default(now())
+  updated_at          DateTime               @updatedAt
+  user                User                   @relation("VerificationOwner", fields: [user_id], references: [id], onDelete: Cascade)
+  reviewer            User?                  @relation("VerificationReviewer", fields: [reviewer_user_id], references: [id], onDelete: SetNull)
+  documents           VerificationDocument[]
+  /// P2.6: the business a BUSINESS verification is for.
+  business_profile_id String?                @db.Uuid
+  business_profile    BusinessProfile?       @relation(fields: [business_profile_id], references: [id], onDelete: SetNull)
 
   @@index([user_id, kind, status])
   @@index([status, created_at])
   @@index([reviewer_user_id])
+  @@index([business_profile_id])
   @@map("verification_requests")
 }
 

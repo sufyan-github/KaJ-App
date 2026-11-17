@@ -7,6 +7,7 @@ import { Prisma, RoleMode } from "@prisma/client";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { activateRoleMode } from "./role-modes";
+import { ensureOwnedBusiness } from "../business/business-bootstrap";
 import { mentorErrors } from "../mentors/mentor.errors";
 import { UpdatePrivacyDto } from "./dto/update-privacy.dto";
 import { UpdateProfileDto } from "./dto/update-profile.dto";
@@ -28,7 +29,9 @@ export class UsersService {
         where: { id: userId },
         select: {
           default_locale: true,
-          profile: { select: { display_name: true } },
+          profile: {
+            select: { display_name: true, primary_location_id: true },
+          },
           role_modes: true,
         },
       });
@@ -59,7 +62,17 @@ export class UsersService {
           update: {},
           create: { user_id: userId },
         });
-      } else if (role !== RoleMode.MENTOR) {
+      }
+      // P2.1: the business capability starts with a (private) business
+      // profile to fill in, not a customer profile.
+      const businessProfileId =
+        role === RoleMode.BUSINESS
+          ? await ensureOwnedBusiness(transaction, userId, {
+              name: current.profile?.display_name ?? "",
+              locationId: current.profile?.primary_location_id ?? null,
+            })
+          : null;
+      if (role === RoleMode.CUSTOMER) {
         await transaction.customerProfile.upsert({
           where: { user_id: userId },
           update: {},
@@ -77,6 +90,7 @@ export class UsersService {
               ? "mentor"
               : "customer",
         onboardingRequired: !(current.profile?.display_name ?? "").trim(),
+        ...(businessProfileId ? { businessProfileId } : {}),
       };
     });
     if (!this.tokens || !deviceId) return result;

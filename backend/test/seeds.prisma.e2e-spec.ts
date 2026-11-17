@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { PrismaClient } from "@prisma/client";
 
 import {
+  businessCategories,
   categories,
   loadReferenceData,
   pilotAreas,
@@ -88,7 +89,7 @@ databaseDescribe("seeds and the reference-data loader", () => {
       NODE_ENV: "production",
     });
     expect(dry).toContain(
-      `would create: ${categories.length} categories, ${skills.length} skills, ${LOCATION_COUNT} locations`,
+      `would create: ${categories.length} categories, ${skills.length} skills, ${LOCATION_COUNT} locations, ${businessCategories.length} business sectors`,
     );
     expect((await snapshot()).categories).toBe(0);
 
@@ -105,11 +106,17 @@ databaseDescribe("seeds and the reference-data loader", () => {
     });
 
     const again = await loadReferenceData(db);
-    expect(again.created).toEqual({ categories: 0, skills: 0, locations: 0 });
+    expect(again.created).toEqual({
+      categories: 0,
+      skills: 0,
+      locations: 0,
+      businessCategories: 0,
+    });
     expect(again.existing).toEqual({
       categories: categories.length,
       skills: skills.length,
       locations: LOCATION_COUNT,
+      businessCategories: businessCategories.length,
     });
     expect(await snapshot()).toEqual(first);
   }, 120_000);

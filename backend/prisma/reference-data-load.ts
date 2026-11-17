@@ -1,6 +1,6 @@
 /**
- * Production-safe reference-data loader: creates missing categories, skills
- * and Rajshahi locations and changes nothing else (no accounts, credentials,
+ * Production-safe reference-data loader: creates missing categories, skills,
+ * business sectors and Rajshahi locations and changes nothing else (no accounts, credentials,
  * flags, settings or fees; existing rows are never overwritten). Safe to run
  * repeatedly in any environment.
  *
@@ -28,9 +28,9 @@ async function main() {
     console.log(
       `${dryRun ? "[dry run] would create" : "Created"}: ` +
         `${report.created.categories} categories, ${report.created.skills} skills, ` +
-        `${report.created.locations} locations. Already present: ` +
+        `${report.created.locations} locations, ${report.created.businessCategories} business sectors. Already present: ` +
         `${report.existing.categories} categories, ${report.existing.skills} skills, ` +
-        `${report.existing.locations} locations.`,
+        `${report.existing.locations} locations, ${report.existing.businessCategories} business sectors.`,
     );
   } finally {
     await prisma.$disconnect();

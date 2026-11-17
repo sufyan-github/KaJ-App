@@ -9,6 +9,8 @@ export interface PolicyResourceContext {
   jobPosterId?: string;
   /** The job's opportunity type (WORK, TRAINING, APPRENTICESHIP). */
   opportunityType?: string;
+  /** Accepted members of the business the route names, with their role. */
+  businessMembers?: ReadonlyArray<{ userId: string; role: string }>;
 }
 
 @Injectable()
@@ -51,6 +53,16 @@ export class AbilityFactory {
           resource?.jobPosterId === actor.sub &&
           resource.opportunityType !== undefined &&
           resource.opportunityType !== "WORK"
+        );
+      case "business-member":
+        return (
+          actor !== undefined &&
+          resource?.businessMembers?.some(
+            (member) =>
+              member.userId === actor.sub &&
+              (!rule.businessRoles ||
+                rule.businessRoles.some((role) => role === member.role)),
+          ) === true
         );
       case "conversation-participant":
         return (

@@ -5,6 +5,7 @@ import { hash } from "bcryptjs";
 
 import { encryptTotpSecret } from "../src/modules/admin-auth/admin-auth.primitives";
 import {
+  businessCategories,
   categories,
   pilotAreas,
   skills,
@@ -163,6 +164,14 @@ async function seed() {
       create: { ...category, sort_order },
     });
     categoryIds.set(saved.slug, saved.id);
+  }
+
+  for (const [sort_order, sector] of businessCategories.entries()) {
+    await prisma.businessCategory.upsert({
+      where: { slug: sector.slug },
+      update: { ...sector, sort_order, is_active: true },
+      create: { ...sector, sort_order },
+    });
   }
 
   for (const [slug, name_en, name_bn, categorySlug] of skills) {
