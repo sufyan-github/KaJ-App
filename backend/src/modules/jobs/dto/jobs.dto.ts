@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { JobType, PaymentModel } from "@prisma/client";
+import { JobType, PaymentModel, WorkArrangement } from "@prisma/client";
 import {
   ArrayMaxSize,
   IsArray,
@@ -96,6 +96,16 @@ export class CreateJobDto {
   @IsOptional()
   @IsUUID()
   subcategoryId?: string;
+
+  /** P3.7: how the work is done (default ON_SITE). */
+  @IsOptional()
+  @IsEnum(WorkArrangement)
+  workArrangement?: WorkArrangement;
+
+  /** P3.7: the hours can be arranged around the worker. */
+  @IsOptional()
+  @IsBoolean()
+  flexibleHours?: boolean;
 
   /** P2.3: post as a business you are an OWNER or MANAGER of. */
   @IsOptional()
@@ -205,6 +215,22 @@ export class JobFeedQueryDto extends CursorQueryDto {
   @IsOptional()
   @IsIn(["true", "false"])
   availableOnly?: "true" | "false";
+
+  /** P3.7: one or more of ON_SITE, HOME_BASED, REMOTE, HYBRID (comma-separated). */
+  @IsOptional()
+  @Matches(
+    /^(ON_SITE|HOME_BASED|REMOTE|HYBRID)(,(ON_SITE|HOME_BASED|REMOTE|HYBRID))*$/,
+  )
+  workArrangement?: string;
+
+  @IsOptional()
+  @IsIn(["true", "false"])
+  flexibleHours?: "true" | "false";
+
+  /** P3.7: use my preferred arrangements and flexible-hours choice. */
+  @IsOptional()
+  @IsIn(["true", "false"])
+  matchMyPreferences?: "true" | "false";
 }
 
 export class ApplyToJobDto {

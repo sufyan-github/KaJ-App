@@ -379,24 +379,25 @@ export class UsersService {
   }
 
   async updateWorkerRates(userId: string, input: UpdateWorkerProfileDto) {
+    const fields = {
+      hourly_rate_poisha: input.hourlyRatePoisha,
+      daily_rate_poisha: input.dailyRatePoisha,
+      monthly_rate_poisha: input.monthlyRatePoisha,
+      // P3.7: work preferences (the feed's "match my preferences").
+      preferred_arrangements: input.preferredArrangements,
+      prefers_flexible_hours: input.prefersFlexibleHours,
+    };
     const profile = await this.prisma.workerProfile.upsert({
       where: { user_id: userId },
-      update: {
-        hourly_rate_poisha: input.hourlyRatePoisha,
-        daily_rate_poisha: input.dailyRatePoisha,
-        monthly_rate_poisha: input.monthlyRatePoisha,
-      },
-      create: {
-        user_id: userId,
-        hourly_rate_poisha: input.hourlyRatePoisha,
-        daily_rate_poisha: input.dailyRatePoisha,
-        monthly_rate_poisha: input.monthlyRatePoisha,
-      },
+      update: fields,
+      create: { user_id: userId, ...fields },
     });
     return {
       hourlyRatePoisha: profile.hourly_rate_poisha?.toString() ?? null,
       dailyRatePoisha: profile.daily_rate_poisha?.toString() ?? null,
       monthlyRatePoisha: profile.monthly_rate_poisha?.toString() ?? null,
+      preferredArrangements: profile.preferred_arrangements,
+      prefersFlexibleHours: profile.prefers_flexible_hours,
     };
   }
 

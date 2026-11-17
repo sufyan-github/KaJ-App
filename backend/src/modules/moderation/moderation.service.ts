@@ -33,6 +33,8 @@ import {
   DirectModerationDto,
   ModerationDecisionDto,
   ReportQueueQueryDto,
+  FIRST_ACTION_MINUTES,
+  REPORT_PRIORITY,
   ReportTargetType,
 } from "./dto/moderation.dto";
 
@@ -85,6 +87,7 @@ export class ModerationService {
           target_id: input.targetId,
           reason_code: input.reasonCode,
           description: input.description.trim(),
+          priority: REPORT_PRIORITY[input.reasonCode] ?? 0,
         },
       });
       await transaction.auditLog.create({
@@ -154,13 +157,19 @@ export class ModerationService {
     context: AdminRequestContext,
   ) {
     // Actionable by default, so decided reports can't push new ones out.
-    const where: Prisma.ReportWhereInput = query.status
-      ? { status: query.status }
-      : { status: { in: [ReportStatus.OPEN, ReportStatus.UNDER_REVIEW] } };
+    const where: Prisma.ReportWhereInput = {
+      ...(query.status
+        ? { status: query.status }
+        : { status: { in: [ReportStatus.OPEN, ReportStatus.UNDER_REVIEW] } }),
+      ...(query.minPriority !== undefined
+        ? { priority: { gte: query.minPriority } }
+        : {}),
+    };
     const [page, total] = await Promise.all([
       this.prisma.report.findMany({
         where,
-        orderBy: [{ created_at: "asc" }, { id: "asc" }],
+        // P3.7: the priority safety queue: higher priority first, then oldest.
+        orderBy: [{ priority: "desc" }, { created_at: "asc" }, { id: "asc" }],
         ...pageArgs(query),
         include: {
           reporter: { include: { profile: true } },
@@ -196,6 +205,7 @@ export class ModerationService {
         targetType: item.target_type,
         targetId: item.target_id,
         content: contents[index] ?? null,
+        ...firstAction(item, this.clock.now()),
         reasonCode: item.reason_code,
         description: item.description,
         status: item.status,
@@ -244,6 +254,7 @@ export class ModerationService {
         data: {
           status: ReportStatus.UNDER_REVIEW,
           reviewer_user_id: actor.userId,
+          first_action_at: this.clock.now(),
         },
       });
       if (claimed.count !== 1) {
@@ -266,6 +277,25 @@ export class ModerationService {
   }
 
   async decide(
+    reportId: string,
+    input: ModerationDecisionDto,
+    actor: AdminActor,
+    context: AdminRequestContext,
+  ) {
+    const result = await this.decideReport(reportId, input, actor, context);
+    await this.markFirstAction(reportId);
+    return result;
+  }
+
+  /** P3.7: time-to-first-action — set once, by the first review or decision. */
+  private markFirstAction(reportId: string) {
+    return this.prisma.report.updateMany({
+      where: { id: reportId, first_action_at: null },
+      data: { first_action_at: this.clock.now() },
+    });
+  }
+
+  private async decideReport(
     reportId: string,
     input: ModerationDecisionDto,
     actor: AdminActor,
@@ -983,6 +1013,7 @@ export class ModerationService {
           },
         });
     });
+    if (options.report) await this.markFirstAction(options.report.id);
     return { targetType: type, targetId: id, hidden };
   }
 
@@ -1006,6 +1037,36 @@ export class ModerationService {
       ua: context.ua,
     };
   }
+}
+
+/**
+ * P3.7: triage facts for the queue: priority, how long it has waited, when
+ * staff should first act (by priority) and how long the first action took.
+ */
+function firstAction(
+  report: { priority: number; created_at: Date; first_action_at: Date | null },
+  now: Date,
+) {
+  const dueMinutes =
+    FIRST_ACTION_MINUTES[report.priority] ?? FIRST_ACTION_MINUTES[0]!;
+  const dueAt = new Date(report.created_at.getTime() + dueMinutes * 60_000);
+  return {
+    priority: report.priority,
+    ageMinutes: Math.floor(
+      (now.getTime() - report.created_at.getTime()) / 60_000,
+    ),
+    firstActionDueAt: dueAt.toISOString(),
+    firstActionAt: report.first_action_at?.toISOString() ?? null,
+    timeToFirstActionMinutes: report.first_action_at
+      ? Math.floor(
+          (report.first_action_at.getTime() - report.created_at.getTime()) /
+            60_000,
+        )
+      : null,
+    overdue: report.first_action_at
+      ? report.first_action_at > dueAt
+      : now > dueAt,
+  };
 }
 
 function effectiveLevel(user: {

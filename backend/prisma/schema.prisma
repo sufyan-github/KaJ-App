@@ -825,6 +825,8 @@ model WorkerProfile {
   transport_mode         String?
   is_available_now       Boolean           @default(false)
   accepts_urgent         Boolean           @default(false)
+  /// P3.7: the worker prefers jobs with flexible hours (feed filter).
+  prefers_flexible_hours Boolean           @default(false)
   completed_jobs_count   Int               @default(0)
   rating_avg             Decimal           @default(0) @db.Decimal(3, 2)
   rating_count           Int               @default(0)
@@ -1537,6 +1539,7 @@ model Job {
   occurrences             JobOccurrence[]
 
   @@index([opportunity_type, status, published_at(sort: Desc)])
+  @@index([opportunity_type, status, work_arrangement])
   @@index([training_course_id])
   @@index([business_profile_id])
   @@index([status, published_at(sort: Desc)])
@@ -2282,6 +2285,8 @@ model Report {
   reviewed_at        DateTime?
   /// Safety triage: higher first (0 = normal).
   priority           Int                @default(0) @db.SmallInt
+  /// P3.7: when staff first acted on it (review started or decided).
+  first_action_at    DateTime?
   created_at         DateTime           @default(now())
   updated_at         DateTime           @updatedAt
   reporter           User               @relation("ReportReporter", fields: [reporter_user_id], references: [id], onDelete: Restrict)

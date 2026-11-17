@@ -23,10 +23,12 @@ import {
   BusinessMemberRole,
   BusinessStage,
   VerificationStatus,
+  WorkArrangement,
 } from "@prisma/client";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { businessErrors } from "../business/business.errors";
+import { assertNoGenderRestriction } from "./gender-restriction";
 import { isVerifiedBusiness } from "../business/business-labels";
 import { CLOCK, type Clock } from "../../common/time/clock";
 import { AvailabilityService } from "../availability/availability.service";
@@ -140,6 +142,7 @@ export class JobsService {
     }
     if (input.recurrenceRule) await this.recurrence?.assertEnabled();
     assertSingleWorker(input.workersRequired ?? 1);
+    assertNoGenderRestriction(input);
     await this.assertActiveReferences(input.categoryId, input.locationId);
     if (input.businessProfileId)
       await assertCanPostForBusiness(
@@ -165,6 +168,10 @@ export class JobsService {
           category_id: input.categoryId,
           subcategory_id: input.subcategoryId,
           business_profile_id: input.businessProfileId ?? null,
+          ...(input.workArrangement
+            ? { work_arrangement: input.workArrangement }
+            : {}),
+          flexible_hours: input.flexibleHours ?? false,
           lat: site.lat,
           lng: site.lng,
           job_type: input.jobType,
@@ -264,6 +271,25 @@ export class JobsService {
   async feed(userId: string, query: JobFeedQueryDto) {
     // Own jobs and jobs of anyone in a block with the viewer stay out.
     const hidden = await this.blocks.hiddenFrom(userId);
+    // P3.7: home-based / remote / flexible work filters, or my preferences.
+    const preferences =
+      query.matchMyPreferences === "true"
+        ? await this.prisma.workerProfile.findUnique({
+            where: { user_id: userId },
+            select: {
+              preferred_arrangements: true,
+              prefers_flexible_hours: true,
+            },
+          })
+        : null;
+    const arrangements = query.workArrangement
+      ? (query.workArrangement.split(",") as WorkArrangement[])
+      : preferences?.preferred_arrangements.length
+        ? preferences.preferred_arrangements
+        : undefined;
+    const flexibleOnly =
+      query.flexibleHours === "true" ||
+      preferences?.prefers_flexible_hours === true;
     const jobs = await this.prisma.job.findMany({
       where: {
         ...WORK_ONLY,
@@ -276,6 +302,8 @@ export class JobsService {
         skills: query.skillId
           ? { some: { skill_id: query.skillId } }
           : undefined,
+        ...(arrangements ? { work_arrangement: { in: arrangements } } : {}),
+        ...(flexibleOnly ? { flexible_hours: true } : {}),
       },
       include: jobInclude,
       // id breaks ties so cursor pages never overlap or skip.

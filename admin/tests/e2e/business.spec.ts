@@ -194,3 +194,45 @@ test("hides a reported idea without touching the account, and restores it", asyn
     .poll(() => restore.body)
     .toEqual({ reason: "Owner corrected the listing." });
 });
+
+test("shows the priority safety queue with time to first action", async ({
+  page,
+}) => {
+  const created = new Date(Date.now() - 2 * 3_600_000).toISOString();
+  const item = (id: string, extra: object) => ({
+    id,
+    targetType: "USER",
+    targetId: `user-${id}`,
+    content: null,
+    reasonCode: "SEXUAL_HARASSMENT",
+    description: `Report ${id}`,
+    status: "OPEN",
+    createdAt: created,
+    reporter: { id: "reporter", name: "Reporter" },
+    subject: null,
+    priority: 2,
+    ageMinutes: 120,
+    firstActionDueAt: new Date(Date.now() - 3_600_000).toISOString(),
+    firstActionAt: null,
+    timeToFirstActionMinutes: null,
+    overdue: true,
+    ...extra,
+  });
+  await respond(page, "reports?limit=100", {
+    total: 1,
+    items: [
+      item("all-1", { priority: 0, reasonCode: "OTHER", overdue: false }),
+    ],
+  });
+  await respond(page, "reports?limit=100&minPriority=1", {
+    total: 1,
+    items: [item("urgent-1", {})],
+  });
+  await openModule(page, /^\d+ Safety reports$/);
+  await expect(page.getByRole("row", { name: /Report all-1/ })).toBeVisible();
+  await page.getByLabel("Priority safety queue only").check();
+  const row = page.getByRole("row", { name: /Report urgent-1/ });
+  await expect(row).toContainText(/urgent/i);
+  await expect(row).toContainText("Waiting 2 h");
+  await expect(row).toContainText("Overdue");
+});

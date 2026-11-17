@@ -86,3 +86,16 @@ migration 8 (never created).
 - Platform announcements use the existing notification campaigns; segments
   now also take `role: MENTOR`, `locationId` (area and what lies inside it,
   by the profile's area) and `communityGroupId` (active members).
+
+## 20261119140000_women_safety (P3.7)
+
+- `worker_profiles.prefers_flexible_hours` (`preferred_arrangements` exists
+  since P1); `PUT /profiles/me/worker` saves both.
+- `reports.first_action_at` (backfilled from `reviewed_at`): set by the first
+  review start, decision or content hide; with `reports.priority` (P1) it
+  drives the priority safety queue: SEXUAL_HARASSMENT / STALKING → 2 (first
+  action within 1 hour), UNSAFE_LOCATION / HARASSMENT / UNSAFE_WORK → 1 (24
+  hours), others 0 (72 hours).
+- Index `jobs(opportunity_type, status, work_arrangement)` for the feed filter.
+- Job posts are checked for gender restrictions (bn/en phrasings); there is no
+  gender field on jobs.

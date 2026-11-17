@@ -917,15 +917,26 @@ type UserItem = {
   reverificationRequired?: boolean;
 };
 function Reports() {
+  // P3.7: the priority safety queue shows priority 1+ (harassment, stalking,
+  // unsafe locations…), highest first, with the time-to-first-action limit.
+  const [priorityOnly, setPriorityOnly] = useState(false);
   const { data, loading, error, reload } = useData<{
     items: ReportItem[];
     total: number;
-  }>("reports?limit=100");
+  }>(priorityOnly ? "reports?limit=100&minPriority=1" : "reports?limit=100");
   const [selected, setSelected] = useState<ReportItem | null>(null);
   const [restoring, setRestoring] = useState<ReportItem | null>(null);
   return (
     <State loading={loading} error={error}>
       <Summary count={data?.total ?? 0} label={tr("safety reports")} />
+      <label className="toggle-filter">
+        <input
+          type="checkbox"
+          checked={priorityOnly}
+          onChange={(event) => setPriorityOnly(event.target.checked)}
+        />
+        {tr("Priority safety queue only")}
+      </label>
       <DataTable
         headers={["Report", "People", "Status", "Evidence", "Actions"]}
       >
@@ -933,10 +944,21 @@ function Reports() {
           <tr key={item.id}>
             <td>
               <strong>{humanize(item.reasonCode)}</strong>
+              {item.priority !== undefined && item.priority > 0 && (
+                <Badge value={item.priority >= 2 ? "URGENT" : "PRIORITY"} />
+              )}
               <small>
                 {humanize(item.targetType)} {tr("\u00B7")}{" "}
                 {formatDate(item.createdAt)}
               </small>
+              {item.firstActionDueAt && (
+                <small className={item.overdue ? "overdue" : undefined}>
+                  {item.firstActionAt
+                    ? `${tr("First action after")} ${formatMinutes(item.timeToFirstActionMinutes ?? 0)}`
+                    : `${tr("Waiting")} ${formatMinutes(item.ageMinutes ?? 0)} ${tr("\u00B7")} ${tr("act by")} ${formatDate(item.firstActionDueAt)}`}
+                  {item.overdue ? ` ${tr("\u00B7")} ${tr("Overdue")}` : ""}
+                </small>
+              )}
               {item.content && (
                 <small>
                   {item.content.title || tr("(no title)")}{" "}
@@ -1032,6 +1054,12 @@ type ReportItem = {
   targetType: string;
   targetId: string;
   content?: { title: string; status: string } | null;
+  priority?: number;
+  ageMinutes?: number;
+  firstActionDueAt?: string;
+  firstActionAt?: string | null;
+  timeToFirstActionMinutes?: number | null;
+  overdue?: boolean;
   reasonCode: string;
   description: string | null;
   status: string;
@@ -3393,6 +3421,12 @@ function nextModerationLevel(value?: string | null) {
     )[value ?? "NONE"] ?? null
   );
 }
+function formatMinutes(minutes: number) {
+  if (minutes < 60) return `${minutes} ${tr("min")}`;
+  if (minutes < 48 * 60) return `${Math.floor(minutes / 60)} ${tr("h")}`;
+  return `${Math.floor(minutes / 1440)} ${tr("days")}`;
+}
+
 function formatDate(value: string) {
   return new Intl.DateTimeFormat(
     getActiveAdminLocale() === "bn" ? "bn-BD" : "en-BD",

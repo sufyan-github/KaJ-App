@@ -43,8 +43,29 @@ export const REPORT_REASON_CODES = [
   "IMPERSONATION",
   "OFF_PLATFORM_PAYMENT",
   "NO_SHOW",
+  // P3.7: safety reasons, triaged first.
+  "SEXUAL_HARASSMENT",
+  "STALKING",
+  "UNSAFE_LOCATION",
   "OTHER",
 ] as const;
+
+/**
+ * P3.7: triage priority (higher first) and the time within which staff
+ * should first act, by reason.
+ */
+export const REPORT_PRIORITY: Record<string, number> = {
+  SEXUAL_HARASSMENT: 2,
+  STALKING: 2,
+  UNSAFE_LOCATION: 1,
+  HARASSMENT: 1,
+  UNSAFE_WORK: 1,
+};
+export const FIRST_ACTION_MINUTES: Record<number, number> = {
+  2: 60,
+  1: 24 * 60,
+  0: 72 * 60,
+};
 
 export class CreateReportDto {
   @IsIn(REPORT_TARGET_TYPES)
@@ -66,6 +87,14 @@ export class ReportQueueQueryDto {
   @IsOptional()
   @IsEnum(ReportStatus)
   status?: ReportStatus;
+
+  /** P3.7: the priority safety queue: only reports at or above this priority. */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @Max(2)
+  minPriority?: number;
 
   @IsOptional()
   @Type(() => Number)

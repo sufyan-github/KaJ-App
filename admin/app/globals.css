@@ -1034,3 +1034,15 @@ textarea.code-editor {
   min-height: 320px;
   white-space: pre;
 }
+
+/* P3.7: priority safety queue */
+.toggle-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+}
+small.overdue {
+  color: #b42318;
+  font-weight: 600;
+}
