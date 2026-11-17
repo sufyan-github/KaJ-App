@@ -796,6 +796,22 @@ export class ModerationService {
       }
       return owners[0]?.user_id ?? business.user_id;
     }
+    if (targetType === "INTRODUCTION") {
+      const introduction = await this.prisma.introductionRequest.findFirst({
+        where: {
+          id: targetId,
+          OR: [
+            { requester_user_id: reporterUserId },
+            { target_user_id: reporterUserId },
+          ],
+        },
+        select: { requester_user_id: true, target_user_id: true },
+      });
+      if (!introduction) throw new NotFoundException();
+      return introduction.requester_user_id === reporterUserId
+        ? introduction.target_user_id
+        : introduction.requester_user_id;
+    }
     if (targetType === "COLLABORATION_REQUEST") {
       const request = await this.prisma.collaborationRequest.findFirst({
         where: {

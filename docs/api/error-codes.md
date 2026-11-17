@@ -130,3 +130,12 @@ Anyone without a right to see an idea gets `404 NOT_FOUND` on every idea endpoin
 | 409  | `COLLABORATION_NOT_AGREED`           | `error.idea.collaboration_not_agreed`      | Add a team member from a collaboration request you both agreed.     | দুজনে সম্মত হওয়া প্রস্তাব থেকে দলের সদস্য যোগ করুন।               |
 | 409  | `IDEA_ALREADY_CONVERTED`             | `error.idea.already_converted`             | This idea is already a business.                                    | এই আইডিয়া ইতিমধ্যে একটি ব্যবসা।                                   |
 | 429  | `RATE_LIMITED`                       | `error.idea.daily_limit`                   | You can ask about 10 ideas a day. Try again later.                  | দিনে ১০টি আইডিয়ার বিস্তারিত চাওয়া যায়। পরে আবার চেষ্টা করুন।    |
+
+## Experts & Community (P3)
+
+| HTTP | Code                                  | messageKey                                  | English                                                      | Bangla                                                      |
+| ---- | ------------------------------------- | ------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------- |
+| 409  | `INTRODUCTION_ALREADY_PENDING`        | `error.introduction.already_pending`        | You already have a pending request to this expert.           | এই বিশেষজ্ঞের কাছে আপনার একটি অনুরোধ এখনো অপেক্ষমাণ।        |
+| 409  | `INTRODUCTION_TRANSITION_NOT_ALLOWED` | `error.introduction.transition_not_allowed` | That step isn't possible now (`details[0].allowedActions`).  | এই ধাপ এখন সম্ভব নয়।                                       |
+| 409  | `IDEA_ACCESS_OWNER_ONLY`              | `error.introduction.idea_access_owner_only` | Only the idea's owner can offer access to its details.       | শুধু আইডিয়ার মালিক বিস্তারিত দেখার অনুমতি দিতে পারেন।      |
+| 429  | `RATE_LIMITED`                        | `error.introduction.daily_limit`            | You can send 5 introduction requests a day. Try again later. | দিনে ৫টি পরিচয়ের অনুরোধ পাঠানো যায়। পরে আবার চেষ্টা করুন। |

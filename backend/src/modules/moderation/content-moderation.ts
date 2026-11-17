@@ -8,6 +8,7 @@ export const CONTENT_TARGET_TYPES = [
   "IDEA",
   "IDEA_ROLE",
   "COLLABORATION_REQUEST",
+  "INTRODUCTION",
 ] as const;
 export type ContentTargetType = (typeof CONTENT_TARGET_TYPES)[number];
 
@@ -96,6 +97,16 @@ export async function setContentHidden(
         .catch(notFound);
       return { ownerUserId: request.requester_user_id, title: "" };
     }
+    case "INTRODUCTION": {
+      const introduction = await transaction.introductionRequest
+        .update({
+          where: { id },
+          data: { hidden_at: at },
+          select: { requester_user_id: true },
+        })
+        .catch(notFound);
+      return { ownerUserId: introduction.requester_user_id, title: "" };
+    }
   }
 }
 
@@ -108,6 +119,7 @@ export async function describeContent(
     | "businessIdea"
     | "ideaRole"
     | "collaborationRequest"
+    | "introductionRequest"
   >,
   type: ContentTargetType,
   id: string,
@@ -180,6 +192,18 @@ export async function describeContent(
     }
     case "COLLABORATION_REQUEST": {
       const row = await prisma.collaborationRequest.findUnique({
+        where: { id },
+        select: { message: true, hidden_at: true },
+      });
+      return row
+        ? {
+            title: row.message.slice(0, 80),
+            status: row.hidden_at ? "HIDDEN" : "VISIBLE",
+          }
+        : null;
+    }
+    case "INTRODUCTION": {
+      const row = await prisma.introductionRequest.findUnique({
         where: { id },
         select: { message: true, hidden_at: true },
       });

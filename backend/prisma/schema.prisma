@@ -302,6 +302,20 @@ enum BusinessStage {
   REGISTERED
 }
 
+enum IntroductionContextType {
+  IDEA
+  BUSINESS
+  LEARNING_GOAL
+}
+
+enum IntroductionStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  WITHDRAWN
+}
+
 enum IdeaStage {
   CONCEPT
   VALIDATING
@@ -498,6 +512,8 @@ model User {
   collaboration_received            CollaborationRequest[]      @relation("CollaborationRecipient")
   collaboration_events              CollaborationRequestEvent[] @relation("CollaborationEventActor")
   ideas                             BusinessIdea[]              @relation("IdeaOwner")
+  introductions_sent                IntroductionRequest[]       @relation("IntroductionRequester")
+  introductions_received            IntroductionRequest[]       @relation("IntroductionTarget")
   idea_access                       IdeaAccess[]                @relation("IdeaAccessHolder")
   idea_access_approvals             IdeaAccess[]                @relation("IdeaAccessApprover")
   idea_detail_views                 IdeaDetailView[]            @relation("IdeaDetailViewer")
@@ -828,6 +844,42 @@ model BusinessOffering {
 
   @@index([business_profile_id, is_active])
   @@map("business_offerings")
+}
+
+/// P3.1: a consent-based introduction to an expert (approved mentor). The
+/// requester shares only a public summary of the context; nobody's phone or
+/// email is ever returned. Accepting opens an in-app conversation and, if
+/// the requester allowed it, gives the expert access to the idea.
+model IntroductionRequest {
+  id                  String                  @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  requester_user_id   String                  @db.Uuid
+  target_user_id      String                  @db.Uuid
+  context_type        IntroductionContextType
+  /// The idea or business (null for a learning goal).
+  context_id          String?                 @db.Uuid
+  /// The public summary shared with the expert, frozen when sent.
+  context_summary     String
+  message             String
+  status              IntroductionStatus      @default(PENDING)
+  /// The requester (idea owner) lets the expert see the idea on accept.
+  allow_idea_access   Boolean                 @default(false)
+  idea_access_granted Boolean                 @default(false)
+  conversation_id     String?                 @unique @db.Uuid
+  expires_at          DateTime
+  decided_at          DateTime?
+  decline_reason      String?
+  /// Set by moderation.
+  hidden_at           DateTime?
+  created_at          DateTime                @default(now())
+  updated_at          DateTime                @updatedAt
+  requester           User                    @relation("IntroductionRequester", fields: [requester_user_id], references: [id], onDelete: Cascade)
+  target              User                    @relation("IntroductionTarget", fields: [target_user_id], references: [id], onDelete: Cascade)
+  conversation        Conversation?           @relation(fields: [conversation_id], references: [id], onDelete: SetNull)
+
+  @@index([requester_user_id, created_at(sort: Desc)])
+  @@index([target_user_id, status])
+  @@index([status, expires_at])
+  @@map("introduction_requests")
 }
 
 /// P2.7: an idea. Private by default; at most a one-line summary is ever
@@ -1745,6 +1797,7 @@ model Conversation {
   participants  ConversationParticipant[]
   messages      Message[]
   collaboration CollaborationRequest?
+  introduction  IntroductionRequest?
 
   @@index([job_id])
   @@map("conversations")
