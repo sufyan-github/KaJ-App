@@ -8,10 +8,12 @@ import '../../core/routing/app_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/k_empty_state.dart';
 import '../../core/widgets/k_localized_text.dart';
+import '../../core/widgets/load_more.dart';
 import '../jobs/presentation/screens/jobs_screens.dart';
 import '../jobs/presentation/widgets/opportunity_listing.dart';
 import '../mentor/domain/mentor_models.dart';
 import '../mentor/presentation/mentor_providers.dart';
+import 'me_filters.dart';
 
 /// Explore → People: workers to book and mentors to learn from.
 class PeopleExploreBody extends StatefulWidget {
@@ -66,66 +68,119 @@ class _PeopleExploreBodyState extends State<PeopleExploreBody> {
   );
 }
 
-class MentorDirectory extends ConsumerWidget {
+class MentorDirectory extends ConsumerStatefulWidget {
   const MentorDirectory({this.searchQuery = '', super.key});
 
   final String searchQuery;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final mentors = ref.watch(mentorDirectoryProvider);
-    return mentors.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => RetryPanel(
-        error: error,
-        label: 'মেন্টরের তালিকা লোড করা যায়নি।',
-        onRetry: () => ref.invalidate(mentorDirectoryProvider),
-      ),
-      data: (all) {
-        final items = all
-            .where(
-              (mentor) => matchesSearch(searchQuery, [
-                mentor.displayName,
-                mentor.bio,
-                mentor.areaNameBn,
-                mentor.areaNameEn,
-                for (final skill in mentor.skills) ...[
-                  skill.nameBn,
-                  skill.nameEn,
-                ],
-              ]),
-            )
-            .toList(growable: false);
-        if (items.isEmpty && all.isNotEmpty) return const NoSearchMatches();
-        return RefreshIndicator(
-          onRefresh: () async {
-            ref.invalidate(mentorDirectoryProvider);
-            await ref
-                .read(mentorDirectoryProvider.future)
-                .then<void>((_) {}, onError: (_) {});
-          },
-          child: items.isEmpty
-              ? ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: const [
-                    SizedBox(height: KSpacing.xl),
-                    KEmptyState(
-                      icon: Icons.school_outlined,
-                      title: 'এখনো কোনো মেন্টর নেই',
-                      message:
-                          'অনুমোদিত মেন্টররা শিক্ষার্থী নিলে এখানে দেখা যাবে।',
-                    ),
-                  ],
-                )
-              : ListView.builder(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(KSpacing.md),
-                  itemCount: items.length,
-                  itemBuilder: (context, index) =>
-                      _MentorCard(mentor: items[index]),
-                ),
-        );
-      },
+  ConsumerState<MentorDirectory> createState() => _MentorDirectoryState();
+}
+
+class _MentorDirectoryState extends ConsumerState<MentorDirectory> {
+  String? _skillId;
+  String? _locationId;
+  final _more = MorePages<PublicMentor>();
+
+  @override
+  Widget build(BuildContext context) {
+    final filter = (skillId: _skillId, locationId: _locationId);
+    final mentors = ref.watch(mentorDirectoryProvider(filter));
+    return Column(
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.fromLTRB(
+            KSpacing.md,
+            KSpacing.sm,
+            KSpacing.md,
+            0,
+          ),
+          child: MeFilterChips(
+            keyPrefix: 'mentors',
+            skillId: _skillId,
+            locationId: _locationId,
+            onSkill: (id) => setState(() => _skillId = id),
+            onLocation: (id) => setState(() => _locationId = id),
+          ),
+        ),
+        Expanded(
+          child: mentors.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) => RetryPanel(
+              error: error,
+              label: 'মেন্টরের তালিকা লোড করা যায়নি।',
+              onRetry: () => ref.invalidate(mentorDirectoryProvider(filter)),
+            ),
+            data: (firstPage) {
+              final all = _more.merge(firstPage);
+              final hasMore = _more.hasMore;
+              final items = all
+                  .where(
+                    (mentor) => matchesSearch(widget.searchQuery, [
+                      mentor.displayName,
+                      mentor.bio,
+                      mentor.areaNameBn,
+                      mentor.areaNameEn,
+                      for (final skill in mentor.skills) ...[
+                        skill.nameBn,
+                        skill.nameEn,
+                      ],
+                    ]),
+                  )
+                  .toList(growable: false);
+              if (items.isEmpty && all.isNotEmpty && !hasMore) {
+                return const NoSearchMatches();
+              }
+              return RefreshIndicator(
+                onRefresh: () async {
+                  ref.invalidate(mentorDirectoryProvider(filter));
+                  await ref
+                      .read(mentorDirectoryProvider(filter).future)
+                      .then<void>((_) {}, onError: (_) {});
+                },
+                child: items.isEmpty && !hasMore
+                    ? ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: const [
+                          SizedBox(height: KSpacing.xl),
+                          KEmptyState(
+                            icon: Icons.school_outlined,
+                            title: 'এখনো কোনো মেন্টর নেই',
+                            message:
+                                'অনুমোদিত মেন্টররা শিক্ষার্থী নিলে এখানে দেখা যাবে।',
+                          ),
+                        ],
+                      )
+                    : ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.all(KSpacing.md),
+                        itemCount: items.length + (hasMore ? 1 : 0),
+                        itemBuilder: (context, index) => index < items.length
+                            ? _MentorCard(mentor: items[index])
+                            : LoadMoreButton(
+                                key: const ValueKey('mentors-load-more'),
+                                loading: _more.loading,
+                                failed: _more.failed,
+                                onPressed: () => _more.loadNext(
+                                  (cursor) => ref
+                                      .read(mentorRepositoryProvider)
+                                      .directory(
+                                        skillId: _skillId,
+                                        locationId: _locationId,
+                                        cursor: cursor,
+                                      ),
+                                  () {
+                                    if (mounted) setState(() {});
+                                  },
+                                ),
+                              ),
+                      ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

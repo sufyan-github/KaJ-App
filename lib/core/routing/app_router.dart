@@ -510,11 +510,9 @@ String? authRedirect(
     }
     if (!auth.subscriptionAccess) {
       if (location == AppRoutes.subscription) return null;
-      // Learning is free: without a subscription the learning screens stay
-      // open; everything else asks for the subscription as before.
-      if (auth.freeModules.contains('LEARN') && isLearningRoute(location)) {
-        return null;
-      }
+      // Learn, Community and Business are free: without a subscription
+      // their screens stay open; Work asks for the subscription as before.
+      if (isFreeRoute(location, auth.freeModules)) return null;
       return AppRoutes.subscription;
     }
     if (auth.needsPasswordSetup) {
@@ -549,12 +547,54 @@ String? authRedirect(
   return null;
 }
 
+bool _under(String location, String root) =>
+    location == root || location.startsWith('$root/');
+
 /// Screens that belong to the Learn module.
 bool isLearningRoute(String location) =>
     location == AppRoutes.explore ||
     location == AppRoutes.activity ||
-    location == AppRoutes.training ||
-    location.startsWith('${AppRoutes.training}/');
+    _under(location, AppRoutes.training) ||
+    _under(location, '/learn') ||
+    _under(location, AppRoutes.mentor) ||
+    _under(location, '/mentors');
+
+/// Screens of the Business & Ideas module. Owner decision: free for
+/// everyone, so they never depend on the server flag.
+bool isBusinessRoute(String location) =>
+    _under(location, '/businesses') ||
+    _under(location, '/business') ||
+    _under(location, '/partners') ||
+    _under(location, '/collaboration-requests') ||
+    _under(location, '/ideas');
+
+/// Screens of the Experts & Community module.
+bool isCommunityRoute(String location) =>
+    _under(location, '/community') ||
+    _under(location, '/sessions') ||
+    _under(location, '/introductions') ||
+    _under(location, '/experts');
+
+/// Whether [location] stays open without a subscription. Shared screens
+/// (Explore, My activity, notifications, safety, reports) open as soon as
+/// any module is free; chat opens for Community and Business rooms.
+bool isFreeRoute(String location, Set<String> freeModules) {
+  final learn = freeModules.contains('LEARN');
+  final community = freeModules.contains('COMMUNITY');
+  if (isBusinessRoute(location)) return true;
+  if (learn && isLearningRoute(location)) return true;
+  if (community && isCommunityRoute(location)) return true;
+  if (location == AppRoutes.explore || location == AppRoutes.activity) {
+    return true;
+  }
+  if (location == AppRoutes.notifications ||
+      location == AppRoutes.helpSafety ||
+      location == AppRoutes.help ||
+      location.startsWith('/report/')) {
+    return true;
+  }
+  return community && _under(location, AppRoutes.conversations);
+}
 
 String onboardingRouteForStep(OnboardingState state) => switch (state.step) {
   0 => AppRoutes.onboardingProfile,

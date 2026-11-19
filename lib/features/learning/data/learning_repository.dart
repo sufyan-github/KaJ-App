@@ -37,6 +37,19 @@ class LearningRepository {
     );
   });
 
+  /// One page of the feed for [filter]; [cursor] asks for a later page.
+  Future<List<LearningOpportunity>> feedPage(
+    LearningFilter filter, {
+    String? cursor,
+  }) => feed(
+    kind: filter.kind,
+    terms: filter.terms,
+    mode: filter.mode,
+    skillId: filter.skillId,
+    locationId: filter.locationId,
+    cursor: cursor,
+  );
+
   /// The mentors own opportunities, drafts included.
   Future<List<LearningOpportunity>> mine() => _guard(() async {
     final response = await _dio.get<Map<String, dynamic>>(

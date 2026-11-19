@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/k_empty_state.dart';
 import '../../../core/widgets/k_localized_text.dart';
+import '../../../core/widgets/load_more.dart';
+import '../../explore/me_filters.dart';
 import '../../jobs/presentation/widgets/opportunity_listing.dart';
 import '../../training/presentation/screens/training_catalog_screen.dart';
 import '../domain/learning_models.dart';
@@ -79,10 +81,21 @@ class _LearningOpportunityListState
   LearningKind? _kind;
   ParticipantTerms? _terms;
   DeliveryMode? _mode;
+  String? _skillId;
+  String? _locationId;
+  final _more = MorePages<LearningOpportunity>();
+
+  LearningFilter get _filter => LearningFilter(
+    kind: _kind,
+    terms: _terms,
+    mode: _mode,
+    skillId: _skillId,
+    locationId: _locationId,
+  );
 
   @override
   Widget build(BuildContext context) {
-    final filter = LearningFilter(kind: _kind, terms: _terms, mode: _mode);
+    final filter = _filter;
     final feed = ref.watch(learningFeedProvider(filter));
     return Column(
       children: [
@@ -94,6 +107,13 @@ class _LearningOpportunityListState
           ),
           child: Row(
             children: [
+              MeFilterChips(
+                keyPrefix: 'learn',
+                skillId: _skillId,
+                locationId: _locationId,
+                onSkill: (id) => setState(() => _skillId = id),
+                onLocation: (id) => setState(() => _locationId = id),
+              ),
               for (final kind in LearningKind.values)
                 _Filter(
                   key: ValueKey('learn-kind-${kind.wire}'),
@@ -127,7 +147,9 @@ class _LearningOpportunityListState
               label: 'শেখার সুযোগ লোড করা যায়নি।',
               onRetry: () => ref.invalidate(learningFeedProvider(filter)),
             ),
-            data: (all) {
+            data: (firstPage) {
+              final all = _more.merge(firstPage);
+              final hasMore = _more.hasMore;
               final language = Localizations.localeOf(context).languageCode;
               final items = all
                   .where(
@@ -145,7 +167,7 @@ class _LearningOpportunityListState
                     ]),
                   )
                   .toList(growable: false);
-              if (items.isEmpty && all.isNotEmpty) {
+              if (items.isEmpty && all.isNotEmpty && !hasMore) {
                 return const NoSearchMatches();
               }
               return RefreshIndicator(
@@ -155,7 +177,7 @@ class _LearningOpportunityListState
                       .read(learningFeedProvider(filter).future)
                       .then<void>((_) {}, onError: (_) {});
                 },
-                child: items.isEmpty
+                child: items.isEmpty && !hasMore
                     ? ListView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         children: const [
@@ -173,9 +195,22 @@ class _LearningOpportunityListState
                         padding: const EdgeInsets.symmetric(
                           horizontal: KSpacing.md,
                         ),
-                        itemCount: items.length,
-                        itemBuilder: (context, index) =>
-                            LearningOpportunityCard(opportunity: items[index]),
+                        itemCount: items.length + (hasMore ? 1 : 0),
+                        itemBuilder: (context, index) => index < items.length
+                            ? LearningOpportunityCard(opportunity: items[index])
+                            : LoadMoreButton(
+                                key: const ValueKey('learn-load-more'),
+                                loading: _more.loading,
+                                failed: _more.failed,
+                                onPressed: () => _more.loadNext(
+                                  (cursor) => ref
+                                      .read(learningRepositoryProvider)
+                                      .feedPage(filter, cursor: cursor),
+                                  () {
+                                    if (mounted) setState(() {});
+                                  },
+                                ),
+                              ),
                       ),
               );
             },

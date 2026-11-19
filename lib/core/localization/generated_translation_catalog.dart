@@ -1298,4 +1298,6 @@ const generatedEnglishTranslations = <String, String>{
   "মেন্টর আর আপনার আবেদন দেখবেন না। চাইলে পরে আবার আবেদন করতে পারবেন।":
       "The mentor will no longer see your application. You can apply again later.",
   "আবেদন প্রত্যাহার করা যায়নি।": "Could not withdraw the application.",
+  // R4: filters
+  "আমার এলাকায়": "In my area",
 };
