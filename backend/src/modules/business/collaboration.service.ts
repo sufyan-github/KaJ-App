@@ -14,6 +14,7 @@ import {
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
 import { RateLimitException } from "../../common/errors/rate-limit.exception";
 import { PrismaService } from "../../infra/prisma/prisma.service";
+import { maskContactDetails } from "../chat/chat-safety";
 import { NotificationsService } from "../notifications/notifications.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
 import { visibleDisplayName } from "../users/public-profile.projection";
@@ -397,6 +398,12 @@ export class CollaborationService {
   ) {
     const isRequester = row.requester_user_id === viewerUserId;
     const connected = row.status !== "PROPOSED" && row.status !== "DECLINED";
+    // API-8: no phone, e-mail or handle reaches the recipient before they
+    // accept (the conversation opens then, too).
+    const accepted =
+      row.status === "ACCEPTED" ||
+      row.status === "AGREED" ||
+      row.status === "ENDED";
     const person = (user: RequestRow["requester"]) => ({
       userId: user.id,
       displayName: visibleDisplayName(user.profile?.display_name ?? "", {
@@ -426,7 +433,8 @@ export class CollaborationService {
       fromBusiness: row.from_business
         ? { id: row.from_business.id, name: row.from_business.business_name }
         : null,
-      message: row.message,
+      message:
+        isRequester || accepted ? row.message : maskContactDetails(row.message),
       conversationId:
         row.status === "ACCEPTED" ||
         row.status === "AGREED" ||
