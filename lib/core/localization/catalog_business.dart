@@ -162,4 +162,31 @@ const businessTranslations = <String, String>{
   "সংরক্ষণ করা যায়নি।": "Could not save.",
   "আপনি": "You",
   "ভূমিকা করুন:": "Make:",
+  "প্রতিটি নিবন্ধিত ব্যবসা আলাদাভাবে · ট্রেড লাইসেন্স":
+      "Each registered business separately · trade licence",
+  "যাচাইয়ের অনুরোধ জমা হয়েছে। ফল নোটিফিকেশনে জানানো হবে।":
+      "Verification request submitted. You will get the result as a notification.",
+  "যাচাইয়ের অনুরোধ জমা দেওয়া যায়নি।":
+      "Could not submit the verification request.",
+  "যাচাইয়ের অবস্থা লোড করা যায়নি।": "Could not load the verification status.",
+  "ব্যবসাটির পাশে যাচাইকৃত চিহ্ন দেখা যাবে। নাম, ট্রেড লাইসেন্স নম্বর বা পর্যায় বদলালে আবার যাচাই করতে হবে।":
+      "The business shows a verified badge. Changing its name, trade licence number or stage needs a new verification.",
+  "KAAJ আপনার নথি দেখছে। সিদ্ধান্ত হলে নোটিফিকেশন পাবেন।":
+      "KAAJ is reviewing your documents. You will get a notification when it decides.",
+  "শুধু ট্রেড লাইসেন্স নম্বরসহ নিবন্ধিত ব্যবসা যাচাই করা যায়। আইডিয়া বা অনিবন্ধিত ব্যবসা যাচাইকৃত হয় না, তবে প্রকাশ করা ও অংশীদার খোঁজা যায়।":
+      "Only a registered business with a trade licence number can be verified. An idea or unregistered business is never verified, but it can still be published and look for partners.",
+  "পর্যায় ও লাইসেন্স নম্বর দিন": "Set the stage and licence number",
+  "শুধু ব্যবসার মালিক যাচাইয়ের জন্য নথি জমা দিতে পারেন।":
+      "Only the owner of the business can submit documents for verification.",
+  "এখন যাচাইয়ের অনুরোধ জমা দেওয়া যাচ্ছে না।":
+      "A verification request cannot be submitted right now.",
+  "ব্যবসা যাচাইয়ের আগে আপনার পরিচয় (এনআইডি ও সেলফি) যাচাই করতে হবে।":
+      "Verify your identity (NID and selfie) before verifying a business.",
+  "ট্রেড লাইসেন্স ও অন্যান্য নথির ছবি দিন":
+      "Add photos of the trade licence and other documents",
+  "লেখা যেন পরিষ্কার পড়া যায়। ১ থেকে ৫টি ছবি দিন। নথি শুধু যাচাইয়ের জন্য ব্যবহৃত হয়।":
+      "Make sure the text is readable. Add 1 to 5 photos. Documents are used only for verification.",
+  "ছবি দিন": "Add photo",
+  "যাচাইয়ের জন্য জমা দিন": "Submit for verification",
+  "জমা দেওয়া হয়েছে": "Submitted",
 };
