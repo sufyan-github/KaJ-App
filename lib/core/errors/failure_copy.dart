@@ -10,13 +10,18 @@ import 'error_mapper.dart';
 /// A stable server code the app knows ("subscription required", "already
 /// applied", "account restricted", a block, no internet) gets its own
 /// Bangla or English message. Anything else keeps the screen's own
-/// [fallback] line, which is a Bangla catalog key as everywhere else.
+/// [fallback] line, which is a Bangla catalog key as everywhere else, and
+/// adds the server's reason and code under it so the person (and support)
+/// can see why it was refused.
 String failureText(BuildContext context, Object error, String fallback) {
-  final known = serverCodeMessage(
-    AppLocalizations.of(context),
-    ErrorMapper.from(error),
+  final failure = ErrorMapper.from(error);
+  final known = serverCodeMessage(AppLocalizations.of(context), failure);
+  if (known != null) return known;
+  final line = KaajLocalizations.text(context, fallback);
+  final reason = failure.serverReason(
+    bangla: !KaajLocalizations.isEnglish(context),
   );
-  return known ?? KaajLocalizations.text(context, fallback);
+  return reason == null ? line : '$line\n$reason';
 }
 
 /// Shows [failureText] in a snack bar.

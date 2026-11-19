@@ -1000,6 +1000,9 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
     final favorites = ref.watch(favoriteWorkersProvider);
     final isFavorite =
         favorites.value?.any((item) => item.userId == widget.workerId) ?? false;
+    // The server books only workers with an approved identity check.
+    final trust = profile.value?.trustLevel;
+    final unverified = trust == 'NONE' || trust == 'PHONE';
     return Scaffold(
       appBar: AppBar(
         title: const KLocalizedText('সময় বেছে বুক করুন'),
@@ -1112,10 +1115,19 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
                   ),
           ),
           const SizedBox(height: KSpacing.xl),
+          if (unverified)
+            const Padding(
+              key: ValueKey('booking-unverified'),
+              padding: EdgeInsets.only(bottom: KSpacing.md),
+              child: KLocalizedText(
+                'এই কর্মী এখনো পরিচয় (NID ও সেলফি) যাচাই করেননি। যাচাই অনুমোদিত হলে তাঁকে বুক করা যাবে। এখন অন্য কর্মী দেখুন বা কাজ পোস্ট করুন।',
+                style: TextStyle(color: KColors.danger),
+              ),
+            ),
           KPrimaryButton(
             label: 'এই সময় বুকিং অনুরোধ করুন',
             isLoading: _saving,
-            onPressed: _selected == null ? null : _book,
+            onPressed: _selected == null || unverified ? null : _book,
           ),
         ],
       ),

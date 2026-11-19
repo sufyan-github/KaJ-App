@@ -72,11 +72,12 @@ String _displayMessage(BuildContext context, Failure failure) {
       ? null
       : serverCodeMessage(AppLocalizations.of(context), failure);
   if (known != null) return known;
-  if (KaajLocalizations.isEnglish(context) ||
-      RegExp(r'[\u0980-\u09FF]').hasMatch(failure.message)) {
-    return failure.message;
+  final english = KaajLocalizations.isEnglish(context);
+  final reason = failure.serverReason(bangla: !english);
+  if (english || RegExp(r'[\u0980-\u09FF]').hasMatch(failure.message)) {
+    return reason ?? failure.message;
   }
-  return switch (failure.kind) {
+  final line = switch (failure.kind) {
     FailureKind.network =>
       'ইন্টারনেট সংযোগ নেই। সংযোগ ঠিক করে আবার চেষ্টা করুন।',
     FailureKind.timeout => 'অনুরোধটি বেশি সময় নিচ্ছে। আবার চেষ্টা করুন।',
@@ -92,4 +93,5 @@ String _displayMessage(BuildContext context, Failure failure) {
     FailureKind.server || FailureKind.unknown =>
       'অনুরোধটি সম্পন্ন করা যায়নি। আবার চেষ্টা করুন বা সহায়তা নিন।',
   };
+  return reason == null ? line : '$line\n$reason';
 }

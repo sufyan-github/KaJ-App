@@ -1300,4 +1300,7 @@ const generatedEnglishTranslations = <String, String>{
   "আবেদন প্রত্যাহার করা যায়নি।": "Could not withdraw the application.",
   // R4: filters
   "আমার এলাকায়": "In my area",
+  // R4: booking refusal
+  "এই কর্মী এখনো পরিচয় (NID ও সেলফি) যাচাই করেননি। যাচাই অনুমোদিত হলে তাঁকে বুক করা যাবে। এখন অন্য কর্মী দেখুন বা কাজ পোস্ট করুন।":
+      "This worker has not verified their identity (NID and selfie) yet. You can book them once it is approved. For now, look at other workers or post a job.",
 };

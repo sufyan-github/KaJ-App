@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kaaj/core/errors/failure.dart';
+import 'package:kaaj/core/errors/server_code_copy.dart';
 import 'package:kaaj/core/widgets/k_error_message.dart';
 import 'package:kaaj/features/jobs/presentation/screens/jobs_screens.dart';
 import 'package:kaaj/features/onboarding/domain/onboarding_state.dart';
@@ -65,6 +66,68 @@ void main() {
       expect(seen.length, codes.length);
     });
   }
+
+  test('every code in the server table has Bangla and English', () {
+    final bangla = RegExp(r'[\u0980-\u09FF]');
+    for (final entry in serverCodeCopy.entries) {
+      expect(entry.value.bn, matches(bangla), reason: entry.key);
+      expect(entry.value.en, isNot(matches(bangla)), reason: entry.key);
+    }
+    for (final code in [
+      'ROLE_REQUIRED',
+      'WOMEN_ONLY',
+      'SESSION_FULL',
+      'INTRODUCTION_ALREADY_PENDING',
+      'GENDER_RESTRICTION_NOT_ALLOWED',
+      'UPLOAD_CONTENT_INVALID',
+    ]) {
+      expect(serverCodeCopy, contains(code));
+    }
+  });
+
+  test('a new mentor refused for the role gets an explanation', () {
+    for (final language in ['en', 'bn']) {
+      final message = serverCodeMessage(
+        lookupAppLocalizations(Locale(language)),
+        const Failure(
+          kind: FailureKind.forbidden,
+          message: 'Role required',
+          code: 'ROLE_REQUIRED',
+        ),
+      );
+      expect(
+        message,
+        language == 'en'
+            ? contains('try again in a few minutes')
+            : contains('কয়েক মিনিট পরে'),
+      );
+    }
+  });
+
+  test('server reason: Bangla text when sent, code always', () {
+    const failure = Failure(
+      kind: FailureKind.conflict,
+      message: 'Identity verification is required before SKILL.',
+      messageBn: 'দক্ষতা যাচাইয়ের আগে পরিচয় যাচাই করুন।',
+      code: 'CONFLICT',
+    );
+    expect(
+      failure.serverReason(bangla: true),
+      'দক্ষতা যাচাইয়ের আগে পরিচয় যাচাই করুন। (CONFLICT)',
+    );
+    expect(
+      failure.serverReason(bangla: false),
+      'Identity verification is required before SKILL. (CONFLICT)',
+    );
+    expect(
+      const Failure(
+        kind: FailureKind.network,
+        message: 'offline',
+        code: 'X',
+      ).serverReason(bangla: false),
+      isNull,
+    );
+  });
 
   test('an unknown code keeps the screen fallback', () {
     final l10n = lookupAppLocalizations(const Locale('en'));
@@ -143,12 +206,14 @@ void main() {
       );
     });
 
-    testWidgets('an unmapped rule keeps the old generic message', (
-      tester,
-    ) async {
+    testWidgets('an unmapped rule keeps the screen line and shows the '
+        'server reason with its code', (tester) async {
       await pumpDrafts(tester, FakeResponse.error(409, 'CONFLICT'));
       expect(
-        find.text('Could not publish the draft. Try again.'),
+        find.text(
+          'Could not publish the draft. Try again.\n'
+          'Request refused (CONFLICT)',
+        ),
         findsOneWidget,
       );
     });

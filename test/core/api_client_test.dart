@@ -172,6 +172,66 @@ void main() {
     );
   });
 
+  test('a refusal for a role the old token lacks refreshes once', () async {
+    final tokenStore = _MemoryTokenStore(
+      accessToken: 'before-approval',
+      refreshToken: 'valid-refresh',
+    );
+    final adapter = _RecordingAdapter((request, attempt) {
+      if (request.path.endsWith('/auth/refresh')) {
+        return _jsonResponse(200, {
+          'data': {
+            'accessToken': 'with-mentor-role',
+            'refreshToken': 'rotated-refresh',
+          },
+        });
+      }
+      if (request.headers['Authorization'] == 'Bearer before-approval') {
+        return _jsonResponse(403, {
+          'error': {'code': 'ROLE_REQUIRED', 'message': 'Mentor role required'},
+        });
+      }
+      return _jsonResponse(200, {
+        'data': {'items': <Object>[]},
+      });
+    });
+    final client = ApiClient(
+      environment: environment,
+      tokenStore: tokenStore,
+      httpClientAdapter: adapter,
+    );
+
+    await client.dio.get<Map<String, dynamic>>('/learning-opportunities/mine');
+    expect(tokenStore.accessToken, 'with-mentor-role');
+    expect(
+      adapter.requests.where((r) => r.path.endsWith('/auth/refresh')),
+      hasLength(1),
+    );
+  });
+
+  test('other 403 refusals neither refresh nor end the session', () async {
+    final tokenStore = _MemoryTokenStore(
+      accessToken: 'access',
+      refreshToken: 'valid-refresh',
+    );
+    final adapter = _RecordingAdapter(
+      (request, attempt) => _jsonResponse(403, {
+        'error': {'code': 'FORBIDDEN', 'message': 'Identity required'},
+      }),
+    );
+    final client = ApiClient(
+      environment: environment,
+      tokenStore: tokenStore,
+      httpClientAdapter: adapter,
+    );
+    await expectLater(
+      client.dio.post<void>('/workers/w1/booking-requests'),
+      throwsA(isA<DioException>()),
+    );
+    expect(adapter.requests, hasLength(1));
+    expect(tokenStore.accessToken, 'access');
+  });
+
   test('concurrent 401 responses share one rotating-token refresh', () async {
     final tokenStore = _MemoryTokenStore(
       accessToken: 'expired-access',
