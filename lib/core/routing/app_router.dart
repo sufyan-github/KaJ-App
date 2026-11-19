@@ -40,6 +40,7 @@ import '../../features/trust_safety/presentation/attendance_screen.dart';
 import '../../features/trust_safety/presentation/dispute_screens.dart';
 import '../../features/trust_safety/presentation/safety_screens.dart';
 import '../../features/trust_safety/presentation/verification_screens.dart';
+import '../security/secure_screen.dart';
 import 'route_arguments.dart';
 
 abstract final class AppRoutes {
@@ -363,8 +364,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.verificationCapturePath,
-        builder: (context, state) =>
-            VerificationCaptureScreen(kind: state.pathParameters['kind']!),
+        // NID and selfie photos: no screenshots or recent-apps preview.
+        builder: (context, state) => SecureScreen(
+          child: VerificationCaptureScreen(kind: state.pathParameters['kind']!),
+        ),
       ),
       GoRoute(
         path: AppRoutes.attendancePath,

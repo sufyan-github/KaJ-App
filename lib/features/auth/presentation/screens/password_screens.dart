@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -420,7 +422,11 @@ class _PasswordRecoveryScreenState
       } else {
         await repository.reset(_challenge!, _code.text.trim(), _password.text);
         if (mounted) {
-          ref.read(authControllerProvider.notifier).passwordRecoverySucceeded();
+          unawaited(
+            ref
+                .read(authControllerProvider.notifier)
+                .passwordRecoverySucceeded(),
+          );
           setState(() {
             _done = true;
             _password.clear();
