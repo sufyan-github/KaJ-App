@@ -179,6 +179,13 @@ class _Body extends ConsumerWidget {
               subtitle: KLocalizedText(
                 jobStatusLabel(item.viewerApplicationStatus!),
               ),
+              trailing: item.canWithdraw
+                  ? TextButton(
+                      key: const ValueKey('learning-withdraw'),
+                      onPressed: () => _withdraw(context, ref),
+                      child: const KLocalizedText('প্রত্যাহার'),
+                    )
+                  : null,
             ),
           )
         else if (!open || full)
@@ -196,6 +203,39 @@ class _Body extends ConsumerWidget {
           ),
       ],
     );
+  }
+
+  Future<void> _withdraw(BuildContext context, WidgetRef ref) async {
+    final sure = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const KLocalizedText('আবেদন প্রত্যাহার করবেন?'),
+        content: const KLocalizedText(
+          'মেন্টর আর আপনার আবেদন দেখবেন না। চাইলে পরে আবার আবেদন করতে পারবেন।',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const KLocalizedText('ফিরুন'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const KLocalizedText('প্রত্যাহার'),
+          ),
+        ],
+      ),
+    );
+    if (sure != true) return;
+    try {
+      await ref
+          .read(learningRepositoryProvider)
+          .withdrawApplication(opportunity.viewerApplicationId!);
+      ref.invalidate(learningDetailProvider(opportunity.id));
+    } on Object catch (error) {
+      if (context.mounted) {
+        showFailureSnack(context, error, 'আবেদন প্রত্যাহার করা যায়নি।');
+      }
+    }
   }
 
   Future<void> _apply(BuildContext context, WidgetRef ref) async {

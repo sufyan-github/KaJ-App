@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/session/user_session.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
+import '../../jobs/domain/job_models.dart';
 import '../../profile/presentation/controllers/me_provider.dart';
 import '../data/learning_repository.dart';
 import '../domain/learning_models.dart';
@@ -74,4 +75,9 @@ final learningEnrolmentsProvider =
 final learningEnrolmentProvider = FutureProvider.autoDispose
     .family<LearningEnrolment, String>(
       (ref, id) => ref.watch(learningRepositoryProvider).enrolment(id),
+    );
+
+final learningReviewStateProvider = FutureProvider.autoDispose
+    .family<AssignmentReviewState, String>(
+      (ref, id) => ref.watch(learningRepositoryProvider).reviewState(id),
     );

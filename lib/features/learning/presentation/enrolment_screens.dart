@@ -15,6 +15,8 @@ import '../../../core/widgets/k_error_state.dart';
 import '../../../core/widgets/k_localized_text.dart';
 import '../../../core/widgets/k_primary_button.dart';
 import '../../../core/widgets/k_text_field.dart';
+import '../../jobs/domain/job_models.dart';
+import '../../jobs/presentation/widgets/review_dialog.dart';
 import '../domain/learning_models.dart';
 import 'learning_providers.dart';
 import 'learning_widgets.dart';
@@ -206,6 +208,29 @@ class _EnrolmentBody extends ConsumerWidget {
           const SizedBox(height: KSpacing.md),
           _CompletionCard(enrolment: item, record: record),
         ],
+        if (item.isCompleted) ...[
+          const SizedBox(height: KSpacing.md),
+          _LearningReviewPanel(enrolmentId: item.id),
+        ],
+        if (item.withdrawnAt != null || item.status == 'CANCELLED') ...[
+          const SizedBox(height: KSpacing.md),
+          KLocalizedText(
+            item.isMentor
+                ? 'শিক্ষার্থী এই শেখা ছেড়ে দিয়েছেন।'
+                : 'আপনি এই শেখা ছেড়ে দিয়েছেন।',
+            style: const TextStyle(color: KColors.textSecondary),
+          ),
+        ],
+        if (!item.isMentor && item.isActive && !item.isCompleted) ...[
+          const SizedBox(height: KSpacing.lg),
+          TextButton.icon(
+            key: const ValueKey('leave-learning'),
+            style: TextButton.styleFrom(foregroundColor: KColors.danger),
+            onPressed: () => _leave(context, ref),
+            icon: const Icon(Icons.logout),
+            label: const KLocalizedText('শেখা ছেড়ে দিন'),
+          ),
+        ],
       ],
     );
   }
@@ -233,6 +258,40 @@ class _EnrolmentBody extends ConsumerWidget {
       builder: (_) => _SessionDialog(enrolmentId: enrolment.id),
     );
     if (updated != null) _replace(ref, updated);
+  }
+
+  Future<void> _leave(BuildContext context, WidgetRef ref) async {
+    final sure = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const KLocalizedText('শেখা ছেড়ে দেবেন?'),
+        content: const KLocalizedText(
+          'কোনো জরিমানা নেই, আর আসনটি অন্য কেউ পাবেন। কিন্তু এই সুযোগে আবার আবেদন করা যাবে না।',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const KLocalizedText('ফিরুন'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: KColors.danger),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const KLocalizedText('ছেড়ে দিন'),
+          ),
+        ],
+      ),
+    );
+    if (sure != true) return;
+    try {
+      final updated = await ref
+          .read(learningRepositoryProvider)
+          .withdrawEnrolment(enrolment.id);
+      _replace(ref, updated);
+    } on Object catch (error) {
+      if (context.mounted) {
+        showFailureSnack(context, error, 'শেখা ছেড়ে দেওয়া যায়নি।');
+      }
+    }
   }
 
   Future<void> _complete(BuildContext context, WidgetRef ref) async {
@@ -641,6 +700,82 @@ class MentorApplicationsPanel extends ConsumerWidget {
                 ),
         ),
       ],
+    );
+  }
+}
+
+/// Learner and mentor review each other after completion, double blind:
+/// each sees the other review once both reviewed or the window closed.
+class _LearningReviewPanel extends ConsumerWidget {
+  const _LearningReviewPanel({required this.enrolmentId});
+
+  final String enrolmentId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(learningReviewStateProvider(enrolmentId));
+    return state.when(
+      loading: () => const LinearProgressIndicator(),
+      // Older servers without learning reviews: show nothing.
+      error: (error, _) => const SizedBox.shrink(),
+      data: (review) => Card(
+        key: const ValueKey('learning-review'),
+        child: Padding(
+          padding: const EdgeInsets.all(KSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              KLocalizedText(
+                'রিভিউ',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              if (review.myReview case final mine?)
+                Text(
+                  '${KaajLocalizations.text(context, 'আপনার রেটিং')}: '
+                  '${'★' * mine.rating}${'☆' * (5 - mine.rating)}',
+                ),
+              if (!review.revealed && review.myReview != null)
+                const KLocalizedText(
+                  'অন্য পক্ষ রিভিউ দিলে, অথবা ৭ দিন শেষে, রিভিউ দেখা যাবে।',
+                ),
+              if (review.receivedReview case final received?) ...[
+                Text(
+                  '${received.reviewerName}: '
+                  '${'★' * received.rating}${'☆' * (5 - received.rating)}',
+                ),
+                if (received.comment?.isNotEmpty ?? false)
+                  Text(received.comment!),
+              ],
+              if (review.canReview)
+                FilledButton(
+                  key: const ValueKey('review-learning'),
+                  onPressed: () async {
+                    final input = await showDialog<ReviewInput>(
+                      context: context,
+                      builder: (_) => const ReviewDialog(),
+                    );
+                    if (input == null) return;
+                    try {
+                      await ref
+                          .read(learningRepositoryProvider)
+                          .submitReview(enrolmentId, input);
+                      ref.invalidate(learningReviewStateProvider(enrolmentId));
+                    } on Object catch (error) {
+                      if (context.mounted) {
+                        showFailureSnack(
+                          context,
+                          error,
+                          'রিভিউ জমা দেওয়া যায়নি।',
+                        );
+                      }
+                    }
+                  },
+                  child: const KLocalizedText('রিভিউ দিন'),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

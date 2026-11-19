@@ -1284,4 +1284,18 @@ const generatedEnglishTranslations = <String, String>{
       "Approved mentors taking learners will show here.",
   "শেখার সুযোগ দেখুন": "See ways to learn",
   "বছরের অভিজ্ঞতা": "years of experience",
+  // P1 leftovers: withdrawal and learning reviews.
+  "শিক্ষার্থী এই শেখা ছেড়ে দিয়েছেন।": "The learner has left this learning.",
+  "আপনি এই শেখা ছেড়ে দিয়েছেন।": "You have left this learning.",
+  "শেখা ছেড়ে দিন": "Leave this learning",
+  "শেখা ছেড়ে দেবেন?": "Leave this learning?",
+  "কোনো জরিমানা নেই, আর আসনটি অন্য কেউ পাবেন। কিন্তু এই সুযোগে আবার আবেদন করা যাবে না।":
+      "There is no penalty and someone else gets the seat, but you cannot apply to this one again.",
+  "ছেড়ে দিন": "Leave",
+  "শেখা ছেড়ে দেওয়া যায়নি।": "Could not leave the learning.",
+  "প্রত্যাহার": "Withdraw",
+  "আবেদন প্রত্যাহার করবেন?": "Withdraw your application?",
+  "মেন্টর আর আপনার আবেদন দেখবেন না। চাইলে পরে আবার আবেদন করতে পারবেন।":
+      "The mentor will no longer see your application. You can apply again later.",
+  "আবেদন প্রত্যাহার করা যায়নি।": "Could not withdraw the application.",
 };

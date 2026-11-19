@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../core/errors/error_mapper.dart';
 import '../../../core/network/paged_list.dart';
+import '../../jobs/domain/job_models.dart';
 import '../domain/learning_models.dart';
 
 /// KAAJ Learn opportunities (`/learning-opportunities`). Free: never
@@ -177,6 +178,60 @@ class LearningRepository {
     );
     return LearningEnrolment.fromJson(_data(response.data));
   });
+
+  // ---- P1 leftovers: withdrawal and reviews of learning ----
+
+  /// Takes back an application (before acceptance). After acceptance use
+  /// [withdrawEnrolment].
+  Future<void> withdrawApplication(String applicationId, {String? reason}) =>
+      _guard(() async {
+        await _dio.post<Map<String, dynamic>>(
+          '/learning-applications/$applicationId/withdraw',
+          data: {
+            if (reason != null && reason.trim().isNotEmpty)
+              'reason': reason.trim(),
+          },
+        );
+      });
+
+  /// The learner leaves; no penalty and the seat is freed.
+  Future<LearningEnrolment> withdrawEnrolment(
+    String enrolmentId, {
+    String? reason,
+  }) => _guard(() async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/learning-enrolments/$enrolmentId/withdraw',
+      data: {
+        if (reason != null && reason.trim().isNotEmpty) 'reason': reason.trim(),
+      },
+    );
+    return LearningEnrolment.fromJson(_data(response.data));
+  });
+
+  /// Review state of a finished learning, double blind like job reviews.
+  Future<AssignmentReviewState> reviewState(String enrolmentId) =>
+      _guard(() async {
+        final response = await _dio.get<Map<String, dynamic>>(
+          '/reviews/subject',
+          queryParameters: {
+            'subjectType': 'LEARNING_ENROLMENT',
+            'subjectId': enrolmentId,
+          },
+        );
+        return AssignmentReviewState.fromJson(_data(response.data));
+      });
+
+  Future<void> submitReview(String enrolmentId, ReviewInput review) =>
+      _guard(() async {
+        await _dio.post<Map<String, dynamic>>(
+          '/reviews',
+          data: {
+            'subjectType': 'LEARNING_ENROLMENT',
+            'subjectId': enrolmentId,
+            ...review.toJson(),
+          },
+        );
+      });
 
   Future<T> _guard<T>(Future<T> Function() work) async {
     try {

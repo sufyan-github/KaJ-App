@@ -92,6 +92,7 @@ class LearningOpportunity {
     this.isMine = false,
     this.applicationsCount,
     this.skillIds = const [],
+    this.viewerApplicationId,
   });
 
   /// Reads both the camelCase learning shape and the snake_case job shape.
@@ -157,6 +158,9 @@ class LearningOpportunity {
       mentor: mentor is Map
           ? LearningMentor.fromJson(Map<String, dynamic>.from(mentor))
           : null,
+      viewerApplicationId: application is Map
+          ? application['id'] as String?
+          : null,
       viewerApplicationStatus: application is Map
           ? application['status'] as String?
           : read('viewerApplicationStatus', 'viewer_application_status')
@@ -192,6 +196,15 @@ class LearningOpportunity {
   final String title;
   final String? viewerApplicationStatus;
 
+  /// For withdrawing: the viewer own application on this opportunity.
+  final String? viewerApplicationId;
+
+  /// An application the learner may still take back.
+  bool get canWithdraw =>
+      viewerApplicationId != null &&
+      (viewerApplicationStatus == 'PENDING' ||
+          viewerApplicationStatus == 'SHORTLISTED');
+
   String areaFor(String language) =>
       language == 'en' && areaNameEn.isNotEmpty ? areaNameEn : areaNameBn;
 
@@ -200,7 +213,9 @@ class LearningOpportunity {
       ? categoryNameEn
       : categoryNameBn;
 
-  bool get hasApplied => viewerApplicationStatus != null;
+  /// A withdrawn application can be sent again; anything else counts.
+  bool get hasApplied =>
+      viewerApplicationStatus != null && viewerApplicationStatus != 'WITHDRAWN';
 }
 
 /// What a mentor fills in to publish a learning opportunity.
@@ -421,6 +436,7 @@ class LearningEnrolment {
     this.sessionsConfirmed = 0,
     this.minutesTotal = 0,
     this.completion,
+    this.withdrawnAt,
   });
 
   factory LearningEnrolment.fromJson(Map<String, dynamic> json) {
@@ -461,8 +477,12 @@ class LearningEnrolment {
           ? count('minutesTotal')
           : sessions.fold(0, (sum, item) => sum + item.minutes),
       completion: CompletionRecord.maybe(json['completionRecord']),
+      withdrawnAt: DateTime.tryParse(json['withdrawnAt'] as String? ?? ''),
     );
   }
+
+  /// Set when the learner left.
+  final DateTime? withdrawnAt;
 
   final CompletionRecord? completion;
   final LearningContract? contract;

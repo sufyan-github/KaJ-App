@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/generated/app_localizations.dart';
 import '../errors/failure.dart';
+import '../errors/server_code_copy.dart';
 import '../theme/app_theme.dart';
 
 class KErrorMessage extends StatelessWidget {
@@ -92,12 +93,20 @@ String? serverCodeMessage(AppLocalizations l10n, Failure failure) =>
       // with this reason.
       'CONFLICT' when failure.message.contains('not available for this slot') =>
         l10n.errorSlotUnavailable,
-      _ => switch (failure.kind) {
-        FailureKind.network => l10n.offlineMessage,
-        FailureKind.timeout => l10n.timeoutMessage,
-        _ => null,
-      },
+      _ =>
+        _fromServerTable(l10n, failure.code) ??
+            switch (failure.kind) {
+              FailureKind.network => l10n.offlineMessage,
+              FailureKind.timeout => l10n.timeoutMessage,
+              _ => null,
+            },
     };
+
+String? _fromServerTable(AppLocalizations l10n, String? code) {
+  final copy = code == null ? null : serverCodeCopy[code];
+  if (copy == null) return null;
+  return l10n.localeName.startsWith('bn') ? copy.bn : copy.en;
+}
 
 String localizedFailureMessage(AppLocalizations l10n, Failure failure) =>
     serverCodeMessage(l10n, failure) ??
