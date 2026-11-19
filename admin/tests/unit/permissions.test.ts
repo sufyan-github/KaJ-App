@@ -79,3 +79,14 @@ test("only ADMIN sees staff management", () => {
   for (const role of ROLES)
     assert.equal(keys(role).includes("staff"), role === "ADMIN", role);
 });
+
+test("ideas and introductions are for content moderators only", () => {
+  for (const role of ROLES)
+    assert.equal(
+      keys(role).includes("ideas"),
+      role === "ADMIN" || role === "MODERATOR",
+      role,
+    );
+  assert.ok(keys("SUPPORT").includes("attendance"));
+  assert.ok(!keys("FINANCE").includes("attendance"));
+});

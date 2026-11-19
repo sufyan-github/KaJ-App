@@ -31,6 +31,14 @@ import {
 } from "./ui";
 import { Staff } from "./views/staff";
 import {
+  Attendance,
+  Businesses,
+  Ideas,
+  Introductions,
+  Mentors,
+  Skills,
+} from "./views/directory";
+import {
   type ConsoleModule,
   type ModuleKey,
   visibleModules,
@@ -165,6 +173,19 @@ function ModuleView({
   selfId: string;
 }) {
   if (active === "staff") return <Staff selfId={selfId} />;
+  if (active === "skills") return <Skills />;
+  if (active === "attendance") return <Attendance />;
+  if (active === "ideas")
+    return (
+      <TabbedModule
+        module={module}
+        role={role}
+        views={{
+          ideas: () => <Ideas />,
+          introductions: () => <Introductions />,
+        }}
+      />
+    );
   if (active === "dashboard") return <Dashboard />;
   if (active === "users") return <Users />;
   if (active === "reports") return <Reports />;
@@ -191,6 +212,7 @@ function ModuleView({
           opportunities: () => <LearningOpportunities />,
           courses: () => <Courses />,
           certificates: () => <CompletionRecords />,
+          mentorList: () => <Mentors />,
         }}
       />
     );
@@ -202,6 +224,7 @@ function ModuleView({
         intro="Reported businesses, offerings, ideas and collaboration requests are handled in Safety reports."
         views={{
           verification: () => <Verification kind="BUSINESS" />,
+          directory: () => <Businesses />,
           sectors: () => <Sectors />,
         }}
       />

@@ -1065,3 +1065,32 @@ td.empty-row {
   margin: 0;
   word-break: break-all;
 }
+.list-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+.list-toolbar form {
+  display: flex;
+  gap: 6px;
+}
+.list-toolbar input[type="search"] {
+  min-width: 240px;
+}
+.list-toolbar .filter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.load-more {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  font-size: 12px;
+}

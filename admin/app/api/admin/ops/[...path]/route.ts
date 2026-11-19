@@ -17,9 +17,17 @@ async function forward(request: Request, context: RouteContext) {
   const method = request.method.toUpperCase();
   const body =
     method === "GET" || method === "HEAD" ? undefined : await request.text();
+  // Attendance overrides require an Idempotency-Key; nothing else is passed on.
+  const idempotencyKey = request.headers.get("idempotency-key");
   const response = await backendRequest(
     `/admin/${path.map(encodeURIComponent).join("/")}${query}`,
-    { method, body: body || undefined },
+    {
+      method,
+      body: body || undefined,
+      ...(idempotencyKey
+        ? { headers: { "idempotency-key": idempotencyKey.slice(0, 128) } }
+        : {}),
+    },
     token,
     request,
   );

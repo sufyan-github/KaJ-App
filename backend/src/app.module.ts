@@ -45,6 +45,7 @@ import { ReviewsModule } from "./modules/reviews/reviews.module";
 import { ChatModule } from "./modules/chat/chat.module";
 import { AdminAuthModule } from "./modules/admin-auth/admin-auth.module";
 import { AdminOpsModule } from "./modules/admin-ops/admin-ops.module";
+import { AdminDirectoryModule } from "./modules/admin-directory/admin-directory.module";
 import { AdminStaffModule } from "./modules/admin-staff/admin-staff.module";
 import { PaymentsModule } from "./modules/payments/payments.module";
 import { VerificationModule } from "./modules/verification/verification.module";
@@ -90,6 +91,7 @@ import { AiModule } from "./modules/ai/ai.module";
     AdminAuthModule,
     AdminOpsModule,
     AdminStaffModule,
+    AdminDirectoryModule,
     PaymentsModule,
     VerificationModule,
     DisputesModule,

@@ -35,6 +35,166 @@ export function Can({
   return routes.every(can) ? <>{children}</> : null;
 }
 
+type Page<T> = { items: T[]; nextCursor: string | null; total?: number };
+
+/**
+ * A cursor-paged list: `params` (search, filters) are sent with every page;
+ * changing them starts again from the first page. Empty params are dropped.
+ */
+export function usePagedData<T extends { id: string }>(
+  path: string,
+  params: Record<string, string | undefined> = {},
+  limit = 30,
+) {
+  const query = new URLSearchParams({ limit: String(limit) });
+  for (const [key, value] of Object.entries(params))
+    if (value) query.set(key, value);
+  const base = `${path}?${query.toString()}`;
+  const [items, setItems] = useState<T[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [total, setTotal] = useState<number | undefined>(undefined);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const page = await adminApi<Page<T>>(base);
+      setItems(page.items);
+      setNextCursor(page.nextCursor ?? null);
+      setTotal(page.total);
+    } catch (caught) {
+      setError(friendlyAdminError(caught));
+    } finally {
+      setLoading(false);
+    }
+  }, [base]);
+  useEffect(() => void load(), [load]);
+  async function loadMore() {
+    if (!nextCursor) return;
+    setLoadingMore(true);
+    try {
+      const page = await adminApi<Page<T>>(
+        `${base}&cursor=${encodeURIComponent(nextCursor)}`,
+      );
+      setItems((current) => [
+        ...current,
+        ...page.items.filter((item) => !current.some((c) => c.id === item.id)),
+      ]);
+      setNextCursor(page.nextCursor ?? null);
+    } catch (caught) {
+      setError(friendlyAdminError(caught));
+    } finally {
+      setLoadingMore(false);
+    }
+  }
+  return {
+    items,
+    total,
+    error,
+    loading,
+    loadingMore,
+    hasMore: !!nextCursor,
+    loadMore,
+    reload: load,
+  };
+}
+
+/** Search box (applied on Enter or the button) plus any filter controls. */
+export function ListToolbar({
+  search,
+  onSearch,
+  placeholder = "Search",
+  children,
+}: {
+  search?: string;
+  onSearch?: (value: string) => void;
+  placeholder?: string;
+  children?: ReactNode;
+}) {
+  const [draft, setDraft] = useState(search ?? "");
+  return (
+    <div className="list-toolbar">
+      {onSearch && (
+        <form
+          role="search"
+          onSubmit={(event) => {
+            event.preventDefault();
+            onSearch(draft.trim());
+          }}
+        >
+          <input
+            type="search"
+            aria-label={tr(placeholder)}
+            placeholder={tr(placeholder)}
+            value={draft}
+            maxLength={120}
+            onChange={(event) => setDraft(event.target.value)}
+          />
+          <button type="submit">{tr("Search")}</button>
+        </form>
+      )}
+      {children}
+    </div>
+  );
+}
+
+/** A labelled filter select; "" means no filter. */
+export function FilterSelect({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: ReadonlyArray<[string, string]>;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="filter">
+      {tr(label)}
+      <select value={value} onChange={(event) => onChange(event.target.value)}>
+        {options.map(([key, name]) => (
+          <option key={key} value={key}>
+            {tr(name)}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+export function LoadMore({
+  hasMore,
+  loading,
+  shown,
+  total,
+  onClick,
+}: {
+  hasMore: boolean;
+  loading: boolean;
+  shown: number;
+  total?: number;
+  onClick: () => void;
+}) {
+  return (
+    <div className="load-more">
+      <span className="muted">
+        {total === undefined
+          ? `${tr("Showing")} ${formatNumber(shown)}`
+          : `${tr("Showing")} ${formatNumber(shown)} ${tr("of")} ${formatNumber(total)}`}
+      </span>
+      {hasMore && (
+        <button onClick={onClick} disabled={loading}>
+          {tr(loading ? "Loading…" : "Load more")}
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function useData<T>(path: string) {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState("");

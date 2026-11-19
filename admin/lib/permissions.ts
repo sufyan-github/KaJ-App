@@ -43,6 +43,7 @@ export type ModuleKey =
   | "applications"
   | "verification"
   | "categories"
+  | "skills"
   | "locations"
   | "config"
   | "flags"
@@ -54,6 +55,8 @@ export type ModuleKey =
   | "learn"
   | "business"
   | "community"
+  | "ideas"
+  | "attendance"
   | "staff"
   | "audit";
 
@@ -109,6 +112,12 @@ export const CONSOLE_MODULES: readonly ConsoleModule[] = [
     name: "Categories",
     note: "D12 safety policies",
     requires: ["GET categories"],
+  },
+  {
+    key: "skills",
+    name: "Skills",
+    note: "Skills under each work category",
+    requires: ["GET skills", "GET categories"],
   },
   {
     key: "locations",
@@ -188,6 +197,12 @@ export const CONSOLE_MODULES: readonly ConsoleModule[] = [
         note: "",
         requires: ["GET certificates"],
       },
+      {
+        key: "mentorList",
+        name: "Mentors",
+        note: "",
+        requires: ["GET mentors"],
+      },
     ],
   },
   {
@@ -201,6 +216,12 @@ export const CONSOLE_MODULES: readonly ConsoleModule[] = [
         name: "Business verification",
         note: "",
         requires: ["GET verification-requests"],
+      },
+      {
+        key: "directory",
+        name: "Businesses",
+        note: "",
+        requires: ["GET businesses"],
       },
       {
         key: "sectors",
@@ -235,6 +256,27 @@ export const CONSOLE_MODULES: readonly ConsoleModule[] = [
         requires: ["GET community/ambassadors"],
       },
     ],
+  },
+  {
+    key: "ideas",
+    name: "Ideas and introductions",
+    note: "Shared ideas and introduction requests",
+    requires: [],
+    tabs: [
+      { key: "ideas", name: "Ideas", note: "", requires: ["GET ideas"] },
+      {
+        key: "introductions",
+        name: "Introductions",
+        note: "",
+        requires: ["GET introductions"],
+      },
+    ],
+  },
+  {
+    key: "attendance",
+    name: "Attendance",
+    note: "Check-in and check-out overrides",
+    requires: ["GET attendance"],
   },
   {
     key: "staff",

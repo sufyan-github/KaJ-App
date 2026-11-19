@@ -118,6 +118,6 @@ test("SUPPORT can dry-run a campaign but has no send button", async ({
 test("Learn shows only the tabs the role can open", async ({ page }) => {
   await signInAs(page, "MODERATOR");
   await nav(page).getByRole("button", { name: "Learn" }).click();
-  await expect(page.getByRole("tab")).toHaveCount(4);
+  await expect(page.getByRole("tab")).toHaveCount(5);
   await expect(page.getByRole("button", { name: "New course" })).toHaveCount(0);
 });
