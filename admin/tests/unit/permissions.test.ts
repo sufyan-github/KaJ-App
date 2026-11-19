@@ -74,3 +74,8 @@ test("the matrix lists only known roles", () => {
     for (const role of roles) assert.ok(ROLES.includes(role), route);
   }
 });
+
+test("only ADMIN sees staff management", () => {
+  for (const role of ROLES)
+    assert.equal(keys(role).includes("staff"), role === "ADMIN", role);
+});

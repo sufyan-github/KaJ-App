@@ -54,6 +54,7 @@ export type ModuleKey =
   | "learn"
   | "business"
   | "community"
+  | "staff"
   | "audit";
 
 export type ConsoleModule = Gated<ModuleKey> & {
@@ -234,6 +235,12 @@ export const CONSOLE_MODULES: readonly ConsoleModule[] = [
         requires: ["GET community/ambassadors"],
       },
     ],
+  },
+  {
+    key: "staff",
+    name: "Staff",
+    note: "Invite, change roles and deactivate operators",
+    requires: ["GET staff"],
   },
   {
     key: "audit",

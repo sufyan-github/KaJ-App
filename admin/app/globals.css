@@ -1051,3 +1051,17 @@ td.empty-row {
   text-align: center;
   color: var(--muted, #6b7280);
 }
+.credentials {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 14px;
+  margin: 12px 0 18px;
+  font-size: 12px;
+}
+.credentials dt {
+  color: var(--muted);
+}
+.credentials dd {
+  margin: 0;
+  word-break: break-all;
+}

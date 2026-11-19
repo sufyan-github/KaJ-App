@@ -29,6 +29,7 @@ import {
   RoleProvider,
   useCan,
 } from "./ui";
+import { Staff } from "./views/staff";
 import {
   type ConsoleModule,
   type ModuleKey,
@@ -140,6 +141,7 @@ export function OperationsConsole({
               active={current.key}
               module={current}
               role={admin.role}
+              selfId={admin.userId}
             />
           ) : (
             <div className="panel-state" role="alert">
@@ -155,11 +157,14 @@ function ModuleView({
   active,
   module,
   role,
+  selfId,
 }: {
   active: ModuleKey;
   module: ConsoleModule;
   role: string;
+  selfId: string;
 }) {
+  if (active === "staff") return <Staff selfId={selfId} />;
   if (active === "dashboard") return <Dashboard />;
   if (active === "users") return <Users />;
   if (active === "reports") return <Reports />;
