@@ -424,6 +424,17 @@ export class AdminOpsController {
     return this.ops.sendCampaign(body, actor, this.context(request));
   }
 
+  @Get("notifications/campaigns")
+  @Policy(Policies.public())
+  @AdminRoles(AdminRole.ADMIN, AdminRole.SUPPORT)
+  campaigns(
+    @Query() query: PageQueryDto,
+    @CurrentAdmin() actor: AdminActor,
+    @Req() request: Request,
+  ) {
+    return this.ops.campaigns(query, actor, this.context(request));
+  }
+
   @Get("analytics")
   @Policy(Policies.public())
   @AdminRoles(...OPS_ROLES)

@@ -1046,3 +1046,8 @@ small.overdue {
   color: #b42318;
   font-weight: 600;
 }
+td.empty-row {
+  padding: 22px 12px;
+  text-align: center;
+  color: var(--muted, #6b7280);
+}

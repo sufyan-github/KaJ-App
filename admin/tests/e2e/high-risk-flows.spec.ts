@@ -422,3 +422,70 @@ test("notification dry-run previews audience without sending", async ({
   ).toBeVisible();
   expect(dryRunCalls).toBe(1);
 });
+
+test("campaign send asks for confirmation and shows batch progress", async ({
+  page,
+}) => {
+  let sendBody: Record<string, unknown> | null = null;
+  let campaigns: unknown[] = [];
+  await page.route(
+    "**/api/admin/ops/notifications/campaigns?limit=20",
+    (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(envelope({ items: campaigns, nextCursor: null })),
+      }),
+  );
+  await fulfill(page, "notifications/campaign/dry-run", {
+    audienceCount: 250,
+    preview: { title: "KAAJ update", body: "Update" },
+  });
+  await page.route(
+    "**/api/admin/ops/notifications/campaign/send",
+    async (route) => {
+      sendBody = route.request().postDataJSON();
+      campaigns = [
+        {
+          id: "c-1",
+          name: "Pilot update",
+          title: "KAAJ update",
+          audienceCount: 250,
+          sentCount: 100,
+          throttlePerMinute: 100,
+          status: "SENDING",
+          createdBy: "ops@kaj.test",
+          createdAt: new Date().toISOString(),
+          completedAt: null,
+        },
+      ];
+      await route.fulfill({
+        status: 201,
+        contentType: "application/json",
+        body: JSON.stringify(
+          envelope({
+            id: "c-1",
+            audienceCount: 250,
+            sentCount: 100,
+            status: "SENDING",
+          }),
+        ),
+      });
+    },
+  );
+  await page.goto("/");
+  await page.getByRole("button", { name: "Notifications" }).click();
+  await expect(page.getByText("Nothing to show")).toBeVisible();
+  await page.getByRole("button", { name: "Run dry-run" }).click();
+  await page.getByRole("button", { name: "Send campaign" }).click();
+  // Nothing is sent until the operator confirms the audience size.
+  await expect(page.getByRole("dialog")).toContainText("250 people");
+  expect(sendBody).toBeNull();
+  await page.getByRole("button", { name: "Confirm send" }).click();
+  await expect
+    .poll(() => sendBody)
+    .toMatchObject({ name: "Pilot update", throttlePerMinute: 100 });
+  await expect(page.getByText("Sent to 100 of 250")).toBeVisible();
+  await expect(page.getByText("100 / 250")).toBeVisible();
+  await expect(page.getByText("Sending", { exact: true })).toBeVisible();
+});

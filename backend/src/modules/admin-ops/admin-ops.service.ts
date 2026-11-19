@@ -69,6 +69,19 @@ import { PaymentsService } from "../payments/payments.service";
 import { planDisputeAllocation } from "../disputes/dispute-ledger";
 import { randomUUID } from "node:crypto";
 
+/** Most recipients one campaign may reach (unchanged from the first version). */
+const CAMPAIGN_AUDIENCE_CAP = 10_000;
+
+/**
+ * `notification_campaigns.status`. PARTIAL rows were written by the old
+ * single-batch send and are left alone: resuming them days later would surprise
+ * their recipients.
+ */
+export const CampaignStatus = {
+  SENDING: "SENDING",
+  COMPLETED: "COMPLETED",
+} as const;
+
 const TERMINAL_JOB_STATUSES: JobStatus[] = [
   JobStatus.REVIEWED,
   JobStatus.EXPIRED,
@@ -1710,17 +1723,21 @@ export class AdminOpsService {
     };
   }
 
+  /**
+   * Starts a campaign and sends its first batch. The rest goes out one batch
+   * (`throttlePerMinute` recipients) per minute through `continueCampaigns`,
+   * driven by CampaignRunner, until everyone in the frozen audience has it.
+   */
   async sendCampaign(
     input: CampaignDto,
     actor: AdminActor,
     context: AdminRequestContext,
   ) {
-    const recipients = await this.prisma.user.findMany({
-      where: campaignWhere(input.segment),
-      select: { id: true },
-      take: 10_000,
-    });
-    const batch = recipients.slice(0, input.throttlePerMinute);
+    const audienceCount = Math.min(
+      await this.prisma.user.count({ where: campaignWhere(input.segment) }),
+      CAMPAIGN_AUDIENCE_CAP,
+    );
+    const now = this.clock.now();
     const campaign = await this.prisma.$transaction(async (transaction) => {
       const saved = await transaction.notificationCampaign.create({
         data: {
@@ -1729,23 +1746,15 @@ export class AdminOpsService {
           title: input.title,
           body: input.body,
           throttle_per_minute: input.throttlePerMinute,
-          dry_run_count: recipients.length,
-          sent_count: batch.length,
-          status: batch.length === recipients.length ? "COMPLETED" : "PARTIAL",
+          dry_run_count: audienceCount,
+          sent_count: 0,
+          status: audienceCount
+            ? CampaignStatus.SENDING
+            : CampaignStatus.COMPLETED,
           created_by: actor.userId,
-          sent_at: new Date(),
+          sent_at: audienceCount ? null : now,
         },
       });
-      if (batch.length)
-        await transaction.notification.createMany({
-          data: batch.map((recipient) => ({
-            user_id: recipient.id,
-            type: "ADMIN_CAMPAIGN",
-            title_key: input.title,
-            body_key: input.body,
-            payload_json: { campaignId: saved.id },
-          })),
-        });
       await transaction.auditLog.create({
         data: this.auditData(
           actor,
@@ -1754,8 +1763,7 @@ export class AdminOpsService {
           saved.id,
           null,
           {
-            audienceCount: recipients.length,
-            sentCount: batch.length,
+            audienceCount,
             throttlePerMinute: input.throttlePerMinute,
           },
           context,
@@ -1763,12 +1771,141 @@ export class AdminOpsService {
       });
       return saved;
     });
+    const progress = audienceCount
+      ? await this.sendCampaignBatch(campaign.id)
+      : null;
     return {
       id: campaign.id,
-      audienceCount: recipients.length,
-      sentCount: batch.length,
-      status: campaign.status,
+      audienceCount,
+      sentCount: progress?.sentCount ?? 0,
+      status: progress?.status ?? campaign.status,
     };
+  }
+
+  /** One batch for every campaign still sending (oldest first). */
+  async continueCampaigns(): Promise<number> {
+    const sending = await this.prisma.notificationCampaign.findMany({
+      where: { status: CampaignStatus.SENDING },
+      orderBy: { created_at: "asc" },
+      select: { id: true },
+      take: 20,
+    });
+    for (const campaign of sending) await this.sendCampaignBatch(campaign.id);
+    return sending.length;
+  }
+
+  /**
+   * Sends the next batch of one campaign. The row is locked, so two runners
+   * never send the same batch; recipients who already have this campaign's
+   * notification are skipped, and only users who existed when the campaign
+   * was started are counted, so the audience does not grow while sending.
+   */
+  async sendCampaignBatch(campaignId: string) {
+    return this.prisma.$transaction(async (transaction) => {
+      const locked = await transaction.$queryRaw<{ id: string }[]>`
+        SELECT id FROM notification_campaigns
+        WHERE id = ${campaignId}::uuid AND status = ${CampaignStatus.SENDING}
+        FOR UPDATE SKIP LOCKED`;
+      if (!locked.length) return null;
+      const campaign = await transaction.notificationCampaign.findUniqueOrThrow(
+        {
+          where: { id: campaignId },
+        },
+      );
+      const take = Math.max(
+        0,
+        Math.min(
+          campaign.throttle_per_minute,
+          campaign.dry_run_count - campaign.sent_count,
+        ),
+      );
+      const recipients = take
+        ? await transaction.user.findMany({
+            where: {
+              AND: [
+                campaignWhere(
+                  (campaign.segment_json ?? {}) as Record<string, unknown>,
+                ),
+                { created_at: { lte: campaign.created_at } },
+                {
+                  notifications: {
+                    none: {
+                      type: "ADMIN_CAMPAIGN",
+                      payload_json: {
+                        path: ["campaignId"],
+                        equals: campaign.id,
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+            select: { id: true },
+            orderBy: { id: "asc" },
+            take,
+          })
+        : [];
+      if (recipients.length)
+        await transaction.notification.createMany({
+          data: recipients.map((recipient) => ({
+            user_id: recipient.id,
+            type: "ADMIN_CAMPAIGN",
+            title_key: campaign.title,
+            body_key: campaign.body,
+            payload_json: { campaignId: campaign.id },
+          })),
+        });
+      const sentCount = campaign.sent_count + recipients.length;
+      // Fewer recipients than asked for: the rest left the segment.
+      const done =
+        recipients.length < take || sentCount >= campaign.dry_run_count;
+      const status = done ? CampaignStatus.COMPLETED : CampaignStatus.SENDING;
+      await transaction.notificationCampaign.update({
+        where: { id: campaign.id },
+        data: {
+          sent_count: sentCount,
+          status,
+          ...(done ? { sent_at: this.clock.now() } : {}),
+        },
+      });
+      return { sentCount, status };
+    });
+  }
+
+  async campaigns(
+    query: PageQueryDto,
+    actor: AdminActor,
+    context: AdminRequestContext,
+  ) {
+    const rows = await this.prisma.notificationCampaign.findMany({
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
+      include: { actor: { select: { email: true } } },
+      ...pageArgs(query),
+    });
+    await this.audit(
+      actor,
+      "ADMIN_NOTIFICATION_CAMPAIGNS_VIEWED",
+      "NOTIFICATION_CAMPAIGN",
+      null,
+      null,
+      { filters: { limit: query.limit, cursor: query.cursor ?? null } },
+      context,
+    );
+    return pageResult(
+      rows.map((row) => ({
+        id: row.id,
+        name: row.name,
+        title: row.title,
+        audienceCount: row.dry_run_count,
+        sentCount: row.sent_count,
+        throttlePerMinute: row.throttle_per_minute,
+        status: row.status,
+        createdBy: row.actor.email,
+        createdAt: row.created_at,
+        completedAt: row.sent_at,
+      })),
+      query.limit,
+    );
   }
 
   async analytics(actor: AdminActor, context: AdminRequestContext) {

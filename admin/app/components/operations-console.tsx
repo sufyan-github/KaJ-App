@@ -3352,6 +3352,18 @@ function DisputeDialog({
     </Dialog>
   );
 }
+type CampaignItem = {
+  id: string;
+  name: string;
+  title: string;
+  audienceCount: number;
+  sentCount: number;
+  throttlePerMinute: number;
+  status: string;
+  createdBy: string | null;
+  createdAt: string;
+  completedAt: string | null;
+};
 function Notifications() {
   const [result, setResult] = useState<{
     audienceCount: number;
@@ -3361,7 +3373,12 @@ function Notifications() {
     };
   } | null>(null);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [confirming, setConfirming] = useState(false);
   const [sending, setSending] = useState(false);
+  const history = useData<{ items: CampaignItem[] }>(
+    "notifications/campaigns?limit=20",
+  );
   const [payload, setPayload] = useState({
     name: "Pilot update",
     title: "KAAJ update",
@@ -3371,6 +3388,7 @@ function Notifications() {
   });
   async function dryRun() {
     setError("");
+    setNotice("");
     try {
       setResult(
         await adminApi("notifications/campaign/dry-run", json("POST", payload)),
@@ -3381,104 +3399,198 @@ function Notifications() {
   }
   async function send() {
     setSending(true);
+    setError("");
     try {
-      await adminApi("notifications/campaign/send", json("POST", payload));
+      const sent = await adminApi<{
+        audienceCount: number;
+        sentCount: number;
+        status: string;
+      }>("notifications/campaign/send", json("POST", payload));
       setResult(null);
+      setConfirming(false);
+      setNotice(
+        tr(
+          `Sent to ${sent.sentCount} of ${sent.audienceCount}. The rest go out ${payload.throttlePerMinute} per minute.`,
+        ),
+      );
+      await history.reload();
     } catch (caught) {
       setError(friendlyAdminError(caught));
     } finally {
       setSending(false);
     }
   }
+  const minutes = result
+    ? Math.max(
+        0,
+        Math.ceil(result.audienceCount / payload.throttlePerMinute) - 1,
+      )
+    : 0;
   return (
-    <div className="campaign-layout">
-      <section className="config-editor">
-        <label>
-          {tr("Campaign name")}
-          <input
-            value={payload.name}
-            onChange={(event) =>
-              setPayload({ ...payload, name: event.target.value })
-            }
-          />
-        </label>
-        <label>
-          {tr("Title")}
-          <input
-            value={payload.title}
-            onChange={(event) =>
-              setPayload({ ...payload, title: event.target.value })
-            }
-          />
-        </label>
-        <label>
-          {tr("Message")}
-          <textarea
-            value={payload.body}
-            onChange={(event) =>
-              setPayload({ ...payload, body: event.target.value })
-            }
-          />
-        </label>
-        <label>
-          {tr("Audience")}
-          <select
-            onChange={(event) =>
-              setPayload({
-                ...payload,
-                segment: {
-                  status: "ACTIVE",
-                  ...(event.target.value ? { role: event.target.value } : {}),
-                },
-              })
-            }
-          >
-            <option value="">{tr("All active users")}</option>
-            <option value="WORKER">{humanize("WORKER")}</option>
-            <option value="CUSTOMER">{humanize("CUSTOMER")}</option>
-            <option value="BUSINESS">{humanize("BUSINESS")}</option>
-          </select>
-        </label>
-        <label>
-          {tr("Throttle per minute")}
-          <input
-            type="number"
-            min="1"
-            max="1000"
-            value={payload.throttlePerMinute}
-            onChange={(event) =>
-              setPayload({
-                ...payload,
-                throttlePerMinute: Number(event.target.value),
-              })
-            }
-          />
-        </label>
-        {error && <p className="error">{error}</p>}
-        <div className="actions">
-          <button onClick={dryRun}>{tr("Run dry-run")}</button>
+    <>
+      <div className="campaign-layout">
+        <section className="config-editor">
+          <label>
+            {tr("Campaign name")}
+            <input
+              value={payload.name}
+              onChange={(event) =>
+                setPayload({ ...payload, name: event.target.value })
+              }
+            />
+          </label>
+          <label>
+            {tr("Title")}
+            <input
+              value={payload.title}
+              onChange={(event) =>
+                setPayload({ ...payload, title: event.target.value })
+              }
+            />
+          </label>
+          <label>
+            {tr("Message")}
+            <textarea
+              value={payload.body}
+              onChange={(event) =>
+                setPayload({ ...payload, body: event.target.value })
+              }
+            />
+          </label>
+          <label>
+            {tr("Audience")}
+            <select
+              onChange={(event) =>
+                setPayload({
+                  ...payload,
+                  segment: {
+                    status: "ACTIVE",
+                    ...(event.target.value ? { role: event.target.value } : {}),
+                  },
+                })
+              }
+            >
+              <option value="">{tr("All active users")}</option>
+              <option value="WORKER">{humanize("WORKER")}</option>
+              <option value="CUSTOMER">{humanize("CUSTOMER")}</option>
+              <option value="BUSINESS">{humanize("BUSINESS")}</option>
+            </select>
+          </label>
+          <label>
+            {tr("Throttle per minute")}
+            <input
+              type="number"
+              min="1"
+              max="1000"
+              value={payload.throttlePerMinute}
+              onChange={(event) =>
+                setPayload({
+                  ...payload,
+                  throttlePerMinute: Number(event.target.value),
+                })
+              }
+            />
+          </label>
+          {error && (
+            <p className="error" role="alert">
+              {error}
+            </p>
+          )}
+          {notice && <p className="success">{notice}</p>}
+          <div className="actions">
+            <button onClick={dryRun}>{tr("Run dry-run")}</button>
+            {result && (
+              <button
+                className="primary small-button"
+                disabled={sending}
+                onClick={() => setConfirming(true)}
+              >
+                {tr("Send campaign")}
+              </button>
+            )}
+          </div>
+        </section>
+        <section className="phone-preview">
+          <span>{tr("PREVIEW")}</span>
+          <div>
+            <strong>{result?.preview.title ?? payload.title}</strong>
+            <p>{result?.preview.body ?? payload.body}</p>
+          </div>
           {result && (
+            <em>
+              {tr(`${result.audienceCount} recipients match this segment`)}
+            </em>
+          )}
+        </section>
+      </div>
+      <Section
+        title="Campaign history"
+        note="Large audiences are sent in batches, one batch per minute"
+      >
+        <State loading={history.loading} error={history.error}>
+          <DataTable
+            headers={["Campaign", "Progress", "Status", "Started", "By"]}
+            empty={!history.data?.items.length}
+          >
+            {(history.data?.items ?? []).map((item) => (
+              <tr key={item.id}>
+                <td>
+                  <strong>{item.name}</strong>
+                  <small>{item.title}</small>
+                </td>
+                <td>
+                  {formatNumber(item.sentCount)} /{" "}
+                  {formatNumber(item.audienceCount)}
+                  <small>
+                    {formatNumber(item.throttlePerMinute)} {tr("per minute")}
+                  </small>
+                </td>
+                <td>
+                  <Badge value={item.status} />
+                </td>
+                <td>{formatDate(item.createdAt)}</td>
+                <td>{item.createdBy ?? tr("System")}</td>
+              </tr>
+            ))}
+          </DataTable>
+          <div className="actions">
+            <button onClick={() => void history.reload()}>
+              {tr("Refresh")}
+            </button>
+          </div>
+        </State>
+      </Section>
+      {confirming && result && (
+        <Dialog
+          title="Send this campaign?"
+          onClose={() => setConfirming(false)}
+        >
+          <p>
+            {tr(
+              `${result.audienceCount} people will get "${payload.title}". The first ${Math.min(payload.throttlePerMinute, result.audienceCount)} get it now; the rest over about ${minutes} more minutes.`,
+            )}
+          </p>
+          <p className="muted">
+            {tr("A sent notification cannot be recalled.")}
+          </p>
+          {error && (
+            <p className="error" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="actions">
+            <button onClick={() => setConfirming(false)}>{tr("Cancel")}</button>
             <button
               className="primary small-button"
               disabled={sending}
               onClick={send}
             >
-              {tr("Send campaign")}
+              {tr(sending ? "Sending…" : "Confirm send")}
             </button>
-          )}
-        </div>
-      </section>
-      <section className="phone-preview">
-        <span>{tr("PREVIEW")}</span>
-        <div>
-          <strong>{result?.preview.title ?? payload.title}</strong>
-          <p>{result?.preview.body ?? payload.body}</p>
-        </div>
-        {result && (
-          <em>{tr(`${result.audienceCount} recipients match this segment`)}</em>
-        )}
-      </section>
-    </div>
+          </div>
+        </Dialog>
+      )}
+    </>
   );
 }
 function Analytics() {
@@ -3640,9 +3752,12 @@ function Summary({ count, label }: { count: number; label: string }) {
 function DataTable({
   headers,
   children,
+  empty,
 }: {
   headers: string[];
   children: ReactNode;
+  /** Shows "Nothing to show" instead of a blank body. */
+  empty?: boolean;
 }) {
   return (
     <div className="table-wrap">
@@ -3654,7 +3769,17 @@ function DataTable({
             ))}
           </tr>
         </thead>
-        <tbody>{children}</tbody>
+        <tbody>
+          {empty ? (
+            <tr>
+              <td className="empty-row" colSpan={headers.length}>
+                {tr("Nothing to show")}
+              </td>
+            </tr>
+          ) : (
+            children
+          )}
+        </tbody>
       </table>
     </div>
   );
