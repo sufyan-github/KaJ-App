@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, Optional } from "@nestjs/common";
 import {
-  Gender,
   GroupMemberRole,
   GroupMemberStatus,
   SessionSubjectType,
@@ -25,6 +24,10 @@ import { ChatService } from "../chat/chat.service";
 import { MentorsService } from "../mentors/mentors.service";
 import { NotificationsService } from "../notifications/notifications.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
+import {
+  assertVerifiedWoman,
+  verifiedWomanProfile,
+} from "../safety/women-only";
 import { visibleDisplayName } from "../users/public-profile.projection";
 import {
   BookConsultationDto,
@@ -395,7 +398,7 @@ export class SessionsService {
         },
         status: UserStatus.ACTIVE,
         deleted_at: null,
-        ...(row.women_only ? { profile: { gender: Gender.FEMALE } } : {}),
+        ...(row.women_only ? { profile: verifiedWomanProfile } : {}),
       },
       select: { id: true },
     });
@@ -1313,12 +1316,13 @@ export class SessionsService {
       });
   }
 
+  /** API-9: a woman with verified identity (see safety/women-only.ts). */
   private async assertWoman(userId: string) {
     const profile = await this.prisma.profile.findUnique({
       where: { user_id: userId },
-      select: { gender: true },
+      select: { gender: true, trust_level: true },
     });
-    if (profile?.gender !== Gender.FEMALE) throw sessionErrors.womenOnly();
+    assertVerifiedWoman(profile, sessionErrors.womenOnly);
   }
 
   private price(model?: SessionPriceModel, pricePoisha?: string) {

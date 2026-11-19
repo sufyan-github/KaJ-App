@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { Prisma, RoleMode } from "@prisma/client";
+import { Prisma, RoleMode, TrustLevel } from "@prisma/client";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { activateRoleMode } from "./role-modes";
@@ -17,6 +17,8 @@ import { validateWorkerSkillIds } from "./worker-skills.rules";
 import { AuthTokenService } from "../auth/auth-token.service";
 import { EngagementService } from "../safety/engagement.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
+import { genderLocked } from "../safety/women-only";
+import { hasTrust } from "../verification/trust-level";
 import { visibleDisplayName } from "./public-profile.projection";
 
 @Injectable()
@@ -262,6 +264,20 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, input: UpdateProfileDto) {
+    // API-9: after identity verification the gender is the verified one.
+    if (input.gender !== undefined) {
+      const current = await this.prisma.profile.findUnique({
+        where: { user_id: userId },
+        select: { gender: true, trust_level: true },
+      });
+      if (
+        current &&
+        current.gender !== null &&
+        current.gender !== input.gender &&
+        hasTrust(current.trust_level, TrustLevel.IDENTITY)
+      )
+        throw genderLocked();
+    }
     const profile = await this.prisma.profile.upsert({
       where: { user_id: userId },
       update: {

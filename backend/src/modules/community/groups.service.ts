@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, Optional } from "@nestjs/common";
 import {
-  Gender,
   GroupMemberRole,
   GroupMemberStatus,
   GroupVisibility,
@@ -14,6 +13,10 @@ import { PrismaService } from "../../infra/prisma/prisma.service";
 import { ChatService } from "../chat/chat.service";
 import { NotificationsService } from "../notifications/notifications.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
+import {
+  assertVerifiedWoman,
+  verifiedWomanProfile,
+} from "../safety/women-only";
 import { visibleDisplayName } from "../users/public-profile.projection";
 import { hasTrust } from "../verification/trust-level";
 import { communityErrors } from "./community.errors";
@@ -79,8 +82,8 @@ export class GroupsService {
     });
     if (!hasTrust(profile?.trust_level ?? TrustLevel.NONE, TrustLevel.IDENTITY))
       throw communityErrors.identityRequired();
-    if (input.womenOnly && profile?.gender !== Gender.FEMALE)
-      throw communityErrors.womenOnly();
+    if (input.womenOnly)
+      assertVerifiedWoman(profile ?? null, communityErrors.womenOnly);
     const created = await this.prisma.communityGroup.count({
       where: { created_by_user_id: userId, deleted_at: null },
     });
@@ -346,7 +349,7 @@ export class GroupsService {
         },
         status: UserStatus.ACTIVE,
         deleted_at: null,
-        ...(group.women_only ? { profile: { gender: Gender.FEMALE } } : {}),
+        ...(group.women_only ? { profile: verifiedWomanProfile } : {}),
       },
       select: { id: true },
     });
@@ -747,12 +750,13 @@ export class GroupsService {
       });
   }
 
+  /** API-9: a woman with verified identity (see safety/women-only.ts). */
   private async assertWoman(userId: string) {
     const profile = await this.prisma.profile.findUnique({
       where: { user_id: userId },
-      select: { gender: true },
+      select: { gender: true, trust_level: true },
     });
-    if (profile?.gender !== Gender.FEMALE) throw communityErrors.womenOnly();
+    assertVerifiedWoman(profile, communityErrors.womenOnly);
   }
 
   private async assertReferences(locationId?: string, categoryId?: string) {
