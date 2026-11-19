@@ -106,4 +106,60 @@ const businessTranslations = <String, String>{
   "প্রকাশিত হলে অংশীদার তালিকায় দেখা যাবে।":
       "When published, it shows in the partner directory.",
   "ব্যবসা মুছে ফেলুন": "Delete business",
+  "সদস্যকে সরাবেন?": "Remove this member?",
+  "তিনি আর এই ব্যবসার তথ্য দেখতে বা কাজ করতে পারবেন না।":
+      "They will no longer see or work on this business.",
+  "সরিয়ে দিন": "Remove",
+  "সদস্যকে সরানো যায়নি।": "Could not remove the member.",
+  "কোন ভূমিকায় আমন্ত্রণ জানাবেন?": "Invite them as",
+  "আমন্ত্রণ পাঠানো যায়নি।": "Could not send the invitation.",
+  "আমন্ত্রণ পাঠানো হয়েছে। তিনি নোটিফিকেশন পাবেন।":
+      "Invitation sent. They will get a notification.",
+  "সদস্য আমন্ত্রণ": "Invite member",
+  "সদস্যদের তালিকা লোড করা যায়নি।": "Could not load the members.",
+  "এখনো কোনো সদস্য নেই": "No members yet",
+  "মালিক কর্মী ও ম্যানেজারদের আমন্ত্রণ জানাতে পারেন।":
+      "The owner can invite staff and managers.",
+  "ব্যবসায় অন্তত একজন মালিক থাকতে হয়। শেষ মালিককে সরানো বা তার ভূমিকা বদলানো যায় না।":
+      "A business needs at least one owner. The last owner cannot be removed or given another role.",
+  "ভূমিকা বদলানো যায়নি।": "Could not change the role.",
+  "আমন্ত্রিত": "Invited",
+  "আমন্ত্রণ বাতিল করুন": "Cancel invitation",
+  "কাকে আমন্ত্রণ জানাবেন?": "Whom do you want to invite?",
+  "নাম বা দক্ষতা খুঁজুন": "Search by name or skill",
+  "কাউকে পাওয়া যায়নি।": "Nobody found.",
+  "এটি মুছে ফেলবেন?": "Delete this?",
+  "পণ্য বা সেবাটি তালিকা থেকে সরে যাবে।":
+      "The product or service will be removed from the list.",
+  "মুছে ফেলা যায়নি।": "Could not delete it.",
+  "এখনো কোনো পণ্য বা সেবা নেই": "No products or services yet",
+  "আপনার পণ্য বা সেবা যোগ করুন, যাতে ক্রেতা ও অংশীদাররা জানতে পারেন।":
+      "Add your products or services so buyers and partners know what you offer.",
+  "এই ব্যবসা এখনো কোনো পণ্য বা সেবা যোগ করেনি।":
+      "This business has not added any products or services yet.",
+  "সেবা": "Service",
+  "পণ্য": "Product",
+  "KAAJ লুকিয়ে রেখেছে": "Hidden by KAAJ",
+  "রিপোর্টের পরে এটি সবার কাছ থেকে লুকানো হয়েছে।":
+      "After a report it was hidden from everyone.",
+  "পণ্য বা সেবা যোগ করুন": "Add a product or service",
+  "পণ্য বা সেবা বদলান": "Edit product or service",
+  "নাম (বাংলা)": "Name (Bangla)",
+  "বাংলা বা ইংরেজিতে অন্তত একটি নাম দিন":
+      "Give at least one name, in Bangla or English",
+  "নাম (ইংরেজি)": "Name (English)",
+  "বিবরণ": "Description",
+  "বিবরণ ১০০০ অক্ষরের বেশি হতে পারবে না":
+      "The description can be at most 1000 characters",
+  "সর্বনিম্ন দাম (টাকা)": "Lowest price (taka)",
+  "সর্বোচ্চ দাম (টাকা)": "Highest price (taka)",
+  "সর্বোচ্চ দাম সর্বনিম্নের চেয়ে কম হতে পারে না":
+      "The highest price cannot be below the lowest",
+  "দামের একক (যেমন প্রতি কেজি)": "Price unit (for example per kg)",
+  "একক ৪০ অক্ষরের বেশি হতে পারবে না": "The unit can be at most 40 characters",
+  "চালু আছে": "Active",
+  "বন্ধ থাকলে শুধু সদস্যরা দেখেন।": "When inactive, only members see it.",
+  "সংরক্ষণ করা যায়নি।": "Could not save.",
+  "আপনি": "You",
+  "ভূমিকা করুন:": "Make:",
 };

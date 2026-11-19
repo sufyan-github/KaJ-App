@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../jobs/presentation/screens/jobs_screens.dart';
 import 'presentation/business_detail_screen.dart';
 import 'presentation/business_form_screen.dart';
+import 'presentation/business_members_screen.dart';
+import 'presentation/business_offerings_screen.dart';
 import 'presentation/my_businesses_screen.dart';
 
 /// Paths of the Business screens. All start with `/businesses`, `/partners`
@@ -48,5 +50,15 @@ List<RouteBase> businessRoutes() => [
     path: '/businesses/:id/jobs/new',
     builder: (_, state) =>
         CreateJobScreen(businessProfileId: state.pathParameters['id']),
+  ),
+  GoRoute(
+    path: '/businesses/:id/members',
+    builder: (_, state) =>
+        BusinessMembersScreen(businessId: state.pathParameters['id']!),
+  ),
+  GoRoute(
+    path: '/businesses/:id/offerings',
+    builder: (_, state) =>
+        BusinessOfferingsScreen(businessId: state.pathParameters['id']!),
   ),
 ];
