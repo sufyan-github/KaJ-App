@@ -1,5 +1,7 @@
 import 'package:go_router/go_router.dart';
 
+import 'presentation/idea_detail_screen.dart';
+import 'presentation/idea_editor_screen.dart';
 import 'presentation/my_ideas_section.dart';
 
 /// Paths of the Ideas screens. All start with `/ideas`, which the paywall
@@ -27,4 +29,17 @@ abstract final class IdeaPaths {
 /// Screens of Ideas (always free).
 List<RouteBase> ideaRoutes() => [
   GoRoute(path: IdeaPaths.mine, builder: (_, _) => const MyIdeasScreen()),
+  GoRoute(path: IdeaPaths.create, builder: (_, _) => const IdeaEditorScreen()),
+  GoRoute(
+    path: '/ideas/:id',
+    builder: (_, state) =>
+        IdeaDetailScreen(ideaId: state.pathParameters['id']!),
+    routes: [
+      GoRoute(
+        path: 'edit',
+        builder: (_, state) =>
+            IdeaEditorScreen(ideaId: state.pathParameters['id']),
+      ),
+    ],
+  ),
 ];
