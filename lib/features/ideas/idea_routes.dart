@@ -1,7 +1,10 @@
 import 'package:go_router/go_router.dart';
 
+import 'presentation/idea_access_screens.dart';
 import 'presentation/idea_detail_screen.dart';
 import 'presentation/idea_editor_screen.dart';
+import 'presentation/idea_role_screens.dart';
+import 'presentation/idea_team_screens.dart';
 import 'presentation/my_ideas_section.dart';
 
 /// Paths of the Ideas screens. All start with `/ideas`, which the paywall
@@ -39,6 +42,45 @@ List<RouteBase> ideaRoutes() => [
         path: 'edit',
         builder: (_, state) =>
             IdeaEditorScreen(ideaId: state.pathParameters['id']),
+      ),
+      GoRoute(
+        path: 'access',
+        builder: (_, state) =>
+            IdeaAccessScreen(ideaId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: 'views',
+        builder: (_, state) =>
+            IdeaViewsScreen(ideaId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: 'roles/new',
+        builder: (_, state) =>
+            IdeaRoleEditorScreen(ideaId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: 'roles/:roleId/edit',
+        builder: (_, state) => IdeaRoleEditorScreen(
+          ideaId: state.pathParameters['id']!,
+          roleId: state.pathParameters['roleId'],
+        ),
+      ),
+      GoRoute(
+        path: 'roles/:roleId/matches',
+        builder: (_, state) => IdeaRoleMatchesScreen(
+          ideaId: state.pathParameters['id']!,
+          roleId: state.pathParameters['roleId']!,
+        ),
+      ),
+      GoRoute(
+        path: 'team',
+        builder: (_, state) =>
+            IdeaTeamScreen(ideaId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: 'convert',
+        builder: (_, state) =>
+            IdeaConvertScreen(ideaId: state.pathParameters['id']!),
       ),
     ],
   ),

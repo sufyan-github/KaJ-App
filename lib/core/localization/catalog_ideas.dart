@@ -179,4 +179,97 @@ const ideaTranslations = <String, String>{
   "আইডিয়াটি মুছে ফেলুন": "Delete this idea",
   "সারাংশ সবার জন্য খুলতে আগে পরিচয় (এনআইডি ও সেলফি) যাচাই করুন। এখন গোপন রেখে সংরক্ষণ করতে পারেন।":
       "To open the summary to everyone, verify your identity (NID and selfie) first. You can save it as private for now.",
+  "অনুমতি তুলে নেবেন?": "Revoke access?",
+  "এই মানুষটি আর বিস্তারিত দেখতে পারবেন না। চাইলে তিনি আবার অনুরোধ করতে পারবেন।":
+      "This person will no longer see the details. They can ask again if they want.",
+  "দেখার অনুমতি তুলে নিন": "Revoke access",
+  "সিদ্ধান্তটি সংরক্ষণ করা যায়নি।": "Could not save the decision.",
+  "অনুমতি পাওয়া মানুষ সমস্যা, সমাধান ও বিস্তারিত দেখবেন এবং গোপন রাখতে রাজি হয়েছেন। প্রতিবার দেখা আপনার কাছে লেখা থাকে।":
+      "Approved people see the problem, solution and details and have agreed to keep them confidential. Each view is recorded for you.",
+  "এখনো কোনো অনুরোধ নেই": "No requests yet",
+  "কেউ বিস্তারিত দেখতে চাইলে এখানে দেখবেন এবং নোটিফিকেশন পাবেন।":
+      "When someone asks to see the details you will see it here and get a notification.",
+  "অপেক্ষমাণ দেখার অনুরোধ": "Waiting access requests",
+  "যাঁরা দেখতে পারেন": "People with access",
+  "আগের দেখার অনুরোধ": "Earlier access requests",
+  "দেখার অনুমতি দিন": "Approve access",
+  "অনুরোধ নাকচ করুন": "Decline request",
+  "এখনো কেউ বিস্তারিত দেখেননি": "Nobody has viewed the details yet",
+  "দলের সদস্য বা অনুমতি পাওয়া কেউ বিস্তারিত খুললে এখানে লেখা থাকবে।":
+      "When a team member or an approved person opens the details it is recorded here.",
+  "দলের সদস্য হিসেবে": "As a team member",
+  "অনুমতি নিয়ে": "With approved access",
+  "ভূমিকাটি পাওয়া যাচ্ছে না": "This role is not available",
+  "ভূমিকাটি সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।":
+      "Could not save the role. Try again.",
+  "ভূমিকাটি মুছে ফেলবেন?": "Delete this role?",
+  "ভূমিকাটি আর কেউ দেখবেন না। পাঠানো আগ্রহগুলো থেকে যাবে।":
+      "Nobody will see this role any more. Interest already sent stays.",
+  "ভূমিকা মুছুন": "Delete role",
+  "ভূমিকাটি মুছে ফেলা যায়নি।": "Could not delete the role.",
+  "সারাংশ সবার জন্য খোলা থাকলে ভূমিকার বিবরণও সবাই দেখবেন। এখানে গোপন কিছু লিখবেন না।":
+      "If the summary is open to all, everyone also sees the role description. Do not write anything confidential here.",
+  "কোন ধরনের মানুষ দরকার": "What kind of person you need",
+  "ভূমিকার নাম (ঐচ্ছিক)": "Role name (optional)",
+  "ভূমিকার নাম সর্বোচ্চ ৮০ অক্ষরের হতে পারে।":
+      "The role name can be at most 80 characters.",
+  "কী কাজ করবেন (ঐচ্ছিক)": "What they will do (optional)",
+  "ভূমিকার বিবরণ সর্বোচ্চ ৫০০ অক্ষরের হতে পারে।":
+      "The role description can be at most 500 characters.",
+  "ভূমিকার দরকারি দক্ষতা": "Skills the role needs",
+  "ভূমিকার দক্ষতা বাছুন": "Choose skills",
+  "দক্ষতা দিলে KAAJ মানানসই মানুষ খুঁজে দেখাতে পারে।":
+      "Add skills so KAAJ can suggest matching people.",
+  "কতটা সময় লাগবে": "Time needed",
+  "কী শর্তে": "On what terms",
+  "ভূমিকার অবস্থা": "Role status",
+  "ভূমিকা সংরক্ষণ করুন": "Save role",
+  "দক্ষতা বাছাই শেষ": "Done choosing skills",
+  "KAAJ-এর পরামর্শ": "Suggested by KAAJ",
+  "এখনো মানানসই কেউ নেই": "No matching people yet",
+  "ভূমিকায় দক্ষতা যোগ করুন, অথবা পরে আবার দেখুন। শুধু যাঁরা খুঁজে পাওয়ার অনুমতি দিয়েছেন তাঁরাই এখানে আসেন।":
+      "Add skills to the role, or check again later. Only people who allow being found appear here.",
+  "দলে যোগ করা যায়নি।": "Could not add to the team.",
+  "দল থেকে সরাবেন?": "Remove from the team?",
+  "তিনি আর বিস্তারিত দেখতে বা দলের আলাপে থাকতে পারবেন না। সহযোগিতার অনুরোধটি থেকে যাবে।":
+      "They will no longer see the details or be in the team chat. The collaboration request stays.",
+  "আইডিয়ার দল থেকে সরান": "Remove from the idea team",
+  "দল থেকে সরানো যায়নি।": "Could not remove from the team.",
+  "আইডিয়ার মালিক": "Idea owner",
+  "নীতিগতভাবে সম্মত": "Agreed in principle",
+  "দলে এখনো আর কেউ নেই।": "Nobody else is on the team yet.",
+  "আইডিয়ার দলে যোগ করুন": "Add to the idea team",
+  "যাঁদের সঙ্গে সহযোগিতায় দুজনেই সম্মত হয়েছেন, শুধু তাঁদের দলে যোগ করা যায়।":
+      "You can only add people with whom you both agreed a collaboration.",
+  "সম্মত সহযোগিতাগুলো লোড করা যায়নি।":
+      "Could not load the agreed collaborations.",
+  "এখন যোগ করার মতো কেউ নেই।": "Nobody to add right now.",
+  "আইডিয়ার দলে নিন": "Add to team",
+  "দলের সদস্য বিস্তারিত দেখবেন ও দলের আলাপে থাকবেন। এটি কোনো আইনি অংশীদারি নয়।":
+      "Team members see the details and join the team chat. This is not a legal partnership.",
+  "দলে তাঁর ভূমিকা (ঐচ্ছিক)": "Their role in the team (optional)",
+  "ব্যবসায় রূপ দেবেন?": "Turn into a business?",
+  "আইডিয়াটি একটি ব্যবসা হবে এবং দলের সবাই কর্মী হিসেবে আমন্ত্রণ পাবেন। এটি আর ফেরানো যাবে না।":
+      "The idea becomes a business and everyone on the team is invited as staff. This cannot be undone.",
+  "আইডিয়া থেকে ব্যবসা তৈরি করুন": "Create the business",
+  "আইডিয়া থেকে ব্যবসা তৈরি করা যায়নি। আবার চেষ্টা করুন।":
+      "Could not create the business. Try again.",
+  "আইডিয়াটি থেকে একটি নতুন ব্যবসার প্রোফাইল তৈরি হবে, আপনি হবেন মালিক। দলের সদস্যরা ব্যবসায় কর্মী হিসেবে আমন্ত্রণ পাবেন; তাঁরা রাজি হলে যোগ দেবেন। আইডিয়াটি “ব্যবসায় রূপ নিয়েছে” হিসেবে থেকে যাবে।":
+      "A new business profile is created from the idea, with you as the owner. Your team members are invited to the business as staff and join if they accept. The idea stays, marked as became a business.",
+  "এই আইডিয়া ইতিমধ্যে একটি ব্যবসা।": "This idea is already a business.",
+  "নতুন ব্যবসার অবস্থা": "Business stage",
+  "অনানুষ্ঠানিক ব্যবসা হিসেবে": "As an informal business",
+  "ট্রেড লাইসেন্স ছাড়া চলছে বা শুরু হচ্ছে।":
+      "Running or starting without a trade licence.",
+  "নিবন্ধিত ব্যবসা হিসেবে": "As a registered business",
+  "ট্রেড লাইসেন্স আছে; পরে ব্যবসা যাচাই করাতে পারবেন।":
+      "Has a trade licence; you can get the business verified later.",
+  "ব্যবসার নাম (খালি রাখলে আইডিয়ার শিরোনাম)":
+      "Business name (empty uses the idea title)",
+  "নতুন ব্যবসার নাম ২ থেকে ১২০ অক্ষরের হতে হবে।":
+      "The business name must be 2 to 120 characters.",
+  "নতুন ব্যবসার ট্রেড লাইসেন্স নম্বর (ঐচ্ছিক)":
+      "Trade licence number (optional)",
+  "লাইসেন্স নম্বর সর্বোচ্চ ৬০ অক্ষরের হতে পারে।":
+      "The licence number can be at most 60 characters.",
 };
