@@ -28,6 +28,10 @@ import { AbilityFactory } from "./common/policy/ability.factory";
 import { PolicyGuard } from "./common/policy/policy.guard";
 import { PolicyResourceResolver } from "./common/policy/policy-resource.resolver";
 import { TimeModule } from "./common/time/time.module";
+import {
+  UserRateLimitGuard,
+  UserRateLimitModule,
+} from "./common/rate-limit/user-rate-limit";
 import { validateEnvironment } from "./config/environment";
 import { createLoggerConfig } from "./config/logger.config";
 import { InfrastructureModule } from "./infra/infrastructure.module";
@@ -104,6 +108,7 @@ import { CommunityModule } from "./modules/community/community.module";
     UploadsModule,
     TrainingModule,
     JobAlertsModule,
+    UserRateLimitModule,
   ],
   providers: [
     AbilityFactory,
@@ -122,6 +127,7 @@ import { CommunityModule } from "./modules/community/community.module";
     { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_GUARD, useClass: PolicyGuard },
     { provide: APP_GUARD, useClass: SubscriptionGuard },
+    { provide: APP_GUARD, useClass: UserRateLimitGuard },
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
     { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
   ],

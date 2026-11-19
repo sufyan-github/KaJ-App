@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { UserRateLimit } from "../../common/rate-limit/user-rate-limit";
 import { Policy } from "../../common/policy/policy.decorator";
 import { Policies } from "../../common/policy/policy.types";
 import { AccessTokenClaims } from "../auth/auth-token.service";
@@ -14,6 +15,7 @@ export class ModerationController {
   constructor(private readonly moderation: ModerationService) {}
 
   @Post("reports")
+  @UserRateLimit("report-create")
   @Policy(Policies.authenticated())
   report(
     @CurrentUser() claims: AccessTokenClaims,

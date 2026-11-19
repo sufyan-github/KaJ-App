@@ -15,6 +15,7 @@ import {
 } from "@prisma/client";
 
 import { CLOCK, Clock } from "../../common/time/clock";
+import { UserRateLimiter } from "../../common/rate-limit/user-rate-limit";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { STORAGE_PORT, StoragePort } from "../../infra/storage/storage.port";
 import { NotificationsService } from "../notifications/notifications.service";
@@ -35,6 +36,7 @@ export class ChatService {
     @Inject(CLOCK) private readonly clock: Clock,
     @Optional() private readonly userBlocks?: UserBlocksService,
     @Optional() private readonly engagementService?: EngagementService,
+    @Optional() private readonly rateLimiter?: UserRateLimiter,
   ) {}
 
   private get blocks() {
@@ -285,6 +287,8 @@ export class ChatService {
 
   async send(userId: string, conversationId: string, input: SendMessageDto) {
     const conversation = await this.assertParticipant(userId, conversationId);
+    // API-3: HTTP and socket sends share one per-sender limit.
+    await this.rateLimiter?.consume(userId, "chat-send");
     const group = conversation.kind === ConversationKind.GROUP;
     const other = conversation.participants.find(
       (item) => item.user_id !== userId,
