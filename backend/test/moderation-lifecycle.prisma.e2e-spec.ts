@@ -366,7 +366,8 @@ databaseDescribe("moderation lifecycle with PostgreSQL", () => {
     expect(result.items).toEqual([
       expect.objectContaining({
         userId: subjectId,
-        displayName: "Reported worker",
+        // R1 name rule: masked, no full-name choice and no hire between them.
+        displayName: "Reported W.",
       }),
     ]);
     expect(result.items[0]).not.toHaveProperty("phone");
