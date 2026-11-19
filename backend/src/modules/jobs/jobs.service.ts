@@ -390,10 +390,18 @@ export class JobsService {
       job,
       await this.blocks.hiddenFrom(posterUserId),
     );
+    // One name rule (R1): masked unless shown by choice or already hired.
+    const hiredWith = await this.engagement.hiredWith(
+      posterUserId,
+      ranked.map(({ worker }) => worker.id),
+    );
     return {
       items: ranked.map(({ worker, match }) => ({
         id: worker.id,
-        displayName: worker.profile?.display_name ?? "Worker",
+        displayName: visibleDisplayName(worker.profile?.display_name ?? "", {
+          showFullName: worker.profile?.show_full_name ?? false,
+          hired: hiredWith.has(worker.id),
+        }),
         ratingAverage: worker.worker_profile?.rating_avg.toString() ?? "0",
         experienceYears: worker.worker_profile?.experience_years ?? 0,
         skills: worker.skills.map((item) => ({

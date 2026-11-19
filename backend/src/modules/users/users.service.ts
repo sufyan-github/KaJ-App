@@ -15,6 +15,8 @@ import { UpdateWorkerProfileDto } from "./dto/update-worker-profile.dto";
 import { WorkerSkillInputDto } from "./dto/update-worker-skills.dto";
 import { validateWorkerSkillIds } from "./worker-skills.rules";
 import { AuthTokenService } from "../auth/auth-token.service";
+import { EngagementService } from "../safety/engagement.service";
+import { visibleDisplayName } from "./public-profile.projection";
 
 @Injectable()
 export class UsersService {
@@ -407,10 +409,19 @@ export class UsersService {
       include: { target: { include: { profile: true, worker_profile: true } } },
       orderBy: { created_at: "desc" },
     });
+    // One name rule (R1): masked unless shown by choice or already hired.
+    const hiredWith = await new EngagementService(this.prisma).hiredWith(
+      userId,
+      rows.map((row) => row.target_user_id),
+    );
     return {
       items: rows.map((row) => ({
         userId: row.target_user_id,
-        displayName: row.target.profile?.display_name || "কর্মী",
+        displayName:
+          visibleDisplayName(row.target.profile?.display_name ?? "", {
+            showFullName: row.target.profile?.show_full_name ?? false,
+            hired: hiredWith.has(row.target_user_id),
+          }) || "কর্মী",
         ratingAverage: row.target.worker_profile?.rating_avg.toString() ?? "0",
         savedAt: row.created_at.toISOString(),
       })),
