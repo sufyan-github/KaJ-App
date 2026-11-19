@@ -8,6 +8,8 @@ import '../../../../core/widgets/k_localized_text.dart';
 import '../../../catalog/domain/entities/catalog_category.dart';
 import '../../../catalog/domain/entities/catalog_skill.dart';
 import '../../../catalog/presentation/controllers/catalog_providers.dart';
+import '../../../trust_safety/presentation/emergency_call.dart';
+import '../../../trust_safety/presentation/report_action.dart';
 import '../controllers/public_profile_provider.dart';
 
 class CategoriesBrowseScreen extends ConsumerWidget {
@@ -339,6 +341,9 @@ class PublicWorkerProfileScreen extends ConsumerWidget {
         title: KLocalizedText(
           id == null ? 'কর্মীর পাবলিক প্রোফাইল' : 'কর্মীর প্রোফাইল',
         ),
+        actions: [
+          if (id != null) ReportAction(targetType: 'USER', targetId: id),
+        ],
       ),
       body: profile.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -450,16 +455,13 @@ class HelpSafetyScreen extends StatelessWidget {
     body: ListView(
       padding: const EdgeInsets.all(KSpacing.md),
       children: [
-        const Card(
-          color: KColors.surfaceAlt,
-          child: ListTile(
-            leading: Icon(Icons.emergency_outlined, color: KColors.danger),
-            title: KLocalizedText('তাৎক্ষণিক বিপদে ৯৯৯'),
-            subtitle: KLocalizedText(
-              'KAAJ জরুরি সেবা নয়। নিরাপদ স্থানে যান এবং জাতীয় জরুরি সেবায় কল করুন।',
-            ),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: KSpacing.sm),
+          child: KLocalizedText(
+            'KAAJ জরুরি সেবা নয়। নিরাপদ স্থানে যান এবং জাতীয় জরুরি সেবায় কল করুন।',
           ),
         ),
+        const EmergencyCallTiles(),
         const ListTile(
           leading: Icon(Icons.shield_outlined),
           title: KLocalizedText('ব্যক্তিগত তথ্য শেয়ার করবেন না'),

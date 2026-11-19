@@ -6,18 +6,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/errors/failure.dart';
+import '../../../core/errors/failure_copy.dart';
 import '../../../core/localization/kaaj_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/k_empty_state.dart';
 import '../../../core/widgets/k_localized_text.dart';
 import '../../../core/widgets/k_network_image.dart';
 import '../../../core/widgets/k_primary_button.dart';
 import '../../catalog/domain/entities/catalog_category.dart';
 import '../../catalog/presentation/controllers/catalog_providers.dart';
 import '../domain/trust_models.dart';
+import 'emergency_call.dart';
 import 'trust_safety_providers.dart';
 
+/// Reason codes `POST /reports` accepts. The women-safety reasons sit near
+/// the top; staff review them first.
 const reportReasons = <String, String>{
   'HARASSMENT': 'হয়রানি বা হুমকি',
+  'SEXUAL_HARASSMENT': 'যৌন হয়রানি',
+  'STALKING': 'পিছু নেওয়া বা নজরদারি',
+  'UNSAFE_LOCATION': 'অনিরাপদ জায়গা',
   'SCAM': 'প্রতারণা',
   'WAGE_THEFT': 'পারিশ্রমিক না দেওয়া',
   'UNSAFE_WORK': 'অনিরাপদ কাজ',
@@ -28,6 +36,28 @@ const reportReasons = <String, String>{
   'NO_SHOW': 'উপস্থিত হননি',
   'OTHER': 'অন্যান্য',
 };
+
+/// What can be reported (`targetType`), with how the form names it.
+const reportTargets = <String, String>{
+  'USER': 'একজন ব্যক্তি',
+  'JOB': 'কাজের পোস্ট',
+  'CONVERSATION': 'চ্যাট',
+  'MESSAGE': 'একটি বার্তা',
+  'ASSIGNMENT': 'কাজের চুক্তি',
+  'BUSINESS': 'একটি ব্যবসা',
+  'BUSINESS_OFFERING': 'পণ্য বা সেবা',
+  'COLLABORATION_REQUEST': 'সহযোগিতার অনুরোধ',
+  'IDEA': 'একটি আইডিয়া',
+  'IDEA_ROLE': 'আইডিয়ার ভূমিকা',
+  'INTRODUCTION': 'পরিচয়ের অনুরোধ',
+  'SESSION': 'একটি সেশন',
+  'GROUP': 'কমিউনিটি গ্রুপ',
+};
+
+/// Whether a report link names a known target and a well-formed id.
+bool isReportableTarget(String type, String id) =>
+    reportTargets.containsKey(type) &&
+    RegExp(r'^[A-Za-z0-9_-]{1,64}$').hasMatch(id);
 
 class ReportScreen extends ConsumerStatefulWidget {
   const ReportScreen({
@@ -54,79 +84,102 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: const KLocalizedText('নিরাপত্তা রিপোর্ট')),
-    body: Column(
-      children: [
-        Expanded(
-          child: ListView(
-            primary: true,
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: const EdgeInsets.all(KSpacing.lg),
+    body: !isReportableTarget(widget.targetType, widget.targetId)
+        // Links can carry any path; never send an unknown target.
+        ? const KEmptyState(
+            icon: Icons.report_off_outlined,
+            title: 'এটি রিপোর্ট করা যাচ্ছে না',
+            message:
+                'লিংকটি সঠিক নয়। যেখানে সমস্যা দেখেছেন সেখান থেকে রিপোর্ট করুন।',
+          )
+        : Column(
             children: [
-              const Card(
-                color: KColors.surfaceAlt,
-                child: ListTile(
-                  leading: Icon(Icons.shield_outlined, color: KColors.primary),
-                  title: KLocalizedText('রিপোর্ট গোপন রাখা হয়'),
-                  subtitle: KLocalizedText(
-                    'যাকে রিপোর্ট করছেন তিনি আপনার পরিচয় বা বিবরণ দেখতে পাবেন না। জরুরি বিপদে ৯৯৯-এ কল করুন।',
-                  ),
-                ),
-              ),
-              const SizedBox(height: KSpacing.md),
-              DropdownButtonFormField<String>(
-                initialValue: _reason,
-                isExpanded: true,
-                decoration: InputDecoration(
-                  labelText: KaajLocalizations.text(context, 'রিপোর্টের কারণ'),
-                ),
-                items: reportReasons.entries
-                    .map(
-                      (e) => DropdownMenuItem(
-                        value: e.key,
-                        child: KLocalizedText(e.value),
+              Expanded(
+                child: ListView(
+                  primary: true,
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.all(KSpacing.lg),
+                  children: [
+                    Text(
+                      '${KaajLocalizations.text(context, 'যা রিপোর্ট করছেন:')} '
+                      '${KaajLocalizations.text(context, reportTargets[widget.targetType]!)}',
+                      key: const ValueKey('report-target'),
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: KSpacing.sm),
+                    const Card(
+                      color: KColors.surfaceAlt,
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.shield_outlined,
+                          color: KColors.primary,
+                        ),
+                        title: KLocalizedText('রিপোর্ট গোপন রাখা হয়'),
+                        subtitle: KLocalizedText(
+                          'যাকে রিপোর্ট করছেন তিনি আপনার পরিচয় বা বিবরণ দেখতে পাবেন না। জরুরি বিপদে ৯৯৯-এ কল করুন।',
+                        ),
                       ),
-                    )
-                    .toList(),
-                onChanged: (value) =>
-                    setState(() => _reason = value ?? _reason),
+                    ),
+                    const EmergencyCallTiles(),
+                    const SizedBox(height: KSpacing.md),
+                    DropdownButtonFormField<String>(
+                      initialValue: _reason,
+                      isExpanded: true,
+                      decoration: InputDecoration(
+                        labelText: KaajLocalizations.text(
+                          context,
+                          'রিপোর্টের কারণ',
+                        ),
+                      ),
+                      items: reportReasons.entries
+                          .map(
+                            (e) => DropdownMenuItem(
+                              value: e.key,
+                              child: KLocalizedText(e.value),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) =>
+                          setState(() => _reason = value ?? _reason),
+                    ),
+                    const SizedBox(height: KSpacing.md),
+                    TextField(
+                      controller: _description,
+                      minLines: 3,
+                      maxLines: 8,
+                      maxLength: 1000,
+                      decoration: InputDecoration(
+                        labelText: KaajLocalizations.text(
+                          context,
+                          'কি ঘটেছে? (কমপক্ষে ১০ অক্ষর)',
+                        ),
+                        hintText: KaajLocalizations.text(
+                          context,
+                          'ঘটনার সময় ও গুরুত্বপূর্ণ তথ্য লিখুন',
+                        ),
+                        alignLabelWithHint: true,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: KSpacing.md),
-              TextField(
-                controller: _description,
-                minLines: 3,
-                maxLines: 8,
-                maxLength: 1000,
-                decoration: InputDecoration(
-                  labelText: KaajLocalizations.text(
-                    context,
-                    'কি ঘটেছে? (কমপক্ষে ১০ অক্ষর)',
-                  ),
-                  hintText: KaajLocalizations.text(
-                    context,
-                    'ঘটনার সময় ও গুরুত্বপূর্ণ তথ্য লিখুন',
-                  ),
-                  alignLabelWithHint: true,
+              SafeArea(
+                top: false,
+                minimum: const EdgeInsets.fromLTRB(
+                  KSpacing.lg,
+                  KSpacing.sm,
+                  KSpacing.lg,
+                  KSpacing.md,
+                ),
+                child: KPrimaryButton(
+                  label: 'রিপোর্ট জমা দিন',
+                  isLoading: _loading,
+                  onPressed: _submit,
                 ),
               ),
             ],
           ),
-        ),
-        SafeArea(
-          top: false,
-          minimum: const EdgeInsets.fromLTRB(
-            KSpacing.lg,
-            KSpacing.sm,
-            KSpacing.lg,
-            KSpacing.md,
-          ),
-          child: KPrimaryButton(
-            label: 'রিপোর্ট জমা দিন',
-            isLoading: _loading,
-            onPressed: _submit,
-          ),
-        ),
-      ],
-    ),
   );
 
   Future<void> _submit() async {
@@ -168,7 +221,17 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
         if (mounted) Navigator.pop(context);
       }
     } on Object catch (error) {
-      if (mounted) _snack(_message(error));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(
+                failureText(context, error, 'রিপোর্ট জমা দেওয়া যায়নি।'),
+              ),
+            ),
+          );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }

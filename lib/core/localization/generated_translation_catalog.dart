@@ -1310,4 +1310,37 @@ const generatedEnglishTranslations = <String, String>{
   "কমিউনিটি": "Community",
   // R4: module name
   "ব্যবসা-বাণিজ্য": "Business",
+  // R4: safety
+  "জাতীয় জরুরি সেবা ৯৯৯": "National emergency service 999",
+  "পুলিশ, ফায়ার সার্ভিস ও অ্যাম্বুলেন্স। তাৎক্ষণিক বিপদে কল করুন।":
+      "Police, fire service and ambulance. Call in immediate danger.",
+  "নারী ও শিশু নির্যাতন প্রতিরোধ হেল্পলাইন ১০৯":
+      "Helpline against violence on women and children 109",
+  "হয়রানি, পিছু নেওয়া বা সহিংসতার শিকার হলে বিনা খরচে কল করুন।":
+      "Call free of charge if you face harassment, stalking or violence.",
+  "যৌন হয়রানি": "Sexual harassment",
+  "পিছু নেওয়া বা নজরদারি": "Stalking or being watched",
+  "অনিরাপদ জায়গা": "Unsafe location",
+  "একজন ব্যক্তি": "A person",
+  "কাজের পোস্ট": "A job post",
+  "চ্যাট": "Chat",
+  "একটি বার্তা": "A message",
+  "কাজের চুক্তি": "A hire",
+  "পণ্য বা সেবা": "A product or service",
+  "সহযোগিতার অনুরোধ": "Collaboration request",
+  "আইডিয়ার ভূমিকা": "A role on an idea",
+  "পরিচয়ের অনুরোধ": "Introduction request",
+  "কমিউনিটি গ্রুপ": "Community group",
+  "এটি রিপোর্ট করা যাচ্ছে না": "This cannot be reported",
+  "লিংকটি সঠিক নয়। যেখানে সমস্যা দেখেছেন সেখান থেকে রিপোর্ট করুন।":
+      "The link is not valid. Report from the place where you saw the problem.",
+  "রিপোর্ট জমা দেওয়া যায়নি।": "Could not send the report.",
+  // R4: safety (interpolated)
+  "যা রিপোর্ট করছেন:": "Reporting:",
+  "ফোন অ্যাপ খোলা যায়নি। নিজে ডায়াল করুন:":
+      "Could not open the phone app. Dial it yourself:",
+  // R4: report targets
+  "একটি ব্যবসা": "A business",
+  "একটি আইডিয়া": "An idea",
+  "একটি সেশন": "A session",
 };
