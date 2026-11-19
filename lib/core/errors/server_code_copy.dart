@@ -136,8 +136,8 @@ const serverCodeCopy = <String, ({String bn, String en})>{
     en: "This role is no longer open.",
   ),
   "IDENTITY_REQUIRED": (
-    bn: "মেন্টর হওয়ার আবেদনের আগে পরিচয় (এনআইডি ও সেলফি) যাচাই করুন।",
-    en: "Verify your identity (NID and selfie) before applying to mentor.",
+    bn: "আগে আপনার পরিচয় (এনআইডি ও সেলফি) যাচাই করুন।",
+    en: "Verify your identity (NID and selfie) first.",
   ),
   "INTRODUCTION_ALREADY_PENDING": (
     bn: "এই বিশেষজ্ঞের কাছে আপনার একটি অনুরোধ এখনো অপেক্ষমাণ।",

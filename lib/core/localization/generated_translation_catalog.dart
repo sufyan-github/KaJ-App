@@ -1328,7 +1328,7 @@ const generatedEnglishTranslations = <String, String>{
   "কাজের চুক্তি": "A hire",
   "পণ্য বা সেবা": "A product or service",
   "সহযোগিতার অনুরোধ": "Collaboration request",
-  "আইডিয়ার ভূমিকা": "A role on an idea",
+  "একটি আইডিয়ার ভূমিকা": "A role on an idea",
   "পরিচয়ের অনুরোধ": "Introduction request",
   "কমিউনিটি গ্রুপ": "Community group",
   "এটি রিপোর্ট করা যাচ্ছে না": "This cannot be reported",

@@ -588,7 +588,8 @@ bool isCommunityRoute(String location) =>
 
 /// Whether [location] stays open without a subscription. Shared screens
 /// (Explore, My activity, notifications, safety, reports) open as soon as
-/// any module is free; chat opens for Community and Business rooms.
+/// any module is free. Conversations are always open: collaboration and
+/// idea rooms are free, and the server gates starting a job chat itself.
 bool isFreeRoute(String location, Set<String> freeModules) {
   final learn = freeModules.contains('LEARN');
   final community = freeModules.contains('COMMUNITY');
@@ -604,7 +605,7 @@ bool isFreeRoute(String location, Set<String> freeModules) {
       location.startsWith('/report/')) {
     return true;
   }
-  return community && _under(location, AppRoutes.conversations);
+  return _under(location, AppRoutes.conversations);
 }
 
 String onboardingRouteForStep(OnboardingState state) => switch (state.step) {

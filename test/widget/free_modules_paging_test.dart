@@ -104,11 +104,10 @@ void main() {
         expect(authRedirect(free, route), isNull, reason: route);
         expect(authRedirect(none, route), AppRoutes.subscription);
       }
+      // Collaboration and idea rooms are free; job chats are gated by the
+      // server when they are opened.
       expect(authRedirect(free, AppRoutes.chatThread('c1')), isNull);
-      expect(
-        authRedirect(none, AppRoutes.chatThread('c1')),
-        AppRoutes.subscription,
-      );
+      expect(authRedirect(none, AppRoutes.chatThread('c1')), isNull);
     });
 
     test('Work keeps the paywall', () {
