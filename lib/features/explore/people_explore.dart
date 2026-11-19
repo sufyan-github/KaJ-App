@@ -4,11 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/formatting/kaaj_format.dart';
 import '../../core/localization/kaaj_localizations.dart';
-import '../../core/routing/app_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/k_empty_state.dart';
 import '../../core/widgets/k_localized_text.dart';
 import '../../core/widgets/load_more.dart';
+import '../community/community_routes.dart';
 import '../jobs/presentation/screens/jobs_screens.dart';
 import '../jobs/presentation/widgets/opportunity_listing.dart';
 import '../mentor/domain/mentor_models.dart';
@@ -245,12 +245,37 @@ class _MentorCard extends StatelessWidget {
             ],
             if (mentor.bio?.isNotEmpty ?? false)
               Text(mentor.bio!, maxLines: 3, overflow: TextOverflow.ellipsis),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () => context.push(AppRoutes.exploreLearn),
-                child: const KLocalizedText('শেখার সুযোগ দেখুন'),
-              ),
+            const SizedBox(height: KSpacing.sm),
+            // An expert: ask for an introduction or book a consultation.
+            Wrap(
+              spacing: KSpacing.sm,
+              runSpacing: KSpacing.xs,
+              alignment: WrapAlignment.end,
+              children: [
+                OutlinedButton.icon(
+                  key: ValueKey('mentor-introduce-${mentor.id}'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, 44),
+                  ),
+                  onPressed: () => context.push(
+                    CommunityPaths.introduce(
+                      mentor.id,
+                      name: mentor.displayName,
+                    ),
+                  ),
+                  icon: const Icon(Icons.handshake_outlined),
+                  label: const KLocalizedText('পরিচয়ের অনুরোধ'),
+                ),
+                FilledButton.icon(
+                  key: ValueKey('mentor-book-${mentor.id}'),
+                  style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
+                  onPressed: () => context.push(
+                    CommunityPaths.book(mentor.id, name: mentor.displayName),
+                  ),
+                  icon: const Icon(Icons.event_outlined),
+                  label: const KLocalizedText('পরামর্শের সময় নিন'),
+                ),
+              ],
             ),
           ],
         ),
