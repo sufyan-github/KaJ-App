@@ -1,6 +1,8 @@
 import 'package:go_router/go_router.dart';
 
 import 'presentation/consultation_booking_screen.dart';
+import 'presentation/group_members_screen.dart';
+import 'presentation/group_screens.dart';
 import 'presentation/introduction_screens.dart';
 import 'presentation/session_detail_screen.dart';
 import 'presentation/session_form_screen.dart';
@@ -88,5 +90,44 @@ List<RouteBase> communityRoutes() => [
     path: '/sessions/:id/edit',
     builder: (context, state) =>
         SessionFormScreen(sessionId: state.pathParameters['id']),
+  ),
+  GoRoute(
+    path: CommunityPaths.groups,
+    builder: (context, state) => const MyGroupsScreen(),
+  ),
+  // Declared before the detail path so "new" is not read as an id.
+  GoRoute(
+    path: CommunityPaths.newGroup,
+    builder: (context, state) => const GroupFormScreen(),
+  ),
+  GoRoute(
+    path: '/community/groups/:id',
+    builder: (context, state) =>
+        GroupDetailScreen(groupId: state.pathParameters['id']!),
+  ),
+  GoRoute(
+    path: '/community/groups/:id/edit',
+    builder: (context, state) =>
+        GroupFormScreen(groupId: state.pathParameters['id']),
+  ),
+  GoRoute(
+    path: '/community/groups/:id/members',
+    builder: (context, state) =>
+        GroupMembersScreen(groupId: state.pathParameters['id']!),
+  ),
+  GoRoute(
+    path: '/community/groups/:id/announcements',
+    builder: (context, state) =>
+        GroupAnnouncementsScreen(groupId: state.pathParameters['id']!),
+  ),
+  GoRoute(
+    path: '/community/groups/:id/sessions',
+    builder: (context, state) =>
+        GroupSessionsScreen(groupId: state.pathParameters['id']!),
+  ),
+  GoRoute(
+    path: '/community/groups/:id/sessions/new',
+    builder: (context, state) =>
+        SessionFormScreen(groupId: state.pathParameters['id']),
   ),
 ];

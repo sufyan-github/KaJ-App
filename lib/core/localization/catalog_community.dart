@@ -310,4 +310,134 @@ const communityTranslations = <String, String>{
   // Booking
   "বিশেষজ্ঞ ওই সময়ে ফাঁকা নেই। অন্য সময় বেছে নিন।":
       "The expert is not free at that time. Choose another time.",
+  // Pieces composed with numbers or values
+  "সেখানেই নগদে": "cash on the spot",
+  "মতামতের শেষ সময়": "Feedback closes",
+  "জন সদস্য": "members",
+  "জনকে আমন্ত্রণ পাঠানো হয়েছে।": "people invited.",
+  // Community groups
+  "সব অনুরোধ": "All requests",
+  "সব সেশন": "All sessions",
+  "আমার দল": "My groups",
+  "দলগুলো লোড করা যায়নি।": "Could not load the groups.",
+  "সব দল": "All groups",
+  "নতুন দল শুরু করুন": "Start a new group",
+  "নতুন দল": "New group",
+  "বিশেষজ্ঞ খুঁজুন": "Find experts",
+  "বিশেষজ্ঞরা মানুষ > মেন্টর অংশে আছেন। সেখান থেকে পরিচয়ের অনুরোধ বা পরামর্শের সময় নিন।":
+      "Experts are under People > Mentor. Ask for an introduction or book a consultation there.",
+  "এখনো কোনো দল নেই": "No groups yet",
+  "কোনো দল মেলেনি": "No groups match",
+  "আপনার এলাকা বা কাজের মানুষদের নিয়ে একটি দল শুরু করুন।":
+      "Start a group for people of your area or trade.",
+  "অন্য শব্দে খুঁজুন বা ফিল্টার বদলান।":
+      "Try other words or change the filters.",
+  "অনুরোধ নাকচ করবেন?": "Turn down the request?",
+  "আমন্ত্রণ বাতিল করবেন?": "Cancel the invitation?",
+  "সদস্যকে সরাবেন?": "Remove the member?",
+  "তিনি পরে আবার যোগ দিতে চাইতে পারবেন।": "They can ask to join again later.",
+  "সরানো সদস্য আর এই দলে যোগ দিতে পারবেন না।":
+      "A removed member cannot join this group again.",
+  "সরিয়ে দিন": "Remove",
+  "হয়ে গেছে।": "Done.",
+  "সদস্যদের তালিকা লোড করা যায়নি।": "Could not load the members.",
+  "কোনো অপেক্ষমাণ অনুরোধ নেই": "No pending requests",
+  "কোনো সদস্য নেই": "No members",
+  "যোগ দেওয়ার অনুরোধ ও পাঠানো আমন্ত্রণ এখানে দেখা যাবে।":
+      "Join requests and sent invitations show here.",
+  "সদস্যরা যোগ দিলে এখানে দেখা যাবে।": "Members show here once they join.",
+  "অনুরোধ অনুমোদন হয়েছে।": "Request approved.",
+  "অনুমোদন করা যায়নি। আবার চেষ্টা করুন।": "Could not approve. Try again.",
+  "ভূমিকা বদলানো হয়েছে।": "Role changed.",
+  "ভূমিকা বদলানো যায়নি। আবার চেষ্টা করুন।":
+      "Could not change the role. Try again.",
+  "যোগ দিতে চান": "Wants to join",
+  "অনুমোদন করুন": "Approve",
+  "নাকচ করুন": "Turn down",
+  "দল থেকে সরিয়ে দিন": "Remove from the group",
+  "মডারেটর করুন": "Make moderator",
+  "অ্যাম্বাসেডর করুন": "Make ambassador",
+  "সাধারণ সদস্য করুন": "Make regular member",
+  "এটি শুধু নারীদের দল। প্রোফাইলে লিঙ্গ নারী দেওয়া থাকলে যোগ দেওয়া যায়।":
+      "This is a women-only group. You can join if your profile gender is female.",
+  "আপনি ইতিমধ্যে সদস্য, অথবা আপনার অনুরোধ অপেক্ষমাণ।":
+      "You are already a member, or your request is pending.",
+  "শুধু নারীদের দল শুরু করতে প্রোফাইলে লিঙ্গ নারী দেওয়া থাকতে হয়।":
+      "To start a women-only group your profile gender must be female.",
+  "আমন্ত্রণ এসেছে": "Invited",
+  "অনুরোধ অপেক্ষমাণ": "Request pending",
+  "সরানো হয়েছে": "Removed",
+  "ব্যক্তিগত": "Private",
+  "আপনি কোনো দলে নেই": "You are not in any group",
+  "খুঁজুন ও জানুন > কমিউনিটি থেকে দল খুঁজে যোগ দিন, অথবা নিজে একটি শুরু করুন।":
+      "Find a group in Explore > Community and join, or start one yourself.",
+  "অনুরোধ পাঠানো হয়েছে। মডারেটর অনুমোদন করলে জানানো হবে।":
+      "Request sent. You will be told when a moderator approves it.",
+  "আপনি দলে যোগ দিয়েছেন।": "You joined the group.",
+  "দলে যোগ দেওয়া যায়নি। আবার চেষ্টা করুন।":
+      "Could not join the group. Try again.",
+  "দল ছেড়ে দেবেন?": "Leave the group?",
+  "অনুরোধ তুলে নেবেন?": "Cancel your request?",
+  "আপনি আর দলের চ্যাট, ঘোষণা ও সেশন দেখতে পাবেন না।":
+      "You will no longer see the group chat, announcements and sessions.",
+  "পরে আবার যোগ দিতে চাইতে পারবেন।": "You can ask to join again later.",
+  "দল": "Group",
+  "সবার জন্য খোলা": "Open to everyone",
+  "লুকানো": "Hidden",
+  "শুধু নারীদের দল: যোগ দিতে প্রোফাইলে লিঙ্গ নারী দেওয়া থাকতে হয়, আর একজন মডারেটর অনুরোধ অনুমোদন করেন। সার্ভার এটি যাচাই করে।":
+      "Women-only group: joining needs the profile gender female, and a moderator approves the request. The server checks it.",
+  "যোগ দেওয়ার অনুরোধ পাঠান": "Ask to join",
+  "দলে যোগ দিন": "Join the group",
+  "এই দলে যোগ দিতে আপনাকে আমন্ত্রণ জানানো হয়েছে।":
+      "You are invited to join this group.",
+  "আমন্ত্রণ গ্রহণ করুন": "Accept the invitation",
+  "ফিরিয়ে দিন": "Decline",
+  "আপনার যোগ দেওয়ার অনুরোধ অপেক্ষমাণ। মডারেটর অনুমোদন করলে জানানো হবে।":
+      "Your request to join is pending. You will be told when a moderator approves it.",
+  "অনুরোধ তুলে নিন": "Cancel the request",
+  "একজন মডারেটর আপনাকে এই দল থেকে সরিয়েছেন।":
+      "A moderator removed you from this group.",
+  "দলের চ্যাট": "Group chat",
+  "ঘোষণা": "Announcements",
+  "দলের সেশন": "Group sessions",
+  "সদস্য ও অনুরোধ": "Members and requests",
+  "দল ছেড়ে দিন": "Leave the group",
+  "দল সম্পাদনা": "Edit group",
+  "দল সংরক্ষণ হয়েছে।": "Group saved.",
+  "দল তৈরি হয়েছে। আপনি এর মডারেটর।": "Group created. You are its moderator.",
+  "দল সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।":
+      "Could not save the group. Try again.",
+  "দলের নাম": "Group name",
+  "৩ থেকে ৮০ অক্ষরের মধ্যে লিখুন।": "Write between 3 and 80 characters.",
+  "কারা দেখতে পাবেন": "Who can see it",
+  "যে কেউ দলটি খুঁজে পাবেন ও যোগ দিতে পারবেন।":
+      "Anyone can find the group and join.",
+  "শুধু সদস্য ও আমন্ত্রিতরা দলটি দেখতে পান।":
+      "Only members and invited people can see the group.",
+  "শুধু নারীদের দল": "Women-only group",
+  "দল তৈরির পরে এটি বদলানো যায় না।":
+      "This cannot change after the group is created.",
+  "আপনার ও সদস্যদের প্রোফাইলে লিঙ্গ নারী দেওয়া থাকতে হবে; সার্ভার এটি যাচাই করে। যোগ দেওয়ার অনুরোধ মডারেটর অনুমোদন করেন। পরে বদলানো যায় না।":
+      "You and the members need the profile gender female; the server checks it. A moderator approves join requests. This cannot change later.",
+  "এলাকা (ঐচ্ছিক)": "Area (optional)",
+  "কাজের ধরন (ঐচ্ছিক)": "Type of work (optional)",
+  "কোনোটি নয়": "None",
+  "দল শুরু করুন": "Start the group",
+  "দল শুরু করতে পরিচয় যাচাই লাগে। একজন সর্বোচ্চ ৫টি দল শুরু করতে পারেন।":
+      "Starting a group needs identity verification. One person can start up to 5 groups.",
+  "ঘোষণা পাঠানো হয়েছে। দলের চ্যাটেও দেখা যাবে।":
+      "Announcement sent. It also shows in the group chat.",
+  "ঘোষণা পাঠানো যায়নি। আবার চেষ্টা করুন।":
+      "Could not send the announcement. Try again.",
+  "ঘোষণা লোড করা যায়নি।": "Could not load the announcements.",
+  "সব সদস্যের জন্য ঘোষণা": "Announcement for all members",
+  "ঘোষণা পাঠান": "Send announcement",
+  "এখনো কোনো ঘোষণা নেই": "No announcements yet",
+  "মডারেটর ও অ্যাম্বাসেডরদের ঘোষণা এখানে দেখা যাবে।":
+      "Announcements from moderators and ambassadors show here.",
+  "এখনো কোনো সেশন নেই": "No sessions yet",
+  "দলের জন্য আলোচনা, কর্মশালা বা অনুষ্ঠান আয়োজন করুন।":
+      "Host a discussion, workshop or event for the group.",
+  "মডারেটর বা অ্যাম্বাসেডর সেশন প্রকাশ করলে এখানে দেখা যাবে।":
+      "Sessions published by moderators or ambassadors show here.",
 };
