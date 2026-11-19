@@ -1,5 +1,5 @@
 "use client";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useState } from "react";
 import { adminApi, json } from "@/lib/admin-api";
 import {
   AdminLocale,
@@ -25,55 +25,21 @@ import {
   formatPoisha,
   formatNumber,
   formatBasisPoints,
+  Can,
+  RoleProvider,
+  useCan,
 } from "./ui";
+import {
+  type ConsoleModule,
+  type ModuleKey,
+  visibleModules,
+  visibleTabs,
+} from "@/lib/permissions";
 type Admin = {
   email: string;
   role: string;
   userId: string;
 };
-type ModuleKey =
-  | "dashboard"
-  | "users"
-  | "reports"
-  | "risk"
-  | "jobs"
-  | "applications"
-  | "verification"
-  | "categories"
-  | "locations"
-  | "config"
-  | "flags"
-  | "disputes"
-  | "subscriptions"
-  | "jobPayments"
-  | "notifications"
-  | "analytics"
-  | "learn"
-  | "business"
-  | "community"
-  | "audit";
-const modules: Array<[ModuleKey, string, string]> = [
-  ["dashboard", "Dashboard", "Live marketplace health"],
-  ["users", "Users", "Support and moderation"],
-  ["reports", "Safety reports", "Human review and progressive action"],
-  ["risk", "Risk review", "Deterministic signals, human decisions only"],
-  ["jobs", "Jobs", "Lifecycle rescue"],
-  ["applications", "Applications", "Unstick applications"],
-  ["verification", "Verification", "Document review queue"],
-  ["categories", "Categories", "D12 safety policies"],
-  ["locations", "Locations", "Launch service areas"],
-  ["config", "Configuration", "Preview and revert"],
-  ["flags", "Feature flags", "Percentage rollouts"],
-  ["disputes", "Disputes", "Evidence and resolution"],
-  ["subscriptions", "Subscriptions", "Plans and operator access"],
-  ["jobPayments", "Job payments", "Offline cash payment oversight"],
-  ["notifications", "Notifications", "Campaign dry-runs"],
-  ["analytics", "Analytics", "Marketplace health"],
-  ["learn", "Learn", "Mentors, learning and courses"],
-  ["business", "Business", "Sectors, business verification and content"],
-  ["community", "Community", "Groups, sessions, events and ambassadors"],
-  ["audit", "Audit trail", "Who changed what"],
-];
 export function OperationsConsole({
   admin,
   busy,
@@ -88,82 +54,112 @@ export function OperationsConsole({
   onLocaleChange: (locale: AdminLocale) => void;
 }) {
   setActiveAdminLocale(locale);
-  const [active, setActive] = useState<ModuleKey>("dashboard");
+  const modules = visibleModules(admin.role);
+  const [selected, setActive] = useState<ModuleKey>("dashboard");
+  // A role that cannot open the selected module lands on its first one.
+  const current =
+    modules.find((module) => module.key === selected) ?? modules[0];
+  const active = current?.key;
   return (
-    <main className="ops-shell">
-      <aside>
-        <div className="brand-row">
-          <div className="brand-mark small">{tr("\u0995")}</div>
-          <div>
-            <strong>{tr("KAAJ")}</strong>
-            <span>{tr("OPERATIONS")}</span>
+    <RoleProvider value={admin.role}>
+      <main className="ops-shell">
+        <aside>
+          <div className="brand-row">
+            <div className="brand-mark small">{tr("\u0995")}</div>
+            <div>
+              <strong>{tr("KAAJ")}</strong>
+              <span>{tr("OPERATIONS")}</span>
+            </div>
           </div>
-        </div>
-        <nav>
-          {modules.map(([key, name], index) => (
+          <nav>
+            {modules.map(({ key, name }, index) => (
+              <button
+                className={active === key ? "active" : ""}
+                aria-current={active === key ? "page" : undefined}
+                key={key}
+                onClick={() => setActive(key)}
+              >
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                {tr(name)}
+              </button>
+            ))}
+          </nav>
+          <div className="account">
+            <div className="avatar">{admin.email[0]?.toUpperCase()}</div>
+            <div>
+              <strong>{admin.email}</strong>
+              <span>{humanize(admin.role)}</span>
+            </div>
             <button
-              className={active === key ? "active" : ""}
-              key={key}
-              onClick={() => setActive(key)}
+              onClick={logout}
+              disabled={busy}
+              aria-label={tr("Sign out")}
             >
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              {tr(name)}
+              {tr("\u2197")}
             </button>
-          ))}
-        </nav>
-        <div className="account">
-          <div className="avatar">{admin.email[0]?.toUpperCase()}</div>
-          <div>
-            <strong>{admin.email}</strong>
-            <span>{humanize(admin.role)}</span>
           </div>
-          <button onClick={logout} disabled={busy} aria-label={tr("Sign out")}>
-            {tr("\u2197")}
-          </button>
-        </div>
-      </aside>
-      <section className="workspace">
-        <header>
-          <div>
-            <p className="eyebrow">{tr("MVP OPERATIONS")}</p>
-            <h1>{tr(modules.find(([key]) => key === active)?.[1] ?? "")}</h1>
-            <p>{tr(modules.find(([key]) => key === active)?.[2] ?? "")}</p>
-          </div>
-          <div className="header-actions">
-            <div className="locale-switch" aria-label={tr("Language")}>
-              <button
-                className={locale === "en" ? "active" : ""}
-                onClick={() => onLocaleChange("en")}
-              >
-                EN
-              </button>
-              <button
-                className={locale === "bn" ? "active" : ""}
-                onClick={() => onLocaleChange("bn")}
-              >
-                বাংলা
-              </button>
+        </aside>
+        <section className="workspace">
+          <header>
+            <div>
+              <p className="eyebrow">{tr("MVP OPERATIONS")}</p>
+              <h1>{tr(current?.name ?? "")}</h1>
+              <p>{tr(current?.note ?? "")}</p>
             </div>
-            <div className="session-pill">
-              <span />
-              {tr("Secure session \u00B7 30 min")}
+            <div className="header-actions">
+              <div className="locale-switch" aria-label={tr("Language")}>
+                <button
+                  className={locale === "en" ? "active" : ""}
+                  onClick={() => onLocaleChange("en")}
+                >
+                  EN
+                </button>
+                <button
+                  className={locale === "bn" ? "active" : ""}
+                  onClick={() => onLocaleChange("bn")}
+                >
+                  বাংলা
+                </button>
+              </div>
+              <div className="session-pill">
+                <span />
+                {tr("Secure session \u00B7 30 min")}
+              </div>
             </div>
+          </header>
+          <div className="notice compact">
+            <strong>{tr("Every view and action is audited.")}</strong>
+            <span>
+              {tr(
+                "High-risk changes require a reason and explicit confirmation.",
+              )}
+            </span>
           </div>
-        </header>
-        <div className="notice compact">
-          <strong>{tr("Every view and action is audited.")}</strong>
-          <span>
-            {tr(
-              "High-risk changes require a reason and explicit confirmation.",
-            )}
-          </span>
-        </div>
-        <ModuleView active={active} />
-      </section>
-    </main>
+          {current ? (
+            <ModuleView
+              active={current.key}
+              module={current}
+              role={admin.role}
+            />
+          ) : (
+            <div className="panel-state" role="alert">
+              {tr("Your role has no console views. Ask an administrator.")}
+            </div>
+          )}
+        </section>
+      </main>
+    </RoleProvider>
   );
 }
-function ModuleView({ active }: { active: ModuleKey }) {
+function ModuleView({
+  active,
+  module,
+  role,
+}: {
+  active: ModuleKey;
+  module: ConsoleModule;
+  role: string;
+}) {
   if (active === "dashboard") return <Dashboard />;
   if (active === "users") return <Users />;
   if (active === "reports") return <Reports />;
@@ -180,9 +176,44 @@ function ModuleView({ active }: { active: ModuleKey }) {
   if (active === "jobPayments") return <JobPayments />;
   if (active === "notifications") return <Notifications />;
   if (active === "analytics") return <Analytics />;
-  if (active === "learn") return <Learn />;
-  if (active === "business") return <Business />;
-  if (active === "community") return <Community />;
+  if (active === "learn")
+    return (
+      <TabbedModule
+        module={module}
+        role={role}
+        views={{
+          mentors: () => <MentorApplications />,
+          opportunities: () => <LearningOpportunities />,
+          courses: () => <Courses />,
+          certificates: () => <CompletionRecords />,
+        }}
+      />
+    );
+  if (active === "business")
+    return (
+      <TabbedModule
+        module={module}
+        role={role}
+        intro="Reported businesses, offerings, ideas and collaboration requests are handled in Safety reports."
+        views={{
+          verification: () => <Verification kind="BUSINESS" />,
+          sectors: () => <Sectors />,
+        }}
+      />
+    );
+  if (active === "community")
+    return (
+      <TabbedModule
+        module={module}
+        role={role}
+        intro="Reports on groups, sessions and introductions are decided in Safety reports; hiding here is for content found another way."
+        views={{
+          groups: () => <CommunityGroups />,
+          sessions: () => <CommunitySessions />,
+          ambassadors: () => <Ambassadors />,
+        }}
+      />
+    );
   return <AuditTrail />;
 }
 function Dashboard() {
@@ -328,12 +359,14 @@ function Subscriptions() {
             count={overview.data?.plans.length ?? 0}
             label={tr("plans")}
           />
-          <button
-            className="primary small-button"
-            onClick={() => setCreatePlan(true)}
-          >
-            {tr("Create plan")}
-          </button>
+          <Can route="POST subscriptions/plans">
+            <button
+              className="primary small-button"
+              onClick={() => setCreatePlan(true)}
+            >
+              {tr("Create plan")}
+            </button>
+          </Can>
         </div>
         <DataTable
           headers={["Plan", "Price", "Duration", "Access", "Status", "Action"]}
@@ -353,9 +386,11 @@ function Subscriptions() {
                 <Badge value={plan.isActive ? "ACTIVE" : "INACTIVE"} />
               </td>
               <td className="actions">
-                <button onClick={() => setEditPlan(plan)}>
-                  {tr("Edit plan")}
-                </button>
+                <Can route="PUT subscriptions/plans/:id">
+                  <button onClick={() => setEditPlan(plan)}>
+                    {tr("Edit plan")}
+                  </button>
+                </Can>
               </td>
             </tr>
           ))}
@@ -384,13 +419,15 @@ function Subscriptions() {
                 <Badge value={rule.isActive ? "ACTIVE" : "INACTIVE"} />
               </td>
               <td className="actions">
-                <button onClick={() => setRuleAction(rule)}>
-                  {tr(
-                    rule.requiresActiveSubscription
-                      ? "Make optional"
-                      : "Require subscription",
-                  )}
-                </button>
+                <Can route="PUT subscriptions/access-rules/:featureKey">
+                  <button onClick={() => setRuleAction(rule)}>
+                    {tr(
+                      rule.requiresActiveSubscription
+                        ? "Make optional"
+                        : "Require subscription",
+                    )}
+                  </button>
+                </Can>
               </td>
             </tr>
           ))}
@@ -440,22 +477,26 @@ function Subscriptions() {
               </td>
               <td className="actions">
                 {item.status === "PENDING" && (
-                  <button
-                    onClick={() =>
-                      setSubscriberAction({ item, status: "ACTIVE" })
-                    }
-                  >
-                    {tr("Confirm external payment and activate")}
-                  </button>
+                  <Can route="PUT subscriptions/:id/status">
+                    <button
+                      onClick={() =>
+                        setSubscriberAction({ item, status: "ACTIVE" })
+                      }
+                    >
+                      {tr("Confirm external payment and activate")}
+                    </button>
+                  </Can>
                 )}
                 {(item.status === "ACTIVE" || item.status === "PENDING") && (
-                  <button
-                    onClick={() =>
-                      setSubscriberAction({ item, status: "CANCELLED" })
-                    }
-                  >
-                    {tr("Cancel")}
-                  </button>
+                  <Can route="PUT subscriptions/:id/status">
+                    <button
+                      onClick={() =>
+                        setSubscriberAction({ item, status: "CANCELLED" })
+                      }
+                    >
+                      {tr("Cancel")}
+                    </button>
+                  </Can>
                 )}
               </td>
             </tr>
@@ -819,31 +860,39 @@ function Users() {
               )}
             </td>
             <td className="actions">
-              <button
-                onClick={() =>
-                  setAction({
-                    user,
-                    level: nextModerationLevel(user.moderationLevel),
-                    kind: "moderate",
-                  })
-                }
-                disabled={!nextModerationLevel(user.moderationLevel)}
-              >
-                {tr("Next:")}{" "}
-                {humanize(nextModerationLevel(user.moderationLevel) ?? "final")}
-              </button>
-              <button
-                onClick={() => setAction({ user, kind: "restore" })}
-                disabled={
-                  (user.moderationLevel ?? "NONE") === "NONE" ||
-                  user.reverificationRequired
-                }
-              >
-                {tr("Restore")}
-              </button>
-              <button onClick={() => setAction({ user, kind: "reset" })}>
-                {tr("Reset sessions")}
-              </button>
+              <Can route="POST users/:id/moderation">
+                <button
+                  onClick={() =>
+                    setAction({
+                      user,
+                      level: nextModerationLevel(user.moderationLevel),
+                      kind: "moderate",
+                    })
+                  }
+                  disabled={!nextModerationLevel(user.moderationLevel)}
+                >
+                  {tr("Next:")}{" "}
+                  {humanize(
+                    nextModerationLevel(user.moderationLevel) ?? "final",
+                  )}
+                </button>
+              </Can>
+              <Can route="POST users/:id/moderation/restore">
+                <button
+                  onClick={() => setAction({ user, kind: "restore" })}
+                  disabled={
+                    (user.moderationLevel ?? "NONE") === "NONE" ||
+                    user.reverificationRequired
+                  }
+                >
+                  {tr("Restore")}
+                </button>
+              </Can>
+              <Can route="POST users/:id/reset-sessions">
+                <button onClick={() => setAction({ user, kind: "reset" })}>
+                  {tr("Reset sessions")}
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
@@ -967,27 +1016,33 @@ function Reports() {
             <td>{item.description}</td>
             <td className="actions">
               {item.status === "OPEN" && (
-                <button
-                  onClick={async () => {
-                    await adminApi(
-                      `reports/${item.id}/review`,
-                      json("POST", {}),
-                    );
-                    await reload();
-                  }}
-                >
-                  {tr("Start review")}
-                </button>
+                <Can route="POST reports/:id/review">
+                  <button
+                    onClick={async () => {
+                      await adminApi(
+                        `reports/${item.id}/review`,
+                        json("POST", {}),
+                      );
+                      await reload();
+                    }}
+                  >
+                    {tr("Start review")}
+                  </button>
+                </Can>
               )}
               {(item.status === "OPEN" || item.status === "UNDER_REVIEW") && (
-                <button onClick={() => setSelected(item)}>
-                  {tr("Decide")}
-                </button>
+                <Can route="POST reports/:id/decision">
+                  <button onClick={() => setSelected(item)}>
+                    {tr("Decide")}
+                  </button>
+                </Can>
               )}
               {item.content?.status === "HIDDEN" && (
-                <button onClick={() => setRestoring(item)}>
-                  {tr("Restore content")}
-                </button>
+                <Can route="POST content/:targetType/:id/restore">
+                  <button onClick={() => setRestoring(item)}>
+                    {tr("Restore content")}
+                  </button>
+                </Can>
               )}
             </td>
           </tr>
@@ -1101,7 +1156,11 @@ function RiskReview() {
             "Escalation sends the case to a separate human moderation decision.",
           )}
         </span>
-        <button onClick={() => setScan(true)}>{tr("Run reviewed scan")}</button>
+        <Can route="POST risk/scan">
+          <button onClick={() => setScan(true)}>
+            {tr("Run reviewed scan")}
+          </button>
+        </Can>
       </div>
       <DataTable headers={["Account", "Risk", "Signals", "Status", "Actions"]}>
         {(data?.items ?? []).map((item) => (
@@ -1139,22 +1198,26 @@ function RiskReview() {
             </td>
             <td className="actions">
               {item.status === "OPEN" && (
-                <button
-                  onClick={async () => {
-                    await adminApi(
-                      `risk/items/${item.id}/review`,
-                      json("POST", {}),
-                    );
-                    await reload();
-                  }}
-                >
-                  {tr("Start review")}
-                </button>
+                <Can route="POST risk/items/:id/review">
+                  <button
+                    onClick={async () => {
+                      await adminApi(
+                        `risk/items/${item.id}/review`,
+                        json("POST", {}),
+                      );
+                      await reload();
+                    }}
+                  >
+                    {tr("Start review")}
+                  </button>
+                </Can>
               )}
               {(item.status === "OPEN" || item.status === "UNDER_REVIEW") && (
-                <button onClick={() => setSelected(item)}>
-                  {tr("Decide")}
-                </button>
+                <Can route="POST risk/items/:id/decision">
+                  <button onClick={() => setSelected(item)}>
+                    {tr("Decide")}
+                  </button>
+                </Can>
               )}
             </td>
           </tr>
@@ -1444,29 +1507,33 @@ function Jobs() {
               {job.assignmentsCount} {tr("assignments")}
             </td>
             <td className="actions">
-              <button
-                onClick={() => {
-                  setTarget(targetsFor(job)[0] ?? "SUSPENDED");
-                  setSelected(job);
-                }}
-              >
-                {tr("Force transition")}
-              </button>
-              <button
-                onClick={async () => {
-                  await adminApi(
-                    `jobs/${job.id}/feature`,
-                    json("POST", {
-                      isFeatured: !job.isFeatured,
-                      reason:
-                        "Operations review changed marketplace featuring.",
-                    }),
-                  );
-                  await reload();
-                }}
-              >
-                {tr(job.isFeatured ? "Unfeature" : "Feature")}
-              </button>
+              <Can route="POST jobs/:id/force-transition">
+                <button
+                  onClick={() => {
+                    setTarget(targetsFor(job)[0] ?? "SUSPENDED");
+                    setSelected(job);
+                  }}
+                >
+                  {tr("Force transition")}
+                </button>
+              </Can>
+              <Can route="POST jobs/:id/feature">
+                <button
+                  onClick={async () => {
+                    await adminApi(
+                      `jobs/${job.id}/feature`,
+                      json("POST", {
+                        isFeatured: !job.isFeatured,
+                        reason:
+                          "Operations review changed marketplace featuring.",
+                      }),
+                    );
+                    await reload();
+                  }}
+                >
+                  {tr(job.isFeatured ? "Unfeature" : "Feature")}
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
@@ -1561,12 +1628,14 @@ function Applications() {
               <Badge value={item.status} />
             </td>
             <td>
-              <button
-                className="table-button"
-                onClick={() => setSelected(item.id)}
-              >
-                {tr("Unstick")}
-              </button>
+              <Can route="POST applications/:id/unstick">
+                <button
+                  className="table-button"
+                  onClick={() => setSelected(item.id)}
+                >
+                  {tr("Unstick")}
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
@@ -1628,16 +1697,18 @@ function Verification({ kind }: { kind?: string } = {}) {
             <td>{humanize(item.kind)}</td>
             <td className="actions">
               {item.documents.map((document) => (
-                <button
-                  key={document.id}
-                  onClick={async () =>
-                    setDocumentView(
-                      await adminApi(`verification-documents/${document.id}`),
-                    )
-                  }
-                >
-                  {tr("View")} {humanize(document.kind)}
-                </button>
+                <Can route="GET verification-documents/:id">
+                  <button
+                    key={document.id}
+                    onClick={async () =>
+                      setDocumentView(
+                        await adminApi(`verification-documents/${document.id}`),
+                      )
+                    }
+                  >
+                    {tr("View")} {humanize(document.kind)}
+                  </button>
+                </Can>
               ))}
               {!item.documents.length && tr("None")}
             </td>
@@ -1645,12 +1716,20 @@ function Verification({ kind }: { kind?: string } = {}) {
               <Badge value={item.status} />
             </td>
             <td className="actions">
-              <button onClick={() => setDecision({ item, status: "APPROVED" })}>
-                {tr("Approve")}
-              </button>
-              <button onClick={() => setDecision({ item, status: "REJECTED" })}>
-                {tr("Reject")}
-              </button>
+              <Can route="POST verification-requests/:id/decision">
+                <button
+                  onClick={() => setDecision({ item, status: "APPROVED" })}
+                >
+                  {tr("Approve")}
+                </button>
+              </Can>
+              <Can route="POST verification-requests/:id/decision">
+                <button
+                  onClick={() => setDecision({ item, status: "REJECTED" })}
+                >
+                  {tr("Reject")}
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
@@ -1719,19 +1798,27 @@ type VerificationItem = {
     mime: string;
   }>;
 };
-type LearnTab = "mentors" | "opportunities" | "courses" | "certificates";
-const LEARN_TABS: Array<[LearnTab, string]> = [
-  ["mentors", "Mentor applications"],
-  ["opportunities", "Learning opportunities"],
-  ["courses", "Courses"],
-  ["certificates", "Completion records"],
-];
-function Learn() {
-  const [tab, setTab] = useState<LearnTab>("mentors");
+/** Tabs the role can open; a tab it cannot open is not shown. */
+function TabbedModule({
+  module,
+  role,
+  intro,
+  views,
+}: {
+  module: ConsoleModule;
+  role: string;
+  intro?: string;
+  views: Record<string, () => ReactNode>;
+}) {
+  const tabs = visibleTabs(role, module);
+  const [selected, setTab] = useState(tabs[0]?.key ?? "");
+  const tab = tabs.some((item) => item.key === selected)
+    ? selected
+    : (tabs[0]?.key ?? "");
   return (
     <>
-      <div className="learn-tabs" role="tablist" aria-label={tr("Learn")}>
-        {LEARN_TABS.map(([key, label]) => (
+      <div className="learn-tabs" role="tablist" aria-label={tr(module.name)}>
+        {tabs.map(({ key, name }) => (
           <button
             key={key}
             role="tab"
@@ -1739,49 +1826,12 @@ function Learn() {
             className={tab === key ? "active" : ""}
             onClick={() => setTab(key)}
           >
-            {tr(label)}
+            {tr(name)}
           </button>
         ))}
       </div>
-      {tab === "mentors" && <MentorApplications />}
-      {tab === "opportunities" && <LearningOpportunities />}
-      {tab === "courses" && <Courses />}
-      {tab === "certificates" && <CompletionRecords />}
-    </>
-  );
-}
-type CommunityTab = "groups" | "sessions" | "ambassadors";
-const COMMUNITY_TABS: Array<[CommunityTab, string]> = [
-  ["groups", "Groups"],
-  ["sessions", "Sessions and events"],
-  ["ambassadors", "Ambassadors"],
-];
-/** P3 admin: community groups, sessions/events and ambassadors. */
-function Community() {
-  const [tab, setTab] = useState<CommunityTab>("groups");
-  return (
-    <>
-      <div className="learn-tabs" role="tablist" aria-label={tr("Community")}>
-        {COMMUNITY_TABS.map(([key, label]) => (
-          <button
-            key={key}
-            role="tab"
-            aria-selected={tab === key}
-            className={tab === key ? "active" : ""}
-            onClick={() => setTab(key)}
-          >
-            {tr(label)}
-          </button>
-        ))}
-      </div>
-      <p className="muted">
-        {tr(
-          "Reports on groups, sessions and introductions are decided in Safety reports; hiding here is for content found another way.",
-        )}
-      </p>
-      {tab === "groups" && <CommunityGroups />}
-      {tab === "sessions" && <CommunitySessions />}
-      {tab === "ambassadors" && <Ambassadors />}
+      {intro && <p className="muted">{tr(intro)}</p>}
+      <div role="tabpanel">{views[tab]?.()}</div>
     </>
   );
 }
@@ -1864,19 +1914,21 @@ function CommunityGroups() {
               {item.hiddenReason && <small>{item.hiddenReason}</small>}
             </td>
             <td className="actions">
-              <button
-                onClick={() =>
-                  setTarget({
-                    type: "GROUP",
-                    id: item.id,
-                    hide: item.status !== "HIDDEN",
-                  })
-                }
-              >
-                {item.status === "HIDDEN"
-                  ? tr("Restore content")
-                  : tr("Hide content")}
-              </button>
+              <Can route="POST content/:targetType/:id/hide">
+                <button
+                  onClick={() =>
+                    setTarget({
+                      type: "GROUP",
+                      id: item.id,
+                      hide: item.status !== "HIDDEN",
+                    })
+                  }
+                >
+                  {item.status === "HIDDEN"
+                    ? tr("Restore content")
+                    : tr("Hide content")}
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
@@ -1938,19 +1990,21 @@ function CommunitySessions() {
               {item.visibility === "HIDDEN" && <Badge value="HIDDEN" />}
             </td>
             <td className="actions">
-              <button
-                onClick={() =>
-                  setTarget({
-                    type: "SESSION",
-                    id: item.id,
-                    hide: item.visibility !== "HIDDEN",
-                  })
-                }
-              >
-                {item.visibility === "HIDDEN"
-                  ? tr("Restore content")
-                  : tr("Hide content")}
-              </button>
+              <Can route="POST content/:targetType/:id/hide">
+                <button
+                  onClick={() =>
+                    setTarget({
+                      type: "SESSION",
+                      id: item.id,
+                      hide: item.visibility !== "HIDDEN",
+                    })
+                  }
+                >
+                  {item.visibility === "HIDDEN"
+                    ? tr("Restore content")
+                    : tr("Hide content")}
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
@@ -1983,13 +2037,15 @@ function Ambassadors() {
               </td>
               <td>{group.name}</td>
               <td className="actions">
-                <button
-                  onClick={() =>
-                    setRemoving({ userId: item.userId, groupId: group.id })
-                  }
-                >
-                  {tr("Remove ambassador role")}
-                </button>
+                <Can route="POST community/groups/:id/members/:userId/role">
+                  <button
+                    onClick={() =>
+                      setRemoving({ userId: item.userId, groupId: group.id })
+                    }
+                  >
+                    {tr("Remove ambassador role")}
+                  </button>
+                </Can>
               </td>
             </tr>
           )),
@@ -2013,39 +2069,6 @@ function Ambassadors() {
     </State>
   );
 }
-type BusinessTab = "verification" | "sectors";
-const BUSINESS_TABS: Array<[BusinessTab, string]> = [
-  ["verification", "Business verification"],
-  ["sectors", "Sectors"],
-];
-/** P2 admin: business verification queue and the sector taxonomy. */
-function Business() {
-  const [tab, setTab] = useState<BusinessTab>("verification");
-  return (
-    <>
-      <div className="learn-tabs" role="tablist" aria-label={tr("Business")}>
-        {BUSINESS_TABS.map(([key, label]) => (
-          <button
-            key={key}
-            role="tab"
-            aria-selected={tab === key}
-            className={tab === key ? "active" : ""}
-            onClick={() => setTab(key)}
-          >
-            {tr(label)}
-          </button>
-        ))}
-      </div>
-      <p className="muted">
-        {tr(
-          "Reported businesses, offerings, ideas and collaboration requests are handled in Safety reports.",
-        )}
-      </p>
-      {tab === "verification" && <Verification kind="BUSINESS" />}
-      {tab === "sectors" && <Sectors />}
-    </>
-  );
-}
 type SectorItem = {
   id: string;
   parentId: string | null;
@@ -2067,7 +2090,9 @@ function Sectors() {
   return (
     <State loading={loading} error={error}>
       <div className="dialog-actions">
-        <button onClick={() => setEditing("new")}>{tr("Add sector")}</button>
+        <Can route="POST business-categories">
+          <button onClick={() => setEditing("new")}>{tr("Add sector")}</button>
+        </Can>
       </div>
       <DataTable headers={["Sector", "Parent", "Order", "Active", "Actions"]}>
         {items.map((item) => (
@@ -2090,7 +2115,9 @@ function Sectors() {
               <Badge value={item.isActive ? "ACTIVE" : "INACTIVE"} />
             </td>
             <td className="actions">
-              <button onClick={() => setEditing(item)}>{tr("Edit")}</button>
+              <Can route="PUT business-categories/:id">
+                <button onClick={() => setEditing(item)}>{tr("Edit")}</button>
+              </Can>
             </td>
           </tr>
         ))}
@@ -2280,26 +2307,36 @@ function MentorApplications() {
             </td>
             <td className="actions">
               {item.documents.map((document) => (
-                <button
-                  key={document.id}
-                  onClick={async () => {
-                    const view = await adminApi<{ downloadUrl: string }>(
-                      `verification-documents/${document.id}`,
-                    );
-                    window.open(view.downloadUrl, "_blank", "noopener");
-                  }}
-                >
-                  {tr("View")} {humanize(document.kind)}
-                </button>
+                <Can route="GET verification-documents/:id">
+                  <button
+                    key={document.id}
+                    onClick={async () => {
+                      const view = await adminApi<{ downloadUrl: string }>(
+                        `verification-documents/${document.id}`,
+                      );
+                      window.open(view.downloadUrl, "_blank", "noopener");
+                    }}
+                  >
+                    {tr("View")} {humanize(document.kind)}
+                  </button>
+                </Can>
               ))}
             </td>
             <td className="actions">
-              <button onClick={() => setDecision({ item, status: "APPROVED" })}>
-                {tr("Approve")}
-              </button>
-              <button onClick={() => setDecision({ item, status: "REJECTED" })}>
-                {tr("Reject")}
-              </button>
+              <Can route="POST verification-requests/:id/decision">
+                <button
+                  onClick={() => setDecision({ item, status: "APPROVED" })}
+                >
+                  {tr("Approve")}
+                </button>
+              </Can>
+              <Can route="POST verification-requests/:id/decision">
+                <button
+                  onClick={() => setDecision({ item, status: "REJECTED" })}
+                >
+                  {tr("Reject")}
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
@@ -2382,44 +2419,50 @@ function LearningOpportunities() {
             </td>
             <td className="actions">
               {item.actions.map((action) => (
-                <button
-                  key={action}
-                  onClick={() =>
-                    setPending({
-                      title: `${tr(humanize(action))}: ${item.title}`,
-                      path: `learning-opportunities/${item.id}/${action}`,
-                      label: humanize(action),
-                    })
-                  }
-                >
-                  {tr(humanize(action))}
-                </button>
+                <Can route="POST learning-opportunities/:id/suspend">
+                  <button
+                    key={action}
+                    onClick={() =>
+                      setPending({
+                        title: `${tr(humanize(action))}: ${item.title}`,
+                        path: `learning-opportunities/${item.id}/${action}`,
+                        label: humanize(action),
+                      })
+                    }
+                  >
+                    {tr(humanize(action))}
+                  </button>
+                </Can>
               ))}
               {item.mentor.mentorStatus === "APPROVED" && (
-                <button
-                  onClick={() =>
-                    setPending({
-                      title: `${tr("Suspend mentor")}: ${item.mentor.name}`,
-                      path: `mentors/${item.mentor.userId}/suspend`,
-                      label: "Suspend mentor",
-                    })
-                  }
-                >
-                  {tr("Suspend mentor")}
-                </button>
+                <Can route="POST mentors/:userId/suspend">
+                  <button
+                    onClick={() =>
+                      setPending({
+                        title: `${tr("Suspend mentor")}: ${item.mentor.name}`,
+                        path: `mentors/${item.mentor.userId}/suspend`,
+                        label: "Suspend mentor",
+                      })
+                    }
+                  >
+                    {tr("Suspend mentor")}
+                  </button>
+                </Can>
               )}
               {item.mentor.mentorStatus === "SUSPENDED" && (
-                <button
-                  onClick={() =>
-                    setPending({
-                      title: `${tr("Reinstate mentor")}: ${item.mentor.name}`,
-                      path: `mentors/${item.mentor.userId}/reinstate`,
-                      label: "Reinstate mentor",
-                    })
-                  }
-                >
-                  {tr("Reinstate mentor")}
-                </button>
+                <Can route="POST mentors/:userId/reinstate">
+                  <button
+                    onClick={() =>
+                      setPending({
+                        title: `${tr("Reinstate mentor")}: ${item.mentor.name}`,
+                        path: `mentors/${item.mentor.userId}/reinstate`,
+                        label: "Reinstate mentor",
+                      })
+                    }
+                  >
+                    {tr("Reinstate mentor")}
+                  </button>
+                </Can>
               )}
             </td>
           </tr>
@@ -2482,17 +2525,19 @@ function Courses() {
   return (
     <State loading={loading} error={error}>
       <div className="actions">
-        <button
-          className="primary"
-          onClick={() =>
-            setEditing({
-              id: null,
-              text: JSON.stringify(NEW_COURSE_TEMPLATE, null, 2),
-            })
-          }
-        >
-          {tr("New course")}
-        </button>
+        <Can route="POST training/courses">
+          <button
+            className="primary"
+            onClick={() =>
+              setEditing({
+                id: null,
+                text: JSON.stringify(NEW_COURSE_TEMPLATE, null, 2),
+              })
+            }
+          >
+            {tr("New course")}
+          </button>
+        </Can>
         {message && <span role="status">{message}</span>}
       </div>
       <DataTable
@@ -2515,26 +2560,32 @@ function Courses() {
               <Badge value={item.isPublished ? "PUBLISHED" : "DRAFT"} />
             </td>
             <td className="actions">
-              <button
-                onClick={async () => {
-                  const course = await adminApi<{ document: unknown }>(
-                    `training/courses/${item.id}`,
-                  );
-                  setEditing({
-                    id: item.id,
-                    text: JSON.stringify(course.document, null, 2),
-                  });
-                }}
+              <Can
+                route={["GET training/courses/:id", "PUT training/courses/:id"]}
               >
-                {tr("Edit")}
-              </button>
-              <button
-                onClick={() =>
-                  setPublishing({ item, publish: !item.isPublished })
-                }
-              >
-                {tr(item.isPublished ? "Unpublish" : "Publish")}
-              </button>
+                <button
+                  onClick={async () => {
+                    const course = await adminApi<{ document: unknown }>(
+                      `training/courses/${item.id}`,
+                    );
+                    setEditing({
+                      id: item.id,
+                      text: JSON.stringify(course.document, null, 2),
+                    });
+                  }}
+                >
+                  {tr("Edit")}
+                </button>
+              </Can>
+              <Can route="POST training/courses/:id/publish">
+                <button
+                  onClick={() =>
+                    setPublishing({ item, publish: !item.isPublished })
+                  }
+                >
+                  {tr(item.isPublished ? "Unpublish" : "Publish")}
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
@@ -2685,9 +2736,11 @@ function CompletionRecords() {
             </td>
             <td className="actions">
               {item.status === "VALID" && (
-                <button onClick={() => setRevoking(item)}>
-                  {tr("Revoke")}
-                </button>
+                <Can route="POST certificates/:id/revoke">
+                  <button onClick={() => setRevoking(item)}>
+                    {tr("Revoke")}
+                  </button>
+                </Can>
               )}
             </td>
           </tr>
@@ -2744,39 +2797,49 @@ function Categories() {
               {tr("+")}
             </td>
             <td className="toggle-list">
-              <button
-                className={item.requiresManualApproval ? "on" : ""}
-                onClick={() => toggle(item, "requiresManualApproval")}
-              >
-                {tr("Manual approval")}
-              </button>
-              <button
-                className={item.requiresIdentity ? "on" : ""}
-                onClick={() => toggle(item, "requiresIdentity")}
-              >
-                {tr("Identity")}
-              </button>
-              <button
-                className={item.requiresCertificate ? "on" : ""}
-                onClick={() => toggle(item, "requiresCertificate")}
-              >
-                {tr("Certificate")}
-              </button>
-              <button
-                className={item.unsafeForStudents ? "on danger" : ""}
-                onClick={() => toggle(item, "unsafeForStudents")}
-              >
-                {tr("Student restriction")}
-              </button>
+              <Can route="PUT categories/:id">
+                <button
+                  className={item.requiresManualApproval ? "on" : ""}
+                  onClick={() => toggle(item, "requiresManualApproval")}
+                >
+                  {tr("Manual approval")}
+                </button>
+              </Can>
+              <Can route="PUT categories/:id">
+                <button
+                  className={item.requiresIdentity ? "on" : ""}
+                  onClick={() => toggle(item, "requiresIdentity")}
+                >
+                  {tr("Identity")}
+                </button>
+              </Can>
+              <Can route="PUT categories/:id">
+                <button
+                  className={item.requiresCertificate ? "on" : ""}
+                  onClick={() => toggle(item, "requiresCertificate")}
+                >
+                  {tr("Certificate")}
+                </button>
+              </Can>
+              <Can route="PUT categories/:id">
+                <button
+                  className={item.unsafeForStudents ? "on danger" : ""}
+                  onClick={() => toggle(item, "unsafeForStudents")}
+                >
+                  {tr("Student restriction")}
+                </button>
+              </Can>
             </td>
             <td>
-              <button
-                className={`switch ${item.isActive ? "on" : ""}`}
-                aria-label={`${tr("Toggle")} ${localizedEntityName(item.nameEn, item.nameBn)}`}
-                onClick={() => toggle(item, "isActive")}
-              >
-                <span />
-              </button>
+              <Can route="PUT categories/:id">
+                <button
+                  className={`switch ${item.isActive ? "on" : ""}`}
+                  aria-label={`${tr("Toggle")} ${localizedEntityName(item.nameEn, item.nameBn)}`}
+                  onClick={() => toggle(item, "isActive")}
+                >
+                  <span />
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
@@ -2812,12 +2875,14 @@ function Locations() {
     <State loading={loading} error={error}>
       <div className="toolbar">
         <Summary count={data?.items.length ?? 0} label={tr("locations")} />
-        <button
-          className="primary small-button"
-          onClick={() => setAdding(true)}
-        >
-          {tr("Add location")}
-        </button>
+        <Can route="POST locations">
+          <button
+            className="primary small-button"
+            onClick={() => setAdding(true)}
+          >
+            {tr("Add location")}
+          </button>
+        </Can>
       </div>
       <DataTable headers={["Location", "Type", "Coordinates", "Active"]}>
         {(data?.items ?? []).map((item) => (
@@ -2838,20 +2903,22 @@ function Locations() {
               {tr(",")} {item.lng ?? "—"}
             </td>
             <td>
-              <button
-                className={`switch ${item.isActive ? "on" : ""}`}
-                aria-label={`${tr("Toggle")} ${localizedEntityName(item.nameEn, item.nameBn)}`}
-                onClick={async () => {
-                  const { id: _id, ...body } = item;
-                  await adminApi(
-                    `locations/${item.id}`,
-                    json("PUT", { ...body, isActive: !item.isActive }),
-                  );
-                  await reload();
-                }}
-              >
-                <span />
-              </button>
+              <Can route="PUT locations/:id">
+                <button
+                  className={`switch ${item.isActive ? "on" : ""}`}
+                  aria-label={`${tr("Toggle")} ${localizedEntityName(item.nameEn, item.nameBn)}`}
+                  onClick={async () => {
+                    const { id: _id, ...body } = item;
+                    await adminApi(
+                      `locations/${item.id}`,
+                      json("PUT", { ...body, isActive: !item.isActive }),
+                    );
+                    await reload();
+                  }}
+                >
+                  <span />
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
@@ -3035,11 +3102,15 @@ function Configuration() {
             />
           </label>
           <div className="actions">
-            <button onClick={previewChange}>{tr("Preview diff")}</button>
+            <Can route="POST config/:key/preview">
+              <button onClick={previewChange}>{tr("Preview diff")}</button>
+            </Can>
             {preview && (
-              <button className="primary small-button" onClick={save}>
-                {tr("Confirm change")}
-              </button>
+              <Can route="PUT config/:key">
+                <button className="primary small-button" onClick={save}>
+                  {tr("Confirm change")}
+                </button>
+              </Can>
             )}
           </div>
           {preview && (
@@ -3065,20 +3136,22 @@ function Configuration() {
                   {formatDate(revision.created_at)}
                 </small>
               </div>
-              <button
-                onClick={async () => {
-                  await adminApi(
-                    `config/revisions/${revision.id}/revert`,
-                    json("POST", {
-                      reason:
-                        "Operations rollback after reviewing the revision.",
-                    }),
-                  );
-                  await reload();
-                }}
-              >
-                {tr("Revert")}
-              </button>
+              <Can route="POST config/revisions/:id/revert">
+                <button
+                  onClick={async () => {
+                    await adminApi(
+                      `config/revisions/${revision.id}/revert`,
+                      json("POST", {
+                        reason:
+                          "Operations rollback after reviewing the revision.",
+                      }),
+                    );
+                    await reload();
+                  }}
+                >
+                  {tr("Revert")}
+                </button>
+              </Can>
             </div>
           ))}
         </Section>
@@ -3146,22 +3219,24 @@ function FlagRow({
         {tr("%")}
       </td>
       <td>
-        <button
-          className="table-button"
-          onClick={async () => {
-            await adminApi(
-              `flags/${item.key}`,
-              json("PUT", {
-                isEnabled: enabled,
-                rolloutPercent: rollout,
-                reason: "Confirmed feature rollout adjustment.",
-              }),
-            );
-            await reload();
-          }}
-        >
-          {tr("Save")}
-        </button>
+        <Can route="PUT flags/:key">
+          <button
+            className="table-button"
+            onClick={async () => {
+              await adminApi(
+                `flags/${item.key}`,
+                json("PUT", {
+                  isEnabled: enabled,
+                  rolloutPercent: rollout,
+                  reason: "Confirmed feature rollout adjustment.",
+                }),
+              );
+              await reload();
+            }}
+          >
+            {tr("Save")}
+          </button>
+        </Can>
       </td>
     </tr>
   );
@@ -3193,25 +3268,29 @@ function Disputes() {
             </td>
             <td>
               {!item.firstResponseAt && (
+                <Can route="POST disputes/:id/review">
+                  <button
+                    className="table-button"
+                    onClick={async () => {
+                      await adminApi(
+                        `disputes/${item.id}/review`,
+                        json("POST", {}),
+                      );
+                      await reload();
+                    }}
+                  >
+                    {tr("Start review")}
+                  </button>
+                </Can>
+              )}
+              <Can route="POST disputes/:id/resolve">
                 <button
                   className="table-button"
-                  onClick={async () => {
-                    await adminApi(
-                      `disputes/${item.id}/review`,
-                      json("POST", {}),
-                    );
-                    await reload();
-                  }}
+                  onClick={() => setSelected(item)}
                 >
-                  {tr("Start review")}
+                  {tr("Resolve")}
                 </button>
-              )}
-              <button
-                className="table-button"
-                onClick={() => setSelected(item)}
-              >
-                {tr("Resolve")}
-              </button>
+              </Can>
             </td>
           </tr>
         ))}
@@ -3480,13 +3559,15 @@ function Notifications() {
           <div className="actions">
             <button onClick={dryRun}>{tr("Run dry-run")}</button>
             {result && (
-              <button
-                className="primary small-button"
-                disabled={sending}
-                onClick={() => setConfirming(true)}
-              >
-                {tr("Send campaign")}
-              </button>
+              <Can route="POST notifications/campaign/send">
+                <button
+                  className="primary small-button"
+                  disabled={sending}
+                  onClick={() => setConfirming(true)}
+                >
+                  {tr("Send campaign")}
+                </button>
+              </Can>
             )}
           </div>
         </section>

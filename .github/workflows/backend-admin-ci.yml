@@ -120,6 +120,7 @@ jobs:
           node-version-file: .nvmrc
       - run: corepack enable
       - run: corepack pnpm install --frozen-lockfile
+      - run: corepack pnpm --filter @kaj/admin test
       - run: corepack pnpm --filter @kaj/admin e2e
       - name: The e2e run must not modify tracked files
         run: git diff --exit-code

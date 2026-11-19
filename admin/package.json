@@ -9,6 +9,7 @@
     "e2e:real": "playwright test -c playwright.real.config.ts",
     "lint": "tsc --noEmit",
     "start": "next start -p 3200",
+    "test": "node --test \"tests/unit/*.test.ts\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

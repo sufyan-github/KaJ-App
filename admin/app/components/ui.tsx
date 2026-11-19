@@ -1,7 +1,39 @@
 "use client";
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { adminApi } from "@/lib/admin-api";
+import { type AdminRoute, canCall } from "@/lib/permissions";
 import { friendlyAdminError, getActiveAdminLocale, tr } from "@/lib/admin-i18n";
+
+const RoleContext = createContext<string | null>(null);
+
+/** The signed-in operator's admin role, for hiding what it cannot use. */
+export const RoleProvider = RoleContext.Provider;
+
+/** `can("POST users/:id/moderation")`: whether this role may call a route. */
+export function useCan() {
+  const role = useContext(RoleContext);
+  return (route: AdminRoute) => canCall(role, route);
+}
+
+/** Renders its children only when the role may call every `route`. */
+export function Can({
+  route,
+  children,
+}: {
+  route: AdminRoute | AdminRoute[];
+  children: ReactNode;
+}) {
+  const can = useCan();
+  const routes = Array.isArray(route) ? route : [route];
+  return routes.every(can) ? <>{children}</> : null;
+}
 
 export function useData<T>(path: string) {
   const [data, setData] = useState<T | null>(null);
