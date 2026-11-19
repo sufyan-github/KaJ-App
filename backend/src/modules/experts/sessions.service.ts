@@ -141,51 +141,62 @@ export class SessionsService {
         "Book at least 15 minutes ahead.",
       );
     await this.assertPlace(input.mode, input.locationId);
-    const free = await this.availability.freeSlots(
-      input.expertUserId,
-      startsAt,
-      endsAt,
-      await this.busyWindows(input.expertUserId, startsAt, endsAt),
-    );
-    const fits = free.some(
-      (slot) =>
-        new Date(slot.startsAt).getTime() <= startsAt.getTime() &&
-        new Date(slot.endsAt).getTime() >= endsAt.getTime(),
-    );
-    if (!fits) throw sessionErrors.slotUnavailable();
-    const session = await this.prisma.session.create({
-      data: {
-        host_user_id: input.expertUserId,
-        expert_user_id: input.expertUserId,
-        kind: SessionKind.CONSULTATION,
-        title: input.title?.trim() || "Consultation",
-        description: input.note?.trim() || null,
-        starts_at: startsAt,
-        duration_minutes: input.durationMinutes,
-        mode: input.mode,
-        location_id:
-          input.mode === SessionMode.IN_PERSON ? input.locationId! : null,
-        online_link: null,
-        capacity: 1,
-        introduction_id: input.introductionId ?? null,
-        participants: {
-          create: [
-            {
-              user_id: input.expertUserId,
-              role: SessionParticipantRole.EXPERT,
-              status: SessionParticipantStatus.INVITED,
-              invited_by_user_id: userId,
-            },
-            {
-              user_id: userId,
-              role: SessionParticipantRole.PARTICIPANT,
-              status: SessionParticipantStatus.ACCEPTED,
-              responded_at: new Date(),
-            },
-          ],
+    // W4 (D-3): check and book under the expert's lock, so two people asking
+    // for the same free time at once get one booking and one 409.
+    const session = await this.prisma.$transaction(async (transaction) => {
+      await this.lockExpert(transaction, input.expertUserId);
+      const free = await this.availability.freeSlots(
+        input.expertUserId,
+        startsAt,
+        endsAt,
+        await this.busyWindows(
+          input.expertUserId,
+          startsAt,
+          endsAt,
+          transaction,
+        ),
+        transaction,
+      );
+      const fits = free.some(
+        (slot) =>
+          new Date(slot.startsAt).getTime() <= startsAt.getTime() &&
+          new Date(slot.endsAt).getTime() >= endsAt.getTime(),
+      );
+      if (!fits) throw sessionErrors.slotUnavailable();
+      return transaction.session.create({
+        data: {
+          host_user_id: input.expertUserId,
+          expert_user_id: input.expertUserId,
+          kind: SessionKind.CONSULTATION,
+          title: input.title?.trim() || "Consultation",
+          description: input.note?.trim() || null,
+          starts_at: startsAt,
+          duration_minutes: input.durationMinutes,
+          mode: input.mode,
+          location_id:
+            input.mode === SessionMode.IN_PERSON ? input.locationId! : null,
+          online_link: null,
+          capacity: 1,
+          introduction_id: input.introductionId ?? null,
+          participants: {
+            create: [
+              {
+                user_id: input.expertUserId,
+                role: SessionParticipantRole.EXPERT,
+                status: SessionParticipantStatus.INVITED,
+                invited_by_user_id: userId,
+              },
+              {
+                user_id: userId,
+                role: SessionParticipantRole.PARTICIPANT,
+                status: SessionParticipantStatus.ACCEPTED,
+                responded_at: new Date(),
+              },
+            ],
+          },
         },
-      },
-      select: { id: true },
+        select: { id: true },
+      });
     });
     await this.notify([input.expertUserId], session.id, "SESSION_INVITE", {
       title: "নতুন পরামর্শের অনুরোধ",
@@ -471,15 +482,21 @@ export class SessionsService {
           "Add the meeting link to accept.",
         );
       const price = this.price(input.priceModel, input.pricePoisha);
-      await this.prisma.$transaction([
-        this.prisma.sessionParticipant.update({
-          where: { id: mine.id },
+      await this.prisma.$transaction(async (transaction) => {
+        // W4 (D-3): under the expert's lock, refuse a time they have
+        // already said yes to (bookings made before the lock existed).
+        await this.lockExpert(transaction, userId);
+        if (await this.expertTaken(transaction, userId, row))
+          throw sessionErrors.slotUnavailable();
+        const answered = await transaction.sessionParticipant.updateMany({
+          where: { id: mine.id, status: SessionParticipantStatus.INVITED },
           data: {
             status: SessionParticipantStatus.ACCEPTED,
             responded_at: now,
           },
-        }),
-        this.prisma.session.update({
+        });
+        if (answered.count !== 1) throw sessionErrors.transition(row.status);
+        await transaction.session.update({
           where: { id },
           data: {
             status: SessionStatus.SCHEDULED,
@@ -489,8 +506,8 @@ export class SessionsService {
                 : null,
             ...price,
           },
-        }),
-      ]);
+        });
+      });
       await this.notify(
         this.confirmedIds(row).filter((user) => user !== userId),
         id,
@@ -952,6 +969,18 @@ export class SessionsService {
       !(mine && CONFIRMED.includes(mine.status))
     )
       throw sessionErrors.notFound();
+    // G11: a consultation's chat opens only once the expert has said yes.
+    if (
+      row.kind === SessionKind.CONSULTATION &&
+      (row.status === SessionStatus.DRAFT ||
+        row.status === SessionStatus.CANCELLED ||
+        !row.participants.some(
+          (item) =>
+            item.role === SessionParticipantRole.EXPERT &&
+            CONFIRMED.includes(item.status),
+        ))
+    )
+      throw sessionErrors.consultationNotAccepted();
     return { sessionId: id, conversationId: await this.syncChat(row, true) };
   }
 
@@ -1176,9 +1205,53 @@ export class SessionsService {
       .map((item) => item.user_id);
   }
 
+  /** One booking or acceptance at a time per expert (transaction-scoped). */
+  private async lockExpert(
+    transaction: Prisma.TransactionClient,
+    expertUserId: string,
+  ) {
+    await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`consultation-expert:${expertUserId}`}))`;
+  }
+
+  /** True when the expert has said yes to another open session overlapping this one. */
+  private async expertTaken(
+    transaction: Prisma.TransactionClient,
+    expertUserId: string,
+    row: Row,
+  ) {
+    const endsAt = row.starts_at.getTime() + row.duration_minutes * MINUTE;
+    const others = await transaction.session.findMany({
+      where: {
+        id: { not: row.id },
+        status: { in: OPEN },
+        starts_at: {
+          lt: new Date(endsAt),
+          gt: new Date(row.starts_at.getTime() - 12 * 60 * MINUTE),
+        },
+        participants: {
+          some: {
+            user_id: expertUserId,
+            status: SessionParticipantStatus.ACCEPTED,
+          },
+        },
+      },
+      select: { starts_at: true, duration_minutes: true },
+    });
+    return others.some(
+      (other) =>
+        other.starts_at.getTime() + other.duration_minutes * MINUTE >
+        row.starts_at.getTime(),
+    );
+  }
+
   /** The expert's sessions in a window, so a consultation never overlaps them. */
-  private async busyWindows(expertUserId: string, from: Date, to: Date) {
-    const sessions = await this.prisma.session.findMany({
+  private async busyWindows(
+    expertUserId: string,
+    from: Date,
+    to: Date,
+    db: Prisma.TransactionClient = this.prisma,
+  ) {
+    const sessions = await db.session.findMany({
       where: {
         status: { in: OPEN },
         starts_at: { lt: to, gt: new Date(from.getTime() - 12 * 60 * MINUTE) },

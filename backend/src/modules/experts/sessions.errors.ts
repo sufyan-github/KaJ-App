@@ -27,6 +27,12 @@ export const sessionErrors = {
       message: "The expert isn't available at that time.",
       messageKey: "error.jobs.slot_unavailable",
     }),
+  consultationNotAccepted: () =>
+    new ConflictException({
+      code: "CONSULTATION_NOT_ACCEPTED",
+      message: "The chat opens once the expert accepts the consultation.",
+      messageKey: "error.session.consultation_not_accepted",
+    }),
   womenOnly: () =>
     new ConflictException({
       code: "WOMEN_ONLY",
