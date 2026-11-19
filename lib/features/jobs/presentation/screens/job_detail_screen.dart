@@ -27,7 +27,7 @@ class JobDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const KLocalizedText('কাজের বিবরণ'),
         actions: [
-          if (detail.value case final value? when !value.viewerIsPoster)
+          if (detail.valueOrNull case final value? when !value.viewerIsPoster)
             ReportAction(targetType: 'JOB', targetId: jobId),
         ],
       ),

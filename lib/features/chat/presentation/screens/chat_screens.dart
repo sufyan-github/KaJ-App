@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/errors/failure_copy.dart';
+import '../../../../core/formatting/kaaj_format.dart';
 import '../../../../core/localization/kaaj_localizations.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/routing/route_arguments.dart';
+import '../../../../core/security/secure_screen.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_localized_text.dart';
 import '../../../../core/widgets/k_network_image.dart';
@@ -143,6 +145,12 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
   final input = TextEditingController();
   final scroll = ScrollController();
 
+  /// Resolved in build: from the route, else the conversation list, else
+  /// the messages (a thread opened from a notification has no route data).
+  String? _otherUserId;
+  String? _otherName;
+  bool _isGroup = false;
+
   @override
   void dispose() {
     input.dispose();
@@ -156,188 +164,260 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
     ref.listen(chatThreadProvider(widget.conversationId), (_, _) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
     });
-    return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.otherName ??
-                  KaajLocalizations.text(context, 'KAAJ ব্যবহারকারী'),
-              style: const TextStyle(fontSize: 18),
-            ),
-            const KLocalizedText('আজ সক্রিয়', style: TextStyle(fontSize: 12)),
-          ],
-        ),
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: _menu,
-            itemBuilder: (_) => const [
-              PopupMenuItem(
-                value: 'report',
-                child: KLocalizedText('রিপোর্ট করুন'),
+    final summary = ref
+        .watch(conversationSummaryProvider(widget.conversationId))
+        .valueOrNull;
+    _isGroup = summary?.isGroup ?? false;
+    _otherName = widget.otherName ?? summary?.otherName;
+    _otherUserId = _isGroup
+        ? null
+        : widget.otherUserId ??
+              summary?.otherUserId ??
+              state.messages
+                  .where((m) => !m.isMine && m.senderUserId != null)
+                  .firstOrNull
+                  ?.senderUserId;
+    final subjectType = summary?.subjectType;
+    final subjectId = summary?.subjectId;
+    final names = _isGroup && subjectType != null && subjectId != null
+        ? ref
+                  .watch(
+                    groupMemberNamesProvider((
+                      type: subjectType,
+                      id: subjectId,
+                    )),
+                  )
+                  .valueOrNull ??
+              const <String, String>{}
+        : const <String, String>{};
+    final participants = summary?.participantCount;
+    Widget bubble(ChatMessage message) => _MessageBubble(
+      message: message,
+      senderName: _isGroup && !message.isMine
+          ? names[message.senderUserId] ??
+                KaajLocalizations.text(context, 'গ্রুপের সদস্য')
+          : null,
+      onReport: !message.isMine && message.delivery == ChatDelivery.sent
+          ? () => context.push(AppRoutes.report('MESSAGE', message.id))
+          : null,
+    );
+    // Identity documents may be discussed here: no screenshots.
+    return SecureScreen(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _otherName ??
+                    KaajLocalizations.text(context, 'KAAJ ব্যবহারকারী'),
+                style: const TextStyle(fontSize: 18),
               ),
-              PopupMenuItem(
-                value: 'block',
-                child: KLocalizedText('ব্যবহারকারীকে ব্লক করুন'),
-              ),
+              if (_isGroup && participants != null)
+                Text(
+                  '${KFormat.count(context, participants)} ${KaajLocalizations.text(context, 'জন সদস্য')}',
+                  key: const ValueKey('chat-participants'),
+                  style: const TextStyle(fontSize: 12),
+                ),
             ],
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            color: KColors.surfaceAlt,
-            padding: const EdgeInsets.symmetric(
-              horizontal: KSpacing.md,
-              vertical: KSpacing.sm,
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.work_outline, color: KColors.primary),
-                const SizedBox(width: KSpacing.sm),
-                Expanded(
-                  child: Text(
-                    widget.jobTitle ??
-                        KaajLocalizations.text(context, 'কাজের আলোচনা'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall,
+          actions: [
+            PopupMenuButton<String>(
+              key: const ValueKey('chat-menu'),
+              onSelected: _menu,
+              itemBuilder: (_) => [
+                // A group has no single person to report or block; report
+                // a message by holding it instead.
+                if (!_isGroup)
+                  const PopupMenuItem(
+                    value: 'report',
+                    child: KLocalizedText('রিপোর্ট করুন'),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            width: double.infinity,
-            color: Colors.amber.shade50,
-            padding: const EdgeInsets.all(KSpacing.sm),
-            child: const Row(
-              children: [
-                Icon(Icons.shield_outlined, size: 20),
-                SizedBox(width: KSpacing.sm),
-                Expanded(
-                  child: KLocalizedText(
-                    'সুরক্ষিত থাকতে আলোচনা ও পেমেন্ট KAAJ-এর ভেতরে রাখুন।',
+                if (!_isGroup && _otherUserId != null)
+                  const PopupMenuItem(
+                    value: 'block',
+                    child: KLocalizedText('ব্যবহারকারীকে ব্লক করুন'),
                   ),
-                ),
-              ],
-            ),
-          ),
-          if (state.error != null)
-            MaterialBanner(
-              content: KLocalizedText(state.error!),
-              actions: [
-                TextButton(
-                  onPressed: () =>
-                      ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
-                  child: const KLocalizedText('ঠিক আছে'),
-                ),
-              ],
-            ),
-          Expanded(
-            child: state.loading
-                ? const Center(child: CircularProgressIndicator())
-                : state.messages.isEmpty
-                ? const Center(
-                    child: KLocalizedText('নিরাপদ আলোচনা শুরু করুন।'),
-                  )
-                : ListView.builder(
-                    controller: scroll,
-                    padding: const EdgeInsets.all(KSpacing.md),
-                    itemCount:
-                        state.messages.length + (state.hasEarlier ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (state.hasEarlier) {
-                        if (index == 0) {
-                          return Center(
-                            child: state.loadingEarlier
-                                ? const Padding(
-                                    padding: EdgeInsets.all(KSpacing.sm),
-                                    child: CircularProgressIndicator(),
-                                  )
-                                : TextButton.icon(
-                                    key: const ValueKey('chat-load-earlier'),
-                                    onPressed: () => ref
-                                        .read(
-                                          chatThreadProvider(
-                                            widget.conversationId,
-                                          ).notifier,
-                                        )
-                                        .loadEarlier(),
-                                    icon: const Icon(Icons.history),
-                                    label: const KLocalizedText(
-                                      'আগের বার্তা দেখুন',
-                                    ),
-                                  ),
-                          );
-                        }
-                        return _MessageBubble(
-                          message: state.messages[index - 1],
-                        );
-                      }
-                      return _MessageBubble(message: state.messages[index]);
-                    },
-                  ),
-          ),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                KSpacing.sm,
-                KSpacing.xs,
-                KSpacing.sm,
-                KSpacing.sm,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  IconButton(
-                    tooltip: KaajLocalizations.text(context, 'ছবি পাঠান'),
-                    onPressed: state.sendingImage ? null : _pickImage,
-                    icon: state.sendingImage
-                        ? const SizedBox.square(
-                            dimension: 22,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.image_outlined),
-                  ),
-                  Expanded(
-                    child: TextField(
-                      controller: input,
-                      minLines: 1,
-                      maxLines: 4,
-                      maxLength: 4000,
-                      buildCounter:
-                          (
-                            _, {
-                            required currentLength,
-                            required isFocused,
-                            maxLength,
-                          }) => null,
-                      decoration: InputDecoration(
-                        hintText: KaajLocalizations.text(
-                          context,
-                          'বার্তা লিখুন',
-                        ),
-                        border: OutlineInputBorder(),
-                      ),
-                      onSubmitted: (_) => _send(),
+                if (_isGroup)
+                  const PopupMenuItem(
+                    enabled: false,
+                    value: 'hint',
+                    child: KLocalizedText(
+                      'কোনো বার্তা রিপোর্ট করতে সেটি চেপে ধরুন',
                     ),
                   ),
-                  const SizedBox(width: KSpacing.xs),
-                  IconButton.filled(
-                    tooltip: KaajLocalizations.text(context, 'পাঠান'),
-                    onPressed: _send,
-                    icon: const Icon(Icons.send_rounded),
+              ],
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              color: KColors.surfaceAlt,
+              padding: const EdgeInsets.symmetric(
+                horizontal: KSpacing.md,
+                vertical: KSpacing.sm,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _isGroup ? Icons.groups_outlined : Icons.work_outline,
+                    color: KColors.primary,
+                  ),
+                  const SizedBox(width: KSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      widget.jobTitle ??
+                          summary?.jobTitle ??
+                          KaajLocalizations.text(context, 'কাজের আলোচনা'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+            Container(
+              width: double.infinity,
+              color: Colors.amber.shade50,
+              padding: const EdgeInsets.all(KSpacing.sm),
+              child: const Row(
+                children: [
+                  Icon(Icons.shield_outlined, size: 20),
+                  SizedBox(width: KSpacing.sm),
+                  Expanded(
+                    child: KLocalizedText(
+                      'সুরক্ষিত থাকতে আলোচনা ও পেমেন্ট KAAJ-এর ভেতরে রাখুন।',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (state.failure != null || state.error != null)
+              MaterialBanner(
+                key: const ValueKey('chat-error'),
+                content: Text(
+                  state.failure != null
+                      ? failureText(
+                          context,
+                          state.failure!,
+                          state.error ?? 'চ্যাটে সমস্যা হয়েছে।',
+                        )
+                      : KaajLocalizations.text(context, state.error!),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => ref
+                        .read(
+                          chatThreadProvider(widget.conversationId).notifier,
+                        )
+                        .dismissError(),
+                    child: const KLocalizedText('ঠিক আছে'),
+                  ),
+                ],
+              ),
+            Expanded(
+              child: state.loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : state.messages.isEmpty
+                  ? const Center(
+                      child: KLocalizedText('নিরাপদ আলোচনা শুরু করুন।'),
+                    )
+                  : ListView.builder(
+                      controller: scroll,
+                      padding: const EdgeInsets.all(KSpacing.md),
+                      itemCount:
+                          state.messages.length + (state.hasEarlier ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (state.hasEarlier) {
+                          if (index == 0) {
+                            return Center(
+                              child: state.loadingEarlier
+                                  ? const Padding(
+                                      padding: EdgeInsets.all(KSpacing.sm),
+                                      child: CircularProgressIndicator(),
+                                    )
+                                  : TextButton.icon(
+                                      key: const ValueKey('chat-load-earlier'),
+                                      onPressed: () => ref
+                                          .read(
+                                            chatThreadProvider(
+                                              widget.conversationId,
+                                            ).notifier,
+                                          )
+                                          .loadEarlier(),
+                                      icon: const Icon(Icons.history),
+                                      label: const KLocalizedText(
+                                        'আগের বার্তা দেখুন',
+                                      ),
+                                    ),
+                            );
+                          }
+                          return bubble(state.messages[index - 1]);
+                        }
+                        return bubble(state.messages[index]);
+                      },
+                    ),
+            ),
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  KSpacing.sm,
+                  KSpacing.xs,
+                  KSpacing.sm,
+                  KSpacing.sm,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      tooltip: KaajLocalizations.text(context, 'ছবি পাঠান'),
+                      onPressed: state.sendingImage ? null : _pickImage,
+                      icon: state.sendingImage
+                          ? const SizedBox.square(
+                              dimension: 22,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.image_outlined),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: input,
+                        minLines: 1,
+                        maxLines: 4,
+                        maxLength: 4000,
+                        buildCounter:
+                            (
+                              _, {
+                              required currentLength,
+                              required isFocused,
+                              maxLength,
+                            }) => null,
+                        decoration: InputDecoration(
+                          hintText: KaajLocalizations.text(
+                            context,
+                            'বার্তা লিখুন',
+                          ),
+                          border: OutlineInputBorder(),
+                        ),
+                        onSubmitted: (_) => _send(),
+                      ),
+                    ),
+                    const SizedBox(width: KSpacing.xs),
+                    IconButton.filled(
+                      tooltip: KaajLocalizations.text(context, 'পাঠান'),
+                      onPressed: _send,
+                      icon: const Icon(Icons.send_rounded),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -360,10 +440,10 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
   }
 
   Future<void> _menu(String action) async {
-    if (action == 'block' && widget.otherUserId != null) {
+    final otherUserId = _otherUserId;
+    if (action == 'block' && otherUserId != null) {
       final name =
-          widget.otherName ??
-          KaajLocalizations.text(context, 'KAAJ ব্যবহারকারী');
+          _otherName ?? KaajLocalizations.text(context, 'KAAJ ব্যবহারকারী');
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
@@ -390,7 +470,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
       );
       if (confirmed != true || !mounted) return;
       try {
-        await ref.read(chatRepositoryProvider).blockUser(widget.otherUserId!);
+        await ref.read(chatRepositoryProvider).blockUser(otherUserId);
         ref.invalidate(conversationsProvider);
         if (!mounted) return;
         // Said on the screen the person returns to, so it is not lost
@@ -434,8 +514,14 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
 }
 
 class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({required this.message});
+  const _MessageBubble({required this.message, this.senderName, this.onReport});
   final ChatMessage message;
+
+  /// Shown above other people's messages in a group chat.
+  final String? senderName;
+
+  /// Long press reports this message (others' delivered messages only).
+  final VoidCallback? onReport;
 
   @override
   Widget build(BuildContext context) {
@@ -451,48 +537,86 @@ class _MessageBubble extends StatelessWidget {
     }
     return Align(
       alignment: message.isMine ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 310),
-        margin: const EdgeInsets.only(bottom: KSpacing.sm),
-        padding: const EdgeInsets.all(KSpacing.sm),
-        decoration: BoxDecoration(
-          color: message.isMine ? KColors.primary : KColors.surfaceAlt,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (message.attachmentUrl != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: KNetworkImage(
-                  url: message.attachmentUrl!,
-                  width: 240,
-                  height: 180,
+      child: GestureDetector(
+        onLongPress: onReport == null ? null : () => _confirmReport(context),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 310),
+          margin: const EdgeInsets.only(bottom: KSpacing.sm),
+          padding: const EdgeInsets.all(KSpacing.sm),
+          decoration: BoxDecoration(
+            color: message.isMine ? KColors.primary : KColors.surfaceAlt,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (senderName != null)
+                Text(
+                  senderName!,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-            if (message.body?.isNotEmpty == true) Text(message.body!),
-            if (message.safetyWarning) ...[
-              const SizedBox(height: KSpacing.xs),
-              const KLocalizedText(
-                'পেমেন্ট KAAJ-এ রাখুন—তাহলে সহায়তা ও সুরক্ষা পাবেন।',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
+              if (message.attachmentUrl != null)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: KNetworkImage(
+                    url: message.attachmentUrl!,
+                    width: 240,
+                    height: 180,
+                  ),
+                ),
+              if (message.body?.isNotEmpty == true) Text(message.body!),
+              if (message.safetyWarning) ...[
+                const SizedBox(height: KSpacing.xs),
+                const KLocalizedText(
+                  'পেমেন্ট KAAJ-এ রাখুন—তাহলে সহায়তা ও সুরক্ষা পাবেন।',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ],
+              if (message.isMine && message.delivery != ChatDelivery.sent)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    switch (message.delivery) {
+                      ChatDelivery.sending => KaajLocalizations.text(
+                        context,
+                        'পাঠানো হচ্ছে…',
+                      ),
+                      ChatDelivery.refused => failureText(
+                        context,
+                        message.refusal ?? Object(),
+                        'বার্তাটি পাঠানো হয়নি। আর চেষ্টা করা হবে না।',
+                      ),
+                      _ => KaajLocalizations.text(
+                        context,
+                        'পাঠানো যায়নি—সংযোগ হলে আবার চেষ্টা হবে',
+                      ),
+                    },
+                    key: ValueKey('delivery-${message.delivery.name}'),
+                    style: const TextStyle(fontSize: 11),
+                  ),
+                ),
             ],
-            if (message.isMine && message.delivery != ChatDelivery.sent)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: KLocalizedText(
-                  message.delivery == ChatDelivery.sending
-                      ? 'পাঠানো হচ্ছে…'
-                      : 'পাঠানো যায়নি—সংযোগ হলে আবার চেষ্টা হবে',
-                  style: const TextStyle(fontSize: 11),
-                ),
-              ),
-          ],
+          ),
         ),
       ),
     );
+  }
+
+  Future<void> _confirmReport(BuildContext context) async {
+    final report = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: ListTile(
+          key: const ValueKey('report-message'),
+          leading: const Icon(Icons.flag_outlined),
+          title: const KLocalizedText('এই বার্তা রিপোর্ট করুন'),
+          onTap: () => Navigator.pop(sheetContext, true),
+        ),
+      ),
+    );
+    if (report == true) onReport?.call();
   }
 }
 

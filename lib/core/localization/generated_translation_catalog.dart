@@ -1343,4 +1343,13 @@ const generatedEnglishTranslations = <String, String>{
   "একটি ব্যবসা": "A business",
   "একটি আইডিয়া": "An idea",
   "একটি সেশন": "A session",
+  // R4: chat
+  "গ্রুপের সদস্য": "Member",
+  "জন সদস্য": "members",
+  "কোনো বার্তা রিপোর্ট করতে সেটি চেপে ধরুন":
+      "To report a message, press and hold it",
+  "চ্যাটে সমস্যা হয়েছে।": "Something is wrong with this chat.",
+  "বার্তাটি পাঠানো হয়নি। আর চেষ্টা করা হবে না।":
+      "This message was not sent and will not be retried.",
+  "এই বার্তা রিপোর্ট করুন": "Report this message",
 };

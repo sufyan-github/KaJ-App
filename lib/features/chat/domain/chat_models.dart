@@ -1,4 +1,8 @@
-enum ChatDelivery { sent, sending, failed }
+import '../../../core/errors/failure.dart';
+
+/// `failed` will be retried; `refused` was turned down by the server for
+/// good (blocked, removed, account restricted) and is never re-sent.
+enum ChatDelivery { sent, sending, failed, refused }
 
 class ConversationSummary {
   const ConversationSummary({
@@ -11,26 +15,45 @@ class ConversationSummary {
     this.jobStatus,
     this.otherUserId,
     this.lastMessage,
+    this.isGroup = false,
+    this.subjectType,
+    this.subjectId,
+    this.participantCount,
   });
 
-  factory ConversationSummary.fromJson(Map<String, dynamic> json) =>
-      ConversationSummary(
-        id: json['id'] as String,
-        jobId: json['jobId'] as String?,
-        jobTitle: json['jobTitle'] as String? ?? 'কাজের আলোচনা',
-        jobStatus: json['jobStatus'] as String?,
-        otherUserId: json['otherUserId'] as String?,
-        otherName: json['otherName'] as String? ?? 'KAAJ ব্যবহারকারী',
-        unreadCount: (json['unreadCount'] as num?)?.toInt() ?? 0,
-        lastMessage: json['lastMessage'] is Map
-            ? ChatMessage.fromJson(Map.from(json['lastMessage'] as Map))
-            : null,
-        updatedAt:
-            DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
-            DateTime.now(),
-      );
+  factory ConversationSummary.fromJson(Map<String, dynamic> json) {
+    final subject = json['subject'] is Map ? json['subject'] as Map : null;
+    return ConversationSummary(
+      id: json['id'] as String,
+      isGroup: json['kind'] == 'GROUP',
+      subjectType: subject?['type'] as String?,
+      subjectId: subject?['id'] as String?,
+      participantCount: (json['participantCount'] as num?)?.toInt(),
+      jobId: json['jobId'] as String?,
+      jobTitle: json['jobTitle'] as String? ?? 'কাজের আলোচনা',
+      jobStatus: json['jobStatus'] as String?,
+      otherUserId: json['otherUserId'] as String?,
+      otherName: json['otherName'] as String? ?? 'KAAJ ব্যবহারকারী',
+      unreadCount: (json['unreadCount'] as num?)?.toInt() ?? 0,
+      lastMessage: json['lastMessage'] is Map
+          ? ChatMessage.fromJson(Map.from(json['lastMessage'] as Map))
+          : null,
+      updatedAt:
+          DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
+          DateTime.now(),
+    );
+  }
 
   final String id;
+
+  /// A group chat (community group, session or idea room): no single
+  /// other person, so no block and no person to report.
+  final bool isGroup;
+
+  /// COMMUNITY_GROUP, SESSION or IDEA_ROOM for a group chat.
+  final String? subjectType;
+  final String? subjectId;
+  final int? participantCount;
   final String? jobId;
   final String jobTitle;
   final String? jobStatus;
@@ -54,6 +77,7 @@ class ChatMessage {
     this.clientNonce,
     this.safetyWarning = false,
     this.delivery = ChatDelivery.sent,
+    this.refusal,
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) => ChatMessage(
@@ -70,19 +94,21 @@ class ChatMessage {
         DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
   );
 
-  ChatMessage copyWith({ChatDelivery? delivery}) => ChatMessage(
-    id: id,
-    conversationId: conversationId,
-    senderUserId: senderUserId,
-    isMine: isMine,
-    type: type,
-    body: body,
-    attachmentUrl: attachmentUrl,
-    clientNonce: clientNonce,
-    safetyWarning: safetyWarning,
-    createdAt: createdAt,
-    delivery: delivery ?? this.delivery,
-  );
+  ChatMessage copyWith({ChatDelivery? delivery, Failure? refusal}) =>
+      ChatMessage(
+        id: id,
+        conversationId: conversationId,
+        senderUserId: senderUserId,
+        isMine: isMine,
+        type: type,
+        body: body,
+        attachmentUrl: attachmentUrl,
+        clientNonce: clientNonce,
+        safetyWarning: safetyWarning,
+        createdAt: createdAt,
+        delivery: delivery ?? this.delivery,
+        refusal: refusal ?? this.refusal,
+      );
 
   final String id;
   final String conversationId;
@@ -95,6 +121,9 @@ class ChatMessage {
   final bool safetyWarning;
   final DateTime createdAt;
   final ChatDelivery delivery;
+
+  /// Why the server refused this message, for [ChatDelivery.refused].
+  final Failure? refusal;
 }
 
 class PendingChatMessage {

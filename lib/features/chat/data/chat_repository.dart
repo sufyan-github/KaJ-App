@@ -180,6 +180,55 @@ class ChatRepository {
     }
   }
 
+  /// Names of the people in a group chat, by user id. Messages carry only
+  /// `senderUserId`, so names come from the group, session or idea team the
+  /// chat belongs to. Unknown subjects give an empty map.
+  Future<Map<String, String>> memberNames(
+    String subjectType,
+    String subjectId,
+  ) async {
+    try {
+      final names = <String, String>{};
+      void add(Object? person) {
+        if (person is! Map) return;
+        final id = person['userId'];
+        final name = person['displayName'];
+        if (id is String && name is String && name.trim().isNotEmpty) {
+          names[id] = name;
+        }
+      }
+
+      switch (subjectType) {
+        case 'COMMUNITY_GROUP':
+          final response = await _dio.get<Map<String, dynamic>>(
+            '/community/groups/$subjectId/members',
+            queryParameters: {'limit': 100},
+          );
+          _items(response.data).forEach(add);
+        case 'SESSION':
+          final response = await _dio.get<Map<String, dynamic>>(
+            '/sessions/$subjectId',
+          );
+          final data = _data(response.data);
+          add(data['host']);
+          add(data['expert']);
+          final participants = data['participants'];
+          if (participants is List) participants.forEach(add);
+        case 'IDEA_ROOM':
+          final response = await _dio.get<Map<String, dynamic>>(
+            '/ideas/$subjectId/members',
+          );
+          final data = _data(response.data);
+          add(data['owner']);
+          final items = data['items'];
+          if (items is List) items.forEach(add);
+      }
+      return names;
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
   List<PendingChatMessage> pending(String conversationId) {
     final raw = _queue.get('pending:$conversationId');
     if (raw is! List) return const [];

@@ -1001,7 +1001,7 @@ class _WorkerBookingScreenState extends ConsumerState<WorkerBookingScreen> {
     final isFavorite =
         favorites.value?.any((item) => item.userId == widget.workerId) ?? false;
     // The server books only workers with an approved identity check.
-    final trust = profile.value?.trustLevel;
+    final trust = profile.valueOrNull?.trustLevel;
     final unverified = trust == 'NONE' || trust == 'PHONE';
     return Scaffold(
       appBar: AppBar(
