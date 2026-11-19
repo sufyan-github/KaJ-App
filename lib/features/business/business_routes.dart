@@ -1,5 +1,9 @@
 import 'package:go_router/go_router.dart';
 
+import 'presentation/business_detail_screen.dart';
+import 'presentation/business_form_screen.dart';
+import 'presentation/my_businesses_screen.dart';
+
 /// Paths of the Business screens. All start with `/businesses`, `/partners`
 /// or `/collaboration-requests`, which the paywall guard leaves free.
 abstract final class BusinessRoutes {
@@ -19,4 +23,24 @@ abstract final class BusinessRoutes {
 }
 
 /// Screens of Business, partners and collaboration (always free).
-List<RouteBase> businessRoutes() => [];
+List<RouteBase> businessRoutes() => [
+  GoRoute(
+    path: BusinessRoutes.mine,
+    builder: (_, _) => const MyBusinessesScreen(),
+  ),
+  // Before `/businesses/:id`, so "new" is not read as an id.
+  GoRoute(
+    path: BusinessRoutes.create,
+    builder: (_, _) => const BusinessFormScreen(),
+  ),
+  GoRoute(
+    path: '/businesses/:id',
+    builder: (_, state) =>
+        BusinessDetailScreen(businessId: state.pathParameters['id']!),
+  ),
+  GoRoute(
+    path: '/businesses/:id/edit',
+    builder: (_, state) =>
+        BusinessFormScreen(businessId: state.pathParameters['id']),
+  ),
+];
