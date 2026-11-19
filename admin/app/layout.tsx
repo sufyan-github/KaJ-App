@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans_Bengali, Plus_Jakarta_Sans } from "next/font/google";
+import { connection } from "next/server";
 
 import "./globals.css";
 
@@ -14,9 +15,12 @@ export const metadata: Metadata = {
   description: "Secure marketplace operations console",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // Rendered per request so Next can put the CSP nonce from proxy.ts on its
+  // scripts and styles; a prerendered page would carry none.
+  await connection();
   return (
     <html lang="en">
       <body className={`${sans.variable} ${bangla.variable}`}>{children}</body>
