@@ -185,8 +185,8 @@ databaseDescribe("blocks are enforced on every surface (real HTTP)", () => {
 
   it("hides the worker's public profile and directory entry from a signed-in blocked viewer", async () => {
     await api.get(`users/${blocked.id}/public`, poster).expect(404);
-    // Anonymous visitors and other users still see it.
-    await api.get(`users/${blocked.id}/public`).expect(200);
+    // Other users still see it; signing out does not help (API-6: 401).
+    await api.get(`users/${blocked.id}/public`).expect(401);
     await api.get(`users/${blocked.id}/public`, other).expect(200);
 
     const signedIn = await api
@@ -194,10 +194,7 @@ databaseDescribe("blocks are enforced on every surface (real HTTP)", () => {
       .expect(200);
     expect(ids(signedIn.body)).not.toContain(blocked.id);
     expect(ids(signedIn.body)).toContain(other.id);
-    const anonymous = await api
-      .get(`users/workers?skillId=${skillId}`)
-      .expect(200);
-    expect(ids(anonymous.body)).toContain(blocked.id);
+    await api.get(`users/workers?skillId=${skillId}`).expect(401);
   });
 
   it("hides the worker's availability slots", async () => {
