@@ -1,6 +1,10 @@
 import 'package:go_router/go_router.dart';
 
+import 'presentation/consultation_booking_screen.dart';
 import 'presentation/introduction_screens.dart';
+import 'presentation/session_detail_screen.dart';
+import 'presentation/session_form_screen.dart';
+import 'presentation/session_screens.dart';
 
 /// Paths of the Experts and Community screens. Every path starts with a
 /// prefix the paywall guard keeps free.
@@ -57,5 +61,32 @@ List<RouteBase> communityRoutes() => [
       expertUserId: state.pathParameters['userId']!,
       expertName: state.uri.queryParameters['name'],
     ),
+  ),
+  GoRoute(
+    path: '/experts/:userId/book',
+    builder: (context, state) => ConsultationBookingScreen(
+      expertUserId: state.pathParameters['userId']!,
+      expertName: state.uri.queryParameters['name'],
+      introductionId: state.uri.queryParameters['introductionId'],
+    ),
+  ),
+  GoRoute(
+    path: CommunityPaths.sessions,
+    builder: (context, state) => const SessionsScreen(),
+  ),
+  // Declared before the detail path so "new" is not read as an id.
+  GoRoute(
+    path: CommunityPaths.newSession,
+    builder: (context, state) => const SessionFormScreen(),
+  ),
+  GoRoute(
+    path: '/sessions/:id',
+    builder: (context, state) =>
+        SessionDetailScreen(sessionId: state.pathParameters['id']!),
+  ),
+  GoRoute(
+    path: '/sessions/:id/edit',
+    builder: (context, state) =>
+        SessionFormScreen(sessionId: state.pathParameters['id']),
   ),
 ];

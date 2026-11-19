@@ -133,4 +133,181 @@ const communityTranslations = <String, String>{
   "অনুরোধ প্রত্যাহার করুন": "Withdraw the request",
   "চ্যাট খুলুন": "Open chat",
   "পরামর্শের সময় নিন": "Book a consultation",
+  // Consultations and sessions
+  "সেশন সম্পাদনা": "Edit session",
+  "দলের নতুন সেশন": "New group session",
+  "নতুন সেশন": "New session",
+  "সেশনটি লোড করা যায়নি।": "Could not load the session.",
+  "দলের তথ্য লোড করা যায়নি।": "Could not load the group.",
+  "সেশন আয়োজন করতে মেন্টর হোন": "Become a mentor to host sessions",
+  "মেন্টর পাতা খুলুন": "Open the Mentor page",
+  "শুরুর সময় ভবিষ্যতে হতে হবে।": "The start must be in the future.",
+  "সেশন সংরক্ষণ হয়েছে।": "Session saved.",
+  "খসড়া তৈরি হয়েছে। প্রকাশ করলে মানুষ দেখতে পাবেন।":
+      "Draft created. People see it once you publish it.",
+  "সেশন সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।":
+      "Could not save the session. Try again.",
+  "শুধু নারীদের সেশন আয়োজন করতে প্রোফাইলে লিঙ্গ নারী দেওয়া থাকতে হয়।":
+      "To host a women-only session your profile gender must be female.",
+  "ধরন": "Type",
+  "৩ থেকে ১২০ অক্ষরের মধ্যে লিখুন।": "Write between 3 and 120 characters.",
+  "বিবরণ (ঐচ্ছিক)": "Description (optional)",
+  "সর্বোচ্চ ২০০০ অক্ষর লেখা যাবে।": "You can write up to 2000 characters.",
+  "কতক্ষণ": "How long",
+  "কতজন যোগ দিতে পারবেন": "How many people can join",
+  "১ থেকে ১০০০ এর মধ্যে লিখুন।": "Enter a number from 1 to 1000.",
+  "কীভাবে হবে": "How it happens",
+  "শুধু এলাকা দেখানো হয়, কখনো ঠিকানা নয়। ঠিকানা চ্যাটে জানান।":
+      "Only the area is shown, never an address. Share the address in the chat.",
+  "অনলাইন লিঙ্ক (https://…)": "Online link (https://…)",
+  "প্রকাশের আগে লিঙ্ক দিতে হবে। শুধু নিশ্চিত মানুষেরা দেখবেন।":
+      "Add the link before publishing. Only confirmed people see it.",
+  "https দিয়ে শুরু হওয়া সঠিক লিঙ্ক দিন।":
+      "Enter a valid link starting with https.",
+  "মূল্য": "Price",
+  "নগদে": "In cash",
+  "প্রত্যেকে কত টাকা দেবেন (সেখানেই নগদে)":
+      "Taka per person (cash on the spot)",
+  "শুধু নারীদের জন্য": "Women only",
+  "শুধু নারীদের দলের সব সেশন শুধু নারীদের জন্য।":
+      "Every session of a women-only group is women-only.",
+  "আপনার ও অংশগ্রহণকারীদের প্রোফাইলে লিঙ্গ নারী দেওয়া থাকতে হবে; সার্ভার এটি যাচাই করে।":
+      "You and the participants need the profile gender female; the server checks it.",
+  "ঘরে থেকে কাজের উপযোগী": "Suits home-based work",
+  "খসড়া তৈরি করুন": "Create draft",
+  "সেশন ও পরামর্শ": "Sessions and consultations",
+  "যোগ দিচ্ছি": "Attending",
+  "আয়োজন করছি": "Hosting",
+  "সেশনগুলো লোড করা যায়নি।": "Could not load the sessions.",
+  "আপনি কোনো সেশন আয়োজন করছেন না": "You are not hosting any sessions",
+  "কোনো সেশন নেই": "No sessions",
+  "অনুমোদিত মেন্টররা আলোচনা, কর্মশালা বা অনুষ্ঠান আয়োজন করতে পারেন।":
+      "Approved mentors can host discussions, workshops or events.",
+  "বিশেষজ্ঞের পরামর্শ নিলে বা কোনো দলের সেশনে যোগ দিলে এখানে দেখা যাবে।":
+      "Consultations you book and group sessions you join show here.",
+  "শুধু নারীদের": "Women only",
+  "এই বিশেষজ্ঞ এখন পরামর্শ নিচ্ছেন না।":
+      "This expert is not taking consultations now.",
+  "একটি সময় বেছে নিন।": "Choose a time.",
+  "অনুরোধ পাঠানো হয়েছে। বিশেষজ্ঞ নিশ্চিত করলে জানানো হবে।":
+      "Request sent. You will be told when the expert confirms.",
+  "পরামর্শের অনুরোধ পাঠানো যায়নি। আবার চেষ্টা করুন।":
+      "Could not send the consultation request. Try again.",
+  "বিশেষজ্ঞের ফাঁকা সময় লোড করা যায়নি।":
+      "Could not load the expert's free times.",
+  "কমিউনিটি বিনামূল্যে। বিশেষজ্ঞ নিশ্চিত করার সময় জানাবেন পরামর্শটি বিনামূল্যে, নাকি সেখানেই নগদ টাকায়।":
+      "Community is free. When confirming, the expert says whether the consultation is free or paid in cash on the spot.",
+  "আপনার গৃহীত পরিচয়ের অনুরোধের সঙ্গে যুক্ত।":
+      "Linked to your accepted introduction.",
+  "আগামী ১৪ দিনের ফাঁকা সময়": "Free times in the next 14 days",
+  "কোনো ফাঁকা সময় নেই": "No free times",
+  "এই বিশেষজ্ঞের আগামী ১৪ দিনে ফাঁকা সময় নেই। পরে আবার দেখুন বা পরিচয়ের অনুরোধ পাঠান।":
+      "This expert has no free time in the next 14 days. Check again later or send an introduction request.",
+  "কীভাবে কথা হবে": "How you will talk",
+  "বিশেষজ্ঞ নিশ্চিত করার সময় অনলাইন লিঙ্ক দেবেন।":
+      "The expert adds the online link when confirming.",
+  "বিষয় (ঐচ্ছিক)": "Topic (optional)",
+  "বিশেষজ্ঞের জন্য নোট (ঐচ্ছিক)": "Note for the expert (optional)",
+  "সর্বোচ্চ ১০০০ অক্ষর লেখা যাবে।": "You can write up to 1000 characters.",
+  "পরামর্শের অনুরোধ পাঠান": "Send consultation request",
+  "এই সেশনে এখন চেক-ইন চালু নেই।": "Check-in is not on for this session now.",
+  "চেক-ইন হয়নি: আপনার অবস্থান সেশনের এলাকা থেকে দূরে, বা যথেষ্ট নির্ভুল নয়।":
+      "Not checked in: you are too far from the session area, or the location is not accurate enough.",
+  "এটি শুধু নারীদের সেশন। প্রোফাইলে লিঙ্গ নারী দেওয়া থাকলে যোগ দেওয়া যায়।":
+      "This is a women-only session. You can join if your profile gender is female.",
+  "পরামর্শ নিশ্চিত করেছেন।": "You confirmed the consultation.",
+  "নিশ্চিত করা যায়নি। আবার চেষ্টা করুন।": "Could not confirm. Try again.",
+  "পরামর্শটি নেবেন না?": "Turn down this consultation?",
+  "আমন্ত্রণ ফিরিয়ে দেবেন?": "Decline the invitation?",
+  "পরামর্শটি বাতিল হবে এবং অনুরোধকারীকে জানানো হবে।":
+      "The consultation is cancelled and the requester is told.",
+  "আপনি এই সেশনে যাচ্ছেন না বলে জানানো হবে।":
+      "The host is told you are not going.",
+  "না বলুন": "Say no",
+  "আপনি যোগ দিচ্ছেন।": "You are going.",
+  "জানিয়ে দেওয়া হয়েছে।": "Sent.",
+  "উত্তর পাঠানো যায়নি। আবার চেষ্টা করুন।":
+      "Could not send your answer. Try again.",
+  "পরামর্শ বাতিল করবেন?": "Cancel the consultation?",
+  "সেশন থেকে সরে যাবেন?": "Leave the session?",
+  "পরামর্শটি বাতিল হবে এবং বিশেষজ্ঞকে জানানো হবে।":
+      "The consultation is cancelled and the expert is told.",
+  "আপনার জায়গা অপেক্ষা তালিকার পরের জনকে দেওয়া হবে।":
+      "Your place goes to the next person on the waitlist.",
+  "সরে যান": "Leave",
+  "পরামর্শ বাতিল হয়েছে।": "Consultation cancelled.",
+  "আপনি সেশন থেকে সরে গেছেন।": "You left the session.",
+  "এটি করা যায়নি। আবার চেষ্টা করুন।": "That did not work. Try again.",
+  "সেশন বাতিল করবেন?": "Cancel the session?",
+  "কারণ (কমপক্ষে ৫ অক্ষর)": "Reason (at least 5 characters)",
+  "সেশন বাতিল হয়েছে। সবাইকে জানানো হয়েছে।":
+      "Session cancelled. Everyone was told.",
+  "বাতিল করা যায়নি। আবার চেষ্টা করুন।": "Could not cancel. Try again.",
+  "সেশন শেষ হয়েছে?": "Has the session finished?",
+  "শেষ করার পর উপস্থিত অংশগ্রহণকারীরা ৭ দিনের মধ্যে মতামত দিতে পারবেন।":
+      "After you complete it, people who attended can give feedback within 7 days.",
+  "শেষ করুন": "Complete",
+  "সেশন শেষ হিসেবে চিহ্নিত হয়েছে।": "Session marked as completed.",
+  "শেষ করা যায়নি। আবার চেষ্টা করুন।": "Could not complete. Try again.",
+  "আমন্ত্রণ যোগ হয়েছে। প্রকাশ করলে তাঁদের জানানো হবে।":
+      "Invitations added. They are told when you publish.",
+  "আমন্ত্রণ পাঠানো হয়েছে।": "Invitations sent.",
+  "আমন্ত্রণ পাঠানো যায়নি। আবার চেষ্টা করুন।":
+      "Could not send the invitations. Try again.",
+  "নগদ টাকা লিখুন": "Record cash",
+  "কত টাকা পেয়েছেন": "Taka received",
+  "নগদ টাকা লেখা হয়েছে।": "Cash recorded.",
+  "সেশনে চেক-ইন করবেন?": "Check in to the session?",
+  "চেক-ইনের জন্য একবার আপনার অবস্থান নেওয়া হবে। শুধু সেশনের এলাকা থেকে দূরত্ব রাখা হয়, আপনার অবস্থান নয়।":
+      "Your location is read once to check in. Only the distance from the session area is kept, never your location.",
+  "চেক-ইন করুন": "Check in",
+  "চেক-ইন করা যায়নি। আবার চেষ্টা করুন।": "Could not check in. Try again.",
+  "চ্যাট এখন খোলা যাচ্ছে না।": "The chat cannot be opened now.",
+  "চ্যাট খোলা যায়নি।": "Could not open the chat.",
+  "KAAJ মডারেশন এই সেশনটি লুকিয়েছে": "KAAJ moderation hid this session",
+  "কীভাবে": "How",
+  "অনলাইন লিঙ্ক": "Online link",
+  "লিঙ্ক কপি করুন": "Copy link",
+  "লিঙ্ক কপি হয়েছে।": "Link copied.",
+  "জায়গা": "Places",
+  "বিশেষজ্ঞ নিশ্চিত করার সময় জানাবেন": "The expert says when confirming",
+  "আয়োজক": "Host",
+  "আপনি": "You",
+  "অনুরোধকারী": "Requester",
+  "অপেক্ষা তালিকায় আপনার স্থান": "Your place on the waitlist",
+  "চেক-ইন করেছেন": "Checked in",
+  "বাতিলের কারণ": "Reason for cancelling",
+  "বিবরণ": "Description",
+  "শুধু যাঁদের প্রোফাইলে লিঙ্গ নারী দেওয়া আছে তাঁরা যোগ দিতে পারেন; সার্ভার এটি যাচাই করে।":
+      "Only people whose profile gender is female can join; the server checks it.",
+  "পরামর্শ নিশ্চিত করুন": "Confirm the consultation",
+  "এবার পারছি না": "I can't this time",
+  "যোগ দেব": "I'll join",
+  "যাব না": "I won't go",
+  "আপনার সাড়া নেওয়া হয়েছে।": "Your answer was recorded.",
+  "যোগ দেওয়া যায়নি। আবার চেষ্টা করুন।": "Could not join. Try again.",
+  "আমি যাব": "I'm going",
+  "সেশনের চ্যাট": "Session chat",
+  "পরামর্শ বাতিল করুন": "Cancel consultation",
+  "সেশন প্রকাশিত হয়েছে।": "Session published.",
+  "প্রকাশ করা যায়নি। আবার চেষ্টা করুন।": "Could not publish. Try again.",
+  "সম্পাদনা": "Edit",
+  "মানুষকে আমন্ত্রণ": "Invite people",
+  "সেশন শেষ করুন": "Complete the session",
+  "সেশন বাতিল করুন": "Cancel the session",
+  "অংশগ্রহণকারী": "Participants",
+  "যাঁরা যাচ্ছেন": "Who is going",
+  "উপস্থিতি লেখা হয়েছে।": "Attendance recorded.",
+  "উপস্থিতি লেখা যায়নি। আবার চেষ্টা করুন।":
+      "Could not record attendance. Try again.",
+  "আপনার মতামত জমা হয়েছে।": "Your feedback was sent.",
+  "মতামত জমা দেওয়া যায়নি।": "Could not send the feedback.",
+  "আপনি মতামত দিয়েছেন": "You gave feedback",
+  "মতামত দিন": "Give feedback",
+  "অংশগ্রহণকারীদের মতামত": "Feedback from participants",
+  "এখনো কেউ মতামত দেননি।": "No feedback yet.",
+  "কত টাকা (সেখানেই নগদে)": "Taka (cash on the spot)",
+  // Booking
+  "বিশেষজ্ঞ ওই সময়ে ফাঁকা নেই। অন্য সময় বেছে নিন।":
+      "The expert is not free at that time. Choose another time.",
 };
