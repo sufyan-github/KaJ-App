@@ -1303,4 +1303,11 @@ const generatedEnglishTranslations = <String, String>{
   // R4: booking refusal
   "এই কর্মী এখনো পরিচয় (NID ও সেলফি) যাচাই করেননি। যাচাই অনুমোদিত হলে তাঁকে বুক করা যাবে। এখন অন্য কর্মী দেখুন বা কাজ পোস্ট করুন।":
       "This worker has not verified their identity (NID and selfie) yet. You can book them once it is approved. For now, look at other workers or post a job.",
+  // R4: new modules
+  "শীঘ্রই আসছে": "Coming soon",
+  "এই অংশটি তৈরি হচ্ছে।": "This part is being built.",
+  "আইডিয়া": "Ideas",
+  "কমিউনিটি": "Community",
+  // R4: module name
+  "ব্যবসা-বাণিজ্য": "Business",
 };

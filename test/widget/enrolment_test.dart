@@ -306,7 +306,7 @@ void main() {
     await pumpRouted(
       tester,
       api: api,
-      home: const MyActivityScreen(initialSection: 1),
+      home: const MyActivityScreen(initialSection: ActivitySection.learning),
     );
     expect(find.text('Learning with a mentor'), findsOneWidget);
     await tester.tap(find.text('House wiring apprenticeship'));

@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/localization/kaaj_localizations.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/k_localized_text.dart';
+import '../business/presentation/business_explore.dart';
+import '../community/presentation/community_explore.dart';
+import '../ideas/presentation/ideas_explore.dart';
 import '../jobs/presentation/screens/jobs_screens.dart';
 import '../learning/presentation/learn_explore.dart';
 import '../onboarding/domain/onboarding_state.dart';
@@ -15,7 +18,10 @@ import 'people_explore.dart';
 enum ExploreSection {
   work,
   learn,
-  people;
+  people,
+  business,
+  ideas,
+  community;
 
   static ExploreSection parse(String? value) => ExploreSection.values
       .firstWhere((item) => item.name == value, orElse: () => work);
@@ -116,6 +122,30 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                         onSelected: () =>
                             setState(() => _section = ExploreSection.learn),
                       ),
+                      for (final (section, icon, label) in const [
+                        (
+                          ExploreSection.business,
+                          Icons.storefront_outlined,
+                          'ব্যবসা-বাণিজ্য',
+                        ),
+                        (
+                          ExploreSection.ideas,
+                          Icons.lightbulb_outline,
+                          'আইডিয়া',
+                        ),
+                        (
+                          ExploreSection.community,
+                          Icons.diversity_3_outlined,
+                          'কমিউনিটি',
+                        ),
+                      ])
+                        _SectionChip(
+                          key: ValueKey('explore-${section.name}'),
+                          icon: icon,
+                          label: label,
+                          selected: _section == section,
+                          onSelected: () => setState(() => _section = section),
+                        ),
                     ],
                   ),
                 ),
@@ -134,6 +164,9 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
         // Learning with a mentor, then online courses.
         ExploreSection.learn => LearnExploreBody(searchQuery: _query),
         ExploreSection.people => PeopleExploreBody(searchQuery: _query),
+        ExploreSection.business => BusinessExploreBody(searchQuery: _query),
+        ExploreSection.ideas => IdeasExploreBody(searchQuery: _query),
+        ExploreSection.community => CommunityExploreBody(searchQuery: _query),
       },
     );
   }
