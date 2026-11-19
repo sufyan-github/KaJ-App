@@ -46,7 +46,7 @@ export class ChatService {
   }
 
   async list(userId: string) {
-    const rows = await this.prisma.conversation.findMany({
+    const all = await this.prisma.conversation.findMany({
       where: { deleted_at: null, participants: { some: { user_id: userId } } },
       include: {
         job: { select: { id: true, title: true, status: true } },
@@ -62,6 +62,15 @@ export class ChatService {
       orderBy: { updated_at: "desc" },
     });
     const hidden = new Set(await this.blocks.hiddenFrom(userId));
+    // W6 (D-14): a 1:1 conversation with someone in a block leaves the list
+    // for both sides. Group rooms stay; the blocked person is muted there.
+    const rows = all.filter(
+      (row) =>
+        row.kind === ConversationKind.GROUP ||
+        !row.participants.some(
+          (item) => item.user_id !== userId && hidden.has(item.user_id),
+        ),
+    );
     // Names follow the same rule as the job page: masked until a confirmed
     // hire, unless the person chose to show their full name.
     const hiredWith = await this.engagement.hiredWith(

@@ -16,6 +16,7 @@ import { WorkerSkillInputDto } from "./dto/update-worker-skills.dto";
 import { validateWorkerSkillIds } from "./worker-skills.rules";
 import { AuthTokenService } from "../auth/auth-token.service";
 import { EngagementService } from "../safety/engagement.service";
+import { UserBlocksService } from "../safety/user-blocks.service";
 import { visibleDisplayName } from "./public-profile.projection";
 
 @Injectable()
@@ -404,13 +405,24 @@ export class UsersService {
   }
 
   async favorites(userId: string) {
-    const rows = await this.prisma.favorite.findMany({
-      where: { user_id: userId },
+    const engagement = new EngagementService(this.prisma);
+    // W6 (D-9): nobody in a block with you; nobody who left the directory
+    // unless you already deal with them (the public-profile rule).
+    const hidden = await new UserBlocksService(this.prisma).hiddenFrom(userId);
+    const saved = await this.prisma.favorite.findMany({
+      where: { user_id: userId, target_user_id: { notIn: hidden } },
       include: { target: { include: { profile: true, worker_profile: true } } },
       orderBy: { created_at: "desc" },
     });
+    const rows = [];
+    for (const row of saved)
+      if (
+        row.target.profile?.discoverable !== false ||
+        (await engagement.engaged(userId, row.target_user_id))
+      )
+        rows.push(row);
     // One name rule (R1): masked unless shown by choice or already hired.
-    const hiredWith = await new EngagementService(this.prisma).hiredWith(
+    const hiredWith = await engagement.hiredWith(
       userId,
       rows.map((row) => row.target_user_id),
     );
@@ -437,9 +449,17 @@ export class UsersService {
         worker_profile: { isNot: null },
         deleted_at: null,
       },
-      select: { id: true },
+      select: { id: true, profile: { select: { discoverable: true } } },
     });
     if (!worker) throw new NotFoundException();
+    // W6 (D-9): the same 404 a blocked or hidden public profile gives.
+    if (await new UserBlocksService(this.prisma).between(userId, workerId))
+      throw new NotFoundException();
+    if (
+      worker.profile?.discoverable === false &&
+      !(await new EngagementService(this.prisma).engaged(userId, workerId))
+    )
+      throw new NotFoundException();
     await this.prisma.favorite.upsert({
       where: {
         user_id_target_user_id: { user_id: userId, target_user_id: workerId },

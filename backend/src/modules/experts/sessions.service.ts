@@ -985,6 +985,11 @@ export class SessionsService {
     const rows = await this.prisma.session.findMany({
       where: {
         hidden_at: null,
+        // W6 (D-4): a consultation across a block is gone for both sides.
+        NOT: {
+          kind: SessionKind.CONSULTATION,
+          participants: { some: { user_id: { in: hidden } } },
+        },
         ...(query.status ? { status: query.status } : {}),
         ...(role === "hosting"
           ? { host_user_id: userId }
@@ -1054,6 +1059,13 @@ export class SessionsService {
         (await this.activeGroupMember(userId, row.group_id));
       if (!onIt && !groupMember) throw sessionErrors.notFound();
       if (await this.blocks.between(userId, row.host_user_id))
+        throw sessionErrors.notFound();
+    }
+    // W6 (D-4): a consultation is one to one, so a block between the expert
+    // and the person who booked hides it from both, host included.
+    if (row.kind === SessionKind.CONSULTATION) {
+      const hidden = new Set(await this.blocks.hiddenFrom(userId));
+      if (row.participants.some((item) => hidden.has(item.user_id)))
         throw sessionErrors.notFound();
     }
     return row;
