@@ -3,6 +3,7 @@ import {
   IsBoolean,
   IsEmail,
   IsEnum,
+  IsIn,
   IsInt,
   IsObject,
   IsOptional,
@@ -96,7 +97,8 @@ export class FeatureJobDto extends ReasonDto {
 }
 
 export class ApplicationActionDto extends ReasonDto {
-  @IsEnum(ApplicationStatus)
+  // R1 (A1): unstick only puts an application back to PENDING.
+  @IsIn([ApplicationStatus.PENDING])
   status: ApplicationStatus = ApplicationStatus.PENDING;
 }
 

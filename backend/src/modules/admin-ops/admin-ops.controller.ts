@@ -128,7 +128,8 @@ export class AdminOpsController {
 
   @Post("jobs/:id/force-transition")
   @Policy(Policies.public())
-  @AdminRoles(AdminRole.ADMIN, AdminRole.MODERATOR, AdminRole.SUPPORT)
+  // R1 (A2): a repair tool; SUPPORT reads, it does not repair.
+  @AdminRoles(AdminRole.ADMIN, AdminRole.MODERATOR)
   transition(
     @Param("id", new ParseUUIDPipe()) id: string,
     @Body() body: ForceTransitionDto,
@@ -163,7 +164,8 @@ export class AdminOpsController {
 
   @Post("applications/:id/unstick")
   @Policy(Policies.public())
-  @AdminRoles(AdminRole.ADMIN, AdminRole.MODERATOR, AdminRole.SUPPORT)
+  // R1 (A1): a repair tool; SUPPORT reads, it does not repair.
+  @AdminRoles(AdminRole.ADMIN, AdminRole.MODERATOR)
   unstick(
     @Param("id", new ParseUUIDPipe()) id: string,
     @Body() body: ApplicationActionDto,

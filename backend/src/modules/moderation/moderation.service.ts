@@ -1,4 +1,5 @@
 import { EngagementService } from "../safety/engagement.service";
+import { assertMayActOnAccount } from "../admin-auth/staff-accounts";
 import { visibleDisplayName } from "../users/public-profile.projection";
 import {
   BadRequestException,
@@ -438,6 +439,7 @@ export class ModerationService {
     }
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException();
+    await assertMayActOnAccount(this.prisma, actor, userId);
     if (user.reverification_required) {
       throw new ConflictException(
         "Required identity re-verification must be approved before restoration.",
@@ -567,6 +569,7 @@ export class ModerationService {
     }
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException();
+    await assertMayActOnAccount(this.prisma, actor, userId);
     const previous = effectiveLevel(user);
     const expected = NEXT_LEVEL[previous];
     if (input.action !== expected) {

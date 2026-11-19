@@ -156,3 +156,10 @@ Anyone without a right to see an idea gets `404 NOT_FOUND` on every idea endpoin
 | 409  | `LAST_MODERATOR`                          | `error.community.last_moderator`            | A group needs at least one moderator. Add another first.                                                           | দলে অন্তত একজন মডারেটর থাকতে হবে। আগে আরেকজন যোগ করুন।                         |
 | 409  | `GROUP_MEMBERSHIP_TRANSITION_NOT_ALLOWED` | `error.community.transition_not_allowed`    | That isn't possible for this membership now.                                                                       | এই সদস্যপদে এখন এটি সম্ভব নয়।                                                 |
 | 400  | `GENDER_RESTRICTION_NOT_ALLOWED`          | `error.job.gender_restriction`              | Jobs can't be limited to one gender. Describe the work and the conditions instead (`field`: title or description). | কাজ কোনো এক লিঙ্গের জন্য সীমিত করা যায় না। কাজ ও শর্তগুলো লিখুন।              |
+
+## Admin console (R1 roles)
+
+| HTTP | Code                   | messageKey                         | Meaning                                                                                                                                                                                                          |
+| ---- | ---------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 403  | `ADMIN_ROLE_FORBIDDEN` | `error.admin.admin_role_forbidden` | The role does not allow this route (every admin route names its roles; none is open by default), or the target is a staff account and the actor is not an ADMIN (moderate, restore, reactivate, reset sessions). |
+| 400  | `CONFIG_INVALID`       | `error.admin.config_invalid`       | `PUT /admin/config/:key` (also preview and revert): the value does not fit the key's shape; `details[]` gives `{field, rules}`. Keys without rules can't be changed.                                             |
