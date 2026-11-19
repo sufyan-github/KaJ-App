@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../jobs/presentation/screens/jobs_screens.dart';
 import 'presentation/business_detail_screen.dart';
 import 'presentation/business_form_screen.dart';
 import 'presentation/my_businesses_screen.dart';
@@ -42,5 +43,10 @@ List<RouteBase> businessRoutes() => [
     path: '/businesses/:id/edit',
     builder: (_, state) =>
         BusinessFormScreen(businessId: state.pathParameters['id']),
+  ),
+  GoRoute(
+    path: '/businesses/:id/jobs/new',
+    builder: (_, state) =>
+        CreateJobScreen(businessProfileId: state.pathParameters['id']),
   ),
 ];

@@ -486,9 +486,13 @@ class CreateJobScreen extends ConsumerStatefulWidget {
   const CreateJobScreen({
     super.key,
     this.permissionGateway = const PermissionGateway(),
+    this.businessProfileId,
   });
 
   final PermissionGateway permissionGateway;
+
+  /// Posts a staff job for this business (its owner or manager only).
+  final String? businessProfileId;
 
   @override
   ConsumerState<CreateJobScreen> createState() => _CreateJobScreenState();
@@ -529,7 +533,13 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
         .where((item) => item.categoryId == _categoryId)
         .toList();
     return Scaffold(
-      appBar: AppBar(title: const KLocalizedText('নতুন কাজ পোস্ট করুন')),
+      appBar: AppBar(
+        title: KLocalizedText(
+          widget.businessProfileId == null
+              ? 'নতুন কাজ পোস্ট করুন'
+              : 'কর্মী নিয়োগের কাজ পোস্ট করুন',
+        ),
+      ),
       body: Form(
         key: _form,
         child: ListView(
@@ -771,6 +781,7 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
         'locationId': locationId,
         'startsAt': startsAt.toUtc().toIso8601String(),
         'endsAt': endsAt.toUtc().toIso8601String(),
+        'businessProfileId': ?widget.businessProfileId,
         // Stored with 6 decimal places (~0.1 m) by the API.
         if (_site case final site?) ...{
           'lat': double.parse(site.latitude.toStringAsFixed(6)),
