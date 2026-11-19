@@ -42,6 +42,7 @@ import '../../features/trust_safety/presentation/safety_screens.dart';
 import '../../features/trust_safety/presentation/verification_screens.dart';
 import '../security/secure_screen.dart';
 import 'route_arguments.dart';
+import 'route_not_found.dart';
 
 abstract final class AppRoutes {
   static const register = '/auth/register';
@@ -163,6 +164,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: AppRoutes.splash,
     refreshListenable: refresh,
+    errorBuilder: (context, state) => const RouteNotFoundScreen(),
     redirect: (context, state) => authRedirect(
       ref.read(authControllerProvider),
       state.matchedLocation,

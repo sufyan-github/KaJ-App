@@ -1352,4 +1352,10 @@ const generatedEnglishTranslations = <String, String>{
   "বার্তাটি পাঠানো হয়নি। আর চেষ্টা করা হবে না।":
       "This message was not sent and will not be retried.",
   "এই বার্তা রিপোর্ট করুন": "Report this message",
+  // R4: unknown links
+  "এই পাতাটি খোলা যাচ্ছে না": "This page cannot be opened",
+  "লিংকটি পুরোনো বা অ্যাপের এই সংস্করণে নেই। অ্যাপ হালনাগাদ করে আবার চেষ্টা করুন।":
+      "The link is old or not in this version of the app. Update the app and try again.",
+  // R4: unknown links (button)
+  "হোমে ফিরুন": "Back to Home",
 };
