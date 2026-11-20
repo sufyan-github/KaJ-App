@@ -189,4 +189,10 @@ const businessTranslations = <String, String>{
   "ছবি দিন": "Add photo",
   "যাচাইয়ের জন্য জমা দিন": "Submit for verification",
   "জমা দেওয়া হয়েছে": "Submitted",
+  "সব খাত": "All sectors",
+  "অংশীদারদের তালিকা লোড করা যায়নি।": "Could not load the partner directory.",
+  "কোনো ব্যবসা পাওয়া যায়নি": "No businesses found",
+  "অংশীদার খুঁজছে এমন প্রকাশিত ব্যবসা এখানে দেখা যায়। ফিল্টার বদলে দেখুন, বা নিজের ব্যবসা যোগ করুন।":
+      "Published businesses looking for partners show here. Try other filters, or add your own business.",
+  "ব্যবসার নাম বা কাজ লিখুন": "Type a business name or what it does",
 };

@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 
 import '../jobs/presentation/screens/jobs_screens.dart';
 import 'presentation/business_detail_screen.dart';
+import 'presentation/business_explore.dart';
 import 'presentation/business_form_screen.dart';
 import 'presentation/business_members_screen.dart';
 import 'presentation/business_offerings_screen.dart';
@@ -66,5 +67,9 @@ List<RouteBase> businessRoutes() => [
     path: '/businesses/:id/verification',
     builder: (_, state) =>
         BusinessVerificationScreen(businessId: state.pathParameters['id']!),
+  ),
+  GoRoute(
+    path: BusinessRoutes.partners,
+    builder: (_, _) => const PartnersScreen(),
   ),
 ];
