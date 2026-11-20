@@ -64,6 +64,9 @@ abstract final class ErrorMapper {
       retryable: descriptor['retryable'] == true || (status ?? 0) >= 500,
       details: _details(descriptor['details']),
       messageBn: messageBn,
+      messageKey: descriptor['messageKey'] is String
+          ? descriptor['messageKey'] as String
+          : null,
     );
   }
 

@@ -7,6 +7,14 @@
 
 /// Code to (Bangla, English).
 const serverCodeCopy = <String, ({String bn, String en})>{
+  "GENDER_LOCKED": (
+    bn: "পরিচয় যাচাইয়ের পর লিঙ্গ বদলানো যায় না। সংশোধনের জন্য সাপোর্টে যোগাযোগ করুন।",
+    en: "Gender cannot be changed after identity verification. Contact support to correct it.",
+  ),
+  "CONSULTATION_NOT_ACCEPTED": (
+    bn: "বিশেষজ্ঞ পরামর্শটি গ্রহণ করলে চ্যাট খুলবে।",
+    en: "The chat opens once the expert accepts the consultation.",
+  ),
   "AI_DISABLED": (
     bn: "এই মুহূর্তে AI সুবিধা পাওয়া যাচ্ছে না।",
     en: "AI features are not available right now.",
@@ -61,7 +69,7 @@ const serverCodeCopy = <String, ({String bn, String en})>{
   ),
   "BUSINESS_CATEGORY_SLUG_TAKEN": (
     bn: "এই স্লাগে আগেই একটি খাত আছে।",
-    en: "A sector with this slug already exists. (admin)",
+    en: "A sector with this slug already exists.",
   ),
   "BUSINESS_LIMIT_REACHED": (
     bn: "আপনি সর্বোচ্চ ৫টি ব্যবসার মালিক হতে পারেন।",
@@ -105,11 +113,11 @@ const serverCodeCopy = <String, ({String bn, String en})>{
   ),
   "COURSE_SLUG_IMMUTABLE": (
     bn: "কোর্সের স্লাগ বদলানো যায় না।",
-    en: "A course's slug can't change. (admin)",
+    en: "A course's slug can't change.",
   ),
   "COURSE_SLUG_TAKEN": (
     bn: "এই স্লাগে আগেই একটি কোর্স আছে।",
-    en: "A course with this slug already exists. (admin)",
+    en: "A course with this slug already exists.",
   ),
   "ENROLMENT_NOT_ACTIVE": (
     bn: "শুধু চলমান ভর্তির জন্য ক্লাস নথিভুক্ত করা যায়।",
@@ -117,7 +125,7 @@ const serverCodeCopy = <String, ({String bn, String en})>{
   ),
   "GENDER_RESTRICTION_NOT_ALLOWED": (
     bn: "কাজ কোনো এক লিঙ্গের জন্য সীমিত করা যায় না। কাজ ও শর্তগুলো লিখুন।",
-    en: "Jobs can't be limited to one gender. Describe the work and the conditions instead (`field`: title or description).",
+    en: "Jobs can't be limited to one gender. Describe the work and the conditions instead.",
   ),
   "GROUP_LIMIT_REACHED": (
     bn: "আপনি সর্বোচ্চ ৫টি দল শুরু করতে পারেন।",
@@ -173,7 +181,7 @@ const serverCodeCopy = <String, ({String bn, String en})>{
   ),
   "INTRODUCTION_TRANSITION_NOT_ALLOWED": (
     bn: "এই ধাপ এখন সম্ভব নয়।",
-    en: "That step isn't possible now (`details[0].allowedActions`).",
+    en: "That step isn't possible now.",
   ),
   "JOB_ALERT_FILTER_UNAVAILABLE": (
     bn: "এই ফিল্টার দিয়ে সতর্কবার্তা রাখা যায় না। অন্য এলাকা বা দক্ষতা বেছে নিন।",
@@ -189,7 +197,7 @@ const serverCodeCopy = <String, ({String bn, String en})>{
   ),
   "LEARNING_TERMS_INVALID": (
     bn: "শর্তের সাথে ফি বা ভাতা মিলছে না।",
-    en: "The fee or stipend doesn't match the terms (`field` says which).",
+    en: "The fee or stipend doesn't match the terms.",
   ),
   "MEMBER_LIMIT_REACHED": (
     bn: "একটি ব্যবসায় সর্বোচ্চ ৫০ জন সদস্য থাকতে পারে।",
@@ -253,7 +261,7 @@ const serverCodeCopy = <String, ({String bn, String en})>{
   ),
   "RATE_LIMITED": (
     bn: "দিনে ১০টি সহযোগিতার প্রস্তাব পাঠানো যায়। পরে আবার চেষ্টা করুন।",
-    en: "You can send 10 collaboration requests a day. Try again later (`Retry-After`).",
+    en: "You can send 10 collaboration requests a day. Try again later.",
   ),
   "REAPPLY_NOT_ALLOWED": (
     bn: "ভর্তির পর সরে যাওয়ায় এই সুযোগে আবার আবেদন করা যায় না।",
@@ -282,7 +290,7 @@ const serverCodeCopy = <String, ({String bn, String en})>{
   "SEATS_FULL": (bn: "সব আসন পূর্ণ হয়ে গেছে।", en: "Every seat is taken."),
   "SESSION_DETAILS_INVALID": (
     bn: "একটি তথ্য নেই বা ভুল (`field` দেখুন)।",
-    en: "A detail is missing or invalid (`field` says which: area, link, price, time, capacity).",
+    en: "A detail is missing or invalid.",
   ),
   "SESSION_FULL": (
     bn: "এই সেশনের সব জায়গা পূর্ণ।",
@@ -298,7 +306,7 @@ const serverCodeCopy = <String, ({String bn, String en})>{
   ),
   "SESSION_TRANSITION_NOT_ALLOWED": (
     bn: "সেশনের বর্তমান অবস্থায় এটি সম্ভব নয়।",
-    en: "Not possible in the session's current state (`details[0].status`).",
+    en: "Not possible in the session's current state.",
   ),
   "SLOT_IN_PAST": (
     bn: "এই সময় পেরিয়ে গেছে। পরের কোনো সময় বেছে নিন।",
@@ -354,7 +362,7 @@ const serverCodeCopy = <String, ({String bn, String en})>{
   ),
   "USE_BUSINESS_VERIFICATION": (
     bn: "ব্যবসার পাতা থেকে ব্যবসা যাচাই করুন (শুধু মালিক)।",
-    en: "Verify a business from its page (POST /businesses/:id/verification, owner only).",
+    en: "Verify a business from its page.",
   ),
   "USE_MENTOR_APPLICATION": (
     bn: "মেন্টর হতে মেন্টর আবেদন ফর্ম ব্যবহার করুন।",
@@ -367,5 +375,348 @@ const serverCodeCopy = <String, ({String bn, String en})>{
   "WORKER_ROLE_REQUIRED": (
     bn: "এটি করতে কাজের মোড চালু করুন।",
     en: "Turn on work mode to do this.",
+  ),
+};
+
+/// Server `messageKey` to (Bangla, English), from the same doc (backend
+/// integration 37f29e5). One code can mean different things by context
+/// (IDENTITY_REQUIRED for mentors, ideas, groups or women-only spaces), so
+/// the key wins over the code when both are known.
+const serverMessageKeyCopy = <String, ({String bn, String en})>{
+  "error.account.restricted": (
+    bn: "আপনার অ্যাকাউন্টে কাজের সুবিধা সাময়িকভাবে সীমিত।",
+    en: "Marketplace actions are temporarily restricted.",
+  ),
+  "error.account.reverification_required": (
+    bn: "কাজ চালিয়ে যেতে আবার পরিচয় যাচাই করুন।",
+    en: "Identity re-verification is required before marketplace actions.",
+  ),
+  "error.account.suspended": (
+    bn: "এই অ্যাকাউন্ট স্থগিত আছে।",
+    en: "This account is suspended.",
+  ),
+  "error.account.unavailable": (
+    bn: "এই অ্যাকাউন্ট ব্যবহার করা যাচ্ছে না।",
+    en: "This account is unavailable.",
+  ),
+  "error.ai.consent_required": (
+    bn: "আগে আপনার তথ্য দিয়ে AI ব্যবহারের অনুমতি দিন।",
+    en: "Allow KAAJ to use AI with your information first.",
+  ),
+  "error.ai.consent_version": (
+    bn: "অনুমতির লেখা বদলেছে। সর্বশেষ সংস্করণটি দেখান।",
+    en: "The consent text has changed. Show the latest version.",
+  ),
+  "error.ai.declined": (
+    bn: "AI সহকারী এটি বিশ্লেষণ করতে পারেনি। লেখা বদলে আবার চেষ্টা করুন।",
+    en: "The AI assistant couldn't analyse this. Edit the text and try again.",
+  ),
+  "error.ai.disabled": (
+    bn: "এই মুহূর্তে AI সুবিধা পাওয়া যাচ্ছে না।",
+    en: "AI features are not available right now.",
+  ),
+  "error.ai.idea_consent_required": (
+    bn: "আগে এই আইডিয়ার জন্য AI বিশ্লেষণ চালু করুন।",
+    en: "Turn on AI analysis for this idea first.",
+  ),
+  "error.ai.quota_exceeded": (
+    bn: "আজকের AI অনুরোধ শেষ। আগামীকাল আবার চেষ্টা করুন।",
+    en: "You have used today's AI requests for this feature.",
+  ),
+  "error.ai.unavailable": (
+    bn: "AI সহকারী এখন ব্যস্ত। কয়েক মিনিট পরে আবার চেষ্টা করুন।",
+    en: "The AI assistant is busy. Please try again in a few minutes.",
+  ),
+  "error.business.already_member": (
+    bn: "এই ব্যক্তি ইতিমধ্যে সদস্য বা আমন্ত্রিত।",
+    en: "This person is already a member or invited.",
+  ),
+  "error.business.already_verified": (
+    bn: "এই ব্যবসাটি ইতিমধ্যে যাচাই করা।",
+    en: "This business is already verified.",
+  ),
+  "error.business.category_slug_taken": (
+    bn: "এই স্লাগে আগেই একটি খাত আছে।",
+    en: "A sector with this slug already exists.",
+  ),
+  "error.business.last_owner": (
+    bn: "ব্যবসার অন্তত একজন মালিক থাকতে হবে। আগে আরেকজন মালিক যোগ করুন।",
+    en: "A business needs at least one owner. Add another owner first.",
+  ),
+  "error.business.limit_reached": (
+    bn: "আপনি সর্বোচ্চ ৫টি ব্যবসার মালিক হতে পারেন।",
+    en: "You can own at most 5 businesses.",
+  ),
+  "error.business.member_limit": (
+    bn: "একটি ব্যবসায় সর্বোচ্চ ৫০ জন সদস্য থাকতে পারে।",
+    en: "A business can have at most 50 members.",
+  ),
+  "error.business.not_registered": (
+    bn: "শুধু ট্রেড লাইসেন্স নম্বরসহ নিবন্ধিত ব্যবসা যাচাই করা যায়।",
+    en: "Only a registered business with a trade licence number can be verified.",
+  ),
+  "error.business.offering_limit": (
+    bn: "একটি ব্যবসা সর্বোচ্চ ১০০টি অফার রাখতে পারে।",
+    en: "A business can list at most 100 offerings.",
+  ),
+  "error.business.offering_price_invalid": (
+    bn: "সর্বনিম্ন দাম সর্বোচ্চ দামের চেয়ে বেশি হতে পারে না।",
+    en: "The lowest price can't be more than the highest.",
+  ),
+  "error.business.offering_title_required": (
+    bn: "অফারের একটি বাংলা বা ইংরেজি নাম দিন।",
+    en: "Give the offering a title in Bangla or English.",
+  ),
+  "error.business.profile_incomplete": (
+    bn: "ব্যবসা সবার জন্য প্রকাশের আগে খাত ও এলাকা যোগ করুন।",
+    en: "Add a sector and an area before making the business public.",
+  ),
+  "error.business.suspended": (
+    bn: "এই ব্যবসাটি KAAJ মডারেশন স্থগিত করেছে।",
+    en: "This business is suspended by KAAJ moderation.",
+  ),
+  "error.business.use_verification": (
+    bn: "ব্যবসার পাতা থেকে ব্যবসা যাচাই করুন (শুধু মালিক)।",
+    en: "Verify a business from its page.",
+  ),
+  "error.chat.messages_after_hire_only": (
+    bn: "এই ব্যক্তি কাজে নিয়োগের পরেই বার্তা গ্রহণ করেন।",
+    en: "This person accepts messages only after a hire.",
+  ),
+  "error.collaboration.already_open": (
+    bn: "এ বিষয়ে আপনার একটি প্রস্তাব এখনো চলমান।",
+    en: "You already have an open request about this.",
+  ),
+  "error.collaboration.daily_limit": (
+    bn: "দিনে ১০টি সহযোগিতার প্রস্তাব পাঠানো যায়। পরে আবার চেষ্টা করুন।",
+    en: "You can send 10 collaboration requests a day. Try again later.",
+  ),
+  "error.collaboration.own_subject": (
+    bn: "নিজের বা নিজের ব্যবসায় সহযোগিতার প্রস্তাব পাঠানো যায় না।",
+    en: "You can't send a collaboration request to yourself or your own business.",
+  ),
+  "error.collaboration.subject_unsupported": (
+    bn: "এই ধরনের বিষয়ে প্রস্তাব এখনো চালু হয়নি।",
+    en: "Requests about this kind of subject are not available yet.",
+  ),
+  "error.collaboration.transition_not_allowed": (
+    bn: "এই ধাপ এখন সম্ভব নয়।",
+    en: "That step isn't possible now.",
+  ),
+  "error.community.group_limit": (
+    bn: "আপনি সর্বোচ্চ ৫টি দল শুরু করতে পারেন।",
+    en: "You can start at most 5 groups.",
+  ),
+  "error.community.identity_required": (
+    bn: "দল শুরু করার আগে পরিচয় যাচাই করুন।",
+    en: "Verify your identity (NID and selfie) before starting a group.",
+  ),
+  "error.community.last_moderator": (
+    bn: "দলে অন্তত একজন মডারেটর থাকতে হবে। আগে আরেকজন যোগ করুন।",
+    en: "A group needs at least one moderator. Add another first.",
+  ),
+  "error.community.removed": (
+    bn: "একজন মডারেটর আপনাকে এই দল থেকে সরিয়েছেন।",
+    en: "A moderator removed you from this group.",
+  ),
+  "error.community.transition_not_allowed": (
+    bn: "এই সদস্যপদে এখন এটি সম্ভব নয়।",
+    en: "That isn't possible for this membership now.",
+  ),
+  "error.community.women_only": (
+    bn: "এটি শুধু নারীদের দল।",
+    en: "This is a women-only group (open to profiles marked female).",
+  ),
+  "error.idea.access_already_granted": (
+    bn: "আপনি ইতিমধ্যে এই আইডিয়ার বিস্তারিত দেখতে পারেন।",
+    en: "You can already see this idea's details.",
+  ),
+  "error.idea.access_already_requested": (
+    bn: "আপনি আগেই অনুরোধ করেছেন; মালিক এখনো উত্তর দেননি।",
+    en: "You already asked; the owner hasn't answered yet.",
+  ),
+  "error.idea.access_transition_not_allowed": (
+    bn: "এই অনুরোধটি এভাবে বদলানো যায় না।",
+    en: "That access request can't be changed this way.",
+  ),
+  "error.idea.already_converted": (
+    bn: "এই আইডিয়া ইতিমধ্যে একটি ব্যবসা।",
+    en: "This idea is already a business.",
+  ),
+  "error.idea.collaboration_not_agreed": (
+    bn: "দুজনে সম্মত হওয়া প্রস্তাব থেকে দলের সদস্য যোগ করুন।",
+    en: "Add a team member from a collaboration request you both agreed.",
+  ),
+  "error.idea.confidentiality_required": (
+    bn: "বিস্তারিত চাইতে গোপনীয়তার শর্ত মেনে নিন।",
+    en: "Accept the confidentiality notice to ask for the details.",
+  ),
+  "error.idea.daily_limit": (
+    bn: "দিনে ১০টি আইডিয়ার বিস্তারিত চাওয়া যায়। পরে আবার চেষ্টা করুন।",
+    en: "You can ask about 10 ideas a day. Try again later.",
+  ),
+  "error.idea.identity_required": (
+    bn: "আইডিয়া সবার জন্য প্রকাশের আগে পরিচয় (এনআইডি ও সেলফি) যাচাই করুন।",
+    en: "Verify your identity (NID and selfie) before making an idea public.",
+  ),
+  "error.idea.limit_reached": (
+    bn: "আপনি সর্বোচ্চ ২০টি আইডিয়া রাখতে পারেন।",
+    en: "You can have at most 20 ideas.",
+  ),
+  "error.idea.role_limit": (
+    bn: "একটি আইডিয়ায় সর্বোচ্চ ১০টি ভূমিকা চাওয়া যায়।",
+    en: "An idea can seek at most 10 roles.",
+  ),
+  "error.idea.role_not_open": (
+    bn: "এই ভূমিকাটি আর খোলা নেই।",
+    en: "This role is no longer open.",
+  ),
+  "error.introduction.already_pending": (
+    bn: "এই বিশেষজ্ঞের কাছে আপনার একটি অনুরোধ এখনো অপেক্ষমাণ।",
+    en: "You already have a pending request to this expert.",
+  ),
+  "error.introduction.daily_limit": (
+    bn: "দিনে ৫টি পরিচয়ের অনুরোধ পাঠানো যায়। পরে আবার চেষ্টা করুন।",
+    en: "You can send 5 introduction requests a day. Try again later.",
+  ),
+  "error.introduction.idea_access_owner_only": (
+    bn: "শুধু আইডিয়ার মালিক বিস্তারিত দেখার অনুমতি দিতে পারেন।",
+    en: "Only the idea's owner can offer access to its details.",
+  ),
+  "error.introduction.transition_not_allowed": (
+    bn: "এই ধাপ এখন সম্ভব নয়।",
+    en: "That step isn't possible now.",
+  ),
+  "error.job.gender_restriction": (
+    bn: "কাজ কোনো এক লিঙ্গের জন্য সীমিত করা যায় না। কাজ ও শর্তগুলো লিখুন।",
+    en: "Jobs can't be limited to one gender. Describe the work and the conditions instead.",
+  ),
+  "error.job.hiring_unavailable": (
+    bn: "এই কাজে এই কর্মীকে নেওয়া যাবে না।",
+    en: "This worker can't be hired for this job.",
+  ),
+  "error.job.not_work": (
+    bn: "এটি একটি শেখার সুযোগ। শেখার অংশ থেকে ব্যবহার করুন।",
+    en: "This is a learning opportunity. Use the learning routes instead.",
+  ),
+  "error.jobs.slot_unavailable": (
+    bn: "বিশেষজ্ঞ ওই সময়ে ফাঁকা নেই।",
+    en: "The expert is not available at that time. Pick another time.",
+  ),
+  "error.learning.application_not_withdrawable": (
+    bn: "এই আবেদন আর প্রত্যাহার করা যায় না।",
+    en: "This application can no longer be withdrawn (declined or expired).",
+  ),
+  "error.learning.closed": (
+    bn: "এই সুযোগে এখন আবেদন নেওয়া হচ্ছে না।",
+    en: "This opportunity is not taking applications.",
+  ),
+  "error.learning.enrolment_not_active": (
+    bn: "শুধু চলমান ভর্তির জন্য ক্লাস নথিভুক্ত করা যায়।",
+    en: "Sessions can be recorded only for an active enrolment.",
+  ),
+  "error.learning.no_confirmed_sessions": (
+    bn: "সমাপ্তির আগে শিক্ষার্থীকে অন্তত একটি ক্লাসে উপস্থিতি নিশ্চিত করতে হবে।",
+    en: "The learner must confirm at least one session before completion.",
+  ),
+  "error.learning.own_opportunity": (
+    bn: "নিজের সুযোগে আবেদন করা যায় না।",
+    en: "You can't apply to your own opportunity.",
+  ),
+  "error.learning.reapply_not_allowed": (
+    bn: "ভর্তির পর সরে যাওয়ায় এই সুযোগে আবার আবেদন করা যায় না।",
+    en: "You left this opportunity after being accepted.",
+  ),
+  "error.learning.seats_full": (
+    bn: "সব আসন পূর্ণ হয়ে গেছে।",
+    en: "Every seat is taken.",
+  ),
+  "error.learning.session_in_future": (
+    bn: "ক্লাস হয়ে যাওয়ার পরে নথিভুক্ত করুন।",
+    en: "Record a session after it has happened.",
+  ),
+  "error.learning.terms_invalid": (
+    bn: "শর্তের সাথে ফি বা ভাতা মিলছে না।",
+    en: "The fee or stipend doesn't match the terms.",
+  ),
+  "error.mentor.already_approved": (
+    bn: "আপনি ইতিমধ্যে অনুমোদিত মেন্টর।",
+    en: "You are already an approved mentor.",
+  ),
+  "error.mentor.application_pending": (
+    bn: "আপনার মেন্টর আবেদন যাচাই করা হচ্ছে।",
+    en: "Your mentor application is being reviewed.",
+  ),
+  "error.mentor.approval_required": (
+    bn: "শুধু অনুমোদিত মেন্টর এটি করতে পারেন। আগে মেন্টর হওয়ার আবেদন করুন।",
+    en: "Only approved mentors can do this. Apply to become a mentor first.",
+  ),
+  "error.mentor.identity_required": (
+    bn: "মেন্টর হওয়ার আবেদনের আগে পরিচয় (এনআইডি ও সেলফি) যাচাই করুন।",
+    en: "Verify your identity (NID and selfie) before applying to mentor.",
+  ),
+  "error.mentor.suspended": (
+    bn: "আপনার মেন্টর প্রোফাইল স্থগিত আছে।",
+    en: "Your mentor profile is suspended.",
+  ),
+  "error.mentor.use_application": (
+    bn: "মেন্টর হতে মেন্টর আবেদন ফর্ম ব্যবহার করুন।",
+    en: "Apply to become a mentor with POST /me/mentor/application.",
+  ),
+  "error.profile.gender_locked": (
+    bn: "পরিচয় যাচাইয়ের পর লিঙ্গ বদলানো যায় না। সংশোধনের জন্য সাপোর্টে যোগাযোগ করুন।",
+    en: "Gender cannot be changed after identity verification. Contact support to correct it.",
+  ),
+  "error.review.not_allowed": (
+    bn: "সেশন শেষ হলে উপস্থিত অংশগ্রহণকারীরা মতামত দিতে পারেন।",
+    en: "Feedback opens for people who attended, once the session is completed.",
+  ),
+  "error.review.subject_unsupported": (
+    bn: "এই ধরনের রিভিউ এখনো চালু হয়নি।",
+    en: "Reviews of this kind are not available yet.",
+  ),
+  "error.safety.blocked": (
+    bn: "এই ব্যক্তির সাথে যোগাযোগ করা যাবে না।",
+    en: "You can't interact with this person.",
+  ),
+  "error.session.consultation_not_accepted": (
+    bn: "বিশেষজ্ঞ পরামর্শটি গ্রহণ করলে চ্যাট খুলবে।",
+    en: "The chat opens once the expert accepts the consultation.",
+  ),
+  "error.session.details_invalid": (
+    bn: "একটি তথ্য নেই বা ভুল (`field` দেখুন)।",
+    en: "A detail is missing or invalid.",
+  ),
+  "error.session.full": (
+    bn: "এই সেশনের সব জায়গা পূর্ণ।",
+    en: "Every place in this session is taken.",
+  ),
+  "error.session.not_started": (
+    bn: "সেশন শুরু হওয়ার পর উপস্থিতি বা সমাপ্তি দিন।",
+    en: "Mark attendance or complete the session once it has started.",
+  ),
+  "error.session.transition_not_allowed": (
+    bn: "সেশনের বর্তমান অবস্থায় এটি সম্ভব নয়।",
+    en: "Not possible in the session's current state.",
+  ),
+  "error.session.women_only": (
+    bn: "এটি শুধু নারীদের সেশন।",
+    en: "This is a women-only session (open to profiles marked female).",
+  ),
+  "error.subscription.required": (
+    bn: "আপনার সাবস্ক্রিপশন চালু নেই বা মেয়াদ শেষ। চালিয়ে যেতে নবায়ন করুন।",
+    en: "Your subscription is inactive or expired. Renew it to continue using this feature.",
+  ),
+  "error.training.slug_immutable": (
+    bn: "কোর্সের স্লাগ বদলানো যায় না।",
+    en: "A course's slug can't change.",
+  ),
+  "error.training.slug_taken": (
+    bn: "এই স্লাগে আগেই একটি কোর্স আছে।",
+    en: "A course with this slug already exists.",
+  ),
+  "error.women_only.identity_required": (
+    bn: "নারীদের দল ও সেশনে যোগ দিতে পরিচয় (এনআইডি ও সেলফি) যাচাই করুন।",
+    en: "Verify your identity (NID and selfie) to join women-only groups and sessions.",
   ),
 };

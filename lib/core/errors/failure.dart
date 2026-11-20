@@ -25,6 +25,7 @@ class Failure implements Exception {
     this.retryable = false,
     this.details = const [],
     this.messageBn,
+    this.messageKey,
   });
 
   final FailureKind kind;
@@ -40,6 +41,10 @@ class Failure implements Exception {
 
   /// The server's Bangla text, when it sent one next to [message].
   final String? messageBn;
+
+  /// The server's message key (`error.session.women_only`): tells apart the
+  /// same [code] used in different places.
+  final String? messageKey;
 
   /// The server's own reason with its code, for an error the app has no
   /// copy for: "Approved identity verification is required. (FORBIDDEN)".

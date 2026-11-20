@@ -334,7 +334,11 @@ class _SessionDetailScreenState extends ConsumerState<SessionDetailScreen> {
         s.startsAt != null &&
         now.isAfter(s.startsAt!.subtract(const Duration(hours: 1))) &&
         (s.endsAt == null || now.isBefore(s.endsAt!));
-    final canChat = (s.isHost || s.confirmed) && s.status != 'CANCELLED';
+    // A consultation chat opens only once the expert accepts
+    // (CONSULTATION_NOT_ACCEPTED before that).
+    final awaitingExpert = s.isConsultation && s.status == 'DRAFT';
+    final canChat =
+        (s.isHost || s.confirmed) && s.status != 'CANCELLED' && !awaitingExpert;
     final people = s.participants
         .where((person) => person.role != 'HOST')
         .toList(growable: false);
@@ -534,6 +538,13 @@ class _SessionDetailScreenState extends ConsumerState<SessionDetailScreen> {
             onPressed: _busy ? null : _checkIn,
             icon: const Icon(Icons.where_to_vote_outlined),
             label: const KLocalizedText('চেক-ইন করুন'),
+          ),
+          const SizedBox(height: KSpacing.sm),
+        ],
+        if (awaitingExpert && s.confirmed) ...[
+          const KLocalizedText(
+            'বিশেষজ্ঞ পরামর্শটি গ্রহণ করলে চ্যাট খুলবে।',
+            key: ValueKey('session-chat-pending'),
           ),
           const SizedBox(height: KSpacing.sm),
         ],

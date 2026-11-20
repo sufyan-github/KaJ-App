@@ -59,6 +59,16 @@ class KErrorMessage extends StatelessWidget {
 /// The app's own message for a stable server error code the person can act
 /// on, or null for codes the app has no specific copy for.
 String? serverCodeMessage(AppLocalizations l10n, Failure failure) =>
+    _fromMessageKey(l10n, failure.messageKey) ?? _fromCode(l10n, failure);
+
+/// The context-precise copy for a message key the app knows.
+String? _fromMessageKey(AppLocalizations l10n, String? key) {
+  final copy = key == null ? null : serverMessageKeyCopy[key];
+  if (copy == null) return null;
+  return l10n.localeName.startsWith('bn') ? copy.bn : copy.en;
+}
+
+String? _fromCode(AppLocalizations l10n, Failure failure) =>
     switch (failure.code) {
       'ACCOUNT_RESTRICTED' => l10n.errorAccountRestricted,
       'REVERIFICATION_REQUIRED' => l10n.errorReverificationRequired,

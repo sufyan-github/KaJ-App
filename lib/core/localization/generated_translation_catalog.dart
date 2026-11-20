@@ -1358,4 +1358,9 @@ const generatedEnglishTranslations = <String, String>{
       "The link is old or not in this version of the app. Update the app and try again.",
   // R4: unknown links (button)
   "হোমে ফিরুন": "Back to Home",
+  // R1: consultation chat and gender lock
+  "পরিচয় যাচাইয়ের পর লিঙ্গ বদলানো যায় না। সংশোধনের জন্য সাপোর্টে যোগাযোগ করুন।":
+      "Gender cannot be changed after identity verification. Contact support to correct it.",
+  "বিশেষজ্ঞ পরামর্শটি গ্রহণ করলে চ্যাট খুলবে।":
+      "The chat opens once the expert accepts the consultation.",
 };
