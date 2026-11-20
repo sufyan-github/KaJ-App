@@ -68,6 +68,7 @@ import {
 import { EngagementService } from "../safety/engagement.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
+import { withinLocation } from "../../common/location-scope";
 import { managesJob } from "../business/job-managers";
 import { assertWork, isWork, WORK_ONLY } from "./opportunity";
 import { CursorQueryDto } from "../../common/api/cursor-query.dto";
@@ -288,23 +289,55 @@ export class JobsService {
       : preferences?.preferred_arrangements.length
         ? preferences.preferred_arrangements
         : undefined;
-    const flexibleOnly =
-      query.flexibleHours === "true" ||
-      preferences?.prefers_flexible_hours === true;
+    // W13: "false" asks for jobs without flexible hours; it used to be
+    // ignored.
+    const flexible =
+      query.flexibleHours === "true"
+        ? true
+        : query.flexibleHours === "false"
+          ? false
+          : preferences?.prefers_flexible_hours === true
+            ? true
+            : undefined;
+    const text = query.q?.trim();
     const jobs = await this.prisma.job.findMany({
       where: {
         ...WORK_ONLY,
         status: JobStatus.APPLICATIONS_OPEN,
         deleted_at: null,
         poster_user_id: { notIn: [userId, ...hidden] },
-        OR: [{ expires_at: null }, { expires_at: { gt: this.now() } }],
+        AND: [
+          { OR: [{ expires_at: null }, { expires_at: { gt: this.now() } }] },
+          // W13: free-text search on title and description.
+          ...(text
+            ? [
+                {
+                  OR: [
+                    {
+                      title: {
+                        contains: text,
+                        mode: Prisma.QueryMode.insensitive,
+                      },
+                    },
+                    {
+                      description: {
+                        contains: text,
+                        mode: Prisma.QueryMode.insensitive,
+                      },
+                    },
+                  ],
+                },
+              ]
+            : []),
+        ],
         category_id: query.categoryId,
-        location_id: query.locationId,
+        // W13: a thana or city also finds its areas' jobs.
+        location: withinLocation(query.locationId),
         skills: query.skillId
           ? { some: { skill_id: query.skillId } }
           : undefined,
         ...(arrangements ? { work_arrangement: { in: arrangements } } : {}),
-        ...(flexibleOnly ? { flexible_hours: true } : {}),
+        ...(flexible !== undefined ? { flexible_hours: flexible } : {}),
       },
       include: jobInclude,
       // id breaks ties so cursor pages never overlap or skip.
@@ -321,7 +354,8 @@ export class JobsService {
       string,
       { timeCompatibility: string; availabilityCoverage: number | null }
     >();
-    if (query.scope === "for-me") {
+    // W13: availableOnly needs the availability even outside "for me".
+    if (query.scope === "for-me" || query.availableOnly === "true") {
       await Promise.all(
         jobs.map(async (job) => {
           if (!job.starts_at || !job.ends_at) {

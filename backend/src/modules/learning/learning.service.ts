@@ -20,6 +20,7 @@ import {
 } from "@prisma/client";
 
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
+import { withinLocation } from "../../common/location-scope";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { JobStateMachine } from "../jobs/state-machine/job-state.machine";
 import { MentorsService } from "../mentors/mentors.service";
@@ -192,7 +193,8 @@ export class LearningService {
         },
         participant_terms: query.participantTerms,
         work_arrangement: query.workArrangement,
-        location_id: query.locationId,
+        // W13: a thana or city also finds its areas' opportunities.
+        location: withinLocation(query.locationId),
         skills: query.skillId
           ? { some: { skill_id: query.skillId } }
           : undefined,
