@@ -29,10 +29,16 @@ export const LearnFeatures = {
 
 export type EntitlementModule = "WORK" | "LEARN" | "COMMUNITY" | "BUSINESS";
 
-/** Modules that never require a subscription. */
+/**
+ * Modules that never require a subscription (owner decisions: Learn and
+ * Community are free; R1: Business, partners, collaboration and Ideas are
+ * free too). Work stays paid. AI features use their own keys (for example
+ * AI_IDEA_ANALYSIS), which count as paid, not as BUSINESS_ keys.
+ */
 export const FREE_MODULES: readonly EntitlementModule[] = [
   "LEARN",
   "COMMUNITY",
+  "BUSINESS",
 ];
 
 /**

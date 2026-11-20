@@ -1,3 +1,6 @@
+import { EngagementService } from "../safety/engagement.service";
+import { assertMayActOnAccount } from "../admin-auth/staff-accounts";
+import { visibleDisplayName } from "../users/public-profile.projection";
 import {
   BadRequestException,
   ConflictException,
@@ -137,15 +140,26 @@ export class ModerationService {
       where: { blocker_user_id: userId },
       include: {
         blocked: {
-          include: { profile: { select: { display_name: true } } },
+          include: {
+            profile: { select: { display_name: true, show_full_name: true } },
+          },
         },
       },
       orderBy: { created_at: "desc" },
     });
+    // One name rule (R1): masked unless shown by choice or hired before.
+    const hiredWith = await new EngagementService(this.prisma).hiredWith(
+      userId,
+      items.map((item) => item.blocked_user_id),
+    );
     return {
       items: items.map((item) => ({
         userId: item.blocked_user_id,
-        displayName: item.blocked.profile?.display_name ?? "KAAJ user",
+        displayName:
+          visibleDisplayName(item.blocked.profile?.display_name ?? "", {
+            showFullName: item.blocked.profile?.show_full_name ?? false,
+            hired: hiredWith.has(item.blocked_user_id),
+          }) || "KAAJ user",
         blockedAt: item.created_at.toISOString(),
       })),
     };
@@ -425,6 +439,7 @@ export class ModerationService {
     }
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException();
+    await assertMayActOnAccount(this.prisma, actor, userId);
     if (user.reverification_required) {
       throw new ConflictException(
         "Required identity re-verification must be approved before restoration.",
@@ -554,6 +569,7 @@ export class ModerationService {
     }
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException();
+    await assertMayActOnAccount(this.prisma, actor, userId);
     const previous = effectiveLevel(user);
     const expected = NEXT_LEVEL[previous];
     if (input.action !== expected) {

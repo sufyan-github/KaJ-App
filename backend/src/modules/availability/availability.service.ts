@@ -5,7 +5,7 @@ import {
   NotFoundException,
   Optional,
 } from "@nestjs/common";
-import { AssignmentStatus } from "@prisma/client";
+import { AssignmentStatus, Prisma } from "@prisma/client";
 
 import { CLOCK, Clock } from "../../common/time/clock";
 import { PrismaService } from "../../infra/prisma/prisma.service";
@@ -222,20 +222,22 @@ export class AvailabilityService {
     from: Date,
     to: Date,
     extraBlocked: Array<{ startsAt: Date; endsAt: Date }> = [],
+    // A caller holding a lock passes its transaction, so the reads use it.
+    db: Prisma.TransactionClient = this.prisma,
   ): Promise<Array<{ startsAt: string; endsAt: string }>> {
     const [rules, exceptions, assignments] = await Promise.all([
-      this.prisma.availabilityRule.findMany({
+      db.availabilityRule.findMany({
         where: { user_id: userId, is_active: true },
         orderBy: [{ day_of_week: "asc" }, { start_time: "asc" }],
       }),
-      this.prisma.availabilityException.findMany({
+      db.availabilityException.findMany({
         where: {
           user_id: userId,
           starts_at: { lt: to },
           ends_at: { gt: from },
         },
       }),
-      this.prisma.assignment.findMany({
+      db.assignment.findMany({
         where: {
           worker_user_id: userId,
           status: { in: BLOCKING_ASSIGNMENT_STATUSES },

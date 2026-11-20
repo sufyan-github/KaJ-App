@@ -12,6 +12,7 @@ import {
   thanaNames,
   thanas,
 } from "./reference-data";
+import { adminSeedDecision } from "./seed-admin";
 
 // This seed resets admin credentials, fees, settings, and feature flags.
 // Refuse before constructing a client or performing any database work.
@@ -235,53 +236,58 @@ async function seed() {
     }
   }
 
-  const adminEmail = process.env.ADMIN_SEED_EMAIL ?? "admin@kaj.local";
-  const adminPassword = process.env.ADMIN_SEED_PASSWORD ?? "KajAdminLocal123!";
-  const adminTotpSecret =
-    process.env.ADMIN_SEED_TOTP_SECRET ?? "JBSWY3DPEHPK3PXP";
-  const adminEncryptionKey =
-    process.env.ADMIN_TOTP_ENCRYPTION_KEY ||
-    createHash("sha256")
-      .update("kaj:admin-totp:local-development-only")
-      .digest("hex");
-  const passwordHash = await hash(adminPassword, 12);
-  const admin = await prisma.user.upsert({
-    where: { email: adminEmail },
-    update: {
-      is_admin: true,
-      password_hash: passwordHash,
-      status: "ACTIVE",
-    },
-    create: {
-      phone_e164: "+8801000000000",
-      email: adminEmail,
-      password_hash: passwordHash,
-      status: "ACTIVE",
-      role_modes: [RoleMode.CUSTOMER, RoleMode.WORKER, RoleMode.BUSINESS],
-      is_admin: true,
-    },
-  });
-  await prisma.adminCredential.upsert({
-    where: { user_id: admin.id },
-    update: {
-      role: AdminRole.ADMIN,
-      totp_secret_ciphertext: encryptTotpSecret(
-        adminTotpSecret,
-        adminEncryptionKey,
-      ),
-      totp_confirmed_at: new Date(),
-      last_totp_counter: null,
-    },
-    create: {
-      user_id: admin.id,
-      role: AdminRole.ADMIN,
-      totp_secret_ciphertext: encryptTotpSecret(
-        adminTotpSecret,
-        adminEncryptionKey,
-      ),
-      totp_confirmed_at: new Date(),
-    },
-  });
+  // SEC-1: no fallback credentials; the committed example values only
+  // against a local database (see seed-admin.ts).
+  const adminSeed = adminSeedDecision(process.env);
+  if (!adminSeed.seed) console.warn(adminSeed.reason);
+  else {
+    const adminEmail = adminSeed.email;
+    const adminPassword = adminSeed.password;
+    const adminTotpSecret = adminSeed.totpSecret;
+    const adminEncryptionKey =
+      process.env.ADMIN_TOTP_ENCRYPTION_KEY ||
+      createHash("sha256")
+        .update("kaj:admin-totp:local-development-only")
+        .digest("hex");
+    const passwordHash = await hash(adminPassword, 12);
+    const admin = await prisma.user.upsert({
+      where: { email: adminEmail },
+      update: {
+        is_admin: true,
+        password_hash: passwordHash,
+        status: "ACTIVE",
+      },
+      create: {
+        phone_e164: "+8801000000000",
+        email: adminEmail,
+        password_hash: passwordHash,
+        status: "ACTIVE",
+        role_modes: [RoleMode.CUSTOMER, RoleMode.WORKER, RoleMode.BUSINESS],
+        is_admin: true,
+      },
+    });
+    await prisma.adminCredential.upsert({
+      where: { user_id: admin.id },
+      update: {
+        role: AdminRole.ADMIN,
+        totp_secret_ciphertext: encryptTotpSecret(
+          adminTotpSecret,
+          adminEncryptionKey,
+        ),
+        totp_confirmed_at: new Date(),
+        last_totp_counter: null,
+      },
+      create: {
+        user_id: admin.id,
+        role: AdminRole.ADMIN,
+        totp_secret_ciphertext: encryptTotpSecret(
+          adminTotpSecret,
+          adminEncryptionKey,
+        ),
+        totp_confirmed_at: new Date(),
+      },
+    });
+  }
 
   for (const key of featureFlags) {
     await prisma.featureFlag.upsert({
