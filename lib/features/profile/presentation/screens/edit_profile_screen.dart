@@ -80,6 +80,16 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
   late final TextEditingController _bio;
   late final TextEditingController _birthYear;
   String? _gender;
+
+  /// The server locks gender once identity is verified (GENDER_LOCKED).
+  bool get _genderLocked =>
+      widget.profile.gender != null &&
+      const {
+        'IDENTITY',
+        'VERIFIED',
+        'SKILL',
+        'BUSINESS',
+      }.contains(widget.profile.trustLevel);
   String? _locationId;
   bool _saving = false;
   bool _uploading = false;
@@ -276,7 +286,9 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
               labelText: KaajLocalizations.text(context, 'লিঙ্গ (ঐচ্ছিক)'),
               helperText: KaajLocalizations.text(
                 context,
-                'শুধু নারীদের দল ও সেশনে যোগ দিতে নারী বেছে নিতে হয়।',
+                _genderLocked
+                    ? 'পরিচয় যাচাইয়ের পর লিঙ্গ বদলানো যায় না। সংশোধনের জন্য সাপোর্টে যোগাযোগ করুন।'
+                    : 'শুধু নারীদের দল ও সেশনে যোগ দিতে নারী বেছে নিতে হয়।',
               ),
               helperMaxLines: 2,
             ),
@@ -287,7 +299,7 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
                   child: KLocalizedText(entry.value),
                 ),
             ],
-            onChanged: _saving
+            onChanged: _saving || _genderLocked
                 ? null
                 : (value) => setState(() => _gender = value),
           ),

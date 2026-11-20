@@ -82,6 +82,9 @@ Failure? socketExceptionFailure(Object? payload) {
         : genericFailureMessage,
     code: code is String ? code : null,
     field: payload['field'] is String ? payload['field'] as String : null,
+    messageKey: payload['messageKey'] is String
+        ? payload['messageKey'] as String
+        : null,
   );
 }
 

@@ -402,4 +402,38 @@ void main() {
       expect(body['rating'], 5);
     });
   });
+
+  for (final (status, chat) in [('DRAFT', false), ('SCHEDULED', true)]) {
+    testWidgets('consultation chat waits for the expert ($status)', (
+      tester,
+    ) async {
+      final api = FakeApi()
+        ..on(
+          'GET /sessions/s1',
+          FakeResponse.data(
+            _session(
+              kind: 'CONSULTATION',
+              status: status,
+              mode: 'IN_APP_CHAT',
+              myStatus: 'ACCEPTED',
+              groupId: null,
+            ),
+          ),
+        );
+      await pumpRouted(
+        tester,
+        api: api,
+        home: const SessionDetailScreen(sessionId: 's1'),
+        size: const Size(400, 1800),
+      );
+      expect(
+        find.byKey(const ValueKey('session-chat')),
+        chat ? findsOneWidget : findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey('session-chat-pending')),
+        chat ? findsNothing : findsOneWidget,
+      );
+    });
+  }
 }

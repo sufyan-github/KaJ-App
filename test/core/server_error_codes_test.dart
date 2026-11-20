@@ -129,6 +129,43 @@ void main() {
     );
   });
 
+  test('the message key picks the right copy for a shared code', () {
+    for (final language in ['en', 'bn']) {
+      final l10n = lookupAppLocalizations(Locale(language));
+      String? text(String key) => serverCodeMessage(
+        l10n,
+        Failure(
+          kind: FailureKind.conflict,
+          message: 'x',
+          code: 'IDENTITY_REQUIRED',
+          messageKey: key,
+        ),
+      );
+      final womenOnly = text('error.women_only.identity_required');
+      final idea = text('error.idea.identity_required');
+      expect(womenOnly, isNot(idea));
+      expect(
+        womenOnly,
+        language == 'en'
+            ? contains('women-only groups and sessions')
+            : contains('নারীদের দল ও সেশনে'),
+      );
+    }
+    // An unknown key falls back to the code copy.
+    expect(
+      serverCodeMessage(
+        lookupAppLocalizations(const Locale('en')),
+        const Failure(
+          kind: FailureKind.conflict,
+          message: 'x',
+          code: 'CONSULTATION_NOT_ACCEPTED',
+          messageKey: 'error.unknown.key',
+        ),
+      ),
+      'The chat opens once the expert accepts the consultation.',
+    );
+  });
+
   test('an unknown code keeps the screen fallback', () {
     final l10n = lookupAppLocalizations(const Locale('en'));
     expect(

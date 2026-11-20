@@ -65,4 +65,36 @@ void main() {
     expect(find.text('সঠিক জন্ম সাল লিখুন, যেমন ১৯৯৫।'), findsOneWidget);
     expect(api.called('PUT /profiles/me'), isEmpty);
   });
+
+  testWidgets('gender is locked after identity verification', (tester) async {
+    final api = FakeApi()
+      ..on(
+        'GET /profiles/me',
+        FakeResponse.data({
+          ...myProfileJson(),
+          'gender': 'FEMALE',
+          'trustLevel': 'IDENTITY',
+        }),
+      );
+    await pumpRouted(
+      tester,
+      api: api,
+      initial: '/profile/edit',
+      size: const Size(400, 1800),
+    );
+    expect(
+      find.text(
+        'Gender cannot be changed after identity verification. '
+        'Contact support to correct it.',
+      ),
+      findsOneWidget,
+    );
+    final field = tester.widget<DropdownButton<String>>(
+      find.descendant(
+        of: find.byKey(const ValueKey('profile-gender')),
+        matching: find.byType(DropdownButton<String>),
+      ),
+    );
+    expect(field.onChanged, isNull);
+  });
 }
