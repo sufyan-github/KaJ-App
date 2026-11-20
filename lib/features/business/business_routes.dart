@@ -7,6 +7,7 @@ import 'presentation/business_form_screen.dart';
 import 'presentation/business_members_screen.dart';
 import 'presentation/business_offerings_screen.dart';
 import 'presentation/business_verification_screen.dart';
+import 'presentation/collaboration_screens.dart';
 import 'presentation/my_businesses_screen.dart';
 
 /// Paths of the Business screens. All start with `/businesses`, `/partners`
@@ -71,5 +72,21 @@ List<RouteBase> businessRoutes() => [
   GoRoute(
     path: BusinessRoutes.partners,
     builder: (_, _) => const PartnersScreen(),
+  ),
+  GoRoute(
+    path: '/businesses/:id/collaborate',
+    builder: (_, state) => CollaborationRequestFormScreen(
+      subjectType: 'BUSINESS',
+      subjectId: state.pathParameters['id']!,
+    ),
+  ),
+  GoRoute(
+    path: BusinessRoutes.collaborations,
+    builder: (_, _) => const CollaborationListScreen(),
+  ),
+  GoRoute(
+    path: '/collaboration-requests/:id',
+    builder: (_, state) =>
+        CollaborationDetailScreen(requestId: state.pathParameters['id']!),
   ),
 ];

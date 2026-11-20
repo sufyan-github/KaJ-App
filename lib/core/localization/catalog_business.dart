@@ -195,4 +195,43 @@ const businessTranslations = <String, String>{
   "অংশীদার খুঁজছে এমন প্রকাশিত ব্যবসা এখানে দেখা যায়। ফিল্টার বদলে দেখুন, বা নিজের ব্যবসা যোগ করুন।":
       "Published businesses looking for partners show here. Try other filters, or add your own business.",
   "ব্যবসার নাম বা কাজ লিখুন": "Type a business name or what it does",
+  "প্রত্যাহার করুন": "Withdraw",
+  "নীতিগতভাবে সম্মতি দিন": "Agree in principle",
+  "সহযোগিতা শেষ করুন": "End collaboration",
+  "অন্য পক্ষ": "The other side",
+  "অজানা": "Unknown",
+  "পাওয়া": "Received",
+  "পাঠানো": "Sent",
+  "অনুরোধের তালিকা লোড করা যায়নি।": "Could not load the requests.",
+  "কোনো অনুরোধ আসেনি": "No requests received",
+  "আপনি কোনো অনুরোধ পাঠাননি": "You have not sent any requests",
+  "অংশীদার তালিকা থেকে কোনো ব্যবসায় সহযোগিতার অনুরোধ পাঠাতে পারেন।":
+      "You can send a collaboration request to a business from the partner directory.",
+  "অনুরোধটি লোড করা যায়নি।": "Could not load the request.",
+  "আইডিয়ার একটি নির্দিষ্ট ভূমিকা নিয়ে আগ্রহ":
+      "Interest in a specific role of the idea",
+  "যাকে পাঠিয়েছেন": "Sent to",
+  "যিনি পাঠিয়েছেন": "Sent by",
+  "ব্যবসার পক্ষ থেকে:": "On behalf of:",
+  "চ্যাট খুলুন": "Open chat",
+  "নীতিগত সমঝোতা": "Agreement in principle",
+  "এখনো কোনো সারাংশ লেখা হয়নি।": "No summary written yet.",
+  "আপনি সম্মত": "You agreed",
+  "অন্য পক্ষ সম্মত": "The other side agreed",
+  "ইতিহাস": "History",
+  "আপনারা কী বিষয়ে নীতিগতভাবে সম্মত হয়েছেন, সংক্ষেপে লিখুন। এটি কোনো আইনি চুক্তি নয়।":
+      "Briefly write what you agreed in principle. This is not a legal contract.",
+  "সমঝোতার সারাংশ (ঐচ্ছিক)": "Summary of the agreement (optional)",
+  "কাজটি সম্পন্ন হয়নি।": "That could not be done.",
+  "আপনার বার্তা": "Your message",
+  "আপনি কে, কী ধরনের সহযোগিতা চান এবং কেন":
+      "Who you are, what kind of collaboration you want and why",
+  "কমপক্ষে ১০ অক্ষরে বার্তা লিখুন": "Write a message of at least 10 characters",
+  "বার্তা ১০০০ অক্ষরের বেশি হতে পারবে না":
+      "The message can be at most 1000 characters",
+  "কোন ব্যবসার পক্ষ থেকে (ঐচ্ছিক)": "On behalf of which business (optional)",
+  "ব্যক্তিগতভাবে": "As myself",
+  "অনুরোধ পাঠানো যায়নি।": "Could not send the request.",
+  "আমার অনুরোধগুলো দেখুন": "See my requests",
+  "ফিরিয়ে দেওয়া হয়েছে": "Declined",
 };
