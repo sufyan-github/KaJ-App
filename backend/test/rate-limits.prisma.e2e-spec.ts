@@ -80,6 +80,10 @@ databaseDescribe("per-person rate limits (real HTTP)", () => {
         description: "Rate limit test report.",
       });
     });
+    // Leave the shared report queue as it was (its suites page by 50).
+    await api.db.report.deleteMany({
+      where: { reporter_user_id: reporter.id },
+    });
   });
 
   it("limits upload URLs per person", async () => {
