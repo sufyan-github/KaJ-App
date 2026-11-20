@@ -460,37 +460,9 @@ class NotificationPreferencesScreen extends ConsumerStatefulWidget {
 }
 
 class _NotificationPreferencesScreenState
-    extends ConsumerState<NotificationPreferencesScreen>
-    with WidgetsBindingObserver {
-  late Future<KPermissionStatus> _permissionStatus;
+    extends ConsumerState<NotificationPreferencesScreen> {
   final Map<String, bool> _overrides = {};
   final Set<String> _busyGroups = {};
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _permissionStatus = widget.permissionGateway.status(
-      KPermission.notifications,
-    );
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      setState(() {
-        _permissionStatus = widget.permissionGateway.status(
-          KPermission.notifications,
-        );
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -541,35 +513,6 @@ class _NotificationPreferencesScreenState
         KSpacing.xl,
       ),
       children: [
-        FutureBuilder<KPermissionStatus>(
-          future: _permissionStatus,
-          builder: (context, snapshot) {
-            if (!snapshot.hasData ||
-                snapshot.data == KPermissionStatus.granted) {
-              return const SizedBox.shrink();
-            }
-            return Padding(
-              padding: const EdgeInsets.only(bottom: KSpacing.md),
-              child: Card(
-                color: KColors.warning.withValues(alpha: .09),
-                child: ListTile(
-                  leading: const Icon(
-                    Icons.notifications_off_outlined,
-                    color: KColors.warning,
-                  ),
-                  title: const KLocalizedText('ফোনের নোটিফিকেশন বন্ধ আছে'),
-                  subtitle: const KLocalizedText(
-                    'ইনবক্স থাকবে, তবে ফোনের বাইরে নতুন আপডেট দেখবেন না।',
-                  ),
-                  trailing: TextButton(
-                    onPressed: widget.permissionGateway.openSettings,
-                    child: const KLocalizedText('সেটিংস'),
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
         Card(
           color: KColors.primary.withValues(alpha: .07),
           child: const Padding(
@@ -1187,22 +1130,16 @@ const _preferenceGroups = [
 IconData _permissionIcon(KPermission permission) => switch (permission) {
   KPermission.camera => Icons.photo_camera_outlined,
   KPermission.location => Icons.location_on_outlined,
-  KPermission.notifications => Icons.notifications_outlined,
-  KPermission.photos => Icons.photo_library_outlined,
 };
 
 String _permissionName(KPermission permission) => switch (permission) {
   KPermission.camera => 'ক্যামেরা',
   KPermission.location => 'লোকেশন',
-  KPermission.notifications => 'নোটিফিকেশন',
-  KPermission.photos => 'ছবি',
 };
 
 String _permissionReason(KPermission permission) => switch (permission) {
   KPermission.camera => 'কাজ, প্রোফাইল ও যাচাইয়ের ছবি তুলতে',
   KPermission.location => 'কাজের উপস্থিতি যাচাই করতে',
-  KPermission.notifications => 'কাজ ও বার্তার আপডেট জানতে',
-  KPermission.photos => 'পোর্টফোলিও ও প্রমাণের ছবি বেছে নিতে',
 };
 
 String _settingsMessage(Object error) {
