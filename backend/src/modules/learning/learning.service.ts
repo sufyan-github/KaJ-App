@@ -9,6 +9,7 @@ import {
   ApplicationStatus,
   JobActorType,
   JobStatus,
+  MentorStatus,
   JobType,
   OpportunityType,
   ParticipantTerms,
@@ -184,6 +185,11 @@ export class LearningService {
         deleted_at: null,
         poster_user_id: { notIn: [viewerUserId, ...hidden] },
         OR: [{ expires_at: null }, { expires_at: { gt: new Date() } }],
+        // W7: full ones and those of a suspended mentor are not offered.
+        workers_filled: { lt: this.prisma.job.fields.workers_required },
+        poster: {
+          profile: { mentor_status: { not: MentorStatus.SUSPENDED } },
+        },
         participant_terms: query.participantTerms,
         work_arrangement: query.workArrangement,
         location_id: query.locationId,
@@ -272,9 +278,16 @@ export class LearningService {
       });
     if (await this.blocks.between(learnerUserId, job.poster_user_id))
       throw new NotFoundException();
+    // W7: closed when full, or while the mentor is suspended.
+    const mentor = await this.prisma.profile.findUnique({
+      where: { user_id: job.poster_user_id },
+      select: { mentor_status: true },
+    });
     if (
       job.status !== JobStatus.APPLICATIONS_OPEN ||
-      (job.expires_at && job.expires_at <= new Date())
+      (job.expires_at && job.expires_at <= new Date()) ||
+      job.workers_filled >= job.workers_required ||
+      mentor?.mentor_status === MentorStatus.SUSPENDED
     )
       throw new ConflictException({
         code: "OPPORTUNITY_CLOSED",
