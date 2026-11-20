@@ -388,7 +388,13 @@ export class SessionsService {
     const row = await this.hosted(userId, id);
     if (!OPEN.includes(row.status) || row.kind === SessionKind.CONSULTATION)
       throw sessionErrors.transition(row.status);
-    const existing = new Set(row.participants.map((item) => item.user_id));
+    // W16 (D-11): someone who declined may be invited again; everyone else
+    // already on the session is skipped.
+    const existing = new Set(
+      row.participants
+        .filter((item) => item.status !== SessionParticipantStatus.DECLINED)
+        .map((item) => item.user_id),
+    );
     const hidden = new Set(await this.blocks.hiddenFrom(userId));
     const users = await this.prisma.user.findMany({
       where: {
@@ -403,6 +409,25 @@ export class SessionsService {
       },
       select: { id: true },
     });
+    const declined = new Set(
+      row.participants
+        .filter((item) => item.status === SessionParticipantStatus.DECLINED)
+        .map((item) => item.user_id),
+    );
+    const reinvited = users.filter((user) => declined.has(user.id));
+    if (reinvited.length)
+      await this.prisma.sessionParticipant.updateMany({
+        where: {
+          session_id: id,
+          user_id: { in: reinvited.map((user) => user.id) },
+          status: SessionParticipantStatus.DECLINED,
+        },
+        data: {
+          status: SessionParticipantStatus.INVITED,
+          responded_at: null,
+          invited_by_user_id: userId,
+        },
+      });
     if (users.length)
       await this.prisma.sessionParticipant.createMany({
         data: users.map((user) => ({

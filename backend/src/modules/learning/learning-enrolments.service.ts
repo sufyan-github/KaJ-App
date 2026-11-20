@@ -462,6 +462,15 @@ export class LearningEnrolmentsService {
         messageKey: "error.learning.enrolment_not_active",
       });
     const heldAt = new Date(input.heldAt);
+    // W16: a session can't predate the enrolment by more than a week (a
+    // mentor may record a few sessions held just before accepting).
+    if (heldAt.getTime() < assignment.created_at.getTime() - 7 * 86_400_000)
+      throw new ConflictException({
+        code: "SESSION_BEFORE_ENROLMENT",
+        message: "A session can't be dated before the learner was enrolled.",
+        messageKey: "error.learning.session_before_enrolment",
+        field: "heldAt",
+      });
     if (heldAt.getTime() > Date.now() + 5 * 60_000)
       throw new ConflictException({
         code: "SESSION_IN_FUTURE",

@@ -8,6 +8,7 @@ import {
   IsUUID,
   Max,
   MaxLength,
+  MinLength,
   Min,
 } from "class-validator";
 
@@ -64,6 +65,8 @@ export class MessagePageQueryDto {
 
 export class ReportConversationDto {
   @IsString()
+  // W16: an empty report gives the safety team nothing to go on.
+  @MinLength(3)
   @MaxLength(1000)
   description!: string;
 }

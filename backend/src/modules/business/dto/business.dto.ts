@@ -1,3 +1,4 @@
+import { IsOptionalNotNull } from "../../../common/validation/optional-not-null";
 import { BusinessMemberRole, BusinessStage } from "@prisma/client";
 import { Type } from "class-transformer";
 import {
@@ -77,13 +78,13 @@ export class CreateBusinessDto {
 
 /** PATCH /businesses/:id — any subset; null clears an optional field. */
 export class UpdateBusinessDto {
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsString()
   @MinLength(2)
   @MaxLength(120)
   name?: string;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsEnum(BusinessStage)
   stage?: BusinessStage;
 
@@ -122,11 +123,11 @@ export class UpdateBusinessDto {
   @Max(100000)
   employeesCount?: number | null;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsBoolean()
   isPublic?: boolean;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsBoolean()
   seekingPartners?: boolean;
 }

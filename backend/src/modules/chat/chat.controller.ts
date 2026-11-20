@@ -11,6 +11,7 @@ import {
 import { ApiTags } from "@nestjs/swagger";
 
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { CursorQueryDto } from "../../common/api/cursor-query.dto";
 import { Policy } from "../../common/policy/policy.decorator";
 import { Policies } from "../../common/policy/policy.types";
 import { AccessTokenClaims } from "../auth/auth-token.service";
@@ -29,8 +30,11 @@ export class ChatController {
 
   @Get("conversations")
   @Policy(Policies.authenticated())
-  list(@CurrentUser() claims: AccessTokenClaims) {
-    return this.chat.list(claims.sub);
+  list(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Query() query: CursorQueryDto,
+  ) {
+    return this.chat.list(claims.sub, query);
   }
 
   // Direct contact is checked in ChatService.open: paid work only (W3).

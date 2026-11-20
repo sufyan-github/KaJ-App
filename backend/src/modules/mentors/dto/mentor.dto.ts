@@ -1,3 +1,4 @@
+import { IsOptionalNotNull } from "../../../common/validation/optional-not-null";
 import { SkillLevel } from "@prisma/client";
 import { Type } from "class-transformer";
 import {
@@ -79,7 +80,7 @@ export class MentorApplicationDto {
 }
 
 export class UpdateMentorDto {
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsBoolean()
   accepting?: boolean;
 

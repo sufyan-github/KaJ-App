@@ -1,3 +1,4 @@
+import { IsOptionalNotNull } from "../../../common/validation/optional-not-null";
 import {
   BusinessStage,
   IdeaArrangement,
@@ -81,25 +82,25 @@ export class CreateIdeaDto {
 
 /** PATCH /ideas/:id — any subset; null clears details or the area. */
 export class UpdateIdeaDto {
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsString()
   @MinLength(3)
   @MaxLength(120)
   title?: string;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsString()
   @MinLength(10)
   @MaxLength(160)
   summary?: string;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsString()
   @MinLength(10)
   @MaxLength(2000)
   problem?: string;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsString()
   @MinLength(10)
   @MaxLength(2000)
@@ -110,7 +111,7 @@ export class UpdateIdeaDto {
   @MaxLength(5000)
   details?: string | null;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsUUID()
   categoryId?: string;
 
@@ -118,15 +119,15 @@ export class UpdateIdeaDto {
   @IsUUID()
   locationId?: string | null;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsIn(OPEN_STAGES)
   stage?: (typeof OPEN_STAGES)[number];
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsEnum(IdeaVisibility)
   visibility?: IdeaVisibility;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsBoolean()
   aiConsent?: boolean;
 }
@@ -208,7 +209,7 @@ export class CreateIdeaRoleDto {
 
 /** PATCH /ideas/:id/roles/:roleId */
 export class UpdateIdeaRoleDto {
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsEnum(IdeaRoleType)
   roleType?: IdeaRoleType;
 
@@ -222,22 +223,22 @@ export class UpdateIdeaRoleDto {
   @MaxLength(500)
   description?: string | null;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsArray()
   @ArrayMaxSize(10)
   @ArrayUnique()
   @IsUUID("all", { each: true })
   skillIds?: string[];
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsEnum(IdeaTimeCommitment)
   timeCommitment?: IdeaTimeCommitment;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsEnum(IdeaArrangement)
   arrangement?: IdeaArrangement;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsEnum(IdeaRoleStatus)
   status?: IdeaRoleStatus;
 }

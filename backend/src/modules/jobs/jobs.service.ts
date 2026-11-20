@@ -7,6 +7,7 @@ import {
   NotFoundException,
   UnprocessableEntityException,
   Optional,
+  HttpStatus,
 } from "@nestjs/common";
 import {
   ApplicationStatus,
@@ -27,6 +28,7 @@ import {
 } from "@prisma/client";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
+import { KajHttpException } from "../../common/errors/kaj-http.exception";
 import { businessErrors } from "../business/business.errors";
 import { ACTIVE_ACCOUNT } from "../safety/account-cascade";
 import { assertNoGenderRestriction } from "./gender-restriction";
@@ -151,6 +153,18 @@ export class JobsService {
     }
     if (input.recurrenceRule) await this.recurrence?.assertEnabled();
     assertSingleWorker(input.workersRequired ?? 1);
+    // W16: a budget's minimum can't be above its maximum.
+    if (
+      input.budgetMinPoisha !== undefined &&
+      input.budgetMaxPoisha !== undefined &&
+      BigInt(input.budgetMinPoisha) > BigInt(input.budgetMaxPoisha)
+    )
+      throw new BadRequestException({
+        code: "VALIDATION_FAILED",
+        message: "The highest budget must be at least the lowest.",
+        messageKey: "error.validation.failed",
+        field: "budgetMaxPoisha",
+      });
     assertNoGenderRestriction(input);
     await this.assertActiveReferences(input.categoryId, input.locationId);
     if (input.businessProfileId)
@@ -628,19 +642,28 @@ export class JobsService {
     return serializeApplication(application);
   }
 
-  async listApplications(posterUserId: string, jobId: string) {
+  /** R3: paged (limit, cursor; 100 by default). */
+  async listApplications(
+    posterUserId: string,
+    jobId: string,
+    query: CursorQueryDto = {},
+  ) {
     await this.ownedJob(posterUserId, jobId);
+    const limit = query.limit ?? 100;
     const hidden = await this.blocks.hiddenFrom(posterUserId);
-    const applications = await this.prisma.application.findMany({
+    const rows = await this.prisma.application.findMany({
       where: { job_id: jobId, worker_user_id: { notIn: hidden } },
-      orderBy: { created_at: "desc" },
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
       include: { worker: { select: applicantSelect } },
+      ...pageArgs({ limit, cursor: query.cursor }),
     });
+    const { items: applications, nextCursor } = pageResult(rows, limit);
     return {
       items: applications.map((application) => ({
         ...serializeApplication(application),
         applicant: applicantSummary(application.worker),
       })),
+      nextCursor,
     };
   }
 
@@ -1096,6 +1119,7 @@ export class JobsService {
       workerUserId,
       posterUserId,
       input.categoryId,
+      "booking",
     );
     const window = requiredWindow(input.startsAt, input.endsAt);
     this.assertFutureSlot(window.startsAt);
@@ -1604,6 +1628,8 @@ export class JobsService {
     workerUserId: string,
     posterUserId: string,
     categoryId: string,
+    // W15: who is told: the worker themself, or a client booking them.
+    asker: "worker" | "booking" = "worker",
   ) {
     const [worker, category, block] = await Promise.all([
       this.prisma.user.findFirst({
@@ -1628,9 +1654,7 @@ export class JobsService {
       worker.reverification_required ||
       !hasTrust(trustLevel, TrustLevel.IDENTITY)
     ) {
-      throw new ForbiddenException(
-        "Approved identity verification with NID and selfie is required before applying.",
-      );
+      throw asker === "booking" ? workerNotVerified() : identityRequired();
     }
     if (!worker.role_modes.includes(RoleMode.WORKER)) {
       throw new UnprocessableEntityException({
@@ -2018,6 +2042,39 @@ function slotUnavailable(message: string) {
     code: "SLOT_UNAVAILABLE",
     message,
     messageKey: "error.jobs.slot_unavailable",
+  });
+}
+
+/**
+ * W15: the worker must verify (NID and selfie) first: the same code the
+ * mentor, idea and group routes use, with an action the app can follow.
+ */
+function identityRequired() {
+  return new KajHttpException(
+    {
+      action: {
+        type: "VERIFY_IDENTITY",
+        target: "POST /verification-requests",
+      },
+      code: "IDENTITY_REQUIRED",
+      details: [],
+      field: null,
+      message:
+        "Verify your identity (NID and selfie) before applying for or confirming work.",
+      messageKey: "error.jobs.identity_required",
+      retryable: false,
+    },
+    HttpStatus.CONFLICT,
+  );
+}
+
+/** W15: a client booking a worker who has not verified their identity. */
+function workerNotVerified() {
+  return new ConflictException({
+    code: "WORKER_NOT_VERIFIED",
+    message:
+      "This worker hasn't verified their identity yet, so they can't be booked.",
+    messageKey: "error.jobs.worker_not_verified",
   });
 }
 

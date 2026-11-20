@@ -18,6 +18,7 @@ import {
 } from "@prisma/client";
 
 import { CLOCK, Clock } from "../../common/time/clock";
+import { CursorQueryDto } from "../../common/api/cursor-query.dto";
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
 import { ideaRelation, isTeam } from "../ideas/idea-visibility";
 import {
@@ -136,7 +137,9 @@ export class ModerationService {
     };
   }
 
-  async blocks(userId: string) {
+  /** R3: paged by the blocked user id (limit, cursor; 100 default). */
+  async blocks(userId: string, query: CursorQueryDto = {}) {
+    const limit = query.limit ?? 100;
     const items = await this.prisma.userBlock.findMany({
       where: { blocker_user_id: userId },
       include: {
@@ -146,8 +149,23 @@ export class ModerationService {
           },
         },
       },
-      orderBy: { created_at: "desc" },
+      orderBy: [{ created_at: "desc" }, { blocked_user_id: "desc" }],
+      take: limit + 1,
+      ...(query.cursor
+        ? {
+            cursor: {
+              blocker_user_id_blocked_user_id: {
+                blocker_user_id: userId,
+                blocked_user_id: query.cursor,
+              },
+            },
+            skip: 1,
+          }
+        : {}),
     });
+    const nextCursor =
+      items.length > limit ? items[limit - 1]!.blocked_user_id : null;
+    items.splice(limit);
     // One name rule (R1): masked unless shown by choice or hired before.
     const hiredWith = await new EngagementService(this.prisma).hiredWith(
       userId,
@@ -163,6 +181,7 @@ export class ModerationService {
           }) || "KAAJ user",
         blockedAt: item.created_at.toISOString(),
       })),
+      nextCursor,
     };
   }
 

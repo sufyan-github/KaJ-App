@@ -80,9 +80,12 @@ databaseDescribe("hiring eligibility and job privacy (real HTTP)", () => {
     categoryId = (
       await db.category.findFirstOrThrow({ where: { is_active: true } })
     ).id;
-    locationId = (
-      await db.location.findFirstOrThrow({ where: { is_active: true } })
-    ).id;
+    locationId = // The profile area can't be the whole city (R3 W16).
+      (
+        await db.location.findFirstOrThrow({
+          where: { is_active: true, type: "AREA" },
+        })
+      ).id;
     poster = await actor([RoleMode.CUSTOMER]);
     worker = await actor([RoleMode.WORKER]);
     stranger = await actor([RoleMode.CUSTOMER]);
@@ -168,7 +171,12 @@ databaseDescribe("hiring eligibility and job privacy (real HTTP)", () => {
         `workers/${unverified.id}/booking-requests`,
         poster,
         booking(),
-      ).expect(403);
+      )
+        .expect(409)
+        // W15: worded for the client, not "before applying".
+        .expect((response) =>
+          expect(response.body.error.code).toBe("WORKER_NOT_VERIFIED"),
+        );
     });
 
     it("refuses to book a worker who blocked the poster, without saying so", async () => {

@@ -174,8 +174,9 @@ export class JobsController {
   applications(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("id", new ParseUUIDPipe()) id: string,
+    @Query() query: CursorQueryDto,
   ) {
-    return this.jobs.listApplications(claims.sub, id);
+    return this.jobs.listApplications(claims.sub, id, query);
   }
 
   @Get("assignments")

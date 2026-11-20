@@ -1,3 +1,4 @@
+import { IsOptionalNotNull } from "../../../common/validation/optional-not-null";
 import { OfferingKind } from "@prisma/client";
 import { Type } from "class-transformer";
 import {
@@ -63,7 +64,7 @@ export class CreateOfferingDto {
 
 /** PATCH …/offerings/:offeringId — any subset; null clears an optional field. */
 export class UpdateOfferingDto {
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsEnum(OfferingKind)
   kind?: OfferingKind;
 
@@ -95,11 +96,11 @@ export class UpdateOfferingDto {
   @MaxLength(40)
   priceUnit?: string | null;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsBoolean()
   isActive?: boolean;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @Type(() => Number)
   @IsInt()
   @Min(0)

@@ -6,10 +6,12 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { CursorQueryDto } from "../../common/api/cursor-query.dto";
 import { Policy } from "../../common/policy/policy.decorator";
 import { Policies } from "../../common/policy/policy.types";
 import { AccessTokenClaims } from "../auth/auth-token.service";
@@ -38,8 +40,11 @@ export class UsersController {
 
   @Get("favorites")
   @Policy(Policies.authenticated())
-  favorites(@CurrentUser() claims: AccessTokenClaims) {
-    return this.users.favorites(claims.sub);
+  favorites(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Query() query: CursorQueryDto,
+  ) {
+    return this.users.favorites(claims.sub, query);
   }
 
   @Post("favorites/:workerId")
