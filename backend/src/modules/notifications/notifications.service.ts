@@ -5,6 +5,7 @@ import { CursorQueryDto } from "../../common/api/cursor-query.dto";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { NotificationPreferenceDto } from "./dto/notification-preference.dto";
+import { ENGLISH_BY_TYPE, TEXT_BY_KEY } from "./notification-texts";
 
 export interface NotificationInput {
   userId: string;
@@ -209,10 +210,16 @@ function serializeNotification(item: {
   created_at: Date;
 }) {
   const payload = asPayload(item.payload_json);
-  const titleBn = titleFor(item.type, item.title_key);
-  const bodyBn = bodyFor(item.type, item.body_key);
-  const titleEn = titleEnglishFor(item.type, item.title_key);
-  const bodyEn = bodyEnglishFor(item.type, item.body_key);
+  // W14: message keys (moderation, hidden content, verification) are
+  // written out from the payload in both languages.
+  const titleKey = TEXT_BY_KEY[item.title_key];
+  const bodyKey = TEXT_BY_KEY[item.body_key];
+  const titleBn = titleKey?.bn(payload) ?? titleFor(item.type, item.title_key);
+  const bodyBn = bodyKey?.bn(payload) ?? bodyFor(item.type, item.body_key);
+  const titleEn =
+    titleKey?.en(payload) ?? titleEnglishFor(item.type, item.title_key);
+  const bodyEn =
+    bodyKey?.en(payload) ?? bodyEnglishFor(item.type, item.body_key);
   const deepLink = deepLinkFor(item.type, payload);
   return {
     id: item.id,
@@ -251,7 +258,7 @@ function titleEnglishFor(type: string, value: string): string {
   };
   if (titles[type]) return titles[type];
   if (/^[\x00-\x7F]+$/.test(value) && !value.includes(".")) return value;
-  return "KAAJ update";
+  return ENGLISH_BY_TYPE[type]?.title ?? "KAAJ update";
 }
 
 function bodyEnglishFor(type: string, value: string): string {
@@ -324,7 +331,11 @@ function bodyEnglishFor(type: string, value: string): string {
     VERIFICATION_SUBMITTED:
       "Your identity verification request was submitted for review.",
   };
-  return bodies[type] ?? "There is a new update about your work.";
+  return (
+    bodies[type] ??
+    ENGLISH_BY_TYPE[type]?.body ??
+    "There is a new update about your work."
+  );
 }
 
 function asPayload(value: Prisma.JsonValue): Record<string, unknown> {
