@@ -3,6 +3,39 @@ import { z } from "zod";
 const environmentSchema = z
   .object({
     API_BASE_URL: z.url().default("http://localhost:3000"),
+    // P4 AI Opportunity Intelligence. Off by default; with it on but no
+    // ANTHROPIC_API_KEY the API still boots and AI routes answer 503
+    // AI_DISABLED. The key is a secret: set it only in the host's env.
+    AI_ENABLED: z.enum(["true", "false"]).default("false"),
+    ANTHROPIC_API_KEY: z.string().trim().default(""),
+    AI_MODEL: z.string().trim().min(1).default("claude-sonnet-5-5"),
+    AI_TIMEOUT_MS: z.coerce
+      .number()
+      .int()
+      .min(5_000)
+      .max(300_000)
+      .default(60_000),
+    AI_MAX_RETRIES: z.coerce.number().int().min(0).max(5).default(2),
+    AI_DAILY_LIMIT_IDEA_ANALYSIS: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .max(100)
+      .default(3),
+    AI_DAILY_LIMIT_SUGGESTIONS: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .max(100)
+      .default(10),
+    AI_DAILY_LIMIT_GROWTH_TIPS: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .max(100)
+      .default(5),
+    // Cost backstop: model calls per Asia/Dhaka day across all users.
+    AI_GLOBAL_DAILY_LIMIT: z.coerce.number().int().min(0).default(2_000),
     ADMIN_SESSION_SECRET: z.string().default(""),
     ADMIN_TOTP_ENCRYPTION_KEY: z.string().default(""),
     BDAPPS_GATEWAY_URL: z.union([z.literal(""), z.url()]).default(""),

@@ -582,6 +582,8 @@ model User {
   collaboration_received            CollaborationRequest[]      @relation("CollaborationRecipient")
   collaboration_events              CollaborationRequestEvent[] @relation("CollaborationEventActor")
   ideas                             BusinessIdea[]              @relation("IdeaOwner")
+  ai_consent                        AiConsent?
+  ai_usage_logs                     AiUsageLog[]
   introductions_sent                IntroductionRequest[]       @relation("IntroductionRequester")
   introductions_received            IntroductionRequest[]       @relation("IntroductionTarget")
   community_groups_created          CommunityGroup[]            @relation("CommunityGroupCreator")
@@ -1133,8 +1135,13 @@ model BusinessIdea {
   location_id           String?          @db.Uuid
   stage                 IdeaStage        @default(CONCEPT)
   visibility            IdeaVisibility   @default(PRIVATE)
-  /// The owner allows AI analysis of the idea (no AI runs yet).
+  /// The owner allows AI analysis of the idea (P4 AI requires it).
   ai_consent            Boolean          @default(false)
+  /// P4: the latest AI analysis (owner-only; JSON validated server-side).
+  ai_analysis           Json?
+  ai_analysis_locale    String?
+  ai_analysis_model     String?
+  ai_analyzed_at        DateTime?
   converted_business_id String?          @unique @db.Uuid
   converted_at          DateTime?
   /// Set by moderation: hidden from everyone but the owner.
@@ -2646,4 +2653,58 @@ model LearningSession {
   @@index([assignment_id, held_at])
   @@index([recorded_by_user_id])
   @@map("learning_sessions")
+}
+
+/// P4 AI Opportunity Intelligence: which AI feature a call served.
+enum AiFeature {
+  IDEA_ANALYSIS
+  OPPORTUNITY_SUGGESTIONS
+  BUSINESS_GROWTH_TIPS
+}
+
+/// P4: how a model call ended.
+enum AiCallOutcome {
+  SUCCESS
+  REFUSED
+  INVALID_OUTPUT
+  ERROR
+}
+
+/// P4: a user's one-time opt-in to AI features (version = consent text shown).
+model AiConsent {
+  user_id      String    @id @db.Uuid
+  version      Int
+  consented_at DateTime
+  withdrawn_at DateTime?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  user         User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("ai_consents")
+}
+
+/// P4: one row per model call — tokens and estimated cost, no prompt text.
+model AiUsageLog {
+  id                          String        @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id                     String?       @db.Uuid
+  feature                     AiFeature
+  outcome                     AiCallOutcome
+  model                       String
+  /// The idea or business the call was about, when there is one.
+  subject_id                  String?       @db.Uuid
+  stop_reason                 String?
+  input_tokens                Int           @default(0)
+  output_tokens               Int           @default(0)
+  cache_read_input_tokens     Int           @default(0)
+  cache_creation_input_tokens Int           @default(0)
+  /// Estimated cost in millionths of a US dollar (list prices).
+  cost_usd_micros             Int           @default(0)
+  latency_ms                  Int           @default(0)
+  created_at                  DateTime      @default(now())
+  user                        User?         @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id, created_at(sort: Desc)])
+  @@index([feature, created_at(sort: Desc)])
+  @@index([created_at])
+  @@map("ai_usage_logs")
 }
