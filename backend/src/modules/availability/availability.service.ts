@@ -5,7 +5,14 @@ import {
   NotFoundException,
   Optional,
 } from "@nestjs/common";
-import { AssignmentStatus, Prisma } from "@prisma/client";
+import {
+  AssignmentStatus,
+  MentorStatus,
+  Prisma,
+  RoleMode,
+} from "@prisma/client";
+
+import { roleRequiredError } from "../../common/errors/authorization.errors";
 
 import { CLOCK, Clock } from "../../common/time/clock";
 import { PrismaService } from "../../infra/prisma/prisma.service";
@@ -217,6 +224,14 @@ export class AvailabilityService {
    * (e.g. an expert's scheduled sessions). Used for booking a worker and,
    * P3.2, a consultation with an expert.
    */
+  /** 403 ROLE_REQUIRED (WORKER) unless the user is an approved mentor. */
+  async assertApprovedMentor(userId: string): Promise<void> {
+    const approved = await this.prisma.profile.count({
+      where: { user_id: userId, mentor_status: MentorStatus.APPROVED },
+    });
+    if (!approved) throw roleRequiredError(RoleMode.WORKER);
+  }
+
   async freeSlots(
     userId: string,
     from: Date,

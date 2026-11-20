@@ -99,11 +99,18 @@ export class PublicProfilesService {
         id: userId,
         status: UserStatus.ACTIVE,
         deleted_at: null,
-        role_modes: { has: RoleMode.WORKER },
+        // W5: workers, and approved mentors who are not workers.
+        OR: [
+          { role_modes: { has: RoleMode.WORKER } },
+          {
+            role_modes: { has: RoleMode.MENTOR },
+            profile: { mentor_status: MentorStatus.APPROVED },
+          },
+        ],
       },
       select: workerPublicSelect,
     });
-    if (!user?.profile || !user.worker_profile) throw new NotFoundException();
+    if (!user?.profile) throw new NotFoundException();
     // A worker who left the directory is still visible to people they are
     // already dealing with (an applicant's poster opens it from the list).
     const engaged =
@@ -181,7 +188,9 @@ export class PublicProfilesService {
 
   /** `hiredByViewer`: the viewer has a hire with this worker (photo rule). */
   private async project(user: PublicWorkerRecord, hiredByViewer = false) {
-    if (!user.profile || !user.worker_profile) throw new NotFoundException();
+    if (!user.profile) throw new NotFoundException();
+    // A mentor who is not a worker has no work record yet (W5).
+    const work = user.worker_profile;
     const visibility =
       user.profile.photo_visibility ?? PhotoVisibility.EVERYONE;
     const photoAllowed =
@@ -210,9 +219,9 @@ export class PublicProfilesService {
         latitude: user.profile.lat?.toNumber() ?? null,
         longitude: user.profile.lng?.toNumber() ?? null,
         trustLevel: user.profile.trust_level,
-        ratingAverage: user.worker_profile.rating_avg.toString(),
-        ratingCount: user.worker_profile.rating_count,
-        completedJobsCount: user.worker_profile.completed_jobs_count,
+        ratingAverage: work?.rating_avg.toString() ?? "0",
+        ratingCount: work?.rating_count ?? 0,
+        completedJobsCount: work?.completed_jobs_count ?? 0,
         skills: user.skills.map((item) => ({
           id: item.skill.id,
           nameEn: item.skill.name_en,
