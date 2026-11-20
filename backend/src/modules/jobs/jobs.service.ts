@@ -609,6 +609,8 @@ export class JobsService {
     const limit = query.limit ?? 100;
     const rows = await this.prisma.assignment.findMany({
       where: {
+        // W2: learning enrolments have their own routes.
+        job: WORK_ONLY,
         OR: [{ worker_user_id: userId }, { job: { poster_user_id: userId } }],
       },
       include: {
@@ -644,6 +646,7 @@ export class JobsService {
     const assignment = await this.prisma.assignment.findFirst({
       where: {
         id: assignmentId,
+        job: WORK_ONLY,
         OR: [{ worker_user_id: userId }, { job: { poster_user_id: userId } }],
       },
       include: {

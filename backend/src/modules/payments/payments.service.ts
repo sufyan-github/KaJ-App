@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { assertWork } from "../jobs/opportunity";
+import { assertWork, WORK_ONLY } from "../jobs/opportunity";
 
 import {
   ConflictException,
@@ -60,8 +60,14 @@ export class PaymentsService {
 
   async adminOverview() {
     const [counts, recent] = await Promise.all([
-      this.prisma.payment.groupBy({ by: ["status"], _count: true }),
+      // W2: work payments only; learning never takes a platform payment.
+      this.prisma.payment.groupBy({
+        by: ["status"],
+        where: { job: WORK_ONLY },
+        _count: true,
+      }),
       this.prisma.payment.findMany({
+        where: { job: WORK_ONLY },
         include: {
           assignment: { select: { worker_user_id: true } },
           job: { select: { title: true, currency: true } },
@@ -87,6 +93,7 @@ export class PaymentsService {
   async history(userId: string) {
     const items = await this.prisma.payment.findMany({
       where: {
+        job: WORK_ONLY,
         OR: [
           { payer_user_id: userId },
           { assignment: { worker_user_id: userId } },
@@ -316,12 +323,19 @@ export class PaymentsService {
         include: {
           contracts: { orderBy: { version: "desc" }, take: 1 },
           job: {
-            select: { category_id: true, currency: true, poster_user_id: true },
+            select: {
+              category_id: true,
+              currency: true,
+              poster_user_id: true,
+              opportunity_type: true,
+            },
           },
         },
       });
       if (!assignment || assignment.job.poster_user_id !== actorUserId)
         throw new NotFoundException("Assignment not found.");
+      // W2: a learning enrolment is not paid work (also no more 500s).
+      assertWork(assignment.job);
       const contract = assignment.contracts[0];
       if (!contract)
         throw new ConflictException("Assignment contract is not available.");
