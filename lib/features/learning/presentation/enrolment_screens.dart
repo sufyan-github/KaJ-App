@@ -298,7 +298,10 @@ class _EnrolmentBody extends ConsumerWidget {
   Future<void> _recordSession(BuildContext context, WidgetRef ref) async {
     final updated = await showDialog<LearningEnrolment>(
       context: context,
-      builder: (_) => _SessionDialog(enrolmentId: enrolment.id),
+      builder: (_) => _SessionDialog(
+        enrolmentId: enrolment.id,
+        earliest: enrolment.earliestSessionDate(DateTime.now()),
+      ),
     );
     if (updated != null) _replace(ref, updated);
   }
@@ -448,9 +451,12 @@ class _CompletionCard extends StatelessWidget {
 }
 
 class _SessionDialog extends ConsumerStatefulWidget {
-  const _SessionDialog({required this.enrolmentId});
+  const _SessionDialog({required this.enrolmentId, this.earliest});
 
   final String enrolmentId;
+
+  /// No session earlier than this (a week before enrolment).
+  final DateTime? earliest;
 
   @override
   ConsumerState<_SessionDialog> createState() => _SessionDialogState();
@@ -477,7 +483,8 @@ class _SessionDialogState extends ConsumerState<_SessionDialog> {
     final date = await showDatePicker(
       context: context,
       initialDate: _heldAt,
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      firstDate:
+          widget.earliest ?? DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now(),
     );
     if (date != null) {

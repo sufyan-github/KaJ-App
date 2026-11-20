@@ -6,6 +6,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/errors/error_mapper.dart';
+import '../../../core/network/paged_list.dart';
 import '../domain/chat_models.dart';
 
 /// Hive box holding this person's unsent chat messages.
@@ -17,10 +18,17 @@ class ChatRepository {
   final Dio _dio;
   final Box<dynamic> _queue;
 
-  Future<List<ConversationSummary>> conversations() async {
+  /// One page of conversations; [cursor] asks for the next one.
+  Future<List<ConversationSummary>> conversations({String? cursor}) async {
     try {
-      final response = await _dio.get<Map<String, dynamic>>('/conversations');
-      return _items(response.data).map(ConversationSummary.fromJson).toList();
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/conversations',
+        queryParameters: {'cursor': ?cursor},
+      );
+      return PagedList(
+        _items(response.data).map(ConversationSummary.fromJson).toList(),
+        nextCursor: PagedList.cursorFrom(response.data),
+      );
     } on Object catch (error) {
       throw ErrorMapper.from(error);
     }

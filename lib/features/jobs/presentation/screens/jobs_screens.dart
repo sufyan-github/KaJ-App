@@ -377,138 +377,173 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
     WidgetRef ref,
     JobSummary job,
   ) async {
+    // New applicants since the sheet was last open.
+    ref.invalidate(jobApplicationsProvider(job.id));
+    final more = MorePages<JobApplicationSummary>();
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
-      builder: (sheetContext) => Consumer(
-        builder: (context, sheetRef, _) {
-          final applications = sheetRef.watch(jobApplicationsProvider(job.id));
-          return SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                KSpacing.lg,
-                0,
-                KSpacing.lg,
-                KSpacing.lg,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    job.title,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: KSpacing.sm),
-                  KLocalizedText(
-                    'ম্যাচ করা কর্মী',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: KSpacing.xs),
-                  sheetRef
-                      .watch(suggestedWorkersProvider(job.id))
-                      .when(
-                        loading: () => const LinearProgressIndicator(),
-                        error: (error, _) => Text(
-                          failureText(
-                            context,
-                            error,
-                            'পরামর্শ লোড করা যায়নি।',
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (_, setSheetState) => Consumer(
+          builder: (context, sheetRef, _) {
+            final applications = sheetRef.watch(
+              jobApplicationsProvider(job.id),
+            );
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  KSpacing.lg,
+                  0,
+                  KSpacing.lg,
+                  KSpacing.lg,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      job.title,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: KSpacing.sm),
+                    KLocalizedText(
+                      'ম্যাচ করা কর্মী',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: KSpacing.xs),
+                    sheetRef
+                        .watch(suggestedWorkersProvider(job.id))
+                        .when(
+                          loading: () => const LinearProgressIndicator(),
+                          error: (error, _) => Text(
+                            failureText(
+                              context,
+                              error,
+                              'পরামর্শ লোড করা যায়নি।',
+                            ),
                           ),
+                          data: (workers) => workers.isEmpty
+                              ? const KLocalizedText(
+                                  'এখনো কোনো উপযুক্ত কর্মী পাওয়া যায়নি।',
+                                )
+                              : SizedBox(
+                                  height: 92,
+                                  child: ListView.separated(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: workers.take(8).length,
+                                    separatorBuilder: (_, _) =>
+                                        const SizedBox(width: KSpacing.sm),
+                                    itemBuilder: (context, index) {
+                                      final worker = workers[index];
+                                      return ActionChip(
+                                        avatar: CircleAvatar(
+                                          child: KLocalizedText(
+                                            '${worker.matchScore}%',
+                                          ),
+                                        ),
+                                        label: Text(
+                                          '${worker.displayName}\n${worker.skills.take(2).join(', ')}',
+                                        ),
+                                        onPressed: () => context.push(
+                                          AppRoutes.workerBooking(worker.id),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
                         ),
-                        data: (workers) => workers.isEmpty
-                            ? const KLocalizedText(
-                                'এখনো কোনো উপযুক্ত কর্মী পাওয়া যায়নি।',
+                    const SizedBox(height: KSpacing.md),
+                    applications.when(
+                      loading: () => const Padding(
+                        padding: EdgeInsets.all(KSpacing.xl),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                      error: (_, _) => const Padding(
+                        padding: EdgeInsets.all(KSpacing.lg),
+                        child: KLocalizedText('আবেদনের তালিকা লোড করা যায়নি।'),
+                      ),
+                      data: (firstPage) {
+                        final items = more.merge(firstPage);
+                        final hasMore = more.hasMore;
+                        return items.isEmpty
+                            ? const Padding(
+                                padding: EdgeInsets.all(KSpacing.lg),
+                                child: KLocalizedText('এখনো কেউ আবেদন করেননি।'),
                               )
-                            : SizedBox(
-                                height: 92,
+                            : Flexible(
                                 child: ListView.separated(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: workers.take(8).length,
+                                  shrinkWrap: true,
+                                  itemCount: items.length + (hasMore ? 1 : 0),
                                   separatorBuilder: (_, _) =>
-                                      const SizedBox(width: KSpacing.sm),
+                                      const SizedBox(height: KSpacing.sm),
                                   itemBuilder: (context, index) {
-                                    final worker = workers[index];
-                                    return ActionChip(
-                                      avatar: CircleAvatar(
-                                        child: KLocalizedText(
-                                          '${worker.matchScore}%',
+                                    if (index == items.length) {
+                                      return LoadMoreButton(
+                                        key: const ValueKey(
+                                          'applications-load-more',
+                                        ),
+                                        loading: more.loading,
+                                        failed: more.failed,
+                                        onPressed: () => more.loadNext(
+                                          (cursor) => sheetRef
+                                              .read(jobsRepositoryProvider)
+                                              .getApplications(
+                                                job.id,
+                                                cursor: cursor,
+                                              ),
+                                          () => setSheetState(() {}),
+                                        ),
+                                      );
+                                    }
+                                    final item = items[index];
+                                    return ApplicantCard(
+                                      application: item,
+                                      statusLabel: _statusBn(item.status),
+                                      onViewProfile: () => context.push(
+                                        AppRoutes.workerProfile(
+                                          item.workerUserId,
                                         ),
                                       ),
-                                      label: Text(
-                                        '${worker.displayName}\n${worker.skills.take(2).join(', ')}',
-                                      ),
-                                      onPressed: () => context.push(
-                                        AppRoutes.workerBooking(worker.id),
-                                      ),
+                                      onAccept: item.status != 'PENDING'
+                                          ? null
+                                          : () async {
+                                              try {
+                                                await sheetRef
+                                                    .read(
+                                                      jobsRepositoryProvider,
+                                                    )
+                                                    .acceptApplication(item.id);
+                                                sheetRef.invalidate(
+                                                  jobApplicationsProvider(
+                                                    job.id,
+                                                  ),
+                                                );
+                                                sheetRef.invalidate(
+                                                  assignmentsProvider,
+                                                );
+                                              } on Object catch (error) {
+                                                if (sheetContext.mounted) {
+                                                  showFailureSnack(
+                                                    sheetContext,
+                                                    error,
+                                                    'আবেদনটি গ্রহণ করা যায়নি।',
+                                                  );
+                                                }
+                                              }
+                                            },
                                     );
                                   },
                                 ),
-                              ),
-                      ),
-                  const SizedBox(height: KSpacing.md),
-                  applications.when(
-                    loading: () => const Padding(
-                      padding: EdgeInsets.all(KSpacing.xl),
-                      child: Center(child: CircularProgressIndicator()),
+                              );
+                      },
                     ),
-                    error: (_, _) => const Padding(
-                      padding: EdgeInsets.all(KSpacing.lg),
-                      child: KLocalizedText('আবেদনের তালিকা লোড করা যায়নি।'),
-                    ),
-                    data: (items) => items.isEmpty
-                        ? const Padding(
-                            padding: EdgeInsets.all(KSpacing.lg),
-                            child: KLocalizedText('এখনো কেউ আবেদন করেননি।'),
-                          )
-                        : Flexible(
-                            child: ListView.separated(
-                              shrinkWrap: true,
-                              itemCount: items.length,
-                              separatorBuilder: (_, _) =>
-                                  const SizedBox(height: KSpacing.sm),
-                              itemBuilder: (context, index) {
-                                final item = items[index];
-                                return ApplicantCard(
-                                  application: item,
-                                  statusLabel: _statusBn(item.status),
-                                  onViewProfile: () => context.push(
-                                    AppRoutes.workerProfile(item.workerUserId),
-                                  ),
-                                  onAccept: item.status != 'PENDING'
-                                      ? null
-                                      : () async {
-                                          try {
-                                            await sheetRef
-                                                .read(jobsRepositoryProvider)
-                                                .acceptApplication(item.id);
-                                            sheetRef.invalidate(
-                                              jobApplicationsProvider(job.id),
-                                            );
-                                            sheetRef.invalidate(
-                                              assignmentsProvider,
-                                            );
-                                          } on Object catch (error) {
-                                            if (sheetContext.mounted) {
-                                              showFailureSnack(
-                                                sheetContext,
-                                                error,
-                                                'আবেদনটি গ্রহণ করা যায়নি।',
-                                              );
-                                            }
-                                          }
-                                        },
-                                );
-                              },
-                            ),
-                          ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -2026,11 +2061,19 @@ class ReceivedReviewsScreen extends ConsumerWidget {
   }
 }
 
-class FavoriteWorkersScreen extends ConsumerWidget {
+class FavoriteWorkersScreen extends ConsumerStatefulWidget {
   const FavoriteWorkersScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FavoriteWorkersScreen> createState() =>
+      _FavoriteWorkersScreenState();
+}
+
+class _FavoriteWorkersScreenState extends ConsumerState<FavoriteWorkersScreen> {
+  final _more = MorePages<FavoriteWorker>();
+
+  @override
+  Widget build(BuildContext context) {
     final favorites = ref.watch(favoriteWorkersProvider);
     return Scaffold(
       appBar: AppBar(title: const KLocalizedText('পছন্দের কর্মী')),
@@ -2041,27 +2084,66 @@ class FavoriteWorkersScreen extends ConsumerWidget {
           label: 'পছন্দের তালিকা লোড করা যায়নি।',
           onRetry: () => ref.invalidate(favoriteWorkersProvider),
         ),
-        data: (items) => items.isEmpty
-            ? const Center(
-                child: KLocalizedText('এখনো কোনো কর্মী পছন্দে রাখা হয়নি।'),
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.all(KSpacing.md),
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final worker = items[index];
-                  return Card(
-                    child: ListTile(
-                      leading: const CircleAvatar(child: Icon(Icons.person)),
-                      title: Text(worker.displayName),
-                      subtitle: KLocalizedText('★ ${worker.ratingAverage}'),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () =>
-                          context.push(AppRoutes.workerBooking(worker.userId)),
-                    ),
-                  );
-                },
-              ),
+        data: (firstPage) {
+          final items = _more.merge(firstPage);
+          final hasMore = _more.hasMore;
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(favoriteWorkersProvider);
+              await ref
+                  .read(favoriteWorkersProvider.future)
+                  .then<void>((_) {}, onError: (_) {});
+            },
+            child: items.isEmpty
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const [
+                      SizedBox(height: 180),
+                      Center(
+                        child: KLocalizedText(
+                          'এখনো কোনো কর্মী পছন্দে রাখা হয়নি।',
+                        ),
+                      ),
+                    ],
+                  )
+                : ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(KSpacing.md),
+                    itemCount: items.length + (hasMore ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == items.length) {
+                        return LoadMoreButton(
+                          key: const ValueKey('favorites-load-more'),
+                          loading: _more.loading,
+                          failed: _more.failed,
+                          onPressed: () => _more.loadNext(
+                            (cursor) => ref
+                                .read(jobsRepositoryProvider)
+                                .getFavorites(cursor: cursor),
+                            () {
+                              if (mounted) setState(() {});
+                            },
+                          ),
+                        );
+                      }
+                      final worker = items[index];
+                      return Card(
+                        child: ListTile(
+                          leading: const CircleAvatar(
+                            child: Icon(Icons.person),
+                          ),
+                          title: Text(worker.displayName),
+                          subtitle: KLocalizedText('★ ${worker.ratingAverage}'),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => context.push(
+                            AppRoutes.workerBooking(worker.userId),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          );
+        },
       ),
     );
   }

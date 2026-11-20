@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../core/errors/error_mapper.dart';
 import '../../../core/location/location_gateway.dart';
+import '../../../core/network/paged_list.dart';
 import '../domain/trust_models.dart';
 
 class TrustSafetyRepository {
@@ -255,10 +256,17 @@ class TrustSafetyRepository {
     );
   });
 
-  Future<List<BlockedUser>> blockedUsers() async => _guard(() async {
-    final response = await _dio.get<Map<String, dynamic>>('/me/blocks');
-    return _items(response.data).map(BlockedUser.fromJson).toList();
-  });
+  Future<List<BlockedUser>> blockedUsers({String? cursor}) async =>
+      _guard(() async {
+        final response = await _dio.get<Map<String, dynamic>>(
+          '/me/blocks',
+          queryParameters: {'cursor': ?cursor},
+        );
+        return PagedList(
+          _items(response.data).map(BlockedUser.fromJson).toList(),
+          nextCursor: PagedList.cursorFrom(response.data),
+        );
+      });
 
   Future<void> unblock(String userId) async => _guard(() async {
     await _dio.delete<Map<String, dynamic>>('/users/$userId/block');

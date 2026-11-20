@@ -444,6 +444,7 @@ class LearningEnrolment {
     this.withdrawnAt,
     this.learnerUserId,
     this.mentorUserId,
+    this.enrolledAt,
   });
 
   factory LearningEnrolment.fromJson(Map<String, dynamic> json) {
@@ -487,11 +488,24 @@ class LearningEnrolment {
       withdrawnAt: DateTime.tryParse(json['withdrawnAt'] as String? ?? ''),
       learnerUserId: learner is Map ? learner['userId'] as String? : null,
       mentorUserId: json['mentorUserId'] as String?,
+      enrolledAt: DateTime.tryParse(json['enrolledAt'] as String? ?? ''),
     );
   }
 
   final String? learnerUserId;
   final String? mentorUserId;
+  final DateTime? enrolledAt;
+
+  /// The earliest date a session can be recorded for: the server refuses
+  /// one more than a week before enrolment (SESSION_BEFORE_ENROLMENT).
+  DateTime earliestSessionDate(DateTime now) {
+    final yearAgo = now.subtract(const Duration(days: 365));
+    final enrolled = enrolledAt;
+    if (enrolled == null) return yearAgo;
+    final limit = enrolled.toLocal().subtract(const Duration(days: 7));
+    final day = DateTime(limit.year, limit.month, limit.day);
+    return day.isAfter(yearAgo) ? day : yearAgo;
+  }
 
   /// The other person in this enrolment, for a chat.
   String? get otherUserId => isMentor ? learnerUserId : mentorUserId;

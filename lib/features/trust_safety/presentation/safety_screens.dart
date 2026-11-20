@@ -13,6 +13,7 @@ import '../../../core/widgets/k_empty_state.dart';
 import '../../../core/widgets/k_localized_text.dart';
 import '../../../core/widgets/k_network_image.dart';
 import '../../../core/widgets/k_primary_button.dart';
+import '../../../core/widgets/load_more.dart';
 import '../../catalog/domain/entities/catalog_category.dart';
 import '../../catalog/presentation/controllers/catalog_providers.dart';
 import '../domain/trust_models.dart';
@@ -242,10 +243,18 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   ).showSnackBar(SnackBar(content: KLocalizedText(text)));
 }
 
-class BlockedUsersScreen extends ConsumerWidget {
+class BlockedUsersScreen extends ConsumerStatefulWidget {
   const BlockedUsersScreen({super.key});
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BlockedUsersScreen> createState() => _BlockedUsersScreenState();
+}
+
+class _BlockedUsersScreenState extends ConsumerState<BlockedUsersScreen> {
+  final _more = MorePages<BlockedUser>();
+
+  @override
+  Widget build(BuildContext context) {
     final users = ref.watch(blockedUsersProvider);
     return Scaffold(
       appBar: AppBar(title: const KLocalizedText('ব্লক করা ব্যবহারকারী')),
@@ -254,47 +263,87 @@ class BlockedUsersScreen extends ConsumerWidget {
         error: (error, _) => Center(
           child: FilledButton(
             onPressed: () => ref.invalidate(blockedUsersProvider),
-            child: KLocalizedText(_message(error)),
+            child: Text(
+              failureText(
+                context,
+                error,
+                'তালিকা লোড করা যায়নি। আবার চেষ্টা করুন।',
+              ),
+            ),
           ),
         ),
-        data: (items) => items.isEmpty
-            ? const Center(child: KLocalizedText('আপনি কাউকে ব্লক করেননি।'))
-            : ListView.separated(
-                padding: const EdgeInsets.all(KSpacing.md),
-                itemCount: items.length,
-                separatorBuilder: (_, _) => const Divider(),
-                itemBuilder: (context, index) {
-                  final user = items[index];
-                  return ListTile(
-                    leading: const CircleAvatar(
-                      child: Icon(Icons.person_off_outlined),
-                    ),
-                    title: Text(user.displayName),
-                    subtitle: const KLocalizedText(
-                      'বার্তা ও নতুন যোগাযোগ বন্ধ আছে',
-                    ),
-                    trailing: TextButton(
-                      onPressed: () async {
-                        try {
-                          await ref
-                              .read(trustSafetyRepositoryProvider)
-                              .unblock(user.userId);
-                          ref.invalidate(blockedUsersProvider);
-                        } on Object catch (error) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: KLocalizedText(_message(error)),
-                              ),
-                            );
-                          }
-                        }
-                      },
-                      child: const KLocalizedText('আনব্লক'),
-                    ),
-                  );
-                },
-              ),
+        data: (firstPage) {
+          final items = _more.merge(firstPage);
+          final hasMore = _more.hasMore;
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(blockedUsersProvider);
+              await ref
+                  .read(blockedUsersProvider.future)
+                  .then<void>((_) {}, onError: (_) {});
+            },
+            child: items.isEmpty
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const [
+                      SizedBox(height: 180),
+                      Center(child: KLocalizedText('আপনি কাউকে ব্লক করেননি।')),
+                    ],
+                  )
+                : ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(KSpacing.md),
+                    itemCount: items.length + (hasMore ? 1 : 0),
+                    separatorBuilder: (_, _) => const Divider(),
+                    itemBuilder: (context, index) {
+                      if (index == items.length) {
+                        return LoadMoreButton(
+                          key: const ValueKey('blocked-load-more'),
+                          loading: _more.loading,
+                          failed: _more.failed,
+                          onPressed: () => _more.loadNext(
+                            (cursor) => ref
+                                .read(trustSafetyRepositoryProvider)
+                                .blockedUsers(cursor: cursor),
+                            () {
+                              if (mounted) setState(() {});
+                            },
+                          ),
+                        );
+                      }
+                      final user = items[index];
+                      return ListTile(
+                        leading: const CircleAvatar(
+                          child: Icon(Icons.person_off_outlined),
+                        ),
+                        title: Text(user.displayName),
+                        subtitle: const KLocalizedText(
+                          'বার্তা ও নতুন যোগাযোগ বন্ধ আছে',
+                        ),
+                        trailing: TextButton(
+                          onPressed: () async {
+                            try {
+                              await ref
+                                  .read(trustSafetyRepositoryProvider)
+                                  .unblock(user.userId);
+                              ref.invalidate(blockedUsersProvider);
+                            } on Object catch (error) {
+                              if (context.mounted) {
+                                showFailureSnack(
+                                  context,
+                                  error,
+                                  'আনব্লক করা যায়নি। আবার চেষ্টা করুন।',
+                                );
+                              }
+                            }
+                          },
+                          child: const KLocalizedText('আনব্লক'),
+                        ),
+                      );
+                    },
+                  ),
+          );
+        },
       ),
     );
   }
@@ -1370,6 +1419,3 @@ String _banglaNumber(int value) => value
     .replaceAll('7', '৭')
     .replaceAll('8', '৮')
     .replaceAll('9', '৯');
-
-String _message(Object error) =>
-    error is Failure ? error.message : 'কাজটি সম্পন্ন হয়নি। আবার চেষ্টা করুন।';

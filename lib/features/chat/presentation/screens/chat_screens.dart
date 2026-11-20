@@ -12,14 +12,22 @@ import '../../../../core/security/secure_screen.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_localized_text.dart';
 import '../../../../core/widgets/k_network_image.dart';
+import '../../../../core/widgets/load_more.dart';
 import '../../domain/chat_models.dart';
 import '../controllers/chat_providers.dart';
 
-class ChatListScreen extends ConsumerWidget {
+class ChatListScreen extends ConsumerStatefulWidget {
   const ChatListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ChatListScreen> createState() => _ChatListScreenState();
+}
+
+class _ChatListScreenState extends ConsumerState<ChatListScreen> {
+  final _more = MorePages<ConversationSummary>();
+
+  @override
+  Widget build(BuildContext context) {
     final conversations = ref.watch(conversationsProvider);
     return Scaffold(
       appBar: AppBar(title: const KLocalizedText('বার্তা')),
@@ -39,27 +47,44 @@ class ChatListScreen extends ConsumerWidget {
               ),
             ],
           ),
-          data: (items) => items.isEmpty
-              ? ListView(
-                  children: const [
-                    SizedBox(height: 180),
-                    Icon(Icons.forum_outlined, size: 56),
-                    SizedBox(height: KSpacing.md),
-                    Center(
-                      child: KLocalizedText(
-                        'কাজে আবেদন বা বুকিং হলে আলোচনা শুরু হবে।',
+          data: (firstPage) {
+            final items = _more.merge(firstPage);
+            final hasMore = _more.hasMore;
+            return items.isEmpty
+                ? ListView(
+                    children: const [
+                      SizedBox(height: 180),
+                      Icon(Icons.forum_outlined, size: 56),
+                      SizedBox(height: KSpacing.md),
+                      Center(
+                        child: KLocalizedText(
+                          'কাজে আবেদন বা বুকিং হলে আলোচনা শুরু হবে।',
+                        ),
                       ),
-                    ),
-                  ],
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.all(KSpacing.md),
-                  itemCount: items.length,
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(height: KSpacing.sm),
-                  itemBuilder: (context, index) =>
-                      _ConversationCard(item: items[index]),
-                ),
+                    ],
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.all(KSpacing.md),
+                    itemCount: items.length + (hasMore ? 1 : 0),
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(height: KSpacing.sm),
+                    itemBuilder: (context, index) => index < items.length
+                        ? _ConversationCard(item: items[index])
+                        : LoadMoreButton(
+                            key: const ValueKey('conversations-load-more'),
+                            loading: _more.loading,
+                            failed: _more.failed,
+                            onPressed: () => _more.loadNext(
+                              (cursor) => ref
+                                  .read(chatRepositoryProvider)
+                                  .conversations(cursor: cursor),
+                              () {
+                                if (mounted) setState(() {});
+                              },
+                            ),
+                          ),
+                  );
+          },
         ),
       ),
     );

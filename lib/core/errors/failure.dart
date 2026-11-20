@@ -26,6 +26,7 @@ class Failure implements Exception {
     this.details = const [],
     this.messageBn,
     this.messageKey,
+    this.actionType,
   });
 
   final FailureKind kind;
@@ -45,6 +46,14 @@ class Failure implements Exception {
   /// The server's message key (`error.session.women_only`): tells apart the
   /// same [code] used in different places.
   final String? messageKey;
+
+  /// What the server suggests doing next (`action.type`), for example
+  /// VERIFY_IDENTITY.
+  final String? actionType;
+
+  /// The person must verify their identity before this can work.
+  bool get needsIdentityVerification =>
+      actionType == 'VERIFY_IDENTITY' || code == 'IDENTITY_REQUIRED';
 
   /// The server's own reason with its code, for an error the app has no
   /// copy for: "Approved identity verification is required. (FORBIDDEN)".
