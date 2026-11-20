@@ -80,8 +80,11 @@ databaseDescribe("hiring eligibility and job privacy (real HTTP)", () => {
     categoryId = (
       await db.category.findFirstOrThrow({ where: { is_active: true } })
     ).id;
-    locationId = (
-      await db.location.findFirstOrThrow({ where: { is_active: true } })
+    locationId = // The profile area can't be the whole city (R3 W16).
+    (
+      await db.location.findFirstOrThrow({
+        where: { is_active: true, type: "AREA" },
+      })
     ).id;
     poster = await actor([RoleMode.CUSTOMER]);
     worker = await actor([RoleMode.WORKER]);
