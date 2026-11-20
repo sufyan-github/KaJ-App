@@ -1056,91 +1056,113 @@ export class JobsService {
       throw slotUnavailable("Worker is not available for this slot.");
     }
     const price = BigInt(input.offeredPricePoisha);
-    const assignment = await this.prisma.$transaction(async (transaction) => {
-      const site = await siteCoordinates(transaction, posterUserId, input);
-      const job = await transaction.job.create({
-        data: {
-          poster_user_id: posterUserId,
-          title: input.title.trim(),
-          description: input.description.trim(),
-          category_id: input.categoryId,
-          lat: site.lat,
-          lng: site.lng,
-          job_type: JobType.SERVICE_BOOKING,
-          payment_model: PaymentModel.FIXED,
-          budget_min_poisha: price,
-          budget_max_poisha: price,
-          location_id: input.locationId,
-          starts_at: window.startsAt,
-          ends_at: window.endsAt,
-          skills: input.skillId
-            ? { create: [{ skill_id: input.skillId }] }
-            : undefined,
-        },
+    const assignment = await this.prisma
+      .$transaction(async (transaction) => {
+        // W11: one pending booking per worker and slot. The lock makes the
+        // check and the insert one step; the partial unique index
+        // assignments_one_pending_per_worker_slot backs it up.
+        await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`booking-worker:${workerUserId}`}))`;
+        const held = await transaction.assignment.count({
+          where: {
+            worker_user_id: workerUserId,
+            status: AssignmentStatus.PENDING_CONFIRMATION,
+            agreed_starts_at: window.startsAt,
+            agreed_ends_at: window.endsAt,
+          },
+        });
+        if (held) throw bookingAlreadyPending();
+        const site = await siteCoordinates(transaction, posterUserId, input);
+        const job = await transaction.job.create({
+          data: {
+            poster_user_id: posterUserId,
+            title: input.title.trim(),
+            description: input.description.trim(),
+            category_id: input.categoryId,
+            lat: site.lat,
+            lng: site.lng,
+            job_type: JobType.SERVICE_BOOKING,
+            payment_model: PaymentModel.FIXED,
+            budget_min_poisha: price,
+            budget_max_poisha: price,
+            location_id: input.locationId,
+            starts_at: window.startsAt,
+            ends_at: window.endsAt,
+            skills: input.skillId
+              ? { create: [{ skill_id: input.skillId }] }
+              : undefined,
+          },
+        });
+        await this.states.recordInitialDraft(transaction, job.id, posterUserId);
+        const published = await this.states.transitionInTransaction(
+          transaction,
+          job,
+          JobStatus.PUBLISHED,
+          { type: JobActorType.POSTER, userId: posterUserId },
+        );
+        await transaction.job.update({
+          where: { id: job.id },
+          data: { published_at: new Date(), expires_at: window.startsAt },
+        });
+        const opened = await this.states.transitionInTransaction(
+          transaction,
+          published,
+          JobStatus.APPLICATIONS_OPEN,
+          { type: JobActorType.SYSTEM },
+        );
+        const application = await transaction.application.create({
+          data: {
+            job_id: job.id,
+            worker_user_id: workerUserId,
+            status: ApplicationStatus.ACCEPTED,
+            proposed_price_poisha: price,
+            proposed_starts_at: window.startsAt,
+            proposed_ends_at: window.endsAt,
+            responded_at: new Date(),
+          },
+        });
+        const selected = await this.states.transitionInTransaction(
+          transaction,
+          opened,
+          JobStatus.WORKER_SELECTED,
+          { type: JobActorType.POSTER, userId: posterUserId },
+        );
+        const assignment = await transaction.assignment.create({
+          data: {
+            job_id: job.id,
+            worker_user_id: workerUserId,
+            application_id: application.id,
+            agreed_price_poisha: price,
+            agreed_starts_at: window.startsAt,
+            agreed_ends_at: window.endsAt,
+            confirmation_deadline_at: new Date(
+              this.now().getTime() + settings.confirmWindowMinutes * 60_000,
+            ),
+          },
+        });
+        await createContractSnapshot(transaction, {
+          assignmentId: assignment.id,
+          job,
+          workerUserId,
+          agreedPricePoisha: price,
+          agreedStartsAt: window.startsAt,
+          agreedEndsAt: window.endsAt,
+        });
+        await this.states.transitionInTransaction(
+          transaction,
+          selected,
+          JobStatus.CONFIRMATION_PENDING,
+          { type: JobActorType.SYSTEM },
+        );
+        return assignment;
+      })
+      .catch((error: unknown) => {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2002"
+        )
+          throw bookingAlreadyPending();
+        throw error;
       });
-      await this.states.recordInitialDraft(transaction, job.id, posterUserId);
-      const published = await this.states.transitionInTransaction(
-        transaction,
-        job,
-        JobStatus.PUBLISHED,
-        { type: JobActorType.POSTER, userId: posterUserId },
-      );
-      await transaction.job.update({
-        where: { id: job.id },
-        data: { published_at: new Date(), expires_at: window.startsAt },
-      });
-      const opened = await this.states.transitionInTransaction(
-        transaction,
-        published,
-        JobStatus.APPLICATIONS_OPEN,
-        { type: JobActorType.SYSTEM },
-      );
-      const application = await transaction.application.create({
-        data: {
-          job_id: job.id,
-          worker_user_id: workerUserId,
-          status: ApplicationStatus.ACCEPTED,
-          proposed_price_poisha: price,
-          proposed_starts_at: window.startsAt,
-          proposed_ends_at: window.endsAt,
-          responded_at: new Date(),
-        },
-      });
-      const selected = await this.states.transitionInTransaction(
-        transaction,
-        opened,
-        JobStatus.WORKER_SELECTED,
-        { type: JobActorType.POSTER, userId: posterUserId },
-      );
-      const assignment = await transaction.assignment.create({
-        data: {
-          job_id: job.id,
-          worker_user_id: workerUserId,
-          application_id: application.id,
-          agreed_price_poisha: price,
-          agreed_starts_at: window.startsAt,
-          agreed_ends_at: window.endsAt,
-          confirmation_deadline_at: new Date(
-            this.now().getTime() + settings.confirmWindowMinutes * 60_000,
-          ),
-        },
-      });
-      await createContractSnapshot(transaction, {
-        assignmentId: assignment.id,
-        job,
-        workerUserId,
-        agreedPricePoisha: price,
-        agreedStartsAt: window.startsAt,
-        agreedEndsAt: window.endsAt,
-      });
-      await this.states.transitionInTransaction(
-        transaction,
-        selected,
-        JobStatus.CONFIRMATION_PENDING,
-        { type: JobActorType.SYSTEM },
-      );
-      return assignment;
-    });
     await this.notifications?.create({
       userId: workerUserId,
       type: "BOOKING_REQUESTED",
@@ -1863,6 +1885,15 @@ function slotUnavailable(message: string) {
     code: "SLOT_UNAVAILABLE",
     message,
     messageKey: "error.jobs.slot_unavailable",
+  });
+}
+
+/** W11: this worker already has a pending booking for exactly this time. */
+function bookingAlreadyPending() {
+  return new ConflictException({
+    code: "BOOKING_ALREADY_PENDING",
+    message: "This worker already has a booking request waiting for this time.",
+    messageKey: "error.jobs.booking_already_pending",
   });
 }
 
