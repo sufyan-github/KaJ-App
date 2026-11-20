@@ -19,7 +19,7 @@ This runbook covers moving production from `agent/p1-ui-07-tracker` (the current
 3. Run `prisma migrate status` against production (read-only) and compare with §2. Exactly the 25 migrations below should be pending.
 4. Run the §2 pre-check queries. Fix anything they find before migrating.
 5. `pnpm --filter @kaj/backend exec prisma migrate deploy` from a one-off Render shell with production `DATABASE_URL`, or let the release command do it. Do not use `migrate dev` or `db push`.
-6. Load the reference data (sectors etc.) with the production-safe loader: `pnpm --filter @kaj/backend seed:reference --dry-run`, then without `--dry-run`. Never run `prisma db seed` (the development seed) against production; it refuses `NODE_ENV=production` anyway.
+6. Load the reference data (sectors etc.) with the production-safe loader: `pnpm --filter @kaj/backend seed:reference --dry-run`, then without `--dry-run`. Since R2 it also gives each pilot area without coordinates an approximate centre and radius (`areaCentres` in `prisma/reference-data.ts`), so check-in works for jobs and sessions without a map pin. It never moves a centre that is already set. Have the owner check the centres in the admin console. Never run `prisma db seed` (the development seed) against production; it refuses `NODE_ENV=production` anyway.
 7. Deploy the new API build.
 8. Run the smoke test (§6).
 9. Keep the backup until the smoke test and one day of traffic look right.

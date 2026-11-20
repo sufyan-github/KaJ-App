@@ -5,6 +5,7 @@ import { hash } from "bcryptjs";
 
 import { encryptTotpSecret } from "../src/modules/admin-auth/admin-auth.primitives";
 import {
+  fillAreaCentres,
   businessCategories,
   categories,
   pilotAreas,
@@ -235,6 +236,9 @@ async function seed() {
       });
     }
   }
+
+  // W1: area centres for check-in without a map pin (only where missing).
+  await fillAreaCentres(prisma);
 
   // SEC-1: no fallback credentials; the committed example values only
   // against a local database (see seed-admin.ts).

@@ -147,6 +147,50 @@ databaseDescribe("seeds and the reference-data loader", () => {
     });
   }, 60_000);
 
+  it("gives every area a centre and radius, fills a missing one and keeps an admin's (W1)", async () => {
+    // Rajshahi city, roughly: every centre must fall inside it.
+    const inRajshahi = (lat: number, lng: number) =>
+      lat > 24.33 && lat < 24.45 && lng > 88.53 && lng < 88.7;
+    const areas = await db.location.findMany({ where: { type: "AREA" } });
+    expect(areas).toHaveLength(AREA_COUNT);
+    for (const area of areas) {
+      expect(area.lat).not.toBeNull();
+      expect(area.lng).not.toBeNull();
+      expect(Number(area.radius_km)).toBeGreaterThan(0);
+      expect(inRajshahi(Number(area.lat), Number(area.lng))).toBe(true);
+    }
+    const [missing, edited] = areas;
+    await db.location.update({
+      where: { id: missing!.id },
+      data: { lat: null, lng: null, radius_km: null },
+    });
+    await db.location.update({
+      where: { id: edited!.id },
+      data: { lat: 24.4, lng: 88.6, radius_km: 0.5 },
+    });
+    const report = await loadReferenceData(db);
+    expect(report.centresSet).toBe(1);
+    const [refilled, kept] = await Promise.all([
+      db.location.findUniqueOrThrow({ where: { id: missing!.id } }),
+      db.location.findUniqueOrThrow({ where: { id: edited!.id } }),
+    ]);
+    expect(Number(refilled.lat)).toBe(Number(missing!.lat));
+    expect(Number(refilled.radius_km)).toBe(Number(missing!.radius_km));
+    expect([
+      Number(kept.lat),
+      Number(kept.lng),
+      Number(kept.radius_km),
+    ]).toEqual([24.4, 88.6, 0.5]);
+    await db.location.update({
+      where: { id: edited!.id },
+      data: {
+        lat: edited!.lat,
+        lng: edited!.lng,
+        radius_km: edited!.radius_km,
+      },
+    });
+  }, 60_000);
+
   it("creates no admin without explicit seed credentials (SEC-1)", async () => {
     const email = `no-default-${randomUUID().slice(0, 8)}@kaj.local`;
     const env: Record<string, string> = {
