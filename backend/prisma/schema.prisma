@@ -623,7 +623,6 @@ model User {
   verification_reviews              VerificationRequest[]       @relation("VerificationReviewer")
   documents                         Document[]
   portfolio_items                   PortfolioItem[]
-  community_groups                  CommunityGroup[]
   disputes_opened                   Dispute[]                   @relation("DisputeOpener")
   disputes_resolved                 Dispute[]                   @relation("DisputeResolver")
   dispute_evidence                  DisputeEvidence[]
@@ -936,29 +935,25 @@ model BusinessOffering {
 /// Women-only groups are opt-in: joining needs a profile marked female and
 /// a moderator's approval.
 model CommunityGroup {
-  id                    String                 @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  created_by_user_id    String                 @db.Uuid
-  name                  String
-  description           String?
-  visibility            GroupVisibility        @default(PUBLIC)
-  women_only            Boolean                @default(false)
-  location_id           String?                @db.Uuid
-  category_id           String?                @db.Uuid
+  id                 String                 @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  created_by_user_id String                 @db.Uuid
+  name               String
+  description        String?
+  visibility         GroupVisibility        @default(PUBLIC)
+  women_only         Boolean                @default(false)
+  location_id        String?                @db.Uuid
+  category_id        String?                @db.Uuid
   /// Set by moderation.
-  hidden_at             DateTime?
-  hidden_reason         String?
-  deleted_at            DateTime?
-  created_at            DateTime               @default(now())
-  updated_at            DateTime               @updatedAt
-  created_by            User                   @relation("CommunityGroupCreator", fields: [created_by_user_id], references: [id], onDelete: Cascade)
-  location              Location?              @relation(fields: [location_id], references: [id], onDelete: Restrict)
-  category              Category?              @relation(fields: [category_id], references: [id], onDelete: Restrict)
-  members               CommunityGroupMember[]
-  sessions              Session[]
-  user                  User?                  @relation(fields: [userId], references: [id])
-  userId                String?                @db.Uuid
-  introductionRequest   IntroductionRequest?   @relation(fields: [introductionRequestId], references: [id])
-  introductionRequestId String?                @db.Uuid
+  hidden_at          DateTime?
+  hidden_reason      String?
+  deleted_at         DateTime?
+  created_at         DateTime               @default(now())
+  updated_at         DateTime               @updatedAt
+  created_by         User                   @relation("CommunityGroupCreator", fields: [created_by_user_id], references: [id], onDelete: Cascade)
+  location           Location?              @relation(fields: [location_id], references: [id], onDelete: Restrict)
+  category           Category?              @relation(fields: [category_id], references: [id], onDelete: Restrict)
+  members            CommunityGroupMember[]
+  sessions           Session[]
 
   @@index([visibility, location_id, category_id])
   @@index([created_by_user_id])
@@ -1112,7 +1107,6 @@ model IntroductionRequest {
   target              User                    @relation("IntroductionTarget", fields: [target_user_id], references: [id], onDelete: Cascade)
   conversation        Conversation?           @relation(fields: [conversation_id], references: [id], onDelete: SetNull)
   sessions            Session[]
-  community_groups    CommunityGroup[]
 
   @@index([requester_user_id, created_at(sort: Desc)])
   @@index([target_user_id, status])
@@ -1305,6 +1299,7 @@ model CollaborationRequest {
   @@index([recipient_user_id, status])
   @@index([subject_type, subject_id])
   @@index([from_business_profile_id])
+  @@index([idea_role_id])
   @@map("collaboration_requests")
 }
 
@@ -1392,7 +1387,7 @@ model Category {
   primary_jobs             Job[]            @relation("JobCategory")
   subcategory_jobs         Job[]            @relation("JobSubcategory")
   portfolio_items          PortfolioItem[]
-  communityGroups          CommunityGroup[]
+  community_groups         CommunityGroup[]
 
   @@index([parent_id, sort_order])
   @@index([is_active, sort_order])
@@ -1459,7 +1454,7 @@ model Location {
   sessions          Session[]
   service_areas     ServiceArea[]
   jobs              Job[]
-  communityGroups   CommunityGroup[]
+  community_groups  CommunityGroup[]
 
   @@unique([parent_id, type, name_en])
   @@index([parent_id, type, is_active])
