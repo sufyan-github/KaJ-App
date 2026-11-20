@@ -11,6 +11,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/k_localized_text.dart';
 import '../../auth/presentation/controllers/auth_controller.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
+import '../../business/business_routes.dart';
 import '../../onboarding/domain/onboarding_state.dart';
 import '../../profile/presentation/controllers/me_provider.dart';
 import '../../profile/presentation/widgets/profile_completeness_card.dart';
@@ -137,6 +138,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ? 'শিক্ষার্থী নেওয়া চালু বা বন্ধ করুন'
                     : 'আপনার দক্ষতা অন্যদের শেখান',
                 onTap: () => context.push(AppRoutes.mentor),
+              ),
+              _SettingsTile(
+                key: const ValueKey('settings-business'),
+                icon: Icons.storefront_outlined,
+                title: 'আমার ব্যবসা',
+                subtitle: 'ব্যবসা, সদস্য, যাচাই ও সহযোগিতা',
+                onTap: () => context.push(BusinessRoutes.mine),
               ),
               if (role == KaajRole.worker)
                 _SettingsTile(

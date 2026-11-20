@@ -44,7 +44,10 @@ class TrustSafetyRepository {
     );
   });
 
-  Future<void> submitVerification(String kind, List<Uint8List> images) async =>
+  /// Skill evidence. A business is verified per business
+  /// (`/businesses/:id/verification`); the server refuses kind BUSINESS
+  /// here with USE_BUSINESS_VERIFICATION.
+  Future<void> submitSkillVerification(List<Uint8List> images) async =>
       _guard(() async {
         final ids = <String>[];
         for (final image in images) {
@@ -52,7 +55,7 @@ class TrustSafetyRepository {
         }
         await _dio.post<Map<String, dynamic>>(
           '/verification-requests',
-          data: {'kind': kind, 'documentIds': ids},
+          data: {'kind': 'SKILL', 'documentIds': ids},
         );
       });
 

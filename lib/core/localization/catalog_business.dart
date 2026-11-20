@@ -2,4 +2,238 @@
 
 /// English renderings for the Business, partners and collaboration screens (Bangla key to English).
 /// Keys must not repeat a key of another catalog.
-const businessTranslations = <String, String>{};
+const businessTranslations = <String, String>{
+  "আইডিয়া পর্যায়": "Idea stage",
+  "অনিবন্ধিত ব্যবসা": "Unregistered business",
+  "নিবন্ধিত ব্যবসা": "Registered business",
+  "মালিক": "Owner",
+  "ম্যানেজার": "Manager",
+  "স্টাফ": "Staff",
+  "সদস্য": "Member",
+  "প্রস্তাব পাঠানো হয়েছে": "Proposed",
+  "গ্রহণ করা হয়েছে": "Accepted",
+  "নীতিগতভাবে সম্মত": "Agreed in principle",
+  "শেষ হয়েছে": "Ended",
+  "অবস্থা অজানা": "Status unknown",
+  "যাচাইকৃত ব্যবসা": "Verified business",
+  "অংশীদার খুঁজছে": "Seeking partners",
+  "KAAJ শুধু মানুষকে যুক্ত করে। এখানে যুক্ত হওয়া কোনো আইনি অংশীদারত্ব তৈরি করে না।":
+      "KAAJ only connects people. Connecting here does not create a legal partnership.",
+  "এটি পাওয়া যাচ্ছে না": "Not available",
+  "এটি সরানো হয়েছে, ব্যক্তিগত করা হয়েছে, বা আপনি এটি দেখতে পারেন না।":
+      "It was removed, made private, or you cannot see it.",
+  "ব্যবসাটি মুছে ফেলা হয়েছে।": "The business was deleted.",
+  "ব্যবসা ছেড়ে দেবেন?": "Leave this business?",
+  "আপনি আর এই ব্যবসার সদস্য থাকবেন না।":
+      "You will no longer be a member of this business.",
+  "ব্যবসা ছেড়ে দেওয়া যায়নি।": "Could not leave the business.",
+  "আপনি ব্যবসাটি ছেড়ে দিয়েছেন।": "You left the business.",
+  "তথ্য বদলান": "Edit details",
+  "ব্যবসার তথ্য লোড করা যায়নি।": "Could not load the business.",
+  "KAAJ এই ব্যবসাটি স্থগিত করেছে। এটি অন্যরা দেখতে পান না এবং এখন কিছু বদলানো যাবে না। জানতে সহায়তায় যোগাযোগ করুন।":
+      "KAAJ has suspended this business. Others cannot see it and nothing can be changed for now. Contact support to learn more.",
+  "আপনাকে এই ব্যবসায় যোগ দিতে আমন্ত্রণ জানানো হয়েছে।":
+      "You have been invited to join this business.",
+  "আমন্ত্রণ ফিরিয়ে দেওয়া যায়নি।": "Could not decline the invitation.",
+  "আমন্ত্রণ ফিরিয়ে দেওয়া হয়েছে।": "Invitation declined.",
+  "ফিরিয়ে দিন": "Decline",
+  "আমন্ত্রণ গ্রহণ করা যায়নি।": "Could not accept the invitation.",
+  "আপনি এখন এই ব্যবসার সদস্য।": "You are now a member of this business.",
+  "গ্রহণ করুন": "Accept",
+  "খাত": "Sector",
+  "কর্মীর সংখ্যা": "Number of employees",
+  "ঠিকানা": "Address",
+  "ট্রেড লাইসেন্স": "Trade licence",
+  "দৃশ্যমানতা": "Visibility",
+  "সবাই দেখতে পান": "Everyone can see it",
+  "শুধু সদস্যরা দেখেন": "Only members can see it",
+  "পণ্য ও সেবা": "Products and services",
+  "ব্যবসা যাচাই": "Business verification",
+  "ব্যবসা ছেড়ে দিন": "Leave business",
+  "জমা দেওয়া হয়নি": "Not submitted",
+  "সহযোগিতার অনুরোধ পাঠান": "Request collaboration",
+  "ব্যবসাটি রিপোর্ট করুন": "Report this business",
+  "পরিচালনা করুন": "Manage",
+  "পণ্য ও সেবা লোড করা যায়নি।": "Could not load products and services.",
+  "এখনো কোনো পণ্য বা সেবা যোগ করা হয়নি।": "No products or services added yet.",
+  "এই ব্যবসার কাজ": "Jobs of this business",
+  "খোলা কাজ": "Open jobs",
+  "কর্মী নিয়োগের কাজ পোস্ট করুন": "Post a staff job",
+  "এখন কোনো কাজ নেই।": "No jobs right now.",
+  "সহযোগিতার অনুরোধ": "Collaboration requests",
+  "পাঠানো ও পাওয়া অনুরোধ": "Requests sent and received",
+  "অংশীদার খুঁজুন": "Find partners",
+  "যে ব্যবসাগুলো অংশীদার খুঁজছে": "Businesses looking for partners",
+  "ব্যবসা তৈরি করুন": "Create business",
+  "বিনামূল্যে, কোনো সাবস্ক্রিপশন লাগে না": "Free, no subscription needed",
+  "আমার ব্যবসা": "My businesses",
+  "আপনার ব্যবসার তালিকা লোড করা যায়নি।": "Could not load your businesses.",
+  "আমন্ত্রণ": "Invitations",
+  "এখনো কোনো ব্যবসা নেই": "No businesses yet",
+  "আপনার ব্যবসা যোগ করুন, অংশীদার খুঁজুন এবং কর্মী নিয়োগ দিন। ব্যবসা অংশ বিনামূল্যে।":
+      "Add your business, find partners and hire staff. Business is free.",
+  "আমার ব্যবসাগুলো": "Businesses I am in",
+  "আপনাকে যোগ দিতে আমন্ত্রণ জানানো হয়েছে:": "You are invited to join as:",
+  "নতুন ব্যবসা": "New business",
+  "ব্যবসার তথ্য বদলান": "Edit business",
+  "ব্যবসার তথ্য সংরক্ষণ করা যায়নি।": "Could not save the business.",
+  "ব্যবসাটি মুছে ফেলবেন?": "Delete this business?",
+  "ব্যবসার প্রোফাইল, পণ্য ও সেবা এবং সদস্যদের তালিকা আর দেখা যাবে না।":
+      "The business profile, its products and services and its member list will no longer be visible.",
+  "মুছে ফেলুন": "Delete",
+  "ব্যবসা মুছে ফেলা যায়নি।": "Could not delete the business.",
+  "ব্যবসার নাম": "Business name",
+  "নাম ১২০ অক্ষরের বেশি হতে পারবে না": "The name can be at most 120 characters",
+  "ব্যবসার পর্যায়": "Business stage",
+  "ট্রেড লাইসেন্স নম্বর": "Trade licence number",
+  "যাচাইয়ের জন্য প্রয়োজন": "Needed for verification",
+  "লাইসেন্স নম্বর ৬০ অক্ষরের বেশি হতে পারবে না":
+      "The licence number can be at most 60 characters",
+  "ব্যবসার বিবরণ": "Business description",
+  "বিবরণ ২০০০ অক্ষরের বেশি হতে পারবে না":
+      "The description can be at most 2000 characters",
+  "খাতের তালিকা লোড করা যায়নি।": "Could not load the sectors.",
+  "ব্যবসার খাত": "Business sector",
+  "এলাকা বেছে নিন": "Choose an area",
+  "ঠিকানা ৩০০ অক্ষরের বেশি হতে পারবে না":
+      "The address can be at most 300 characters",
+  "যোগাযোগের ব্যক্তি": "Contact person",
+  "সঠিক সংখ্যা লিখুন": "Enter a valid number",
+  "সবাই দেখতে পাবে": "Visible to everyone",
+  "প্রকাশ করতে খাত ও এলাকা দিতে হবে। ব্যক্তিগত ব্যবসা শুধু সদস্যরা দেখেন।":
+      "To publish, add a sector and an area. A private business is seen only by its members.",
+  "অংশীদার খুঁজছি": "Looking for partners",
+  "প্রকাশিত হলে অংশীদার তালিকায় দেখা যাবে।":
+      "When published, it shows in the partner directory.",
+  "ব্যবসা মুছে ফেলুন": "Delete business",
+  "সদস্যকে সরাবেন?": "Remove this member?",
+  "তিনি আর এই ব্যবসার তথ্য দেখতে বা কাজ করতে পারবেন না।":
+      "They will no longer see or work on this business.",
+  "সরিয়ে দিন": "Remove",
+  "সদস্যকে সরানো যায়নি।": "Could not remove the member.",
+  "কোন ভূমিকায় আমন্ত্রণ জানাবেন?": "Invite them as",
+  "আমন্ত্রণ পাঠানো যায়নি।": "Could not send the invitation.",
+  "আমন্ত্রণ পাঠানো হয়েছে। তিনি নোটিফিকেশন পাবেন।":
+      "Invitation sent. They will get a notification.",
+  "সদস্য আমন্ত্রণ": "Invite member",
+  "সদস্যদের তালিকা লোড করা যায়নি।": "Could not load the members.",
+  "এখনো কোনো সদস্য নেই": "No members yet",
+  "মালিক কর্মী ও ম্যানেজারদের আমন্ত্রণ জানাতে পারেন।":
+      "The owner can invite staff and managers.",
+  "ব্যবসায় অন্তত একজন মালিক থাকতে হয়। শেষ মালিককে সরানো বা তার ভূমিকা বদলানো যায় না।":
+      "A business needs at least one owner. The last owner cannot be removed or given another role.",
+  "ভূমিকা বদলানো যায়নি।": "Could not change the role.",
+  "আমন্ত্রিত": "Invited",
+  "আমন্ত্রণ বাতিল করুন": "Cancel invitation",
+  "কাকে আমন্ত্রণ জানাবেন?": "Whom do you want to invite?",
+  "নাম বা দক্ষতা খুঁজুন": "Search by name or skill",
+  "কাউকে পাওয়া যায়নি।": "Nobody found.",
+  "এটি মুছে ফেলবেন?": "Delete this?",
+  "পণ্য বা সেবাটি তালিকা থেকে সরে যাবে।":
+      "The product or service will be removed from the list.",
+  "মুছে ফেলা যায়নি।": "Could not delete it.",
+  "এখনো কোনো পণ্য বা সেবা নেই": "No products or services yet",
+  "আপনার পণ্য বা সেবা যোগ করুন, যাতে ক্রেতা ও অংশীদাররা জানতে পারেন।":
+      "Add your products or services so buyers and partners know what you offer.",
+  "এই ব্যবসা এখনো কোনো পণ্য বা সেবা যোগ করেনি।":
+      "This business has not added any products or services yet.",
+  "সেবা": "Service",
+  "পণ্য": "Product",
+  "KAAJ লুকিয়ে রেখেছে": "Hidden by KAAJ",
+  "রিপোর্টের পরে এটি সবার কাছ থেকে লুকানো হয়েছে।":
+      "After a report it was hidden from everyone.",
+  "পণ্য বা সেবা যোগ করুন": "Add a product or service",
+  "পণ্য বা সেবা বদলান": "Edit product or service",
+  "নাম (বাংলা)": "Name (Bangla)",
+  "বাংলা বা ইংরেজিতে অন্তত একটি নাম দিন":
+      "Give at least one name, in Bangla or English",
+  "নাম (ইংরেজি)": "Name (English)",
+  "বিবরণ": "Description",
+  "বিবরণ ১০০০ অক্ষরের বেশি হতে পারবে না":
+      "The description can be at most 1000 characters",
+  "সর্বনিম্ন দাম (টাকা)": "Lowest price (taka)",
+  "সর্বোচ্চ দাম (টাকা)": "Highest price (taka)",
+  "সর্বোচ্চ দাম সর্বনিম্নের চেয়ে কম হতে পারে না":
+      "The highest price cannot be below the lowest",
+  "দামের একক (যেমন প্রতি কেজি)": "Price unit (for example per kg)",
+  "একক ৪০ অক্ষরের বেশি হতে পারবে না": "The unit can be at most 40 characters",
+  "চালু আছে": "Active",
+  "বন্ধ থাকলে শুধু সদস্যরা দেখেন।": "When inactive, only members see it.",
+  "সংরক্ষণ করা যায়নি।": "Could not save.",
+  "আপনি": "You",
+  "ভূমিকা করুন:": "Make:",
+  "প্রতিটি নিবন্ধিত ব্যবসা আলাদাভাবে · ট্রেড লাইসেন্স":
+      "Each registered business separately · trade licence",
+  "যাচাইয়ের অনুরোধ জমা হয়েছে। ফল নোটিফিকেশনে জানানো হবে।":
+      "Verification request submitted. You will get the result as a notification.",
+  "যাচাইয়ের অনুরোধ জমা দেওয়া যায়নি।":
+      "Could not submit the verification request.",
+  "যাচাইয়ের অবস্থা লোড করা যায়নি।": "Could not load the verification status.",
+  "ব্যবসাটির পাশে যাচাইকৃত চিহ্ন দেখা যাবে। নাম, ট্রেড লাইসেন্স নম্বর বা পর্যায় বদলালে আবার যাচাই করতে হবে।":
+      "The business shows a verified badge. Changing its name, trade licence number or stage needs a new verification.",
+  "KAAJ আপনার নথি দেখছে। সিদ্ধান্ত হলে নোটিফিকেশন পাবেন।":
+      "KAAJ is reviewing your documents. You will get a notification when it decides.",
+  "শুধু ট্রেড লাইসেন্স নম্বরসহ নিবন্ধিত ব্যবসা যাচাই করা যায়। আইডিয়া বা অনিবন্ধিত ব্যবসা যাচাইকৃত হয় না, তবে প্রকাশ করা ও অংশীদার খোঁজা যায়।":
+      "Only a registered business with a trade licence number can be verified. An idea or unregistered business is never verified, but it can still be published and look for partners.",
+  "পর্যায় ও লাইসেন্স নম্বর দিন": "Set the stage and licence number",
+  "শুধু ব্যবসার মালিক যাচাইয়ের জন্য নথি জমা দিতে পারেন।":
+      "Only the owner of the business can submit documents for verification.",
+  "এখন যাচাইয়ের অনুরোধ জমা দেওয়া যাচ্ছে না।":
+      "A verification request cannot be submitted right now.",
+  "ব্যবসা যাচাইয়ের আগে আপনার পরিচয় (এনআইডি ও সেলফি) যাচাই করতে হবে।":
+      "Verify your identity (NID and selfie) before verifying a business.",
+  "ট্রেড লাইসেন্স ও অন্যান্য নথির ছবি দিন":
+      "Add photos of the trade licence and other documents",
+  "লেখা যেন পরিষ্কার পড়া যায়। ১ থেকে ৫টি ছবি দিন। নথি শুধু যাচাইয়ের জন্য ব্যবহৃত হয়।":
+      "Make sure the text is readable. Add 1 to 5 photos. Documents are used only for verification.",
+  "ছবি দিন": "Add photo",
+  "যাচাইয়ের জন্য জমা দিন": "Submit for verification",
+  "জমা দেওয়া হয়েছে": "Submitted",
+  "সব খাত": "All sectors",
+  "অংশীদারদের তালিকা লোড করা যায়নি।": "Could not load the partner directory.",
+  "কোনো ব্যবসা পাওয়া যায়নি": "No businesses found",
+  "অংশীদার খুঁজছে এমন প্রকাশিত ব্যবসা এখানে দেখা যায়। ফিল্টার বদলে দেখুন, বা নিজের ব্যবসা যোগ করুন।":
+      "Published businesses looking for partners show here. Try other filters, or add your own business.",
+  "ব্যবসার নাম বা কাজ লিখুন": "Type a business name or what it does",
+  "প্রত্যাহার করুন": "Withdraw",
+  "নীতিগতভাবে সম্মতি দিন": "Agree in principle",
+  "সহযোগিতা শেষ করুন": "End collaboration",
+  "অন্য পক্ষ": "The other side",
+  "অজানা": "Unknown",
+  "পাওয়া": "Received",
+  "পাঠানো": "Sent",
+  "অনুরোধের তালিকা লোড করা যায়নি।": "Could not load the requests.",
+  "কোনো অনুরোধ আসেনি": "No requests received",
+  "আপনি কোনো অনুরোধ পাঠাননি": "You have not sent any requests",
+  "অংশীদার তালিকা থেকে কোনো ব্যবসায় সহযোগিতার অনুরোধ পাঠাতে পারেন।":
+      "You can send a collaboration request to a business from the partner directory.",
+  "অনুরোধটি লোড করা যায়নি।": "Could not load the request.",
+  "আইডিয়ার একটি নির্দিষ্ট ভূমিকা নিয়ে আগ্রহ":
+      "Interest in a specific role of the idea",
+  "যাকে পাঠিয়েছেন": "Sent to",
+  "যিনি পাঠিয়েছেন": "Sent by",
+  "ব্যবসার পক্ষ থেকে:": "On behalf of:",
+  "চ্যাট খুলুন": "Open chat",
+  "নীতিগত সমঝোতা": "Agreement in principle",
+  "এখনো কোনো সারাংশ লেখা হয়নি।": "No summary written yet.",
+  "আপনি সম্মত": "You agreed",
+  "অন্য পক্ষ সম্মত": "The other side agreed",
+  "ইতিহাস": "History",
+  "আপনারা কী বিষয়ে নীতিগতভাবে সম্মত হয়েছেন, সংক্ষেপে লিখুন। এটি কোনো আইনি চুক্তি নয়।":
+      "Briefly write what you agreed in principle. This is not a legal contract.",
+  "সমঝোতার সারাংশ (ঐচ্ছিক)": "Summary of the agreement (optional)",
+  "কাজটি সম্পন্ন হয়নি।": "That could not be done.",
+  "আপনার বার্তা": "Your message",
+  "আপনি কে, কী ধরনের সহযোগিতা চান এবং কেন":
+      "Who you are, what kind of collaboration you want and why",
+  "কমপক্ষে ১০ অক্ষরে বার্তা লিখুন": "Write a message of at least 10 characters",
+  "বার্তা ১০০০ অক্ষরের বেশি হতে পারবে না":
+      "The message can be at most 1000 characters",
+  "কোন ব্যবসার পক্ষ থেকে (ঐচ্ছিক)": "On behalf of which business (optional)",
+  "ব্যক্তিগতভাবে": "As myself",
+  "অনুরোধ পাঠানো যায়নি।": "Could not send the request.",
+  "আমার অনুরোধগুলো দেখুন": "See my requests",
+  "ফিরিয়ে দেওয়া হয়েছে": "Declined",
+  "ব্যবসা, সদস্য, যাচাই ও সহযোগিতা":
+      "Businesses, members, verification and collaboration",
+};
