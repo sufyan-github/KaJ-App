@@ -22,7 +22,7 @@ import {
  * Read-only lists (R5). Roles follow who may act on what is listed:
  * businesses and mentors as their verification queues, ideas and
  * introductions as content moderation (ADMIN, MODERATOR), attendance as the
- * check-in/check-out overrides.
+ * check-in/check-out overrides (ADMIN, MODERATOR since R1).
  */
 @Controller("admin")
 @UseGuards(AdminSessionGuard)
@@ -75,7 +75,7 @@ export class AdminDirectoryController {
 
   @Get("attendance")
   @Policy(Policies.public())
-  @AdminRoles(AdminRole.ADMIN, AdminRole.MODERATOR, AdminRole.SUPPORT)
+  @AdminRoles(AdminRole.ADMIN, AdminRole.MODERATOR)
   attendance(
     @Query() query: AttendanceListQueryDto,
     @CurrentAdmin() actor: AdminActor,

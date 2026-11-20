@@ -226,7 +226,9 @@ test("mentors: a mentor without opportunities can be suspended", async ({
     });
 });
 
-test("ideas and introductions: hidden from SUPPORT", async ({ page }) => {
+test("ideas, introductions and attendance: hidden from SUPPORT", async ({
+  page,
+}) => {
   await page.route("**/api/admin/ops/**", (route) =>
     route.fulfill(ok({ items: [], nextCursor: null, counts: {} })),
   );
@@ -238,5 +240,8 @@ test("ideas and introductions: hidden from SUPPORT", async ({ page }) => {
   ).toHaveCount(0);
   await expect(
     page.getByRole("navigation").getByRole("button", { name: "Attendance" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("navigation").getByRole("button", { name: "Users" }),
   ).toBeVisible();
 });

@@ -87,6 +87,8 @@ test("ideas and introductions are for content moderators only", () => {
       role === "ADMIN" || role === "MODERATOR",
       role,
     );
-  assert.ok(keys("SUPPORT").includes("attendance"));
+  // R1: the attendance overrides are ADMIN and MODERATOR only.
+  assert.ok(keys("MODERATOR").includes("attendance"));
+  assert.ok(!keys("SUPPORT").includes("attendance"));
   assert.ok(!keys("FINANCE").includes("attendance"));
 });
