@@ -68,6 +68,7 @@ import {
 import { EngagementService } from "../safety/engagement.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
+import { managesJob } from "../business/job-managers";
 import { assertWork, isWork, WORK_ONLY } from "./opportunity";
 import { CursorQueryDto } from "../../common/api/cursor-query.dto";
 import { disputeEligibility } from "../disputes/dispute-eligibility";
@@ -376,15 +377,11 @@ export class JobsService {
 
   async suggestedWorkers(posterUserId: string, jobId: string) {
     const job = await this.prisma.job.findFirst({
-      where: {
-        ...WORK_ONLY,
-        id: jobId,
-        poster_user_id: posterUserId,
-        deleted_at: null,
-      },
+      where: { ...WORK_ONLY, id: jobId, deleted_at: null },
       include: { skills: true },
     });
-    if (!job) throw new NotFoundException();
+    if (!job || !(await managesJob(this.prisma, posterUserId, job)))
+      throw new NotFoundException();
     if (!this.matching) return { items: [] };
     const ranked = await this.matching.suggestedWorkers(
       job,
@@ -942,7 +939,10 @@ export class JobsService {
       where: { id: applicationId },
       include: { job: true },
     });
-    if (!application || application.job.poster_user_id !== posterUserId) {
+    if (
+      !application ||
+      !(await managesJob(this.prisma, posterUserId, application.job))
+    ) {
       throw new NotFoundException();
     }
     assertWork(application.job);
@@ -1674,11 +1674,13 @@ export class JobsService {
     return value as unknown as CancellationPolicy;
   }
 
+  /** The job, if this user runs it (poster, or a business's managers: W8). */
   private async ownedJob(posterUserId: string, jobId: string) {
     const job = await this.prisma.job.findFirst({
-      where: { id: jobId, poster_user_id: posterUserId, deleted_at: null },
+      where: { id: jobId, deleted_at: null },
     });
-    if (!job) throw new NotFoundException();
+    if (!job || !(await managesJob(this.prisma, posterUserId, job)))
+      throw new NotFoundException();
     return job;
   }
 }

@@ -7,6 +7,8 @@ export interface PolicyResourceContext {
   assignedWorkerId?: string;
   conversationParticipantIds?: readonly string[];
   jobPosterId?: string;
+  /** W8: who runs the job (a business's managers); else the poster. */
+  jobManagerIds?: string[];
   /** The job's opportunity type (WORK, TRAINING, APPRENTICESHIP). */
   opportunityType?: string;
   /** Accepted members of the business the route names, with their role. */
@@ -48,7 +50,11 @@ export class AbilityFactory {
       case "admin":
         return actor?.isAdmin === true;
       case "job-poster":
-        return actor !== undefined && resource?.jobPosterId === actor.sub;
+        return (
+          actor !== undefined &&
+          (resource?.jobManagerIds?.includes(actor.sub) ??
+            resource?.jobPosterId === actor.sub)
+        );
       case "assigned-worker":
         return actor !== undefined && resource?.assignedWorkerId === actor.sub;
       case "mentor-owner":
