@@ -13,6 +13,9 @@ const databaseDescribe =
 
 const REASON = "Staff change requested by the operations lead.";
 
+// Invites, sign-ins and reactivation each run bcrypt (cost 12).
+jest.setTimeout(30_000);
+
 /** Staff management (R5): list, invite, change role, deactivate, reactivate. */
 databaseDescribe("admin staff management (real HTTP)", () => {
   let api: HttpHarness;
