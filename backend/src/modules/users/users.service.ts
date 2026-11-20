@@ -135,8 +135,11 @@ export class UsersService {
         this.prisma.job.count({
           where: {
             poster_user_id: userId,
+            // DB-1: removed jobs and drafts don't count as active work.
+            deleted_at: null,
             status: {
               notIn: [
+                "DRAFT",
                 "COMPLETED",
                 "PAYMENT_RELEASED",
                 "PAYMENT_RECORDED",

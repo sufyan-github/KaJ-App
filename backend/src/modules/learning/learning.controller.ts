@@ -68,6 +68,19 @@ export class LearningController {
     return this.learning.get(claims.sub, id);
   }
 
+  /**
+   * DB-1: the mentor closes an opportunity. With learners enrolled it only
+   * stops new applications; otherwise it ends (CANCELLED_BY_CUSTOMER).
+   */
+  @Post(":id/close")
+  @Policy(Policies.mentorOwner())
+  close(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+  ) {
+    return this.learning.close(claims.sub, id);
+  }
+
   @Post(":id/publish")
   @Roles(RoleMode.MENTOR)
   @Policy(Policies.mentorOwner())

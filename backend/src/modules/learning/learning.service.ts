@@ -7,6 +7,7 @@ import {
 } from "@nestjs/common";
 import {
   ApplicationStatus,
+  AssignmentStatus,
   JobActorType,
   JobStatus,
   MentorStatus,
@@ -22,6 +23,7 @@ import {
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
 import { withinLocation } from "../../common/location-scope";
 import { PrismaService } from "../../infra/prisma/prisma.service";
+import { CLOSABLE, endOpenJob, jobNotClosable } from "../jobs/close-job";
 import { JobStateMachine } from "../jobs/state-machine/job-state.machine";
 import { MentorsService } from "../mentors/mentors.service";
 import { NotificationsService } from "../notifications/notifications.service";
@@ -267,6 +269,47 @@ export class LearningService {
   }
 
   /** A learner applies. Free: no subscription, no hiring trust gate. */
+  async close(mentorUserId: string, id: string) {
+    const job = await this.prisma.job.findFirst({
+      where: {
+        ...LEARNING_ONLY,
+        id,
+        poster_user_id: mentorUserId,
+        deleted_at: null,
+      },
+    });
+    if (!job) throw new NotFoundException();
+    if (!CLOSABLE.includes(job.status)) throw jobNotClosable(job.status);
+    const enrolled = await this.prisma.assignment.count({
+      where: {
+        job_id: id,
+        status: {
+          in: [
+            AssignmentStatus.PENDING_CONFIRMATION,
+            AssignmentStatus.CONFIRMED,
+          ],
+        },
+      },
+    });
+    if (enrolled) {
+      // Learners keep their place; nobody new can apply.
+      await this.prisma.job.update({
+        where: { id },
+        data: { expires_at: new Date() },
+      });
+      return { id, status: job.status, closedToApplications: true };
+    }
+    const closed = await endOpenJob(
+      this.prisma,
+      this.states,
+      job,
+      JobStatus.CANCELLED_BY_CUSTOMER,
+      { type: JobActorType.POSTER, userId: mentorUserId },
+      "Closed by the mentor.",
+    );
+    return { id, status: closed.status, closedToApplications: true };
+  }
+
   async apply(learnerUserId: string, id: string, input: ApplyToLearningDto) {
     const job = await this.prisma.job.findFirst({
       where: { ...LEARNING_ONLY, id, deleted_at: null },

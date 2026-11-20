@@ -62,6 +62,15 @@ const transitions = new Map<TransitionKey, readonly JobActorType[]>([
   [key(JobStatus.PAYMENT_RELEASED, JobStatus.REVIEWED), [JobActorType.SYSTEM]],
   [key(JobStatus.PAYMENT_RECORDED, JobStatus.REVIEWED), [JobActorType.SYSTEM]],
   [key(JobStatus.PUBLISHED, JobStatus.EXPIRED), [JobActorType.SYSTEM]],
+  // DB-1: an owner closes a draft or an open job nobody is booked for
+  // (service-guarded in jobs/close-job.ts).
+  ...[JobStatus.DRAFT, JobStatus.PUBLISHED, JobStatus.APPLICATIONS_OPEN].map(
+    (from) =>
+      [
+        key(from, JobStatus.CANCELLED_BY_CUSTOMER),
+        [JobActorType.POSTER],
+      ] as const,
+  ),
   [key(JobStatus.APPLICATIONS_OPEN, JobStatus.EXPIRED), [JobActorType.SYSTEM]],
   // Disputes can be opened, or a resolution appealed, from these states. These
   // were previously written directly by the disputes service.

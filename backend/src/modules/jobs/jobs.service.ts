@@ -69,6 +69,12 @@ import { EngagementService } from "../safety/engagement.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
 import { withinLocation } from "../../common/location-scope";
+import {
+  CLOSABLE,
+  dueForExpiry,
+  endOpenJob,
+  jobNotClosable,
+} from "./close-job";
 import { managesJob } from "../business/job-managers";
 import { assertWork, isWork, WORK_ONLY } from "./opportunity";
 import { CursorQueryDto } from "../../common/api/cursor-query.dto";
@@ -1725,6 +1731,60 @@ export class JobsService {
       return defaultCancellationPolicy;
     }
     return value as unknown as CancellationPolicy;
+  }
+
+  /**
+   * DB-1: the poster (or a business's managers) closes a draft or an open
+   * job nobody is booked for; waiting applications expire.
+   */
+  async closeJob(userId: string, jobId: string) {
+    const job = await this.ownedJob(userId, jobId);
+    assertWork(job);
+    if (!CLOSABLE.includes(job.status)) throw jobNotClosable(job.status);
+    const closed = await endOpenJob(
+      this.prisma,
+      this.states,
+      job,
+      JobStatus.CANCELLED_BY_CUSTOMER,
+      { type: JobActorType.POSTER, userId },
+      "Closed by the poster.",
+    );
+    return { id: jobId, status: closed.status };
+  }
+
+  /**
+   * DB-1: jobs and learning opportunities past their date that nobody was
+   * booked for become EXPIRED (runner, every minute, 100 at a time).
+   */
+  async expireDueJobs(limit = 100) {
+    const due = await this.prisma.job.findMany({
+      where: dueForExpiry(this.now()),
+      select: {
+        id: true,
+        status: true,
+        workers_filled: true,
+        workers_required: true,
+      },
+      orderBy: [{ expires_at: "asc" }, { id: "asc" }],
+      take: limit,
+    });
+    let expired = 0;
+    for (const job of due) {
+      try {
+        await endOpenJob(
+          this.prisma,
+          this.states,
+          job,
+          JobStatus.EXPIRED,
+          { type: JobActorType.SYSTEM },
+          "Not filled before its date.",
+        );
+        expired += 1;
+      } catch {
+        // Changed meanwhile (booked, closed): the next run looks again.
+      }
+    }
+    return { expired };
   }
 
   /** The job, if this user runs it (poster, or a business's managers: W8). */

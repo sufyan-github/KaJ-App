@@ -51,6 +51,17 @@ export class JobsController {
     return this.jobs.create(claims.sub, body);
   }
 
+  /** DB-1: close a draft or an open job nobody is booked for. */
+  @Post("jobs/:id/close")
+  @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
+  @Policy(Policies.jobPoster())
+  close(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+  ) {
+    return this.jobs.closeJob(claims.sub, id);
+  }
+
   @Post("jobs/:id/publish")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
   @Policy(Policies.jobPoster())
