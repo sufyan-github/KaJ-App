@@ -51,7 +51,7 @@ async function openLearn(page: Page) {
 test("approves a mentor application showing what they will teach", async ({
   page,
 }) => {
-  await respond(page, "verification-requests?kind=MENTOR&limit=100", {
+  await respond(page, "verification-requests?limit=100&kind=MENTOR", {
     items: [
       {
         id: "request-1",
