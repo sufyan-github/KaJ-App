@@ -19,12 +19,12 @@ This runbook covers moving production from `agent/p1-ui-07-tracker` (the current
 3. Run `prisma migrate status` against production (read-only) and compare with §2. Exactly the 25 migrations below should be pending.
 4. Run the §2 pre-check queries. Fix anything they find before migrating.
 5. `pnpm --filter @kaj/backend exec prisma migrate deploy` from a one-off Render shell with production `DATABASE_URL`, or let the release command do it. Do not use `migrate dev` or `db push`.
-6. Load the reference data (sectors etc.) with the production-safe loader: `pnpm --filter @kaj/backend seed:reference --dry-run`, then without `--dry-run`. Never run `prisma db seed` (the development seed) against production; it refuses `NODE_ENV=production` anyway.
+6. Load the reference data (sectors etc.) with the production-safe loader: `pnpm --filter @kaj/backend seed:reference --dry-run`, then without `--dry-run`. Since R2 it also gives each pilot area without coordinates an approximate centre and radius (`areaCentres` in `prisma/reference-data.ts`), so check-in works for jobs and sessions without a map pin. It never moves a centre that is already set. Have the owner check the centres in the admin console. Never run `prisma db seed` (the development seed) against production; it refuses `NODE_ENV=production` anyway.
 7. Deploy the new API build.
 8. Run the smoke test (§6).
 9. Keep the backup until the smoke test and one day of traffic look right.
 
-## 2. The 25 pending migrations, in order
+## 2. The pending migrations, in order
 
 All are add-only. Each must apply in this order (Prisma applies them by folder name). "down.sql" means a hand-written rollback in the migration folder, tested up → down → up in CI (`migrations-rollback.prisma.e2e-spec.ts`). The general rollback rule is: roll the **app** back first, then run that migration's `down.sql`, then delete the migration's row from `_prisma_migrations`.
 
@@ -57,6 +57,10 @@ Enum values can't be removed in PostgreSQL; rollbacks leave them in place (unuse
 | 23  | `20261119120000_community_groups`                   | Groups + members                                                                               | none                                                                                                                | down.sql                                                                                                     |
 | 24  | `20261119130000_group_sessions`                     | Group link, venue pin, check-in fields, WAITLISTED                                             | none                                                                                                                | down.sql (enum value stays)                                                                                  |
 | 25  | `20261119140000_women_safety`                       | `prefers_flexible_hours`, `reports.first_action_at` (backfill), jobs index                     | Index build on `jobs`: short lock                                                                                   | down.sql                                                                                                     |
+| 26  | `20261120090000_ai_opportunity_intelligence`        | P4 AI: consents, usage logs, `business_ideas.ai_analysis*`, access rule `AI_IDEA_ANALYSIS`     | none                                                                                                                | down.sql (P4; details in `docs/api/ai.md`)                                                                   |
+| 27  | `20261121100000_assignment_cancellation_fee`        | R2 W12: nullable `assignments.cancellation_fee_poisha` + CHECK (>= 0, NOT VALID then VALIDATE) | Short lock on `assignments` (nullable column, no default)                                                           | down.sql                                                                                                     |
+| 28  | `20261121110000_account_purge`                      | R2 PRIV-1: nullable `users.purged_at`                                                          | Short lock on `users` (nullable column)                                                                             | down.sql                                                                                                     |
+| 29  | `20261121120000_assignment_reconcile_index`         | R2 DB-4: index `assignments(status, agreed_starts_at)`                                         | Index build on `assignments`: short lock (see the note below)                                                       | down.sql                                                                                                     |
 
 Indexes are created inside Prisma's migration transaction (not `CONCURRENTLY`). At pilot scale the locks are short. If a table has grown large, run the `CREATE INDEX` statements by hand with `CONCURRENTLY` first, then let the migration's `IF NOT EXISTS` / Prisma state catch up (`prisma migrate resolve --applied <name>` only after checking the result matches the migration exactly).
 
@@ -153,6 +157,29 @@ Run from a laptop against production; use a staff phone number, not a customer's
 
 Roll back if 1–4 fail: redeploy the previous build; the schema is add-only, so the old code runs on the new schema (rolling the schema back is only needed for the cases in §2's "Rollback" column).
 
+### 6.1 One-off data fix after R2 (W10)
+
+Since R2, leaving or being removed from a group gives up the person's places on the group's sessions. People who left or were removed **before** the deploy may still hold an ACCEPTED or WAITLISTED place, and they can no longer open the session. Free those places once, after the deploy (read-only check first):
+
+```sql
+-- How many?
+SELECT count(*) FROM session_participants sp
+JOIN sessions s ON s.id = sp.session_id
+WHERE s.group_id IS NOT NULL AND s.status IN ('DRAFT', 'SCHEDULED')
+  AND sp.role = 'PARTICIPANT' AND sp.status IN ('INVITED', 'ACCEPTED', 'WAITLISTED')
+  AND NOT EXISTS (SELECT 1 FROM community_group_members m
+                  WHERE m.group_id = s.group_id AND m.user_id = sp.user_id AND m.status = 'ACTIVE');
+-- Free them (same WHERE):
+UPDATE session_participants sp SET status = 'DECLINED', responded_at = now()
+FROM sessions s
+WHERE s.id = sp.session_id AND s.group_id IS NOT NULL AND s.status IN ('DRAFT', 'SCHEDULED')
+  AND sp.role = 'PARTICIPANT' AND sp.status IN ('INVITED', 'ACCEPTED', 'WAITLISTED')
+  AND NOT EXISTS (SELECT 1 FROM community_group_members m
+                  WHERE m.group_id = s.group_id AND m.user_id = sp.user_id AND m.status = 'ACTIVE');
+```
+
+Waitlists move up the next time a place changes on each session (a host raising capacity, someone leaving); hosts can also re-invite.
+
 ## 7. PHP BDApps gateway: where the env file must live (GW-3)
 
 The gateway reads its configuration from, in order: `KAAJ_GATEWAY_ENV_FILE`, then `../kaaj-bdapps-gateway.env`, then `.env` in its own folder. When the gateway is installed at `public_html/bdapps/`, the second location (`public_html/kaaj-bdapps-gateway.env`) is **inside the web root** and may be downloadable — the gateway's `.htaccess` does not cover its parent, and nginx, `php -S` and OpenLiteSpeed ignore `FilesMatch`.
@@ -169,4 +196,4 @@ Do this:
 
 - Render service creation, DNS and TLS (owner's account actions).
 - Mobile release and store listing.
-- Account-deletion purge and data-retention jobs (not built yet; see the 19 Nov audit, PRIV-1/PRIV-2).
+- Data-retention jobs other than the account purge (PRIV-2). Since R2 a daily runner purges an account 30 days after `DELETE /me`: its documents and photo are deleted from storage, and phone, e-mail, passwords, name, bio, coordinates, birth year, gender and devices are cleared, which frees the number. Work records stay without a name. The window is `ACCOUNT_PURGE_AFTER_DAYS` in `users/account-purge.service.ts`; change it there if a legal retention rule says otherwise.

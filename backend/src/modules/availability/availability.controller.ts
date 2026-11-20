@@ -32,40 +32,53 @@ import {
 export class AvailabilityController {
   constructor(private readonly availability: AvailabilityService) {}
 
+  /**
+   * W5: workers, and approved mentors (who may not be workers), keep their
+   * own availability so they can offer consultation times.
+   */
+  private async assertMayKeepAvailability(claims: AccessTokenClaims) {
+    if (claims.roles.includes(RoleMode.WORKER)) return;
+    await this.availability.assertApprovedMentor(claims.sub);
+  }
+
   @Get()
-  @Roles(RoleMode.WORKER)
+  @Roles(RoleMode.WORKER, RoleMode.MENTOR)
   @Policy(Policies.authenticated())
-  getAvailability(@CurrentUser() claims: AccessTokenClaims) {
+  async getAvailability(@CurrentUser() claims: AccessTokenClaims) {
+    await this.assertMayKeepAvailability(claims);
     return this.availability.getAvailability(claims.sub);
   }
 
   @Put()
-  @Roles(RoleMode.WORKER)
+  @Roles(RoleMode.WORKER, RoleMode.MENTOR)
   @Policy(Policies.authenticated())
-  replaceRules(
+  async replaceRules(
     @CurrentUser() claims: AccessTokenClaims,
     @Body() body: ReplaceAvailabilityDto,
   ) {
+    await this.assertMayKeepAvailability(claims);
     return this.availability.replaceRules(claims.sub, body.rules);
   }
 
   @Post("exceptions")
-  @Roles(RoleMode.WORKER)
+  @Roles(RoleMode.WORKER, RoleMode.MENTOR)
   @Policy(Policies.authenticated())
-  createException(
+  async createException(
     @CurrentUser() claims: AccessTokenClaims,
     @Body() body: CreateAvailabilityExceptionDto,
   ) {
+    await this.assertMayKeepAvailability(claims);
     return this.availability.createException(claims.sub, body);
   }
 
   @Delete("exceptions/:id")
-  @Roles(RoleMode.WORKER)
+  @Roles(RoleMode.WORKER, RoleMode.MENTOR)
   @Policy(Policies.authenticated())
-  deleteException(
+  async deleteException(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("id", new ParseUUIDPipe()) id: string,
   ) {
+    await this.assertMayKeepAvailability(claims);
     return this.availability.deleteException(claims.sub, id);
   }
 }

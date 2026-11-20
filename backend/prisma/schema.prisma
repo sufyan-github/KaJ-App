@@ -565,6 +565,8 @@ model User {
   created_at                  DateTime        @default(now())
   updated_at                  DateTime        @updatedAt
   deleted_at                  DateTime?
+  /// PRIV-1: when the deleted account's personal data was removed.
+  purged_at                   DateTime?
   moderation_level            ModerationLevel @default(NONE)
   restriction_ends_at         DateTime?
   reverification_required     Boolean         @default(false)
@@ -1665,6 +1667,9 @@ model Assignment {
   /// late, not an emergency) count against the worker's completion rate.
   cancelled_by_user_id     String?              @db.Uuid
   cancellation_penalised   Boolean              @default(false)
+  /// W12: the fee the cancellation policy set when this was cancelled (the
+  /// amount the preview showed); null when not cancelled or no fee.
+  cancellation_fee_poisha  BigInt?
   created_at               DateTime             @default(now())
   updated_at               DateTime             @updatedAt
   job                      Job                  @relation(fields: [job_id], references: [id], onDelete: Restrict)
@@ -1684,6 +1689,7 @@ model Assignment {
   @@index([application_id])
   @@index([confirmation_deadline_at, status])
   @@index([completion_due_at, status])
+  @@index([status, agreed_starts_at])
   @@map("assignments")
 }
 

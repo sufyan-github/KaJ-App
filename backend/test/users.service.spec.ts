@@ -116,6 +116,8 @@ describe("UsersService account deletion", () => {
   const deviceUpdateMany = jest.fn();
   const prisma = {
     job: { count: jobCount },
+    // DB-3: deletion cancels hosted sessions (none here).
+    session: { findMany: jest.fn().mockResolvedValue([]) },
     assignment: { count: assignmentCount },
     dispute: { count: disputeCount },
     user: { update: userUpdate },

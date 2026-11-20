@@ -7,8 +7,10 @@ import {
 } from "@nestjs/common";
 import {
   ApplicationStatus,
+  AssignmentStatus,
   JobActorType,
   JobStatus,
+  MentorStatus,
   JobType,
   OpportunityType,
   ParticipantTerms,
@@ -19,7 +21,10 @@ import {
 } from "@prisma/client";
 
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
+import { withinLocation } from "../../common/location-scope";
 import { PrismaService } from "../../infra/prisma/prisma.service";
+import { CLOSABLE, endOpenJob, jobNotClosable } from "../jobs/close-job";
+import { ACTIVE_ACCOUNT } from "../safety/account-cascade";
 import { JobStateMachine } from "../jobs/state-machine/job-state.machine";
 import { MentorsService } from "../mentors/mentors.service";
 import { NotificationsService } from "../notifications/notifications.service";
@@ -184,9 +189,17 @@ export class LearningService {
         deleted_at: null,
         poster_user_id: { notIn: [viewerUserId, ...hidden] },
         OR: [{ expires_at: null }, { expires_at: { gt: new Date() } }],
+        // W7: full ones and those of a suspended mentor are not offered.
+        workers_filled: { lt: this.prisma.job.fields.workers_required },
+        // DB-3: and nothing from a suspended, banned or deleting account.
+        poster: {
+          ...ACTIVE_ACCOUNT,
+          profile: { mentor_status: { not: MentorStatus.SUSPENDED } },
+        },
         participant_terms: query.participantTerms,
         work_arrangement: query.workArrangement,
-        location_id: query.locationId,
+        // W13: a thana or city also finds its areas' opportunities.
+        location: withinLocation(query.locationId),
         skills: query.skillId
           ? { some: { skill_id: query.skillId } }
           : undefined,
@@ -259,6 +272,47 @@ export class LearningService {
   }
 
   /** A learner applies. Free: no subscription, no hiring trust gate. */
+  async close(mentorUserId: string, id: string) {
+    const job = await this.prisma.job.findFirst({
+      where: {
+        ...LEARNING_ONLY,
+        id,
+        poster_user_id: mentorUserId,
+        deleted_at: null,
+      },
+    });
+    if (!job) throw new NotFoundException();
+    if (!CLOSABLE.includes(job.status)) throw jobNotClosable(job.status);
+    const enrolled = await this.prisma.assignment.count({
+      where: {
+        job_id: id,
+        status: {
+          in: [
+            AssignmentStatus.PENDING_CONFIRMATION,
+            AssignmentStatus.CONFIRMED,
+          ],
+        },
+      },
+    });
+    if (enrolled) {
+      // Learners keep their place; nobody new can apply.
+      await this.prisma.job.update({
+        where: { id },
+        data: { expires_at: new Date() },
+      });
+      return { id, status: job.status, closedToApplications: true };
+    }
+    const closed = await endOpenJob(
+      this.prisma,
+      this.states,
+      job,
+      JobStatus.CANCELLED_BY_CUSTOMER,
+      { type: JobActorType.POSTER, userId: mentorUserId },
+      "Closed by the mentor.",
+    );
+    return { id, status: closed.status, closedToApplications: true };
+  }
+
   async apply(learnerUserId: string, id: string, input: ApplyToLearningDto) {
     const job = await this.prisma.job.findFirst({
       where: { ...LEARNING_ONLY, id, deleted_at: null },
@@ -272,9 +326,16 @@ export class LearningService {
       });
     if (await this.blocks.between(learnerUserId, job.poster_user_id))
       throw new NotFoundException();
+    // W7: closed when full, or while the mentor is suspended.
+    const mentor = await this.prisma.profile.findUnique({
+      where: { user_id: job.poster_user_id },
+      select: { mentor_status: true },
+    });
     if (
       job.status !== JobStatus.APPLICATIONS_OPEN ||
-      (job.expires_at && job.expires_at <= new Date())
+      (job.expires_at && job.expires_at <= new Date()) ||
+      job.workers_filled >= job.workers_required ||
+      mentor?.mentor_status === MentorStatus.SUSPENDED
     )
       throw new ConflictException({
         code: "OPPORTUNITY_CLOSED",

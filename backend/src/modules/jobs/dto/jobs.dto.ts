@@ -231,6 +231,13 @@ export class JobFeedQueryDto extends CursorQueryDto {
   @IsOptional()
   @IsIn(["true", "false"])
   matchMyPreferences?: "true" | "false";
+
+  /** W13: words to find in the title or description (2–100 characters). */
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  @MaxLength(100)
+  q?: string;
 }
 
 export class ApplyToJobDto {

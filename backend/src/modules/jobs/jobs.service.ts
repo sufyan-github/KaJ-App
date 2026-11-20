@@ -28,6 +28,7 @@ import {
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { businessErrors } from "../business/business.errors";
+import { ACTIVE_ACCOUNT } from "../safety/account-cascade";
 import { assertNoGenderRestriction } from "./gender-restriction";
 import { isVerifiedBusiness } from "../business/business-labels";
 import { CLOCK, type Clock } from "../../common/time/clock";
@@ -68,6 +69,14 @@ import {
 import { EngagementService } from "../safety/engagement.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
+import { withinLocation } from "../../common/location-scope";
+import {
+  CLOSABLE,
+  dueForExpiry,
+  endOpenJob,
+  jobNotClosable,
+} from "./close-job";
+import { managesJob } from "../business/job-managers";
 import { assertWork, isWork, WORK_ONLY } from "./opportunity";
 import { CursorQueryDto } from "../../common/api/cursor-query.dto";
 import { disputeEligibility } from "../disputes/dispute-eligibility";
@@ -287,23 +296,57 @@ export class JobsService {
       : preferences?.preferred_arrangements.length
         ? preferences.preferred_arrangements
         : undefined;
-    const flexibleOnly =
-      query.flexibleHours === "true" ||
-      preferences?.prefers_flexible_hours === true;
+    // W13: "false" asks for jobs without flexible hours; it used to be
+    // ignored.
+    const flexible =
+      query.flexibleHours === "true"
+        ? true
+        : query.flexibleHours === "false"
+          ? false
+          : preferences?.prefers_flexible_hours === true
+            ? true
+            : undefined;
+    const text = query.q?.trim();
     const jobs = await this.prisma.job.findMany({
       where: {
         ...WORK_ONLY,
         status: JobStatus.APPLICATIONS_OPEN,
         deleted_at: null,
         poster_user_id: { notIn: [userId, ...hidden] },
-        OR: [{ expires_at: null }, { expires_at: { gt: this.now() } }],
+        // DB-3: nothing from a suspended, banned or deleting account.
+        poster: ACTIVE_ACCOUNT,
+        AND: [
+          { OR: [{ expires_at: null }, { expires_at: { gt: this.now() } }] },
+          // W13: free-text search on title and description.
+          ...(text
+            ? [
+                {
+                  OR: [
+                    {
+                      title: {
+                        contains: text,
+                        mode: Prisma.QueryMode.insensitive,
+                      },
+                    },
+                    {
+                      description: {
+                        contains: text,
+                        mode: Prisma.QueryMode.insensitive,
+                      },
+                    },
+                  ],
+                },
+              ]
+            : []),
+        ],
         category_id: query.categoryId,
-        location_id: query.locationId,
+        // W13: a thana or city also finds its areas' jobs.
+        location: withinLocation(query.locationId),
         skills: query.skillId
           ? { some: { skill_id: query.skillId } }
           : undefined,
         ...(arrangements ? { work_arrangement: { in: arrangements } } : {}),
-        ...(flexibleOnly ? { flexible_hours: true } : {}),
+        ...(flexible !== undefined ? { flexible_hours: flexible } : {}),
       },
       include: jobInclude,
       // id breaks ties so cursor pages never overlap or skip.
@@ -320,7 +363,8 @@ export class JobsService {
       string,
       { timeCompatibility: string; availabilityCoverage: number | null }
     >();
-    if (query.scope === "for-me") {
+    // W13: availableOnly needs the availability even outside "for me".
+    if (query.scope === "for-me" || query.availableOnly === "true") {
       await Promise.all(
         jobs.map(async (job) => {
           if (!job.starts_at || !job.ends_at) {
@@ -376,15 +420,11 @@ export class JobsService {
 
   async suggestedWorkers(posterUserId: string, jobId: string) {
     const job = await this.prisma.job.findFirst({
-      where: {
-        ...WORK_ONLY,
-        id: jobId,
-        poster_user_id: posterUserId,
-        deleted_at: null,
-      },
+      where: { ...WORK_ONLY, id: jobId, deleted_at: null },
       include: { skills: true },
     });
-    if (!job) throw new NotFoundException();
+    if (!job || !(await managesJob(this.prisma, posterUserId, job)))
+      throw new NotFoundException();
     if (!this.matching) return { items: [] };
     const ranked = await this.matching.suggestedWorkers(
       job,
@@ -605,10 +645,12 @@ export class JobsService {
   }
 
   async listAssignments(userId: string, query: CursorQueryDto = {}) {
-    await this.reconcileDueAssignments(userId);
+    // DB-4: the minute runner reconciles; reading no longer does.
     const limit = query.limit ?? 100;
     const rows = await this.prisma.assignment.findMany({
       where: {
+        // W2: learning enrolments have their own routes.
+        job: WORK_ONLY,
         OR: [{ worker_user_id: userId }, { job: { poster_user_id: userId } }],
       },
       include: {
@@ -640,10 +682,12 @@ export class JobsService {
   }
 
   async getAssignment(userId: string, assignmentId: string) {
-    await this.reconcileDueAssignments(userId);
+    // DB-4: only this assignment is brought up to date on read.
+    await this.reconcileDueAssignments(userId, assignmentId);
     const assignment = await this.prisma.assignment.findFirst({
       where: {
         id: assignmentId,
+        job: WORK_ONLY,
         OR: [{ worker_user_id: userId }, { job: { poster_user_id: userId } }],
       },
       include: {
@@ -865,6 +909,10 @@ export class JobsService {
           cancelled_by_user_id: userId,
           cancellation_penalised:
             actor === "worker" && preview.reliabilityDelta !== 0,
+          // W12: record the fee the preview showed (cash platform: owed
+          // between the two people, not collected by KAAJ).
+          cancellation_fee_poisha:
+            BigInt(preview.feePoisha) > 0n ? BigInt(preview.feePoisha) : null,
         },
       });
       if (
@@ -939,7 +987,10 @@ export class JobsService {
       where: { id: applicationId },
       include: { job: true },
     });
-    if (!application || application.job.poster_user_id !== posterUserId) {
+    if (
+      !application ||
+      !(await managesJob(this.prisma, posterUserId, application.job))
+    ) {
       throw new NotFoundException();
     }
     assertWork(application.job);
@@ -1054,6 +1105,21 @@ export class JobsService {
     }
     const price = BigInt(input.offeredPricePoisha);
     const assignment = await this.prisma.$transaction(async (transaction) => {
+      // W11: one pending booking request per worker and slot. The lock
+      // makes the check and the insert one step. Only booking requests
+      // count: a worker may still hold pending confirmations from two
+      // accepted applications for the same time, and pick one.
+      await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`booking-worker:${workerUserId}`}))`;
+      const held = await transaction.assignment.count({
+        where: {
+          worker_user_id: workerUserId,
+          status: AssignmentStatus.PENDING_CONFIRMATION,
+          agreed_starts_at: window.startsAt,
+          agreed_ends_at: window.endsAt,
+          job: { job_type: JobType.SERVICE_BOOKING },
+        },
+      });
+      if (held) throw bookingAlreadyPending();
       const site = await siteCoordinates(transaction, posterUserId, input);
       const job = await transaction.job.create({
         data: {
@@ -1359,13 +1425,26 @@ export class JobsService {
     }
   }
 
-  async reconcileDueAssignments(userId?: string) {
+  /**
+   * Moves assignments on with time: expired confirmation windows, jobs
+   * starting within a day or started, and work waiting in customer review.
+   * DB-4: paid work only (learning enrolments stay CONFIRMED for a whole
+   * course), only rows that are due, at most RECONCILE_BATCH per run
+   * (indexed by status + agreed_starts_at); `assignmentId` limits it to one.
+   */
+  async reconcileDueAssignments(userId?: string, assignmentId?: string) {
     const now = this.now();
-    const participantWhere = userId
-      ? {
-          OR: [{ worker_user_id: userId }, { job: { poster_user_id: userId } }],
-        }
-      : {};
+    const participantWhere = {
+      ...(userId
+        ? {
+            OR: [
+              { worker_user_id: userId },
+              { job: { poster_user_id: userId } },
+            ],
+          }
+        : {}),
+      ...(assignmentId ? { id: assignmentId } : {}),
+    };
     const pending = await this.prisma.assignment.findMany({
       where: {
         status: AssignmentStatus.PENDING_CONFIRMATION,
@@ -1373,6 +1452,8 @@ export class JobsService {
         ...participantWhere,
       },
       select: { id: true, job_id: true, application_id: true },
+      orderBy: { confirmation_deadline_at: "asc" },
+      take: RECONCILE_BATCH,
     });
     for (const item of pending) {
       await this.expirePendingAssignment(item, "Confirmation window expired");
@@ -1382,8 +1463,28 @@ export class JobsService {
       where: {
         status: AssignmentStatus.CONFIRMED,
         ...participantWhere,
+        job: WORK_ONLY,
+        AND: [
+          {
+            OR: [
+              {
+                job: { status: JobStatus.CONFIRMED },
+                agreed_starts_at: {
+                  lte: new Date(now.getTime() + 24 * 3_600_000),
+                },
+              },
+              {
+                job: { status: JobStatus.UPCOMING },
+                agreed_starts_at: { lte: now },
+              },
+              { job: { status: JobStatus.CUSTOMER_REVIEW } },
+            ],
+          },
+        ],
       },
       include: { job: true },
+      orderBy: [{ agreed_starts_at: "asc" }, { id: "asc" }],
+      take: RECONCILE_BATCH,
     });
     for (const item of active) {
       if (
@@ -1671,11 +1772,67 @@ export class JobsService {
     return value as unknown as CancellationPolicy;
   }
 
+  /**
+   * DB-1: the poster (or a business's managers) closes a draft or an open
+   * job nobody is booked for; waiting applications expire.
+   */
+  async closeJob(userId: string, jobId: string) {
+    const job = await this.ownedJob(userId, jobId);
+    assertWork(job);
+    if (!CLOSABLE.includes(job.status)) throw jobNotClosable(job.status);
+    const closed = await endOpenJob(
+      this.prisma,
+      this.states,
+      job,
+      JobStatus.CANCELLED_BY_CUSTOMER,
+      { type: JobActorType.POSTER, userId },
+      "Closed by the poster.",
+    );
+    return { id: jobId, status: closed.status };
+  }
+
+  /**
+   * DB-1: jobs and learning opportunities past their date that nobody was
+   * booked for become EXPIRED (runner, every minute, 100 at a time).
+   */
+  async expireDueJobs(limit = 100) {
+    const due = await this.prisma.job.findMany({
+      where: dueForExpiry(this.now()),
+      select: {
+        id: true,
+        status: true,
+        workers_filled: true,
+        workers_required: true,
+      },
+      orderBy: [{ expires_at: "asc" }, { id: "asc" }],
+      take: limit,
+    });
+    let expired = 0;
+    for (const job of due) {
+      try {
+        await endOpenJob(
+          this.prisma,
+          this.states,
+          job,
+          JobStatus.EXPIRED,
+          { type: JobActorType.SYSTEM },
+          "Not filled before its date.",
+        );
+        expired += 1;
+      } catch {
+        // Changed meanwhile (booked, closed): the next run looks again.
+      }
+    }
+    return { expired };
+  }
+
+  /** The job, if this user runs it (poster, or a business's managers: W8). */
   private async ownedJob(posterUserId: string, jobId: string) {
     const job = await this.prisma.job.findFirst({
-      where: { id: jobId, poster_user_id: posterUserId, deleted_at: null },
+      where: { id: jobId, deleted_at: null },
     });
-    if (!job) throw new NotFoundException();
+    if (!job || !(await managesJob(this.prisma, posterUserId, job)))
+      throw new NotFoundException();
     return job;
   }
 }
@@ -1847,6 +2004,9 @@ function integerValue(value: Prisma.JsonValue | undefined): number | undefined {
 
 // The work-site pin and address are private: attendance reads them from the
 // database, and they are often the poster's home. Never return them.
+/** DB-4: assignments the reconciler handles per run (it runs every minute). */
+const RECONCILE_BATCH = 200;
+
 const PRIVATE_JOB_FIELDS = new Set(["lat", "lng", "exact_address_encrypted"]);
 
 /**
@@ -1858,6 +2018,15 @@ function slotUnavailable(message: string) {
     code: "SLOT_UNAVAILABLE",
     message,
     messageKey: "error.jobs.slot_unavailable",
+  });
+}
+
+/** W11: this worker already has a pending booking for exactly this time. */
+function bookingAlreadyPending() {
+  return new ConflictException({
+    code: "BOOKING_ALREADY_PENDING",
+    message: "This worker already has a booking request waiting for this time.",
+    messageKey: "error.jobs.booking_already_pending",
   });
 }
 
@@ -2032,6 +2201,7 @@ function serializeAssignment(assignment: {
   agreed_price_poisha: bigint;
   agreed_starts_at: Date | null;
   agreed_ends_at: Date | null;
+  cancellation_fee_poisha?: bigint | null;
 }) {
   return {
     id: assignment.id,
@@ -2041,6 +2211,9 @@ function serializeAssignment(assignment: {
     agreedPricePoisha: assignment.agreed_price_poisha.toString(),
     agreedStartsAt: assignment.agreed_starts_at?.toISOString() ?? null,
     agreedEndsAt: assignment.agreed_ends_at?.toISOString() ?? null,
+    // W12: the recorded cancellation fee, if any.
+    cancellationFeePoisha:
+      assignment.cancellation_fee_poisha?.toString() ?? null,
   };
 }
 

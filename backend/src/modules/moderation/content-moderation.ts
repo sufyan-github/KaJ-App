@@ -1,6 +1,8 @@
 import { NotFoundException } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 
+import { currentBusinessOwnerId } from "../business/job-managers";
+
 /** P2 content an admin can hide (and restore) from the report queue. */
 export const CONTENT_TARGET_TYPES = [
   "BUSINESS",
@@ -43,7 +45,15 @@ export async function setContentHidden(
           select: { user_id: true, business_name: true },
         })
         .catch(notFound);
-      return { ownerUserId: business.user_id, title: business.business_name };
+      // W8: tell whoever owns it now, not necessarily its creator.
+      return {
+        ownerUserId: await currentBusinessOwnerId(
+          transaction,
+          id,
+          business.user_id,
+        ),
+        title: business.business_name,
+      };
     }
     case "BUSINESS_OFFERING": {
       const offering = await transaction.businessOffering
@@ -53,12 +63,16 @@ export async function setContentHidden(
           select: {
             title_en: true,
             title_bn: true,
-            business: { select: { user_id: true } },
+            business: { select: { id: true, user_id: true } },
           },
         })
         .catch(notFound);
       return {
-        ownerUserId: offering.business.user_id,
+        ownerUserId: await currentBusinessOwnerId(
+          transaction,
+          offering.business.id,
+          offering.business.user_id,
+        ),
         title: offering.title_bn ?? offering.title_en ?? "",
       };
     }

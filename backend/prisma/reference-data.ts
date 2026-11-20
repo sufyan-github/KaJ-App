@@ -120,6 +120,68 @@ export const pilotAreas: Record<
 };
 
 /**
+ * W1: an approximate centre and radius for each pilot area, so check-in at a
+ * job or session without its own map pin can use the area as the geofence
+ * (attendance.service jobLocation). The centres are approximate (landmark
+ * level, about 1 km); the radius allows for that. Admins can correct them in
+ * the console; the loader fills only areas with no centre and never moves
+ * one that is set.
+ */
+export const areaCentres: Record<
+  string,
+  { lat: number; lng: number; radiusKm: number }
+> = {
+  "Shaheb Bazar": { lat: 24.3655, lng: 88.5985, radiusKm: 1.5 },
+  "Hetem Khan": { lat: 24.3705, lng: 88.596, radiusKm: 1.5 },
+  "Padma R/A": { lat: 24.3745, lng: 88.6135, radiusKm: 1.5 },
+  RUET: { lat: 24.3635, lng: 88.628, radiusKm: 1.5 },
+  "University of Rajshahi": { lat: 24.3695, lng: 88.6385, radiusKm: 2 },
+  Talaimari: { lat: 24.3605, lng: 88.6235, radiusKm: 1.5 },
+  Kazla: { lat: 24.364, lng: 88.634, radiusKm: 1.5 },
+  Binodpur: { lat: 24.3745, lng: 88.643, radiusKm: 1.5 },
+  Motihar: { lat: 24.368, lng: 88.645, radiusKm: 2 },
+  Laxmipur: { lat: 24.372, lng: 88.587, radiusKm: 1.5 },
+  Court: { lat: 24.377, lng: 88.568, radiusKm: 1.5 },
+  Rajpara: { lat: 24.379, lng: 88.581, radiusKm: 1.5 },
+  "Shah Makhdum": { lat: 24.405, lng: 88.612, radiusKm: 2.5 },
+  Uposhohor: { lat: 24.3845, lng: 88.613, radiusKm: 1.5 },
+  Novotheatre: { lat: 24.392, lng: 88.62, radiusKm: 1.5 },
+};
+
+/**
+ * Gives each pilot area without a centre its reference centre and radius.
+ * Areas with a centre (seeded earlier or set by an admin) are left alone.
+ * Returns how many were (or, in a dry run, would be) set.
+ */
+export async function fillAreaCentres(
+  prisma: PrismaClient | Prisma.TransactionClient,
+  options: { dryRun?: boolean } = {},
+): Promise<number> {
+  const areas = await prisma.location.findMany({
+    where: {
+      type: LocationType.AREA,
+      name_en: { in: Object.keys(areaCentres) },
+      lat: null,
+      lng: null,
+    },
+    select: { id: true, name_en: true },
+  });
+  if (!options.dryRun)
+    for (const area of areas) {
+      const centre = areaCentres[area.name_en]!;
+      await prisma.location.update({
+        where: { id: area.id },
+        data: {
+          lat: centre.lat,
+          lng: centre.lng,
+          radius_km: centre.radiusKm,
+        },
+      });
+    }
+  return areas.length;
+}
+
+/**
  * P2: the sector taxonomy for businesses and ideas (business_categories).
  * Admins can rename, reorder, deactivate or add sub-sectors; the loader
  * only adds missing slugs.
@@ -201,6 +263,8 @@ export interface ReferenceDataReport {
     locations: number;
     businessCategories: number;
   };
+  /** W1: areas given their reference centre (only ones that had none). */
+  centresSet: number;
 }
 
 type Client = PrismaClient | Prisma.TransactionClient;
@@ -220,6 +284,7 @@ export async function loadReferenceData(
   const report: ReferenceDataReport = {
     created: { categories: 0, skills: 0, locations: 0, businessCategories: 0 },
     existing: { categories: 0, skills: 0, locations: 0, businessCategories: 0 },
+    centresSet: 0,
   };
 
   const categoryIds = new Map<string, string | null>();
@@ -325,6 +390,9 @@ export async function loadReferenceData(
     for (const [name_en, name_bn] of pilotAreas[thanaName])
       await ensureChild(thanaId, LocationType.AREA, name_en, name_bn);
   }
+  report.centresSet = write
+    ? await fillAreaCentres(prisma)
+    : await fillAreaCentres(prisma, { dryRun: true });
 
   for (const [sort_order, sector] of businessCategories.entries()) {
     const found = await prisma.businessCategory.findUnique({

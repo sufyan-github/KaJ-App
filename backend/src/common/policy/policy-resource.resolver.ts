@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
+import { jobManagerIds } from "../../modules/business/job-managers";
 import { PolicyResourceContext } from "./ability.factory";
 import { PolicyRule } from "./policy.types";
 
@@ -34,10 +35,15 @@ export class PolicyResourceResolver {
         case "job": {
           const job = await this.prisma.job.findFirst({
             where: { id, deleted_at: null },
-            select: { poster_user_id: true, opportunity_type: true },
+            select: {
+              poster_user_id: true,
+              opportunity_type: true,
+              business_profile_id: true,
+            },
           });
           if (job) {
             context.jobPosterId = job.poster_user_id;
+            context.jobManagerIds = await jobManagerIds(this.prisma, job);
             context.opportunityType = job.opportunity_type;
           }
           break;

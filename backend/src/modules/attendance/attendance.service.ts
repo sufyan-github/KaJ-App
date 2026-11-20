@@ -723,7 +723,17 @@ export class AttendanceService {
     );
     this.assertConsent(input, settings);
     this.assertAccuracy(input.accuracyM, settings);
-    const location = this.jobLocation(place, settings);
+    let location: ReturnType<AttendanceService["jobLocation"]>;
+    try {
+      location = this.jobLocation(place, settings);
+    } catch (error) {
+      // D-8: say what a session participant can do (there is no override).
+      if (error instanceof UnprocessableEntityException)
+        throw new UnprocessableEntityException(
+          "This session has no check-in location. Ask the host to mark you present.",
+        );
+      throw error;
+    }
     const distanceM = distanceMetres(location, {
       lat: input.lat,
       lng: input.lng,

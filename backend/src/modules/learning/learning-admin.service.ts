@@ -219,6 +219,18 @@ export class LearningAdminService {
         ),
       }),
     ]);
+    // W7: the mentor is told (their opportunities leave the feed while
+    // suspended and take no applications).
+    await this.notifications?.create({
+      userId,
+      type: suspended ? "MENTOR_SUSPENDED" : "MENTOR_REINSTATED",
+      title: suspended ? "মেন্টর হিসেবে স্থগিত" : "মেন্টর হিসেবে আবার চালু",
+      body: suspended
+        ? "KAAJ পর্যালোচনা চলাকালীন আপনার শেখার সুযোগগুলো লুকানো থাকবে এবং নতুন আবেদন নেওয়া হবে না।"
+        : "আপনার শেখার সুযোগগুলো আবার দেখা যাচ্ছে।",
+      payload: { route: "/learn/mentor" },
+      dedupeKey: `mentor-${suspended ? "suspended" : "reinstated"}:${userId}:${Date.now()}`,
+    });
     return { userId, mentorStatus: next };
   }
 

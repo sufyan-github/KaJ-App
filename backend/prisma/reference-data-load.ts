@@ -30,7 +30,8 @@ async function main() {
         `${report.created.categories} categories, ${report.created.skills} skills, ` +
         `${report.created.locations} locations, ${report.created.businessCategories} business sectors. Already present: ` +
         `${report.existing.categories} categories, ${report.existing.skills} skills, ` +
-        `${report.existing.locations} locations, ${report.existing.businessCategories} business sectors.`,
+        `${report.existing.locations} locations, ${report.existing.businessCategories} business sectors. ` +
+        `Area centres ${dryRun ? "to set" : "set"}: ${report.centresSet}.`,
     );
   } finally {
     await prisma.$disconnect();

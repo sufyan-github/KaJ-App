@@ -17,8 +17,8 @@
     "seed:reference": "tsx prisma/reference-data-load.ts",
     "seed:training": "tsx prisma/training-seed.ts",
     "start": "node dist/main.js",
-    "test": "jest --runInBand",
-    "test:coverage": "jest --runInBand --coverage",
+    "test": "jest --maxWorkers=1",
+    "test:coverage": "jest --maxWorkers=1 --coverage",
     "test:future-clock": "TEST_CLOCK_OFFSET_DAYS=1100 jest --setupFiles=./test/support/shifted-clock.cjs",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p prisma/tsconfig.json --noEmit"
   },

@@ -36,5 +36,11 @@ export class AssignmentLifecycleRunner
           : "Assignment reconciliation failed",
       );
     });
+    // DB-1: unfilled jobs and opportunities end after their date.
+    void this.jobs.expireDueJobs().catch((error: unknown) => {
+      this.logger.error(
+        error instanceof Error ? error.message : "Job expiry failed",
+      );
+    });
   }
 }

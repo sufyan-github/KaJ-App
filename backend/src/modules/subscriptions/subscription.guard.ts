@@ -30,12 +30,16 @@ export class SubscriptionGuard implements CanActivate {
       featureKey,
     );
     if (access.allowed) return true;
-    throw new ForbiddenException({
-      code: "SUBSCRIPTION_REQUIRED",
-      field: "subscription",
-      message:
-        "Your subscription is inactive or expired. Renew it to continue using this feature.",
-      messageKey: "error.subscription.required",
-    });
+    throw subscriptionRequiredError();
   }
 }
+
+/** 403 SUBSCRIPTION_REQUIRED, as the guard answers it. */
+export const subscriptionRequiredError = () =>
+  new ForbiddenException({
+    code: "SUBSCRIPTION_REQUIRED",
+    field: "subscription",
+    message:
+      "Your subscription is inactive or expired. Renew it to continue using this feature.",
+    messageKey: "error.subscription.required",
+  });
