@@ -1689,6 +1689,7 @@ model Assignment {
   @@index([application_id])
   @@index([confirmation_deadline_at, status])
   @@index([completion_due_at, status])
+  @@index([status, agreed_starts_at])
   @@map("assignments")
 }
 

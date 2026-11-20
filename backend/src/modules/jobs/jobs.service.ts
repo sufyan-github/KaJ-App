@@ -645,7 +645,7 @@ export class JobsService {
   }
 
   async listAssignments(userId: string, query: CursorQueryDto = {}) {
-    await this.reconcileDueAssignments(userId);
+    // DB-4: the minute runner reconciles; reading no longer does.
     const limit = query.limit ?? 100;
     const rows = await this.prisma.assignment.findMany({
       where: {
@@ -682,7 +682,8 @@ export class JobsService {
   }
 
   async getAssignment(userId: string, assignmentId: string) {
-    await this.reconcileDueAssignments(userId);
+    // DB-4: only this assignment is brought up to date on read.
+    await this.reconcileDueAssignments(userId, assignmentId);
     const assignment = await this.prisma.assignment.findFirst({
       where: {
         id: assignmentId,
@@ -1424,13 +1425,26 @@ export class JobsService {
     }
   }
 
-  async reconcileDueAssignments(userId?: string) {
+  /**
+   * Moves assignments on with time: expired confirmation windows, jobs
+   * starting within a day or started, and work waiting in customer review.
+   * DB-4: paid work only (learning enrolments stay CONFIRMED for a whole
+   * course), only rows that are due, at most RECONCILE_BATCH per run
+   * (indexed by status + agreed_starts_at); `assignmentId` limits it to one.
+   */
+  async reconcileDueAssignments(userId?: string, assignmentId?: string) {
     const now = this.now();
-    const participantWhere = userId
-      ? {
-          OR: [{ worker_user_id: userId }, { job: { poster_user_id: userId } }],
-        }
-      : {};
+    const participantWhere = {
+      ...(userId
+        ? {
+            OR: [
+              { worker_user_id: userId },
+              { job: { poster_user_id: userId } },
+            ],
+          }
+        : {}),
+      ...(assignmentId ? { id: assignmentId } : {}),
+    };
     const pending = await this.prisma.assignment.findMany({
       where: {
         status: AssignmentStatus.PENDING_CONFIRMATION,
@@ -1438,6 +1452,8 @@ export class JobsService {
         ...participantWhere,
       },
       select: { id: true, job_id: true, application_id: true },
+      orderBy: { confirmation_deadline_at: "asc" },
+      take: RECONCILE_BATCH,
     });
     for (const item of pending) {
       await this.expirePendingAssignment(item, "Confirmation window expired");
@@ -1447,8 +1463,28 @@ export class JobsService {
       where: {
         status: AssignmentStatus.CONFIRMED,
         ...participantWhere,
+        job: WORK_ONLY,
+        AND: [
+          {
+            OR: [
+              {
+                job: { status: JobStatus.CONFIRMED },
+                agreed_starts_at: {
+                  lte: new Date(now.getTime() + 24 * 3_600_000),
+                },
+              },
+              {
+                job: { status: JobStatus.UPCOMING },
+                agreed_starts_at: { lte: now },
+              },
+              { job: { status: JobStatus.CUSTOMER_REVIEW } },
+            ],
+          },
+        ],
       },
       include: { job: true },
+      orderBy: [{ agreed_starts_at: "asc" }, { id: "asc" }],
+      take: RECONCILE_BATCH,
     });
     for (const item of active) {
       if (
@@ -1968,6 +2004,9 @@ function integerValue(value: Prisma.JsonValue | undefined): number | undefined {
 
 // The work-site pin and address are private: attendance reads them from the
 // database, and they are often the poster's home. Never return them.
+/** DB-4: assignments the reconciler handles per run (it runs every minute). */
+const RECONCILE_BATCH = 200;
+
 const PRIVATE_JOB_FIELDS = new Set(["lat", "lng", "exact_address_encrypted"]);
 
 /**
