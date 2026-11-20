@@ -319,7 +319,12 @@ databaseDescribe("introduction requests (real HTTP)", () => {
       ).body.data.id;
       await api.db.introductionRequest.update({
         where: { id },
-        data: { expires_at: new Date(Date.now() - 1000) },
+        // Made 8 days ago, so it expired a day ago (an expiry can't come
+        // before the request: R3 CHECK).
+        data: {
+          created_at: new Date(Date.now() - 8 * 86_400_000),
+          expires_at: new Date(Date.now() - 1000),
+        },
       });
       const result = await api.app.get(IntroductionsService).expireDue();
       expect(result.expired).toBeGreaterThanOrEqual(1);

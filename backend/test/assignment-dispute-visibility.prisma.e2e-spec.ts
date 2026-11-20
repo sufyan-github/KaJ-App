@@ -53,7 +53,8 @@ databaseDescribe("dispute eligibility on the assignment (real HTTP)", () => {
     const again = await api
       .post(`assignments/${assignmentId}/disputes`, poster, dispute)
       .expect(409);
-    expect(again.body.error.code).toBe("DISPUTE_NOT_ELIGIBLE");
+    // R3 W15: the same answer as the assignment shows.
+    expect(again.body.error.code).toBe("DISPUTE_EXISTS");
   });
 
   it("hides it once the job is reviewed, and POST gives the same answer", async () => {

@@ -1,0 +1,10 @@
+ALTER TABLE "reviews" DROP CONSTRAINT IF EXISTS "reviews_not_self";
+ALTER TABLE "reports" DROP CONSTRAINT IF EXISTS "reports_priority_range";
+ALTER TABLE "ledger_entries" DROP CONSTRAINT IF EXISTS "ledger_entries_amount_positive";
+ALTER TABLE "assignments" DROP CONSTRAINT IF EXISTS "assignments_price_non_negative";
+ALTER TABLE "business_profiles" DROP CONSTRAINT IF EXISTS "business_profiles_name_not_blank";
+ALTER TABLE "sessions" DROP CONSTRAINT IF EXISTS "sessions_title_not_blank";
+ALTER TABLE "introduction_requests" DROP CONSTRAINT IF EXISTS "introduction_requests_expiry_after_creation";
+ALTER TABLE "idea_detail_views" DROP CONSTRAINT IF EXISTS "idea_detail_views_basis_known";
+ALTER TABLE "jobs" DROP CONSTRAINT IF EXISTS "jobs_workers_in_range";
+ALTER TABLE "jobs" DROP CONSTRAINT IF EXISTS "jobs_budget_ordered";
