@@ -12,6 +12,7 @@ import { BusinessMemberRole } from "@prisma/client";
 import { ApiTags } from "@nestjs/swagger";
 
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { UserRateLimit } from "../../common/rate-limit/user-rate-limit";
 import { Policy } from "../../common/policy/policy.decorator";
 import { Policies } from "../../common/policy/policy.types";
 import { AccessTokenClaims } from "../auth/auth-token.service";
@@ -90,6 +91,7 @@ export class BusinessesController {
   }
 
   @Post("businesses/:id/members")
+  @UserRateLimit("invite")
   @Policy(Policies.businessMember({ roles: OWNER }))
   invite(
     @CurrentUser() claims: AccessTokenClaims,

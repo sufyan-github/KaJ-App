@@ -12,6 +12,7 @@ import { RoleMode } from "@prisma/client";
 import { ApiTags } from "@nestjs/swagger";
 
 import { CursorQueryDto } from "../../common/api/cursor-query.dto";
+import { UserRateLimit } from "../../common/rate-limit/user-rate-limit";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { Roles } from "../../common/decorators/roles.decorator";
 import { Policy } from "../../common/policy/policy.decorator";
@@ -188,6 +189,7 @@ export class JobsController {
   }
 
   @Post("workers/:workerId/booking-requests")
+  @UserRateLimit("booking-request")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
   @Policy(Policies.authenticated())
   @SubscriptionFeature(SubscriptionFeatures.workerHiring)

@@ -573,7 +573,9 @@ export class IdeasService {
       where: { idea_id: ideaId },
       include: {
         viewer: {
-          select: { profile: { select: { display_name: true } } },
+          select: {
+            profile: { select: { display_name: true, show_full_name: true } },
+          },
         },
       },
       orderBy: [{ viewed_at: "desc" }, { id: "desc" }],
@@ -584,7 +586,14 @@ export class IdeasService {
       items: page.items.map((row) => ({
         id: row.id,
         viewerUserId: row.viewer_user_id,
-        displayName: row.viewer.profile?.display_name?.trim() ?? "",
+        // R1 name rule (G5): full name for the team, masked otherwise.
+        displayName: visibleDisplayName(
+          row.viewer.profile?.display_name ?? "",
+          {
+            showFullName: row.viewer.profile?.show_full_name ?? false,
+            hired: row.basis === "MEMBER",
+          },
+        ),
         basis: row.basis,
         viewedAt: row.viewed_at.toISOString(),
       })),

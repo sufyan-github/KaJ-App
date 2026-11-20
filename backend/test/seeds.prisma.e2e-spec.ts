@@ -147,6 +147,25 @@ databaseDescribe("seeds and the reference-data loader", () => {
     });
   }, 60_000);
 
+  it("creates no admin without explicit seed credentials (SEC-1)", async () => {
+    const email = `no-default-${randomUUID().slice(0, 8)}@kaj.local`;
+    const env: Record<string, string> = {
+      ...(process.env as Record<string, string>),
+      DATABASE_URL: url.toString(),
+      NODE_ENV: "test",
+      ADMIN_SEED_EMAIL: email,
+    };
+    delete env.ADMIN_SEED_PASSWORD;
+    delete env.ADMIN_SEED_TOTP_SECRET;
+    const output = execFileSync(join(BIN, "tsx"), ["prisma/seed.ts"], {
+      cwd: BACKEND,
+      env,
+      stdio: "pipe",
+    }).toString();
+    expect(await db.user.count({ where: { email } })).toBe(0);
+    expect(output).not.toMatch(/KajAdminLocal123!|JBSWY3DPEHPK3PXP/);
+  }, 180_000);
+
   it("runs the development and demo seeds twice with the same result", async () => {
     const counts = async () => ({
       users: await db.user.count(),

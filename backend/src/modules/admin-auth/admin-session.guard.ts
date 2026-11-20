@@ -31,7 +31,8 @@ export class AdminSessionGuard implements CanActivate {
       ADMIN_ROLES_KEY,
       [context.getHandler(), context.getClass()],
     );
-    if (required?.length && !required.includes(actor.role)) {
+    // Default deny (R1): a route must name the roles it is for.
+    if (!required?.length || !required.includes(actor.role)) {
       throw adminRoleForbiddenError();
     }
     request.admin = actor;

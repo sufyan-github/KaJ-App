@@ -164,12 +164,13 @@ export class SubscriptionsService {
     return {
       accessActive,
       gateEnabled,
-      // Modules that never need a subscription (owner decision: Learn and
-      // Community are free), and per-module access for the app's paywall.
+      // Modules that never need a subscription (owner decisions: Learn,
+      // Community and Business are free), and per-module access for the
+      // app's paywall.
       freeModules: [...FREE_MODULES],
       moduleAccess: {
         WORK: accessActive,
-        BUSINESS: accessActive,
+        BUSINESS: true,
         LEARN: true,
         COMMUNITY: true,
       },
@@ -400,7 +401,7 @@ export class SubscriptionsService {
     featureKey: string,
     options: { ignoreGlobalGate: boolean },
   ) {
-    // Learn and Community are free whatever the flags or rules say.
+    // Learn, Community and Business are free whatever the flags or rules say.
     if (FREE_MODULES.includes(moduleForFeature(featureKey)))
       return { allowed: true, gated: false };
     if (!options.ignoreGlobalGate && !(await this.gateEnabled()))

@@ -10,6 +10,7 @@ import {
 
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
 import { PrismaService } from "../../infra/prisma/prisma.service";
+import { maskContactDetails } from "../chat/chat-safety";
 import { ideaRelation, isTeam } from "../ideas/idea-visibility";
 import { NotificationsService } from "../notifications/notifications.service";
 import { UserBlocksService } from "../safety/user-blocks.service";
@@ -318,6 +319,9 @@ export class IntroductionsService {
   private serialize(row: Row, viewerUserId: string) {
     const isRequester = row.requester_user_id === viewerUserId;
     const accepted = row.status === IntroductionStatus.ACCEPTED;
+    // API-8: no phone, e-mail or handle reaches the expert before they accept.
+    const screen = (text: string) =>
+      isRequester || accepted ? text : maskContactDetails(text);
     const person = (user: Row["requester"], expert: boolean) => ({
       userId: user.id,
       displayName: visibleDisplayName(user.profile?.display_name ?? "", {
@@ -337,9 +341,12 @@ export class IntroductionsService {
         type: row.context_type,
         // The expert learns which idea or business only once connected.
         id: isRequester || accepted ? row.context_id : null,
-        summary: row.context_summary,
+        summary:
+          row.context_type === IntroductionContextType.LEARNING_GOAL
+            ? screen(row.context_summary)
+            : row.context_summary,
       },
-      message: row.message,
+      message: screen(row.message),
       allowIdeaAccess: row.allow_idea_access,
       ideaAccessGranted: row.idea_access_granted,
       conversationId: accepted ? row.conversation_id : null,

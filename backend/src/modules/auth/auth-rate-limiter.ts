@@ -15,7 +15,9 @@ export interface AuthRateLimitRequest {
     | "certificate-ip"
     | "admin-login-email"
     | "admin-login-ip"
-    | "slots-viewer";
+    | "slots-viewer"
+    // API-3: per-user action limits (common/rate-limit/user-rate-limit.ts).
+    | `user-${string}`;
   windowSeconds: number;
 }
 

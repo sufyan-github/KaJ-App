@@ -19,6 +19,8 @@ databaseDescribe("privacy settings and hardening (real HTTP)", () => {
   let api: HttpHarness;
   let poster: Actor;
   let worker: Actor;
+  // API-6: profiles need a sign-in; "anyone" is a signed-in stranger now.
+  let stranger: Actor;
   let skillId: string;
   let categoryId: string;
   let locationId: string;
@@ -27,7 +29,7 @@ databaseDescribe("privacy settings and hardening (real HTTP)", () => {
   const ids = (body: { data: { items: Array<{ id: string }> } }) =>
     body.data.items.map((item) => item.id);
   const directory = (as?: Actor) =>
-    api.get(`users/workers?skillId=${skillId}`, as).expect(200);
+    api.get(`users/workers?skillId=${skillId}`, as ?? stranger).expect(200);
   const setPrivacy = (as: Actor, body: object) =>
     api.put("profiles/me/privacy", as, body).expect(200);
 
@@ -72,6 +74,7 @@ databaseDescribe("privacy settings and hardening (real HTTP)", () => {
       })
     ).id;
     poster = await api.actor([RoleMode.CUSTOMER]);
+    stranger = await api.actor([RoleMode.CUSTOMER]);
     worker = await api.actor([RoleMode.WORKER], {
       displayName: "Shirin Akter",
       profile: {
@@ -115,7 +118,9 @@ databaseDescribe("privacy settings and hardening (real HTTP)", () => {
   });
 
   it("applies the defaults: masked name, coarse point, photo shown", async () => {
-    const profile = await api.get(`users/${worker.id}/public`).expect(200);
+    const profile = await api
+      .get(`users/${worker.id}/public`, stranger)
+      .expect(200);
     expect(profile.body.data).toMatchObject({
       displayName: "Shirin A.",
       location: { latitude: 24.375, longitude: 88.605 },
@@ -125,14 +130,18 @@ databaseDescribe("privacy settings and hardening (real HTTP)", () => {
 
   it("shows the full name only when the person chose to", async () => {
     await setPrivacy(worker, { showFullName: true });
-    const profile = await api.get(`users/${worker.id}/public`).expect(200);
+    const profile = await api
+      .get(`users/${worker.id}/public`, stranger)
+      .expect(200);
     expect(profile.body.data.displayName).toBe("Shirin Akter");
     await setPrivacy(worker, { showFullName: false });
   });
 
   it("hides the precise area but keeps the area name", async () => {
     await setPrivacy(worker, { hidePreciseArea: true });
-    const profile = await api.get(`users/${worker.id}/public`).expect(200);
+    const profile = await api
+      .get(`users/${worker.id}/public`, stranger)
+      .expect(200);
     expect(profile.body.data.location).toBeNull();
     expect(profile.body.data.area).not.toBeNull();
     const listed = (await directory()).body.data.items.find(
@@ -178,8 +187,8 @@ databaseDescribe("privacy settings and hardening (real HTTP)", () => {
     expect(listed.photoUrl).toEqual(expect.any(String));
     // Still hidden from anyone else.
     expect(
-      (await api.get(`users/${worker.id}/public`).expect(200)).body.data
-        .photoUrl,
+      (await api.get(`users/${worker.id}/public`, stranger).expect(200)).body
+        .data.photoUrl,
     ).toBeNull();
     await api.db.assignment.delete({ where: { id: assignment.id } });
     await api.db.application.delete({ where: { id: application.id } });
@@ -193,7 +202,7 @@ databaseDescribe("privacy settings and hardening (real HTTP)", () => {
 
     expect(ids((await directory()).body)).not.toContain(worker.id);
     expect(ids((await directory(poster)).body)).not.toContain(worker.id);
-    await api.get(`users/${worker.id}/public`).expect(404);
+    await api.get(`users/${worker.id}/public`, stranger).expect(404);
     const suggested = await api
       .get(`jobs/${jobId}/suggested-workers`, poster)
       .expect(200);

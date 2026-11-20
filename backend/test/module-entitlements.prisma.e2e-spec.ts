@@ -119,10 +119,10 @@ databaseDescribe("module entitlements", () => {
     const me = await api.get("subscriptions/me", actor).expect(200);
     expect(me.body.data).toMatchObject({
       accessActive: false,
-      freeModules: ["LEARN", "COMMUNITY"],
+      freeModules: ["LEARN", "COMMUNITY", "BUSINESS"],
       moduleAccess: {
         WORK: false,
-        BUSINESS: false,
+        BUSINESS: true,
         LEARN: true,
         COMMUNITY: true,
       },

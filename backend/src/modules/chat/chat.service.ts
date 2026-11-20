@@ -15,6 +15,7 @@ import {
 } from "@prisma/client";
 
 import { CLOCK, Clock } from "../../common/time/clock";
+import { UserRateLimiter } from "../../common/rate-limit/user-rate-limit";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { STORAGE_PORT, StoragePort } from "../../infra/storage/storage.port";
 import { NotificationsService } from "../notifications/notifications.service";
@@ -35,6 +36,7 @@ export class ChatService {
     @Inject(CLOCK) private readonly clock: Clock,
     @Optional() private readonly userBlocks?: UserBlocksService,
     @Optional() private readonly engagementService?: EngagementService,
+    @Optional() private readonly rateLimiter?: UserRateLimiter,
   ) {}
 
   private get blocks() {
@@ -46,7 +48,7 @@ export class ChatService {
   }
 
   async list(userId: string) {
-    const rows = await this.prisma.conversation.findMany({
+    const all = await this.prisma.conversation.findMany({
       where: { deleted_at: null, participants: { some: { user_id: userId } } },
       include: {
         job: { select: { id: true, title: true, status: true } },
@@ -62,6 +64,15 @@ export class ChatService {
       orderBy: { updated_at: "desc" },
     });
     const hidden = new Set(await this.blocks.hiddenFrom(userId));
+    // W6 (D-14): a 1:1 conversation with someone in a block leaves the list
+    // for both sides. Group rooms stay; the blocked person is muted there.
+    const rows = all.filter(
+      (row) =>
+        row.kind === ConversationKind.GROUP ||
+        !row.participants.some(
+          (item) => item.user_id !== userId && hidden.has(item.user_id),
+        ),
+    );
     // Names follow the same rule as the job page: masked until a confirmed
     // hire, unless the person chose to show their full name.
     const hiredWith = await this.engagement.hiredWith(
@@ -276,6 +287,8 @@ export class ChatService {
 
   async send(userId: string, conversationId: string, input: SendMessageDto) {
     const conversation = await this.assertParticipant(userId, conversationId);
+    // API-3: HTTP and socket sends share one per-sender limit.
+    await this.rateLimiter?.consume(userId, "chat-send");
     const group = conversation.kind === ConversationKind.GROUP;
     const other = conversation.participants.find(
       (item) => item.user_id !== userId,

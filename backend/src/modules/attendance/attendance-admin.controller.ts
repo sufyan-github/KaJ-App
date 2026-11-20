@@ -25,9 +25,10 @@ import { AttendanceOverrideDto } from "./dto/attendance.dto";
 export class AttendanceAdminController {
   constructor(private readonly attendance: AttendanceService) {}
 
+  // R1 (A13): attendance overrides are a repair tool, not for SUPPORT.
   @Post(":id/checkin-override")
   @Policy(Policies.public())
-  @AdminRoles(AdminRole.ADMIN, AdminRole.MODERATOR, AdminRole.SUPPORT)
+  @AdminRoles(AdminRole.ADMIN, AdminRole.MODERATOR)
   override(
     @CurrentAdmin() actor: AdminActor,
     @Param("id", new ParseUUIDPipe()) id: string,
@@ -47,9 +48,10 @@ export class AttendanceAdminController {
     );
   }
 
+  // R1 (A13): attendance overrides are a repair tool, not for SUPPORT.
   @Post(":id/checkout-override")
   @Policy(Policies.public())
-  @AdminRoles(AdminRole.ADMIN, AdminRole.MODERATOR, AdminRole.SUPPORT)
+  @AdminRoles(AdminRole.ADMIN, AdminRole.MODERATOR)
   checkoutOverride(
     @CurrentAdmin() actor: AdminActor,
     @Param("id", new ParseUUIDPipe()) id: string,

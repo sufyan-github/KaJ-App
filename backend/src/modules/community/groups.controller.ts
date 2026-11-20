@@ -12,6 +12,7 @@ import {
 import { ApiTags } from "@nestjs/swagger";
 
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { UserRateLimit } from "../../common/rate-limit/user-rate-limit";
 import { Policy } from "../../common/policy/policy.decorator";
 import { Policies } from "../../common/policy/policy.types";
 import { AccessTokenClaims } from "../auth/auth-token.service";
@@ -112,6 +113,7 @@ export class GroupsController {
   }
 
   @Post("community/groups/:id/members")
+  @UserRateLimit("invite")
   @Policy(Policies.authenticated())
   invite(
     @CurrentUser() claims: AccessTokenClaims,
