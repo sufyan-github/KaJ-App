@@ -126,9 +126,9 @@ export class AdminOpsController {
     return this.ops.jobs(query, actor, this.context(request));
   }
 
+  // R1 (A2): a repair tool; SUPPORT reads, it does not repair.
   @Post("jobs/:id/force-transition")
   @Policy(Policies.public())
-  // R1 (A2): a repair tool; SUPPORT reads, it does not repair.
   @AdminRoles(AdminRole.ADMIN, AdminRole.MODERATOR)
   transition(
     @Param("id", new ParseUUIDPipe()) id: string,
@@ -162,9 +162,9 @@ export class AdminOpsController {
     return this.ops.applications(query, actor, this.context(request));
   }
 
+  // R1 (A1): a repair tool; SUPPORT reads, it does not repair.
   @Post("applications/:id/unstick")
   @Policy(Policies.public())
-  // R1 (A1): a repair tool; SUPPORT reads, it does not repair.
   @AdminRoles(AdminRole.ADMIN, AdminRole.MODERATOR)
   unstick(
     @Param("id", new ParseUUIDPipe()) id: string,
