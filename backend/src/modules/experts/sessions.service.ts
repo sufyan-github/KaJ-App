@@ -18,6 +18,7 @@ import {
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { AttendanceLocationDto } from "../attendance/dto/attendance.dto";
+import { ACTIVE_ACCOUNT } from "../safety/account-cascade";
 import { AttendanceService } from "../attendance/attendance.service";
 import { AvailabilityService } from "../availability/availability.service";
 import { ChatService } from "../chat/chat.service";
@@ -789,6 +790,7 @@ export class SessionsService {
         hidden_at: null,
         status: { not: SessionStatus.DRAFT },
         host_user_id: { notIn: hidden },
+        host: ACTIVE_ACCOUNT,
       },
       include,
       orderBy: [{ starts_at: "asc" }, { id: "asc" }],
@@ -1089,6 +1091,8 @@ export class SessionsService {
         status: SessionStatus.SCHEDULED,
         reminder_sent_at: null,
         hidden_at: null,
+        // DB-3: no reminders for a host who is no longer active.
+        host: ACTIVE_ACCOUNT,
         starts_at: { gt: now, lte: new Date(now.getTime() + 60 * MINUTE) },
       },
       include,

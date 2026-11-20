@@ -24,6 +24,7 @@ import { pageArgs, pageResult } from "../../common/api/cursor-page";
 import { withinLocation } from "../../common/location-scope";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { CLOSABLE, endOpenJob, jobNotClosable } from "../jobs/close-job";
+import { ACTIVE_ACCOUNT } from "../safety/account-cascade";
 import { JobStateMachine } from "../jobs/state-machine/job-state.machine";
 import { MentorsService } from "../mentors/mentors.service";
 import { NotificationsService } from "../notifications/notifications.service";
@@ -190,7 +191,9 @@ export class LearningService {
         OR: [{ expires_at: null }, { expires_at: { gt: new Date() } }],
         // W7: full ones and those of a suspended mentor are not offered.
         workers_filled: { lt: this.prisma.job.fields.workers_required },
+        // DB-3: and nothing from a suspended, banned or deleting account.
         poster: {
+          ...ACTIVE_ACCOUNT,
           profile: { mentor_status: { not: MentorStatus.SUSPENDED } },
         },
         participant_terms: query.participantTerms,

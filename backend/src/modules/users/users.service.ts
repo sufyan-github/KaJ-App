@@ -8,6 +8,7 @@ import { Prisma, RoleMode, TrustLevel } from "@prisma/client";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { activateRoleMode } from "./role-modes";
 import { ensureOwnedBusiness } from "../business/business-bootstrap";
+import { cancelHostedSessions } from "../safety/account-cascade";
 import { mentorErrors } from "../mentors/mentor.errors";
 import { UpdatePrivacyDto } from "./dto/update-privacy.dto";
 import { UpdateProfileDto } from "./dto/update-profile.dto";
@@ -191,6 +192,12 @@ export class UsersService {
         data: { fcm_token: null },
       }),
     ]);
+    // DB-3: sessions they host that have not happened yet are cancelled.
+    await cancelHostedSessions(
+      this.prisma,
+      userId,
+      "The host is no longer available.",
+    );
     return {
       status: "PENDING_DELETION",
       requestedAt: requestedAt.toISOString(),

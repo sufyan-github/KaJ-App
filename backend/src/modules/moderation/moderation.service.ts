@@ -1,4 +1,5 @@
 import { EngagementService } from "../safety/engagement.service";
+import { cancelHostedSessions } from "../safety/account-cascade";
 import { assertMayActOnAccount } from "../admin-auth/staff-accounts";
 import { visibleDisplayName } from "../users/public-profile.projection";
 import {
@@ -706,6 +707,17 @@ export class ModerationService {
         },
       });
     });
+    // DB-3: a suspended or banned host's upcoming sessions are cancelled
+    // (their job and learning listings leave the feeds by account status).
+    if (
+      input.action === ModerationLevel.SUSPEND ||
+      input.action === ModerationLevel.BAN
+    )
+      await cancelHostedSessions(
+        this.prisma,
+        userId,
+        "The host is no longer available.",
+      );
     return {
       id: userId,
       reportId: report?.id ?? null,

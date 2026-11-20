@@ -28,6 +28,7 @@ import {
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { businessErrors } from "../business/business.errors";
+import { ACTIVE_ACCOUNT } from "../safety/account-cascade";
 import { assertNoGenderRestriction } from "./gender-restriction";
 import { isVerifiedBusiness } from "../business/business-labels";
 import { CLOCK, type Clock } from "../../common/time/clock";
@@ -312,6 +313,8 @@ export class JobsService {
         status: JobStatus.APPLICATIONS_OPEN,
         deleted_at: null,
         poster_user_id: { notIn: [userId, ...hidden] },
+        // DB-3: nothing from a suspended, banned or deleting account.
+        poster: ACTIVE_ACCOUNT,
         AND: [
           { OR: [{ expires_at: null }, { expires_at: { gt: this.now() } }] },
           // W13: free-text search on title and description.
