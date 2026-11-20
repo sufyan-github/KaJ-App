@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException } from "@nestjs/common";
+import { ConflictException } from "@nestjs/common";
 import { AssignmentStatus, TrustLevel, UserStatus } from "@prisma/client";
 
 import { PrismaService } from "../src/infra/prisma/prisma.service";
@@ -277,9 +277,12 @@ describe("JobsService application identity gate", () => {
       fixedClock,
     );
 
+    // W15: 409 IDENTITY_REQUIRED with a "verify" action (was a generic 403).
     await expect(
       service.apply("worker-id", job.id, input),
-    ).rejects.toBeInstanceOf(ForbiddenException);
+    ).rejects.toMatchObject({
+      descriptor: expect.objectContaining({ code: "IDENTITY_REQUIRED" }),
+    });
     expect(availability.evaluate).not.toHaveBeenCalled();
   });
 

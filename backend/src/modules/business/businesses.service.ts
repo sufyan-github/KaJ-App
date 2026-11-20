@@ -582,11 +582,10 @@ export class BusinessesService {
     input: SubmitBusinessVerificationDto,
   ) {
     const business = await this.activeBusiness(id);
-    if (
-      business.stage !== BusinessStage.REGISTERED ||
-      !business.trade_licence_no
-    )
-      throw businessErrors.notRegistered();
+    if (business.stage !== BusinessStage.REGISTERED)
+      throw businessErrors.notRegistered("stage");
+    if (!business.trade_licence_no)
+      throw businessErrors.notRegistered("tradeLicenceNo");
     if (business.verification_status === VerificationStatus.APPROVED)
       throw businessErrors.alreadyVerified();
     if (!this.verification)

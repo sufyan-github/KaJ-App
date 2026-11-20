@@ -49,6 +49,14 @@ export class DisputesService {
     });
     if (!assignment || !isParty(assignment, userId))
       throw new NotFoundException();
+    // W15: a second dispute is told so (its job is DISPUTED by then, which
+    // the eligibility check below would call "not eligible").
+    if (
+      await this.prisma.dispute.count({
+        where: { assignment_id: assignmentId },
+      })
+    )
+      throw new ConflictException(disputeRefusal("DISPUTE_EXISTS"));
     // Only the poster's chats with this assignment's worker are evidence. A
     // job has one conversation per applicant, and both parties can read the
     // transcript, so loading every conversation would expose other applicants.

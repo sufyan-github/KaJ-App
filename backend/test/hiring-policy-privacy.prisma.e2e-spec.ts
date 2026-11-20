@@ -168,7 +168,12 @@ databaseDescribe("hiring eligibility and job privacy (real HTTP)", () => {
         `workers/${unverified.id}/booking-requests`,
         poster,
         booking(),
-      ).expect(403);
+      )
+        .expect(409)
+        // W15: worded for the client, not "before applying".
+        .expect((response) =>
+          expect(response.body.error.code).toBe("WORKER_NOT_VERIFIED"),
+        );
     });
 
     it("refuses to book a worker who blocked the poster, without saying so", async () => {

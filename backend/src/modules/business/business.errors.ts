@@ -76,13 +76,16 @@ export const businessErrors = {
       message: "A business can list at most 100 offerings.",
       messageKey: "error.business.offering_limit",
     }),
-  notRegistered: () =>
+  // W15: `field` names what is missing: the stage, or the licence number.
+  notRegistered: (field: "stage" | "tradeLicenceNo" = "stage") =>
     new ConflictException({
       code: "BUSINESS_NOT_REGISTERED",
       message:
-        "Only a registered business with a trade licence number can be verified.",
+        field === "stage"
+          ? "Only a registered business with a trade licence number can be verified."
+          : "Add the trade licence number before asking for verification.",
       messageKey: "error.business.not_registered",
-      field: "stage",
+      field,
     }),
   alreadyVerified: () =>
     new ConflictException({
