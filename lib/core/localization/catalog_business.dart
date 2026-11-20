@@ -234,4 +234,6 @@ const businessTranslations = <String, String>{
   "অনুরোধ পাঠানো যায়নি।": "Could not send the request.",
   "আমার অনুরোধগুলো দেখুন": "See my requests",
   "ফিরিয়ে দেওয়া হয়েছে": "Declined",
+  "ব্যবসা, সদস্য, যাচাই ও সহযোগিতা":
+      "Businesses, members, verification and collaboration",
 };
