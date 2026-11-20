@@ -5,6 +5,7 @@ import {
   IsEnum,
   IsIn,
   IsInt,
+  IsISO8601,
   IsObject,
   IsOptional,
   IsString,
@@ -43,6 +44,45 @@ export class PageQueryDto {
   @IsOptional()
   @IsUUID()
   cursor?: string;
+}
+
+export class AuditLogQueryDto extends PageQueryDto {
+  @IsOptional()
+  @Matches(/^[A-Z0-9_]{2,80}$/u)
+  action?: string;
+
+  @IsOptional()
+  @Matches(/^[A-Z0-9_]{2,80}$/u)
+  entity?: string;
+
+  @IsOptional()
+  @IsUUID()
+  entityId?: string;
+
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === "string" ? value.trim().toLowerCase() : value,
+  )
+  @IsEmail()
+  actorEmail?: string;
+
+  /** Inclusive start, ISO 8601. */
+  @IsOptional()
+  @IsISO8601({ strict: true })
+  from?: string;
+
+  /** Exclusive end, ISO 8601. */
+  @IsOptional()
+  @IsISO8601({ strict: true })
+  to?: string;
+
+  /** Leave out the rows written by opening list views (`*_VIEWED`). */
+  @IsOptional()
+  @Transform(
+    ({ value }: { value: unknown }) => value === true || value === "true",
+  )
+  @IsBoolean()
+  changesOnly?: boolean;
 }
 
 export class DisputeQueryDto extends PageQueryDto {

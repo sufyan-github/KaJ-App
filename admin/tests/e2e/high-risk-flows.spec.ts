@@ -422,3 +422,178 @@ test("notification dry-run previews audience without sending", async ({
   ).toBeVisible();
   expect(dryRunCalls).toBe(1);
 });
+
+test("campaign send asks for confirmation and shows batch progress", async ({
+  page,
+}) => {
+  let sendBody: Record<string, unknown> | null = null;
+  let campaigns: unknown[] = [];
+  await page.route(
+    "**/api/admin/ops/notifications/campaigns?limit=20",
+    (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(envelope({ items: campaigns, nextCursor: null })),
+      }),
+  );
+  await fulfill(page, "notifications/campaign/dry-run", {
+    audienceCount: 250,
+    preview: { title: "KAAJ update", body: "Update" },
+  });
+  await page.route(
+    "**/api/admin/ops/notifications/campaign/send",
+    async (route) => {
+      sendBody = route.request().postDataJSON();
+      campaigns = [
+        {
+          id: "c-1",
+          name: "Pilot update",
+          title: "KAAJ update",
+          audienceCount: 250,
+          sentCount: 100,
+          throttlePerMinute: 100,
+          status: "SENDING",
+          createdBy: "ops@kaj.test",
+          createdAt: new Date().toISOString(),
+          completedAt: null,
+        },
+      ];
+      await route.fulfill({
+        status: 201,
+        contentType: "application/json",
+        body: JSON.stringify(
+          envelope({
+            id: "c-1",
+            audienceCount: 250,
+            sentCount: 100,
+            status: "SENDING",
+          }),
+        ),
+      });
+    },
+  );
+  await page.goto("/");
+  await page.getByRole("button", { name: "Notifications" }).click();
+  await expect(page.getByText("Nothing to show")).toBeVisible();
+  await page.getByRole("button", { name: "Run dry-run" }).click();
+  await page.getByRole("button", { name: "Send campaign" }).click();
+  // Nothing is sent until the operator confirms the audience size.
+  await expect(page.getByRole("dialog")).toContainText("250 people");
+  expect(sendBody).toBeNull();
+  await page.getByRole("button", { name: "Confirm send" }).click();
+  await expect
+    .poll(() => sendBody)
+    .toMatchObject({ name: "Pilot update", throttlePerMinute: 100 });
+  await expect(page.getByText("Sent to 100 of 250")).toBeVisible();
+  await expect(page.getByText("100 / 250")).toBeVisible();
+  await expect(page.getByText("Sending", { exact: true })).toBeVisible();
+});
+
+test("audit trail filters, shows details and exports CSV", async ({ page }) => {
+  const requested: string[] = [];
+  let exported: string | null = null;
+  await page.route("**/api/admin/ops/audit-logs?*", (route) => {
+    requested.push(new URL(route.request().url()).search);
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(
+        envelope({
+          nextCursor: null,
+          items: [
+            {
+              id: "log-1",
+              action: "ADMIN_STAFF_ROLE_CHANGED",
+              entity: "ADMIN_STAFF",
+              entity_id: "staff-2",
+              created_at: "2026-11-19T08:00:00.000Z",
+              ip: "203.0.113.5",
+              ua: "Chrome",
+              before_json: { role: "MODERATOR" },
+              after_json: { role: "SUPPORT" },
+              actor: { email: "ops@kaj.test" },
+            },
+          ],
+        }),
+      ),
+    });
+  });
+  await page.route("**/api/admin/ops/audit-logs/export?*", (route) => {
+    exported = new URL(route.request().url()).search;
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(
+        envelope({
+          filename: "kaaj-audit.csv",
+          rowCount: 1,
+          truncated: false,
+          csv: "created_at,action\r\n",
+        }),
+      ),
+    });
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Audit trail" }).click();
+  await expect(page.getByText("ADMIN_STAFF_ROLE_CHANGED")).toBeVisible();
+  expect(requested[0]).toContain("changesOnly=true");
+  await page.getByLabel("Action").fill("admin_staff_role_changed");
+  await page.getByLabel("Actor email").fill("ops@kaj.test");
+  await page.getByRole("button", { name: "Apply filters" }).click();
+  await expect
+    .poll(() => requested.at(-1))
+    .toContain("action=ADMIN_STAFF_ROLE_CHANGED");
+  expect(requested.at(-1)).toContain("actorEmail=ops%40kaj.test");
+  await page.getByRole("button", { name: "View", exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText('"role": "SUPPORT"');
+  await expect(page.getByRole("dialog")).toContainText("203.0.113.5");
+  await page.getByRole("button", { name: "Close dialog" }).click();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export CSV" }).click();
+  expect((await download).suggestedFilename()).toBe("kaaj-audit.csv");
+  expect(exported).toContain("action=ADMIN_STAFF_ROLE_CHANGED");
+  await expect(page.getByText("Exported 1 rows.")).toBeVisible();
+});
+
+test("users: search and status filter reach the API, load more appends", async ({
+  page,
+}) => {
+  const requested: string[] = [];
+  const user = (id: string, name: string) => ({
+    id,
+    name,
+    phone: "+8801700000000",
+    email: null,
+    roles: ["WORKER"],
+    trustLevel: "PHONE",
+    status: "ACTIVE",
+    moderationLevel: "NONE",
+    reverificationRequired: false,
+  });
+  await page.route("**/api/admin/ops/users?*", (route) => {
+    const url = new URL(route.request().url());
+    requested.push(url.search);
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(
+        envelope(
+          url.searchParams.get("cursor")
+            ? { total: 2, items: [user("u-2", "Second")], nextCursor: null }
+            : { total: 2, items: [user("u-1", "First")], nextCursor: "u-1" },
+        ),
+      ),
+    });
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Users" }).click();
+  await expect(page.getByText("Showing 1 of 2")).toBeVisible();
+  await page.getByRole("button", { name: "Load more" }).click();
+  await expect(page.getByText("Second")).toBeVisible();
+  await page.getByRole("searchbox").fill("rahim");
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await page.getByLabel("Status").selectOption("SUSPENDED");
+  await expect.poll(() => requested.at(-1)).toContain("status=SUSPENDED");
+  expect(requested.at(-1)).toContain("search=rahim");
+});

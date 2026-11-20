@@ -1,15 +1,9 @@
 import "reflect-metadata";
-import { createHash, randomBytes, randomUUID } from "node:crypto";
-
-import { ConfigService } from "@nestjs/config";
 import { AdminRole, RoleMode } from "@prisma/client";
 
 import { RedisService } from "../src/infra/redis/redis.service";
-import {
-  encryptTotpSecret,
-  tokenHash,
-} from "../src/modules/admin-auth/admin-auth.primitives";
 import { AiSettings } from "../src/modules/ai/ai.settings";
+import { adminSession } from "./support/admin-session";
 import { Actor, HttpHarness } from "./support/http-harness";
 
 const databaseDescribe =
@@ -18,47 +12,6 @@ const databaseDescribe =
 const DHAKA_OFFSET_MS = 6 * 3_600_000;
 const dhakaDay = (date: Date) =>
   new Date(date.getTime() + DHAKA_OFFSET_MS).toISOString().slice(0, 10);
-
-/** A staff account with a live admin session (no password + TOTP flow). */
-async function adminSession(api: HttpHarness, role: AdminRole): Promise<Actor> {
-  const config = api.app.get(ConfigService);
-  const secret =
-    config.get<string>("ADMIN_SESSION_SECRET") ||
-    createHash("sha256")
-      .update("kaj:admin-session:local-development-only")
-      .digest("hex");
-  const totpKey =
-    config.get<string>("ADMIN_TOTP_ENCRYPTION_KEY") ||
-    createHash("sha256")
-      .update("kaj:admin-totp:local-development-only")
-      .digest("hex");
-  const user = await api.db.user.create({
-    data: {
-      email: `${role.toLowerCase()}-${randomUUID()}@test.invalid`,
-      is_admin: true,
-      admin_credential: {
-        create: {
-          role,
-          totp_secret_ciphertext: encryptTotpSecret(
-            "JBSWY3DPEHPK3PXP",
-            totpKey,
-          ),
-          totp_confirmed_at: new Date(),
-        },
-      },
-    },
-  });
-  api.userIds.push(user.id);
-  const token = randomBytes(48).toString("base64url");
-  await api.db.adminSession.create({
-    data: {
-      user_id: user.id,
-      token_hash: tokenHash(token, secret),
-      expires_at: new Date(Date.now() + 30 * 60_000),
-    },
-  });
-  return { id: user.id, token };
-}
 
 /** ADMIN view of AI usage: daily cost per feature, top users, outcomes, cap. */
 databaseDescribe("GET /admin/ai/usage", () => {

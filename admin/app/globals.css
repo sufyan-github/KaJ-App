@@ -1046,6 +1046,78 @@ small.overdue {
   color: #b42318;
   font-weight: 600;
 }
+td.empty-row {
+  padding: 22px 12px;
+  text-align: center;
+  color: var(--muted, #6b7280);
+}
+.credentials {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 14px;
+  margin: 12px 0 18px;
+  font-size: 12px;
+}
+.credentials dt {
+  color: var(--muted);
+}
+.credentials dd {
+  margin: 0;
+  word-break: break-all;
+}
+.list-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+.list-toolbar form {
+  display: flex;
+  gap: 6px;
+}
+.list-toolbar input[type="search"] {
+  min-width: 240px;
+}
+.list-toolbar .filter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.load-more {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  font-size: 12px;
+}
+.audit-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+  align-items: end;
+  margin: 0 0 14px;
+}
+.audit-filters .actions {
+  grid-column: 1 / -1;
+}
+.diff-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.diff-columns pre {
+  max-height: 320px;
+  overflow: auto;
+  padding: 10px;
+  background: #f4f6f5;
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 .cap-meter {
   height: 8px;
   max-width: 420px;

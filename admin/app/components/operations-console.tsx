@@ -1,7 +1,6 @@
 "use client";
-import { FormEvent, ReactNode, useCallback, useEffect, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useState } from "react";
 import { adminApi, json } from "@/lib/admin-api";
-import { AiUsage } from "./ai-usage";
 import {
   AdminLocale,
   friendlyAdminError,
@@ -10,56 +9,51 @@ import {
   setActiveAdminLocale,
   tr,
 } from "@/lib/admin-i18n";
+import {
+  useData,
+  State,
+  ReasonDialog,
+  Dialog,
+  Section,
+  Summary,
+  DataTable,
+  Badge,
+  humanize,
+  nextModerationLevel,
+  formatMinutes,
+  formatDate,
+  formatPoisha,
+  formatNumber,
+  formatBasisPoints,
+  Can,
+  RoleProvider,
+  useCan,
+  FilterSelect,
+  ListToolbar,
+  usePagedView,
+} from "./ui";
+import { Staff } from "./views/staff";
+import { AuditTrail } from "./views/audit";
+import { AiUsage } from "./ai-usage";
+import {
+  Attendance,
+  Businesses,
+  Ideas,
+  Introductions,
+  Mentors,
+  Skills,
+} from "./views/directory";
+import {
+  type ConsoleModule,
+  type ModuleKey,
+  visibleModules,
+  visibleTabs,
+} from "@/lib/permissions";
 type Admin = {
   email: string;
   role: string;
   userId: string;
 };
-type ModuleKey =
-  | "dashboard"
-  | "users"
-  | "reports"
-  | "risk"
-  | "jobs"
-  | "applications"
-  | "verification"
-  | "categories"
-  | "locations"
-  | "config"
-  | "flags"
-  | "disputes"
-  | "subscriptions"
-  | "jobPayments"
-  | "notifications"
-  | "analytics"
-  | "learn"
-  | "business"
-  | "community"
-  | "aiUsage"
-  | "audit";
-const modules: Array<[ModuleKey, string, string]> = [
-  ["dashboard", "Dashboard", "Live marketplace health"],
-  ["users", "Users", "Support and moderation"],
-  ["reports", "Safety reports", "Human review and progressive action"],
-  ["risk", "Risk review", "Deterministic signals, human decisions only"],
-  ["jobs", "Jobs", "Lifecycle rescue"],
-  ["applications", "Applications", "Unstick applications"],
-  ["verification", "Verification", "Document review queue"],
-  ["categories", "Categories", "D12 safety policies"],
-  ["locations", "Locations", "Launch service areas"],
-  ["config", "Configuration", "Preview and revert"],
-  ["flags", "Feature flags", "Percentage rollouts"],
-  ["disputes", "Disputes", "Evidence and resolution"],
-  ["subscriptions", "Subscriptions", "Plans and operator access"],
-  ["jobPayments", "Job payments", "Offline cash payment oversight"],
-  ["notifications", "Notifications", "Campaign dry-runs"],
-  ["analytics", "Analytics", "Marketplace health"],
-  ["learn", "Learn", "Mentors, learning and courses"],
-  ["business", "Business", "Sectors, business verification and content"],
-  ["community", "Community", "Groups, sessions, events and ambassadors"],
-  ["aiUsage", "AI usage", "Calls, estimated cost and daily caps"],
-  ["audit", "Audit trail", "Who changed what"],
-];
 export function OperationsConsole({
   admin,
   busy,
@@ -74,24 +68,28 @@ export function OperationsConsole({
   onLocaleChange: (locale: AdminLocale) => void;
 }) {
   setActiveAdminLocale(locale);
-  const [active, setActive] = useState<ModuleKey>("dashboard");
+  const modules = visibleModules(admin.role);
+  const [selected, setActive] = useState<ModuleKey>("dashboard");
+  // A role that cannot open the selected module lands on its first one.
+  const current =
+    modules.find((module) => module.key === selected) ?? modules[0];
+  const active = current?.key;
   return (
-    <main className="ops-shell">
-      <aside>
-        <div className="brand-row">
-          <div className="brand-mark small">{tr("\u0995")}</div>
-          <div>
-            <strong>{tr("KAAJ")}</strong>
-            <span>{tr("OPERATIONS")}</span>
+    <RoleProvider value={admin.role}>
+      <main className="ops-shell">
+        <aside>
+          <div className="brand-row">
+            <div className="brand-mark small">{tr("\u0995")}</div>
+            <div>
+              <strong>{tr("KAAJ")}</strong>
+              <span>{tr("OPERATIONS")}</span>
+            </div>
           </div>
-        </div>
-        <nav>
-          {modules
-            // AI usage is ADMIN only (GET admin/ai/usage).
-            .filter(([key]) => key !== "aiUsage" || admin.role === "ADMIN")
-            .map(([key, name], index) => (
+          <nav>
+            {modules.map(({ key, name }, index) => (
               <button
                 className={active === key ? "active" : ""}
+                aria-current={active === key ? "page" : undefined}
                 key={key}
                 onClick={() => setActive(key)}
               >
@@ -99,60 +97,101 @@ export function OperationsConsole({
                 {tr(name)}
               </button>
             ))}
-        </nav>
-        <div className="account">
-          <div className="avatar">{admin.email[0]?.toUpperCase()}</div>
-          <div>
-            <strong>{admin.email}</strong>
-            <span>{humanize(admin.role)}</span>
-          </div>
-          <button onClick={logout} disabled={busy} aria-label={tr("Sign out")}>
-            {tr("\u2197")}
-          </button>
-        </div>
-      </aside>
-      <section className="workspace">
-        <header>
-          <div>
-            <p className="eyebrow">{tr("MVP OPERATIONS")}</p>
-            <h1>{tr(modules.find(([key]) => key === active)?.[1] ?? "")}</h1>
-            <p>{tr(modules.find(([key]) => key === active)?.[2] ?? "")}</p>
-          </div>
-          <div className="header-actions">
-            <div className="locale-switch" aria-label={tr("Language")}>
-              <button
-                className={locale === "en" ? "active" : ""}
-                onClick={() => onLocaleChange("en")}
-              >
-                EN
-              </button>
-              <button
-                className={locale === "bn" ? "active" : ""}
-                onClick={() => onLocaleChange("bn")}
-              >
-                বাংলা
-              </button>
+          </nav>
+          <div className="account">
+            <div className="avatar">{admin.email[0]?.toUpperCase()}</div>
+            <div>
+              <strong>{admin.email}</strong>
+              <span>{humanize(admin.role)}</span>
             </div>
-            <div className="session-pill">
-              <span />
-              {tr("Secure session \u00B7 30 min")}
-            </div>
+            <button
+              onClick={logout}
+              disabled={busy}
+              aria-label={tr("Sign out")}
+            >
+              {tr("\u2197")}
+            </button>
           </div>
-        </header>
-        <div className="notice compact">
-          <strong>{tr("Every view and action is audited.")}</strong>
-          <span>
-            {tr(
-              "High-risk changes require a reason and explicit confirmation.",
-            )}
-          </span>
-        </div>
-        <ModuleView active={active} />
-      </section>
-    </main>
+        </aside>
+        <section className="workspace">
+          <header>
+            <div>
+              <p className="eyebrow">{tr("MVP OPERATIONS")}</p>
+              <h1>{tr(current?.name ?? "")}</h1>
+              <p>{tr(current?.note ?? "")}</p>
+            </div>
+            <div className="header-actions">
+              <div className="locale-switch" aria-label={tr("Language")}>
+                <button
+                  className={locale === "en" ? "active" : ""}
+                  onClick={() => onLocaleChange("en")}
+                >
+                  EN
+                </button>
+                <button
+                  className={locale === "bn" ? "active" : ""}
+                  onClick={() => onLocaleChange("bn")}
+                >
+                  বাংলা
+                </button>
+              </div>
+              <div className="session-pill">
+                <span />
+                {tr("Secure session \u00B7 30 min")}
+              </div>
+            </div>
+          </header>
+          <div className="notice compact">
+            <strong>{tr("Every view and action is audited.")}</strong>
+            <span>
+              {tr(
+                "High-risk changes require a reason and explicit confirmation.",
+              )}
+            </span>
+          </div>
+          {current ? (
+            <ModuleView
+              active={current.key}
+              module={current}
+              role={admin.role}
+              selfId={admin.userId}
+            />
+          ) : (
+            <div className="panel-state" role="alert">
+              {tr("Your role has no console views. Ask an administrator.")}
+            </div>
+          )}
+        </section>
+      </main>
+    </RoleProvider>
   );
 }
-function ModuleView({ active }: { active: ModuleKey }) {
+function ModuleView({
+  active,
+  module,
+  role,
+  selfId,
+}: {
+  active: ModuleKey;
+  module: ConsoleModule;
+  role: string;
+  selfId: string;
+}) {
+  if (active === "staff") return <Staff selfId={selfId} />;
+  if (active === "aiUsage") return <AiUsage />;
+  if (active === "skills") return <Skills />;
+  if (active === "attendance") return <Attendance />;
+  if (active === "ideas")
+    return (
+      <TabbedModule
+        module={module}
+        role={role}
+        views={{
+          ideas: () => <Ideas />,
+          introductions: () => <Introductions />,
+        }}
+      />
+    );
   if (active === "dashboard") return <Dashboard />;
   if (active === "users") return <Users />;
   if (active === "reports") return <Reports />;
@@ -169,48 +208,47 @@ function ModuleView({ active }: { active: ModuleKey }) {
   if (active === "jobPayments") return <JobPayments />;
   if (active === "notifications") return <Notifications />;
   if (active === "analytics") return <Analytics />;
-  if (active === "learn") return <Learn />;
-  if (active === "business") return <Business />;
-  if (active === "community") return <Community />;
-  if (active === "aiUsage") return <AiUsage />;
-  return <AuditTrail />;
-}
-function useData<T>(path: string) {
-  const [data, setData] = useState<T | null>(null);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      setData(await adminApi<T>(path));
-    } catch (caught) {
-      setError(friendlyAdminError(caught));
-    } finally {
-      setLoading(false);
-    }
-  }, [path]);
-  useEffect(() => void load(), [load]);
-  return { data, error, loading, reload: load };
-}
-function State({
-  loading,
-  error,
-  children,
-}: {
-  loading: boolean;
-  error: string;
-  children: ReactNode;
-}) {
-  if (loading)
-    return <div className="panel-state">{tr("Loading secure data\u2026")}</div>;
-  if (error)
+  if (active === "learn")
     return (
-      <div className="panel-state error" role="alert">
-        {error}
-      </div>
+      <TabbedModule
+        module={module}
+        role={role}
+        views={{
+          mentors: () => <MentorApplications />,
+          opportunities: () => <LearningOpportunities />,
+          courses: () => <Courses />,
+          certificates: () => <CompletionRecords />,
+          mentorList: () => <Mentors />,
+        }}
+      />
     );
-  return <>{children}</>;
+  if (active === "business")
+    return (
+      <TabbedModule
+        module={module}
+        role={role}
+        intro="Reported businesses, offerings, ideas and collaboration requests are handled in Safety reports."
+        views={{
+          verification: () => <Verification kind="BUSINESS" />,
+          directory: () => <Businesses />,
+          sectors: () => <Sectors />,
+        }}
+      />
+    );
+  if (active === "community")
+    return (
+      <TabbedModule
+        module={module}
+        role={role}
+        intro="Reports on groups, sessions and introductions are decided in Safety reports; hiding here is for content found another way."
+        views={{
+          groups: () => <CommunityGroups />,
+          sessions: () => <CommunitySessions />,
+          ambassadors: () => <Ambassadors />,
+        }}
+      />
+    );
+  return <AuditTrail />;
 }
 function Dashboard() {
   const { data, loading, error } = useData<{
@@ -292,6 +330,7 @@ type SubscriptionItem = {
   };
 };
 function Subscriptions() {
+  const [subscriberStatus, setSubscriberStatus] = useState("");
   const overview = useData<{
     subscriptions: Record<string, number>;
     payments: Record<string, number>;
@@ -299,9 +338,9 @@ function Subscriptions() {
     plans: SubscriptionPlanItem[];
     accessRules: SubscriptionRuleItem[];
   }>("subscriptions/overview");
-  const subscribers = useData<{ items: SubscriptionItem[] }>(
-    "subscriptions?limit=100",
-  );
+  const subscribers = usePagedView<SubscriptionItem>("subscriptions", {
+    status: subscriberStatus,
+  });
   const [createPlan, setCreatePlan] = useState(false);
   const [editPlan, setEditPlan] = useState<SubscriptionPlanItem | null>(null);
   const [subscriberAction, setSubscriberAction] = useState<{
@@ -355,12 +394,14 @@ function Subscriptions() {
             count={overview.data?.plans.length ?? 0}
             label={tr("plans")}
           />
-          <button
-            className="primary small-button"
-            onClick={() => setCreatePlan(true)}
-          >
-            {tr("Create plan")}
-          </button>
+          <Can route="POST subscriptions/plans">
+            <button
+              className="primary small-button"
+              onClick={() => setCreatePlan(true)}
+            >
+              {tr("Create plan")}
+            </button>
+          </Can>
         </div>
         <DataTable
           headers={["Plan", "Price", "Duration", "Access", "Status", "Action"]}
@@ -380,9 +421,11 @@ function Subscriptions() {
                 <Badge value={plan.isActive ? "ACTIVE" : "INACTIVE"} />
               </td>
               <td className="actions">
-                <button onClick={() => setEditPlan(plan)}>
-                  {tr("Edit plan")}
-                </button>
+                <Can route="PUT subscriptions/plans/:id">
+                  <button onClick={() => setEditPlan(plan)}>
+                    {tr("Edit plan")}
+                  </button>
+                </Can>
               </td>
             </tr>
           ))}
@@ -411,13 +454,15 @@ function Subscriptions() {
                 <Badge value={rule.isActive ? "ACTIVE" : "INACTIVE"} />
               </td>
               <td className="actions">
-                <button onClick={() => setRuleAction(rule)}>
-                  {tr(
-                    rule.requiresActiveSubscription
-                      ? "Make optional"
-                      : "Require subscription",
-                  )}
-                </button>
+                <Can route="PUT subscriptions/access-rules/:featureKey">
+                  <button onClick={() => setRuleAction(rule)}>
+                    {tr(
+                      rule.requiresActiveSubscription
+                        ? "Make optional"
+                        : "Require subscription",
+                    )}
+                  </button>
+                </Can>
               </td>
             </tr>
           ))}
@@ -427,6 +472,21 @@ function Subscriptions() {
         title="Subscribers"
         note="Subscription payment records are separate from job payments"
       >
+        <ListToolbar>
+          <FilterSelect
+            label="Status"
+            value={subscriberStatus}
+            onChange={setSubscriberStatus}
+            options={[
+              ["", "All"],
+              ["PENDING", "Pending"],
+              ["ACTIVE", "Active"],
+              ["EXPIRED", "Expired"],
+              ["CANCELLED", "Cancelled"],
+              ["INACTIVE", "Inactive"],
+            ]}
+          />
+        </ListToolbar>
         <DataTable
           headers={[
             "Person",
@@ -467,27 +527,32 @@ function Subscriptions() {
               </td>
               <td className="actions">
                 {item.status === "PENDING" && (
-                  <button
-                    onClick={() =>
-                      setSubscriberAction({ item, status: "ACTIVE" })
-                    }
-                  >
-                    {tr("Confirm external payment and activate")}
-                  </button>
+                  <Can route="PUT subscriptions/:id/status">
+                    <button
+                      onClick={() =>
+                        setSubscriberAction({ item, status: "ACTIVE" })
+                      }
+                    >
+                      {tr("Confirm external payment and activate")}
+                    </button>
+                  </Can>
                 )}
                 {(item.status === "ACTIVE" || item.status === "PENDING") && (
-                  <button
-                    onClick={() =>
-                      setSubscriberAction({ item, status: "CANCELLED" })
-                    }
-                  >
-                    {tr("Cancel")}
-                  </button>
+                  <Can route="PUT subscriptions/:id/status">
+                    <button
+                      onClick={() =>
+                        setSubscriberAction({ item, status: "CANCELLED" })
+                      }
+                    >
+                      {tr("Cancel")}
+                    </button>
+                  </Can>
                 )}
               </td>
             </tr>
           ))}
         </DataTable>
+        {subscribers.more}
       </Section>
       {createPlan && (
         <PlanDialog
@@ -813,10 +878,15 @@ function JobPayments() {
   );
 }
 function Users() {
-  const { data, loading, error, reload } = useData<{
-    items: UserItem[];
-    total: number;
-  }>("users?limit=100");
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
+  const { data, loading, error, reload, more } = usePagedView<UserItem>(
+    "users",
+    {
+      search,
+      status,
+    },
+  );
   const [action, setAction] = useState<{
     user: UserItem;
     level?: string;
@@ -824,6 +894,24 @@ function Users() {
   } | null>(null);
   return (
     <State loading={loading} error={error}>
+      <ListToolbar
+        search={search}
+        onSearch={setSearch}
+        placeholder="Search name, phone or email"
+      >
+        <FilterSelect
+          label="Status"
+          value={status}
+          onChange={setStatus}
+          options={[
+            ["", "All"],
+            ["ACTIVE", "Active"],
+            ["SUSPENDED", "Suspended"],
+            ["BANNED", "Banned"],
+            ["PENDING_DELETION", "Pending deletion"],
+          ]}
+        />
+      </ListToolbar>
       <Summary count={data?.total ?? 0} label={tr("users")} />
       <DataTable
         headers={["Person", "Roles", "Trust", "Moderation", "Actions"]}
@@ -846,35 +934,44 @@ function Users() {
               )}
             </td>
             <td className="actions">
-              <button
-                onClick={() =>
-                  setAction({
-                    user,
-                    level: nextModerationLevel(user.moderationLevel),
-                    kind: "moderate",
-                  })
-                }
-                disabled={!nextModerationLevel(user.moderationLevel)}
-              >
-                {tr("Next:")}{" "}
-                {humanize(nextModerationLevel(user.moderationLevel) ?? "final")}
-              </button>
-              <button
-                onClick={() => setAction({ user, kind: "restore" })}
-                disabled={
-                  (user.moderationLevel ?? "NONE") === "NONE" ||
-                  user.reverificationRequired
-                }
-              >
-                {tr("Restore")}
-              </button>
-              <button onClick={() => setAction({ user, kind: "reset" })}>
-                {tr("Reset sessions")}
-              </button>
+              <Can route="POST users/:id/moderation">
+                <button
+                  onClick={() =>
+                    setAction({
+                      user,
+                      level: nextModerationLevel(user.moderationLevel),
+                      kind: "moderate",
+                    })
+                  }
+                  disabled={!nextModerationLevel(user.moderationLevel)}
+                >
+                  {tr("Next:")}{" "}
+                  {humanize(
+                    nextModerationLevel(user.moderationLevel) ?? "final",
+                  )}
+                </button>
+              </Can>
+              <Can route="POST users/:id/moderation/restore">
+                <button
+                  onClick={() => setAction({ user, kind: "restore" })}
+                  disabled={
+                    (user.moderationLevel ?? "NONE") === "NONE" ||
+                    user.reverificationRequired
+                  }
+                >
+                  {tr("Restore")}
+                </button>
+              </Can>
+              <Can route="POST users/:id/reset-sessions">
+                <button onClick={() => setAction({ user, kind: "reset" })}>
+                  {tr("Reset sessions")}
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
       </DataTable>
+      {more}
       {action && (
         <ReasonDialog
           title={
@@ -927,17 +1024,35 @@ type UserItem = {
   reverificationRequired?: boolean;
 };
 function Reports() {
+  const [status, setStatus] = useState("");
   // P3.7: the priority safety queue shows priority 1+ (harassment, stalking,
   // unsafe locations…), highest first, with the time-to-first-action limit.
   const [priorityOnly, setPriorityOnly] = useState(false);
-  const { data, loading, error, reload } = useData<{
-    items: ReportItem[];
-    total: number;
-  }>(priorityOnly ? "reports?limit=100&minPriority=1" : "reports?limit=100");
+  const { data, loading, error, reload, more } = usePagedView<ReportItem>(
+    "reports",
+    {
+      minPriority: priorityOnly ? "1" : undefined,
+      status,
+    },
+  );
   const [selected, setSelected] = useState<ReportItem | null>(null);
   const [restoring, setRestoring] = useState<ReportItem | null>(null);
   return (
     <State loading={loading} error={error}>
+      <ListToolbar>
+        <FilterSelect
+          label="Status"
+          value={status}
+          onChange={setStatus}
+          options={[
+            ["", "All"],
+            ["OPEN", "Open"],
+            ["UNDER_REVIEW", "Under review"],
+            ["ACTIONED", "Actioned"],
+            ["DISMISSED", "Dismissed"],
+          ]}
+        />
+      </ListToolbar>
       <Summary count={data?.total ?? 0} label={tr("safety reports")} />
       <label className="toggle-filter">
         <input
@@ -994,32 +1109,39 @@ function Reports() {
             <td>{item.description}</td>
             <td className="actions">
               {item.status === "OPEN" && (
-                <button
-                  onClick={async () => {
-                    await adminApi(
-                      `reports/${item.id}/review`,
-                      json("POST", {}),
-                    );
-                    await reload();
-                  }}
-                >
-                  {tr("Start review")}
-                </button>
+                <Can route="POST reports/:id/review">
+                  <button
+                    onClick={async () => {
+                      await adminApi(
+                        `reports/${item.id}/review`,
+                        json("POST", {}),
+                      );
+                      await reload();
+                    }}
+                  >
+                    {tr("Start review")}
+                  </button>
+                </Can>
               )}
               {(item.status === "OPEN" || item.status === "UNDER_REVIEW") && (
-                <button onClick={() => setSelected(item)}>
-                  {tr("Decide")}
-                </button>
+                <Can route="POST reports/:id/decision">
+                  <button onClick={() => setSelected(item)}>
+                    {tr("Decide")}
+                  </button>
+                </Can>
               )}
               {item.content?.status === "HIDDEN" && (
-                <button onClick={() => setRestoring(item)}>
-                  {tr("Restore content")}
-                </button>
+                <Can route="POST content/:targetType/:id/restore">
+                  <button onClick={() => setRestoring(item)}>
+                    {tr("Restore content")}
+                  </button>
+                </Can>
               )}
             </td>
           </tr>
         ))}
       </DataTable>
+      {more}
       {restoring && (
         <ReasonDialog
           title={tr("Restore hidden content")}
@@ -1087,20 +1209,38 @@ type ReportItem = {
   } | null;
 };
 function RiskReview() {
-  const { data, loading, error, reload } = useData<{
-    items: RiskItem[];
-    total: number;
-    metrics: {
-      adjudicatedCount: number;
-      observedFalsePositiveRateBps: number | null;
-      observedPrecisionBps: number | null;
-    };
-  }>("risk/items?limit=100");
+  const [status, setStatus] = useState("");
+  const { data, loading, error, reload, more } = usePagedView<
+    RiskItem,
+    {
+      items: RiskItem[];
+      total: number;
+      metrics: {
+        adjudicatedCount: number;
+        observedFalsePositiveRateBps: number | null;
+        observedPrecisionBps: number | null;
+      };
+    }
+  >("risk/items", { status });
   const [scan, setScan] = useState(false);
   const [selected, setSelected] = useState<RiskItem | null>(null);
   const metrics = data?.metrics;
   return (
     <State loading={loading} error={error}>
+      <ListToolbar>
+        <FilterSelect
+          label="Status"
+          value={status}
+          onChange={setStatus}
+          options={[
+            ["", "All"],
+            ["OPEN", "Open"],
+            ["UNDER_REVIEW", "Under review"],
+            ["CLEARED", "Cleared"],
+            ["ESCALATED", "Escalated"],
+          ]}
+        />
+      </ListToolbar>
       <div className="metric-grid">
         <article>
           <span>{tr("Queue items")}</span>
@@ -1128,7 +1268,11 @@ function RiskReview() {
             "Escalation sends the case to a separate human moderation decision.",
           )}
         </span>
-        <button onClick={() => setScan(true)}>{tr("Run reviewed scan")}</button>
+        <Can route="POST risk/scan">
+          <button onClick={() => setScan(true)}>
+            {tr("Run reviewed scan")}
+          </button>
+        </Can>
       </div>
       <DataTable headers={["Account", "Risk", "Signals", "Status", "Actions"]}>
         {(data?.items ?? []).map((item) => (
@@ -1166,27 +1310,32 @@ function RiskReview() {
             </td>
             <td className="actions">
               {item.status === "OPEN" && (
-                <button
-                  onClick={async () => {
-                    await adminApi(
-                      `risk/items/${item.id}/review`,
-                      json("POST", {}),
-                    );
-                    await reload();
-                  }}
-                >
-                  {tr("Start review")}
-                </button>
+                <Can route="POST risk/items/:id/review">
+                  <button
+                    onClick={async () => {
+                      await adminApi(
+                        `risk/items/${item.id}/review`,
+                        json("POST", {}),
+                      );
+                      await reload();
+                    }}
+                  >
+                    {tr("Start review")}
+                  </button>
+                </Can>
               )}
               {(item.status === "OPEN" || item.status === "UNDER_REVIEW") && (
-                <button onClick={() => setSelected(item)}>
-                  {tr("Decide")}
-                </button>
+                <Can route="POST risk/items/:id/decision">
+                  <button onClick={() => setSelected(item)}>
+                    {tr("Decide")}
+                  </button>
+                </Can>
               )}
             </td>
           </tr>
         ))}
       </DataTable>
+      {more}
       {scan && (
         <ReasonDialog
           title={tr("Run deterministic risk scan")}
@@ -1446,14 +1595,33 @@ function ReportDecisionDialog({
   );
 }
 function Jobs() {
-  const { data, loading, error, reload } = useData<{
-    items: JobItem[];
-    total: number;
-  }>("jobs?limit=100");
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
+  const { data, loading, error, reload, more } = usePagedView<JobItem>("jobs", {
+    search,
+    status,
+  });
   const [selected, setSelected] = useState<JobItem | null>(null);
   const [target, setTarget] = useState("SUSPENDED");
   return (
     <State loading={loading} error={error}>
+      <ListToolbar
+        search={search}
+        onSearch={setSearch}
+        placeholder="Search job title"
+      >
+        <FilterSelect
+          label="Status"
+          value={status}
+          onChange={setStatus}
+          options={[
+            ["", "All"],
+            ...JOB_STATUSES.map(
+              (value) => [value, humanize(value)] as [string, string],
+            ),
+          ]}
+        />
+      </ListToolbar>
       <Summary count={data?.total ?? 0} label={tr("jobs")} />
       <DataTable headers={["Job", "Poster", "Status", "Activity", "Actions"]}>
         {(data?.items ?? []).map((job) => (
@@ -1471,33 +1639,38 @@ function Jobs() {
               {job.assignmentsCount} {tr("assignments")}
             </td>
             <td className="actions">
-              <button
-                onClick={() => {
-                  setTarget(targetsFor(job)[0] ?? "SUSPENDED");
-                  setSelected(job);
-                }}
-              >
-                {tr("Force transition")}
-              </button>
-              <button
-                onClick={async () => {
-                  await adminApi(
-                    `jobs/${job.id}/feature`,
-                    json("POST", {
-                      isFeatured: !job.isFeatured,
-                      reason:
-                        "Operations review changed marketplace featuring.",
-                    }),
-                  );
-                  await reload();
-                }}
-              >
-                {tr(job.isFeatured ? "Unfeature" : "Feature")}
-              </button>
+              <Can route="POST jobs/:id/force-transition">
+                <button
+                  onClick={() => {
+                    setTarget(targetsFor(job)[0] ?? "SUSPENDED");
+                    setSelected(job);
+                  }}
+                >
+                  {tr("Force transition")}
+                </button>
+              </Can>
+              <Can route="POST jobs/:id/feature">
+                <button
+                  onClick={async () => {
+                    await adminApi(
+                      `jobs/${job.id}/feature`,
+                      json("POST", {
+                        isFeatured: !job.isFeatured,
+                        reason:
+                          "Operations review changed marketplace featuring.",
+                      }),
+                    );
+                    await reload();
+                  }}
+                >
+                  {tr(job.isFeatured ? "Unfeature" : "Feature")}
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
       </DataTable>
+      {more}
       {selected && (
         <ReasonDialog
           title={`Force transition: ${selected.title}`}
@@ -1564,21 +1737,29 @@ type JobItem = {
   assignmentsCount: number;
 };
 function Applications() {
-  const { data, loading, error, reload } = useData<{
-    items: Array<{
-      id: string;
-      status: string;
-      job: {
-        title: string;
-      };
-      worker: {
-        name: string;
-      };
-    }>;
-  }>("applications?limit=100");
+  const [search, setSearch] = useState("");
+  const { data, loading, error, reload, more } = usePagedView<
+    {
+      items: Array<{
+        id: string;
+        status: string;
+        job: {
+          title: string;
+        };
+        worker: {
+          name: string;
+        };
+      }>;
+    }["items"][number]
+  >("applications", { search });
   const [selected, setSelected] = useState<string | null>(null);
   return (
     <State loading={loading} error={error}>
+      <ListToolbar
+        search={search}
+        onSearch={setSearch}
+        placeholder="Search job or worker"
+      />
       <DataTable headers={["Job", "Worker", "Status", "Action"]}>
         {(data?.items ?? []).map((item) => (
           <tr key={item.id}>
@@ -1588,16 +1769,19 @@ function Applications() {
               <Badge value={item.status} />
             </td>
             <td>
-              <button
-                className="table-button"
-                onClick={() => setSelected(item.id)}
-              >
-                {tr("Unstick")}
-              </button>
+              <Can route="POST applications/:id/unstick">
+                <button
+                  className="table-button"
+                  onClick={() => setSelected(item.id)}
+                >
+                  {tr("Unstick")}
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
       </DataTable>
+      {more}
       {selected && (
         <ReasonDialog
           title={tr("Return application to pending")}
@@ -1617,12 +1801,10 @@ function Applications() {
   );
 }
 function Verification({ kind }: { kind?: string } = {}) {
-  const { data, loading, error, reload } = useData<{
-    items: VerificationItem[];
-  }>(
-    kind
-      ? `verification-requests?kind=${kind}&limit=100`
-      : "verification-requests?limit=100",
+  const [status, setStatus] = useState("");
+  const { data, loading, error, reload, more } = usePagedView<VerificationItem>(
+    "verification-requests",
+    { kind, status },
   );
   const [decision, setDecision] = useState<{
     item: VerificationItem;
@@ -1635,6 +1817,19 @@ function Verification({ kind }: { kind?: string } = {}) {
   } | null>(null);
   return (
     <State loading={loading} error={error}>
+      <ListToolbar>
+        <FilterSelect
+          label="Status"
+          value={status}
+          onChange={setStatus}
+          options={[
+            ["", "Needs a decision"],
+            ["APPROVED", "Approved"],
+            ["REJECTED", "Rejected"],
+            ["EXPIRED", "Expired"],
+          ]}
+        />
+      </ListToolbar>
       <DataTable
         headers={["Person", "Kind", "Documents", "Status", "Decision"]}
       >
@@ -1655,16 +1850,18 @@ function Verification({ kind }: { kind?: string } = {}) {
             <td>{humanize(item.kind)}</td>
             <td className="actions">
               {item.documents.map((document) => (
-                <button
-                  key={document.id}
-                  onClick={async () =>
-                    setDocumentView(
-                      await adminApi(`verification-documents/${document.id}`),
-                    )
-                  }
-                >
-                  {tr("View")} {humanize(document.kind)}
-                </button>
+                <Can route="GET verification-documents/:id">
+                  <button
+                    key={document.id}
+                    onClick={async () =>
+                      setDocumentView(
+                        await adminApi(`verification-documents/${document.id}`),
+                      )
+                    }
+                  >
+                    {tr("View")} {humanize(document.kind)}
+                  </button>
+                </Can>
               ))}
               {!item.documents.length && tr("None")}
             </td>
@@ -1672,16 +1869,25 @@ function Verification({ kind }: { kind?: string } = {}) {
               <Badge value={item.status} />
             </td>
             <td className="actions">
-              <button onClick={() => setDecision({ item, status: "APPROVED" })}>
-                {tr("Approve")}
-              </button>
-              <button onClick={() => setDecision({ item, status: "REJECTED" })}>
-                {tr("Reject")}
-              </button>
+              <Can route="POST verification-requests/:id/decision">
+                <button
+                  onClick={() => setDecision({ item, status: "APPROVED" })}
+                >
+                  {tr("Approve")}
+                </button>
+              </Can>
+              <Can route="POST verification-requests/:id/decision">
+                <button
+                  onClick={() => setDecision({ item, status: "REJECTED" })}
+                >
+                  {tr("Reject")}
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
       </DataTable>
+      {more}
       {decision && (
         <ReasonDialog
           title={`${humanize(decision.status)} ${decision.item.kind} verification`}
@@ -1746,19 +1952,27 @@ type VerificationItem = {
     mime: string;
   }>;
 };
-type LearnTab = "mentors" | "opportunities" | "courses" | "certificates";
-const LEARN_TABS: Array<[LearnTab, string]> = [
-  ["mentors", "Mentor applications"],
-  ["opportunities", "Learning opportunities"],
-  ["courses", "Courses"],
-  ["certificates", "Completion records"],
-];
-function Learn() {
-  const [tab, setTab] = useState<LearnTab>("mentors");
+/** Tabs the role can open; a tab it cannot open is not shown. */
+function TabbedModule({
+  module,
+  role,
+  intro,
+  views,
+}: {
+  module: ConsoleModule;
+  role: string;
+  intro?: string;
+  views: Record<string, () => ReactNode>;
+}) {
+  const tabs = visibleTabs(role, module);
+  const [selected, setTab] = useState(tabs[0]?.key ?? "");
+  const tab = tabs.some((item) => item.key === selected)
+    ? selected
+    : (tabs[0]?.key ?? "");
   return (
     <>
-      <div className="learn-tabs" role="tablist" aria-label={tr("Learn")}>
-        {LEARN_TABS.map(([key, label]) => (
+      <div className="learn-tabs" role="tablist" aria-label={tr(module.name)}>
+        {tabs.map(({ key, name }) => (
           <button
             key={key}
             role="tab"
@@ -1766,49 +1980,12 @@ function Learn() {
             className={tab === key ? "active" : ""}
             onClick={() => setTab(key)}
           >
-            {tr(label)}
+            {tr(name)}
           </button>
         ))}
       </div>
-      {tab === "mentors" && <MentorApplications />}
-      {tab === "opportunities" && <LearningOpportunities />}
-      {tab === "courses" && <Courses />}
-      {tab === "certificates" && <CompletionRecords />}
-    </>
-  );
-}
-type CommunityTab = "groups" | "sessions" | "ambassadors";
-const COMMUNITY_TABS: Array<[CommunityTab, string]> = [
-  ["groups", "Groups"],
-  ["sessions", "Sessions and events"],
-  ["ambassadors", "Ambassadors"],
-];
-/** P3 admin: community groups, sessions/events and ambassadors. */
-function Community() {
-  const [tab, setTab] = useState<CommunityTab>("groups");
-  return (
-    <>
-      <div className="learn-tabs" role="tablist" aria-label={tr("Community")}>
-        {COMMUNITY_TABS.map(([key, label]) => (
-          <button
-            key={key}
-            role="tab"
-            aria-selected={tab === key}
-            className={tab === key ? "active" : ""}
-            onClick={() => setTab(key)}
-          >
-            {tr(label)}
-          </button>
-        ))}
-      </div>
-      <p className="muted">
-        {tr(
-          "Reports on groups, sessions and introductions are decided in Safety reports; hiding here is for content found another way.",
-        )}
-      </p>
-      {tab === "groups" && <CommunityGroups />}
-      {tab === "sessions" && <CommunitySessions />}
-      {tab === "ambassadors" && <Ambassadors />}
+      {intro && <p className="muted">{tr(intro)}</p>}
+      <div role="tabpanel">{views[tab]?.()}</div>
     </>
   );
 }
@@ -1850,12 +2027,29 @@ function useContentToggle(reload: () => Promise<void>) {
   return { setTarget, dialog };
 }
 function CommunityGroups() {
-  const { data, loading, error, reload } = useData<{
-    items: CommunityGroupItem[];
-  }>("community/groups?limit=100");
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
+  const { data, loading, error, reload, more } =
+    usePagedView<CommunityGroupItem>("community/groups", { q: search, status });
   const { setTarget, dialog } = useContentToggle(reload);
   return (
     <State loading={loading} error={error}>
+      <ListToolbar
+        search={search}
+        onSearch={setSearch}
+        placeholder="Search groups"
+      >
+        <FilterSelect
+          label="Status"
+          value={status}
+          onChange={setStatus}
+          options={[
+            ["", "All"],
+            ["ACTIVE", "Active"],
+            ["HIDDEN", "Hidden"],
+          ]}
+        />
+      </ListToolbar>
       <DataTable
         headers={[
           "Group",
@@ -1891,23 +2085,26 @@ function CommunityGroups() {
               {item.hiddenReason && <small>{item.hiddenReason}</small>}
             </td>
             <td className="actions">
-              <button
-                onClick={() =>
-                  setTarget({
-                    type: "GROUP",
-                    id: item.id,
-                    hide: item.status !== "HIDDEN",
-                  })
-                }
-              >
-                {item.status === "HIDDEN"
-                  ? tr("Restore content")
-                  : tr("Hide content")}
-              </button>
+              <Can route="POST content/:targetType/:id/hide">
+                <button
+                  onClick={() =>
+                    setTarget({
+                      type: "GROUP",
+                      id: item.id,
+                      hide: item.status !== "HIDDEN",
+                    })
+                  }
+                >
+                  {item.status === "HIDDEN"
+                    ? tr("Restore content")
+                    : tr("Hide content")}
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
       </DataTable>
+      {more}
       {dialog}
     </State>
   );
@@ -1931,12 +2128,28 @@ type AdminSessionItem = {
   hiddenReason: string | null;
 };
 function CommunitySessions() {
-  const { data, loading, error, reload } = useData<{
-    items: AdminSessionItem[];
-  }>("sessions?limit=100");
+  const [kind, setKind] = useState("");
+  const { data, loading, error, reload, more } = usePagedView<AdminSessionItem>(
+    "sessions",
+    { kind },
+  );
   const { setTarget, dialog } = useContentToggle(reload);
   return (
     <State loading={loading} error={error}>
+      <ListToolbar>
+        <FilterSelect
+          label="Kind"
+          value={kind}
+          onChange={setKind}
+          options={[
+            ["", "All"],
+            ["CONSULTATION", "Consultation"],
+            ["GROUP_DISCUSSION", "Group discussion"],
+            ["WORKSHOP", "Workshop"],
+            ["EVENT", "Event"],
+          ]}
+        />
+      </ListToolbar>
       <DataTable
         headers={["Session", "Host", "Places", "Reports", "Status", "Actions"]}
       >
@@ -1965,23 +2178,26 @@ function CommunitySessions() {
               {item.visibility === "HIDDEN" && <Badge value="HIDDEN" />}
             </td>
             <td className="actions">
-              <button
-                onClick={() =>
-                  setTarget({
-                    type: "SESSION",
-                    id: item.id,
-                    hide: item.visibility !== "HIDDEN",
-                  })
-                }
-              >
-                {item.visibility === "HIDDEN"
-                  ? tr("Restore content")
-                  : tr("Hide content")}
-              </button>
+              <Can route="POST content/:targetType/:id/hide">
+                <button
+                  onClick={() =>
+                    setTarget({
+                      type: "SESSION",
+                      id: item.id,
+                      hide: item.visibility !== "HIDDEN",
+                    })
+                  }
+                >
+                  {item.visibility === "HIDDEN"
+                    ? tr("Restore content")
+                    : tr("Hide content")}
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
       </DataTable>
+      {more}
       {dialog}
     </State>
   );
@@ -2010,13 +2226,15 @@ function Ambassadors() {
               </td>
               <td>{group.name}</td>
               <td className="actions">
-                <button
-                  onClick={() =>
-                    setRemoving({ userId: item.userId, groupId: group.id })
-                  }
-                >
-                  {tr("Remove ambassador role")}
-                </button>
+                <Can route="POST community/groups/:id/members/:userId/role">
+                  <button
+                    onClick={() =>
+                      setRemoving({ userId: item.userId, groupId: group.id })
+                    }
+                  >
+                    {tr("Remove ambassador role")}
+                  </button>
+                </Can>
               </td>
             </tr>
           )),
@@ -2040,39 +2258,6 @@ function Ambassadors() {
     </State>
   );
 }
-type BusinessTab = "verification" | "sectors";
-const BUSINESS_TABS: Array<[BusinessTab, string]> = [
-  ["verification", "Business verification"],
-  ["sectors", "Sectors"],
-];
-/** P2 admin: business verification queue and the sector taxonomy. */
-function Business() {
-  const [tab, setTab] = useState<BusinessTab>("verification");
-  return (
-    <>
-      <div className="learn-tabs" role="tablist" aria-label={tr("Business")}>
-        {BUSINESS_TABS.map(([key, label]) => (
-          <button
-            key={key}
-            role="tab"
-            aria-selected={tab === key}
-            className={tab === key ? "active" : ""}
-            onClick={() => setTab(key)}
-          >
-            {tr(label)}
-          </button>
-        ))}
-      </div>
-      <p className="muted">
-        {tr(
-          "Reported businesses, offerings, ideas and collaboration requests are handled in Safety reports.",
-        )}
-      </p>
-      {tab === "verification" && <Verification kind="BUSINESS" />}
-      {tab === "sectors" && <Sectors />}
-    </>
-  );
-}
 type SectorItem = {
   id: string;
   parentId: string | null;
@@ -2094,7 +2279,9 @@ function Sectors() {
   return (
     <State loading={loading} error={error}>
       <div className="dialog-actions">
-        <button onClick={() => setEditing("new")}>{tr("Add sector")}</button>
+        <Can route="POST business-categories">
+          <button onClick={() => setEditing("new")}>{tr("Add sector")}</button>
+        </Can>
       </div>
       <DataTable headers={["Sector", "Parent", "Order", "Active", "Actions"]}>
         {items.map((item) => (
@@ -2117,7 +2304,9 @@ function Sectors() {
               <Badge value={item.isActive ? "ACTIVE" : "INACTIVE"} />
             </td>
             <td className="actions">
-              <button onClick={() => setEditing(item)}>{tr("Edit")}</button>
+              <Can route="PUT business-categories/:id">
+                <button onClick={() => setEditing(item)}>{tr("Edit")}</button>
+              </Can>
             </td>
           </tr>
         ))}
@@ -2273,9 +2462,10 @@ function skillName(skill: { nameEn: string; nameBn: string }) {
   return getActiveAdminLocale() === "bn" ? skill.nameBn : skill.nameEn;
 }
 function MentorApplications() {
-  const { data, loading, error, reload } = useData<{
-    items: MentorApplicationItem[];
-  }>("verification-requests?kind=MENTOR&limit=100");
+  const { data, loading, error, reload, more } =
+    usePagedView<MentorApplicationItem>("verification-requests", {
+      kind: "MENTOR",
+    });
   const [decision, setDecision] = useState<{
     item: MentorApplicationItem;
     status: "APPROVED" | "REJECTED";
@@ -2307,30 +2497,41 @@ function MentorApplications() {
             </td>
             <td className="actions">
               {item.documents.map((document) => (
-                <button
-                  key={document.id}
-                  onClick={async () => {
-                    const view = await adminApi<{ downloadUrl: string }>(
-                      `verification-documents/${document.id}`,
-                    );
-                    window.open(view.downloadUrl, "_blank", "noopener");
-                  }}
-                >
-                  {tr("View")} {humanize(document.kind)}
-                </button>
+                <Can route="GET verification-documents/:id">
+                  <button
+                    key={document.id}
+                    onClick={async () => {
+                      const view = await adminApi<{ downloadUrl: string }>(
+                        `verification-documents/${document.id}`,
+                      );
+                      window.open(view.downloadUrl, "_blank", "noopener");
+                    }}
+                  >
+                    {tr("View")} {humanize(document.kind)}
+                  </button>
+                </Can>
               ))}
             </td>
             <td className="actions">
-              <button onClick={() => setDecision({ item, status: "APPROVED" })}>
-                {tr("Approve")}
-              </button>
-              <button onClick={() => setDecision({ item, status: "REJECTED" })}>
-                {tr("Reject")}
-              </button>
+              <Can route="POST verification-requests/:id/decision">
+                <button
+                  onClick={() => setDecision({ item, status: "APPROVED" })}
+                >
+                  {tr("Approve")}
+                </button>
+              </Can>
+              <Can route="POST verification-requests/:id/decision">
+                <button
+                  onClick={() => setDecision({ item, status: "REJECTED" })}
+                >
+                  {tr("Reject")}
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
       </DataTable>
+      {more}
       {decision && (
         <ReasonDialog
           title={`${humanize(decision.status)} ${decision.item.kind} verification`}
@@ -2362,9 +2563,11 @@ type OpportunityItem = {
   actions: Array<"suspend" | "restore">;
 };
 function LearningOpportunities() {
-  const { data, loading, error, reload } = useData<{
-    items: OpportunityItem[];
-  }>("learning-opportunities?limit=100");
+  const [search, setSearch] = useState("");
+  const { data, loading, error, reload, more } = usePagedView<OpportunityItem>(
+    "learning-opportunities",
+    { search },
+  );
   const [pending, setPending] = useState<{
     title: string;
     path: string;
@@ -2372,6 +2575,11 @@ function LearningOpportunities() {
   } | null>(null);
   return (
     <State loading={loading} error={error}>
+      <ListToolbar
+        search={search}
+        onSearch={setSearch}
+        placeholder="Search opportunities"
+      />
       <Summary count={data?.items.length ?? 0} label="learning opportunities" />
       <DataTable
         headers={[
@@ -2409,49 +2617,56 @@ function LearningOpportunities() {
             </td>
             <td className="actions">
               {item.actions.map((action) => (
-                <button
-                  key={action}
-                  onClick={() =>
-                    setPending({
-                      title: `${tr(humanize(action))}: ${item.title}`,
-                      path: `learning-opportunities/${item.id}/${action}`,
-                      label: humanize(action),
-                    })
-                  }
-                >
-                  {tr(humanize(action))}
-                </button>
+                <Can route="POST learning-opportunities/:id/suspend">
+                  <button
+                    key={action}
+                    onClick={() =>
+                      setPending({
+                        title: `${tr(humanize(action))}: ${item.title}`,
+                        path: `learning-opportunities/${item.id}/${action}`,
+                        label: humanize(action),
+                      })
+                    }
+                  >
+                    {tr(humanize(action))}
+                  </button>
+                </Can>
               ))}
               {item.mentor.mentorStatus === "APPROVED" && (
-                <button
-                  onClick={() =>
-                    setPending({
-                      title: `${tr("Suspend mentor")}: ${item.mentor.name}`,
-                      path: `mentors/${item.mentor.userId}/suspend`,
-                      label: "Suspend mentor",
-                    })
-                  }
-                >
-                  {tr("Suspend mentor")}
-                </button>
+                <Can route="POST mentors/:userId/suspend">
+                  <button
+                    onClick={() =>
+                      setPending({
+                        title: `${tr("Suspend mentor")}: ${item.mentor.name}`,
+                        path: `mentors/${item.mentor.userId}/suspend`,
+                        label: "Suspend mentor",
+                      })
+                    }
+                  >
+                    {tr("Suspend mentor")}
+                  </button>
+                </Can>
               )}
               {item.mentor.mentorStatus === "SUSPENDED" && (
-                <button
-                  onClick={() =>
-                    setPending({
-                      title: `${tr("Reinstate mentor")}: ${item.mentor.name}`,
-                      path: `mentors/${item.mentor.userId}/reinstate`,
-                      label: "Reinstate mentor",
-                    })
-                  }
-                >
-                  {tr("Reinstate mentor")}
-                </button>
+                <Can route="POST mentors/:userId/reinstate">
+                  <button
+                    onClick={() =>
+                      setPending({
+                        title: `${tr("Reinstate mentor")}: ${item.mentor.name}`,
+                        path: `mentors/${item.mentor.userId}/reinstate`,
+                        label: "Reinstate mentor",
+                      })
+                    }
+                  >
+                    {tr("Reinstate mentor")}
+                  </button>
+                </Can>
               )}
             </td>
           </tr>
         ))}
       </DataTable>
+      {more}
       {pending && (
         <ReasonDialog
           title={pending.title}
@@ -2509,17 +2724,19 @@ function Courses() {
   return (
     <State loading={loading} error={error}>
       <div className="actions">
-        <button
-          className="primary"
-          onClick={() =>
-            setEditing({
-              id: null,
-              text: JSON.stringify(NEW_COURSE_TEMPLATE, null, 2),
-            })
-          }
-        >
-          {tr("New course")}
-        </button>
+        <Can route="POST training/courses">
+          <button
+            className="primary"
+            onClick={() =>
+              setEditing({
+                id: null,
+                text: JSON.stringify(NEW_COURSE_TEMPLATE, null, 2),
+              })
+            }
+          >
+            {tr("New course")}
+          </button>
+        </Can>
         {message && <span role="status">{message}</span>}
       </div>
       <DataTable
@@ -2542,26 +2759,32 @@ function Courses() {
               <Badge value={item.isPublished ? "PUBLISHED" : "DRAFT"} />
             </td>
             <td className="actions">
-              <button
-                onClick={async () => {
-                  const course = await adminApi<{ document: unknown }>(
-                    `training/courses/${item.id}`,
-                  );
-                  setEditing({
-                    id: item.id,
-                    text: JSON.stringify(course.document, null, 2),
-                  });
-                }}
+              <Can
+                route={["GET training/courses/:id", "PUT training/courses/:id"]}
               >
-                {tr("Edit")}
-              </button>
-              <button
-                onClick={() =>
-                  setPublishing({ item, publish: !item.isPublished })
-                }
-              >
-                {tr(item.isPublished ? "Unpublish" : "Publish")}
-              </button>
+                <button
+                  onClick={async () => {
+                    const course = await adminApi<{ document: unknown }>(
+                      `training/courses/${item.id}`,
+                    );
+                    setEditing({
+                      id: item.id,
+                      text: JSON.stringify(course.document, null, 2),
+                    });
+                  }}
+                >
+                  {tr("Edit")}
+                </button>
+              </Can>
+              <Can route="POST training/courses/:id/publish">
+                <button
+                  onClick={() =>
+                    setPublishing({ item, publish: !item.isPublished })
+                  }
+                >
+                  {tr(item.isPublished ? "Unpublish" : "Publish")}
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
@@ -2685,12 +2908,19 @@ type CertificateItem = {
   status: string;
 };
 function CompletionRecords() {
-  const { data, loading, error, reload } = useData<{
-    items: CertificateItem[];
-  }>("certificates?limit=100");
+  const [search, setSearch] = useState("");
+  const { data, loading, error, reload, more } = usePagedView<CertificateItem>(
+    "certificates",
+    { search },
+  );
   const [revoking, setRevoking] = useState<CertificateItem | null>(null);
   return (
     <State loading={loading} error={error}>
+      <ListToolbar
+        search={search}
+        onSearch={setSearch}
+        placeholder="Search code or holder"
+      />
       <DataTable headers={["Code", "Holder", "Record", "Status", "Actions"]}>
         {(data?.items ?? []).map((item) => (
           <tr key={item.id}>
@@ -2712,14 +2942,17 @@ function CompletionRecords() {
             </td>
             <td className="actions">
               {item.status === "VALID" && (
-                <button onClick={() => setRevoking(item)}>
-                  {tr("Revoke")}
-                </button>
+                <Can route="POST certificates/:id/revoke">
+                  <button onClick={() => setRevoking(item)}>
+                    {tr("Revoke")}
+                  </button>
+                </Can>
               )}
             </td>
           </tr>
         ))}
       </DataTable>
+      {more}
       {revoking && (
         <ReasonDialog
           title={`${tr("Revoke")}: ${revoking.code}`}
@@ -2771,39 +3004,49 @@ function Categories() {
               {tr("+")}
             </td>
             <td className="toggle-list">
-              <button
-                className={item.requiresManualApproval ? "on" : ""}
-                onClick={() => toggle(item, "requiresManualApproval")}
-              >
-                {tr("Manual approval")}
-              </button>
-              <button
-                className={item.requiresIdentity ? "on" : ""}
-                onClick={() => toggle(item, "requiresIdentity")}
-              >
-                {tr("Identity")}
-              </button>
-              <button
-                className={item.requiresCertificate ? "on" : ""}
-                onClick={() => toggle(item, "requiresCertificate")}
-              >
-                {tr("Certificate")}
-              </button>
-              <button
-                className={item.unsafeForStudents ? "on danger" : ""}
-                onClick={() => toggle(item, "unsafeForStudents")}
-              >
-                {tr("Student restriction")}
-              </button>
+              <Can route="PUT categories/:id">
+                <button
+                  className={item.requiresManualApproval ? "on" : ""}
+                  onClick={() => toggle(item, "requiresManualApproval")}
+                >
+                  {tr("Manual approval")}
+                </button>
+              </Can>
+              <Can route="PUT categories/:id">
+                <button
+                  className={item.requiresIdentity ? "on" : ""}
+                  onClick={() => toggle(item, "requiresIdentity")}
+                >
+                  {tr("Identity")}
+                </button>
+              </Can>
+              <Can route="PUT categories/:id">
+                <button
+                  className={item.requiresCertificate ? "on" : ""}
+                  onClick={() => toggle(item, "requiresCertificate")}
+                >
+                  {tr("Certificate")}
+                </button>
+              </Can>
+              <Can route="PUT categories/:id">
+                <button
+                  className={item.unsafeForStudents ? "on danger" : ""}
+                  onClick={() => toggle(item, "unsafeForStudents")}
+                >
+                  {tr("Student restriction")}
+                </button>
+              </Can>
             </td>
             <td>
-              <button
-                className={`switch ${item.isActive ? "on" : ""}`}
-                aria-label={`${tr("Toggle")} ${localizedEntityName(item.nameEn, item.nameBn)}`}
-                onClick={() => toggle(item, "isActive")}
-              >
-                <span />
-              </button>
+              <Can route="PUT categories/:id">
+                <button
+                  className={`switch ${item.isActive ? "on" : ""}`}
+                  aria-label={`${tr("Toggle")} ${localizedEntityName(item.nameEn, item.nameBn)}`}
+                  onClick={() => toggle(item, "isActive")}
+                >
+                  <span />
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
@@ -2839,12 +3082,14 @@ function Locations() {
     <State loading={loading} error={error}>
       <div className="toolbar">
         <Summary count={data?.items.length ?? 0} label={tr("locations")} />
-        <button
-          className="primary small-button"
-          onClick={() => setAdding(true)}
-        >
-          {tr("Add location")}
-        </button>
+        <Can route="POST locations">
+          <button
+            className="primary small-button"
+            onClick={() => setAdding(true)}
+          >
+            {tr("Add location")}
+          </button>
+        </Can>
       </div>
       <DataTable headers={["Location", "Type", "Coordinates", "Active"]}>
         {(data?.items ?? []).map((item) => (
@@ -2865,20 +3110,22 @@ function Locations() {
               {tr(",")} {item.lng ?? "—"}
             </td>
             <td>
-              <button
-                className={`switch ${item.isActive ? "on" : ""}`}
-                aria-label={`${tr("Toggle")} ${localizedEntityName(item.nameEn, item.nameBn)}`}
-                onClick={async () => {
-                  const { id: _id, ...body } = item;
-                  await adminApi(
-                    `locations/${item.id}`,
-                    json("PUT", { ...body, isActive: !item.isActive }),
-                  );
-                  await reload();
-                }}
-              >
-                <span />
-              </button>
+              <Can route="PUT locations/:id">
+                <button
+                  className={`switch ${item.isActive ? "on" : ""}`}
+                  aria-label={`${tr("Toggle")} ${localizedEntityName(item.nameEn, item.nameBn)}`}
+                  onClick={async () => {
+                    const { id: _id, ...body } = item;
+                    await adminApi(
+                      `locations/${item.id}`,
+                      json("PUT", { ...body, isActive: !item.isActive }),
+                    );
+                    await reload();
+                  }}
+                >
+                  <span />
+                </button>
+              </Can>
             </td>
           </tr>
         ))}
@@ -3062,11 +3309,15 @@ function Configuration() {
             />
           </label>
           <div className="actions">
-            <button onClick={previewChange}>{tr("Preview diff")}</button>
+            <Can route="POST config/:key/preview">
+              <button onClick={previewChange}>{tr("Preview diff")}</button>
+            </Can>
             {preview && (
-              <button className="primary small-button" onClick={save}>
-                {tr("Confirm change")}
-              </button>
+              <Can route="PUT config/:key">
+                <button className="primary small-button" onClick={save}>
+                  {tr("Confirm change")}
+                </button>
+              </Can>
             )}
           </div>
           {preview && (
@@ -3092,20 +3343,22 @@ function Configuration() {
                   {formatDate(revision.created_at)}
                 </small>
               </div>
-              <button
-                onClick={async () => {
-                  await adminApi(
-                    `config/revisions/${revision.id}/revert`,
-                    json("POST", {
-                      reason:
-                        "Operations rollback after reviewing the revision.",
-                    }),
-                  );
-                  await reload();
-                }}
-              >
-                {tr("Revert")}
-              </button>
+              <Can route="POST config/revisions/:id/revert">
+                <button
+                  onClick={async () => {
+                    await adminApi(
+                      `config/revisions/${revision.id}/revert`,
+                      json("POST", {
+                        reason:
+                          "Operations rollback after reviewing the revision.",
+                      }),
+                    );
+                    await reload();
+                  }}
+                >
+                  {tr("Revert")}
+                </button>
+              </Can>
             </div>
           ))}
         </Section>
@@ -3173,33 +3426,52 @@ function FlagRow({
         {tr("%")}
       </td>
       <td>
-        <button
-          className="table-button"
-          onClick={async () => {
-            await adminApi(
-              `flags/${item.key}`,
-              json("PUT", {
-                isEnabled: enabled,
-                rolloutPercent: rollout,
-                reason: "Confirmed feature rollout adjustment.",
-              }),
-            );
-            await reload();
-          }}
-        >
-          {tr("Save")}
-        </button>
+        <Can route="PUT flags/:key">
+          <button
+            className="table-button"
+            onClick={async () => {
+              await adminApi(
+                `flags/${item.key}`,
+                json("PUT", {
+                  isEnabled: enabled,
+                  rolloutPercent: rollout,
+                  reason: "Confirmed feature rollout adjustment.",
+                }),
+              );
+              await reload();
+            }}
+          >
+            {tr("Save")}
+          </button>
+        </Can>
       </td>
     </tr>
   );
 }
 function Disputes() {
-  const { data, loading, error, reload } = useData<{
-    items: DisputeItem[];
-  }>("disputes?limit=100");
+  const [status, setStatus] = useState("");
+  const { data, loading, error, reload, more } = usePagedView<DisputeItem>(
+    "disputes",
+    { status },
+  );
   const [selected, setSelected] = useState<DisputeItem | null>(null);
   return (
     <State loading={loading} error={error}>
+      <ListToolbar>
+        <FilterSelect
+          label="Status"
+          value={status}
+          onChange={setStatus}
+          options={[
+            ["", "All"],
+            ["OPEN", "Open"],
+            ["UNDER_REVIEW", "Under review"],
+            ["RESOLVED", "Resolved"],
+            ["EVIDENCE", "Evidence"],
+            ["CLOSED", "Closed"],
+          ]}
+        />
+      </ListToolbar>
       <DataTable headers={["Job", "Reason", "Evidence", "Status", "Action"]}>
         {(data?.items ?? []).map((item) => (
           <tr key={item.id}>
@@ -3220,29 +3492,34 @@ function Disputes() {
             </td>
             <td>
               {!item.firstResponseAt && (
+                <Can route="POST disputes/:id/review">
+                  <button
+                    className="table-button"
+                    onClick={async () => {
+                      await adminApi(
+                        `disputes/${item.id}/review`,
+                        json("POST", {}),
+                      );
+                      await reload();
+                    }}
+                  >
+                    {tr("Start review")}
+                  </button>
+                </Can>
+              )}
+              <Can route="POST disputes/:id/resolve">
                 <button
                   className="table-button"
-                  onClick={async () => {
-                    await adminApi(
-                      `disputes/${item.id}/review`,
-                      json("POST", {}),
-                    );
-                    await reload();
-                  }}
+                  onClick={() => setSelected(item)}
                 >
-                  {tr("Start review")}
+                  {tr("Resolve")}
                 </button>
-              )}
-              <button
-                className="table-button"
-                onClick={() => setSelected(item)}
-              >
-                {tr("Resolve")}
-              </button>
+              </Can>
             </td>
           </tr>
         ))}
       </DataTable>
+      {more}
       {selected && (
         <DisputeDialog
           item={selected}
@@ -3359,6 +3636,18 @@ function DisputeDialog({
     </Dialog>
   );
 }
+type CampaignItem = {
+  id: string;
+  name: string;
+  title: string;
+  audienceCount: number;
+  sentCount: number;
+  throttlePerMinute: number;
+  status: string;
+  createdBy: string | null;
+  createdAt: string;
+  completedAt: string | null;
+};
 function Notifications() {
   const [result, setResult] = useState<{
     audienceCount: number;
@@ -3368,7 +3657,12 @@ function Notifications() {
     };
   } | null>(null);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [confirming, setConfirming] = useState(false);
   const [sending, setSending] = useState(false);
+  const history = useData<{ items: CampaignItem[] }>(
+    "notifications/campaigns?limit=20",
+  );
   const [payload, setPayload] = useState({
     name: "Pilot update",
     title: "KAAJ update",
@@ -3378,6 +3672,7 @@ function Notifications() {
   });
   async function dryRun() {
     setError("");
+    setNotice("");
     try {
       setResult(
         await adminApi("notifications/campaign/dry-run", json("POST", payload)),
@@ -3388,104 +3683,200 @@ function Notifications() {
   }
   async function send() {
     setSending(true);
+    setError("");
     try {
-      await adminApi("notifications/campaign/send", json("POST", payload));
+      const sent = await adminApi<{
+        audienceCount: number;
+        sentCount: number;
+        status: string;
+      }>("notifications/campaign/send", json("POST", payload));
       setResult(null);
+      setConfirming(false);
+      setNotice(
+        tr(
+          `Sent to ${sent.sentCount} of ${sent.audienceCount}. The rest go out ${payload.throttlePerMinute} per minute.`,
+        ),
+      );
+      await history.reload();
     } catch (caught) {
       setError(friendlyAdminError(caught));
     } finally {
       setSending(false);
     }
   }
+  const minutes = result
+    ? Math.max(
+        0,
+        Math.ceil(result.audienceCount / payload.throttlePerMinute) - 1,
+      )
+    : 0;
   return (
-    <div className="campaign-layout">
-      <section className="config-editor">
-        <label>
-          {tr("Campaign name")}
-          <input
-            value={payload.name}
-            onChange={(event) =>
-              setPayload({ ...payload, name: event.target.value })
-            }
-          />
-        </label>
-        <label>
-          {tr("Title")}
-          <input
-            value={payload.title}
-            onChange={(event) =>
-              setPayload({ ...payload, title: event.target.value })
-            }
-          />
-        </label>
-        <label>
-          {tr("Message")}
-          <textarea
-            value={payload.body}
-            onChange={(event) =>
-              setPayload({ ...payload, body: event.target.value })
-            }
-          />
-        </label>
-        <label>
-          {tr("Audience")}
-          <select
-            onChange={(event) =>
-              setPayload({
-                ...payload,
-                segment: {
-                  status: "ACTIVE",
-                  ...(event.target.value ? { role: event.target.value } : {}),
-                },
-              })
-            }
-          >
-            <option value="">{tr("All active users")}</option>
-            <option value="WORKER">{humanize("WORKER")}</option>
-            <option value="CUSTOMER">{humanize("CUSTOMER")}</option>
-            <option value="BUSINESS">{humanize("BUSINESS")}</option>
-          </select>
-        </label>
-        <label>
-          {tr("Throttle per minute")}
-          <input
-            type="number"
-            min="1"
-            max="1000"
-            value={payload.throttlePerMinute}
-            onChange={(event) =>
-              setPayload({
-                ...payload,
-                throttlePerMinute: Number(event.target.value),
-              })
-            }
-          />
-        </label>
-        {error && <p className="error">{error}</p>}
-        <div className="actions">
-          <button onClick={dryRun}>{tr("Run dry-run")}</button>
+    <>
+      <div className="campaign-layout">
+        <section className="config-editor">
+          <label>
+            {tr("Campaign name")}
+            <input
+              value={payload.name}
+              onChange={(event) =>
+                setPayload({ ...payload, name: event.target.value })
+              }
+            />
+          </label>
+          <label>
+            {tr("Title")}
+            <input
+              value={payload.title}
+              onChange={(event) =>
+                setPayload({ ...payload, title: event.target.value })
+              }
+            />
+          </label>
+          <label>
+            {tr("Message")}
+            <textarea
+              value={payload.body}
+              onChange={(event) =>
+                setPayload({ ...payload, body: event.target.value })
+              }
+            />
+          </label>
+          <label>
+            {tr("Audience")}
+            <select
+              onChange={(event) =>
+                setPayload({
+                  ...payload,
+                  segment: {
+                    status: "ACTIVE",
+                    ...(event.target.value ? { role: event.target.value } : {}),
+                  },
+                })
+              }
+            >
+              <option value="">{tr("All active users")}</option>
+              <option value="WORKER">{humanize("WORKER")}</option>
+              <option value="CUSTOMER">{humanize("CUSTOMER")}</option>
+              <option value="BUSINESS">{humanize("BUSINESS")}</option>
+            </select>
+          </label>
+          <label>
+            {tr("Throttle per minute")}
+            <input
+              type="number"
+              min="1"
+              max="1000"
+              value={payload.throttlePerMinute}
+              onChange={(event) =>
+                setPayload({
+                  ...payload,
+                  throttlePerMinute: Number(event.target.value),
+                })
+              }
+            />
+          </label>
+          {error && (
+            <p className="error" role="alert">
+              {error}
+            </p>
+          )}
+          {notice && <p className="success">{notice}</p>}
+          <div className="actions">
+            <button onClick={dryRun}>{tr("Run dry-run")}</button>
+            {result && (
+              <Can route="POST notifications/campaign/send">
+                <button
+                  className="primary small-button"
+                  disabled={sending}
+                  onClick={() => setConfirming(true)}
+                >
+                  {tr("Send campaign")}
+                </button>
+              </Can>
+            )}
+          </div>
+        </section>
+        <section className="phone-preview">
+          <span>{tr("PREVIEW")}</span>
+          <div>
+            <strong>{result?.preview.title ?? payload.title}</strong>
+            <p>{result?.preview.body ?? payload.body}</p>
+          </div>
           {result && (
+            <em>
+              {tr(`${result.audienceCount} recipients match this segment`)}
+            </em>
+          )}
+        </section>
+      </div>
+      <Section
+        title="Campaign history"
+        note="Large audiences are sent in batches, one batch per minute"
+      >
+        <State loading={history.loading} error={history.error}>
+          <DataTable
+            headers={["Campaign", "Progress", "Status", "Started", "By"]}
+            empty={!history.data?.items.length}
+          >
+            {(history.data?.items ?? []).map((item) => (
+              <tr key={item.id}>
+                <td>
+                  <strong>{item.name}</strong>
+                  <small>{item.title}</small>
+                </td>
+                <td>
+                  {formatNumber(item.sentCount)} /{" "}
+                  {formatNumber(item.audienceCount)}
+                  <small>
+                    {formatNumber(item.throttlePerMinute)} {tr("per minute")}
+                  </small>
+                </td>
+                <td>
+                  <Badge value={item.status} />
+                </td>
+                <td>{formatDate(item.createdAt)}</td>
+                <td>{item.createdBy ?? tr("System")}</td>
+              </tr>
+            ))}
+          </DataTable>
+          <div className="actions">
+            <button onClick={() => void history.reload()}>
+              {tr("Refresh")}
+            </button>
+          </div>
+        </State>
+      </Section>
+      {confirming && result && (
+        <Dialog
+          title="Send this campaign?"
+          onClose={() => setConfirming(false)}
+        >
+          <p>
+            {tr(
+              `${result.audienceCount} people will get "${payload.title}". The first ${Math.min(payload.throttlePerMinute, result.audienceCount)} get it now; the rest over about ${minutes} more minutes.`,
+            )}
+          </p>
+          <p className="muted">
+            {tr("A sent notification cannot be recalled.")}
+          </p>
+          {error && (
+            <p className="error" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="actions">
+            <button onClick={() => setConfirming(false)}>{tr("Cancel")}</button>
             <button
               className="primary small-button"
               disabled={sending}
               onClick={send}
             >
-              {tr("Send campaign")}
+              {tr(sending ? "Sending…" : "Confirm send")}
             </button>
-          )}
-        </div>
-      </section>
-      <section className="phone-preview">
-        <span>{tr("PREVIEW")}</span>
-        <div>
-          <strong>{result?.preview.title ?? payload.title}</strong>
-          <p>{result?.preview.body ?? payload.body}</p>
-        </div>
-        {result && (
-          <em>{tr(`${result.audienceCount} recipients match this segment`)}</em>
-        )}
-      </section>
-    </div>
+          </div>
+        </Dialog>
+      )}
+    </>
   );
 }
 function Analytics() {
@@ -3506,223 +3897,4 @@ function Analytics() {
       <p className="muted">{data?.note}</p>
     </State>
   );
-}
-function AuditTrail() {
-  const { data, loading, error } = useData<{
-    items: Array<{
-      id: string;
-      action: string;
-      entity: string;
-      entity_id: string | null;
-      created_at: string;
-      actor: {
-        email: string;
-      } | null;
-    }>;
-  }>("audit-logs?limit=100");
-  return (
-    <State loading={loading} error={error}>
-      <DataTable headers={["Action", "Entity", "Actor", "Time"]}>
-        {(data?.items ?? []).map((item) => (
-          <tr key={item.id}>
-            <td>
-              <strong>{humanize(item.action)}</strong>
-            </td>
-            <td>
-              {item.entity}
-              <small>{item.entity_id}</small>
-            </td>
-            <td>{item.actor?.email ?? tr("System")}</td>
-            <td>{formatDate(item.created_at)}</td>
-          </tr>
-        ))}
-      </DataTable>
-    </State>
-  );
-}
-function ReasonDialog({
-  title,
-  confirmLabel,
-  extra,
-  onClose,
-  onConfirm,
-}: {
-  title: string;
-  confirmLabel: string;
-  extra?: ReactNode;
-  onClose: () => void;
-  onConfirm: (reason: string) => Promise<void>;
-}) {
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-  return (
-    <Dialog title={title} onClose={onClose}>
-      <form
-        onSubmit={async (event) => {
-          event.preventDefault();
-          setBusy(true);
-          const reason = String(
-            new FormData(event.currentTarget).get("reason"),
-          );
-          try {
-            await onConfirm(reason);
-          } catch (caught) {
-            setError(friendlyAdminError(caught));
-            setBusy(false);
-          }
-        }}
-      >
-        {extra}
-        <label>
-          {tr("Required operational reason")}
-          <textarea name="reason" minLength={8} required autoFocus />
-        </label>
-        {error && <p className="error">{error}</p>}
-        <button className="primary" disabled={busy}>
-          {tr(busy ? "Applying…" : confirmLabel)}
-        </button>
-      </form>
-    </Dialog>
-  );
-}
-function Dialog({
-  title,
-  onClose,
-  children,
-}: {
-  title: string;
-  onClose: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <div className="dialog-backdrop" role="presentation">
-      <section
-        className="dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-label={tr(title)}
-      >
-        <div className="dialog-head">
-          <h2>{tr(title)}</h2>
-          <button onClick={onClose} aria-label={tr("Close dialog")}>
-            {tr("\u00D7")}
-          </button>
-        </div>
-        {children}
-      </section>
-    </div>
-  );
-}
-function Section({
-  title,
-  note,
-  children,
-}: {
-  title: string;
-  note: string;
-  children: ReactNode;
-}) {
-  return (
-    <section className="data-section">
-      <div className="section-title">
-        <div>
-          <h2>{tr(title)}</h2>
-          <p>{tr(note)}</p>
-        </div>
-      </div>
-      {children}
-    </section>
-  );
-}
-function Summary({ count, label }: { count: number; label: string }) {
-  return (
-    <div className="summary">
-      <strong>{formatNumber(count)}</strong>
-      <span>
-        {tr(label)} {tr("in this operational view")}
-      </span>
-    </div>
-  );
-}
-function DataTable({
-  headers,
-  children,
-}: {
-  headers: string[];
-  children: ReactNode;
-}) {
-  return (
-    <div className="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            {headers.map((header) => (
-              <th key={header}>{tr(header)}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>{children}</tbody>
-      </table>
-    </div>
-  );
-}
-function Badge({ value }: { value: string }) {
-  return (
-    <span className={`badge badge-${value.toLowerCase()}`}>
-      {humanize(value)}
-    </span>
-  );
-}
-function humanize(value: string) {
-  return tr(
-    value
-      .replaceAll("_", " ")
-      .replace(/([a-z])([A-Z])/gu, "$1 $2")
-      .toLowerCase()
-      .replace(/^./u, (letter) => letter.toUpperCase()),
-  );
-}
-function nextModerationLevel(value?: string | null) {
-  return (
-    (
-      {
-        NONE: "WARN",
-        WARN: "RESTRICT",
-        RESTRICT: "SUSPEND",
-        SUSPEND: "BAN",
-      } as Record<string, string>
-    )[value ?? "NONE"] ?? null
-  );
-}
-function formatMinutes(minutes: number) {
-  if (minutes < 60) return `${minutes} ${tr("min")}`;
-  if (minutes < 48 * 60) return `${Math.floor(minutes / 60)} ${tr("h")}`;
-  return `${Math.floor(minutes / 1440)} ${tr("days")}`;
-}
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat(
-    getActiveAdminLocale() === "bn" ? "bn-BD" : "en-BD",
-    {
-      dateStyle: "medium",
-      timeStyle: "short",
-      hour12: getActiveAdminLocale() !== "bn",
-    },
-  ).format(new Date(value));
-}
-function formatPoisha(value: string) {
-  return new Intl.NumberFormat(
-    getActiveAdminLocale() === "bn" ? "bn-BD" : "en-BD",
-    { style: "currency", currency: "BDT" },
-  ).format(Number(value) / 100);
-}
-function formatNumber(value: number) {
-  return new Intl.NumberFormat(
-    getActiveAdminLocale() === "bn" ? "bn-BD" : "en-BD",
-  ).format(value);
-}
-function formatBasisPoints(value?: number | null) {
-  return value == null
-    ? tr("Not enough decisions")
-    : `${(value / 100).toFixed(1)}%`;
 }

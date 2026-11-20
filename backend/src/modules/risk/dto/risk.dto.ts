@@ -4,6 +4,7 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  IsUUID,
   Max,
   MaxLength,
   Min,
@@ -27,6 +28,11 @@ export class RiskQueueQueryDto {
   @Min(0)
   @Max(100)
   minScore = 0;
+
+  /** The last item id of the previous page (see `nextCursor`). */
+  @IsOptional()
+  @IsUUID()
+  cursor?: string;
 
   @IsOptional()
   @Type(() => Number)

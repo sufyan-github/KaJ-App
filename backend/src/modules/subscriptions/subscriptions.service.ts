@@ -1,3 +1,4 @@
+import { pageArgs, pageResult } from "../../common/api/cursor-page";
 import {
   BadRequestException,
   ConflictException,
@@ -515,11 +516,13 @@ export class SubscriptionsService {
           },
         },
       },
-      orderBy: { created_at: "desc" },
-      take: query.limit,
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
+      ...pageArgs({ limit: query.limit, cursor: query.cursor }),
     });
+    const page = pageResult(items, query.limit);
     return {
-      items: items.map((item) => ({
+      nextCursor: page.nextCursor,
+      items: page.items.map((item) => ({
         ...serializeSubscription(item),
         user: {
           displayName: item.user.profile?.display_name ?? "Profile incomplete",

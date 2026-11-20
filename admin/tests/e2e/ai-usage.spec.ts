@@ -97,7 +97,10 @@ test("ADMIN sees AI calls, cost, outcomes and the global cap", async ({
     });
   });
   await signIn(page, "ADMIN");
-  await page.getByRole("button", { name: "AI usage" }).click();
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "AI usage" })
+    .click();
   await expect(page.getByText("500 / 2,000")).toBeVisible();
   await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "25");
   await expect(
