@@ -8,6 +8,8 @@ import '../../../core/localization/kaaj_localizations.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/k_localized_text.dart';
+import '../../ai/presentation/ai_common.dart';
+import '../../ai/presentation/ai_providers.dart';
 import '../../profile/presentation/controllers/me_provider.dart';
 import '../domain/idea_models.dart';
 import '../idea_routes.dart';
@@ -333,6 +335,17 @@ class _IdeaBodyState extends ConsumerState<_IdeaBody> {
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.push(IdeaPaths.access(idea.id)),
               ),
+              // Shown only while KAAJ AI is on.
+              if (ref.watch(aiStatusProvider).valueOrNull?.enabled ?? false)
+                ListTile(
+                  key: const ValueKey('idea-tool-ai'),
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.auto_awesome_outlined),
+                  title: const KLocalizedText('AI বিশ্লেষণ'),
+                  subtitle: const KLocalizedText('শুধু গ্রাহকদের জন্য'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(AiPaths.ideaAnalysis(idea.id)),
+                ),
               ListTile(
                 key: const ValueKey('idea-tool-views'),
                 contentPadding: EdgeInsets.zero,

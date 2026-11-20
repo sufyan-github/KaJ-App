@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/activity/my_activity_screen.dart';
+import '../../features/ai/ai_routes.dart';
 import '../../features/auth/domain/entities/otp_challenge.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/controllers/auth_providers.dart';
@@ -482,6 +483,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ...businessRoutes(),
       ...ideaRoutes(),
       ...communityRoutes(),
+      ...aiRoutes(),
     ],
   );
 });
@@ -594,6 +596,9 @@ bool isFreeRoute(String location, Set<String> freeModules) {
   final learn = freeModules.contains('LEARN');
   final community = freeModules.contains('COMMUNITY');
   if (isBusinessRoute(location)) return true;
+  // AI screens: the server applies its own rules (subscribers-only idea
+  // analysis answers SUBSCRIPTION_REQUIRED and the app explains it).
+  if (_under(location, '/ai')) return true;
   if (learn && isLearningRoute(location)) return true;
   if (community && isCommunityRoute(location)) return true;
   if (location == AppRoutes.explore || location == AppRoutes.activity) {

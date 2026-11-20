@@ -7,6 +7,34 @@
 
 /// Code to (Bangla, English).
 const serverCodeCopy = <String, ({String bn, String en})>{
+  "AI_DISABLED": (
+    bn: "এই মুহূর্তে AI সুবিধা পাওয়া যাচ্ছে না।",
+    en: "AI features are not available right now.",
+  ),
+  "AI_UNAVAILABLE": (
+    bn: "AI সহকারী এখন ব্যস্ত। কয়েক মিনিট পরে আবার চেষ্টা করুন।",
+    en: "The AI assistant is busy. Please try again in a few minutes.",
+  ),
+  "AI_CONSENT_REQUIRED": (
+    bn: "আগে আপনার তথ্য দিয়ে AI ব্যবহারের অনুমতি দিন।",
+    en: "Allow KAAJ to use AI with your information first.",
+  ),
+  "AI_CONSENT_VERSION_MISMATCH": (
+    bn: "অনুমতির লেখা বদলেছে। অ্যাপ হালনাগাদ করে নতুন লেখাটি দেখুন।",
+    en: "The consent text has changed. Update the app to see the latest version.",
+  ),
+  "AI_IDEA_CONSENT_REQUIRED": (
+    bn: "আগে এই আইডিয়ার জন্য AI বিশ্লেষণ চালু করুন।",
+    en: "Turn on AI analysis for this idea first.",
+  ),
+  "AI_DECLINED": (
+    bn: "AI সহকারী এটি বিশ্লেষণ করতে পারেনি। লেখা বদলে আবার চেষ্টা করুন।",
+    en: "The AI assistant could not analyse this. Edit the text and try again.",
+  ),
+  "AI_QUOTA_EXCEEDED": (
+    bn: "আজকের AI অনুরোধ শেষ।",
+    en: "You have used today's AI requests for this feature.",
+  ),
   "ACCOUNT_RESTRICTED": (
     bn: "আপনার অ্যাকাউন্টে কাজের সুবিধা সাময়িকভাবে সীমিত।",
     en: "Marketplace actions are temporarily restricted.",
