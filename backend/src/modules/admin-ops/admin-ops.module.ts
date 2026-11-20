@@ -6,10 +6,11 @@ import { CatalogModule } from "../catalog/catalog.module";
 import { PaymentsModule } from "../payments/payments.module";
 import { AdminOpsController } from "./admin-ops.controller";
 import { AdminOpsService } from "./admin-ops.service";
+import { CampaignRunner } from "./campaign.runner";
 
 @Module({
   controllers: [AdminOpsController],
   imports: [AdminAuthModule, CatalogModule, PaymentsModule, PrismaModule],
-  providers: [AdminOpsService],
+  providers: [AdminOpsService, CampaignRunner],
 })
 export class AdminOpsModule {}
