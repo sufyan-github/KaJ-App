@@ -10,6 +10,7 @@ export const ADMIN_ROUTE_ROLES = {
   "GET applications": ["ADMIN", "MODERATOR", "SUPPORT", "FINANCE"],
   "GET attendance": ["ADMIN", "MODERATOR", "SUPPORT"],
   "GET audit-logs": ["ADMIN", "MODERATOR", "SUPPORT", "FINANCE"],
+  "GET audit-logs/export": ["ADMIN"],
   "GET business-categories": ["ADMIN", "MODERATOR", "SUPPORT"],
   "GET businesses": ["ADMIN", "MODERATOR", "SUPPORT"],
   "GET categories": ["ADMIN", "MODERATOR", "SUPPORT", "FINANCE"],

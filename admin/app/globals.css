@@ -1094,3 +1094,27 @@ td.empty-row {
   padding: 10px 0;
   font-size: 12px;
 }
+.audit-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+  align-items: end;
+  margin: 0 0 14px;
+}
+.audit-filters .actions {
+  grid-column: 1 / -1;
+}
+.diff-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.diff-columns pre {
+  max-height: 320px;
+  overflow: auto;
+  padding: 10px;
+  background: #f4f6f5;
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

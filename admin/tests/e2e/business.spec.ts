@@ -52,7 +52,7 @@ async function openModule(page: Page, name: RegExp) {
 test("verifies a registered business, showing its licence", async ({
   page,
 }) => {
-  await respond(page, "verification-requests?kind=BUSINESS&limit=100", {
+  await respond(page, "verification-requests?limit=100&kind=BUSINESS", {
     items: [
       {
         id: "request-b1",

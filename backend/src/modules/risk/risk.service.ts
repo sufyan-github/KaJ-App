@@ -1,3 +1,4 @@
+import { pageArgs, pageResult } from "../../common/api/cursor-page";
 import {
   BadRequestException,
   ConflictException,
@@ -233,8 +234,8 @@ export class RiskService {
     const [items, total, grouped] = await Promise.all([
       this.prisma.riskReviewItem.findMany({
         where,
-        orderBy: [{ score: "desc" }, { created_at: "asc" }],
-        take: query.limit,
+        orderBy: [{ score: "desc" }, { created_at: "asc" }, { id: "asc" }],
+        ...pageArgs({ limit: query.limit, cursor: query.cursor }),
         include: {
           subject: { include: { profile: true } },
           reviewer: { include: { profile: true } },
@@ -264,8 +265,10 @@ export class RiskService {
       grouped.map((item) => [item.status, item._count._all]),
     ) as Partial<Record<RiskReviewStatus, number>>;
     const decided = (counts.CLEARED ?? 0) + (counts.ESCALATED ?? 0);
+    const page = pageResult(items, query.limit);
     return {
       total,
+      nextCursor: page.nextCursor,
       metrics: {
         adjudicatedCount: decided,
         observedFalsePositiveRateBps:
@@ -277,7 +280,7 @@ export class RiskService {
             ? null
             : Math.round(((counts.ESCALATED ?? 0) / decided) * 10_000),
       },
-      items: items.map((item) => ({
+      items: page.items.map((item) => ({
         id: item.id,
         score: item.score,
         severity: item.severity,

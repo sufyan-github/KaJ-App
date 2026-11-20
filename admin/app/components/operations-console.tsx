@@ -28,8 +28,12 @@ import {
   Can,
   RoleProvider,
   useCan,
+  FilterSelect,
+  ListToolbar,
+  usePagedView,
 } from "./ui";
 import { Staff } from "./views/staff";
+import { AuditTrail } from "./views/audit";
 import {
   Attendance,
   Businesses,
@@ -324,6 +328,7 @@ type SubscriptionItem = {
   };
 };
 function Subscriptions() {
+  const [subscriberStatus, setSubscriberStatus] = useState("");
   const overview = useData<{
     subscriptions: Record<string, number>;
     payments: Record<string, number>;
@@ -331,9 +336,9 @@ function Subscriptions() {
     plans: SubscriptionPlanItem[];
     accessRules: SubscriptionRuleItem[];
   }>("subscriptions/overview");
-  const subscribers = useData<{ items: SubscriptionItem[] }>(
-    "subscriptions?limit=100",
-  );
+  const subscribers = usePagedView<SubscriptionItem>("subscriptions", {
+    status: subscriberStatus,
+  });
   const [createPlan, setCreatePlan] = useState(false);
   const [editPlan, setEditPlan] = useState<SubscriptionPlanItem | null>(null);
   const [subscriberAction, setSubscriberAction] = useState<{
@@ -465,6 +470,21 @@ function Subscriptions() {
         title="Subscribers"
         note="Subscription payment records are separate from job payments"
       >
+        <ListToolbar>
+          <FilterSelect
+            label="Status"
+            value={subscriberStatus}
+            onChange={setSubscriberStatus}
+            options={[
+              ["", "All"],
+              ["PENDING", "Pending"],
+              ["ACTIVE", "Active"],
+              ["EXPIRED", "Expired"],
+              ["CANCELLED", "Cancelled"],
+              ["INACTIVE", "Inactive"],
+            ]}
+          />
+        </ListToolbar>
         <DataTable
           headers={[
             "Person",
@@ -530,6 +550,7 @@ function Subscriptions() {
             </tr>
           ))}
         </DataTable>
+        {subscribers.more}
       </Section>
       {createPlan && (
         <PlanDialog
@@ -855,10 +876,15 @@ function JobPayments() {
   );
 }
 function Users() {
-  const { data, loading, error, reload } = useData<{
-    items: UserItem[];
-    total: number;
-  }>("users?limit=100");
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
+  const { data, loading, error, reload, more } = usePagedView<UserItem>(
+    "users",
+    {
+      search,
+      status,
+    },
+  );
   const [action, setAction] = useState<{
     user: UserItem;
     level?: string;
@@ -866,6 +892,24 @@ function Users() {
   } | null>(null);
   return (
     <State loading={loading} error={error}>
+      <ListToolbar
+        search={search}
+        onSearch={setSearch}
+        placeholder="Search name, phone or email"
+      >
+        <FilterSelect
+          label="Status"
+          value={status}
+          onChange={setStatus}
+          options={[
+            ["", "All"],
+            ["ACTIVE", "Active"],
+            ["SUSPENDED", "Suspended"],
+            ["BANNED", "Banned"],
+            ["PENDING_DELETION", "Pending deletion"],
+          ]}
+        />
+      </ListToolbar>
       <Summary count={data?.total ?? 0} label={tr("users")} />
       <DataTable
         headers={["Person", "Roles", "Trust", "Moderation", "Actions"]}
@@ -925,6 +969,7 @@ function Users() {
           </tr>
         ))}
       </DataTable>
+      {more}
       {action && (
         <ReasonDialog
           title={
@@ -977,17 +1022,35 @@ type UserItem = {
   reverificationRequired?: boolean;
 };
 function Reports() {
+  const [status, setStatus] = useState("");
   // P3.7: the priority safety queue shows priority 1+ (harassment, stalking,
   // unsafe locations…), highest first, with the time-to-first-action limit.
   const [priorityOnly, setPriorityOnly] = useState(false);
-  const { data, loading, error, reload } = useData<{
-    items: ReportItem[];
-    total: number;
-  }>(priorityOnly ? "reports?limit=100&minPriority=1" : "reports?limit=100");
+  const { data, loading, error, reload, more } = usePagedView<ReportItem>(
+    "reports",
+    {
+      minPriority: priorityOnly ? "1" : undefined,
+      status,
+    },
+  );
   const [selected, setSelected] = useState<ReportItem | null>(null);
   const [restoring, setRestoring] = useState<ReportItem | null>(null);
   return (
     <State loading={loading} error={error}>
+      <ListToolbar>
+        <FilterSelect
+          label="Status"
+          value={status}
+          onChange={setStatus}
+          options={[
+            ["", "All"],
+            ["OPEN", "Open"],
+            ["UNDER_REVIEW", "Under review"],
+            ["ACTIONED", "Actioned"],
+            ["DISMISSED", "Dismissed"],
+          ]}
+        />
+      </ListToolbar>
       <Summary count={data?.total ?? 0} label={tr("safety reports")} />
       <label className="toggle-filter">
         <input
@@ -1076,6 +1139,7 @@ function Reports() {
           </tr>
         ))}
       </DataTable>
+      {more}
       {restoring && (
         <ReasonDialog
           title={tr("Restore hidden content")}
@@ -1143,20 +1207,38 @@ type ReportItem = {
   } | null;
 };
 function RiskReview() {
-  const { data, loading, error, reload } = useData<{
-    items: RiskItem[];
-    total: number;
-    metrics: {
-      adjudicatedCount: number;
-      observedFalsePositiveRateBps: number | null;
-      observedPrecisionBps: number | null;
-    };
-  }>("risk/items?limit=100");
+  const [status, setStatus] = useState("");
+  const { data, loading, error, reload, more } = usePagedView<
+    RiskItem,
+    {
+      items: RiskItem[];
+      total: number;
+      metrics: {
+        adjudicatedCount: number;
+        observedFalsePositiveRateBps: number | null;
+        observedPrecisionBps: number | null;
+      };
+    }
+  >("risk/items", { status });
   const [scan, setScan] = useState(false);
   const [selected, setSelected] = useState<RiskItem | null>(null);
   const metrics = data?.metrics;
   return (
     <State loading={loading} error={error}>
+      <ListToolbar>
+        <FilterSelect
+          label="Status"
+          value={status}
+          onChange={setStatus}
+          options={[
+            ["", "All"],
+            ["OPEN", "Open"],
+            ["UNDER_REVIEW", "Under review"],
+            ["CLEARED", "Cleared"],
+            ["ESCALATED", "Escalated"],
+          ]}
+        />
+      </ListToolbar>
       <div className="metric-grid">
         <article>
           <span>{tr("Queue items")}</span>
@@ -1251,6 +1333,7 @@ function RiskReview() {
           </tr>
         ))}
       </DataTable>
+      {more}
       {scan && (
         <ReasonDialog
           title={tr("Run deterministic risk scan")}
@@ -1510,14 +1593,33 @@ function ReportDecisionDialog({
   );
 }
 function Jobs() {
-  const { data, loading, error, reload } = useData<{
-    items: JobItem[];
-    total: number;
-  }>("jobs?limit=100");
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
+  const { data, loading, error, reload, more } = usePagedView<JobItem>("jobs", {
+    search,
+    status,
+  });
   const [selected, setSelected] = useState<JobItem | null>(null);
   const [target, setTarget] = useState("SUSPENDED");
   return (
     <State loading={loading} error={error}>
+      <ListToolbar
+        search={search}
+        onSearch={setSearch}
+        placeholder="Search job title"
+      >
+        <FilterSelect
+          label="Status"
+          value={status}
+          onChange={setStatus}
+          options={[
+            ["", "All"],
+            ...JOB_STATUSES.map(
+              (value) => [value, humanize(value)] as [string, string],
+            ),
+          ]}
+        />
+      </ListToolbar>
       <Summary count={data?.total ?? 0} label={tr("jobs")} />
       <DataTable headers={["Job", "Poster", "Status", "Activity", "Actions"]}>
         {(data?.items ?? []).map((job) => (
@@ -1566,6 +1668,7 @@ function Jobs() {
           </tr>
         ))}
       </DataTable>
+      {more}
       {selected && (
         <ReasonDialog
           title={`Force transition: ${selected.title}`}
@@ -1632,21 +1735,29 @@ type JobItem = {
   assignmentsCount: number;
 };
 function Applications() {
-  const { data, loading, error, reload } = useData<{
-    items: Array<{
-      id: string;
-      status: string;
-      job: {
-        title: string;
-      };
-      worker: {
-        name: string;
-      };
-    }>;
-  }>("applications?limit=100");
+  const [search, setSearch] = useState("");
+  const { data, loading, error, reload, more } = usePagedView<
+    {
+      items: Array<{
+        id: string;
+        status: string;
+        job: {
+          title: string;
+        };
+        worker: {
+          name: string;
+        };
+      }>;
+    }["items"][number]
+  >("applications", { search });
   const [selected, setSelected] = useState<string | null>(null);
   return (
     <State loading={loading} error={error}>
+      <ListToolbar
+        search={search}
+        onSearch={setSearch}
+        placeholder="Search job or worker"
+      />
       <DataTable headers={["Job", "Worker", "Status", "Action"]}>
         {(data?.items ?? []).map((item) => (
           <tr key={item.id}>
@@ -1668,6 +1779,7 @@ function Applications() {
           </tr>
         ))}
       </DataTable>
+      {more}
       {selected && (
         <ReasonDialog
           title={tr("Return application to pending")}
@@ -1687,12 +1799,10 @@ function Applications() {
   );
 }
 function Verification({ kind }: { kind?: string } = {}) {
-  const { data, loading, error, reload } = useData<{
-    items: VerificationItem[];
-  }>(
-    kind
-      ? `verification-requests?kind=${kind}&limit=100`
-      : "verification-requests?limit=100",
+  const [status, setStatus] = useState("");
+  const { data, loading, error, reload, more } = usePagedView<VerificationItem>(
+    "verification-requests",
+    { kind, status },
   );
   const [decision, setDecision] = useState<{
     item: VerificationItem;
@@ -1705,6 +1815,19 @@ function Verification({ kind }: { kind?: string } = {}) {
   } | null>(null);
   return (
     <State loading={loading} error={error}>
+      <ListToolbar>
+        <FilterSelect
+          label="Status"
+          value={status}
+          onChange={setStatus}
+          options={[
+            ["", "Needs a decision"],
+            ["APPROVED", "Approved"],
+            ["REJECTED", "Rejected"],
+            ["EXPIRED", "Expired"],
+          ]}
+        />
+      </ListToolbar>
       <DataTable
         headers={["Person", "Kind", "Documents", "Status", "Decision"]}
       >
@@ -1762,6 +1885,7 @@ function Verification({ kind }: { kind?: string } = {}) {
           </tr>
         ))}
       </DataTable>
+      {more}
       {decision && (
         <ReasonDialog
           title={`${humanize(decision.status)} ${decision.item.kind} verification`}
@@ -1901,12 +2025,29 @@ function useContentToggle(reload: () => Promise<void>) {
   return { setTarget, dialog };
 }
 function CommunityGroups() {
-  const { data, loading, error, reload } = useData<{
-    items: CommunityGroupItem[];
-  }>("community/groups?limit=100");
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
+  const { data, loading, error, reload, more } =
+    usePagedView<CommunityGroupItem>("community/groups", { q: search, status });
   const { setTarget, dialog } = useContentToggle(reload);
   return (
     <State loading={loading} error={error}>
+      <ListToolbar
+        search={search}
+        onSearch={setSearch}
+        placeholder="Search groups"
+      >
+        <FilterSelect
+          label="Status"
+          value={status}
+          onChange={setStatus}
+          options={[
+            ["", "All"],
+            ["ACTIVE", "Active"],
+            ["HIDDEN", "Hidden"],
+          ]}
+        />
+      </ListToolbar>
       <DataTable
         headers={[
           "Group",
@@ -1961,6 +2102,7 @@ function CommunityGroups() {
           </tr>
         ))}
       </DataTable>
+      {more}
       {dialog}
     </State>
   );
@@ -1984,12 +2126,28 @@ type AdminSessionItem = {
   hiddenReason: string | null;
 };
 function CommunitySessions() {
-  const { data, loading, error, reload } = useData<{
-    items: AdminSessionItem[];
-  }>("sessions?limit=100");
+  const [kind, setKind] = useState("");
+  const { data, loading, error, reload, more } = usePagedView<AdminSessionItem>(
+    "sessions",
+    { kind },
+  );
   const { setTarget, dialog } = useContentToggle(reload);
   return (
     <State loading={loading} error={error}>
+      <ListToolbar>
+        <FilterSelect
+          label="Kind"
+          value={kind}
+          onChange={setKind}
+          options={[
+            ["", "All"],
+            ["CONSULTATION", "Consultation"],
+            ["GROUP_DISCUSSION", "Group discussion"],
+            ["WORKSHOP", "Workshop"],
+            ["EVENT", "Event"],
+          ]}
+        />
+      </ListToolbar>
       <DataTable
         headers={["Session", "Host", "Places", "Reports", "Status", "Actions"]}
       >
@@ -2037,6 +2195,7 @@ function CommunitySessions() {
           </tr>
         ))}
       </DataTable>
+      {more}
       {dialog}
     </State>
   );
@@ -2301,9 +2460,10 @@ function skillName(skill: { nameEn: string; nameBn: string }) {
   return getActiveAdminLocale() === "bn" ? skill.nameBn : skill.nameEn;
 }
 function MentorApplications() {
-  const { data, loading, error, reload } = useData<{
-    items: MentorApplicationItem[];
-  }>("verification-requests?kind=MENTOR&limit=100");
+  const { data, loading, error, reload, more } =
+    usePagedView<MentorApplicationItem>("verification-requests", {
+      kind: "MENTOR",
+    });
   const [decision, setDecision] = useState<{
     item: MentorApplicationItem;
     status: "APPROVED" | "REJECTED";
@@ -2369,6 +2529,7 @@ function MentorApplications() {
           </tr>
         ))}
       </DataTable>
+      {more}
       {decision && (
         <ReasonDialog
           title={`${humanize(decision.status)} ${decision.item.kind} verification`}
@@ -2400,9 +2561,11 @@ type OpportunityItem = {
   actions: Array<"suspend" | "restore">;
 };
 function LearningOpportunities() {
-  const { data, loading, error, reload } = useData<{
-    items: OpportunityItem[];
-  }>("learning-opportunities?limit=100");
+  const [search, setSearch] = useState("");
+  const { data, loading, error, reload, more } = usePagedView<OpportunityItem>(
+    "learning-opportunities",
+    { search },
+  );
   const [pending, setPending] = useState<{
     title: string;
     path: string;
@@ -2410,6 +2573,11 @@ function LearningOpportunities() {
   } | null>(null);
   return (
     <State loading={loading} error={error}>
+      <ListToolbar
+        search={search}
+        onSearch={setSearch}
+        placeholder="Search opportunities"
+      />
       <Summary count={data?.items.length ?? 0} label="learning opportunities" />
       <DataTable
         headers={[
@@ -2496,6 +2664,7 @@ function LearningOpportunities() {
           </tr>
         ))}
       </DataTable>
+      {more}
       {pending && (
         <ReasonDialog
           title={pending.title}
@@ -2737,12 +2906,19 @@ type CertificateItem = {
   status: string;
 };
 function CompletionRecords() {
-  const { data, loading, error, reload } = useData<{
-    items: CertificateItem[];
-  }>("certificates?limit=100");
+  const [search, setSearch] = useState("");
+  const { data, loading, error, reload, more } = usePagedView<CertificateItem>(
+    "certificates",
+    { search },
+  );
   const [revoking, setRevoking] = useState<CertificateItem | null>(null);
   return (
     <State loading={loading} error={error}>
+      <ListToolbar
+        search={search}
+        onSearch={setSearch}
+        placeholder="Search code or holder"
+      />
       <DataTable headers={["Code", "Holder", "Record", "Status", "Actions"]}>
         {(data?.items ?? []).map((item) => (
           <tr key={item.id}>
@@ -2774,6 +2950,7 @@ function CompletionRecords() {
           </tr>
         ))}
       </DataTable>
+      {more}
       {revoking && (
         <ReasonDialog
           title={`${tr("Revoke")}: ${revoking.code}`}
@@ -3270,12 +3447,29 @@ function FlagRow({
   );
 }
 function Disputes() {
-  const { data, loading, error, reload } = useData<{
-    items: DisputeItem[];
-  }>("disputes?limit=100");
+  const [status, setStatus] = useState("");
+  const { data, loading, error, reload, more } = usePagedView<DisputeItem>(
+    "disputes",
+    { status },
+  );
   const [selected, setSelected] = useState<DisputeItem | null>(null);
   return (
     <State loading={loading} error={error}>
+      <ListToolbar>
+        <FilterSelect
+          label="Status"
+          value={status}
+          onChange={setStatus}
+          options={[
+            ["", "All"],
+            ["OPEN", "Open"],
+            ["UNDER_REVIEW", "Under review"],
+            ["RESOLVED", "Resolved"],
+            ["EVIDENCE", "Evidence"],
+            ["CLOSED", "Closed"],
+          ]}
+        />
+      </ListToolbar>
       <DataTable headers={["Job", "Reason", "Evidence", "Status", "Action"]}>
         {(data?.items ?? []).map((item) => (
           <tr key={item.id}>
@@ -3323,6 +3517,7 @@ function Disputes() {
           </tr>
         ))}
       </DataTable>
+      {more}
       {selected && (
         <DisputeDialog
           item={selected}
@@ -3698,39 +3893,6 @@ function Analytics() {
           ))}
       </div>
       <p className="muted">{data?.note}</p>
-    </State>
-  );
-}
-function AuditTrail() {
-  const { data, loading, error } = useData<{
-    items: Array<{
-      id: string;
-      action: string;
-      entity: string;
-      entity_id: string | null;
-      created_at: string;
-      actor: {
-        email: string;
-      } | null;
-    }>;
-  }>("audit-logs?limit=100");
-  return (
-    <State loading={loading} error={error}>
-      <DataTable headers={["Action", "Entity", "Actor", "Time"]}>
-        {(data?.items ?? []).map((item) => (
-          <tr key={item.id}>
-            <td>
-              <strong>{humanize(item.action)}</strong>
-            </td>
-            <td>
-              {item.entity}
-              <small>{item.entity_id}</small>
-            </td>
-            <td>{item.actor?.email ?? tr("System")}</td>
-            <td>{formatDate(item.created_at)}</td>
-          </tr>
-        ))}
-      </DataTable>
     </State>
   );
 }

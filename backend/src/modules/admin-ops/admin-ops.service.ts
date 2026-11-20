@@ -36,6 +36,7 @@ import {
 } from "../admin-auth/admin-auth.types";
 import {
   ApplicationActionDto,
+  AuditLogQueryDto,
   CampaignDto,
   CategoryDto,
   ConfigChangeDto,
@@ -68,6 +69,9 @@ import { LedgerService } from "../payments/ledger.service";
 import { PaymentsService } from "../payments/payments.service";
 import { planDisputeAllocation } from "../disputes/dispute-ledger";
 import { randomUUID } from "node:crypto";
+
+/** Most rows one audit-log export returns. */
+export const AUDIT_EXPORT_MAX_ROWS = 5_000;
 
 /** Most recipients one campaign may reach (unchanged from the first version). */
 const CAMPAIGN_AUDIENCE_CAP = 10_000;
@@ -189,9 +193,9 @@ export class AdminOpsService {
     const [items, total] = await Promise.all([
       this.prisma.user.findMany({
         where,
-        take: query.limit,
-        orderBy: { created_at: "desc" },
+        orderBy: [{ created_at: "desc" }, { id: "desc" }],
         include: { profile: true, admin_credential: true },
+        ...pageArgs(query),
       }),
       this.prisma.user.count({ where }),
     ]);
@@ -210,9 +214,11 @@ export class AdminOpsService {
       },
       context,
     );
+    const page = pageResult(items, query.limit);
     return {
       total,
-      items: items.map((user) => ({
+      nextCursor: page.nextCursor,
+      items: page.items.map((user) => ({
         id: user.id,
         name: user.profile?.display_name ?? "Profile incomplete",
         email: user.email,
@@ -388,8 +394,8 @@ export class AdminOpsService {
     const [items, total] = await Promise.all([
       this.prisma.job.findMany({
         where,
-        take: query.limit,
-        orderBy: { updated_at: "desc" },
+        orderBy: [{ updated_at: "desc" }, { id: "desc" }],
+        ...pageArgs(query),
         include: {
           poster: { include: { profile: true } },
           status_history: { orderBy: { created_at: "desc" }, take: 6 },
@@ -413,9 +419,11 @@ export class AdminOpsService {
       },
       context,
     );
+    const page = pageResult(items, query.limit);
     return {
       total,
-      items: items.map((job) => ({
+      nextCursor: page.nextCursor,
+      items: page.items.map((job) => ({
         ...serializeJob(job),
         // The latest history row of a SUSPENDED job is its suspension.
         allowedTransitions: adminForceTargets(job.status, {
@@ -553,10 +561,10 @@ export class AdminOpsService {
           ],
         }
       : {};
-    const items = await this.prisma.application.findMany({
+    const rows = await this.prisma.application.findMany({
       where,
-      take: query.limit,
-      orderBy: { created_at: "desc" },
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
+      ...pageArgs(query),
       include: {
         job: { select: { id: true, title: true, status: true } },
         worker: { include: { profile: true } },
@@ -571,8 +579,10 @@ export class AdminOpsService {
       { filters: { limit: query.limit, search: query.search ?? null } },
       context,
     );
+    const page = pageResult(rows, query.limit);
     return {
-      items: items.map((item) => ({
+      nextCursor: page.nextCursor,
+      items: page.items.map((item) => ({
         id: item.id,
         status: item.status,
         createdAt: item.created_at,
@@ -1949,14 +1959,15 @@ export class AdminOpsService {
   }
 
   async auditLogs(
-    query: PageQueryDto,
+    query: AuditLogQueryDto,
     actor: AdminActor,
     context: AdminRequestContext,
   ) {
-    const items = await this.prisma.auditLog.findMany({
-      take: query.limit,
-      orderBy: { created_at: "desc" },
+    const rows = await this.prisma.auditLog.findMany({
+      where: auditWhere(query),
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
       include: { actor: { select: { email: true } } },
+      ...pageArgs(query),
     });
     await this.audit(
       actor,
@@ -1964,10 +1975,75 @@ export class AdminOpsService {
       "AUDIT_LOG",
       null,
       null,
-      null,
+      { filters: auditFilters(query) },
       context,
     );
-    return { items };
+    return pageResult(rows, query.limit);
+  }
+
+  /**
+   * The filtered audit trail as CSV (newest first, at most
+   * AUDIT_EXPORT_MAX_ROWS). Returned inside the JSON envelope because the
+   * console's proxy relays JSON; the console saves it as a file. The export
+   * itself is audited with its filters and row count.
+   */
+  async exportAuditLogs(
+    query: AuditLogQueryDto,
+    actor: AdminActor,
+    context: AdminRequestContext,
+  ) {
+    const rows = await this.prisma.auditLog.findMany({
+      where: auditWhere(query),
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
+      include: { actor: { select: { email: true } } },
+      take: AUDIT_EXPORT_MAX_ROWS + 1,
+    });
+    const truncated = rows.length > AUDIT_EXPORT_MAX_ROWS;
+    const exported = rows.slice(0, AUDIT_EXPORT_MAX_ROWS);
+    const header = [
+      "created_at",
+      "action",
+      "entity",
+      "entity_id",
+      "actor_email",
+      "actor_user_id",
+      "ip",
+      "user_agent",
+      "before_json",
+      "after_json",
+    ];
+    const lines = exported.map((row) =>
+      [
+        row.created_at.toISOString(),
+        row.action,
+        row.entity,
+        row.entity_id,
+        row.actor?.email ?? null,
+        row.actor_user_id,
+        row.ip,
+        row.ua,
+        row.before_json === null ? null : JSON.stringify(row.before_json),
+        row.after_json === null ? null : JSON.stringify(row.after_json),
+      ]
+        .map(csvCell)
+        .join(","),
+    );
+    const now = this.clock.now();
+    await this.audit(
+      actor,
+      "ADMIN_AUDIT_LOG_EXPORTED",
+      "AUDIT_LOG",
+      null,
+      null,
+      { filters: auditFilters(query), rowCount: exported.length, truncated },
+      context,
+    );
+    return {
+      filename: `kaaj-audit-${now.toISOString().slice(0, 19).replace(/[:T]/gu, "-")}.csv`,
+      rowCount: exported.length,
+      truncated,
+      csv: [header.join(","), ...lines].join("\r\n") + "\r\n",
+    };
   }
 
   private audit(
@@ -2134,6 +2210,58 @@ function diffKeys(
   return [...new Set([...Object.keys(previous), ...Object.keys(after)])].filter(
     (key) => JSON.stringify(previous[key]) !== JSON.stringify(after[key]),
   );
+}
+
+function auditWhere(query: AuditLogQueryDto): Prisma.AuditLogWhereInput {
+  const and: Prisma.AuditLogWhereInput[] = [];
+  if (query.action) and.push({ action: query.action });
+  if (query.entity) and.push({ entity: query.entity });
+  if (query.entityId) and.push({ entity_id: query.entityId });
+  if (query.actorEmail)
+    and.push({
+      actor: { email: { equals: query.actorEmail, mode: "insensitive" } },
+    });
+  if (query.from || query.to)
+    and.push({
+      created_at: {
+        ...(query.from ? { gte: new Date(query.from) } : {}),
+        ...(query.to ? { lt: new Date(query.to) } : {}),
+      },
+    });
+  // Every list view writes a *_VIEWED row; this hides them.
+  if (query.changesOnly) and.push({ NOT: { action: { endsWith: "_VIEWED" } } });
+  if (query.search)
+    and.push({
+      OR: [
+        { action: { contains: query.search, mode: "insensitive" } },
+        { entity: { contains: query.search, mode: "insensitive" } },
+      ],
+    });
+  return and.length ? { AND: and } : {};
+}
+
+function auditFilters(query: AuditLogQueryDto): Prisma.InputJsonObject {
+  return {
+    action: query.action ?? null,
+    entity: query.entity ?? null,
+    entityId: query.entityId ?? null,
+    actorEmail: query.actorEmail ?? null,
+    from: query.from ?? null,
+    to: query.to ?? null,
+    changesOnly: query.changesOnly ?? false,
+    search: query.search ?? null,
+  };
+}
+
+/**
+ * One CSV cell: quoted when needed, and prefixed with ' when it could be read
+ * as a spreadsheet formula (=, +, -, @, tab, CR), since audit rows hold text
+ * that users typed.
+ */
+export function csvCell(value: string | null | undefined): string {
+  if (value === null || value === undefined) return "";
+  const safe = /^[=+\-@\t\r]/u.test(value) ? `'${value}` : value;
+  return /[",\r\n]/u.test(safe) ? `"${safe.replaceAll('"', '""')}"` : safe;
 }
 
 function campaignWhere(

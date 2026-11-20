@@ -53,6 +53,7 @@ export function usePagedData<T extends { id: string }>(
   const [items, setItems] = useState<T[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [total, setTotal] = useState<number | undefined>(undefined);
+  const [firstPage, setFirstPage] = useState<Record<string, unknown>>({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -64,6 +65,7 @@ export function usePagedData<T extends { id: string }>(
       setItems(page.items);
       setNextCursor(page.nextCursor ?? null);
       setTotal(page.total);
+      setFirstPage(page as unknown as Record<string, unknown>);
     } catch (caught) {
       setError(friendlyAdminError(caught));
     } finally {
@@ -92,6 +94,8 @@ export function usePagedData<T extends { id: string }>(
   return {
     items,
     total,
+    /** The first page's whole payload (for fields besides items). */
+    firstPage,
     error,
     loading,
     loadingMore,
@@ -193,6 +197,36 @@ export function LoadMore({
       )}
     </div>
   );
+}
+
+/**
+ * usePagedData shaped like useData ({ data: { items, total } }) for the
+ * existing views, plus `more`: the "Load more" footer to put under the table.
+ */
+export function usePagedView<
+  T extends { id: string },
+  Extra extends object = Record<string, never>,
+>(path: string, params: Record<string, string | undefined> = {}, limit = 100) {
+  const list = usePagedData<T>(path, params, limit);
+  return {
+    data: {
+      ...(list.firstPage as Partial<Extra>),
+      items: list.items,
+      total: list.total ?? list.items.length,
+    },
+    loading: list.loading,
+    error: list.error,
+    reload: list.reload,
+    more: (
+      <LoadMore
+        hasMore={list.hasMore}
+        loading={list.loadingMore}
+        shown={list.items.length}
+        total={list.total}
+        onClick={() => void list.loadMore()}
+      />
+    ),
+  };
 }
 
 export function useData<T>(path: string) {

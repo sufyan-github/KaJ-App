@@ -25,6 +25,7 @@ import {
 import { AdminOpsService } from "./admin-ops.service";
 import {
   ApplicationActionDto,
+  AuditLogQueryDto,
   CampaignDto,
   CategoryDto,
   ConfigChangeDto,
@@ -446,11 +447,22 @@ export class AdminOpsController {
   @Policy(Policies.public())
   @AdminRoles(...OPS_ROLES)
   auditLogs(
-    @Query() query: PageQueryDto,
+    @Query() query: AuditLogQueryDto,
     @CurrentAdmin() actor: AdminActor,
     @Req() request: Request,
   ) {
     return this.ops.auditLogs(query, actor, this.context(request));
+  }
+
+  @Get("audit-logs/export")
+  @Policy(Policies.public())
+  @AdminRoles(AdminRole.ADMIN)
+  exportAuditLogs(
+    @Query() query: AuditLogQueryDto,
+    @CurrentAdmin() actor: AdminActor,
+    @Req() request: Request,
+  ) {
+    return this.ops.exportAuditLogs(query, actor, this.context(request));
   }
 
   private context(request: Request): AdminRequestContext {
