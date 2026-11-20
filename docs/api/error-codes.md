@@ -163,3 +163,18 @@ Anyone without a right to see an idea gets `404 NOT_FOUND` on every idea endpoin
 | ---- | ---------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 403  | `ADMIN_ROLE_FORBIDDEN` | `error.admin.admin_role_forbidden` | The role does not allow this route (every admin route names its roles; none is open by default), or the target is a staff account and the actor is not an ADMIN (moderate, restore, reactivate, reset sessions). |
 | 400  | `CONFIG_INVALID`       | `error.admin.config_invalid`       | `PUT /admin/config/:key` (also preview and revert): the value does not fit the key's shape; `details[]` gives `{field, rules}`. Keys without rules can't be changed.                                             |
+
+## AI (P4)
+
+Routes and order of checks: [ai.md](ai.md).
+
+| HTTP | Code                          | messageKey                       | English                                                                                 | Bangla                                                          |
+| ---- | ----------------------------- | -------------------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| 503  | `AI_DISABLED`                 | `error.ai.disabled`              | AI features are not available right now. (Hide AI in the app.)                          | এই মুহূর্তে AI সুবিধা পাওয়া যাচ্ছে না।                         |
+| 503  | `AI_UNAVAILABLE`              | `error.ai.unavailable`           | The AI assistant is busy. Please try again in a few minutes. (retryable)                | AI সহকারী এখন ব্যস্ত। কয়েক মিনিট পরে আবার চেষ্টা করুন।         |
+| 403  | `AI_CONSENT_REQUIRED`         | `error.ai.consent_required`      | Allow KAAJ to use AI with your information first (`details[0].currentVersion`).         | আগে আপনার তথ্য দিয়ে AI ব্যবহারের অনুমতি দিন।                   |
+| 400  | `AI_CONSENT_VERSION_MISMATCH` | `error.ai.consent_version`       | The consent text has changed. Show the latest version.                                  | অনুমতির লেখা বদলেছে। সর্বশেষ সংস্করণটি দেখান।                   |
+| 409  | `AI_IDEA_CONSENT_REQUIRED`    | `error.ai.idea_consent_required` | Turn on AI analysis for this idea first (`field`: aiConsent).                           | আগে এই আইডিয়ার জন্য AI বিশ্লেষণ চালু করুন।                     |
+| 403  | `SUBSCRIPTION_REQUIRED`       | `error.subscription.required`    | AI idea analysis is for subscribers, even before the paywall launches.                  | AI আইডিয়া বিশ্লেষণ শুধু সাবস্ক্রাইবারদের জন্য।                 |
+| 422  | `AI_DECLINED`                 | `error.ai.declined`              | The AI assistant couldn't analyse this. Edit the text and try again.                    | AI সহকারী এটি বিশ্লেষণ করতে পারেনি। লেখা বদলে আবার চেষ্টা করুন। |
+| 429  | `AI_QUOTA_EXCEEDED`           | `error.ai.quota_exceeded`        | You have used today's AI requests for this feature (`details[0].limit`; `Retry-After`). | আজকের AI অনুরোধ শেষ। আগামীকাল আবার চেষ্টা করুন।                 |

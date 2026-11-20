@@ -381,10 +381,30 @@ export class SubscriptionsService {
   }
 
   async accessFor(userId: string, featureKey: string) {
+    return this.access(userId, featureKey, { ignoreGlobalGate: false });
+  }
+
+  /**
+   * For features the owner reserved for subscribers whatever the launch
+   * switch says (P4: AI idea analysis). Only the global
+   * subscriptions_enabled flag is ignored: the feature's access rule (admin
+   * console) and module entitlements still apply, so deactivating the rule
+   * makes the feature free.
+   */
+  async subscriberAccessFor(userId: string, featureKey: string) {
+    return this.access(userId, featureKey, { ignoreGlobalGate: true });
+  }
+
+  private async access(
+    userId: string,
+    featureKey: string,
+    options: { ignoreGlobalGate: boolean },
+  ) {
     // Learn, Community and Business are free whatever the flags or rules say.
     if (FREE_MODULES.includes(moduleForFeature(featureKey)))
       return { allowed: true, gated: false };
-    if (!(await this.gateEnabled())) return { allowed: true, gated: false };
+    if (!options.ignoreGlobalGate && !(await this.gateEnabled()))
+      return { allowed: true, gated: false };
     const rule = await this.prisma.subscriptionAccessRule.findUnique({
       where: { feature_key: featureKey },
     });

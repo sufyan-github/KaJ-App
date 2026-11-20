@@ -13,6 +13,14 @@ export const SubscriptionFeatures = {
   workerHiring: "WORKER_HIRING",
 } as const;
 
+/**
+ * P4 AI features gated by subscription (WORK module: paid). Opportunity
+ * suggestions and growth tips are free (quota-limited) and have no key.
+ */
+export const AiSubscriptionFeatures = {
+  ideaAnalysis: "AI_IDEA_ANALYSIS",
+} as const;
+
 /** Feature keys of the free Learn module (owner decision: Learn is free). */
 export const LearnFeatures = {
   learnApplication: "LEARN_APPLICATION",
