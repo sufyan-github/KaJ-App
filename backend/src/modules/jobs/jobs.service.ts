@@ -865,6 +865,10 @@ export class JobsService {
           cancelled_by_user_id: userId,
           cancellation_penalised:
             actor === "worker" && preview.reliabilityDelta !== 0,
+          // W12: record the fee the preview showed (cash platform: owed
+          // between the two people, not collected by KAAJ).
+          cancellation_fee_poisha:
+            BigInt(preview.feePoisha) > 0n ? BigInt(preview.feePoisha) : null,
         },
       });
       if (
@@ -2061,6 +2065,7 @@ function serializeAssignment(assignment: {
   agreed_price_poisha: bigint;
   agreed_starts_at: Date | null;
   agreed_ends_at: Date | null;
+  cancellation_fee_poisha?: bigint | null;
 }) {
   return {
     id: assignment.id,
@@ -2070,6 +2075,9 @@ function serializeAssignment(assignment: {
     agreedPricePoisha: assignment.agreed_price_poisha.toString(),
     agreedStartsAt: assignment.agreed_starts_at?.toISOString() ?? null,
     agreedEndsAt: assignment.agreed_ends_at?.toISOString() ?? null,
+    // W12: the recorded cancellation fee, if any.
+    cancellationFeePoisha:
+      assignment.cancellation_fee_poisha?.toString() ?? null,
   };
 }
 
