@@ -7,6 +7,14 @@
 
 /// Code to (Bangla, English).
 const serverCodeCopy = <String, ({String bn, String en})>{
+  "JOB_NOT_CLOSABLE": (
+    bn: "শুধু খসড়া বা কেউ বুক না করা খোলা পোস্ট বন্ধ করা যায়। আগে বুকিংটি বাতিল করুন।",
+    en: "Only a draft or an open post nobody is booked for can be closed. Cancel the booking first.",
+  ),
+  "BOOKING_ALREADY_PENDING": (
+    bn: "এই সময়ের জন্য এই কর্মীর কাছে একটি বুকিং অনুরোধ অপেক্ষায় আছে।",
+    en: "This worker already has a booking request waiting for this time.",
+  ),
   "GENDER_LOCKED": (
     bn: "পরিচয় যাচাইয়ের পর লিঙ্গ বদলানো যায় না। সংশোধনের জন্য সাপোর্টে যোগাযোগ করুন।",
     en: "Gender cannot be changed after identity verification. Contact support to correct it.",
@@ -383,6 +391,14 @@ const serverCodeCopy = <String, ({String bn, String en})>{
 /// (IDENTITY_REQUIRED for mentors, ideas, groups or women-only spaces), so
 /// the key wins over the code when both are known.
 const serverMessageKeyCopy = <String, ({String bn, String en})>{
+  "error.job.not_closable": (
+    bn: "শুধু খসড়া বা কেউ বুক না করা খোলা পোস্ট বন্ধ করা যায়। আগে বুকিংটি বাতিল করুন।",
+    en: "Only a draft or an open post nobody is booked for can be closed. Cancel the booking first.",
+  ),
+  "error.jobs.booking_already_pending": (
+    bn: "এই সময়ের জন্য এই কর্মীর কাছে একটি বুকিং অনুরোধ অপেক্ষায় আছে।",
+    en: "This worker already has a booking request waiting for this time.",
+  ),
   "error.account.restricted": (
     bn: "আপনার অ্যাকাউন্টে কাজের সুবিধা সাময়িকভাবে সীমিত।",
     en: "Marketplace actions are temporarily restricted.",

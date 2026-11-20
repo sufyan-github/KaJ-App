@@ -346,6 +346,7 @@ class AssignmentDetail {
     required this.timeline,
     this.contractVersion,
     this.payment,
+    this.cancellationFee,
   });
 
   factory AssignmentDetail.fromJson(Map<String, dynamic> json) =>
@@ -354,6 +355,7 @@ class AssignmentDetail {
         description: json['description'] as String? ?? '',
         locationName: json['locationName'] as String? ?? '',
         contractVersion: (json['contractVersion'] as num?)?.toInt(),
+        cancellationFee: Money.tryParse(json['cancellationFeePoisha']),
         payment: json['payment'] is Map
             ? AssignmentPayment.fromJson(
                 Map<String, dynamic>.from(json['payment'] as Map),
@@ -370,6 +372,10 @@ class AssignmentDetail {
   final String description;
   final String locationName;
   final AssignmentPayment? payment;
+
+  /// The cancellation fee recorded when the hire was cancelled (cash,
+  /// settled between the two people); null when there was none.
+  final Money? cancellationFee;
   final AssignmentSummary summary;
   final List<AssignmentTimelineItem> timeline;
 }

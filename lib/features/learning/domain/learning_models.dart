@@ -90,6 +90,7 @@ class LearningOpportunity {
     this.mentor,
     this.viewerApplicationStatus,
     this.isMine = false,
+    this.closedToApplications = false,
     this.applicationsCount,
     this.skillIds = const [],
     this.viewerApplicationId,
@@ -167,8 +168,12 @@ class LearningOpportunity {
                 as String?,
       applicationsCount: (read('applicationsCount') as num?)?.toInt(),
       isMine: read('isMine') == true || read('viewerIsMentor') == true,
+      closedToApplications: read('closedToApplications') == true,
     );
   }
+
+  /// The mentor stopped new applications; enrolled learners carry on.
+  final bool closedToApplications;
 
   /// For the mentors own list.
   final int? applicationsCount;
@@ -437,6 +442,8 @@ class LearningEnrolment {
     this.minutesTotal = 0,
     this.completion,
     this.withdrawnAt,
+    this.learnerUserId,
+    this.mentorUserId,
   });
 
   factory LearningEnrolment.fromJson(Map<String, dynamic> json) {
@@ -478,8 +485,16 @@ class LearningEnrolment {
           : sessions.fold(0, (sum, item) => sum + item.minutes),
       completion: CompletionRecord.maybe(json['completionRecord']),
       withdrawnAt: DateTime.tryParse(json['withdrawnAt'] as String? ?? ''),
+      learnerUserId: learner is Map ? learner['userId'] as String? : null,
+      mentorUserId: json['mentorUserId'] as String?,
     );
   }
+
+  final String? learnerUserId;
+  final String? mentorUserId;
+
+  /// The other person in this enrolment, for a chat.
+  String? get otherUserId => isMentor ? learnerUserId : mentorUserId;
 
   /// Set when the learner left.
   final DateTime? withdrawnAt;

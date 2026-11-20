@@ -17,6 +17,7 @@ class JobFeedFilter {
     this.locationId,
     this.availableOnly = false,
     this.forMe = true,
+    this.query,
   });
 
   final bool availableOnly;
@@ -27,9 +28,13 @@ class JobFeedFilter {
   final String? locationId;
   final String? skillId;
 
+  /// Text search on title and description (`q`, 2–100 characters).
+  final String? query;
+
   @override
   bool operator ==(Object other) =>
       other is JobFeedFilter &&
+      other.query == query &&
       other.categoryId == categoryId &&
       other.skillId == skillId &&
       other.locationId == locationId &&
@@ -38,7 +43,7 @@ class JobFeedFilter {
 
   @override
   int get hashCode =>
-      Object.hash(categoryId, skillId, locationId, availableOnly, forMe);
+      Object.hash(categoryId, skillId, locationId, availableOnly, forMe, query);
 }
 
 final jobFeedProvider = FutureProvider.family<List<JobSummary>, JobFeedFilter>(
@@ -50,6 +55,7 @@ final jobFeedProvider = FutureProvider.family<List<JobSummary>, JobFeedFilter>(
         locationId: filter.locationId,
         availableOnly: filter.availableOnly,
         forMe: filter.forMe,
+        query: filter.query,
       ),
 );
 

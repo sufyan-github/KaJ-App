@@ -10,11 +10,13 @@ import '../../../core/formatting/kaaj_format.dart';
 import '../../../core/formatting/latin_digits_formatter.dart';
 import '../../../core/localization/kaaj_localizations.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/routing/route_arguments.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/k_error_state.dart';
 import '../../../core/widgets/k_localized_text.dart';
 import '../../../core/widgets/k_primary_button.dart';
 import '../../../core/widgets/k_text_field.dart';
+import '../../chat/presentation/controllers/chat_providers.dart';
 import '../../jobs/domain/job_models.dart';
 import '../../jobs/presentation/widgets/review_dialog.dart';
 import '../domain/learning_models.dart';
@@ -212,6 +214,17 @@ class _EnrolmentBody extends ConsumerWidget {
           const SizedBox(height: KSpacing.md),
           _LearningReviewPanel(enrolmentId: item.id),
         ],
+        if (item.isActive && item.otherUserId != null) ...[
+          const SizedBox(height: KSpacing.md),
+          OutlinedButton.icon(
+            key: const ValueKey('learning-message'),
+            onPressed: () => _message(context, ref),
+            icon: const Icon(Icons.chat_outlined),
+            label: KLocalizedText(
+              item.isMentor ? 'শিক্ষার্থীকে বার্তা দিন' : 'মেন্টরকে বার্তা দিন',
+            ),
+          ),
+        ],
         if (item.withdrawnAt != null || item.status == 'CANCELLED') ...[
           const SizedBox(height: KSpacing.md),
           KLocalizedText(
@@ -233,6 +246,36 @@ class _EnrolmentBody extends ConsumerWidget {
         ],
       ],
     );
+  }
+
+  /// Learning chats need no subscription (the server exempts them).
+  Future<void> _message(BuildContext context, WidgetRef ref) async {
+    final item = enrolment;
+    try {
+      final id = await ref
+          .read(chatRepositoryProvider)
+          .openConversation(
+            jobId: item.opportunityId,
+            participantUserId: item.otherUserId!,
+          );
+      ref.invalidate(conversationsProvider);
+      if (context.mounted) {
+        await context.push(
+          AppRoutes.chatThread(id),
+          extra: ChatThreadArgs(
+            jobTitle: item.title,
+            otherName: item.isMentor
+                ? item.learnerName
+                : KaajLocalizations.text(context, 'মেন্টর'),
+            otherUserId: item.otherUserId,
+          ),
+        );
+      }
+    } on Object catch (error) {
+      if (context.mounted) {
+        showFailureSnack(context, error, 'আলোচনা এখন খোলা যাচ্ছে না।');
+      }
+    }
   }
 
   Future<void> _confirm(

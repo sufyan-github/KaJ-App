@@ -376,4 +376,21 @@ void main() {
       },
     );
   }
+
+  testWidgets('an approved mentor sets consultation times (R2)', (
+    tester,
+  ) async {
+    final api = FakeApi()
+      ..on(
+        'GET /me/mentor',
+        FakeResponse.data(_mentor('APPROVED', accepting: true)),
+      );
+    await _open(tester, api);
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('mentor-availability')),
+    );
+    await tester.tap(find.byKey(const ValueKey('mentor-availability')));
+    await tester.pumpAndSettle();
+    expect(find.text('route:/w/availability'), findsOneWidget);
+  });
 }

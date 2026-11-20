@@ -444,4 +444,28 @@ void main() {
       expect(find.text('এখনো প্রকাশিত কোনো রিভিউ নেই।'), findsOneWidget);
     });
   });
+
+  testWidgets('a cancelled hire shows the cancellation fee (R2)', (
+    tester,
+  ) async {
+    final api = FakeApi()
+      ..on(
+        'GET /assignments/asg-1',
+        FakeResponse.data({
+          ..._assignment(status: 'CANCELLED'),
+          'cancellationFeePoisha': '20000',
+        }),
+      );
+    await pumpRouted(
+      tester,
+      api: api,
+      home: const AssignmentDetailScreen(assignmentId: 'asg-1'),
+      size: const Size(400, 2400),
+    );
+    expect(
+      find.byKey(const ValueKey('assignment-cancellation-fee')),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Cancellation fee: ৳200'), findsOneWidget);
+  });
 }

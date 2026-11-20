@@ -167,6 +167,14 @@ class _Body extends ConsumerWidget {
             'এটি আপনার প্রকাশ করা শেখার সুযোগ।',
             style: TextStyle(color: KColors.textSecondary),
           ),
+          const SizedBox(height: KSpacing.sm),
+          if (item.closedToApplications)
+            const KLocalizedText(
+              'নতুন আবেদন বন্ধ আছে। ভর্তি হওয়া শিক্ষার্থীরা চালিয়ে যাবেন।',
+              key: ValueKey('learning-closed'),
+            )
+          else if (item.status == 'DRAFT' || item.status == 'APPLICATIONS_OPEN')
+            _StopApplicationsButton(opportunityId: item.id),
           const SizedBox(height: KSpacing.md),
           MentorApplicationsPanel(opportunityId: item.id),
         ] else if (item.hasApplied)
@@ -253,6 +261,64 @@ class _Body extends ConsumerWidget {
           ),
         ),
       );
+    }
+  }
+}
+
+class _StopApplicationsButton extends ConsumerStatefulWidget {
+  const _StopApplicationsButton({required this.opportunityId});
+
+  final String opportunityId;
+
+  @override
+  ConsumerState<_StopApplicationsButton> createState() =>
+      _StopApplicationsButtonState();
+}
+
+class _StopApplicationsButtonState
+    extends ConsumerState<_StopApplicationsButton> {
+  bool _busy = false;
+
+  @override
+  Widget build(BuildContext context) => OutlinedButton.icon(
+    key: const ValueKey('learning-close'),
+    onPressed: _busy ? null : _close,
+    icon: const Icon(Icons.block),
+    label: const KLocalizedText('নতুন আবেদন বন্ধ করুন'),
+  );
+
+  Future<void> _close() async {
+    final sure = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const KLocalizedText('নতুন আবেদন বন্ধ করবেন?'),
+        content: const KLocalizedText(
+          'কেউ ভর্তি না হলে সুযোগটি বন্ধ হয়ে যাবে। ভর্তি হওয়া শিক্ষার্থীরা থাকলে তাঁরা চালিয়ে যাবেন, শুধু নতুন আবেদন বন্ধ হবে।',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const KLocalizedText('বাতিল'),
+          ),
+          FilledButton(
+            key: const ValueKey('learning-close-confirm'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const KLocalizedText('বন্ধ করুন'),
+          ),
+        ],
+      ),
+    );
+    if (sure != true || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      await ref.read(learningRepositoryProvider).close(widget.opportunityId);
+      ref
+        ..invalidate(learningDetailProvider(widget.opportunityId))
+        ..invalidate(myLearningOpportunitiesProvider);
+    } on Object catch (error) {
+      if (mounted) showFailureSnack(context, error, 'বন্ধ করা যায়নি।');
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/error_mapper.dart';
+import '../../../../core/errors/failure_copy.dart';
 import '../../../../core/formatting/kaaj_format.dart';
 import '../../../../core/localization/kaaj_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -254,9 +255,18 @@ class _ActionArea extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (detail.viewerIsPoster) {
-      return const _StatusNote(
+      const mine = _StatusNote(
         icon: Icons.assignment_ind_outlined,
         message: 'এটি আপনার পোস্ট করা কাজ।',
+      );
+      if (detail.job.status != 'DRAFT' && !detail.isOpen) return mine;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          mine,
+          const SizedBox(height: KSpacing.sm),
+          _ClosePostButton(jobId: detail.job.id),
+        ],
       );
     }
     if (detail.viewerApplicationStatus case final status?) {
@@ -303,6 +313,71 @@ class _ActionArea extends ConsumerWidget {
       icon: const Icon(Icons.send_outlined),
       label: const KLocalizedText('আবেদন করুন'),
     );
+  }
+}
+
+/// Closes a draft or open post nobody is booked for. Unfilled posts also
+/// expire on their own after their date.
+class _ClosePostButton extends ConsumerStatefulWidget {
+  const _ClosePostButton({required this.jobId});
+
+  final String jobId;
+
+  @override
+  ConsumerState<_ClosePostButton> createState() => _ClosePostButtonState();
+}
+
+class _ClosePostButtonState extends ConsumerState<_ClosePostButton> {
+  bool _busy = false;
+
+  @override
+  Widget build(BuildContext context) => OutlinedButton.icon(
+    key: const ValueKey('job-close'),
+    onPressed: _busy ? null : _close,
+    icon: const Icon(Icons.block),
+    label: const KLocalizedText('পোস্ট বন্ধ করুন'),
+  );
+
+  Future<void> _close() async {
+    final sure = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const KLocalizedText('পোস্টটি বন্ধ করবেন?'),
+        content: const KLocalizedText(
+          'কেউ আর আবেদন করতে পারবেন না। অপেক্ষায় থাকা আবেদনগুলোও বন্ধ হবে।',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const KLocalizedText('বাতিল'),
+          ),
+          FilledButton(
+            key: const ValueKey('job-close-confirm'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const KLocalizedText('বন্ধ করুন'),
+          ),
+        ],
+      ),
+    );
+    if (sure != true || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      await ref.read(jobsRepositoryProvider).closeJob(widget.jobId);
+      ref
+        ..invalidate(jobDetailProvider(widget.jobId))
+        ..invalidate(myJobsProvider);
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(content: KLocalizedText('পোস্টটি বন্ধ করা হয়েছে।')),
+          );
+      }
+    } on Object catch (error) {
+      if (mounted) showFailureSnack(context, error, 'পোস্টটি বন্ধ করা যায়নি।');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 }
 
