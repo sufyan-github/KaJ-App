@@ -19,6 +19,10 @@ import { JobsService } from "../src/modules/jobs/jobs.service";
 import { NotificationsService } from "../src/modules/notifications/notifications.service";
 import { ReviewsService } from "../src/modules/reviews/reviews.service";
 
+// recomputeAllReputation walks every user in the shared test database,
+// which grows with the suites; the default 5 s is too short for it.
+jest.setTimeout(60_000);
+
 const databaseDescribe =
   process.env.TRUST_DATABASE_E2E === "1" ? describe : describe.skip;
 

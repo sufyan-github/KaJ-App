@@ -35,6 +35,9 @@ import { rateBps, rawRating, workerReliability } from "./reputation.calculator";
 
 const REVIEW_WINDOW_MS = 7 * 24 * 60 * 60_000;
 
+/** Q3: people per reputation transaction. */
+const RECOMPUTE_BATCH = 200;
+
 @Injectable()
 export class ReviewsService {
   private readonly states = new JobStateMachine();
@@ -411,13 +414,19 @@ export class ReviewsService {
         ],
       },
       select: { id: true },
+      orderBy: { id: "asc" },
     });
-    await this.prisma.$transaction((transaction) =>
-      this.recomputeProfiles(
-        transaction,
-        users.map((user) => user.id),
-      ),
-    );
+    // Q3: one short transaction per 200 people instead of one for everyone
+    // (that one outgrew the 5 s transaction limit as users grew). Each
+    // person's figures are independent, so batches change nothing else.
+    const ids = users.map((user) => user.id);
+    for (let start = 0; start < ids.length; start += RECOMPUTE_BATCH)
+      await this.prisma.$transaction((transaction) =>
+        this.recomputeProfiles(
+          transaction,
+          ids.slice(start, start + RECOMPUTE_BATCH),
+        ),
+      );
     await this.reconcileBadges();
     return { refreshedUsers: users.length };
   }
