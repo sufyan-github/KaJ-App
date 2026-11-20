@@ -21,10 +21,6 @@ import {
   ReportConversationDto,
   SendMessageDto,
 } from "./dto/chat.dto";
-import {
-  SubscriptionFeature,
-  SubscriptionFeatures,
-} from "../subscriptions/subscription-feature";
 
 @ApiTags("chat")
 @Controller()
@@ -37,9 +33,9 @@ export class ChatController {
     return this.chat.list(claims.sub);
   }
 
+  // Direct contact is checked in ChatService.open: paid work only (W3).
   @Post("jobs/:jobId/conversations")
   @Policy(Policies.authenticated())
-  @SubscriptionFeature(SubscriptionFeatures.directContact)
   open(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("jobId", new ParseUUIDPipe()) jobId: string,

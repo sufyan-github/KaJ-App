@@ -6,13 +6,14 @@ import {
 } from "../../common/guards/account-moderation.reader";
 import { AuthModule } from "../auth/auth.module";
 import { NotificationsModule } from "../notifications/notifications.module";
+import { SubscriptionsModule } from "../subscriptions/subscriptions.module";
 import { ChatController } from "./chat.controller";
 import { ChatEvents } from "./chat.events";
 import { ChatGateway } from "./chat.gateway";
 import { ChatService } from "./chat.service";
 
 @Module({
-  imports: [AuthModule, NotificationsModule],
+  imports: [AuthModule, NotificationsModule, SubscriptionsModule],
   controllers: [ChatController],
   providers: [
     ChatEvents,

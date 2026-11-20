@@ -22,6 +22,10 @@ import { NotificationsService } from "../notifications/notifications.service";
 import { EngagementService } from "../safety/engagement.service";
 import { visibleDisplayName } from "../users/public-profile.projection";
 import { USER_BLOCKED, UserBlocksService } from "../safety/user-blocks.service";
+import { isWork } from "../jobs/opportunity";
+import { SubscriptionFeatures } from "../subscriptions/subscription-feature";
+import { subscriptionRequiredError } from "../subscriptions/subscription.guard";
+import { SubscriptionsService } from "../subscriptions/subscriptions.service";
 import { ChatEvents } from "./chat.events";
 import { needsPaymentSafetyWarning } from "./chat-safety";
 import { MessagePageQueryDto, SendMessageDto } from "./dto/chat.dto";
@@ -37,6 +41,7 @@ export class ChatService {
     @Optional() private readonly userBlocks?: UserBlocksService,
     @Optional() private readonly engagementService?: EngagementService,
     @Optional() private readonly rateLimiter?: UserRateLimiter,
+    @Optional() private readonly subscriptions?: SubscriptionsService,
   ) {}
 
   private get blocks() {
@@ -149,9 +154,18 @@ export class ChatService {
       throw new BadRequestException("Cannot message yourself.");
     const job = await this.prisma.job.findFirst({
       where: { id: jobId, deleted_at: null },
-      select: { id: true, poster_user_id: true },
+      select: { id: true, poster_user_id: true, opportunity_type: true },
     });
     if (!job) throw new NotFoundException();
+    // W3: starting a conversation about paid work needs direct contact;
+    // Learn is free, so learning opportunities need no subscription.
+    if (isWork(job) && this.subscriptions) {
+      const access = await this.subscriptions.accessFor(
+        userId,
+        SubscriptionFeatures.directContact,
+      );
+      if (!access.allowed) throw subscriptionRequiredError();
+    }
     const workerUserId =
       userId === job.poster_user_id ? participantUserId : userId;
     const isPair =
