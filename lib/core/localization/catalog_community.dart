@@ -62,9 +62,7 @@ const communityTranslations = <String, String>{
   "কোন বিষয়ে কথা বলতে চান, তা বেছে নিন।":
       "Choose what you want to talk about.",
   "অনুরোধ পাঠানো হয়েছে।": "Request sent.",
-  "অনুরোধ পাঠানো যায়নি। আবার চেষ্টা করুন।":
-      "Could not send the request. Try again.",
-  "পরিচয়ের অনুরোধ": "Introduction request",
+
   "বিশেষজ্ঞ": "Expert",
   "বিশেষজ্ঞ গ্রহণ করলে আপনাদের মধ্যে অ্যাপের ভেতরে চ্যাট খুলবে। ফোন নম্বর বা ইমেইল কাউকে দেখানো হয় না। উত্তর না এলে ৭ দিন পরে অনুরোধের মেয়াদ শেষ হয়।":
       "If the expert accepts, a chat opens between you in the app. Phone numbers and emails are never shown. Without an answer the request expires after 7 days.",
@@ -313,7 +311,7 @@ const communityTranslations = <String, String>{
   // Pieces composed with numbers or values
   "সেখানেই নগদে": "cash on the spot",
   "মতামতের শেষ সময়": "Feedback closes",
-  "জন সদস্য": "members",
+
   "জনকে আমন্ত্রণ পাঠানো হয়েছে।": "people invited.",
   // Community groups
   "সব অনুরোধ": "All requests",
@@ -376,7 +374,6 @@ const communityTranslations = <String, String>{
   "আপনি দলে যোগ দিয়েছেন।": "You joined the group.",
   "দলে যোগ দেওয়া যায়নি। আবার চেষ্টা করুন।":
       "Could not join the group. Try again.",
-  "দল ছেড়ে দেবেন?": "Leave the group?",
   "অনুরোধ তুলে নেবেন?": "Cancel your request?",
   "আপনি আর দলের চ্যাট, ঘোষণা ও সেশন দেখতে পাবেন না।":
       "You will no longer see the group chat, announcements and sessions.",
@@ -401,7 +398,6 @@ const communityTranslations = <String, String>{
   "ঘোষণা": "Announcements",
   "দলের সেশন": "Group sessions",
   "সদস্য ও অনুরোধ": "Members and requests",
-  "দল ছেড়ে দিন": "Leave the group",
   "দল সম্পাদনা": "Edit group",
   "দল সংরক্ষণ হয়েছে।": "Group saved.",
   "দল তৈরি হয়েছে। আপনি এর মডারেটর।": "Group created. You are its moderator.",
