@@ -54,7 +54,18 @@ databaseDescribe("attendance lifecycle with PostgreSQL", () => {
       }),
     ]);
     categoryId = category.id;
-    locationId = location.id;
+    // An area without a centre (seeded areas have one since R2 W1), for
+    // the "nothing to measure against" cases.
+    locationId = (
+      await prisma.location.create({
+        data: {
+          parent_id: location.parent_id,
+          type: "AREA",
+          name_en: `Attendance area without centre ${Date.now()}`,
+          name_bn: "কেন্দ্রহীন পরীক্ষা এলাকা",
+        },
+      })
+    ).id;
     originalFlag = flag;
     const pinnedArea = await prisma.location.create({
       data: {
@@ -107,6 +118,7 @@ databaseDescribe("attendance lifecycle with PostgreSQL", () => {
     await prisma.job.deleteMany({ where: { id: { in: createdJobIds } } });
     await prisma.user.deleteMany({ where: { id: { in: createdUserIds } } });
     await prisma.location.delete({ where: { id: pinnedAreaId } });
+    await prisma.location.delete({ where: { id: locationId } });
     await prisma.featureFlag.update({
       where: { key: "checkin_enabled" },
       data: originalFlag ?? { is_enabled: false, rollout_percent: 0 },
