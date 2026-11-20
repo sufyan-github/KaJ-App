@@ -274,6 +274,25 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, input: UpdateProfileDto) {
+    // W16: a profile's area is an active area or thana, never the whole
+    // city (the app's picker offers a thana for people who prefer not to be
+    // more precise, but never the city alone).
+    if (input.primaryLocationId) {
+      const place = await this.prisma.location.count({
+        where: {
+          id: input.primaryLocationId,
+          type: { in: ["AREA", "THANA"] },
+          is_active: true,
+        },
+      });
+      if (!place)
+        throw new BadRequestException({
+          code: "VALIDATION_FAILED",
+          message: "Choose your area or thana, not the whole city.",
+          messageKey: "error.validation.failed",
+          field: "primaryLocationId",
+        });
+    }
     // API-9: after identity verification the gender is the verified one.
     if (input.gender !== undefined) {
       const current = await this.prisma.profile.findUnique({

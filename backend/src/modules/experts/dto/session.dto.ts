@@ -1,3 +1,4 @@
+import { IsOptionalNotNull } from "../../../common/validation/optional-not-null";
 import {
   SessionMode,
   SessionParticipantStatus,
@@ -106,7 +107,7 @@ export class CreateSessionDto extends SessionPlaceDto {
 
 /** PATCH /sessions/:id — any subset (host; not once cancelled or completed). */
 export class UpdateSessionDto {
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsString()
   @MinLength(3)
   @MaxLength(120)
@@ -117,18 +118,18 @@ export class UpdateSessionDto {
   @MaxLength(2000)
   description?: string | null;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsDateString()
   startsAt?: string;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @Type(() => Number)
   @IsInt()
   @Min(15)
   @Max(720)
   durationMinutes?: number;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsEnum(SessionMode)
   mode?: SessionMode;
 
@@ -141,14 +142,14 @@ export class UpdateSessionDto {
   @MaxLength(500)
   onlineLink?: string | null;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(1000)
   capacity?: number;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsEnum(SessionPriceModel)
   priceModel?: SessionPriceModel;
 
@@ -156,11 +157,11 @@ export class UpdateSessionDto {
   @Matches(MONEY)
   pricePoisha?: string | null;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsBoolean()
   womenOnly?: boolean;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsBoolean()
   homeBasedFriendly?: boolean;
 }

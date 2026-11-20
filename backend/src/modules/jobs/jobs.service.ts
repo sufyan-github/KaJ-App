@@ -153,6 +153,18 @@ export class JobsService {
     }
     if (input.recurrenceRule) await this.recurrence?.assertEnabled();
     assertSingleWorker(input.workersRequired ?? 1);
+    // W16: a budget's minimum can't be above its maximum.
+    if (
+      input.budgetMinPoisha !== undefined &&
+      input.budgetMaxPoisha !== undefined &&
+      BigInt(input.budgetMinPoisha) > BigInt(input.budgetMaxPoisha)
+    )
+      throw new BadRequestException({
+        code: "VALIDATION_FAILED",
+        message: "The highest budget must be at least the lowest.",
+        messageKey: "error.validation.failed",
+        field: "budgetMaxPoisha",
+      });
     assertNoGenderRestriction(input);
     await this.assertActiveReferences(input.categoryId, input.locationId);
     if (input.businessProfileId)
