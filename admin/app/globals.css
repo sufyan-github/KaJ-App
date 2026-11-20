@@ -1046,3 +1046,16 @@ small.overdue {
   color: #b42318;
   font-weight: 600;
 }
+.cap-meter {
+  height: 8px;
+  max-width: 420px;
+  margin: 8px 0 12px;
+  background: var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.cap-meter span {
+  display: block;
+  height: 100%;
+  background: var(--green);
+}

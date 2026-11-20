@@ -1,6 +1,7 @@
 "use client";
 import { FormEvent, ReactNode, useCallback, useEffect, useState } from "react";
 import { adminApi, json } from "@/lib/admin-api";
+import { AiUsage } from "./ai-usage";
 import {
   AdminLocale,
   friendlyAdminError,
@@ -34,6 +35,7 @@ type ModuleKey =
   | "learn"
   | "business"
   | "community"
+  | "aiUsage"
   | "audit";
 const modules: Array<[ModuleKey, string, string]> = [
   ["dashboard", "Dashboard", "Live marketplace health"],
@@ -55,6 +57,7 @@ const modules: Array<[ModuleKey, string, string]> = [
   ["learn", "Learn", "Mentors, learning and courses"],
   ["business", "Business", "Sectors, business verification and content"],
   ["community", "Community", "Groups, sessions, events and ambassadors"],
+  ["aiUsage", "AI usage", "Calls, estimated cost and daily caps"],
   ["audit", "Audit trail", "Who changed what"],
 ];
 export function OperationsConsole({
@@ -83,16 +86,19 @@ export function OperationsConsole({
           </div>
         </div>
         <nav>
-          {modules.map(([key, name], index) => (
-            <button
-              className={active === key ? "active" : ""}
-              key={key}
-              onClick={() => setActive(key)}
-            >
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              {tr(name)}
-            </button>
-          ))}
+          {modules
+            // AI usage is ADMIN only (GET admin/ai/usage).
+            .filter(([key]) => key !== "aiUsage" || admin.role === "ADMIN")
+            .map(([key, name], index) => (
+              <button
+                className={active === key ? "active" : ""}
+                key={key}
+                onClick={() => setActive(key)}
+              >
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                {tr(name)}
+              </button>
+            ))}
         </nav>
         <div className="account">
           <div className="avatar">{admin.email[0]?.toUpperCase()}</div>
@@ -166,6 +172,7 @@ function ModuleView({ active }: { active: ModuleKey }) {
   if (active === "learn") return <Learn />;
   if (active === "business") return <Business />;
   if (active === "community") return <Community />;
+  if (active === "aiUsage") return <AiUsage />;
   return <AuditTrail />;
 }
 function useData<T>(path: string) {

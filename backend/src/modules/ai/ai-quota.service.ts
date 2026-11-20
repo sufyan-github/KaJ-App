@@ -104,6 +104,16 @@ export class AiQuotaService {
     };
   }
 
+  /** Calls counted against the global daily cap today (null: Redis unreadable). */
+  async globalUsedToday(): Promise<number | null> {
+    try {
+      const value = await this.store().get(`ai:quota:global:${this.day()}`);
+      return Math.max(0, Number(value ?? 0));
+    } catch {
+      return null;
+    }
+  }
+
   /** The next Asia/Dhaka midnight, when every quota resets. */
   resetsAt(): Date {
     const local = this.clock.now().getTime() + DHAKA_OFFSET_MS;
