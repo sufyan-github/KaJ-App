@@ -25,6 +25,8 @@ import {
 } from "@prisma/client";
 
 import { pageArgs, pageResult } from "../../common/api/cursor-page";
+import { assertMayActOnAccount } from "../admin-auth/staff-accounts";
+import { assertValidConfig } from "./config-rules";
 import { applyMentorDecision } from "../mentors/mentor-decision";
 import { isWork } from "../jobs/opportunity";
 import { PrismaService } from "../../infra/prisma/prisma.service";
@@ -226,6 +228,7 @@ export class AdminOpsService {
       throw new ConflictException("Admins cannot moderate their own account.");
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException();
+    await assertMayActOnAccount(this.prisma, actor, id);
     if (input.status !== UserStatus.ACTIVE) {
       throw new ConflictException(
         "Use the progressive moderation endpoint for warnings, restrictions, suspensions, and bans.",
@@ -295,6 +298,7 @@ export class AdminOpsService {
   ) {
     const exists = await this.prisma.user.count({ where: { id } });
     if (!exists) throw new NotFoundException();
+    await assertMayActOnAccount(this.prisma, actor, id);
     const now = new Date();
     const [mobile, admin] = await this.prisma.$transaction([
       this.prisma.refreshToken.updateMany({
@@ -1092,6 +1096,7 @@ export class AdminOpsService {
       where: { key },
     });
     if (!current) throw new NotFoundException();
+    assertValidConfig(key, input.value);
     await this.audit(
       actor,
       "ADMIN_CONFIG_PREVIEWED",
@@ -1129,6 +1134,7 @@ export class AdminOpsService {
       current.updated_at.toISOString() !== input.expectedUpdatedAt
     )
       throw new ConflictException("Configuration changed since preview.");
+    assertValidConfig(key, input.value);
     const after = input.value as Prisma.InputJsonValue;
     const revision = await this.prisma.$transaction(async (transaction) => {
       await transaction.configSetting.update({
@@ -1174,6 +1180,7 @@ export class AdminOpsService {
       where: { key: revision.key },
     });
     if (!current) throw new NotFoundException();
+    assertValidConfig(revision.key, revision.before_json);
     const reverted = await this.prisma.$transaction(async (transaction) => {
       await transaction.configSetting.update({
         where: { key: revision.key },

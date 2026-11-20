@@ -4,10 +4,15 @@ import request from "supertest";
 
 import { configureApp } from "../src/app.bootstrap";
 import { AppModule } from "../src/app.module";
+import { ACCOUNT_MODERATION_READER } from "../src/common/guards/account-moderation.reader";
+import { AuthTokenService } from "../src/modules/auth/auth-token.service";
 import { PrismaService } from "../src/infra/prisma/prisma.service";
 import { STORAGE_PORT } from "../src/infra/storage/storage.port";
 
 const WORKER_ID = "018f4f6f-13e8-7d9a-8c2b-6b6a9f62f901";
+// API-6: these routes need a sign-in. The stub accepts this one token as the
+// worker viewing their own profile (no block or engagement lookups).
+const TOKEN = "Bearer test-access-token";
 
 describe("public worker profile endpoint", () => {
   let app: INestApplication;
@@ -24,6 +29,28 @@ describe("public worker profile endpoint", () => {
       })
       .overrideProvider(STORAGE_PORT)
       .useValue({ createDownloadUrl })
+      .overrideProvider(ACCOUNT_MODERATION_READER)
+      .useValue({
+        findAccount: async () => ({
+          status: "ACTIVE",
+          deleted_at: null,
+          reverification_required: false,
+          moderation_level: "NONE",
+          restriction_ends_at: null,
+        }),
+      })
+      .overrideProvider(AuthTokenService)
+      .useValue({
+        verifyAccessToken: async (token: string) => {
+          if (token !== TOKEN.slice(7)) throw new Error("invalid");
+          return {
+            sub: WORKER_ID,
+            type: "access",
+            deviceId: "test-device",
+            roles: ["WORKER"],
+          };
+        },
+      })
       .compile();
     app = moduleRef.createNestApplication({ logger: false });
     configureApp(app);
@@ -60,9 +87,18 @@ describe("public worker profile endpoint", () => {
     });
   });
 
-  it("returns the masked D10 projection anonymously", async () => {
+  it("needs a sign-in for the profile and the directory (API-6)", async () => {
+    await request(app.getHttpServer())
+      .get(`/api/v1/users/${WORKER_ID}/public`)
+      .expect(401);
+    await request(app.getHttpServer()).get("/api/v1/users/workers").expect(401);
+    expect(findFirst).not.toHaveBeenCalled();
+  });
+
+  it("returns the masked D10 projection to a signed-in viewer", async () => {
     const response = await request(app.getHttpServer())
       .get(`/api/v1/users/${WORKER_ID}/public`)
+      .set("Authorization", TOKEN)
       .expect(200);
 
     expect(response.body.data).toMatchObject({
@@ -83,12 +119,14 @@ describe("public worker profile endpoint", () => {
     findFirst.mockResolvedValue(null);
     await request(app.getHttpServer())
       .get(`/api/v1/users/${WORKER_ID}/public`)
+      .set("Authorization", TOKEN)
       .expect(404);
   });
 
   it("rejects a malformed public user id", async () => {
     await request(app.getHttpServer())
       .get("/api/v1/users/not-a-uuid/public")
+      .set("Authorization", TOKEN)
       .expect(400);
   });
 
@@ -97,6 +135,7 @@ describe("public worker profile endpoint", () => {
     async (field) => {
       await request(app.getHttpServer())
         .get(`/api/v1/users/workers?${field}=not-a-uuid`)
+        .set("Authorization", TOKEN)
         .expect(400);
     },
   );

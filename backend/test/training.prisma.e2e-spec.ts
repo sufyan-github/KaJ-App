@@ -428,7 +428,10 @@ databaseDescribe("training MVP and quick wins with PostgreSQL", () => {
   });
 
   it("shows valid certificates on the public worker profile", async () => {
-    const response = await get(`users/${worker.id}/public`).expect(200);
+    // API-6: public profiles need a sign-in.
+    const response = await get(`users/${worker.id}/public`, stranger).expect(
+      200,
+    );
     expect(response.body.data.trainings).toEqual([
       {
         kind: "QUIZ",
@@ -440,7 +443,7 @@ databaseDescribe("training MVP and quick wins with PostgreSQL", () => {
         isSafetyCritical: false,
       },
     ]);
-    const other = await get(`users/${rival.id}/public`).expect(200);
+    const other = await get(`users/${rival.id}/public`, stranger).expect(200);
     expect(other.body.data.trainings).toEqual([]);
   });
 

@@ -301,7 +301,9 @@ export class BusinessesService {
       where: { business_profile_id: id },
       include: {
         user: {
-          select: { profile: { select: { display_name: true } } },
+          select: {
+            profile: { select: { display_name: true, show_full_name: true } },
+          },
         },
       },
       orderBy: [{ created_at: "asc" }, { id: "asc" }],
@@ -310,7 +312,11 @@ export class BusinessesService {
       items: rows.map((row) => ({
         userId: row.user_id,
         // Members of one business work together: full names among them.
-        displayName: row.user.profile?.display_name?.trim() ?? "",
+        // Someone only invited is not a member yet (R1 name rule, G3).
+        displayName: visibleDisplayName(row.user.profile?.display_name ?? "", {
+          showFullName: row.user.profile?.show_full_name ?? false,
+          hired: row.accepted_at !== null,
+        }),
         role: row.role,
         status: row.accepted_at ? "ACTIVE" : "INVITED",
         invitedAt: row.created_at.toISOString(),

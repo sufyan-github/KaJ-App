@@ -12,9 +12,10 @@ these settings existed.
 | `allowMessagesFrom` | `ANYONE`, `ENGAGED_ONLY`           | `ENGAGED_ONLY`: starting a new conversation with the person needs a hire between the two (`403 MESSAGES_NOT_ALLOWED`). Existing conversations keep working.                                                 |
 | `discoverable`      | `true`, `false`                    | `false` leaves the worker out of `GET /users/workers` and suggested workers; their profile and slots return 404 except to people already dealing with them (an application, offer or hire between the two). |
 
-Signed-in viewers should send their bearer token to the public routes
-(`GET /users/workers`, `GET /users/:id/public`) so blocks and "after hire"
-rules apply to them; without a token they are treated as anonymous.
+The worker directory and public profiles (`GET /users/workers`,
+`GET /users/:id/public`) need a bearer token (R1, API-6): without one they
+answer 401 `ACCESS_TOKEN_INVALID`. So blocks, "after hire" and
+"discoverable" always apply; signing out does not get around a block.
 
 ## Availability slots
 

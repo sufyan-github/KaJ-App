@@ -193,8 +193,9 @@ databaseDescribe("mentor capability (real HTTP)", () => {
         skills: [expect.objectContaining({ skillId, nameBn: "ফোন মেরামত" })],
       }),
     ]);
+    // API-6: public profiles need a sign-in.
     const publicProfile = await api
-      .get(`users/${mentor.id}/public`)
+      .get(`users/${mentor.id}/public`, learner)
       .expect(200);
     expect(publicProfile.body.data.mentor).toMatchObject({
       accepting: true,

@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { Prisma, RoleMode } from "@prisma/client";
+import { Prisma, RoleMode, TrustLevel } from "@prisma/client";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { activateRoleMode } from "./role-modes";
@@ -15,6 +15,11 @@ import { UpdateWorkerProfileDto } from "./dto/update-worker-profile.dto";
 import { WorkerSkillInputDto } from "./dto/update-worker-skills.dto";
 import { validateWorkerSkillIds } from "./worker-skills.rules";
 import { AuthTokenService } from "../auth/auth-token.service";
+import { EngagementService } from "../safety/engagement.service";
+import { UserBlocksService } from "../safety/user-blocks.service";
+import { genderLocked } from "../safety/women-only";
+import { hasTrust } from "../verification/trust-level";
+import { visibleDisplayName } from "./public-profile.projection";
 
 @Injectable()
 export class UsersService {
@@ -259,6 +264,20 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, input: UpdateProfileDto) {
+    // API-9: after identity verification the gender is the verified one.
+    if (input.gender !== undefined) {
+      const current = await this.prisma.profile.findUnique({
+        where: { user_id: userId },
+        select: { gender: true, trust_level: true },
+      });
+      if (
+        current &&
+        current.gender !== null &&
+        current.gender !== input.gender &&
+        hasTrust(current.trust_level, TrustLevel.IDENTITY)
+      )
+        throw genderLocked();
+    }
     const profile = await this.prisma.profile.upsert({
       where: { user_id: userId },
       update: {
@@ -402,15 +421,35 @@ export class UsersService {
   }
 
   async favorites(userId: string) {
-    const rows = await this.prisma.favorite.findMany({
-      where: { user_id: userId },
+    const engagement = new EngagementService(this.prisma);
+    // W6 (D-9): nobody in a block with you; nobody who left the directory
+    // unless you already deal with them (the public-profile rule).
+    const hidden = await new UserBlocksService(this.prisma).hiddenFrom(userId);
+    const saved = await this.prisma.favorite.findMany({
+      where: { user_id: userId, target_user_id: { notIn: hidden } },
       include: { target: { include: { profile: true, worker_profile: true } } },
       orderBy: { created_at: "desc" },
     });
+    const rows = [];
+    for (const row of saved)
+      if (
+        row.target.profile?.discoverable !== false ||
+        (await engagement.engaged(userId, row.target_user_id))
+      )
+        rows.push(row);
+    // One name rule (R1): masked unless shown by choice or already hired.
+    const hiredWith = await engagement.hiredWith(
+      userId,
+      rows.map((row) => row.target_user_id),
+    );
     return {
       items: rows.map((row) => ({
         userId: row.target_user_id,
-        displayName: row.target.profile?.display_name || "কর্মী",
+        displayName:
+          visibleDisplayName(row.target.profile?.display_name ?? "", {
+            showFullName: row.target.profile?.show_full_name ?? false,
+            hired: hiredWith.has(row.target_user_id),
+          }) || "কর্মী",
         ratingAverage: row.target.worker_profile?.rating_avg.toString() ?? "0",
         savedAt: row.created_at.toISOString(),
       })),
@@ -426,9 +465,17 @@ export class UsersService {
         worker_profile: { isNot: null },
         deleted_at: null,
       },
-      select: { id: true },
+      select: { id: true, profile: { select: { discoverable: true } } },
     });
     if (!worker) throw new NotFoundException();
+    // W6 (D-9): the same 404 a blocked or hidden public profile gives.
+    if (await new UserBlocksService(this.prisma).between(userId, workerId))
+      throw new NotFoundException();
+    if (
+      worker.profile?.discoverable === false &&
+      !(await new EngagementService(this.prisma).engaged(userId, workerId))
+    )
+      throw new NotFoundException();
     await this.prisma.favorite.upsert({
       where: {
         user_id_target_user_id: { user_id: userId, target_user_id: workerId },

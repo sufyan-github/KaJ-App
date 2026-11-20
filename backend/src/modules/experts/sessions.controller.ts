@@ -11,6 +11,7 @@ import {
 import { ApiTags } from "@nestjs/swagger";
 
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { UserRateLimit } from "../../common/rate-limit/user-rate-limit";
 import { Policy } from "../../common/policy/policy.decorator";
 import { Policies } from "../../common/policy/policy.types";
 import { AttendanceLocationDto } from "../attendance/dto/attendance.dto";
@@ -48,6 +49,7 @@ export class SessionsController {
   }
 
   @Post("sessions/consultations")
+  @UserRateLimit("consultation-hold")
   @Policy(Policies.authenticated())
   book(
     @CurrentUser() claims: AccessTokenClaims,
@@ -134,6 +136,7 @@ export class SessionsController {
   }
 
   @Post("sessions/:id/invite")
+  @UserRateLimit("invite")
   @Policy(Policies.authenticated())
   invite(
     @CurrentUser() claims: AccessTokenClaims,

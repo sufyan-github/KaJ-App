@@ -12,7 +12,13 @@ import { DHAKA_OFFSET_MINUTES } from "../availability/availability.calculator";
 
 export const workerSelect = {
   id: true,
-  profile: { select: { display_name: true, primary_location_id: true } },
+  profile: {
+    select: {
+      display_name: true,
+      show_full_name: true,
+      primary_location_id: true,
+    },
+  },
   worker_profile: {
     select: {
       hourly_rate_poisha: true,

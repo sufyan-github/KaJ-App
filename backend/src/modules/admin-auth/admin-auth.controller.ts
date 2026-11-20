@@ -13,7 +13,11 @@ import { Request } from "express";
 import { Policy } from "../../common/policy/policy.decorator";
 import { Policies } from "../../common/policy/policy.types";
 import { AdminAuthService } from "./admin-auth.service";
-import { CurrentAdmin } from "./admin-auth.decorators";
+import {
+  ALL_ADMIN_ROLES,
+  AdminRoles,
+  CurrentAdmin,
+} from "./admin-auth.decorators";
 import { AdminSessionGuard } from "./admin-session.guard";
 import { AdminActor, AdminRequestContext } from "./admin-auth.types";
 import { AdminLoginDto, AdminTotpDto } from "./dto/admin-auth.dto";
@@ -41,6 +45,7 @@ export class AdminAuthController {
   @Get("session")
   @Policy(Policies.public())
   @UseGuards(AdminSessionGuard)
+  @AdminRoles(...ALL_ADMIN_ROLES)
   session(@CurrentAdmin() actor: AdminActor, @Req() request: Request) {
     return this.auth.session(actor, this.context(request));
   }
@@ -48,6 +53,7 @@ export class AdminAuthController {
   @Post("logout")
   @Policy(Policies.public())
   @UseGuards(AdminSessionGuard)
+  @AdminRoles(...ALL_ADMIN_ROLES)
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(
     @CurrentAdmin() actor: AdminActor,
