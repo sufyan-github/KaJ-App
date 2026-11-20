@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/errors/error_mapper.dart';
 import '../../../../core/errors/failure_copy.dart';
 import '../../../../core/formatting/kaaj_format.dart';
 import '../../../../core/localization/kaaj_localizations.dart';
@@ -65,6 +66,9 @@ Future<void> showJobApplyFlow(
   // A refusal is shown inside the dialog: a snack bar would sit behind it.
   String? submitError;
   var submitting = false;
+  // Set when the server says identity must be verified first (409
+  // IDENTITY_REQUIRED, action VERIFY_IDENTITY): offer the way there.
+  var needsIdentity = false;
   await showDialog<void>(
     context: context,
     builder: (dialogContext) => StatefulBuilder(
@@ -153,58 +157,71 @@ Future<void> showJobApplyFlow(
             onPressed: () => Navigator.pop(dialogContext),
             child: const KLocalizedText('ফিরুন'),
           ),
-          FilledButton(
-            onPressed: job.isTimeUnavailable || submitting
-                ? null
-                : () async {
-                    final taka = int.tryParse(amount.text);
-                    if (taka == null || taka <= 0) {
-                      setDialogState(
-                        () => submitError = KaajLocalizations.text(
-                          dialogContext,
-                          'প্রস্তাবিত টাকার পরিমাণ লিখুন।',
-                        ),
-                      );
-                      return;
-                    }
-                    setDialogState(() {
-                      submitting = true;
-                      submitError = null;
-                    });
-                    try {
-                      await ref
-                          .read(jobsRepositoryProvider)
-                          .apply(
-                            jobId: job.id,
-                            startsAt: start,
-                            endsAt: end,
-                            proposedPricePoisha: taka * 100,
-                            message: message.text,
-                          );
-                      if (dialogContext.mounted) Navigator.pop(dialogContext);
-                      onApplied?.call();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: KLocalizedText('আবেদন পাঠানো হয়েছে।'),
+          if (needsIdentity)
+            FilledButton(
+              key: const ValueKey('apply-verify-identity'),
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                context.push(AppRoutes.verificationCapture('IDENTITY'));
+              },
+              child: const KLocalizedText('পরিচয় যাচাই করুন'),
+            )
+          else
+            FilledButton(
+              onPressed: job.isTimeUnavailable || submitting
+                  ? null
+                  : () async {
+                      final taka = int.tryParse(amount.text);
+                      if (taka == null || taka <= 0) {
+                        setDialogState(
+                          () => submitError = KaajLocalizations.text(
+                            dialogContext,
+                            'প্রস্তাবিত টাকার পরিমাণ লিখুন।',
                           ),
                         );
+                        return;
                       }
-                    } on Object catch (error) {
-                      if (dialogContext.mounted) {
-                        setDialogState(() {
-                          submitting = false;
-                          submitError = failureText(
-                            dialogContext,
-                            error,
-                            'আবেদন পাঠানো যায়নি। সময়টি যাচাই করুন।',
+                      setDialogState(() {
+                        submitting = true;
+                        submitError = null;
+                      });
+                      try {
+                        await ref
+                            .read(jobsRepositoryProvider)
+                            .apply(
+                              jobId: job.id,
+                              startsAt: start,
+                              endsAt: end,
+                              proposedPricePoisha: taka * 100,
+                              message: message.text,
+                            );
+                        if (dialogContext.mounted) Navigator.pop(dialogContext);
+                        onApplied?.call();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: KLocalizedText('আবেদন পাঠানো হয়েছে।'),
+                            ),
                           );
-                        });
+                        }
+                      } on Object catch (error) {
+                        if (dialogContext.mounted) {
+                          setDialogState(() {
+                            submitting = false;
+                            needsIdentity = ErrorMapper.from(
+                              error,
+                            ).needsIdentityVerification;
+                            submitError = failureText(
+                              dialogContext,
+                              error,
+                              'আবেদন পাঠানো যায়নি। সময়টি যাচাই করুন।',
+                            );
+                          });
+                        }
                       }
-                    }
-                  },
-            child: const KLocalizedText('আবেদন পাঠান'),
-          ),
+                    },
+              child: const KLocalizedText('আবেদন পাঠান'),
+            ),
         ],
       ),
     ),

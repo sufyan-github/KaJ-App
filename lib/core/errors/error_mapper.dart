@@ -67,6 +67,11 @@ abstract final class ErrorMapper {
       messageKey: descriptor['messageKey'] is String
           ? descriptor['messageKey'] as String
           : null,
+      actionType: switch (descriptor['action']) {
+        final Map action when action['type'] is String =>
+          action['type'] as String,
+        _ => null,
+      },
     );
   }
 

@@ -174,12 +174,19 @@ class JobsRepository {
     }
   }
 
-  Future<List<JobApplicationSummary>> getApplications(String jobId) async {
+  Future<List<JobApplicationSummary>> getApplications(
+    String jobId, {
+    String? cursor,
+  }) async {
     try {
       final response = await _dio.get<Map<String, dynamic>>(
         '/jobs/$jobId/applications',
+        queryParameters: {'cursor': ?cursor},
       );
-      return _items(response.data).map(JobApplicationSummary.fromJson).toList();
+      return PagedList(
+        _items(response.data).map(JobApplicationSummary.fromJson).toList(),
+        nextCursor: PagedList.cursorFrom(response.data),
+      );
     } on Object catch (error) {
       throw ErrorMapper.from(error);
     }
@@ -361,10 +368,16 @@ class JobsRepository {
     }
   }
 
-  Future<List<FavoriteWorker>> getFavorites() async {
+  Future<List<FavoriteWorker>> getFavorites({String? cursor}) async {
     try {
-      final response = await _dio.get<Map<String, dynamic>>('/me/favorites');
-      return _items(response.data).map(FavoriteWorker.fromJson).toList();
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/me/favorites',
+        queryParameters: {'cursor': ?cursor},
+      );
+      return PagedList(
+        _items(response.data).map(FavoriteWorker.fromJson).toList(),
+        nextCursor: PagedList.cursorFrom(response.data),
+      );
     } on Object catch (error) {
       throw ErrorMapper.from(error);
     }

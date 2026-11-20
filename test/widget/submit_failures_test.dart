@@ -64,6 +64,41 @@ void main() {
     );
   });
 
+  testWidgets('R3: identity needed on apply offers the way to verify', (
+    tester,
+  ) async {
+    final api = jobApi()
+      ..on(
+        'POST /jobs/job-1/applications',
+        const FakeResponse(409, {
+          'error': {
+            'code': 'IDENTITY_REQUIRED',
+            'messageKey': 'error.jobs.identity_required',
+            'message': 'Verify your identity first.',
+            'action': {
+              'type': 'VERIFY_IDENTITY',
+              'target': 'POST /verification-requests',
+            },
+          },
+        }),
+      );
+    await openJob(tester, api);
+    await tester.tap(find.byKey(const ValueKey('job-apply')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Submit application'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(
+        'Verify your identity (NID and selfie) before applying for or '
+        'confirming work.',
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const ValueKey('apply-verify-identity')));
+    await tester.pumpAndSettle();
+    expect(find.text('route:/verification/IDENTITY/capture'), findsOneWidget);
+  });
+
   group('N4: a refused submit is shown, not swallowed', () {
     testWidgets('slot unavailable keeps the dialog open with the reason', (
       tester,

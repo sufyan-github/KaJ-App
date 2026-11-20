@@ -1386,4 +1386,9 @@ const generatedEnglishTranslations = <String, String>{
       "When people can book a consultation with you",
   "অ্যাকাউন্ট মুছলে প্রোফাইল আর দেখা যাবে না এবং সব ডিভাইস সাইন আউট হবে। ৩০ দিন পরে আপনার ব্যক্তিগত তথ্য মুছে ফেলা হবে এবং এই নম্বর দিয়ে আবার নিবন্ধন করা যাবে। রিভিউ পরিচয়বিহীনভাবে এবং আইনগত আর্থিক রেকর্ড নির্ধারিত সময় রাখা হতে পারে।":
       "Deleting your account hides your profile and signs out every device. After 30 days your personal data is removed and this number can register again. Reviews may stay without your name, and legally required financial records may be kept for the required time.",
+  // R3: lists
+  "তালিকা লোড করা যায়নি। আবার চেষ্টা করুন।":
+      "Could not load the list. Try again.",
+  // R3: blocked list
+  "আনব্লক করা যায়নি। আবার চেষ্টা করুন।": "Could not unblock. Try again.",
 };

@@ -7,6 +7,38 @@
 
 /// Code to (Bangla, English).
 const serverCodeCopy = <String, ({String bn, String en})>{
+  "INVALID_REFERENCE": (
+    bn: "বেছে নেওয়া একটি তথ্য আর নেই। হালনাগাদ করে আবার বেছে নিন।",
+    en: "Something you chose no longer exists. Refresh and choose again.",
+  ),
+  "JOB_STATE_CHANGED": (
+    bn: "কাজটি এইমাত্র বদলেছে। রিফ্রেশ করে আবার চেষ্টা করুন।",
+    en: "This job was just updated. Refresh and try again.",
+  ),
+  "JOB_EXPIRED": (
+    bn: "এই কাজে আর আবেদন নেওয়া হচ্ছে না।",
+    en: "This job is no longer taking applications.",
+  ),
+  "WORKER_NOT_VERIFIED": (
+    bn: "এই কর্মীর পরিচয় এখনও যাচাই হয়নি, তাই বুক করা যাবে না।",
+    en: "This worker hasn't verified their identity yet, so they can't be booked.",
+  ),
+  "SESSION_BEFORE_ENROLMENT": (
+    bn: "শিক্ষার্থী ভর্তি হওয়ার আগের তারিখে সেশন লেখা যায় না।",
+    en: "A learning session can't be dated more than a week before the learner was enrolled.",
+  ),
+  "JOB_ALERT_DUPLICATE": (
+    bn: "এই ফিল্টারে আপনার আগেই একটি সতর্কতা আছে।",
+    en: "You already have an alert for these filters.",
+  ),
+  "JOB_ALERT_LIMIT": (
+    bn: "সর্বোচ্চ সংখ্যক কাজের সতর্কতা আছে। আগে একটি মুছুন।",
+    en: "You have the most job alerts allowed. Delete one first.",
+  ),
+  "BUSINESS_OWNER_REQUIRED": (
+    bn: "শুধু মালিক এটি করতে পারেন।",
+    en: "Only an owner can do this.",
+  ),
   "JOB_NOT_CLOSABLE": (
     bn: "শুধু খসড়া বা কেউ বুক না করা খোলা পোস্ট বন্ধ করা যায়। আগে বুকিংটি বাতিল করুন।",
     en: "Only a draft or an open post nobody is booked for can be closed. Cancel the booking first.",
@@ -391,6 +423,62 @@ const serverCodeCopy = <String, ({String bn, String en})>{
 /// (IDENTITY_REQUIRED for mentors, ideas, groups or women-only spaces), so
 /// the key wins over the code when both are known.
 const serverMessageKeyCopy = <String, ({String bn, String en})>{
+  "error.common.invalid_reference": (
+    bn: "বেছে নেওয়া একটি তথ্য আর নেই। হালনাগাদ করে আবার বেছে নিন।",
+    en: "Something you chose no longer exists. Refresh and choose again.",
+  ),
+  "error.job.state_changed": (
+    bn: "কাজটি এইমাত্র বদলেছে। রিফ্রেশ করে আবার চেষ্টা করুন।",
+    en: "This job was just updated. Refresh and try again.",
+  ),
+  "error.job.expired": (
+    bn: "এই কাজে আর আবেদন নেওয়া হচ্ছে না।",
+    en: "This job is no longer taking applications.",
+  ),
+  "error.job.multi_worker_not_supported": (
+    bn: "একাধিক কর্মীর কাজ এখনও চালু হয়নি। প্রতিজন কর্মীর জন্য আলাদা কাজ দিন।",
+    en: "Jobs for more than one worker are not available yet. Post one job per worker.",
+  ),
+  "error.job.slot_in_past": (
+    bn: "প্রস্তাবিত সময় পেরিয়ে গেছে।",
+    en: "The proposed time has already passed.",
+  ),
+  "error.job.category_policy_unmet": (
+    bn: "এই ধরনের কাজের কিছু শর্ত এখনও পূরণ হয়নি।",
+    en: "Some requirements for this kind of work are not met yet.",
+  ),
+  "error.job.worker_role_required": (
+    bn: "এই অ্যাকাউন্টে কাজ নেওয়ার ব্যবস্থা চালু নেই।",
+    en: "This account is not set up to take work.",
+  ),
+  "error.jobs.identity_required": (
+    bn: "কাজে আবেদন বা নিশ্চিত করার আগে পরিচয় (এনআইডি ও সেলফি) যাচাই করুন।",
+    en: "Verify your identity (NID and selfie) before applying for or confirming work.",
+  ),
+  "error.jobs.worker_not_verified": (
+    bn: "এই কর্মীর পরিচয় এখনও যাচাই হয়নি, তাই বুক করা যাবে না।",
+    en: "This worker hasn't verified their identity yet, so they can't be booked.",
+  ),
+  "error.learning.session_before_enrolment": (
+    bn: "শিক্ষার্থী ভর্তি হওয়ার আগের তারিখে সেশন লেখা যায় না।",
+    en: "A learning session can't be dated more than a week before the learner was enrolled.",
+  ),
+  "error.job_alert.duplicate": (
+    bn: "এই ফিল্টারে আপনার আগেই একটি সতর্কতা আছে।",
+    en: "You already have an alert for these filters.",
+  ),
+  "error.job_alert.limit": (
+    bn: "সর্বোচ্চ সংখ্যক কাজের সতর্কতা আছে। আগে একটি মুছুন।",
+    en: "You have the most job alerts allowed. Delete one first.",
+  ),
+  "error.job_alert.filter_unavailable": (
+    bn: "বেছে নেওয়া ক্যাটাগরি, দক্ষতা বা এলাকা পাওয়া যাচ্ছে না।",
+    en: "A chosen category, skill or area is not available.",
+  ),
+  "error.business.owner_required": (
+    bn: "শুধু মালিক এটি করতে পারেন।",
+    en: "Only an owner can do this.",
+  ),
   "error.job.not_closable": (
     bn: "শুধু খসড়া বা কেউ বুক না করা খোলা পোস্ট বন্ধ করা যায়। আগে বুকিংটি বাতিল করুন।",
     en: "Only a draft or an open post nobody is booked for can be closed. Cancel the booking first.",
