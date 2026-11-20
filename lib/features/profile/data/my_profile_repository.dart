@@ -20,11 +20,15 @@ class MyProfileRepository {
   }
 
   /// Saves the editable profile fields. The display name is required by the
-  /// API on every update, so it is always sent.
+  /// API on every update, so it is always sent. Gender (FEMALE, MALE,
+  /// NON_BINARY, PREFER_NOT_TO_SAY) and birth year are optional and only
+  /// sent when set; women-only groups and sessions need FEMALE.
   Future<void> update({
     required String displayName,
     required String bio,
     String? primaryLocationId,
+    String? gender,
+    int? birthYear,
   }) async {
     try {
       await _dio.put<Map<String, dynamic>>(
@@ -33,6 +37,8 @@ class MyProfileRepository {
           'displayName': displayName.trim(),
           'bio': bio.trim(),
           'primaryLocationId': ?primaryLocationId,
+          'gender': ?gender,
+          'birthYear': ?birthYear,
         },
       );
     } on Object catch (error) {

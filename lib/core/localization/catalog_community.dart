@@ -440,4 +440,15 @@ const communityTranslations = <String, String>{
       "Host a discussion, workshop or event for the group.",
   "মডারেটর বা অ্যাম্বাসেডর সেশন প্রকাশ করলে এখানে দেখা যাবে।":
       "Sessions published by moderators or ambassadors show here.",
+  // Profile gender and birth year
+  "নারী": "Female",
+  "পুরুষ": "Male",
+  "নন-বাইনারি": "Non-binary",
+  "বলতে চাই না": "Prefer not to say",
+  "লিঙ্গ (ঐচ্ছিক)": "Gender (optional)",
+  "শুধু নারীদের দল ও সেশনে যোগ দিতে নারী বেছে নিতে হয়।":
+      "Women-only groups and sessions need Female here.",
+  "জন্ম সাল (ঐচ্ছিক)": "Birth year (optional)",
+  "সঠিক জন্ম সাল লিখুন, যেমন ১৯৯৫।":
+      "Enter a valid birth year, for example 1995.",
 };
