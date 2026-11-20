@@ -157,6 +157,29 @@ Run from a laptop against production; use a staff phone number, not a customer's
 
 Roll back if 1–4 fail: redeploy the previous build; the schema is add-only, so the old code runs on the new schema (rolling the schema back is only needed for the cases in §2's "Rollback" column).
 
+### 6.1 One-off data fix after R2 (W10)
+
+Since R2, leaving or being removed from a group gives up the person's places on the group's sessions. People who left or were removed **before** the deploy may still hold an ACCEPTED or WAITLISTED place, and they can no longer open the session. Free those places once, after the deploy (read-only check first):
+
+```sql
+-- How many?
+SELECT count(*) FROM session_participants sp
+JOIN sessions s ON s.id = sp.session_id
+WHERE s.group_id IS NOT NULL AND s.status IN ('DRAFT', 'SCHEDULED')
+  AND sp.role = 'PARTICIPANT' AND sp.status IN ('INVITED', 'ACCEPTED', 'WAITLISTED')
+  AND NOT EXISTS (SELECT 1 FROM community_group_members m
+                  WHERE m.group_id = s.group_id AND m.user_id = sp.user_id AND m.status = 'ACTIVE');
+-- Free them (same WHERE):
+UPDATE session_participants sp SET status = 'DECLINED', responded_at = now()
+FROM sessions s
+WHERE s.id = sp.session_id AND s.group_id IS NOT NULL AND s.status IN ('DRAFT', 'SCHEDULED')
+  AND sp.role = 'PARTICIPANT' AND sp.status IN ('INVITED', 'ACCEPTED', 'WAITLISTED')
+  AND NOT EXISTS (SELECT 1 FROM community_group_members m
+                  WHERE m.group_id = s.group_id AND m.user_id = sp.user_id AND m.status = 'ACTIVE');
+```
+
+Waitlists move up the next time a place changes on each session (a host raising capacity, someone leaving); hosts can also re-invite.
+
 ## 7. PHP BDApps gateway: where the env file must live (GW-3)
 
 The gateway reads its configuration from, in order: `KAAJ_GATEWAY_ENV_FILE`, then `../kaaj-bdapps-gateway.env`, then `.env` in its own folder. When the gateway is installed at `public_html/bdapps/`, the second location (`public_html/kaaj-bdapps-gateway.env`) is **inside the web root** and may be downloadable — the gateway's `.htaccess` does not cover its parent, and nginx, `php -S` and OpenLiteSpeed ignore `FilesMatch`.
