@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import '../../../core/config/app_environment.dart';
+import '../../../core/errors/failure.dart';
 import '../../../core/storage/session_token_store.dart';
 import '../domain/chat_models.dart';
 
@@ -40,6 +41,50 @@ class ChatTokenRecovery {
   void accepted() => _attempts = 0;
 }
 
+/// Turns the payload of the socket `exception` event into a [Failure].
+///
+/// The server sends `{code, message, messageKey, httpStatus, …}` when a
+/// handler refuses (not a member, blocked, restricted account), and
+/// `{status: "error", message: "Unauthorized."}` for an expired session.
+/// Returns null for the session case, which is handled by re-authenticating.
+Failure? socketExceptionFailure(Object? payload) {
+  if (payload is! Map) {
+    return const Failure(
+      kind: FailureKind.unknown,
+      message: genericFailureMessage,
+    );
+  }
+  final code = payload['code'];
+  final message = payload['message'];
+  if (code is! String) {
+    if (payload['status'] == 'error' &&
+        message is String &&
+        message.toLowerCase().contains('unauthorized')) {
+      return null;
+    }
+  }
+  final status = payload['httpStatus'];
+  return Failure(
+    kind: switch (status) {
+      403 => FailureKind.forbidden,
+      404 => FailureKind.notFound,
+      409 => FailureKind.conflict,
+      400 || 422 => FailureKind.validation,
+      429 => FailureKind.rateLimited,
+      final int value when value >= 500 => FailureKind.server,
+      _ =>
+        code is String && code.startsWith('ACCOUNT_')
+            ? FailureKind.forbidden
+            : FailureKind.unknown,
+    },
+    message: message is String && message.trim().isNotEmpty
+        ? message
+        : genericFailureMessage,
+    code: code is String ? code : null,
+    field: payload['field'] is String ? payload['field'] as String : null,
+  );
+}
+
 class ChatRealtimeService {
   ChatRealtimeService(this._environment, this._tokens)
     : _recovery = ChatTokenRecovery(_tokens);
@@ -49,6 +94,7 @@ class ChatRealtimeService {
   final ChatTokenRecovery _recovery;
   final _messages = StreamController<ChatMessage>.broadcast();
   final _connection = StreamController<ChatConnectionState>.broadcast();
+  final _errors = StreamController<Failure>.broadcast();
 
   io.Socket? _socket;
   String? _conversationId;
@@ -58,6 +104,10 @@ class ChatRealtimeService {
   ChatConnectionState _state = ChatConnectionState.offline;
 
   Stream<ChatMessage> get messages => _messages.stream;
+
+  /// Refusals the server sent on the socket (`exception` event), such as
+  /// joining a conversation you were removed from.
+  Stream<Failure> get errors => _errors.stream;
 
   Stream<ChatConnectionState> get connection => _connection.stream;
 
@@ -103,6 +153,14 @@ class ChatRealtimeService {
       ..on('chat:error', (dynamic value) {
         final code = value is Map ? value['code'] : null;
         if (code == 'UNAUTHORIZED') unawaited(_recoverAuth());
+      })
+      ..on('exception', (dynamic value) {
+        final failure = socketExceptionFailure(value);
+        if (failure == null) {
+          unawaited(_recoverAuth());
+        } else if (!_errors.isClosed) {
+          _errors.add(failure);
+        }
       })
       // A transport failure (offline, server restarting): keep Socket.IO's
       // own retries, but with the newest token the HTTP layer holds.
@@ -175,6 +233,7 @@ class ChatRealtimeService {
     _socket = null;
     _messages.close();
     _connection.close();
+    _errors.close();
   }
 
   void _emit(ChatConnectionState next) {

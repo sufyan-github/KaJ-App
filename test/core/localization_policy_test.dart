@@ -2,6 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kaaj/core/localization/catalog_ai.dart';
+import 'package:kaaj/core/localization/catalog_business.dart';
+import 'package:kaaj/core/localization/catalog_community.dart';
+import 'package:kaaj/core/localization/catalog_ideas.dart';
 import 'package:kaaj/core/localization/generated_translation_catalog.dart';
 import 'package:kaaj/core/localization/kaaj_localizations.dart';
 
@@ -32,12 +36,34 @@ void main() {
 
   test('generated English UI copy contains no Bangla characters', () {
     final bangla = RegExp(r'[\u0980-\u09FF]');
-    for (final entry in generatedEnglishTranslations.entries) {
+    for (final entry in {
+      ...generatedEnglishTranslations,
+      ...businessTranslations,
+      ...ideaTranslations,
+      ...communityTranslations,
+      ...aiTranslations,
+    }.entries) {
       expect(
         entry.value,
         isNot(matches(bangla)),
         reason: 'Untranslated English copy for: ${entry.key}',
       );
+    }
+  });
+
+  test('feature catalogs never repeat a key', () {
+    final catalogs = [
+      generatedEnglishTranslations,
+      businessTranslations,
+      ideaTranslations,
+      communityTranslations,
+      aiTranslations,
+    ];
+    final seen = <String>{};
+    for (final catalog in catalogs) {
+      for (final key in catalog.keys) {
+        expect(seen.add(key), isTrue, reason: 'Repeated catalog key: $key');
+      }
     }
   });
 

@@ -10,6 +10,7 @@ import '../../../../core/widgets/k_error_state.dart';
 import '../../../../core/widgets/k_localized_text.dart';
 import '../../../onboarding/domain/onboarding_state.dart';
 import '../../../profile/presentation/controllers/me_provider.dart';
+import '../../../trust_safety/presentation/report_action.dart';
 import '../../domain/job_models.dart';
 import '../controllers/jobs_providers.dart';
 import 'jobs_screens.dart';
@@ -23,7 +24,13 @@ class JobDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detail = ref.watch(jobDetailProvider(jobId));
     return Scaffold(
-      appBar: AppBar(title: const KLocalizedText('কাজের বিবরণ')),
+      appBar: AppBar(
+        title: const KLocalizedText('কাজের বিবরণ'),
+        actions: [
+          if (detail.valueOrNull case final value? when !value.viewerIsPoster)
+            ReportAction(targetType: 'JOB', targetId: jobId),
+        ],
+      ),
       body: detail.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(

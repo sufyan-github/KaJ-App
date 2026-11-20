@@ -7,6 +7,9 @@ import '../../core/routing/app_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/k_empty_state.dart';
 import '../../core/widgets/k_localized_text.dart';
+import '../business/presentation/my_business_section.dart';
+import '../community/presentation/my_community_section.dart';
+import '../ideas/presentation/my_ideas_section.dart';
 import '../jobs/presentation/screens/jobs_screens.dart';
 import '../learning/presentation/enrolment_screens.dart';
 import '../learning/presentation/learning_providers.dart';
@@ -14,20 +17,42 @@ import '../training/data/training_repository.dart';
 import '../training/presentation/screens/training_catalog_screen.dart';
 import '../training/presentation/training_providers.dart';
 
-/// What the person is doing across KAAJ: jobs and bookings, and learning.
-/// Replaces the old "My work" tab; more sections arrive with new domains.
-class MyActivityScreen extends StatefulWidget {
-  const MyActivityScreen({this.initialSection = 0, super.key});
+/// Sections of My activity; `?section=` uses these names.
+enum ActivitySection {
+  work,
+  learning,
+  business,
+  ideas,
+  community;
 
-  /// 0 = jobs and bookings, 1 = learning.
-  final int initialSection;
+  static ActivitySection parse(String? value) => ActivitySection.values
+      .firstWhere((item) => item.name == value, orElse: () => work);
+}
+
+/// What the person is doing across KAAJ: jobs and bookings, learning,
+/// businesses, ideas and community.
+class MyActivityScreen extends StatefulWidget {
+  const MyActivityScreen({
+    this.initialSection = ActivitySection.work,
+    super.key,
+  });
+
+  final ActivitySection initialSection;
 
   @override
   State<MyActivityScreen> createState() => _MyActivityScreenState();
 }
 
 class _MyActivityScreenState extends State<MyActivityScreen> {
-  late int _section = widget.initialSection;
+  late ActivitySection _section = widget.initialSection;
+
+  static const _chips = [
+    (ActivitySection.work, Icons.handshake_outlined, 'কাজ ও বুকিং'),
+    (ActivitySection.learning, Icons.school_outlined, 'শেখা'),
+    (ActivitySection.business, Icons.storefront_outlined, 'ব্যবসা-বাণিজ্য'),
+    (ActivitySection.ideas, Icons.lightbulb_outline, 'আইডিয়া'),
+    (ActivitySection.community, Icons.diversity_3_outlined, 'কমিউনিটি'),
+  ];
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -35,37 +60,39 @@ class _MyActivityScreenState extends State<MyActivityScreen> {
       title: const KLocalizedText('আমার কার্যক্রম'),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(56),
-        child: Padding(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.fromLTRB(
             KSpacing.md,
             0,
             KSpacing.md,
             KSpacing.sm,
           ),
-          child: SegmentedButton<int>(
-            showSelectedIcon: false,
-            segments: const [
-              ButtonSegment(
-                value: 0,
-                icon: Icon(Icons.handshake_outlined),
-                label: KLocalizedText('কাজ ও বুকিং'),
-              ),
-              ButtonSegment(
-                value: 1,
-                icon: Icon(Icons.school_outlined),
-                label: KLocalizedText('শেখা'),
-              ),
+          child: Row(
+            children: [
+              for (final (section, icon, label) in _chips)
+                Padding(
+                  padding: const EdgeInsets.only(right: KSpacing.sm),
+                  child: ChoiceChip(
+                    key: ValueKey('activity-${section.name}'),
+                    avatar: Icon(icon, size: 18),
+                    label: KLocalizedText(label),
+                    selected: _section == section,
+                    onSelected: (_) => setState(() => _section = section),
+                  ),
+                ),
             ],
-            selected: {_section},
-            onSelectionChanged: (value) =>
-                setState(() => _section = value.first),
           ),
         ),
       ),
     ),
-    body: _section == 0
-        ? const AssignmentsScreen(embedded: true)
-        : const MyLearningSection(),
+    body: switch (_section) {
+      ActivitySection.work => const AssignmentsScreen(embedded: true),
+      ActivitySection.learning => const MyLearningSection(),
+      ActivitySection.business => const MyBusinessSection(),
+      ActivitySection.ideas => const MyIdeasSection(),
+      ActivitySection.community => const MyCommunitySection(),
+    },
   );
 }
 

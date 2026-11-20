@@ -40,8 +40,13 @@ abstract final class ErrorMapper {
     final message = switch (messageValue) {
       final String value when value.trim().isNotEmpty => value,
       final Map value when value['en'] is String => value['en'] as String,
-      _ =>
-        'We could not complete that request. Please try again or contact support.',
+      _ => genericFailureMessage,
+    };
+    final messageBn = switch (messageValue) {
+      final Map value when value['bn'] is String => value['bn'] as String,
+      final String value when RegExp(r'[\u0980-\u09FF]').hasMatch(value) =>
+        value,
+      _ => null,
     };
 
     return Failure(
@@ -58,6 +63,7 @@ abstract final class ErrorMapper {
           error.response?.headers.value('x-request-id'),
       retryable: descriptor['retryable'] == true || (status ?? 0) >= 500,
       details: _details(descriptor['details']),
+      messageBn: messageBn,
     );
   }
 

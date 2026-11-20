@@ -67,12 +67,17 @@ class MentorRepository {
   /// server).
   Future<List<PublicMentor>> directory({
     String? skillId,
+    String? locationId,
     String? cursor,
   }) async {
     try {
       final response = await _dio.get<Map<String, dynamic>>(
         '/mentors',
-        queryParameters: {'skillId': ?skillId, 'cursor': ?cursor},
+        queryParameters: {
+          'skillId': ?skillId,
+          'locationId': ?locationId,
+          'cursor': ?cursor,
+        },
       );
       final items = _data(response.data)['items'];
       return PagedList(

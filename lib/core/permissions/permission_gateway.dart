@@ -1,6 +1,6 @@
 import 'package:permission_handler/permission_handler.dart';
 
-enum KPermission { camera, location, notifications, photos }
+enum KPermission { camera, location }
 
 enum KPermissionStatus { granted, denied, permanentlyDenied, restricted }
 
@@ -29,7 +29,5 @@ class PermissionGateway {
       switch (permission) {
         KPermission.camera => Permission.camera,
         KPermission.location => Permission.locationWhenInUse,
-        KPermission.notifications => Permission.notification,
-        KPermission.photos => Permission.photos,
       };
 }

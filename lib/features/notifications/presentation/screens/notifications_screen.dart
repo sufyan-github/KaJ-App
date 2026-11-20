@@ -29,36 +29,12 @@ class NotificationsScreen extends ConsumerStatefulWidget {
       _NotificationsScreenState();
 }
 
-class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
-    with WidgetsBindingObserver {
+class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   final _more = MorePages<AppNotification>();
 
   final Set<String> _updatingIds = <String>{};
-  late Future<KPermissionStatus> _permissionStatus;
   NotificationGroup _selectedGroup = NotificationGroup.all;
   bool _markingAll = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _permissionStatus = _readPermissionStatus();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      setState(() {
-        _permissionStatus = _readPermissionStatus();
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,18 +100,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
     // 2 GB device before the first frame.
     final rows = _inboxRows(visibleItems);
     final header = <Widget>[
-      FutureBuilder<KPermissionStatus>(
-        future: _permissionStatus,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData || snapshot.data == KPermissionStatus.granted) {
-            return const SizedBox.shrink();
-          }
-          return Padding(
-            padding: const EdgeInsets.only(bottom: KSpacing.md),
-            child: _PermissionBanner(onOpenSettings: _openNotificationSettings),
-          );
-        },
-      ),
       _InboxSummary(unreadCount: inbox.unreadCount),
       const SizedBox(height: KSpacing.md),
       SingleChildScrollView(
@@ -435,70 +399,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
       if (mounted) setState(() => _markingAll = false);
     }
   }
-
-  Future<KPermissionStatus> _readPermissionStatus() async {
-    try {
-      return await widget.permissionGateway.status(KPermission.notifications);
-    } on Object {
-      return KPermissionStatus.granted;
-    }
-  }
-
-  Future<void> _openNotificationSettings() async {
-    await widget.permissionGateway.openSettings();
-  }
-}
-
-class _PermissionBanner extends StatelessWidget {
-  const _PermissionBanner({required this.onOpenSettings});
-
-  final VoidCallback onOpenSettings;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(KSpacing.md),
-    decoration: BoxDecoration(
-      color: Color.alphaBlend(
-        KColors.warning.withValues(alpha: 0.10),
-        Theme.of(context).colorScheme.surface,
-      ),
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: KColors.warning.withValues(alpha: 0.35)),
-    ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Icon(Icons.notifications_off_outlined, color: KColors.warning),
-        const SizedBox(width: KSpacing.md),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              KLocalizedText(
-                'ফোনের নোটিফিকেশন বন্ধ আছে',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontSize: 16),
-              ),
-              const SizedBox(height: KSpacing.xs),
-              KLocalizedText(
-                'নতুন আবেদন, বুকিং বা বার্তার খবর পেতে ফোনের সেটিংসে অনুমতি দিন। ইনবক্স ব্যবহার করা যাবে।',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: KColors.textSecondary),
-              ),
-              const SizedBox(height: KSpacing.sm),
-              TextButton.icon(
-                onPressed: onOpenSettings,
-                icon: const Icon(Icons.settings_outlined, size: 18),
-                label: const KLocalizedText('সেটিংসে যান'),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
 }
 
 class _InboxSummary extends StatelessWidget {

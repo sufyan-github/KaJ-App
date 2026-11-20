@@ -165,13 +165,17 @@ void main() {
 
     expect(find.text('যা সব সময় ব্যক্তিগত'), findsOneWidget);
     expect(find.text('ফোনের অনুমতি'), findsOneWidget);
-    expect(find.text('বন্ধ'), findsNWidgets(4));
+    // Camera and location only: no push, and photos use the system picker.
+    expect(find.text('বন্ধ'), findsNWidgets(2));
     await tester.scrollUntilVisible(
       find.text('ফোনের অনুমতি সেটিংস খুলুন'),
       300,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.ensureVisible(find.text('ফোনের অনুমতি সেটিংস খুলুন'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('ফোনের অনুমতি সেটিংস খুলুন'));
+    await tester.pump();
     expect(gateway.openedSettings, isTrue);
   });
 

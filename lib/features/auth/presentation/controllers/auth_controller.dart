@@ -167,8 +167,12 @@ class AuthController extends StateNotifier<AuthState> {
     );
   }
 
-  void passwordRecoverySucceeded() {
+  /// A reset password ends any session on this phone, so the previous
+  /// person's local data goes too, as on sign-out.
+  Future<void> passwordRecoverySucceeded() async {
+    final wasSignedIn = state.status == AuthStatus.authenticated;
     state = const AuthState(status: AuthStatus.unauthenticated);
+    if (wasSignedIn) await _clearUserData();
   }
 
   void resolveAccess({

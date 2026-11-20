@@ -7,6 +7,8 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../bootstrap.dart';
 import '../../../../core/connectivity/connectivity_service.dart';
+import '../../../../core/errors/error_mapper.dart';
+import '../../../../core/errors/failure.dart';
 import '../../../../core/session/user_session.dart';
 import '../../../auth/presentation/controllers/auth_providers.dart';
 import '../../data/chat_realtime_service.dart';
@@ -21,6 +23,22 @@ final chatRepositoryProvider = Provider<ChatRepository>((ref) {
 final conversationsProvider = FutureProvider<List<ConversationSummary>>(
   (ref) => ref.watch(chatRepositoryProvider).conversations(),
 );
+
+/// The list entry for one conversation, when the person has it: gives a
+/// thread opened from a notification its title, kind and other person.
+final conversationSummaryProvider = FutureProvider.autoDispose
+    .family<ConversationSummary?, String>((ref, id) async {
+      final all = await ref.watch(conversationsProvider.future);
+      return all.where((item) => item.id == id).firstOrNull;
+    });
+
+/// Sender names for a group chat (`subjectType|subjectId`).
+final groupMemberNamesProvider = FutureProvider.autoDispose
+    .family<Map<String, String>, ({String type, String id})>(
+      (ref, subject) => ref
+          .watch(chatRepositoryProvider)
+          .memberNames(subject.type, subject.id),
+    );
 
 final chatRealtimeProvider = Provider.autoDispose<ChatRealtimeService>((ref) {
   final service = ChatRealtimeService(
@@ -37,6 +55,7 @@ class ChatThreadState {
     this.loading = true,
     this.sendingImage = false,
     this.error,
+    this.failure,
     this.hasEarlier = false,
     this.loadingEarlier = false,
   });
@@ -45,6 +64,10 @@ class ChatThreadState {
   final bool loading;
   final bool sendingImage;
   final String? error;
+
+  /// A refusal from the server (socket or REST) to explain with its own
+  /// copy; shown in place of [error] when present.
+  final Failure? failure;
 
   /// The first page was full, so older messages may exist.
   final bool hasEarlier;
@@ -55,6 +78,7 @@ class ChatThreadState {
     bool? loading,
     bool? sendingImage,
     String? error,
+    Failure? failure,
     bool clearError = false,
     bool? hasEarlier,
     bool? loadingEarlier,
@@ -63,6 +87,7 @@ class ChatThreadState {
     loading: loading ?? this.loading,
     sendingImage: sendingImage ?? this.sendingImage,
     error: clearError ? null : error ?? this.error,
+    failure: clearError ? null : failure ?? this.failure,
     hasEarlier: hasEarlier ?? this.hasEarlier,
     loadingEarlier: loadingEarlier ?? this.loadingEarlier,
   );
@@ -84,6 +109,23 @@ class ChatThreadController extends StateNotifier<ChatThreadState> {
   final ConnectivityService _connectivity;
   StreamSubscription<ChatMessage>? _messageSubscription;
   StreamSubscription<bool>? _connectivitySubscription;
+  StreamSubscription<Failure>? _errorSubscription;
+
+  /// Whether the server turned a message down for good. Lost connections,
+  /// timeouts, server faults and rate limits are worth another try; a
+  /// block, a removal, a restricted account or a bad request are not.
+  static bool isPermanentRefusal(Object error) {
+    final failure = ErrorMapper.from(error);
+    return switch (failure.kind) {
+      FailureKind.forbidden ||
+      FailureKind.notFound ||
+      FailureKind.conflict ||
+      FailureKind.validation => true,
+      _ => false,
+    };
+  }
+
+  void dismissError() => state = state.copyWith(clearError: true);
 
   Future<void> _initialize() async {
     try {
@@ -108,18 +150,34 @@ class ChatThreadController extends StateNotifier<ChatThreadState> {
         clearError: true,
         hasEarlier: remote.length >= ChatRepository.pageSize,
       );
-      await _repository.markRead(conversationId);
-      _realtime.connect(conversationId);
-      _messageSubscription = _realtime.messages.listen(_merge);
-      _connectivitySubscription = _connectivity.changes.listen((online) {
-        if (online) _retryPending();
-      });
-      if (await _connectivity.isOnline()) await _retryPending();
-    } on Object {
+    } on Object catch (error) {
       state = state.copyWith(
         loading: false,
         error: 'বার্তাগুলো লোড করা যায়নি।',
+        failure: ErrorMapper.from(error).code == null
+            ? null
+            : ErrorMapper.from(error),
       );
+      return;
+    }
+    // A failed read receipt must not hide the messages or stop realtime.
+    unawaited(_markRead());
+    _realtime.connect(conversationId);
+    _messageSubscription = _realtime.messages.listen(_merge);
+    _errorSubscription = _realtime.errors.listen(
+      (failure) => state = state.copyWith(failure: failure),
+    );
+    _connectivitySubscription = _connectivity.changes.listen((online) {
+      if (online) unawaited(_retryPending());
+    });
+    if (await _connectivity.isOnline()) await _retryPending();
+  }
+
+  Future<void> _markRead() async {
+    try {
+      await _repository.markRead(conversationId);
+    } on Object {
+      // Unread counts catch up on the next open.
     }
   }
 
@@ -194,12 +252,16 @@ class ChatThreadController extends StateNotifier<ChatThreadState> {
     for (final message in _repository.pending(conversationId)) {
       await _deliver(message);
     }
-    final serverMessages = await _repository.messages(
-      conversationId,
-      after: _latestServerMessageId(),
-    );
-    for (final message in serverMessages) {
-      _merge(message);
+    try {
+      final serverMessages = await _repository.messages(
+        conversationId,
+        after: _latestServerMessageId(),
+      );
+      for (final message in serverMessages) {
+        _merge(message);
+      }
+    } on Object {
+      // Still offline or refused; the next reconnect tries again.
     }
   }
 
@@ -212,8 +274,18 @@ class ChatThreadController extends StateNotifier<ChatThreadState> {
       );
       await _repository.removePending(conversationId, pending.clientNonce);
       _merge(sent);
-    } on Object {
-      _replaceDelivery(pending.clientNonce, ChatDelivery.failed);
+    } on Object catch (error) {
+      if (isPermanentRefusal(error)) {
+        // Never queue it again: it would be refused on every open.
+        await _repository.removePending(conversationId, pending.clientNonce);
+        _replaceDelivery(
+          pending.clientNonce,
+          ChatDelivery.refused,
+          refusal: ErrorMapper.from(error),
+        );
+      } else {
+        _replaceDelivery(pending.clientNonce, ChatDelivery.failed);
+      }
     }
   }
 
@@ -243,16 +315,20 @@ class ChatThreadController extends StateNotifier<ChatThreadState> {
     } else {
       messages[index] = incoming;
     }
-    state = state.copyWith(messages: _ordered(messages), clearError: true);
-    if (!incoming.isMine) _repository.markRead(conversationId);
+    state = state.copyWith(messages: _ordered(messages));
+    if (!incoming.isMine) unawaited(_markRead());
   }
 
-  void _replaceDelivery(String nonce, ChatDelivery delivery) {
+  void _replaceDelivery(
+    String nonce,
+    ChatDelivery delivery, {
+    Failure? refusal,
+  }) {
     state = state.copyWith(
       messages: state.messages
           .map(
             (message) => message.clientNonce == nonce
-                ? message.copyWith(delivery: delivery)
+                ? message.copyWith(delivery: delivery, refusal: refusal)
                 : message,
           )
           .toList(growable: false),
@@ -266,6 +342,7 @@ class ChatThreadController extends StateNotifier<ChatThreadState> {
   void dispose() {
     _messageSubscription?.cancel();
     _connectivitySubscription?.cancel();
+    _errorSubscription?.cancel();
     super.dispose();
   }
 }

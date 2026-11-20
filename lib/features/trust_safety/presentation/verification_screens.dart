@@ -12,6 +12,7 @@ import '../../../core/routing/app_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/k_localized_text.dart';
 import '../../../core/widgets/k_primary_button.dart';
+import '../../business/business_routes.dart';
 import '../domain/trust_models.dart';
 import 'trust_safety_providers.dart';
 
@@ -60,14 +61,15 @@ class VerificationCenterScreen extends ConsumerWidget {
                 onTap: () =>
                     context.push(AppRoutes.verificationCapture('SKILL')),
               ),
+              // Each business is verified on its own page (My businesses →
+              // business → verification), not as a person.
               _VerificationStep(
+                key: const ValueKey('verification-business'),
                 title: 'ব্যবসা',
-                subtitle: 'ট্রেড লাইসেন্স বা প্রতিষ্ঠানের নথি',
+                subtitle: 'প্রতিটি নিবন্ধিত ব্যবসা আলাদাভাবে · ট্রেড লাইসেন্স',
                 icon: Icons.business_outlined,
-                status: _latest(items, 'BUSINESS')?.status,
-                rejection: _latest(items, 'BUSINESS')?.rejectionReason,
-                onTap: () =>
-                    context.push(AppRoutes.verificationCapture('BUSINESS')),
+                showStatus: false,
+                onTap: () => context.push(BusinessRoutes.mine),
               ),
               const SizedBox(height: KSpacing.md),
               const Card(
@@ -136,6 +138,8 @@ class _VerificationStep extends StatelessWidget {
     this.status,
     this.rejection,
     this.onTap,
+    this.showStatus = true,
+    super.key,
   });
   final String title;
   final String subtitle;
@@ -143,6 +147,7 @@ class _VerificationStep extends StatelessWidget {
   final String? status;
   final String? rejection;
   final VoidCallback? onTap;
+  final bool showStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -168,10 +173,10 @@ class _VerificationStep extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 KLocalizedText(subtitle),
-                KLocalizedText(_statusLabel(status)),
+                if (showStatus) KLocalizedText(_statusLabel(status)),
               ],
             ),
-            isThreeLine: true,
+            isThreeLine: showStatus,
             trailing: pending
                 ? const Icon(Icons.hourglass_top, color: KColors.warning)
                 : approved
@@ -367,7 +372,7 @@ class _VerificationCaptureScreenState
           selfie: _selfieImage!,
         );
       } else {
-        await repository.submitVerification(widget.kind, _images);
+        await repository.submitSkillVerification(_images);
       }
       ref.invalidate(verificationRequestsProvider);
       ref.invalidate(applicationEligibilityProvider);
@@ -467,7 +472,6 @@ class _IdentityCaptureCard extends StatelessWidget {
 String _kindLabel(String kind) => switch (kind) {
   'IDENTITY' => 'পরিচয়',
   'SKILL' => 'দক্ষতা',
-  'BUSINESS' => 'ব্যবসা',
   _ => 'তথ্য',
 };
 

@@ -1298,4 +1298,64 @@ const generatedEnglishTranslations = <String, String>{
   "মেন্টর আর আপনার আবেদন দেখবেন না। চাইলে পরে আবার আবেদন করতে পারবেন।":
       "The mentor will no longer see your application. You can apply again later.",
   "আবেদন প্রত্যাহার করা যায়নি।": "Could not withdraw the application.",
+  // R4: filters
+  "আমার এলাকায়": "In my area",
+  // R4: booking refusal
+  "এই কর্মী এখনো পরিচয় (NID ও সেলফি) যাচাই করেননি। যাচাই অনুমোদিত হলে তাঁকে বুক করা যাবে। এখন অন্য কর্মী দেখুন বা কাজ পোস্ট করুন।":
+      "This worker has not verified their identity (NID and selfie) yet. You can book them once it is approved. For now, look at other workers or post a job.",
+  // R4: new modules
+  "শীঘ্রই আসছে": "Coming soon",
+  "এই অংশটি তৈরি হচ্ছে।": "This part is being built.",
+  "আইডিয়া": "Ideas",
+  "কমিউনিটি": "Community",
+  // R4: module name
+  "ব্যবসা-বাণিজ্য": "Business",
+  // R4: safety
+  "জাতীয় জরুরি সেবা ৯৯৯": "National emergency service 999",
+  "পুলিশ, ফায়ার সার্ভিস ও অ্যাম্বুলেন্স। তাৎক্ষণিক বিপদে কল করুন।":
+      "Police, fire service and ambulance. Call in immediate danger.",
+  "নারী ও শিশু নির্যাতন প্রতিরোধ হেল্পলাইন ১০৯":
+      "Helpline against violence on women and children 109",
+  "হয়রানি, পিছু নেওয়া বা সহিংসতার শিকার হলে বিনা খরচে কল করুন।":
+      "Call free of charge if you face harassment, stalking or violence.",
+  "যৌন হয়রানি": "Sexual harassment",
+  "পিছু নেওয়া বা নজরদারি": "Stalking or being watched",
+  "অনিরাপদ জায়গা": "Unsafe location",
+  "একজন ব্যক্তি": "A person",
+  "কাজের পোস্ট": "A job post",
+  "চ্যাট": "Chat",
+  "একটি বার্তা": "A message",
+  "কাজের চুক্তি": "A hire",
+  "পণ্য বা সেবা": "A product or service",
+  "একটি সহযোগিতার অনুরোধ": "A collaboration request",
+  "একটি আইডিয়ার ভূমিকা": "A role on an idea",
+  "পরিচয়ের অনুরোধ": "Introduction request",
+  "কমিউনিটি গ্রুপ": "Community group",
+  "এটি রিপোর্ট করা যাচ্ছে না": "This cannot be reported",
+  "লিংকটি সঠিক নয়। যেখানে সমস্যা দেখেছেন সেখান থেকে রিপোর্ট করুন।":
+      "The link is not valid. Report from the place where you saw the problem.",
+  "রিপোর্ট জমা দেওয়া যায়নি।": "Could not send the report.",
+  // R4: safety (interpolated)
+  "যা রিপোর্ট করছেন:": "Reporting:",
+  "ফোন অ্যাপ খোলা যায়নি। নিজে ডায়াল করুন:":
+      "Could not open the phone app. Dial it yourself:",
+  // R4: report targets
+  "একটি ব্যবসা": "A business",
+  "একটি আইডিয়া": "An idea",
+  "একটি সেশন": "A session",
+  // R4: chat
+  "গ্রুপের সদস্য": "Member",
+  "জন সদস্য": "members",
+  "কোনো বার্তা রিপোর্ট করতে সেটি চেপে ধরুন":
+      "To report a message, press and hold it",
+  "চ্যাটে সমস্যা হয়েছে।": "Something is wrong with this chat.",
+  "বার্তাটি পাঠানো হয়নি। আর চেষ্টা করা হবে না।":
+      "This message was not sent and will not be retried.",
+  "এই বার্তা রিপোর্ট করুন": "Report this message",
+  // R4: unknown links
+  "এই পাতাটি খোলা যাচ্ছে না": "This page cannot be opened",
+  "লিংকটি পুরোনো বা অ্যাপের এই সংস্করণে নেই। অ্যাপ হালনাগাদ করে আবার চেষ্টা করুন।":
+      "The link is old or not in this version of the app. Update the app and try again.",
+  // R4: unknown links (button)
+  "হোমে ফিরুন": "Back to Home",
 };

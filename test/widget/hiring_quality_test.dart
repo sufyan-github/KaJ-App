@@ -40,10 +40,13 @@ Map<String, dynamic> _application({Map<String, dynamic>? worker}) => {
   'worker': ?worker,
 };
 
-Map<String, dynamic> _publicWorker({List<Map<String, dynamic>>? skills}) => {
+Map<String, dynamic> _publicWorker({
+  List<Map<String, dynamic>>? skills,
+  String trustLevel = 'IDENTITY',
+}) => {
   'id': 'worker-1',
   'displayName': 'Karim',
-  'trustLevel': 'IDENTITY',
+  'trustLevel': trustLevel,
   'ratingAverage': '4.6',
   'ratingCount': 12,
   'completedJobsCount': 20,
@@ -251,10 +254,15 @@ void main() {
   });
 
   group('booking', () {
-    FakeApi bookingApi({List<Map<String, dynamic>>? skills}) => FakeApi()
+    FakeApi bookingApi({
+      List<Map<String, dynamic>>? skills,
+      String trustLevel = 'IDENTITY',
+    }) => FakeApi()
       ..on(
         'GET /users/worker-1/public',
-        FakeResponse.data(_publicWorker(skills: skills)),
+        FakeResponse.data(
+          _publicWorker(skills: skills, trustLevel: trustLevel),
+        ),
       )
       ..on(
         'GET /workers/worker-1/availability/slots',
@@ -306,6 +314,74 @@ void main() {
       expect(body['skillId'], 'skill-elec');
       expect(body['categoryId'], 'cat-2');
       expect(body['locationId'], 'area-1');
+    });
+
+    for (final language in ['en', 'bn']) {
+      testWidgets('explains that an unverified worker cannot be booked yet '
+          '($language)', (tester) async {
+        final api = bookingApi(trustLevel: 'PHONE');
+        await pumpRouted(
+          tester,
+          api: api,
+          home: const WorkerBookingScreen(workerId: 'worker-1'),
+          locale: Locale(language),
+          overrides: [
+            meAs(KaajRole.customer),
+            catalogSkillsProvider.overrideWith((ref) async => _catalogSkills),
+          ],
+        );
+        expect(
+          find.byKey(const ValueKey('booking-unverified')),
+          findsOneWidget,
+        );
+        if (language == 'en') {
+          expect(
+            find.textContaining('has not verified their identity'),
+            findsOneWidget,
+          );
+        }
+        final button = tester.widget<KPrimaryButton>(
+          find.byType(KPrimaryButton),
+        );
+        expect(button.onPressed, isNull);
+      });
+    }
+
+    testWidgets('a refusal shows the server reason and code', (tester) async {
+      final api = bookingApi()
+        ..on(
+          'POST /workers/worker-1/booking-requests',
+          const FakeResponse(403, {
+            'error': {
+              'code': 'FORBIDDEN',
+              'message':
+                  'Approved identity verification with NID and selfie is '
+                  'required before applying.',
+            },
+          }),
+        );
+      await pumpRouted(
+        tester,
+        api: api,
+        home: const WorkerBookingScreen(workerId: 'worker-1'),
+        overrides: [
+          meAs(KaajRole.customer),
+          catalogSkillsProvider.overrideWith((ref) async => _catalogSkills),
+        ],
+      );
+      await tester.tap(find.text('Electrical'));
+      await tester.pumpAndSettle();
+      await pickSlotAndBook(tester);
+      await tester.enterText(find.byType(TextField).last, '600');
+      await tester.tap(find.text('Send request'));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Approved identity verification with NID and selfie is required '
+          'before applying. (FORBIDDEN)',
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('says why when the area is missing', (tester) async {

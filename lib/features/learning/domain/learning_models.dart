@@ -501,3 +501,32 @@ class LearningEnrolment {
   bool get isActive => status == 'CONFIRMED';
   bool get isCompleted => status == 'COMPLETED' || completion != null;
 }
+
+/// Filters for Explore → Learn.
+class LearningFilter {
+  const LearningFilter({
+    this.kind,
+    this.terms,
+    this.mode,
+    this.skillId,
+    this.locationId,
+  });
+
+  final LearningKind? kind;
+  final DeliveryMode? mode;
+  final ParticipantTerms? terms;
+  final String? skillId;
+  final String? locationId;
+
+  @override
+  bool operator ==(Object other) =>
+      other is LearningFilter &&
+      other.kind == kind &&
+      other.terms == terms &&
+      other.mode == mode &&
+      other.skillId == skillId &&
+      other.locationId == locationId;
+
+  @override
+  int get hashCode => Object.hash(kind, terms, mode, skillId, locationId);
+}

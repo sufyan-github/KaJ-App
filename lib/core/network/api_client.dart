@@ -78,14 +78,26 @@ class _SessionInterceptor extends Interceptor {
     handler.next(options);
   }
 
+  /// Roles live inside the access token. Right after the server grants a
+  /// role (an approved mentor, say) the old token still lacks it for up to
+  /// its lifetime, so a refusal for a missing role earns one refresh.
+  static bool _staleRoleClaim(DioException error) {
+    if (error.response?.statusCode != 403) return false;
+    final body = error.response?.data;
+    final descriptor = body is Map ? body['error'] : null;
+    final code = descriptor is Map ? descriptor['code'] : null;
+    return code == 'ROLE_REQUIRED' || code == 'MENTOR_APPROVAL_REQUIRED';
+  }
+
   @override
   Future<void> onError(
     DioException error,
     ErrorInterceptorHandler handler,
   ) async {
     final request = error.requestOptions;
+    final status = error.response?.statusCode;
     final shouldRefresh =
-        error.response?.statusCode == 401 &&
+        (status == 401 || _staleRoleClaim(error)) &&
         request.extra[_retriedKey] != true &&
         !request.path.endsWith('/auth/refresh') &&
         !request.path.endsWith('/auth/otp/request') &&
@@ -101,7 +113,9 @@ class _SessionInterceptor extends Interceptor {
     if (refreshToken == null) {
       // A signed-in request was refused and there is nothing to refresh
       // with: the session is over, so say so instead of failing quietly.
-      if (_bearerToken(request) != null) await _tokenStore.expireSession();
+      if (status == 401 && _bearerToken(request) != null) {
+        await _tokenStore.expireSession();
+      }
       handler.next(error);
       return;
     }

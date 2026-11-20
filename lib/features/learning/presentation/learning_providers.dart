@@ -12,30 +12,9 @@ final learningRepositoryProvider = Provider<LearningRepository>((ref) {
   return LearningRepository(ref.watch(dioProvider));
 });
 
-/// Filters for Explore → Learn.
-class LearningFilter {
-  const LearningFilter({this.kind, this.terms, this.mode});
-
-  final LearningKind? kind;
-  final DeliveryMode? mode;
-  final ParticipantTerms? terms;
-
-  @override
-  bool operator ==(Object other) =>
-      other is LearningFilter &&
-      other.kind == kind &&
-      other.terms == terms &&
-      other.mode == mode;
-
-  @override
-  int get hashCode => Object.hash(kind, terms, mode);
-}
-
 final learningFeedProvider = FutureProvider.autoDispose
     .family<List<LearningOpportunity>, LearningFilter>(
-      (ref, filter) => ref
-          .watch(learningRepositoryProvider)
-          .feed(kind: filter.kind, terms: filter.terms, mode: filter.mode),
+      (ref, filter) => ref.watch(learningRepositoryProvider).feedPage(filter),
     );
 
 final learningDetailProvider = FutureProvider.autoDispose
@@ -55,11 +34,18 @@ final learningForMySkillsProvider =
       final me = await ref.watch(meProvider.future);
       final mine = {for (final skill in me.skills) skill.skillId};
       if (mine.isEmpty) return const [];
-      final feed = await ref.watch(learningRepositoryProvider).feed();
-      return feed
-          .where((item) => item.skillIds.any(mine.contains))
-          .take(2)
-          .toList(growable: false);
+      // Ask the server per skill (up to three) so a match beyond the first
+      // page of the whole feed is still found.
+      final repository = ref.watch(learningRepositoryProvider);
+      final pages = await Future.wait([
+        for (final skillId in mine.take(3)) repository.feed(skillId: skillId),
+      ]);
+      final seen = <String>{};
+      return [
+        for (final page in pages)
+          for (final item in page)
+            if (item.skillIds.any(mine.contains) && seen.add(item.id)) item,
+      ].take(2).toList(growable: false);
     });
 
 final learningApplicationsProvider = FutureProvider.autoDispose

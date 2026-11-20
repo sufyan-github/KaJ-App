@@ -207,6 +207,31 @@ void main() {
     });
   }
 
+  test('a password reset while signed in clears the local data', () async {
+    var cleared = 0;
+    final controller = AuthController(
+      _AuthRepository(),
+      onSignedOut: () async => cleared++,
+    )..passwordLoginSucceeded();
+    await controller.passwordRecoverySucceeded();
+    expect(controller.state.status, AuthStatus.unauthenticated);
+    expect(cleared, 1);
+    // Recovering from the sign-in screen has nothing of anyone to clear.
+    await controller.passwordRecoverySucceeded();
+    expect(cleared, 1);
+  });
+
+  test('sign-out cleanup also empties the image caches', () async {
+    var images = 0;
+    await UserDataCleaner(const [], clearImages: () async => images++).clear();
+    expect(images, 1);
+    // A failing image cache never blocks the sign-out.
+    await UserDataCleaner(
+      const [],
+      clearImages: () async => throw StateError('disk'),
+    ).clear();
+  });
+
   test('logout then a new account sees only its own data', () async {
     await leavePreviousPersonsData();
     final api = FakeApi();

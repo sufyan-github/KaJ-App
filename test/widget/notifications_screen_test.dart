@@ -114,36 +114,20 @@ void main() {
     expect(find.text('আবার চেষ্টা করুন'), findsOneWidget);
   });
 
-  testWidgets('explains denied phone notifications and opens settings', (
+  testWidgets('no phone-notification prompt: the app has no push', (
     tester,
   ) async {
     final permissionGateway = _DeniedPermissionGateway();
-
     await tester.pumpWidget(
       _app(repository, permissionGateway: permissionGateway),
     );
     await tester.pumpAndSettle();
-
-    expect(find.text('ফোনের নোটিফিকেশন বন্ধ আছে'), findsOneWidget);
-    expect(find.textContaining('ইনবক্স ব্যবহার করা যাবে'), findsOneWidget);
-    await tester.tap(find.text('সেটিংসে যান'));
-    await tester.pump();
-    expect(permissionGateway.didOpenSettings, isTrue);
-  });
-
-  testWidgets('refreshes notification permission after returning to the app', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _app(repository, permissionGateway: _DeniedPermissionGateway()),
-    );
-    await tester.pumpAndSettle();
-
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('ফোনের নোটিফিকেশন বন্ধ আছে'), findsOneWidget);
+    expect(find.text('ফোনের নোটিফিকেশন বন্ধ আছে'), findsNothing);
+    expect(permissionGateway.didOpenSettings, isFalse);
   });
 
   testWidgets('remains usable at 200% text on a narrow phone', (tester) async {

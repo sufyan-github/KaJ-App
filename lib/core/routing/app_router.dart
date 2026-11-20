@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/activity/my_activity_screen.dart';
+import '../../features/ai/ai_routes.dart';
 import '../../features/auth/domain/entities/otp_challenge.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/controllers/auth_providers.dart';
@@ -11,10 +12,13 @@ import '../../features/auth/presentation/screens/password_screens.dart';
 import '../../features/auth/presentation/screens/phone_entry_screen.dart';
 import '../../features/billing/presentation/billing_screens.dart';
 import '../../features/bootstrap/presentation/screens/splash_screen.dart';
+import '../../features/business/business_routes.dart';
 import '../../features/chat/presentation/screens/chat_screens.dart';
+import '../../features/community/community_routes.dart';
 import '../../features/explore/explore_screen.dart';
 import '../../features/help/presentation/help_centre_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/ideas/idea_routes.dart';
 import '../../features/jobs/presentation/screens/job_alerts_screen.dart';
 import '../../features/jobs/presentation/screens/job_detail_screen.dart';
 import '../../features/jobs/presentation/screens/jobs_screens.dart';
@@ -37,7 +41,9 @@ import '../../features/trust_safety/presentation/attendance_screen.dart';
 import '../../features/trust_safety/presentation/dispute_screens.dart';
 import '../../features/trust_safety/presentation/safety_screens.dart';
 import '../../features/trust_safety/presentation/verification_screens.dart';
+import '../security/secure_screen.dart';
 import 'route_arguments.dart';
+import 'route_not_found.dart';
 
 abstract final class AppRoutes {
   static const register = '/auth/register';
@@ -159,6 +165,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: AppRoutes.splash,
     refreshListenable: refresh,
+    errorBuilder: (context, state) => const RouteNotFoundScreen(),
     redirect: (context, state) => authRedirect(
       ref.read(authControllerProvider),
       state.matchedLocation,
@@ -360,8 +367,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.verificationCapturePath,
-        builder: (context, state) =>
-            VerificationCaptureScreen(kind: state.pathParameters['kind']!),
+        // NID and selfie photos: no screenshots or recent-apps preview.
+        builder: (context, state) => SecureScreen(
+          child: VerificationCaptureScreen(kind: state.pathParameters['kind']!),
+        ),
       ),
       GoRoute(
         path: AppRoutes.attendancePath,
@@ -462,15 +471,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.activity,
         builder: (context, state) => MyActivityScreen(
-          initialSection: state.uri.queryParameters['section'] == 'learning'
-              ? 1
-              : 0,
+          initialSection: ActivitySection.parse(
+            state.uri.queryParameters['section'],
+          ),
         ),
       ),
       GoRoute(
         path: AppRoutes.help,
         builder: (context, state) => const HelpCentreScreen(),
       ),
+      ...businessRoutes(),
+      ...ideaRoutes(),
+      ...communityRoutes(),
+      ...aiRoutes(),
     ],
   );
 });
@@ -510,11 +523,9 @@ String? authRedirect(
     }
     if (!auth.subscriptionAccess) {
       if (location == AppRoutes.subscription) return null;
-      // Learning is free: without a subscription the learning screens stay
-      // open; everything else asks for the subscription as before.
-      if (auth.freeModules.contains('LEARN') && isLearningRoute(location)) {
-        return null;
-      }
+      // Learn, Community and Business are free: without a subscription
+      // their screens stay open; Work asks for the subscription as before.
+      if (isFreeRoute(location, auth.freeModules)) return null;
       return AppRoutes.subscription;
     }
     if (auth.needsPasswordSetup) {
@@ -549,12 +560,58 @@ String? authRedirect(
   return null;
 }
 
+bool _under(String location, String root) =>
+    location == root || location.startsWith('$root/');
+
 /// Screens that belong to the Learn module.
 bool isLearningRoute(String location) =>
     location == AppRoutes.explore ||
     location == AppRoutes.activity ||
-    location == AppRoutes.training ||
-    location.startsWith('${AppRoutes.training}/');
+    _under(location, AppRoutes.training) ||
+    _under(location, '/learn') ||
+    _under(location, AppRoutes.mentor) ||
+    _under(location, '/mentors');
+
+/// Screens of the Business & Ideas module. Owner decision: free for
+/// everyone, so they never depend on the server flag.
+bool isBusinessRoute(String location) =>
+    _under(location, '/businesses') ||
+    _under(location, '/business') ||
+    _under(location, '/partners') ||
+    _under(location, '/collaboration-requests') ||
+    _under(location, '/ideas');
+
+/// Screens of the Experts & Community module.
+bool isCommunityRoute(String location) =>
+    _under(location, '/community') ||
+    _under(location, '/sessions') ||
+    _under(location, '/introductions') ||
+    _under(location, '/experts');
+
+/// Whether [location] stays open without a subscription. Shared screens
+/// (Explore, My activity, notifications, safety, reports) open as soon as
+/// any module is free. Conversations are always open: collaboration and
+/// idea rooms are free, and the server gates starting a job chat itself.
+bool isFreeRoute(String location, Set<String> freeModules) {
+  final learn = freeModules.contains('LEARN');
+  final community = freeModules.contains('COMMUNITY');
+  if (isBusinessRoute(location)) return true;
+  // AI screens: the server applies its own rules (subscribers-only idea
+  // analysis answers SUBSCRIPTION_REQUIRED and the app explains it).
+  if (_under(location, '/ai')) return true;
+  if (learn && isLearningRoute(location)) return true;
+  if (community && isCommunityRoute(location)) return true;
+  if (location == AppRoutes.explore || location == AppRoutes.activity) {
+    return true;
+  }
+  if (location == AppRoutes.notifications ||
+      location == AppRoutes.helpSafety ||
+      location == AppRoutes.help ||
+      location.startsWith('/report/')) {
+    return true;
+  }
+  return _under(location, AppRoutes.conversations);
+}
 
 String onboardingRouteForStep(OnboardingState state) => switch (state.step) {
   0 => AppRoutes.onboardingProfile,

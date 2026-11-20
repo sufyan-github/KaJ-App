@@ -157,8 +157,11 @@ void main() {
       await pumpRouted(tester, api: api, home: const MyActivityScreen());
       expect(find.text('My activity'), findsOneWidget);
       expect(api.called('GET /assignments'), hasLength(1));
+      for (final label in ['Business', 'Ideas', 'Community']) {
+        expect(find.text(label), findsOneWidget);
+      }
 
-      await tester.tap(find.text('Learn'));
+      await tester.tap(find.byKey(const ValueKey('activity-learning')));
       await tester.pumpAndSettle();
       expect(find.text('You have not started learning yet'), findsOneWidget);
       expect(api.called('GET /training/courses').single.query['scope'], 'mine');
@@ -178,7 +181,7 @@ void main() {
       await pumpRouted(
         tester,
         api: api,
-        home: const MyActivityScreen(initialSection: 1),
+        home: const MyActivityScreen(initialSection: ActivitySection.learning),
         locale: const Locale('bn'),
       );
       expect(find.text('নিরাপদ ঘর পরিষ্কার'), findsOneWidget);
@@ -193,7 +196,7 @@ void main() {
       await pumpRouted(
         tester,
         api: api,
-        home: const MyActivityScreen(initialSection: 1),
+        home: const MyActivityScreen(initialSection: ActivitySection.learning),
       );
       expect(find.textContaining('KAAJ is busy'), findsOneWidget);
       expect(find.text('Try again'), findsOneWidget);

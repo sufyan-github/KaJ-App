@@ -34,7 +34,11 @@ final mentorEvidenceUploaderProvider =
       return (bytes) => repository.uploadImage('VERIFICATION_DOCUMENT', bytes);
     });
 
-/// The public mentor directory for Explore → People.
-final mentorDirectoryProvider = FutureProvider.autoDispose<List<PublicMentor>>(
-  (ref) => ref.watch(mentorRepositoryProvider).directory(),
-);
+/// The public mentor directory for Explore → People: the first page for a
+/// skill and area filter (`null` = any).
+final mentorDirectoryProvider = FutureProvider.autoDispose
+    .family<List<PublicMentor>, ({String? skillId, String? locationId})>(
+      (ref, filter) => ref
+          .watch(mentorRepositoryProvider)
+          .directory(skillId: filter.skillId, locationId: filter.locationId),
+    );

@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/errors/error_mapper.dart';
 import '../../../../core/errors/failure_copy.dart';
+import '../../../../core/formatting/latin_digits_formatter.dart';
 import '../../../../core/localization/kaaj_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_error_state.dart';
@@ -18,6 +19,14 @@ import '../../../trust_safety/presentation/trust_safety_providers.dart';
 import '../../domain/my_profile.dart';
 import '../controllers/my_profile_provider.dart';
 import '../widgets/profile_completeness_card.dart';
+
+/// Profile genders the API accepts, with their Bangla labels.
+const _genders = {
+  'FEMALE': 'নারী',
+  'MALE': 'পুরুষ',
+  'NON_BINARY': 'নন-বাইনারি',
+  'PREFER_NOT_TO_SAY': 'বলতে চাই না',
+};
 
 typedef ProfilePhotoPicker = Future<Uint8List?> Function();
 
@@ -69,6 +78,8 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _name;
   late final TextEditingController _bio;
+  late final TextEditingController _birthYear;
+  String? _gender;
   String? _locationId;
   bool _saving = false;
   bool _uploading = false;
@@ -78,11 +89,17 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
     super.initState();
     _name = TextEditingController(text: widget.profile.displayName);
     _bio = TextEditingController(text: widget.profile.bio);
+    _birthYear = TextEditingController(
+      text: widget.profile.birthYear?.toString() ?? '',
+    );
+    _gender = _genders.containsKey(widget.profile.gender)
+        ? widget.profile.gender
+        : null;
     _locationId = widget.profile.primaryLocation?.id;
     _locationName = widget.profile.primaryLocation;
   }
 
-  /// The chosen area's names, for showing it in either language.
+  /// The names of the chosen area, for showing it in either language.
   ProfileArea? _locationName;
 
   Future<void> _pickArea() async {
@@ -102,12 +119,14 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
   void dispose() {
     _name.dispose();
     _bio.dispose();
+    _birthYear.dispose();
     super.dispose();
   }
 
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _saving = true);
+    final birthYear = int.tryParse(latinDigits(_birthYear.text.trim()));
     try {
       await ref
           .read(myProfileRepositoryProvider)
@@ -115,6 +134,9 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
             displayName: _name.text,
             bio: _bio.text,
             primaryLocationId: _locationId,
+            // Only changed values are sent; the API keeps the others.
+            gender: _gender == widget.profile.gender ? null : _gender,
+            birthYear: birthYear == widget.profile.birthYear ? null : birthYear,
           );
       ref.invalidate(myProfileProvider);
       if (mounted) _snack('প্রোফাইল সংরক্ষণ হয়েছে।');
@@ -245,6 +267,44 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
               trailing: const KLocalizedText('বদলান'),
               onTap: _saving ? null : _pickArea,
             ),
+          ),
+          const SizedBox(height: KSpacing.md),
+          DropdownButtonFormField<String>(
+            key: const ValueKey('profile-gender'),
+            initialValue: _gender,
+            decoration: InputDecoration(
+              labelText: KaajLocalizations.text(context, 'লিঙ্গ (ঐচ্ছিক)'),
+              helperText: KaajLocalizations.text(
+                context,
+                'শুধু নারীদের দল ও সেশনে যোগ দিতে নারী বেছে নিতে হয়।',
+              ),
+              helperMaxLines: 2,
+            ),
+            items: [
+              for (final entry in _genders.entries)
+                DropdownMenuItem(
+                  value: entry.key,
+                  child: KLocalizedText(entry.value),
+                ),
+            ],
+            onChanged: _saving
+                ? null
+                : (value) => setState(() => _gender = value),
+          ),
+          const SizedBox(height: KSpacing.md),
+          KTextField(
+            key: const ValueKey('profile-birth-year'),
+            label: 'জন্ম সাল (ঐচ্ছিক)',
+            controller: _birthYear,
+            keyboardType: TextInputType.number,
+            validator: (value) {
+              final text = latinDigits(value?.trim() ?? '');
+              if (text.isEmpty) return null;
+              final year = int.tryParse(text);
+              return year == null || year < 1900 || year > DateTime.now().year
+                  ? 'সঠিক জন্ম সাল লিখুন, যেমন ১৯৯৫।'
+                  : null;
+            },
           ),
           const SizedBox(height: KSpacing.lg),
           KPrimaryButton(

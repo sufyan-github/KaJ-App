@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -18,6 +19,9 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     private companion object {
         const val CHANNEL = "app.kaaj.mobile/location"
+
+        /** Turns screenshot and screen-recording protection on and off. */
+        const val SECURE_CHANNEL = "app.kaaj.mobile/secure"
 
         /** How long to wait for a live fix before falling back. */
         const val FIX_TIMEOUT_MS = 15_000L
@@ -42,6 +46,21 @@ class MainActivity : FlutterActivity() {
                     return@setMethodCallHandler
                 }
                 currentLocation(result)
+            }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, SECURE_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                if (call.method != "setSecure") {
+                    result.notImplemented()
+                    return@setMethodCallHandler
+                }
+                // FLAG_SECURE blocks screenshots, screen recording and the
+                // recent-apps thumbnail while an NID, selfie or chat is shown.
+                if (call.arguments == true) {
+                    window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                } else {
+                    window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                }
+                result.success(null)
             }
     }
 

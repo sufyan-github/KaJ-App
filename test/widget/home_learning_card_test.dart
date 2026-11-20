@@ -55,9 +55,10 @@ FakeApi _api() => FakeApi()
 
 void main() {
   testWidgets('shows learning with a mentor in my skills', (tester) async {
+    final api = _api();
     await pumpRouted(
       tester,
-      api: _api(),
+      api: api,
       home: const Scaffold(
         body: SingleChildScrollView(child: MyTrainingCard()),
       ),
@@ -69,6 +70,9 @@ void main() {
     expect(find.text('Learn with a mentor in your skills'), findsOneWidget);
     expect(find.text('Wiring with a mentor'), findsOneWidget);
     expect(find.text('Cooking class'), findsNothing);
+    expect(api.called('GET /learning-opportunities').single.query, {
+      'skillId': 'skill-wiring',
+    });
     await tester.tap(find.byKey(const ValueKey('training-card-explore-learn')));
     await tester.pumpAndSettle();
     expect(find.text('route:/explore?section=learn'), findsOneWidget);

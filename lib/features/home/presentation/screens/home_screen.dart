@@ -9,6 +9,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/k_error_state.dart';
 import '../../../../core/widgets/k_localized_text.dart';
 import '../../../../core/widgets/k_trust_banner.dart';
+import '../../../ai/presentation/ai_suggestions.dart';
 import '../../../catalog/presentation/controllers/catalog_providers.dart';
 import '../../../notifications/presentation/controllers/notifications_providers.dart';
 import '../../../profile/presentation/controllers/me_provider.dart';
@@ -169,6 +170,8 @@ class HomeScreen extends ConsumerWidget {
                       const ProfileCompletenessCard(),
                       const MyTrainingCard(),
                     ],
+                    // Hidden unless KAAJ AI is on.
+                    const AiSuggestionsCard(),
                     const SizedBox(height: KSpacing.md),
                     _SectionHeader(
                       title: isWorker ? 'কাছাকাছি কাজ' : 'জনপ্রিয় সেবা',
