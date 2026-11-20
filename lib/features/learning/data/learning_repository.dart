@@ -91,6 +91,13 @@ class LearningRepository {
         : detail(id);
   });
 
+  /// Stops new applications (`POST /learning-opportunities/:id/close`): a
+  /// draft or an opportunity nobody is enrolled in is closed; with learners
+  /// enrolled only applications stop. Else 409 JOB_NOT_CLOSABLE.
+  Future<void> close(String id) => _guard(() async {
+    await _dio.post<Map<String, dynamic>>('/learning-opportunities/$id/close');
+  });
+
   Future<void> apply(String id, {String? message}) => _guard(() async {
     await _dio.post<Map<String, dynamic>>(
       '/learning-opportunities/$id/applications',

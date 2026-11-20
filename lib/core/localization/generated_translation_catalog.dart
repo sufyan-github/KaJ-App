@@ -1090,8 +1090,8 @@ const generatedEnglishTranslations = <String, String>{
   "বেছে নেওয়া এলাকা": "Chosen area",
   "এখনো বেছে নেওয়া হয়নি": "Not chosen yet",
   "বদলান": "Change",
-  "পিন না করলে কর্মীর পৌঁছানো ও কাজ শেষ হওয়া আপনাকেই \"উপস্থিতি\" থেকে নিশ্চিত করতে হবে। কাজের জায়গায় থাকলে এখনই পিন করুন।":
-      "Without a pin you will confirm the worker's arrival and the end of the work yourself, from Attendance. Pin the site now if you are there.",
+  "পিন না করলে কর্মী আপনার এলাকার কেন্দ্র ধরে চেক-ইন করবেন, তাই অবস্থান কম নির্ভুল হবে। কাজের জায়গায় থাকলে এখনই পিন করুন।":
+      "Without a pin, the worker checks in against the centre of your area, which is less exact. If you are at the work site, pin it now.",
   "কর্মী নিজের ফোন থেকে চেক-ইন ও চেক-আউট করবেন। লোকেশন কাজ না করলে বা কাজের জায়গা পিন করা না থাকলে আপনি এখানে নিশ্চিত করতে পারবেন।":
       "The worker checks in and out on their own phone. If location fails or the site was not pinned, you can confirm it here.",
   "কাজ শেষ হয়েছে নিশ্চিত করুন": "Confirm the work has ended",
@@ -1363,4 +1363,27 @@ const generatedEnglishTranslations = <String, String>{
       "Gender cannot be changed after identity verification. Contact support to correct it.",
   "বিশেষজ্ঞ পরামর্শটি গ্রহণ করলে চ্যাট খুলবে।":
       "The chat opens once the expert accepts the consultation.",
+  // R2: workflows
+  "শিক্ষার্থীকে বার্তা দিন": "Message the learner",
+  "মেন্টরকে বার্তা দিন": "Message the mentor",
+  "নতুন আবেদন বন্ধ আছে। ভর্তি হওয়া শিক্ষার্থীরা চালিয়ে যাবেন।":
+      "New applications are closed. Enrolled learners carry on.",
+  "নতুন আবেদন বন্ধ করুন": "Stop new applications",
+  "নতুন আবেদন বন্ধ করবেন?": "Stop new applications?",
+  "কেউ ভর্তি না হলে সুযোগটি বন্ধ হয়ে যাবে। ভর্তি হওয়া শিক্ষার্থীরা থাকলে তাঁরা চালিয়ে যাবেন, শুধু নতুন আবেদন বন্ধ হবে।":
+      "With nobody enrolled, the opportunity closes. If learners are enrolled, they carry on and only new applications stop.",
+  "পোস্ট বন্ধ করুন": "Close this post",
+  "পোস্টটি বন্ধ করবেন?": "Close this post?",
+  "কেউ আর আবেদন করতে পারবেন না। অপেক্ষায় থাকা আবেদনগুলোও বন্ধ হবে।":
+      "Nobody can apply any more, and waiting applications close too.",
+  "পোস্টটি বন্ধ করা হয়েছে।": "The post is closed.",
+  "পোস্টটি বন্ধ করা যায়নি।": "Could not close the post.",
+  "বাতিলের সময় দেখানো ফি। এটি দুজনের মধ্যে নগদে মেটাতে হয়।":
+      "The fee shown when the hire was cancelled. It is settled in cash between the two of you.",
+  "বাতিলের ফি:": "Cancellation fee:",
+  "পরামর্শের জন্য আমার সময়": "My times for consultations",
+  "যে সময়ে মানুষ আপনার সাথে পরামর্শের সময় নিতে পারবেন":
+      "When people can book a consultation with you",
+  "অ্যাকাউন্ট মুছলে প্রোফাইল আর দেখা যাবে না এবং সব ডিভাইস সাইন আউট হবে। ৩০ দিন পরে আপনার ব্যক্তিগত তথ্য মুছে ফেলা হবে এবং এই নম্বর দিয়ে আবার নিবন্ধন করা যাবে। রিভিউ পরিচয়বিহীনভাবে এবং আইনগত আর্থিক রেকর্ড নির্ধারিত সময় রাখা হতে পারে।":
+      "Deleting your account hides your profile and signs out every device. After 30 days your personal data is removed and this number can register again. Reviews may stay without your name, and legally required financial records may be kept for the required time.",
 };

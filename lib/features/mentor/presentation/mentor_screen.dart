@@ -177,6 +177,18 @@ class _ApprovedPanelState extends ConsumerState<_ApprovedPanel> {
           value: accepting,
           onChanged: _saving ? null : _toggle,
         ),
+        // Approved mentors set the times experts can be booked for a
+        // consultation, worker role or not.
+        ListTile(
+          key: const ValueKey('mentor-availability'),
+          leading: const Icon(Icons.event_available_outlined),
+          title: const KLocalizedText('পরামর্শের জন্য আমার সময়'),
+          subtitle: const KLocalizedText(
+            'যে সময়ে মানুষ আপনার সাথে পরামর্শের সময় নিতে পারবেন',
+          ),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.push(AppRoutes.editAvailability),
+        ),
       ],
     );
   }

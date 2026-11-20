@@ -287,6 +287,30 @@ void main() {
       expect(find.byKey(const ValueKey('learning-apply')), findsNothing);
       expect(find.text('You published this.'), findsOneWidget);
     });
+    testWidgets('the mentor stops new applications (R2)', (tester) async {
+      final api = await openDetail(tester, data: _opportunity(mine: true));
+      api.on(
+        'POST /learning-opportunities/opp-1/close',
+        FakeResponse.data({'id': 'opp-1', 'closedToApplications': true}),
+      );
+      await tester.ensureVisible(find.byKey(const ValueKey('learning-close')));
+      await tester.tap(find.byKey(const ValueKey('learning-close')));
+      await tester.pumpAndSettle();
+      api.on(
+        'GET /learning-opportunities/opp-1',
+        FakeResponse.data({
+          ..._opportunity(mine: true),
+          'closedToApplications': true,
+        }),
+      );
+      await tester.tap(find.byKey(const ValueKey('learning-close-confirm')));
+      await tester.pumpAndSettle();
+      expect(
+        api.called('POST /learning-opportunities/opp-1/close'),
+        hasLength(1),
+      );
+      expect(find.byKey(const ValueKey('learning-closed')), findsOneWidget);
+    });
   });
 
   group('publishing', () {

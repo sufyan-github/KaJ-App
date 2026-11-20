@@ -17,6 +17,7 @@ class JobsRepository {
     bool availableOnly = false,
     bool forMe = true,
     String? locationId,
+    String? query,
     String? cursor,
   }) async {
     try {
@@ -28,6 +29,7 @@ class JobsRepository {
           'skillId': ?skillId,
           'locationId': ?locationId,
           if (availableOnly) 'availableOnly': 'true',
+          'q': ?query,
           // Only ever a cursor the server handed out: an API that does not
           // paginate yet rejects unknown query parameters.
           'cursor': ?cursor,
@@ -135,6 +137,16 @@ class JobsRepository {
   Future<void> publishJob(String jobId) async {
     try {
       await _dio.post<Map<String, dynamic>>('/jobs/$jobId/publish');
+    } on Object catch (error) {
+      throw ErrorMapper.from(error);
+    }
+  }
+
+  /// Closes a draft or open post nobody is booked for
+  /// (`POST /jobs/:id/close`; else 409 JOB_NOT_CLOSABLE).
+  Future<void> closeJob(String jobId) async {
+    try {
+      await _dio.post<Map<String, dynamic>>('/jobs/$jobId/close');
     } on Object catch (error) {
       throw ErrorMapper.from(error);
     }

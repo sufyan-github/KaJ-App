@@ -601,6 +601,10 @@ bool isFreeRoute(String location, Set<String> freeModules) {
   if (_under(location, '/ai')) return true;
   if (learn && isLearningRoute(location)) return true;
   if (community && isCommunityRoute(location)) return true;
+  // Mentors set their consultation times without being workers.
+  if ((learn || community) && location == AppRoutes.editAvailability) {
+    return true;
+  }
   if (location == AppRoutes.explore || location == AppRoutes.activity) {
     return true;
   }

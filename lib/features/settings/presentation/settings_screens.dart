@@ -823,7 +823,7 @@ class _DataAccountScreenState extends ConsumerState<DataAccountScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const KLocalizedText(
-                    'অ্যাকাউন্ট মুছলে প্রোফাইল আর দেখা যাবে না এবং সব ডিভাইস সাইন আউট হবে। রিভিউ পরিচয়বিহীনভাবে এবং আইনগত আর্থিক রেকর্ড নির্ধারিত সময় রাখা হতে পারে।',
+                    'অ্যাকাউন্ট মুছলে প্রোফাইল আর দেখা যাবে না এবং সব ডিভাইস সাইন আউট হবে। ৩০ দিন পরে আপনার ব্যক্তিগত তথ্য মুছে ফেলা হবে এবং এই নম্বর দিয়ে আবার নিবন্ধন করা যাবে। রিভিউ পরিচয়বিহীনভাবে এবং আইনগত আর্থিক রেকর্ড নির্ধারিত সময় রাখা হতে পারে।',
                   ),
                   const SizedBox(height: KSpacing.sm),
                   const KLocalizedText(

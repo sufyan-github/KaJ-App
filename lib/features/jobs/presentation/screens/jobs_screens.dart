@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -76,6 +78,34 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
   bool _creatingAlert = false;
   final _more = MorePages<JobSummary>();
 
+  /// The search text the server searches (`q`), settled for a moment so
+  /// every keystroke does not start a request.
+  late String? _serverQuery = _searchable(widget.searchQuery);
+  Timer? _searchDebounce;
+
+  static String? _searchable(String text) {
+    final value = text.trim();
+    return value.length >= 2 && value.length <= 100 ? value : null;
+  }
+
+  @override
+  void didUpdateWidget(covariant JobFeedScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.searchQuery == widget.searchQuery) return;
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 400), () {
+      if (mounted) {
+        setState(() => _serverQuery = _searchable(widget.searchQuery));
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    super.dispose();
+  }
+
   Future<void> _createAlert() async {
     setState(() => _creatingAlert = true);
     try {
@@ -116,6 +146,7 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
       locationId: widget.locationId,
       availableOnly: isWorker && _availableOnly,
       forMe: isWorker,
+      query: _serverQuery,
     );
     final feed = jobFeedProvider(filter);
     final jobs = showOpenJobs ? ref.watch(feed) : ref.watch(myJobsProvider);
@@ -299,6 +330,7 @@ class _JobFeedScreenState extends ConsumerState<JobFeedScreen> {
                                         locationId: filter.locationId,
                                         availableOnly: filter.availableOnly,
                                         forMe: filter.forMe,
+                                        query: filter.query,
                                         cursor: cursor,
                                       ),
                                   () {
@@ -661,7 +693,7 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
                   _site == null
                       // Without a pin nothing can measure the arrival of the
                       // worker, so the poster confirms start and end.
-                      ? 'পিন না করলে কর্মীর পৌঁছানো ও কাজ শেষ হওয়া আপনাকেই "উপস্থিতি" থেকে নিশ্চিত করতে হবে। কাজের জায়গায় থাকলে এখনই পিন করুন।'
+                      ? 'পিন না করলে কর্মী আপনার এলাকার কেন্দ্র ধরে চেক-ইন করবেন, তাই অবস্থান কম নির্ভুল হবে। কাজের জায়গায় থাকলে এখনই পিন করুন।'
                       : 'কর্মী এই জায়গায় পৌঁছে চেক-ইন করবেন। এখন কাজের জায়গায় থাকলে তবেই পিন করুন।',
                 ),
                 trailing: _pinning
@@ -1531,6 +1563,22 @@ class _AssignmentDetailBody extends ConsumerWidget {
             subtitle: KLocalizedText(KFormat.dateTime(context, step.at)),
           ),
         ),
+        if (detail.cancellationFee case final fee? when fee.poisha > 0) ...[
+          const SizedBox(height: KSpacing.md),
+          Card(
+            key: const ValueKey('assignment-cancellation-fee'),
+            child: ListTile(
+              leading: const Icon(Icons.receipt_long_outlined),
+              title: Text(
+                '${KaajLocalizations.text(context, 'বাতিলের ফি:')} '
+                '${KFormat.money(context, fee)}',
+              ),
+              subtitle: const KLocalizedText(
+                'বাতিলের সময় দেখানো ফি। এটি দুজনের মধ্যে নগদে মেটাতে হয়।',
+              ),
+            ),
+          ),
+        ],
         if (detail.payment != null || item.status == 'COMPLETED') ...[
           const SizedBox(height: KSpacing.lg),
           _CashPaymentPanel(

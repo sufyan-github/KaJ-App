@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:kaaj/core/widgets/k_text_field.dart';
 import 'package:kaaj/features/activity/my_activity_screen.dart';
+import 'package:kaaj/features/chat/data/chat_repository.dart';
+import 'package:kaaj/features/chat/presentation/controllers/chat_providers.dart';
 import 'package:kaaj/features/learning/presentation/enrolment_screens.dart';
 import 'package:kaaj/features/training/presentation/screens/certificates_screen.dart';
 
@@ -343,4 +346,45 @@ void main() {
     expect(find.textContaining('Mentor: Rafiq H.'), findsOneWidget);
     expect(find.text('Safe home cleaning'), findsOneWidget);
   });
+
+  for (final mentor in [false, true]) {
+    testWidgets('message the other person from the enrolment '
+        '(mentor: $mentor)', (tester) async {
+      final api = FakeApi()
+        ..on(
+          'GET /learning-enrolments/e1',
+          FakeResponse.data(_enrolment(mentor: mentor)),
+        )
+        ..on(
+          'POST /jobs/opp-1/conversations',
+          FakeResponse.data({'id': 'conv-9'}),
+        );
+      await pumpRouted(
+        tester,
+        api: api,
+        home: const EnrolmentScreen(enrolmentId: 'e1'),
+        size: const Size(400, 2400),
+        overrides: [
+          chatRepositoryProvider.overrideWithValue(
+            ChatRepository(api.dio(), _NoBox()),
+          ),
+        ],
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('learning-message')),
+      );
+      await tester.tap(find.byKey(const ValueKey('learning-message')));
+      await tester.pumpAndSettle();
+      expect(api.called('POST /jobs/opp-1/conversations').single.data, {
+        'participantUserId': mentor ? 'l1' : 'm1',
+      });
+      expect(find.text('route:/conversations/conv-9'), findsOneWidget);
+    });
+  }
+}
+
+/// Opening a conversation never touches the unsent-message queue.
+class _NoBox implements Box<dynamic> {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/formatting/kaaj_format.dart';
 import '../../core/localization/kaaj_localizations.dart';
+import '../../core/routing/app_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/k_empty_state.dart';
 import '../../core/widgets/k_localized_text.dart';
@@ -252,6 +253,13 @@ class _MentorCard extends StatelessWidget {
               runSpacing: KSpacing.xs,
               alignment: WrapAlignment.end,
               children: [
+                TextButton(
+                  key: ValueKey('mentor-profile-${mentor.id}'),
+                  style: TextButton.styleFrom(minimumSize: const Size(0, 44)),
+                  onPressed: () =>
+                      context.push(AppRoutes.workerProfile(mentor.id)),
+                  child: const KLocalizedText('প্রোফাইল দেখুন'),
+                ),
                 OutlinedButton.icon(
                   key: ValueKey('mentor-introduce-${mentor.id}'),
                   style: OutlinedButton.styleFrom(
