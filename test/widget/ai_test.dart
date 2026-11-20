@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kaaj/features/ai/domain/ai_models.dart';
 import 'package:kaaj/features/ai/presentation/ai_consent_screen.dart';
+import 'package:kaaj/features/ai/presentation/ai_entry_tiles.dart';
 import 'package:kaaj/features/ai/presentation/ai_suggestions.dart';
 import 'package:kaaj/features/ai/presentation/growth_tips_screen.dart';
 import 'package:kaaj/features/ai/presentation/idea_analysis_screen.dart';
@@ -122,6 +123,42 @@ void main() {
       expect(find.text('route:/ai/suggestions'), findsOneWidget);
     });
   });
+
+  for (final enabled in [true, false]) {
+    testWidgets('settings and business AI tiles follow the switch '
+        '(enabled: $enabled)', (tester) async {
+      final api = FakeApi()
+        ..on('GET /ai/status', FakeResponse.data(_status(enabled: enabled)));
+      await pumpRouted(
+        tester,
+        api: api,
+        home: const Scaffold(
+          body: Column(
+            children: [
+              AiSettingsTile(),
+              AiGrowthTipsTile(businessId: 'b-1'),
+            ],
+          ),
+        ),
+      );
+      expect(
+        find.byKey(const ValueKey('settings-ai')),
+        enabled ? findsOneWidget : findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey('business-ai-growth')),
+        enabled ? findsOneWidget : findsNothing,
+      );
+      if (enabled) {
+        await tester.tap(find.byKey(const ValueKey('business-ai-growth')));
+        await tester.pumpAndSettle();
+        expect(
+          find.text('route:/ai/businesses/b-1/growth-tips'),
+          findsOneWidget,
+        );
+      }
+    });
+  }
 
   group('consent', () {
     for (final language in ['en', 'bn']) {

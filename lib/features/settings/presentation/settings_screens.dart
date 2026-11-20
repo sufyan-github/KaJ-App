@@ -9,6 +9,7 @@ import '../../../core/permissions/permission_gateway.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/k_localized_text.dart';
+import '../../ai/presentation/ai_entry_tiles.dart';
 import '../../auth/presentation/controllers/auth_controller.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
 import '../../business/business_routes.dart';
@@ -146,6 +147,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 subtitle: 'ব্যবসা, সদস্য, যাচাই ও সহযোগিতা',
                 onTap: () => context.push(BusinessRoutes.mine),
               ),
+              // Only while KAAJ AI is on: consent and withdraw.
+              const AiSettingsTile(),
               if (role == KaajRole.worker)
                 _SettingsTile(
                   icon: Icons.photo_library_outlined,

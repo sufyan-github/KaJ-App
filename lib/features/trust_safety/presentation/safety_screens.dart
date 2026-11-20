@@ -46,7 +46,7 @@ const reportTargets = <String, String>{
   'ASSIGNMENT': 'কাজের চুক্তি',
   'BUSINESS': 'একটি ব্যবসা',
   'BUSINESS_OFFERING': 'পণ্য বা সেবা',
-  'COLLABORATION_REQUEST': 'সহযোগিতার অনুরোধ',
+  'COLLABORATION_REQUEST': 'একটি সহযোগিতার অনুরোধ',
   'IDEA': 'একটি আইডিয়া',
   'IDEA_ROLE': 'একটি আইডিয়ার ভূমিকা',
   'INTRODUCTION': 'পরিচয়ের অনুরোধ',

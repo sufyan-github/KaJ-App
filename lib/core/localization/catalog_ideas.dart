@@ -164,7 +164,7 @@ const ideaTranslations = <String, String>{
   "খোঁজে এই লাইনটিই দেখা যায়।": "This line is what search shows.",
   "সারাংশ ১০ থেকে ১৬০ অক্ষরের হতে হবে।":
       "The summary must be 10 to 160 characters.",
-  "খাতের তালিকা লোড করা যায়নি।": "Could not load the sectors.",
+
   "একটি খাত বেছে নিন।": "Choose a sector.",
   "আইডিয়ার এলাকা (ঐচ্ছিক)": "Idea area (optional)",
   "আইডিয়ার এলাকা সরান": "Remove the idea area",
@@ -236,7 +236,7 @@ const ideaTranslations = <String, String>{
   "আইডিয়ার দল থেকে সরান": "Remove from the idea team",
   "দল থেকে সরানো যায়নি।": "Could not remove from the team.",
   "আইডিয়ার মালিক": "Idea owner",
-  "নীতিগতভাবে সম্মত": "Agreed in principle",
+
   "দলে এখনো আর কেউ নেই।": "Nobody else is on the team yet.",
   "আইডিয়ার দলে যোগ করুন": "Add to the idea team",
   "যাঁদের সঙ্গে সহযোগিতায় দুজনেই সম্মত হয়েছেন, শুধু তাঁদের দলে যোগ করা যায়।":

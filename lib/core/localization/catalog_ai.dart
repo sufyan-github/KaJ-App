@@ -3,6 +3,9 @@
 /// English renderings for the KAAJ AI screens (Bangla key to English).
 /// Keys must not repeat a key of another catalog.
 const aiTranslations = <String, String>{
+  "AI থেকে কয়েকটি পরামর্শ": "A few suggestions from AI",
+  "চালু আছে · অনুমতি বন্ধ করতে পারবেন": "On · you can withdraw consent",
+  "বন্ধ আছে · অনুমতি দিলে চালু হবে": "Off · turns on when you allow it",
   "KAAJ AI চালু হয়েছে।": "KAAJ AI is on.",
   "AI বিশ্লেষণ": "AI analysis",
   "শুধু গ্রাহকদের জন্য": "Subscribers only",
@@ -10,8 +13,7 @@ const aiTranslations = <String, String>{
   "মোট:": "Total:",
   "কর্মী খুঁজতে কাজ পোস্ট করুন": "Post a job to find workers",
   "কমিউনিটি গ্রুপ দেখুন": "See community groups",
-  "পণ্য বা সেবা যোগ করুন": "Add a product or service",
-  "অংশীদার খুঁজুন": "Find partners",
+
   "ব্যবসা বাড়ানোর টিপস": "Growth tips",
   "AI সুবিধা এখন বন্ধ": "AI is off right now",
   "পরে আবার দেখুন।": "Check again later.",
@@ -23,7 +25,7 @@ const aiTranslations = <String, String>{
   "বেশি": "High",
   "মাঝারি": "Medium",
   "কম": "Low",
-  "অজানা": "Unknown",
+
   "এটি গ্রাহকদের জন্য": "This is for subscribers",
   "আইডিয়ার AI বিশ্লেষণ শুধু KAAJ গ্রাহকদের জন্য। সাবস্ক্রিপশন চালু করলে দিনে কয়েকবার বিশ্লেষণ করাতে পারবেন।":
       "AI idea analysis is for KAAJ subscribers. With a subscription you can run it a few times a day.",

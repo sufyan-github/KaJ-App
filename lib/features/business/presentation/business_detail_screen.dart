@@ -8,6 +8,7 @@ import '../../../core/localization/kaaj_localizations.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/k_localized_text.dart';
+import '../../ai/presentation/ai_entry_tiles.dart';
 import '../../jobs/presentation/screens/jobs_screens.dart';
 import '../business_routes.dart';
 import '../domain/business_models.dart';
@@ -460,6 +461,7 @@ class _MemberActions extends StatelessWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(BusinessRoutes.verification(business.id)),
           ),
+        AiGrowthTipsTile(businessId: business.id),
         ListTile(
           key: const ValueKey('business-leave'),
           leading: const Icon(Icons.logout, color: KColors.danger),

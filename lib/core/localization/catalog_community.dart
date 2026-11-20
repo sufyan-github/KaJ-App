@@ -28,8 +28,7 @@ const communityTranslations = <String, String>{
   "অবস্থা জানা নেই": "Status unknown",
   "শেখার লক্ষ্য": "Learning goal",
   "নির্ধারিত": "Scheduled",
-  "শেষ হয়েছে": "Completed",
-  "আমন্ত্রিত": "Invited",
+
   "যাচ্ছেন না": "Not going",
   "উপস্থিত ছিলেন": "Attended",
   "আসেননি": "Did not come",
@@ -43,7 +42,7 @@ const communityTranslations = <String, String>{
   "অ্যাপের চ্যাটে": "In the app chat",
   "মডারেটর": "Moderator",
   "কমিউনিটি অ্যাম্বাসেডর": "Community ambassador",
-  "সদস্য": "Member",
+
   "এটি দেখা যাচ্ছে না": "This is not available",
   "এটি মুছে ফেলা হয়েছে, ব্যক্তিগত, অথবা আপনার জন্য খোলা নেই।":
       "It was removed, is private, or is not open to you.",
@@ -52,7 +51,7 @@ const communityTranslations = <String, String>{
       "Up to 50 at a time. People who can't join are skipped.",
   "নাম লিখুন": "Type a name",
   "মানুষের তালিকা লোড করা যায়নি।": "Could not load the list of people.",
-  "কাউকে পাওয়া যায়নি।": "No one found.",
+
   "আমন্ত্রণ পাঠান": "Send invitations",
   // Introductions
   "দিনে ৫টি পরিচয় অনুরোধ পাঠানো যায়। পরে আবার চেষ্টা করুন।":
@@ -91,8 +90,7 @@ const communityTranslations = <String, String>{
   "এসেছে": "Received",
   "পাঠিয়েছি": "Sent",
   "অনুরোধগুলো লোড করা যায়নি।": "Could not load the requests.",
-  "কোনো অনুরোধ আসেনি": "No requests yet",
-  "আপনি কোনো অনুরোধ পাঠাননি": "You have not sent any requests",
+
   "কেউ আপনার পরামর্শ চাইলে এখানে দেখা যাবে।":
       "When someone asks for your advice it shows here.",
   "খুঁজুন ও জানুন > মানুষ > মেন্টর থেকে একজন বিশেষজ্ঞের কাছে অনুরোধ পাঠান।":
@@ -108,10 +106,10 @@ const communityTranslations = <String, String>{
   "অনুরোধ প্রত্যাহার করবেন?": "Withdraw the request?",
   "বিশেষজ্ঞ আর এই অনুরোধ দেখতে পাবেন না।":
       "The expert will no longer be able to answer this request.",
-  "প্রত্যাহার করুন": "Withdraw",
+
   "অনুরোধ প্রত্যাহার করা হয়েছে।": "Request withdrawn.",
   "প্রত্যাহার করা যায়নি। আবার চেষ্টা করুন।": "Could not withdraw. Try again.",
-  "অনুরোধটি লোড করা যায়নি।": "Could not load the request.",
+
   "আপনার পরামর্শ চেয়েছেন": "Asked for your advice",
   "বিশেষজ্ঞ, আপনি অনুরোধ পাঠিয়েছেন": "Expert you sent a request to",
   "বিষয়টি গ্রহণের পরে দেখা যাবে": "The subject shows after you accept",
@@ -127,9 +125,9 @@ const communityTranslations = <String, String>{
       "You offered the expert the full idea details (if they accept the confidentiality terms).",
   "আমি গোপনীয়তার শর্ত মানছি: আইডিয়ার বিবরণ কারও সাথে শেয়ার করব না বা নিজে ব্যবহার করব না।":
       "I accept the confidentiality terms: I will not share the idea details or use them myself.",
-  "গ্রহণ করুন": "Accept",
+
   "অনুরোধ প্রত্যাহার করুন": "Withdraw the request",
-  "চ্যাট খুলুন": "Open chat",
+
   "পরামর্শের সময় নিন": "Book a consultation",
   // Consultations and sessions
   "সেশন সম্পাদনা": "Edit session",
@@ -270,12 +268,12 @@ const communityTranslations = <String, String>{
   "জায়গা": "Places",
   "বিশেষজ্ঞ নিশ্চিত করার সময় জানাবেন": "The expert says when confirming",
   "আয়োজক": "Host",
-  "আপনি": "You",
+
   "অনুরোধকারী": "Requester",
   "অপেক্ষা তালিকায় আপনার স্থান": "Your place on the waitlist",
   "চেক-ইন করেছেন": "Checked in",
   "বাতিলের কারণ": "Reason for cancelling",
-  "বিবরণ": "Description",
+
   "শুধু যাঁদের প্রোফাইলে লিঙ্গ নারী দেওয়া আছে তাঁরা যোগ দিতে পারেন; সার্ভার এটি যাচাই করে।":
       "Only people whose profile gender is female can join; the server checks it.",
   "পরামর্শ নিশ্চিত করুন": "Confirm the consultation",
@@ -332,13 +330,13 @@ const communityTranslations = <String, String>{
       "Try other words or change the filters.",
   "অনুরোধ নাকচ করবেন?": "Turn down the request?",
   "আমন্ত্রণ বাতিল করবেন?": "Cancel the invitation?",
-  "সদস্যকে সরাবেন?": "Remove the member?",
+
   "তিনি পরে আবার যোগ দিতে চাইতে পারবেন।": "They can ask to join again later.",
   "সরানো সদস্য আর এই দলে যোগ দিতে পারবেন না।":
       "A removed member cannot join this group again.",
-  "সরিয়ে দিন": "Remove",
+
   "হয়ে গেছে।": "Done.",
-  "সদস্যদের তালিকা লোড করা যায়নি।": "Could not load the members.",
+
   "কোনো অপেক্ষমাণ অনুরোধ নেই": "No pending requests",
   "কোনো সদস্য নেই": "No members",
   "যোগ দেওয়ার অনুরোধ ও পাঠানো আমন্ত্রণ এখানে দেখা যাবে।":
@@ -388,7 +386,7 @@ const communityTranslations = <String, String>{
   "এই দলে যোগ দিতে আপনাকে আমন্ত্রণ জানানো হয়েছে।":
       "You are invited to join this group.",
   "আমন্ত্রণ গ্রহণ করুন": "Accept the invitation",
-  "ফিরিয়ে দিন": "Decline",
+
   "আপনার যোগ দেওয়ার অনুরোধ অপেক্ষমাণ। মডারেটর অনুমোদন করলে জানানো হবে।":
       "Your request to join is pending. You will be told when a moderator approves it.",
   "অনুরোধ তুলে নিন": "Cancel the request",
