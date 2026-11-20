@@ -6,6 +6,7 @@ import {
 import { Prisma, RoleMode, TrustLevel } from "@prisma/client";
 
 import { PrismaService } from "../../infra/prisma/prisma.service";
+import { CursorQueryDto } from "../../common/api/cursor-query.dto";
 import { activateRoleMode } from "./role-modes";
 import { ensureOwnedBusiness } from "../business/business-bootstrap";
 import { cancelHostedSessions } from "../safety/account-cascade";
@@ -449,7 +450,9 @@ export class UsersService {
     };
   }
 
-  async favorites(userId: string) {
+  /** R3: paged by the favourite's user id (limit, cursor; 100 default). */
+  async favorites(userId: string, query: CursorQueryDto = {}) {
+    const limit = query.limit ?? 100;
     const engagement = new EngagementService(this.prisma);
     // W6 (D-9): nobody in a block with you; nobody who left the directory
     // unless you already deal with them (the public-profile rule).
@@ -457,8 +460,23 @@ export class UsersService {
     const saved = await this.prisma.favorite.findMany({
       where: { user_id: userId, target_user_id: { notIn: hidden } },
       include: { target: { include: { profile: true, worker_profile: true } } },
-      orderBy: { created_at: "desc" },
+      orderBy: [{ created_at: "desc" }, { target_user_id: "desc" }],
+      take: limit + 1,
+      ...(query.cursor
+        ? {
+            cursor: {
+              user_id_target_user_id: {
+                user_id: userId,
+                target_user_id: query.cursor,
+              },
+            },
+            skip: 1,
+          }
+        : {}),
     });
+    const nextCursor =
+      saved.length > limit ? saved[limit - 1]!.target_user_id : null;
+    saved.splice(limit);
     const rows = [];
     for (const row of saved)
       if (
@@ -482,6 +500,7 @@ export class UsersService {
         ratingAverage: row.target.worker_profile?.rating_avg.toString() ?? "0",
         savedAt: row.created_at.toISOString(),
       })),
+      nextCursor,
     };
   }
 

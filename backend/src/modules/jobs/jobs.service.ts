@@ -642,19 +642,28 @@ export class JobsService {
     return serializeApplication(application);
   }
 
-  async listApplications(posterUserId: string, jobId: string) {
+  /** R3: paged (limit, cursor; 100 by default). */
+  async listApplications(
+    posterUserId: string,
+    jobId: string,
+    query: CursorQueryDto = {},
+  ) {
     await this.ownedJob(posterUserId, jobId);
+    const limit = query.limit ?? 100;
     const hidden = await this.blocks.hiddenFrom(posterUserId);
-    const applications = await this.prisma.application.findMany({
+    const rows = await this.prisma.application.findMany({
       where: { job_id: jobId, worker_user_id: { notIn: hidden } },
-      orderBy: { created_at: "desc" },
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
       include: { worker: { select: applicantSelect } },
+      ...pageArgs({ limit, cursor: query.cursor }),
     });
+    const { items: applications, nextCursor } = pageResult(rows, limit);
     return {
       items: applications.map((application) => ({
         ...serializeApplication(application),
         applicant: applicantSummary(application.worker),
       })),
+      nextCursor,
     };
   }
 

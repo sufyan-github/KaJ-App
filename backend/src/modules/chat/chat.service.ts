@@ -15,6 +15,8 @@ import {
 } from "@prisma/client";
 
 import { CLOCK, Clock } from "../../common/time/clock";
+import { pageArgs, pageResult } from "../../common/api/cursor-page";
+import { CursorQueryDto } from "../../common/api/cursor-query.dto";
 import { UserRateLimiter } from "../../common/rate-limit/user-rate-limit";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { STORAGE_PORT, StoragePort } from "../../infra/storage/storage.port";
@@ -52,8 +54,10 @@ export class ChatService {
     return this.engagementService ?? new EngagementService(this.prisma);
   }
 
-  async list(userId: string) {
-    const all = await this.prisma.conversation.findMany({
+  /** R3: paged (limit, cursor; 100 by default, as before for most). */
+  async list(userId: string, query: CursorQueryDto = {}) {
+    const limit = query.limit ?? 100;
+    const fetched = await this.prisma.conversation.findMany({
       where: { deleted_at: null, participants: { some: { user_id: userId } } },
       include: {
         job: { select: { id: true, title: true, status: true } },
@@ -66,8 +70,11 @@ export class ChatService {
           take: 10,
         },
       },
-      orderBy: { updated_at: "desc" },
+      orderBy: [{ updated_at: "desc" }, { id: "desc" }],
+      ...pageArgs({ limit, cursor: query.cursor }),
     });
+    const page = pageResult(fetched, limit);
+    const all = page.items;
     const hidden = new Set(await this.blocks.hiddenFrom(userId));
     // W6 (D-14): a 1:1 conversation with someone in a block leaves the list
     // for both sides. Group rooms stay; the blocked person is muted there.
@@ -146,7 +153,7 @@ export class ChatService {
         };
       }),
     );
-    return { items };
+    return { items, nextCursor: page.nextCursor };
   }
 
   async open(userId: string, jobId: string, participantUserId: string) {

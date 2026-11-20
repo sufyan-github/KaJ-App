@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Post } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { CursorQueryDto } from "../../common/api/cursor-query.dto";
 import { UserRateLimit } from "../../common/rate-limit/user-rate-limit";
 import { Policy } from "../../common/policy/policy.decorator";
 import { Policies } from "../../common/policy/policy.types";
@@ -32,7 +33,10 @@ export class ModerationController {
 
   @Get("me/blocks")
   @Policy(Policies.authenticated())
-  blocks(@CurrentUser() claims: AccessTokenClaims) {
-    return this.moderation.blocks(claims.sub);
+  blocks(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Query() query: CursorQueryDto,
+  ) {
+    return this.moderation.blocks(claims.sub, query);
   }
 }
