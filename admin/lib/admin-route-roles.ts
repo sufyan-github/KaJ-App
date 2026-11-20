@@ -6,6 +6,7 @@
 export type AdminRole = "ADMIN" | "MODERATOR" | "SUPPORT" | "FINANCE";
 
 export const ADMIN_ROUTE_ROLES = {
+  "GET ai/usage": ["ADMIN"],
   "GET analytics": ["ADMIN", "MODERATOR", "SUPPORT", "FINANCE"],
   "GET applications": ["ADMIN", "MODERATOR", "SUPPORT", "FINANCE"],
   "GET attendance": ["ADMIN", "MODERATOR"],

@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 
+import { AdminAuthModule } from "../admin-auth/admin-auth.module";
 import { MentorsModule } from "../mentors/mentors.module";
 import { SafetyModule } from "../safety/safety.module";
 import { SubscriptionsModule } from "../subscriptions/subscriptions.module";
@@ -9,6 +10,8 @@ import { AiQuotaService } from "./ai-quota.service";
 import { AiRunnerService } from "./ai-runner.service";
 import { AiStatusService } from "./ai-status.service";
 import { AiController } from "./ai.controller";
+import { AiUsageAdminController } from "./ai-usage-admin.controller";
+import { AiUsageAdminService } from "./ai-usage-admin.service";
 import { AiSettings } from "./ai.settings";
 import { AnthropicAiClient } from "./anthropic-ai.client";
 import { BusinessGrowthService } from "./business-growth.service";
@@ -22,8 +25,8 @@ import { OpportunitySuggestionsService } from "./opportunity-suggestions.service
  * AI_ENABLED=true and ANTHROPIC_API_KEY is set; tests override AI_CLIENT.
  */
 @Module({
-  imports: [MentorsModule, SafetyModule, SubscriptionsModule],
-  controllers: [AiController],
+  imports: [AdminAuthModule, MentorsModule, SafetyModule, SubscriptionsModule],
+  controllers: [AiController, AiUsageAdminController],
   providers: [
     AiSettings,
     {
@@ -39,6 +42,7 @@ import { OpportunitySuggestionsService } from "./opportunity-suggestions.service
     OpportunityRetrievalService,
     OpportunitySuggestionsService,
     BusinessGrowthService,
+    AiUsageAdminService,
   ],
 })
 export class AiModule {}

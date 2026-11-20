@@ -34,6 +34,7 @@ import {
 } from "./ui";
 import { Staff } from "./views/staff";
 import { AuditTrail } from "./views/audit";
+import { AiUsage } from "./ai-usage";
 import {
   Attendance,
   Businesses,
@@ -177,6 +178,7 @@ function ModuleView({
   selfId: string;
 }) {
   if (active === "staff") return <Staff selfId={selfId} />;
+  if (active === "aiUsage") return <AiUsage />;
   if (active === "skills") return <Skills />;
   if (active === "attendance") return <Attendance />;
   if (active === "ideas")

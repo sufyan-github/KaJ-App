@@ -75,9 +75,11 @@ test("the matrix lists only known roles", () => {
   }
 });
 
-test("only ADMIN sees staff management", () => {
-  for (const role of ROLES)
+test("only ADMIN sees staff management and AI usage", () => {
+  for (const role of ROLES) {
     assert.equal(keys(role).includes("staff"), role === "ADMIN", role);
+    assert.equal(keys(role).includes("aiUsage"), role === "ADMIN", role);
+  }
 });
 
 test("ideas and introductions are for content moderators only", () => {

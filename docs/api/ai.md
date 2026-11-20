@@ -332,3 +332,18 @@ SDK — no network in CI. They cover the output schemas, redaction, quota
 (per user, global, Redis down, release), the subscriber gate, consent,
 the disabled flag, refusal / invalid-output fallbacks, retrieval-only
 ranking with blocks, and what is (not) sent to the model.
+
+## Admin: AI usage (`GET /api/v1/admin/ai/usage`)
+
+ADMIN only (admin session). `?days=1..90` (default 14) counts Asia/Dhaka calendar days including
+today. Returns, from `ai_usage_logs` (no prompt text):
+
+- `settings`: whether AI is on, `AI_MODEL`, `AI_GLOBAL_DAILY_LIMIT`, today's count against it
+  (from the Redis quota; `null` if Redis can't be read), the next reset and the per-user limits;
+- `totals` and `daily` (per day and feature): calls, estimated cost (`costUsdMicros`), tokens,
+  `refused`, `invalidOutput`, `errors` and `modelFallbacks` (answered by a model other than
+  `AI_MODEL`, i.e. the server-side fallback);
+- `topUsers`: the ten users with the most calls (display name, calls, cost, refusals).
+
+Each view writes an `ADMIN_AI_USAGE_VIEWED` audit row. The console's "AI usage" page shows it to
+ADMIN only.

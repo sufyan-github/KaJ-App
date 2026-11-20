@@ -58,6 +58,7 @@ export type ModuleKey =
   | "ideas"
   | "attendance"
   | "staff"
+  | "aiUsage"
   | "audit";
 
 export type ConsoleModule = Gated<ModuleKey> & {
@@ -283,6 +284,12 @@ export const CONSOLE_MODULES: readonly ConsoleModule[] = [
     name: "Staff",
     note: "Invite, change roles and deactivate operators",
     requires: ["GET staff"],
+  },
+  {
+    key: "aiUsage",
+    name: "AI usage",
+    note: "Calls, estimated cost and daily caps",
+    requires: ["GET ai/usage"],
   },
   {
     key: "audit",
