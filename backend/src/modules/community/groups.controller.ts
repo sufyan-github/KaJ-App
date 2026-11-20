@@ -95,11 +95,14 @@ export class GroupsController {
 
   @Post("community/groups/:id/leave")
   @Policy(Policies.authenticated())
-  leave(
+  async leave(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("id", uuid()) id: string,
   ) {
-    return this.groups.leave(claims.sub, id);
+    const left = await this.groups.leave(claims.sub, id);
+    // W10: their places in the group's sessions go to the waitlist.
+    await this.sessions.releaseGroupPlaces(id, claims.sub);
+    return left;
   }
 
   @Get("community/groups/:id/members")
@@ -146,12 +149,14 @@ export class GroupsController {
 
   @Delete("community/groups/:id/members/:userId")
   @Policy(Policies.authenticated())
-  remove(
+  async remove(
     @CurrentUser() claims: AccessTokenClaims,
     @Param("id", uuid()) id: string,
     @Param("userId", uuid()) userId: string,
   ) {
-    return this.groups.remove(claims.sub, id, userId);
+    const removed = await this.groups.remove(claims.sub, id, userId);
+    await this.sessions.releaseGroupPlaces(id, userId);
+    return removed;
   }
 
   /** P3.5: the group's sessions and events (members only). */

@@ -346,6 +346,12 @@ export class CollaborationService {
           message: "The request changed meanwhile. Reload it.",
           messageKey: "error.collaboration.transition_not_allowed",
         });
+      // W10: withdrawing a connected request closes its conversation.
+      if (action === "WITHDRAW" && row.conversation_id)
+        await transaction.conversation.update({
+          where: { id: row.conversation_id },
+          data: { deleted_at: now },
+        });
       await transaction.collaborationRequestEvent.create({
         data: {
           request_id: id,

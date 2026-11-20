@@ -908,6 +908,42 @@ export class SessionsService {
     return this.get(userId, id);
   }
 
+  /**
+   * W10 (D-6): someone left or was removed from a group: their invitations,
+   * places and waitlist positions on its open sessions are declined, and
+   * each waitlist moves up. Sessions they host are not touched.
+   */
+  async releaseGroupPlaces(groupId: string, userId: string) {
+    const rows = await this.prisma.sessionParticipant.findMany({
+      where: {
+        user_id: userId,
+        role: SessionParticipantRole.PARTICIPANT,
+        status: {
+          in: [
+            SessionParticipantStatus.INVITED,
+            SessionParticipantStatus.ACCEPTED,
+            SessionParticipantStatus.WAITLISTED,
+          ],
+        },
+        session: { group_id: groupId, status: { in: OPEN } },
+      },
+      select: { id: true, session_id: true },
+    });
+    if (!rows.length) return { released: 0 };
+    await this.prisma.sessionParticipant.updateMany({
+      where: { id: { in: rows.map((row) => row.id) } },
+      data: {
+        status: SessionParticipantStatus.DECLINED,
+        responded_at: new Date(),
+      },
+    });
+    for (const sessionId of new Set(rows.map((row) => row.session_id))) {
+      await this.promoteWaitlist(sessionId);
+      await this.resyncChat(sessionId);
+    }
+    return { released: rows.length };
+  }
+
   /** Fills free places from the waitlist, earliest first. */
   private async promoteWaitlist(id: string) {
     const promoted: string[] = [];
@@ -1090,6 +1126,14 @@ export class SessionsService {
         row.status !== SessionStatus.DRAFT &&
         (await this.activeGroupMember(userId, row.group_id));
       if (!onIt && !groupMember) throw sessionErrors.notFound();
+      // W10 (D-6): a group's session is for its active members only, even
+      // for someone who once had a place.
+      if (
+        onIt &&
+        row.group_id !== null &&
+        !(await this.activeGroupMember(userId, row.group_id))
+      )
+        throw sessionErrors.notFound();
       if (await this.blocks.between(userId, row.host_user_id))
         throw sessionErrors.notFound();
     }
