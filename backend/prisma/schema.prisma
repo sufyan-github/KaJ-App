@@ -565,6 +565,8 @@ model User {
   created_at                  DateTime        @default(now())
   updated_at                  DateTime        @updatedAt
   deleted_at                  DateTime?
+  /// PRIV-1: when the deleted account's personal data was removed.
+  purged_at                   DateTime?
   moderation_level            ModerationLevel @default(NONE)
   restriction_ends_at         DateTime?
   reverification_required     Boolean         @default(false)

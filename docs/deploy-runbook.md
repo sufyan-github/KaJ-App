@@ -59,6 +59,7 @@ Enum values can't be removed in PostgreSQL; rollbacks leave them in place (unuse
 | 25  | `20261119140000_women_safety`                       | `prefers_flexible_hours`, `reports.first_action_at` (backfill), jobs index                     | Index build on `jobs`: short lock                                                                                   | down.sql                                                                                                     |
 | 26  | `20261120090000_ai_opportunity_intelligence`        | P4 AI: consents, usage logs, `business_ideas.ai_analysis*`, access rule `AI_IDEA_ANALYSIS`     | none                                                                                                                | down.sql (P4; details in `docs/api/ai.md`)                                                                   |
 | 27  | `20261121100000_assignment_cancellation_fee`        | R2 W12: nullable `assignments.cancellation_fee_poisha` + CHECK (>= 0, NOT VALID then VALIDATE) | Short lock on `assignments` (nullable column, no default)                                                           | down.sql                                                                                                     |
+| 28  | `20261121110000_account_purge`                      | R2 PRIV-1: nullable `users.purged_at`                                                          | Short lock on `users` (nullable column)                                                                             | down.sql                                                                                                     |
 
 Indexes are created inside Prisma's migration transaction (not `CONCURRENTLY`). At pilot scale the locks are short. If a table has grown large, run the `CREATE INDEX` statements by hand with `CONCURRENTLY` first, then let the migration's `IF NOT EXISTS` / Prisma state catch up (`prisma migrate resolve --applied <name>` only after checking the result matches the migration exactly).
 
@@ -171,4 +172,4 @@ Do this:
 
 - Render service creation, DNS and TLS (owner's account actions).
 - Mobile release and store listing.
-- Account-deletion purge and data-retention jobs (not built yet; see the 19 Nov audit, PRIV-1/PRIV-2).
+- Data-retention jobs other than the account purge (PRIV-2). Since R2 a daily runner purges an account 30 days after `DELETE /me`: its documents and photo are deleted from storage, and phone, e-mail, passwords, name, bio, coordinates, birth year, gender and devices are cleared, which frees the number. Work records stay without a name. The window is `ACCOUNT_PURGE_AFTER_DAYS` in `users/account-purge.service.ts`; change it there if a legal retention rule says otherwise.
