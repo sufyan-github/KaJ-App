@@ -56,7 +56,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
       appBar: AppBar(
         title: const KLocalizedText('খুঁজুন ও জানুন'),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(116),
+          preferredSize: const Size.fromHeight(64),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
               KSpacing.md,
@@ -92,82 +92,98 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                   ),
                   onChanged: (value) => setState(() => _query = value),
                 ),
-                const SizedBox(height: KSpacing.sm),
-                // Scrolls sideways: more kinds (businesses, ideas) join here.
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _SectionChip(
-                        key: const ValueKey('explore-work'),
-                        icon: Icons.work_outline,
-                        label: 'কাজের সুযোগ',
-                        selected: _section == ExploreSection.work,
-                        onSelected: () =>
-                            setState(() => _section = ExploreSection.work),
-                      ),
-                      _SectionChip(
-                        key: const ValueKey('explore-people'),
-                        icon: Icons.groups_outlined,
-                        label: 'মানুষ',
-                        selected: _section == ExploreSection.people,
-                        onSelected: () =>
-                            setState(() => _section = ExploreSection.people),
-                      ),
-                      _SectionChip(
-                        key: const ValueKey('explore-learn'),
-                        icon: Icons.school_outlined,
-                        label: 'শেখা',
-                        selected: _section == ExploreSection.learn,
-                        onSelected: () =>
-                            setState(() => _section = ExploreSection.learn),
-                      ),
-                      for (final (section, icon, label) in const [
-                        (
-                          ExploreSection.business,
-                          Icons.storefront_outlined,
-                          'ব্যবসা-বাণিজ্য',
-                        ),
-                        (
-                          ExploreSection.ideas,
-                          Icons.lightbulb_outline,
-                          'আইডিয়া',
-                        ),
-                        (
-                          ExploreSection.community,
-                          Icons.diversity_3_outlined,
-                          'কমিউনিটি',
-                        ),
-                      ])
-                        _SectionChip(
-                          key: ValueKey('explore-${section.name}'),
-                          icon: icon,
-                          label: label,
-                          selected: _section == section,
-                          onSelected: () => setState(() => _section = section),
-                        ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
         ),
       ),
-      body: switch (_section) {
-        // Work is what the old Search tab showed: open jobs for a worker,
-        // workers to book for a client.
-        ExploreSection.work =>
-          isWorker
-              ? JobFeedScreen(embedded: true, searchQuery: _query)
-              : WorkerDirectoryScreen(embedded: true, searchQuery: _query),
-        // Learning with a mentor, then online courses.
-        ExploreSection.learn => LearnExploreBody(searchQuery: _query),
-        ExploreSection.people => PeopleExploreBody(searchQuery: _query),
-        ExploreSection.business => BusinessExploreBody(searchQuery: _query),
-        ExploreSection.ideas => IdeasExploreBody(searchQuery: _query),
-        ExploreSection.community => CommunityExploreBody(searchQuery: _query),
-      },
+      body: Column(
+        children: [
+          // Wraps onto a second line on narrow phones, so every section
+          // (Community too) is in sight.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              KSpacing.md,
+              KSpacing.sm,
+              KSpacing.md,
+              0,
+            ),
+            child: Wrap(
+              key: const ValueKey('explore-sections'),
+              runSpacing: KSpacing.xs,
+              children: [
+                _SectionChip(
+                  key: const ValueKey('explore-work'),
+                  icon: Icons.work_outline,
+                  label: 'কাজের সুযোগ',
+                  selected: _section == ExploreSection.work,
+                  onSelected: () =>
+                      setState(() => _section = ExploreSection.work),
+                ),
+                _SectionChip(
+                  key: const ValueKey('explore-people'),
+                  icon: Icons.groups_outlined,
+                  label: 'মানুষ',
+                  selected: _section == ExploreSection.people,
+                  onSelected: () =>
+                      setState(() => _section = ExploreSection.people),
+                ),
+                _SectionChip(
+                  key: const ValueKey('explore-learn'),
+                  icon: Icons.school_outlined,
+                  label: 'শেখা',
+                  selected: _section == ExploreSection.learn,
+                  onSelected: () =>
+                      setState(() => _section = ExploreSection.learn),
+                ),
+                for (final (section, icon, label) in const [
+                  (
+                    ExploreSection.business,
+                    Icons.storefront_outlined,
+                    'ব্যবসা-বাণিজ্য',
+                  ),
+                  (ExploreSection.ideas, Icons.lightbulb_outline, 'আইডিয়া'),
+                  (
+                    ExploreSection.community,
+                    Icons.diversity_3_outlined,
+                    'কমিউনিটি',
+                  ),
+                ])
+                  _SectionChip(
+                    key: ValueKey('explore-${section.name}'),
+                    icon: icon,
+                    label: label,
+                    selected: _section == section,
+                    onSelected: () => setState(() => _section = section),
+                  ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: switch (_section) {
+              // Work is what the old Search tab showed: open jobs for a worker,
+              // workers to book for a client.
+              ExploreSection.work =>
+                isWorker
+                    ? JobFeedScreen(embedded: true, searchQuery: _query)
+                    : WorkerDirectoryScreen(
+                        embedded: true,
+                        searchQuery: _query,
+                      ),
+              // Learning with a mentor, then online courses.
+              ExploreSection.learn => LearnExploreBody(searchQuery: _query),
+              ExploreSection.people => PeopleExploreBody(searchQuery: _query),
+              ExploreSection.business => BusinessExploreBody(
+                searchQuery: _query,
+              ),
+              ExploreSection.ideas => IdeasExploreBody(searchQuery: _query),
+              ExploreSection.community => CommunityExploreBody(
+                searchQuery: _query,
+              ),
+            },
+          ),
+        ],
+      ),
     );
   }
 }

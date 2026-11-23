@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:kaaj/core/widgets/k_primary_button.dart';
+import 'package:kaaj/features/onboarding/data/onboarding_repository.dart';
 import 'package:kaaj/features/onboarding/domain/onboarding_state.dart';
+import 'package:kaaj/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:kaaj/features/trust_safety/presentation/dispute_screens.dart';
 
 import '../features/jobs/job_detail_alerts_repository_test.dart'
@@ -62,6 +65,50 @@ void main() {
       api.called('GET /verification-requests/application-eligibility'),
       hasLength(2),
     );
+  });
+
+  testWidgets('R7 M2: adding the post time unlocks Apply in the dialog', (
+    tester,
+  ) async {
+    final api = FakeApi()
+      ..on(
+        'GET /jobs/job-1',
+        FakeResponse.data({
+          ...jobDetailJson(),
+          'timeCompatibility': 'UNAVAILABLE',
+        }),
+      )
+      ..on(
+        'GET /verification-requests/application-eligibility',
+        FakeResponse.data({'canApply': true, 'identityStatus': 'APPROVED'}),
+      )
+      ..on(
+        'GET /profiles/me/availability',
+        FakeResponse.data({'timezone': 'Asia/Dhaka', 'rules': <Object>[]}),
+      )
+      ..on('PUT /profiles/me/availability', FakeResponse.data({'rules': []}));
+    await pumpRouted(
+      tester,
+      api: api,
+      initial: '/jobs/job-1',
+      overrides: [
+        meAs(KaajRole.worker),
+        onboardingRepositoryProvider.overrideWithValue(
+          OnboardingRepository(api.dio(), _NoBox()),
+        ),
+      ],
+    );
+    await tester.tap(find.byKey(const ValueKey('job-apply')));
+    await tester.pumpAndSettle();
+    FilledButton submit() => tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Submit application'),
+    );
+    expect(submit().onPressed, isNull);
+    await tester.tap(find.byKey(const ValueKey('apply-add-time')));
+    await tester.pumpAndSettle();
+    expect(api.called('PUT /profiles/me/availability'), hasLength(1));
+    expect(find.byKey(const ValueKey('apply-time-added')), findsOneWidget);
+    expect(submit().onPressed, isNotNull);
   });
 
   testWidgets('R3: identity needed on apply offers the way to verify', (
@@ -171,4 +218,9 @@ void main() {
       );
     });
   });
+}
+
+class _NoBox implements Box<dynamic> {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

@@ -229,7 +229,7 @@ class _VerificationCaptureScreenState
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: KLocalizedText('${_kindLabel(widget.kind)} যাচাই')),
+    appBar: AppBar(title: KLocalizedText(_kindTitle(widget.kind))),
     body: ListView(
       padding: const EdgeInsets.all(KSpacing.lg),
       children: [
@@ -469,10 +469,11 @@ class _IdentityCaptureCard extends StatelessWidget {
   );
 }
 
-String _kindLabel(String kind) => switch (kind) {
-  'IDENTITY' => 'পরিচয়',
-  'SKILL' => 'দক্ষতা',
-  _ => 'তথ্য',
+/// Whole titles, so each has its own English rendering.
+String _kindTitle(String kind) => switch (kind) {
+  'IDENTITY' => 'পরিচয় যাচাই',
+  'SKILL' => 'দক্ষতা যাচাই',
+  _ => 'তথ্য যাচাই',
 };
 
 String _message(Object error) =>

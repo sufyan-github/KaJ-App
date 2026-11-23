@@ -27,6 +27,22 @@ void main() {
     expect(rules.last, containsPair('endTime', '11:00'));
   });
 
+  test('a post with seconds is covered by whole minutes (R7 M2)', () async {
+    final adapter = _AvailabilityAdapter();
+    final repository = OnboardingRepository(
+      Dio()..httpClientAdapter = adapter,
+      _UnusedBox(),
+    );
+    // 10:26:05 to 12:00:30 Dhaka time.
+    await repository.addAvailabilityWindow(
+      DateTime.parse('2026-09-07T04:26:05Z'),
+      DateTime.parse('2026-09-07T06:00:30Z'),
+    );
+    final rules = adapter.savedBody?['rules'] as List<dynamic>;
+    expect(rules.last, containsPair('startTime', '10:26'));
+    expect(rules.last, containsPair('endTime', '12:01'));
+  });
+
   test(
     'never switches the server role on its own after a forbidden load',
     () async {
