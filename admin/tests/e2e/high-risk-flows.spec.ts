@@ -383,12 +383,23 @@ test("platform fee change requires diff preview and confirmation", async ({
   await page.goto("/");
   await page.getByRole("button", { name: "Configuration" }).click();
   await page.getByLabel("JSON value").fill('{"feeBps":900,"payer":"worker"}');
+  // No reason, no preview: the reason is written to the audit row.
+  await expect(
+    page.getByRole("button", { name: "Preview diff" }),
+  ).toBeDisabled();
+  await page
+    .getByLabel("Required operational reason")
+    .fill("Fee change agreed in the weekly review.");
   await page.getByRole("button", { name: "Preview diff" }).click();
   await expect(page.getByText("feeBps", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Confirm change" }).click();
   await expect
     .poll(() => requestBody)
-    .toMatchObject({ confirm: true, value: { feeBps: 900 } });
+    .toMatchObject({
+      confirm: true,
+      value: { feeBps: 900 },
+      reason: "Fee change agreed in the weekly review.",
+    });
 });
 
 test("notification dry-run previews audience without sending", async ({
@@ -481,10 +492,21 @@ test("campaign send asks for confirmation and shows batch progress", async ({
   // Nothing is sent until the operator confirms the audience size.
   await expect(page.getByRole("dialog")).toContainText("250 people");
   expect(sendBody).toBeNull();
+  await expect(
+    page.getByRole("button", { name: "Confirm send" }),
+  ).toBeDisabled();
+  await page
+    .getByRole("dialog")
+    .getByLabel("Required operational reason")
+    .fill("Monthly update to all active users.");
   await page.getByRole("button", { name: "Confirm send" }).click();
   await expect
     .poll(() => sendBody)
-    .toMatchObject({ name: "Pilot update", throttlePerMinute: 100 });
+    .toMatchObject({
+      name: "Pilot update",
+      throttlePerMinute: 100,
+      reason: "Monthly update to all active users.",
+    });
   await expect(page.getByText("Sent to 100 of 250")).toBeVisible();
   await expect(page.getByText("100 / 250")).toBeVisible();
   await expect(page.getByText("Sending", { exact: true })).toBeVisible();

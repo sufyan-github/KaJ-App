@@ -179,6 +179,10 @@ test("edits a course document and reports the new version", async ({
   await page.getByRole("button", { name: "Edit", exact: true }).click();
   const editor = page.getByLabel("Course document (JSON)");
   await expect(editor).toHaveValue(/safe-ladders/);
+  await page
+    .getByRole("dialog")
+    .getByLabel("Required operational reason")
+    .fill("Fix the ladder lesson title.");
   await editor.fill("{ not json");
   await page.getByRole("button", { name: "Save course" }).click();
   await expect(

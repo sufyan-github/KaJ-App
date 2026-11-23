@@ -11,6 +11,7 @@ import {
   ListToolbar,
   LoadMore,
   ReasonDialog,
+  ReasonField,
   State,
   formatDate,
   humanize,
@@ -212,6 +213,7 @@ function SkillDialog({
         nameEn: String(form.get("nameEn")).trim(),
         nameBn: String(form.get("nameBn")).trim(),
         isActive: form.get("isActive") === "on",
+        reason: String(form.get("reason") ?? ""),
       };
       await adminApi(
         skill ? `skills/${skill.id}` : "skills",
@@ -276,6 +278,7 @@ function SkillDialog({
           />
           {tr("Active")}
         </label>
+        <ReasonField />
         {error && (
           <p className="error" role="alert">
             {error}

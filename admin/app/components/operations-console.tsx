@@ -26,7 +26,9 @@ import {
   formatNumber,
   formatBasisPoints,
   Can,
+  ReasonField,
   RoleProvider,
+  useReasonPrompt,
   useCan,
   FilterSelect,
   ListToolbar,
@@ -331,6 +333,7 @@ type SubscriptionItem = {
 };
 function Subscriptions() {
   const [subscriberStatus, setSubscriberStatus] = useState("");
+  const [subscriberSearch, setSubscriberSearch] = useState("");
   const overview = useData<{
     subscriptions: Record<string, number>;
     payments: Record<string, number>;
@@ -340,6 +343,7 @@ function Subscriptions() {
   }>("subscriptions/overview");
   const subscribers = usePagedView<SubscriptionItem>("subscriptions", {
     status: subscriberStatus,
+    search: subscriberSearch,
   });
   const [createPlan, setCreatePlan] = useState(false);
   const [editPlan, setEditPlan] = useState<SubscriptionPlanItem | null>(null);
@@ -472,7 +476,11 @@ function Subscriptions() {
         title="Subscribers"
         note="Subscription payment records are separate from job payments"
       >
-        <ListToolbar>
+        <ListToolbar
+          search={subscriberSearch}
+          onSearch={setSubscriberSearch}
+          placeholder="Search phone or name"
+        >
           <FilterSelect
             label="Status"
             value={subscriberStatus}
@@ -1595,6 +1603,7 @@ function ReportDecisionDialog({
   );
 }
 function Jobs() {
+  const reasonPrompt = useReasonPrompt();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const { data, loading, error, reload, more } = usePagedView<JobItem>("jobs", {
@@ -1651,17 +1660,19 @@ function Jobs() {
               </Can>
               <Can route="POST jobs/:id/feature">
                 <button
-                  onClick={async () => {
-                    await adminApi(
-                      `jobs/${job.id}/feature`,
-                      json("POST", {
-                        isFeatured: !job.isFeatured,
-                        reason:
-                          "Operations review changed marketplace featuring.",
-                      }),
-                    );
-                    await reload();
-                  }}
+                  onClick={() =>
+                    reasonPrompt.ask(
+                      `${tr(job.isFeatured ? "Unfeature" : "Feature")}: ${job.title}`,
+                      job.isFeatured ? "Unfeature" : "Feature",
+                      async (reason) => {
+                        await adminApi(
+                          `jobs/${job.id}/feature`,
+                          json("POST", { isFeatured: !job.isFeatured, reason }),
+                        );
+                        await reload();
+                      },
+                    )
+                  }
                 >
                   {tr(job.isFeatured ? "Unfeature" : "Feature")}
                 </button>
@@ -1702,6 +1713,7 @@ function Jobs() {
           }}
         />
       )}
+      {reasonPrompt.dialog}
     </State>
   );
 }
@@ -2373,6 +2385,9 @@ function SectorDialog({
                 icon: form.icon.trim() || null,
                 sortOrder: Number(form.sortOrder) || 0,
                 isActive: form.isActive,
+                reason: new FormData(
+                  event.currentTarget as HTMLFormElement,
+                ).get("reason"),
               }),
             );
             await onSaved();
@@ -2439,6 +2454,7 @@ function SectorDialog({
           />
           {tr("Active")}
         </label>
+        <ReasonField />
         {error && <p role="alert">{error}</p>}
         <div className="dialog-actions">
           <button type="button" onClick={onClose}>
@@ -2794,15 +2810,15 @@ function Courses() {
           initial={editing.text}
           isNew={editing.id === null}
           onClose={() => setEditing(null)}
-          onSave={async (document) => {
+          onSave={async (document, reason) => {
             const saved = editing.id
               ? await adminApi<{ outcome: string; version: number }>(
                   `training/courses/${editing.id}`,
-                  json("PUT", { document }),
+                  json("PUT", { document, reason }),
                 )
               : await adminApi<{ version: number }>(
                   "training/courses",
-                  json("POST", { document }),
+                  json("POST", { document, reason }),
                 );
             setMessage(
               `${tr("Saved")}: v${saved.version}${
@@ -2845,7 +2861,7 @@ function CourseEditor({
   initial: string;
   isNew: boolean;
   onClose: () => void;
-  onSave: (document: unknown) => Promise<void>;
+  onSave: (document: unknown, reason: string) => Promise<void>;
 }) {
   const [text, setText] = useState(initial);
   const [error, setError] = useState("");
@@ -2862,9 +2878,12 @@ function CourseEditor({
             setError(tr("The course document is not valid JSON."));
             return;
           }
+          const reason = String(
+            new FormData(event.currentTarget).get("reason") ?? "",
+          );
           setBusy(true);
           try {
-            await onSave(document);
+            await onSave(document, reason);
           } catch (caught) {
             setError(friendlyAdminError(caught));
             setBusy(false);
@@ -2886,6 +2905,7 @@ function CourseEditor({
             spellCheck={false}
           />
         </label>
+        <ReasonField />
         {error && (
           <p className="error" role="alert">
             {error}
@@ -2972,16 +2992,23 @@ function CompletionRecords() {
   );
 }
 function Categories() {
+  const reasonPrompt = useReasonPrompt();
   const { data, loading, error, reload } = useData<{
     items: CategoryItem[];
   }>("categories");
-  async function toggle(item: CategoryItem, key: keyof CategoryItem) {
-    const { id: _id, ...body } = item;
-    await adminApi(
-      `categories/${item.id}`,
-      json("PUT", { ...body, [key]: !item[key] }),
+  function toggle(item: CategoryItem, key: keyof CategoryItem) {
+    reasonPrompt.ask(
+      `${humanize(String(key))}: ${localizedEntityName(item.nameEn, item.nameBn)}`,
+      "Save change",
+      async (reason) => {
+        const { id: _id, ...body } = item;
+        await adminApi(
+          `categories/${item.id}`,
+          json("PUT", { ...body, [key]: !item[key], reason }),
+        );
+        await reload();
+      },
     );
-    await reload();
   }
   return (
     <State loading={loading} error={error}>
@@ -3051,6 +3078,7 @@ function Categories() {
           </tr>
         ))}
       </DataTable>
+      {reasonPrompt.dialog}
     </State>
   );
 }
@@ -3074,6 +3102,7 @@ type CategoryItem = {
   unsafeForStudents: boolean;
 };
 function Locations() {
+  const reasonPrompt = useReasonPrompt();
   const { data, loading, error, reload } = useData<{
     items: LocationItem[];
   }>("locations");
@@ -3114,14 +3143,24 @@ function Locations() {
                 <button
                   className={`switch ${item.isActive ? "on" : ""}`}
                   aria-label={`${tr("Toggle")} ${localizedEntityName(item.nameEn, item.nameBn)}`}
-                  onClick={async () => {
-                    const { id: _id, ...body } = item;
-                    await adminApi(
-                      `locations/${item.id}`,
-                      json("PUT", { ...body, isActive: !item.isActive }),
-                    );
-                    await reload();
-                  }}
+                  onClick={() =>
+                    reasonPrompt.ask(
+                      `${tr(item.isActive ? "Deactivate" : "Activate")}: ${localizedEntityName(item.nameEn, item.nameBn)}`,
+                      item.isActive ? "Deactivate" : "Activate",
+                      async (reason) => {
+                        const { id: _id, ...body } = item;
+                        await adminApi(
+                          `locations/${item.id}`,
+                          json("PUT", {
+                            ...body,
+                            isActive: !item.isActive,
+                            reason,
+                          }),
+                        );
+                        await reload();
+                      },
+                    )
+                  }
                 >
                   <span />
                 </button>
@@ -3140,6 +3179,7 @@ function Locations() {
           }}
         />
       )}
+      {reasonPrompt.dialog}
     </State>
   );
 }
@@ -3179,7 +3219,14 @@ function LocationDialog({
                 parentId: type === "CITY" ? undefined : form.get("parentId"),
                 nameEn: form.get("nameEn"),
                 nameBn: form.get("nameBn"),
+                ...(form.get("lat") && form.get("lng")
+                  ? {
+                      lat: Number(form.get("lat")),
+                      lng: Number(form.get("lng")),
+                    }
+                  : {}),
                 isActive: true,
+                reason: form.get("reason"),
               }),
             );
             await onSaved();
@@ -3227,7 +3274,34 @@ function LocationDialog({
           {tr("Bangla name")}
           <input name="nameBn" required />
         </label>
-        {error && <p className="error">{error}</p>}
+        <div className="form-row">
+          <label>
+            {tr("Latitude (optional)")}
+            <input
+              name="lat"
+              type="number"
+              step="0.000001"
+              min="20.5"
+              max="26.7"
+            />
+          </label>
+          <label>
+            {tr("Longitude (optional)")}
+            <input
+              name="lng"
+              type="number"
+              step="0.000001"
+              min="88"
+              max="92.7"
+            />
+          </label>
+        </div>
+        <ReasonField />
+        {error && (
+          <p className="error" role="alert">
+            {error}
+          </p>
+        )}
         <button className="primary">{tr("Create location")}</button>
       </form>
     </Dialog>
@@ -3250,39 +3324,50 @@ function Configuration() {
     changedFields: string[];
   } | null>(null);
   const [message, setMessage] = useState("");
+  const [reason, setReason] = useState("");
+  const [failure, setFailure] = useState("");
+  const reasonPrompt = useReasonPrompt();
   useEffect(() => {
     if (selected) {
       setDraft(JSON.stringify(selected.value, null, 2));
       setPreview(null);
     }
   }, [selected]);
+  const reasonReady = reason.trim().length >= 8;
   async function previewChange() {
-    const value = JSON.parse(draft);
-    setPreview(
-      await adminApi(
-        `config/${encodeURIComponent(selectedKey)}/preview`,
-        json("POST", {
-          value,
-          reason: "Preview platform configuration change.",
-          confirm: false,
-        }),
-      ),
-    );
+    setFailure("");
+    try {
+      const value = JSON.parse(draft);
+      setPreview(
+        await adminApi(
+          `config/${encodeURIComponent(selectedKey)}/preview`,
+          json("POST", { value, reason: reason.trim(), confirm: false }),
+        ),
+      );
+    } catch (caught) {
+      setFailure(friendlyAdminError(caught));
+    }
   }
   async function save() {
-    const value = JSON.parse(draft);
-    await adminApi(
-      `config/${encodeURIComponent(selectedKey)}`,
-      json("PUT", {
-        value,
-        reason: "Confirmed operations configuration update.",
-        expectedUpdatedAt: selected?.updatedAt,
-        confirm: true,
-      }),
-    );
-    setMessage("Configuration saved with a reversible revision.");
-    setPreview(null);
-    await reload();
+    setFailure("");
+    try {
+      const value = JSON.parse(draft);
+      await adminApi(
+        `config/${encodeURIComponent(selectedKey)}`,
+        json("PUT", {
+          value,
+          reason: reason.trim(),
+          expectedUpdatedAt: selected?.updatedAt,
+          confirm: true,
+        }),
+      );
+      setMessage("Configuration saved with a reversible revision.");
+      setPreview(null);
+      setReason("");
+      await reload();
+    } catch (caught) {
+      setFailure(friendlyAdminError(caught));
+    }
   }
   return (
     <State loading={loading} error={error}>
@@ -3308,13 +3393,28 @@ function Configuration() {
               spellCheck={false}
             />
           </label>
+          <label>
+            {tr("Required operational reason")}
+            <textarea
+              value={reason}
+              minLength={8}
+              maxLength={500}
+              onChange={(event) => setReason(event.target.value)}
+            />
+          </label>
           <div className="actions">
             <Can route="POST config/:key/preview">
-              <button onClick={previewChange}>{tr("Preview diff")}</button>
+              <button onClick={previewChange} disabled={!reasonReady}>
+                {tr("Preview diff")}
+              </button>
             </Can>
             {preview && (
               <Can route="PUT config/:key">
-                <button className="primary small-button" onClick={save}>
+                <button
+                  className="primary small-button"
+                  onClick={save}
+                  disabled={!reasonReady}
+                >
                   {tr("Confirm change")}
                 </button>
               </Can>
@@ -3327,6 +3427,11 @@ function Configuration() {
                 {preview.changedFields.join(", ") || tr("No changes")}
               </span>
             </div>
+          )}
+          {failure && (
+            <p className="error" role="alert">
+              {failure}
+            </p>
           )}
           {message && <p className="success">{message}</p>}
         </section>
@@ -3345,16 +3450,19 @@ function Configuration() {
               </div>
               <Can route="POST config/revisions/:id/revert">
                 <button
-                  onClick={async () => {
-                    await adminApi(
-                      `config/revisions/${revision.id}/revert`,
-                      json("POST", {
-                        reason:
-                          "Operations rollback after reviewing the revision.",
-                      }),
-                    );
-                    await reload();
-                  }}
+                  onClick={() =>
+                    reasonPrompt.ask(
+                      `${tr("Revert")}: ${revision.key}`,
+                      "Revert",
+                      async (typed) => {
+                        await adminApi(
+                          `config/revisions/${revision.id}/revert`,
+                          json("POST", { reason: typed }),
+                        );
+                        await reload();
+                      },
+                    )
+                  }
                 >
                   {tr("Revert")}
                 </button>
@@ -3363,6 +3471,7 @@ function Configuration() {
           ))}
         </Section>
       </div>
+      {reasonPrompt.dialog}
     </State>
   );
 }
@@ -3402,6 +3511,7 @@ function FlagRow({
 }) {
   const [enabled, setEnabled] = useState(item.isEnabled);
   const [rollout, setRollout] = useState(item.rolloutPercent);
+  const reasonPrompt = useReasonPrompt();
   return (
     <tr>
       <td>
@@ -3429,21 +3539,28 @@ function FlagRow({
         <Can route="PUT flags/:key">
           <button
             className="table-button"
-            onClick={async () => {
-              await adminApi(
-                `flags/${item.key}`,
-                json("PUT", {
-                  isEnabled: enabled,
-                  rolloutPercent: rollout,
-                  reason: "Confirmed feature rollout adjustment.",
-                }),
-              );
-              await reload();
-            }}
+            onClick={() =>
+              reasonPrompt.ask(
+                `${item.key}: ${enabled ? `${rollout}%` : tr("off")}`,
+                "Save flag",
+                async (reason) => {
+                  await adminApi(
+                    `flags/${item.key}`,
+                    json("PUT", {
+                      isEnabled: enabled,
+                      rolloutPercent: rollout,
+                      reason,
+                    }),
+                  );
+                  await reload();
+                },
+              )
+            }
           >
             {tr("Save")}
           </button>
         </Can>
+        {reasonPrompt.dialog}
       </td>
     </tr>
   );
@@ -3660,6 +3777,7 @@ function Notifications() {
   const [notice, setNotice] = useState("");
   const [confirming, setConfirming] = useState(false);
   const [sending, setSending] = useState(false);
+  const [sendReason, setSendReason] = useState("");
   const history = useData<{ items: CampaignItem[] }>(
     "notifications/campaigns?limit=20",
   );
@@ -3689,7 +3807,11 @@ function Notifications() {
         audienceCount: number;
         sentCount: number;
         status: string;
-      }>("notifications/campaign/send", json("POST", payload));
+      }>(
+        "notifications/campaign/send",
+        json("POST", { ...payload, reason: sendReason.trim() }),
+      );
+      setSendReason("");
       setResult(null);
       setConfirming(false);
       setNotice(
@@ -3859,6 +3981,15 @@ function Notifications() {
           <p className="muted">
             {tr("A sent notification cannot be recalled.")}
           </p>
+          <label>
+            {tr("Required operational reason")}
+            <textarea
+              value={sendReason}
+              minLength={8}
+              maxLength={500}
+              onChange={(event) => setSendReason(event.target.value)}
+            />
+          </label>
           {error && (
             <p className="error" role="alert">
               {error}
@@ -3868,7 +3999,7 @@ function Notifications() {
             <button onClick={() => setConfirming(false)}>{tr("Cancel")}</button>
             <button
               className="primary small-button"
-              disabled={sending}
+              disabled={sending || sendReason.trim().length < 8}
               onClick={send}
             >
               {tr(sending ? "Sending…" : "Confirm send")}

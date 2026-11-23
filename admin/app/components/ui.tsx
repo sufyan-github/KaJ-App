@@ -311,6 +311,48 @@ export function ReasonDialog({
     </Dialog>
   );
 }
+/**
+ * Ask for a typed operational reason before an inline action. `ask(title,
+ * confirmLabel, run)` opens the dialog; render `dialog` once in the view.
+ * The backend writes the reason to the audit row.
+ */
+export function useReasonPrompt() {
+  const [pending, setPending] = useState<{
+    title: string;
+    confirmLabel: string;
+    run: (reason: string) => Promise<void>;
+  } | null>(null);
+  const dialog = pending ? (
+    <ReasonDialog
+      title={pending.title}
+      confirmLabel={pending.confirmLabel}
+      onClose={() => setPending(null)}
+      onConfirm={async (reason) => {
+        await pending.run(reason);
+        setPending(null);
+      }}
+    />
+  ) : null;
+  return {
+    ask: (
+      title: string,
+      confirmLabel: string,
+      run: (reason: string) => Promise<void>,
+    ) => setPending({ title, confirmLabel, run }),
+    dialog,
+  };
+}
+
+/** The reason textarea for forms that also take other fields. */
+export function ReasonField() {
+  return (
+    <label>
+      {tr("Required operational reason")}
+      <textarea name="reason" minLength={8} maxLength={500} required />
+    </label>
+  );
+}
+
 export function Dialog({
   title,
   onClose,

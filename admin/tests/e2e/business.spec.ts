@@ -112,6 +112,10 @@ test("adds a sub-sector to the taxonomy", async ({ page }) => {
   await page.getByLabel("Name (English)").fill("Fisheries");
   await page.getByLabel("Name (Bangla)").fill("মৎস্য");
   await page.getByLabel("Parent sector").selectOption("sector-1");
+  await page
+    .getByRole("dialog")
+    .getByLabel("Required operational reason")
+    .fill("Requested by the operations lead.");
   await page.getByRole("button", { name: "Save sector" }).click();
   await expect
     .poll(() => created.body)
