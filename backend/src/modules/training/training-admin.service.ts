@@ -117,7 +117,12 @@ export class TrainingAdminService {
     };
   }
 
-  async create(raw: unknown, actor: AdminActor, context: AdminRequestContext) {
+  async create(
+    raw: unknown,
+    reason: string,
+    actor: AdminActor,
+    context: AdminRequestContext,
+  ) {
     const course = parseCourse(raw);
     const exists = await this.prisma.trainingCourse.findUnique({
       where: { slug: course.slug },
@@ -139,6 +144,7 @@ export class TrainingAdminService {
         data: audit(actor, context, "ADMIN_COURSE_CREATED", saved.id, null, {
           slug: course.slug,
           version: saved.version,
+          reason,
         }),
       });
       return saved;
@@ -149,6 +155,7 @@ export class TrainingAdminService {
   async update(
     id: string,
     raw: unknown,
+    reason: string,
     actor: AdminActor,
     context: AdminRequestContext,
   ) {
@@ -178,7 +185,7 @@ export class TrainingAdminService {
             "ADMIN_COURSE_UPDATED",
             id,
             { version: existing.version },
-            { version: saved.version, outcome: result },
+            { version: saved.version, outcome: result, reason },
           ),
         });
       return result;
@@ -196,10 +203,21 @@ export class TrainingAdminService {
     const existing = await this.prisma.trainingCourse.findUnique({
       where: { id },
       include: {
-        _count: { select: { questions: { where: { is_active: true } } } },
+        _count: {
+          select: {
+            lessons: true,
+            questions: { where: { is_active: true } },
+          },
+        },
       },
     });
     if (!existing) throw new NotFoundException();
+    if (published && existing._count.lessons < 1)
+      throw new ConflictException({
+        code: "COURSE_HAS_NO_LESSONS",
+        message: "A course needs at least one lesson before publishing.",
+        messageKey: "error.training.no_lessons",
+      });
     if (published && existing._count.questions < 1)
       throw new ConflictException(
         "A course needs questions before publishing.",

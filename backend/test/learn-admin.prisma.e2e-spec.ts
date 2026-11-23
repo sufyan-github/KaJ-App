@@ -90,7 +90,12 @@ databaseDescribe("Learn admin (services + real HTTP)", () => {
       ).body.data.items.some((item: { id: string }) => item.id === courseId);
 
     it("creates an unpublished course and round-trips the document", async () => {
-      const created = await courses.create(document(), admin, context);
+      const created = await courses.create(
+        document(),
+        "Course change for the test.",
+        admin,
+        context,
+      );
       courseId = created.id;
       expect(created).toMatchObject({ version: 1, isPublished: false });
       expect(created.document).toMatchObject({
@@ -100,18 +105,30 @@ databaseDescribe("Learn admin (services + real HTTP)", () => {
       });
       expect(await visible()).toBe(false);
       await expect(
-        courses.create(document(), admin, context),
+        courses.create(
+          document(),
+          "Course change for the test.",
+          admin,
+          context,
+        ),
       ).rejects.toMatchObject({
         response: expect.objectContaining({ code: "COURSE_SLUG_TAKEN" }),
       });
     });
 
     it("bumps the version only when lessons or questions change", async () => {
-      const same = await courses.update(courseId, document(), admin, context);
+      const same = await courses.update(
+        courseId,
+        document(),
+        "Course change for the test.",
+        admin,
+        context,
+      );
       expect(same).toMatchObject({ outcome: "unchanged", version: 1 });
       const renamed = await courses.update(
         courseId,
         document({ titleEn: "Using a ladder safely" }),
+        "Course change for the test.",
         admin,
         context,
       );
@@ -127,6 +144,7 @@ databaseDescribe("Learn admin (services + real HTTP)", () => {
             },
           ],
         }),
+        "Course change for the test.",
         admin,
         context,
       );
@@ -149,6 +167,7 @@ databaseDescribe("Learn admin (services + real HTTP)", () => {
         courses.update(
           courseId,
           document({ slug: "another-slug" }),
+          "Course change for the test.",
           admin,
           context,
         ),
@@ -156,7 +175,13 @@ databaseDescribe("Learn admin (services + real HTTP)", () => {
         response: expect.objectContaining({ code: "COURSE_SLUG_IMMUTABLE" }),
       });
       await expect(
-        courses.update(courseId, document({ questions: [] }), admin, context),
+        courses.update(
+          courseId,
+          document({ questions: [] }),
+          "Course change for the test.",
+          admin,
+          context,
+        ),
       ).rejects.toMatchObject({
         response: expect.objectContaining({
           code: "VALIDATION_FAILED",

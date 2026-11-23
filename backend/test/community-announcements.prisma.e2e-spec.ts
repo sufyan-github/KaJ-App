@@ -205,6 +205,7 @@ databaseDescribe("announcements and ambassadors (real HTTP)", () => {
         body: "Hello",
         segment: { communityGroupId: groupId },
         throttlePerMinute: 100,
+        reason: "Announcement to the group's members.",
       },
       admin,
       context,

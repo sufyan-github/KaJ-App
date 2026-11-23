@@ -44,6 +44,12 @@ export class SubscriptionQueryDto {
   @IsOptional()
   @IsUUID()
   cursor?: string;
+
+  /** A phone number (any usual format, or part of one) or a display name. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  search?: string;
 }
 
 export class CreateSubscriptionPlanDto {
