@@ -16,6 +16,7 @@ import { AccessTokenClaims } from "../auth/auth-token.service";
 import { Roles } from "../../common/decorators/roles.decorator";
 import { RoleMode } from "@prisma/client";
 import { PaymentsService } from "./payments.service";
+import { Idempotent } from "../../common/idempotency/idempotency";
 
 @ApiTags("payments")
 @Controller()
@@ -44,6 +45,7 @@ export class PaymentsController {
   }
 
   @Post("assignments/:id/payment/cash-paid")
+  @Idempotent("payment-cash-paid")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
   @Policy(Policies.authenticated())
   markCashPaid(

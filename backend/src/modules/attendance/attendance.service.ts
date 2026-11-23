@@ -32,6 +32,7 @@ import {
   CheckOutDto,
 } from "./dto/attendance.dto";
 import { distanceMetres, isInsideGeofence } from "./geofence";
+import { idempotencyKeyReusedError } from "../../common/idempotency/idempotency";
 
 interface AttendanceSettings {
   geofenceRadiusM: number;
@@ -665,9 +666,7 @@ export class AttendanceService {
           existing.operation !== operation ||
           existing.request_hash !== requestHash
         ) {
-          throw new ConflictException(
-            "This Idempotency-Key was already used for a different request.",
-          );
+          throw idempotencyKeyReusedError();
         }
         if (existing.response_json) return existing.response_json as T;
       }

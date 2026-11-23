@@ -29,6 +29,7 @@ import {
   UpdateSessionDto,
 } from "./dto/session.dto";
 import { SessionsService } from "./sessions.service";
+import { Idempotent } from "../../common/idempotency/idempotency";
 
 const uuid = () => new ParseUUIDPipe();
 
@@ -49,6 +50,7 @@ export class SessionsController {
   }
 
   @Post("sessions/consultations")
+  @Idempotent("consultation-book")
   @UserRateLimit("consultation-hold")
   @Policy(Policies.authenticated())
   book(
