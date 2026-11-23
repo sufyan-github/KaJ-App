@@ -481,7 +481,8 @@ export class JobsService {
 
   async get(jobId: string, viewerUserId: string) {
     const job = await this.prisma.job.findFirst({
-      where: { id: jobId, deleted_at: null },
+      // R7 B5: learning rows are read through the learning routes.
+      where: { ...WORK_ONLY, id: jobId, deleted_at: null },
       include: {
         ...jobInclude,
         poster: {
@@ -648,7 +649,9 @@ export class JobsService {
     jobId: string,
     query: CursorQueryDto = {},
   ) {
-    await this.ownedJob(posterUserId, jobId);
+    const job = await this.ownedJob(posterUserId, jobId);
+    // R7 B5: a learning row's applicants are on the learning routes.
+    if (!isWork(job)) throw new NotFoundException();
     const limit = query.limit ?? 100;
     const hidden = await this.blocks.hiddenFrom(posterUserId);
     const rows = await this.prisma.application.findMany({

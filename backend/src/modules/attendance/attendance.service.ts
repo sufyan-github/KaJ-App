@@ -33,6 +33,7 @@ import {
 } from "./dto/attendance.dto";
 import { distanceMetres, isInsideGeofence } from "./geofence";
 import { idempotencyKeyReusedError } from "../../common/idempotency/idempotency";
+import { WORK_ONLY } from "../jobs/opportunity";
 
 interface AttendanceSettings {
   geofenceRadiusM: number;
@@ -70,6 +71,8 @@ export class AttendanceService {
       where: {
         id: assignmentId,
         OR: [{ worker_user_id: userId }, { job: { poster_user_id: userId } }],
+        // R7 B5: learning enrolments have no work attendance.
+        job: WORK_ONLY,
       },
       include: { job: true, work_sessions: true },
     });
