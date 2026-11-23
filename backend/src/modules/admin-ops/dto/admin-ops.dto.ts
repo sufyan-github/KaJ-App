@@ -20,6 +20,7 @@ import {
   ApplicationStatus,
   DisputeDecision,
   DisputeStatus,
+  Gender,
   JobStatus,
   LocationType,
   UserStatus,
@@ -145,6 +146,17 @@ export class ApplicationActionDto extends ReasonDto {
 export class VerificationDecisionDto extends ReasonDto {
   @IsEnum(VerificationStatus)
   status!: VerificationStatus;
+
+  /** R7 B1: on an IDENTITY approval, the gender to record (default: declared). */
+  @IsOptional()
+  @IsEnum(Gender)
+  gender?: Gender;
+}
+
+/** R7 B1: support/admin correction of a verified person's gender. */
+export class GenderCorrectionDto extends ReasonDto {
+  @IsEnum(Gender)
+  gender!: Gender;
 }
 
 export class SkillDto {

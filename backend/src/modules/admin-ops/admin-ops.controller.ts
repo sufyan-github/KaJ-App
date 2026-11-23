@@ -42,6 +42,7 @@ import {
   ReasonDto,
   UserActionDto,
   UserQueryDto,
+  GenderCorrectionDto,
   VerificationDecisionDto,
   VerificationQueryDto,
 } from "./dto/admin-ops.dto";
@@ -196,6 +197,19 @@ export class AdminOpsController {
     @Req() request: Request,
   ) {
     return this.ops.verificationDocument(id, actor, this.context(request));
+  }
+
+  /** R7 B1: correct a verified person's gender (audited, with a reason). */
+  @Put("users/:id/gender")
+  @Policy(Policies.public())
+  @AdminRoles(AdminRole.ADMIN, AdminRole.SUPPORT)
+  correctGender(
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @Body() body: GenderCorrectionDto,
+    @CurrentAdmin() actor: AdminActor,
+    @Req() request: Request,
+  ) {
+    return this.ops.correctGender(id, body, actor, this.context(request));
   }
 
   @Post("verification-requests/:id/decision")

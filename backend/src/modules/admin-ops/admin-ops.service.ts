@@ -54,6 +54,7 @@ import {
   SkillQueryDto,
   UserActionDto,
   UserQueryDto,
+  GenderCorrectionDto,
   VerificationDecisionDto,
   VerificationQueryDto,
 } from "./dto/admin-ops.dto";
@@ -706,6 +707,9 @@ export class AdminOpsService {
           name: item.user.profile?.display_name ?? "Unknown",
           trustLevel: item.user.profile?.trust_level ?? TrustLevel.NONE,
         },
+        // R7 B1: what the person declared, and what the profile says now.
+        declaredGender: item.declared_gender ?? null,
+        profileGender: item.user.profile?.gender ?? null,
         mentorApplication:
           item.kind === VerificationKind.MENTOR
             ? {
@@ -778,6 +782,39 @@ export class AdminOpsService {
     };
   }
 
+  /**
+   * R7 B1: the only way to change a verified person's gender (support or an
+   * admin, with a reason), audited.
+   */
+  async correctGender(
+    userId: string,
+    input: GenderCorrectionDto,
+    actor: AdminActor,
+    context: AdminRequestContext,
+  ) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { user_id: userId },
+      select: { gender: true },
+    });
+    if (!profile) throw new NotFoundException();
+    await this.prisma.$transaction([
+      this.prisma.profile.update({
+        where: { user_id: userId },
+        data: { gender: input.gender },
+      }),
+      this.auditCreate(
+        actor,
+        "ADMIN_GENDER_CORRECTED",
+        "USER",
+        userId,
+        { gender: profile.gender },
+        { gender: input.gender, reason: input.reason },
+        context,
+      ),
+    ]);
+    return { userId, gender: input.gender };
+  }
+
   async decideVerification(
     id: string,
     input: VerificationDecisionDto,
@@ -841,10 +878,20 @@ export class AdminOpsService {
         where: { verification_request_id: id },
         data: { purge_after: purgeAfter },
       });
-      if (candidateTrust)
+      // R7 B1: an approved identity confirms the declared gender (or the
+      // admin's correction); the profile gender is locked from then on.
+      const confirmedGender =
+        input.status === VerificationStatus.APPROVED &&
+        request.kind === VerificationKind.IDENTITY
+          ? (input.gender ?? request.declared_gender ?? null)
+          : null;
+      if (candidateTrust || confirmedGender)
         await transaction.profile.update({
           where: { user_id: request.user_id },
-          data: { trust_level: trustLevel },
+          data: {
+            ...(candidateTrust ? { trust_level: trustLevel } : {}),
+            ...(confirmedGender ? { gender: confirmedGender } : {}),
+          },
         });
       if (request.business_profile_id)
         await transaction.businessProfile.update({
@@ -918,10 +965,23 @@ export class AdminOpsService {
           "ADMIN_VERIFICATION_DECIDED",
           "VERIFICATION",
           id,
-          { status: request.status },
+          {
+            status: request.status,
+            gender: request.user.profile?.gender ?? null,
+          },
           {
             status: input.status,
             trustLevel,
+            ...(input.status === VerificationStatus.APPROVED &&
+            request.kind === VerificationKind.IDENTITY
+              ? {
+                  gender:
+                    input.gender ??
+                    request.declared_gender ??
+                    request.user.profile?.gender ??
+                    null,
+                }
+              : {}),
             reason: input.reason,
             documentPurgeAfter: purgeAfter.toISOString(),
           },

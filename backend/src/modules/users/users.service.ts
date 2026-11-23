@@ -300,9 +300,10 @@ export class UsersService {
         where: { user_id: userId },
         select: { gender: true, trust_level: true },
       });
+      // R7 B1: locked after identity approval, also from empty (the gender
+      // comes with the identity request; support corrects it).
       if (
         current &&
-        current.gender !== null &&
         current.gender !== input.gender &&
         hasTrust(current.trust_level, TrustLevel.IDENTITY)
       )

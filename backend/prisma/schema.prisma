@@ -2142,6 +2142,9 @@ model VerificationRequest {
   user                User                   @relation("VerificationOwner", fields: [user_id], references: [id], onDelete: Cascade)
   reviewer            User?                  @relation("VerificationReviewer", fields: [reviewer_user_id], references: [id], onDelete: SetNull)
   documents           VerificationDocument[]
+  /// R7 B1: the gender declared with an IDENTITY request; the approval
+  /// copies it (or the admin's correction) to the profile, then it locks.
+  declared_gender     Gender?
   /// P2.6: the business a BUSINESS verification is for.
   business_profile_id String?                @db.Uuid
   business_profile    BusinessProfile?       @relation(fields: [business_profile_id], references: [id], onDelete: SetNull)
