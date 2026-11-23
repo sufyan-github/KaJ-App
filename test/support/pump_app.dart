@@ -132,12 +132,16 @@ Future<GoRouter> pumpRouted(
   Size size = const Size(400, 1000),
   TrainingOfferStore? offerStore,
   DateTime? now,
+  List<RouteBase> extraRoutes = const [],
 }) async {
   await tester.binding.setSurfaceSize(size);
   addTearDown(() => tester.binding.setSurfaceSize(null));
   final router = GoRouter(
     initialLocation: initial,
-    routes: testRoutes(home: home),
+    routes: [
+      ...testRoutes(home: home),
+      ...extraRoutes,
+    ],
     errorBuilder: (_, state) => Scaffold(body: Text('route:${state.uri}')),
   );
   addTearDown(router.dispose);
