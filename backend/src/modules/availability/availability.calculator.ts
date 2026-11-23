@@ -61,17 +61,21 @@ export function calculateAvailability(
     };
   }
 
-  const available = expandRules(input.rules, job);
+  // R7 B2: rules are whole minutes, so coverage is measured on the job's
+  // whole minutes (start rounded up, end rounded down). Seconds on a job's
+  // times would otherwise leave an uncovered sliver and fail a 100% rule.
+  const measured = wholeMinutes(job);
+  const available = expandRules(input.rules, measured);
   const exceptions = (input.exceptions ?? []).map(toInterval);
   const covered = subtractIntervals(
-    intersectIntervals(available, job),
+    intersectIntervals(available, measured),
     exceptions,
   );
   const coveredMs = covered.reduce(
     (total, interval) => total + interval.end - interval.start,
     0,
   );
-  const coverage = clamp(coveredMs / (job.end - job.start));
+  const coverage = clamp(coveredMs / (measured.end - measured.start));
   return {
     isAvailable: coverage >= input.minCoverage && conflicts.length === 0,
     coverage,
@@ -202,6 +206,13 @@ function validateRule(rule: AvailabilityRuleInput): void {
 
 function toInterval(window: TimeWindow): Interval {
   return { start: window.startsAt.getTime(), end: window.endsAt.getTime() };
+}
+
+/** The whole minutes inside a window; the window itself if under a minute. */
+function wholeMinutes(window: Interval): Interval {
+  const start = Math.ceil(window.start / 60_000) * 60_000;
+  const end = Math.floor(window.end / 60_000) * 60_000;
+  return end > start ? { start, end } : window;
 }
 
 function startOfUtcDay(timestamp: number): number {
