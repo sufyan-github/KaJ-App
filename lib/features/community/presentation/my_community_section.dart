@@ -11,6 +11,7 @@ import '../community_routes.dart';
 import '../domain/community_models.dart';
 import 'community_providers.dart';
 import 'group_screens.dart';
+import 'session_screens.dart';
 
 /// My activity, Community: introductions, sessions and my groups, with
 /// counts and ways in.
@@ -91,6 +92,18 @@ class MyCommunitySection extends ConsumerWidget {
                 : null,
             actionLabel: 'সব সেশন',
             onAction: () => context.push(CommunityPaths.sessions),
+            // The next few sessions and consultations themselves, not only
+            // how many there are.
+            children: [
+              for (final session in upcomingSessions(
+                attending.valueOrNull,
+                hosting.valueOrNull,
+              ).take(3))
+                Padding(
+                  padding: const EdgeInsets.only(top: KSpacing.xs),
+                  child: SessionCard(session: session),
+                ),
+            ],
           ),
           _SectionCard(
             key: const ValueKey('my-community-groups'),
@@ -206,4 +219,24 @@ class _SectionCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Upcoming sessions and consultations from both lists, soonest first:
+/// not cancelled, not completed, and not over.
+List<CommunitySession> upcomingSessions(
+  List<CommunitySession>? attending,
+  List<CommunitySession>? hosting, {
+  DateTime? now,
+}) {
+  final at = now ?? DateTime.now();
+  final seen = <String>{};
+  final all = [
+    for (final item in [...?attending, ...?hosting])
+      if (seen.add(item.id) &&
+          item.status != 'CANCELLED' &&
+          item.status != 'COMPLETED' &&
+          (item.endsAt ?? item.startsAt ?? at).isAfter(at))
+        item,
+  ]..sort((a, b) => (a.startsAt ?? at).compareTo(b.startsAt ?? at));
+  return all;
 }
