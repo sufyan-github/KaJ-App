@@ -1187,6 +1187,16 @@ export class SessionsService {
     const mine = row.participants.find((item) => item.user_id === viewerUserId);
     const confirmed =
       isHost || (mine !== undefined && CONFIRMED.includes(mine.status));
+    // R7: a consultation is engaged only once the expert has accepted it;
+    // until then both sides see the masked names, as on the lists.
+    const engaged =
+      confirmed &&
+      (row.kind !== SessionKind.CONSULTATION ||
+        row.participants.some(
+          (item) =>
+            item.role === SessionParticipantRole.EXPERT &&
+            CONFIRMED.includes(item.status),
+        ));
     const name = (
       user: {
         id: string;
@@ -1230,8 +1240,8 @@ export class SessionsService {
       pricePoisha: row.price_poisha?.toString() ?? null,
       womenOnly: row.women_only,
       homeBasedFriendly: row.home_based_friendly,
-      host: name(row.host, confirmed),
-      expert: row.expert ? name(row.expert, confirmed) : null,
+      host: name(row.host, engaged),
+      expert: row.expert ? name(row.expert, engaged) : null,
       introductionId: row.introduction_id,
       groupId: row.group_id,
       myCheckedInAt: mine?.checked_in_at?.toISOString() ?? null,
@@ -1252,7 +1262,7 @@ export class SessionsService {
       participants: row.participants
         .filter((item) => isHost || CONFIRMED.includes(item.status))
         .map((item) => ({
-          ...name(item.user, confirmed),
+          ...name(item.user, engaged),
           role: item.role,
           status: item.status,
           ...(isHost
