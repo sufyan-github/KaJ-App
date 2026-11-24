@@ -346,12 +346,14 @@ ThemeData buildAppTheme() {
         side: border,
       ),
     ),
-    navigationBarTheme: const NavigationBarThemeData(
-      height: 64,
+    navigationBarTheme: NavigationBarThemeData(
+      height: 68,
       elevation: 0,
       backgroundColor: KColors.surface,
       indicatorColor: KColors.surfaceAlt,
-      labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+      // Words under the icons: an icon alone does not say where it goes.
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      labelTextStyle: WidgetStateTextStyle.resolveWith(_navigationLabel),
       iconTheme: WidgetStatePropertyAll(
         IconThemeData(color: KColors.textSecondary, size: 23),
       ),
@@ -390,3 +392,16 @@ ThemeData buildAppTheme() {
     ),
   );
 }
+
+TextStyle _navigationLabel(Set<WidgetState> states) => TextStyle(
+  fontFamily: 'HindSiliguri',
+  fontSize: 12,
+  height: 1.2,
+  overflow: TextOverflow.ellipsis,
+  fontWeight: states.contains(WidgetState.selected)
+      ? FontWeight.w600
+      : FontWeight.w500,
+  color: states.contains(WidgetState.selected)
+      ? KColors.primary
+      : KColors.textSecondary,
+);

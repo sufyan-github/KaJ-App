@@ -48,11 +48,25 @@ import '../controllers/my_profile_provider.dart';
 
 /// Profile completeness from the server, with each missing piece as a row
 /// that opens the screen where it can be fixed. Hidden once complete.
-class ProfileCompletenessCard extends ConsumerWidget {
-  const ProfileCompletenessCard({super.key});
+///
+/// [compact] shows only the next step, with a button for the rest: the home
+/// screen uses it so the card does not push everything else down.
+class ProfileCompletenessCard extends ConsumerStatefulWidget {
+  const ProfileCompletenessCard({this.compact = false, super.key});
+
+  final bool compact;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileCompletenessCard> createState() =>
+      _ProfileCompletenessCardState();
+}
+
+class _ProfileCompletenessCardState
+    extends ConsumerState<ProfileCompletenessCard> {
+  var _showAll = false;
+
+  @override
+  Widget build(BuildContext context) {
     final profile = ref
         .watch(myProfileProvider)
         .maybeWhen(data: (value) => value, orElse: () => null);
@@ -62,8 +76,18 @@ class ProfileCompletenessCard extends ConsumerWidget {
     final completeness = profile.completeness;
     final percent = KFormat.count(context, completeness.percent);
     final english = KaajLocalizations.isEnglish(context);
+    final collapsed = widget.compact && !_showAll;
+    final shown = collapsed
+        ? completeness.missing.take(1)
+        : completeness.missing;
     return KCard(
       key: const ValueKey('profile-completeness'),
+      margin: widget.compact
+          ? EdgeInsets.zero
+          : const EdgeInsets.symmetric(vertical: KSpacing.sm),
+      padding: widget.compact
+          ? const EdgeInsets.fromLTRB(KSpacing.md, 12, KSpacing.md, 4)
+          : const EdgeInsets.all(KSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -93,7 +117,7 @@ class ProfileCompletenessCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: KSpacing.xs),
-          for (final item in completeness.missing)
+          for (final item in shown)
             Builder(
               builder: (context) {
                 final action = completenessAction(item);
@@ -107,6 +131,15 @@ class ProfileCompletenessCard extends ConsumerWidget {
                   onTap: () => context.push(action.route),
                 );
               },
+            ),
+          if (widget.compact && completeness.missing.length > 1)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton(
+                key: const ValueKey('completeness-toggle'),
+                onPressed: () => setState(() => _showAll = !_showAll),
+                child: KLocalizedText(_showAll ? 'কম দেখান' : 'সব ধাপ দেখুন'),
+              ),
             ),
         ],
       ),
