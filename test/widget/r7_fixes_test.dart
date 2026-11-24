@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kaaj/core/errors/failure.dart';
 import 'package:kaaj/core/formatting/kaaj_format.dart';
 import 'package:kaaj/core/localization/kaaj_localizations.dart';
+import 'package:kaaj/core/widgets/k_error_message.dart';
 import 'package:kaaj/features/explore/explore_screen.dart';
 import 'package:kaaj/features/home/presentation/screens/home_screen.dart';
+import 'package:kaaj/features/jobs/presentation/screens/jobs_screens.dart';
 import 'package:kaaj/features/onboarding/domain/onboarding_state.dart';
+import 'package:kaaj/l10n/generated/app_localizations.dart';
 
 import '../support/fake_api.dart';
 import '../support/pump_app.dart';
@@ -99,5 +103,40 @@ void main() {
       );
     }
     expect(tester.takeException(), isNull);
+  });
+
+  test('idempotency refusals have their own copy (B4)', () {
+    for (final language in ['en', 'bn']) {
+      final l10n = lookupAppLocalizations(Locale(language));
+      for (final code in [
+        'IDEMPOTENCY_KEY_REUSED',
+        'IDEMPOTENCY_IN_PROGRESS',
+        'IDEMPOTENCY_KEY_INVALID',
+      ]) {
+        expect(
+          serverCodeMessage(
+            l10n,
+            Failure(kind: FailureKind.conflict, message: 'x', code: code),
+          ),
+          isNotNull,
+          reason: '$code $language',
+        );
+      }
+    }
+  });
+
+  testWidgets('M7 a category name typed in Explore goes to the server', (
+    tester,
+  ) async {
+    final api = FakeApi()
+      ..on('GET /jobs', FakeResponse.data({'items': <Object>[]}));
+    await pumpRouted(
+      tester,
+      api: api,
+      home: const JobFeedScreen(embedded: true, searchQuery: 'Tutoring'),
+      overrides: [meAs(KaajRole.worker)],
+    );
+    // The server matches category and skill names in both languages.
+    expect(api.called('GET /jobs').last.query['q'], 'Tutoring');
   });
 }

@@ -8,7 +8,10 @@ import '../support/pump_app.dart';
 void main() {
   testWidgets('gender and birth year are saved when changed', (tester) async {
     final api = FakeApi()
-      ..on('GET /profiles/me', FakeResponse.data(myProfileJson()))
+      ..on(
+        'GET /profiles/me',
+        FakeResponse.data({...myProfileJson(), 'trustLevel': 'PHONE'}),
+      )
       ..on('PUT /profiles/me', FakeResponse.data({}));
     await pumpRouted(
       tester,
@@ -45,7 +48,10 @@ void main() {
 
   testWidgets('an invalid birth year is not sent (Bangla)', (tester) async {
     final api = FakeApi()
-      ..on('GET /profiles/me', FakeResponse.data(myProfileJson()))
+      ..on(
+        'GET /profiles/me',
+        FakeResponse.data({...myProfileJson(), 'trustLevel': 'PHONE'}),
+      )
       ..on('PUT /profiles/me', FakeResponse.data({}));
     await pumpRouted(
       tester,
@@ -96,5 +102,33 @@ void main() {
       ),
     );
     expect(field.onChanged, isNull);
+  });
+
+  testWidgets('an empty gender is locked too after verification (B1)', (
+    tester,
+  ) async {
+    final api = FakeApi()
+      ..on(
+        'GET /profiles/me',
+        FakeResponse.data({
+          ...myProfileJson(),
+          'gender': null,
+          'trustLevel': 'IDENTITY',
+        }),
+      );
+    await pumpRouted(
+      tester,
+      api: api,
+      initial: '/profile/edit',
+      size: const Size(400, 1800),
+    );
+    final field = tester.widget<DropdownButton<String>>(
+      find.descendant(
+        of: find.byKey(const ValueKey('profile-gender')),
+        matching: find.byType(DropdownButton<String>),
+      ),
+    );
+    expect(field.onChanged, isNull);
+    expect(find.textContaining('Contact support'), findsOneWidget);
   });
 }

@@ -32,15 +32,32 @@ class TrustSafetyRepository {
   Future<void> submitIdentityVerification({
     required Uint8List nid,
     required Uint8List selfie,
+    String? gender,
   }) async => _guard(() async {
     final nidDocumentId = await uploadImage('VERIFICATION_DOCUMENT', nid);
     final selfieDocumentId = await uploadImage('VERIFICATION_DOCUMENT', selfie);
+    await requestIdentityVerification(
+      nidDocumentId: nidDocumentId,
+      selfieDocumentId: selfieDocumentId,
+      gender: gender,
+    );
+  });
+
+  /// The request itself, once both photos are uploaded.
+  Future<void> requestIdentityVerification({
+    required String nidDocumentId,
+    required String selfieDocumentId,
+    String? gender,
+  }) async => _guard(() async {
     await _dio.post<Map<String, dynamic>>(
       '/verification-requests',
       data: {
         'kind': 'IDENTITY',
         'nidDocumentId': nidDocumentId,
         'selfieDocumentId': selfieDocumentId,
+        // Declared here and confirmed by the reviewer (B1); required when
+        // the profile has no gender.
+        'gender': ?gender,
       },
     );
   });

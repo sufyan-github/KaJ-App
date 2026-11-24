@@ -1401,4 +1401,19 @@ const generatedEnglishTranslations = <String, String>{
   "ফেরত": "Refund",
   "ফি": "Fee",
   "মোট আসন": "Total seats",
+  // R7 M1: identity gender
+  "যাচাই অনুমোদন হলে এটি প্রোফাইলে বসবে এবং পরে আর বদলানো যাবে না। নারীদের দল ও সেশনে যোগ দিতে এটি লাগে।":
+      "Once verification is approved, this goes on your profile and cannot be changed later. Women-only groups and sessions need it.",
+  "যাচাই অনুরোধ জমা দেওয়া যায়নি।":
+      "Could not submit the verification request.",
+  "লিঙ্গ": "Gender",
+  // R7 M6: learning applications
+  "আমার শেখার আবেদন": "My learning applications",
+  "বাছাই তালিকায়": "Shortlisted",
+  "নেওয়া হয়নি": "Not accepted",
+  "প্রত্যাহার করেছেন": "Withdrawn",
+  // R7 M6: status
+  "আবেদন অপেক্ষমাণ": "Waiting",
+  "আবেদন গৃহীত": "Accepted",
+  "সময় পেরিয়ে গেছে": "Expired",
 };

@@ -88,6 +88,31 @@ void main() {
     expect(harness.locationReads, 0);
   });
 
+  testWidgets('a retry of the same post reuses its idempotency key (R7)', (
+    tester,
+  ) async {
+    final harness = _Harness(
+      reading: _reading(accuracyM: 12, mockLocation: false),
+    );
+    await harness.pump(tester);
+    await harness.publish(tester);
+    await harness.submitAgain(tester);
+    expect(harness.keys, hasLength(2));
+    expect(harness.keys.first, isNotNull);
+    expect(harness.keys[1], harness.keys.first);
+
+    // An edited post is a new request with a new key.
+    tester
+            .widgetList<KTextField>(find.byType(KTextField))
+            .first
+            .controller!
+            .text =
+        'Fix the bathroom tap';
+    await harness.submitAgain(tester);
+    expect(harness.keys, hasLength(3));
+    expect(harness.keys[2], isNot(harness.keys.first));
+  });
+
   testWidgets('the pin is optional and can be removed', (tester) async {
     final harness = _Harness(
       reading: _reading(accuracyM: 5, mockLocation: false),
@@ -124,6 +149,7 @@ class _Harness {
   final KPermissionStatus permission;
   final repository = _MockJobsRepository();
   Map<String, dynamic> payload = const {};
+  final keys = <String?>[];
   int locationReads = 0;
 
   Future<void> pump(WidgetTester tester) async {
@@ -137,8 +163,14 @@ class _Harness {
     );
     // Capture the request, then fail it so the screen stays open (a success
     // would pop a route that this isolated test does not have).
-    when(() => repository.createAndPublishJob(any())).thenAnswer((call) async {
+    when(
+      () => repository.createAndPublishJob(
+        any(),
+        actionKey: any(named: 'actionKey'),
+      ),
+    ).thenAnswer((call) async {
       payload = Map.of(call.positionalArguments.first as Map<String, dynamic>);
+      keys.add(call.namedArguments[#actionKey] as String?);
       throw StateError('captured');
     });
     const size = Size(360, 1400);
@@ -202,9 +234,18 @@ class _Harness {
           find.byType(DropdownButtonFormField<String>).first,
         )
         .didChange('plumbing');
+    await submitAgain(tester);
+    verify(
+      () => repository.createAndPublishJob(
+        any(),
+        actionKey: any(named: 'actionKey'),
+      ),
+    ).called(1);
+  }
+
+  Future<void> submitAgain(WidgetTester tester) async {
     tester.widget<KPrimaryButton>(find.byType(KPrimaryButton)).onPressed!();
     await tester.pumpAndSettle();
-    verify(() => repository.createAndPublishJob(any())).called(1);
   }
 }
 

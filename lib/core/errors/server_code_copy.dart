@@ -7,6 +7,22 @@
 
 /// Code to (Bangla, English).
 const serverCodeCopy = <String, ({String bn, String en})>{
+  "IDEMPOTENCY_KEY_REUSED": (
+    bn: "এই অনুরোধটি আগের একটি অনুরোধের সাথে মিলে গেছে। পাতাটি হালনাগাদ করে আবার চেষ্টা করুন।",
+    en: "This request clashed with an earlier one. Refresh and try again.",
+  ),
+  "IDEMPOTENCY_IN_PROGRESS": (
+    bn: "আগের অনুরোধটি এখনও চলছে। একটু পরে আবার চেষ্টা করুন।",
+    en: "Your earlier request is still being processed. Try again in a moment.",
+  ),
+  "IDEMPOTENCY_KEY_INVALID": (
+    bn: "অনুরোধটি পাঠানো যায়নি। আবার চেষ্টা করুন।",
+    en: "The request could not be sent. Try again.",
+  ),
+  "GENDER_REQUIRED": (
+    bn: "পরিচয় যাচাইয়ের সাথে আপনার লিঙ্গ বেছে নিন।",
+    en: "Choose your gender with the identity verification.",
+  ),
   "INVALID_REFERENCE": (
     bn: "বেছে নেওয়া একটি তথ্য আর নেই। হালনাগাদ করে আবার বেছে নিন।",
     en: "Something you chose no longer exists. Refresh and choose again.",
@@ -423,6 +439,18 @@ const serverCodeCopy = <String, ({String bn, String en})>{
 /// (IDENTITY_REQUIRED for mentors, ideas, groups or women-only spaces), so
 /// the key wins over the code when both are known.
 const serverMessageKeyCopy = <String, ({String bn, String en})>{
+  "error.common.idempotency_key_reused": (
+    bn: "এই অনুরোধটি আগের একটি অনুরোধের সাথে মিলে গেছে। পাতাটি হালনাগাদ করে আবার চেষ্টা করুন।",
+    en: "This request clashed with an earlier one. Refresh and try again.",
+  ),
+  "error.common.idempotency_in_progress": (
+    bn: "আগের অনুরোধটি এখনও চলছে। একটু পরে আবার চেষ্টা করুন।",
+    en: "Your earlier request is still being processed. Try again in a moment.",
+  ),
+  "error.common.idempotency_key_invalid": (
+    bn: "অনুরোধটি পাঠানো যায়নি। আবার চেষ্টা করুন।",
+    en: "The request could not be sent. Try again.",
+  ),
   "error.common.invalid_reference": (
     bn: "বেছে নেওয়া একটি তথ্য আর নেই। হালনাগাদ করে আবার বেছে নিন।",
     en: "Something you chose no longer exists. Refresh and choose again.",

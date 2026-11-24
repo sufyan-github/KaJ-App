@@ -53,6 +53,11 @@ final learningApplicationsProvider = FutureProvider.autoDispose
       (ref, id) => ref.watch(learningRepositoryProvider).applications(id),
     );
 
+final myLearningApplicationsProvider =
+    FutureProvider.autoDispose<List<MyLearningApplication>>(
+      (ref) => ref.watch(learningRepositoryProvider).myApplications(),
+    );
+
 final learningEnrolmentsProvider =
     FutureProvider.autoDispose<List<LearningEnrolment>>(
       (ref) => ref.watch(learningRepositoryProvider).enrolments(),

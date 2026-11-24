@@ -20,13 +20,7 @@ import '../../domain/my_profile.dart';
 import '../controllers/my_profile_provider.dart';
 import '../widgets/profile_completeness_card.dart';
 
-/// Profile genders the API accepts, with their Bangla labels.
-const _genders = {
-  'FEMALE': 'নারী',
-  'MALE': 'পুরুষ',
-  'NON_BINARY': 'নন-বাইনারি',
-  'PREFER_NOT_TO_SAY': 'বলতে চাই না',
-};
+const _genders = profileGenders;
 
 typedef ProfilePhotoPicker = Future<Uint8List?> Function();
 
@@ -82,14 +76,10 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
   String? _gender;
 
   /// The server locks gender once identity is verified (GENDER_LOCKED).
+  /// The server locks gender once identity is verified, even when it was
+  /// never set (GENDER_LOCKED): it is declared on the identity request.
   bool get _genderLocked =>
-      widget.profile.gender != null &&
-      const {
-        'IDENTITY',
-        'VERIFIED',
-        'SKILL',
-        'BUSINESS',
-      }.contains(widget.profile.trustLevel);
+      identityVerifiedLevels.contains(widget.profile.trustLevel);
   String? _locationId;
   bool _saving = false;
   bool _uploading = false;
