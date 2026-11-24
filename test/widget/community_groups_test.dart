@@ -465,4 +465,67 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('route:/community/groups'), findsOneWidget);
   });
+
+  testWidgets('my activity lists upcoming sessions and consultations (R7 M6)', (
+    tester,
+  ) async {
+    Map<String, dynamic> session(
+      String id,
+      String title,
+      String status,
+      int inDays,
+    ) {
+      final start = DateTime.now().add(Duration(days: inDays));
+      return {
+        'id': id,
+        'kind': id == 'c1' ? 'CONSULTATION' : 'WORKSHOP',
+        'title': title,
+        'status': status,
+        'startsAt': start.toUtc().toIso8601String(),
+        'endsAt': start.add(const Duration(hours: 1)).toUtc().toIso8601String(),
+        'durationMinutes': 60,
+        'mode': 'IN_APP_CHAT',
+        'capacity': 1,
+        'placesTaken': 1,
+        'priceModel': 'FREE',
+        'host': {'userId': 'h', 'displayName': 'Rafiq H.'},
+        'myRole': 'PARTICIPANT',
+        'myStatus': 'ACCEPTED',
+        'participants': <Object>[],
+      };
+    }
+
+    final api = FakeApi()
+      ..on(
+        'GET /introductions',
+        FakeResponse.data({'items': [], 'nextCursor': null}),
+      )
+      ..onRequest(
+        'GET /sessions',
+        (request) => FakeResponse.data({
+          'items': request.query['role'] == 'hosting'
+              ? <Object>[]
+              : [
+                  session('s2', 'Sewing workshop', 'SCHEDULED', 3),
+                  session('c1', 'Pricing advice', 'SCHEDULED', 1),
+                  session('s3', 'Old meetup', 'CANCELLED', 2),
+                ],
+          'nextCursor': null,
+        }),
+      )
+      ..on('GET /me/community/groups', FakeResponse.data({'items': []}));
+    await pumpRouted(
+      tester,
+      api: api,
+      home: const Scaffold(body: MyCommunitySection()),
+      size: const Size(400, 2000),
+    );
+    expect(find.text('Pricing advice'), findsOneWidget);
+    expect(find.text('Sewing workshop'), findsOneWidget);
+    expect(find.text('Old meetup'), findsNothing);
+    expect(
+      tester.getTopLeft(find.text('Pricing advice')).dy,
+      lessThan(tester.getTopLeft(find.text('Sewing workshop')).dy),
+    );
+  });
 }

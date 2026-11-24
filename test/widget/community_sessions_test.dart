@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kaaj/features/community/community_routes.dart';
 import 'package:kaaj/features/community/presentation/consultation_booking_screen.dart';
 import 'package:kaaj/features/community/presentation/session_detail_screen.dart';
 import 'package:kaaj/features/community/presentation/session_screens.dart';
@@ -436,4 +438,68 @@ void main() {
       );
     });
   }
+
+  testWidgets('back after a consultation request leaves the session (R7 M9)', (
+    tester,
+  ) async {
+    final start = _tomorrowAt(10);
+    final api = FakeApi()
+      ..on(
+        'GET /experts/u-exp/slots',
+        FakeResponse.data({
+          'expertUserId': 'u-exp',
+          'slots': [
+            {
+              'startsAt': start.toUtc().toIso8601String(),
+              'endsAt': start
+                  .add(const Duration(hours: 1))
+                  .toUtc()
+                  .toIso8601String(),
+            },
+          ],
+        }),
+      )
+      ..on(
+        'POST /sessions/consultations',
+        FakeResponse.data(
+          _session(kind: 'CONSULTATION', status: 'DRAFT', groupId: null),
+        ),
+      )
+      ..on(
+        'GET /sessions/s1',
+        FakeResponse.data(
+          _session(kind: 'CONSULTATION', status: 'DRAFT', groupId: null),
+        ),
+      );
+    await pumpRouted(
+      tester,
+      api: api,
+      home: Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () =>
+                context.push(CommunityPaths.book('u-exp', name: 'Rafiq H.')),
+            child: const Text('mentor card'),
+          ),
+        ),
+      ),
+      size: const Size(400, 1800),
+      extraRoutes: communityRoutes(),
+    );
+    await tester.tap(find.text('mentor card'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(ValueKey('slot-${start.toUtc().toIso8601String()}')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('booking-send')));
+    await tester.pumpAndSettle();
+    expect(find.byType(SessionDetailScreen), findsOneWidget);
+
+    // One system Back returns to where the booking started.
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('mentor card'), findsOneWidget);
+    expect(find.byType(SessionDetailScreen), findsNothing);
+  });
 }

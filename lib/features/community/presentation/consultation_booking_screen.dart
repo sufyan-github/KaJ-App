@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -130,7 +132,16 @@ class _ConsultationBookingScreenState
         context,
         'অনুরোধ পাঠানো হয়েছে। বিশেষজ্ঞ নিশ্চিত করলে জানানো হবে।',
       );
-      context.pushReplacement(CommunityPaths.session(session.id));
+      // Close the form first, then open the session: Back from the session
+      // returns to where the booking started (R7 M9).
+      final router = GoRouter.of(context);
+      final target = CommunityPaths.session(session.id);
+      if (router.canPop()) {
+        router.pop();
+        unawaited(router.push(target));
+      } else {
+        unawaited(router.replace(target));
+      }
     } on Object catch (error) {
       if (!mounted) return;
       final message = communityFailureText(

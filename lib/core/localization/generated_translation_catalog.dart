@@ -421,7 +421,7 @@ const generatedEnglishTranslations = <String, String>{
   "চ্যাটে জাতীয় পরিচয়পত্র, পিন বা ওটিপি দেবেন না।":
       "Do not give National Identity Card, PIN or OTP in chat.",
   "ছবি": "picture",
-  "ছবি তুলুন": "take pictures",
+  "ছবি তুলুন": "Take photo",
   "ছবি নিন": "take picture",
   "ছবি পাঠাতে ইন্টারনেট সংযোগ প্রয়োজন।":
       "Internet connection is required to send images.",
@@ -753,7 +753,7 @@ const generatedEnglishTranslations = <String, String>{
   "সমস্যার ধরন": "Type of problem",
   "সমাপ্তির নোট (ঐচ্ছিক)": "Concluding Notes (Optional)",
   "সম্পন্ন": "completed",
-  "সম্পর্কে": "about",
+  "সম্পর্কে": "About",
   "সম্পূর্ণ অনুবাদ প্রস্তুত হলে চালু হবে":
       "Full translation will be launched when ready",
   "সর্বোচ্চ ২০টি কাজের নমুনা রাখা যায়।":
@@ -1391,4 +1391,14 @@ const generatedEnglishTranslations = <String, String>{
       "Could not load the list. Try again.",
   // R3: blocked list
   "আনব্লক করা যায়নি। আবার চেষ্টা করুন।": "Could not unblock. Try again.",
+  // R7 M3: nested labels
+  "পরিচয় যাচাই": "Identity verification",
+  "দক্ষতা যাচাই": "Skill verification",
+  "তথ্য যাচাই": "Verification",
+  "মিনিট": "minutes",
+  "আপনার রেটিং": "Your rating",
+  "বুকিং": "booking",
+  "ফেরত": "Refund",
+  "ফি": "Fee",
+  "মোট আসন": "Total seats",
 };

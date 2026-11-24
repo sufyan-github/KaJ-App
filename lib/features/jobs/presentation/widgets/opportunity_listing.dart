@@ -92,7 +92,9 @@ class OpportunityCard extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-            const Spacer(),
+            // Details stay together; the free space of a short card goes
+            // above the button so buttons still line up across the grid.
+            const SizedBox(height: KSpacing.sm),
             if (job.startsAt != null)
               KLocalizedText(
                 'কাজের সময়: ${KFormat.dateTime(context, job.startsAt!)}',
@@ -130,6 +132,7 @@ class OpportunityCard extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
+            const Spacer(),
             if (actionLabel != null) ...[
               const SizedBox(height: KSpacing.sm),
               SizedBox(

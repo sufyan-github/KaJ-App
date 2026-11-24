@@ -123,8 +123,10 @@ class OnboardingRepository {
     final localStart = startsAt.toUtc().add(const Duration(hours: 6));
     final localEnd = endsAt.toUtc().add(const Duration(hours: 6));
     final dayOfWeek = localStart.weekday % 7;
+    // Whole minutes that cover the post: start rounded down, end rounded
+    // up. A post at 10:26:05 is otherwise never covered by a 10:26 rule.
     final startTime = _time(localStart);
-    final endTime = _time(localEnd);
+    final endTime = _ceilTime(localEnd);
     final alreadyCovered = schedule.rules.any(
       (rule) =>
           rule.dayOfWeek == dayOfWeek &&
@@ -140,6 +142,15 @@ class OnboardingRepository {
         endTime: endTime,
       ),
     ]);
+  }
+
+  static String _ceilTime(DateTime value) {
+    final partial = value.second > 0 || value.millisecond > 0;
+    final minutes = value.hour * 60 + value.minute + (partial ? 1 : 0);
+    // A window ends on the same day at the latest.
+    if (minutes >= 24 * 60) return '23:59';
+    return '${(minutes ~/ 60).toString().padLeft(2, '0')}:'
+        '${(minutes % 60).toString().padLeft(2, '0')}';
   }
 
   static String _time(DateTime value) =>

@@ -44,6 +44,12 @@ abstract final class KFormat {
         _intlLocale(_language(context)),
       ).format(value);
 
+  /// "1 member" / "12 members" in English, "১২ জন সদস্য" in Bangla.
+  static String members(BuildContext context, int value) =>
+      _language(context) == 'en'
+      ? '${count(context, value)} ${value == 1 ? 'member' : 'members'}'
+      : '${count(context, value)} জন সদস্য';
+
   // ------------------------------------------------------------------ time --
 
   /// `5 Sep 2026, 9:41 AM` / `৫ সেপ ২০২৬, ৯:৪১ AM`

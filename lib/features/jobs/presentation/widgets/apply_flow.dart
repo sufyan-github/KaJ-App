@@ -69,6 +69,9 @@ Future<void> showJobApplyFlow(
   // Set when the server says identity must be verified first (409
   // IDENTITY_REQUIRED, action VERIFY_IDENTITY): offer the way there.
   var needsIdentity = false;
+  // The post time was added to the default hours: Apply is open now.
+  var timeAdded = false;
+  var addingTime = false;
   await showDialog<void>(
     context: context,
     builder: (dialogContext) => StatefulBuilder(
@@ -93,7 +96,17 @@ Future<void> showJobApplyFlow(
                     'এই সময়টি আপনার ডিফল্ট সময়ের সঙ্গে মেলে',
                   ),
                 ),
-              if (job.isTimeUnavailable) ...[
+              if (job.isTimeUnavailable && timeAdded)
+                const ListTile(
+                  key: ValueKey('apply-time-added'),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.event_available, color: KColors.success),
+                  title: KLocalizedText(
+                    'পোস্টের সময়টি আপনার ডিফল্ট কাজের সময়ে যোগ হয়েছে। এখন আবেদন করতে পারবেন।',
+                  ),
+                ),
+              if (job.isTimeUnavailable && !timeAdded) ...[
                 const ListTile(
                   dense: true,
                   contentPadding: EdgeInsets.zero,
@@ -106,32 +119,39 @@ Future<void> showJobApplyFlow(
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed: () async {
-                      try {
-                        await ref
-                            .read(onboardingRepositoryProvider)
-                            .addAvailabilityWindow(start, end);
-                        ref.invalidate(jobFeedProvider);
-                        if (dialogContext.mounted) Navigator.pop(dialogContext);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: KLocalizedText(
-                                'পোস্টের সময়টি আপনার ডিফল্ট কাজের সময়ে যোগ হয়েছে। এখন আবেদন করতে পারবেন।',
-                              ),
-                            ),
-                          );
-                        }
-                      } on Object catch (error) {
-                        if (context.mounted) {
-                          showFailureSnack(
-                            context,
-                            error,
-                            'কাজের সময় আপডেট করা যায়নি।',
-                          );
-                        }
-                      }
-                    },
+                    key: const ValueKey('apply-add-time'),
+                    onPressed: addingTime
+                        ? null
+                        : () async {
+                            setDialogState(() => addingTime = true);
+                            try {
+                              await ref
+                                  .read(onboardingRepositoryProvider)
+                                  .addAvailabilityWindow(start, end);
+                              // The feed and the post re-read their time match;
+                              // the dialog stays open with Apply unlocked.
+                              ref
+                                ..invalidate(jobFeedProvider)
+                                ..invalidate(jobDetailProvider(job.id));
+                              if (dialogContext.mounted) {
+                                setDialogState(() {
+                                  timeAdded = true;
+                                  addingTime = false;
+                                });
+                              }
+                            } on Object catch (error) {
+                              if (dialogContext.mounted) {
+                                setDialogState(() {
+                                  addingTime = false;
+                                  submitError = failureText(
+                                    dialogContext,
+                                    error,
+                                    'কাজের সময় আপডেট করা যায়নি।',
+                                  );
+                                });
+                              }
+                            }
+                          },
                     icon: const Icon(Icons.playlist_add),
                     label: const KLocalizedText('এই পোস্টের সময় যোগ করুন'),
                   ),
@@ -168,7 +188,7 @@ Future<void> showJobApplyFlow(
             )
           else
             FilledButton(
-              onPressed: job.isTimeUnavailable || submitting
+              onPressed: (job.isTimeUnavailable && !timeAdded) || submitting
                   ? null
                   : () async {
                       final taka = int.tryParse(amount.text);
