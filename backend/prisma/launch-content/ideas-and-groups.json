@@ -1,0 +1,502 @@
+{
+  "_note": "Launch content approved by the founder on 2026-11-24 (lists only). Text is Bangla, as authored content is shown as written. `en` fields are for review and are not loaded. Arrangement is UNDECIDED everywhere: the founder has not yet said what each partner call offers. Owner account comes from LAUNCH_FOUNDER_PHONE / LAUNCH_FOUNDER_NAME at load time.",
+  "ideas": [
+    {
+      "key": "mango-direct",
+      "en": "Mango season direct delivery",
+      "title": "আমের মৌসুমে বাগান থেকে সরাসরি ডেলিভারি",
+      "category": "agriculture",
+      "area": "Shaheb Bazar",
+      "stage": "CONCEPT",
+      "visibility": "SUMMARY_PUBLIC",
+      "summary": "রাজশাহীর বাগানের বাছাই করা আম ৪৮ ঘণ্টার মধ্যে শহরের ক্রেতার হাতে, মান ও ওজন যাচাই করে।",
+      "problem": "ক্রেতা বোঝেন না আম কোন বাগানের, কবে পাড়া, কার্বাইড দেওয়া কি না। চাষি ন্যায্য দাম পান না, কারণ মাঝখানে কয়েক হাত বদল হয়।",
+      "solution": "নির্দিষ্ট বাগানের সঙ্গে চুক্তি, পাড়ার দিন বাছাই ও প্যাকিং, প্রতিটি কার্টনে বাগান ও তারিখ লেখা, এবং কুরিয়ার বা নিজস্ব রাইডার দিয়ে দ্রুত পৌঁছানো।",
+      "details": "প্রথম মৌসুমে ৩ থেকে ৫টি বাগান, দুই জাতের আম এবং শুধু রাজশাহী ও ঢাকায় ডেলিভারি দিয়ে শুরু। প্রতিটি অর্ডারের ছবি ও ওজন অ্যাপে রাখা হবে।",
+      "roles": [
+        {
+          "type": "OPERATIONS",
+          "title": "বাগান সমন্বয়কারী",
+          "description": "চাষিদের সঙ্গে যোগাযোগ, পাড়ার দিন ঠিক করা ও মান দেখা।",
+          "time": "PART_TIME"
+        },
+        {
+          "type": "PRODUCTION",
+          "title": "প্যাকিং প্রধান",
+          "description": "বাছাই, ওজন ও প্যাকিং দল চালানো।",
+          "time": "FULL_TIME"
+        },
+        {
+          "type": "DISTRIBUTION",
+          "title": "ডেলিভারি অংশীদার",
+          "description": "শহরের ভেতরে ও বাইরে সময়মতো পৌঁছানো।",
+          "time": "FLEXIBLE"
+        }
+      ]
+    },
+    {
+      "key": "silk-showroom",
+      "en": "Rajshahi silk online showroom",
+      "title": "রাজশাহী সিল্কের অনলাইন শোরুম",
+      "category": "manufacturing",
+      "area": "Shaheb Bazar",
+      "stage": "CONCEPT",
+      "visibility": "SUMMARY_PUBLIC",
+      "summary": "স্থানীয় তাঁতি ও সিল্ক কারিগরদের পণ্য এক জায়গায়, ন্যায্য দাম দেখিয়ে অনলাইনে বিক্রি।",
+      "problem": "ছোট কারিগর নিজে অনলাইনে বিক্রি করতে পারেন না। ক্রেতা আসল রাজশাহী সিল্ক চিনতে পারেন না।",
+      "solution": "যাচাই করা কারিগরের পণ্য ভালো ছবি ও সঠিক বিবরণসহ এক অনলাইন দোকানে, প্রতিটি পণ্যে কারিগরের নাম ও দাম ভাগ দেখানো।",
+      "details": "১০ জন কারিগর ও ৫০টি পণ্য দিয়ে শুরু। ছবি তোলা, অর্ডার নেওয়া ও পাঠানোর কাজ একটি ছোট দল করবে।",
+      "roles": [
+        {
+          "type": "SUPPLIER",
+          "title": "কারিগর সমন্বয়কারী",
+          "description": "তাঁতি ও কারিগরদের সঙ্গে কাজ ও মান ঠিক রাখা।",
+          "time": "PART_TIME"
+        },
+        {
+          "type": "MARKETING",
+          "title": "পণ্যের ছবি ও অনলাইন বিক্রি",
+          "description": "ছবি তোলা, পাতা চালানো ও ক্রেতার প্রশ্নের উত্তর দেওয়া।",
+          "time": "PART_TIME"
+        }
+      ]
+    },
+    {
+      "key": "home-service-team",
+      "en": "Home-service team for apartments and messes",
+      "title": "অ্যাপার্টমেন্ট ও মেসের জন্য হোম সার্ভিস দল",
+      "category": "services",
+      "area": "Padma R/A",
+      "stage": "CONCEPT",
+      "visibility": "SUMMARY_PUBLIC",
+      "summary": "যাচাই করা ইলেকট্রিশিয়ান, প্লাম্বার ও পরিচ্ছন্নতাকর্মী, ভবন ও মেসের জন্য মাসিক চুক্তিতে।",
+      "problem": "ভবনের মালিক ও মেস পরিচালক জরুরি সময়ে ভরসার কারিগর পান না। কারিগরদের কাজ অনিয়মিত।",
+      "solution": "প্রতিটি ভবনের জন্য নির্দিষ্ট দল, মাসিক ফি, নির্দিষ্ট সময়ে সাড়া এবং প্রতিটি কাজের রেকর্ড অ্যাপে।",
+      "details": "৫টি ভবন ও একটি ৪ জনের দল দিয়ে পরীক্ষা। কাজের মান রিভিউ দিয়ে মাপা হবে।",
+      "roles": [
+        {
+          "type": "OPERATIONS",
+          "title": "পরিচালনা প্রধান",
+          "description": "ভবনের সঙ্গে চুক্তি, কাজ ভাগ ও অভিযোগ দেখা।",
+          "time": "FULL_TIME"
+        },
+        {
+          "type": "TECHNICAL",
+          "title": "ট্রেড সুপারভাইজার",
+          "description": "ইলেকট্রিক বা প্লাম্বিং কাজে অভিজ্ঞ, দলের কাজ পরীক্ষা করবেন।",
+          "time": "PART_TIME"
+        }
+      ]
+    },
+    {
+      "key": "mess-meals",
+      "en": "Home-cooked meals for student messes",
+      "title": "ছাত্র মেসের জন্য ঘরে রান্না খাবার",
+      "category": "food",
+      "area": "Kazla",
+      "stage": "CONCEPT",
+      "visibility": "SUMMARY_PUBLIC",
+      "summary": "ঘরোয়া রাঁধুনিরা রাবি ও রুয়েটের আশপাশের মেসে প্রতিদিন পরিচ্ছন্ন খাবার দেবেন।",
+      "problem": "অনেক মেসে খাবারের মান ও পরিচ্ছন্নতা ভালো নয়। ঘরে বসে আয় করতে চান এমন রাঁধুনিরা ক্রেতা পান না।",
+      "solution": "রাঁধুনিদের পরিচ্ছন্নতার প্রশিক্ষণ, সাপ্তাহিক মেনু, নির্দিষ্ট সময়ে ডেলিভারি এবং মাস শেষে হিসাব।",
+      "details": "দুটি মেস ও তিন জন রাঁধুনি দিয়ে এক মাসের পরীক্ষা। খাবারের মান নিয়ে প্রতি সপ্তাহে মতামত নেওয়া হবে।",
+      "roles": [
+        {
+          "type": "OPERATIONS",
+          "title": "রান্নাঘর সমন্বয়কারী",
+          "description": "মেনু, বাজার ও মান দেখা।",
+          "time": "PART_TIME"
+        },
+        {
+          "type": "PRODUCTION",
+          "title": "ঘরোয়া রাঁধুনি",
+          "description": "নিজের রান্নাঘরে প্রতিদিন নির্দিষ্ট পরিমাণ খাবার রান্না।",
+          "time": "PART_TIME"
+        },
+        {
+          "type": "DISTRIBUTION",
+          "title": "ডেলিভারি রাইডার",
+          "description": "দুপুর ও রাতে মেসে খাবার পৌঁছানো।",
+          "time": "FEW_HOURS_A_WEEK"
+        }
+      ]
+    },
+    {
+      "key": "tutor-network",
+      "en": "Quality-checked tutor network",
+      "title": "মান যাচাই করা গৃহশিক্ষক নেটওয়ার্ক",
+      "category": "education",
+      "area": "Binodpur",
+      "stage": "CONCEPT",
+      "visibility": "SUMMARY_PUBLIC",
+      "summary": "ছোট পরীক্ষা পাস করা গৃহশিক্ষক, বিষয় ও এলাকা মিলিয়ে অভিভাবকের সঙ্গে যুক্ত করা।",
+      "problem": "অভিভাবক জানেন না কোন শিক্ষক সত্যিই পড়াতে পারেন। ভালো শিক্ষকও পরিচিতি ছাড়া ছাত্র পান না।",
+      "solution": "শিক্ষকের পরিচয় ও পড়ানোর দক্ষতা যাচাই, আচরণ বিষয়ে ছোট কোর্স, এবং প্রতি মাসে অভিভাবকের মতামত।",
+      "details": "ষষ্ঠ থেকে দশম শ্রেণির গণিত ও ইংরেজি দিয়ে শুরু। প্রথম ধাপে ২০ জন শিক্ষক।",
+      "roles": [
+        {
+          "type": "INDUSTRY_EXPERT",
+          "title": "একাডেমিক প্রধান",
+          "description": "শিক্ষক বাছাইয়ের পরীক্ষা ও মান ঠিক করা।",
+          "time": "PART_TIME"
+        },
+        {
+          "type": "MENTOR",
+          "title": "শিক্ষক প্রশিক্ষক",
+          "description": "নতুন শিক্ষকদের পড়ানোর কৌশল শেখানো।",
+          "time": "FEW_HOURS_A_WEEK"
+        }
+      ]
+    },
+    {
+      "key": "repair-pickup",
+      "en": "Phone and appliance repair pick-up",
+      "title": "ফোন ও যন্ত্রপাতি মেরামত, বাসা থেকে নিয়ে বাসায় ফেরত",
+      "category": "technology",
+      "area": "Shaheb Bazar",
+      "stage": "CONCEPT",
+      "visibility": "SUMMARY_PUBLIC",
+      "summary": "বাসা থেকে নিয়ে দুই দিনের মধ্যে মেরামত করে ফেরত, কাজ শুরুর আগে লিখিত দাম।",
+      "problem": "মেরামতের দোকানে দাম ও সময় আগে থেকে জানা যায় না, আর যন্ত্র রেখে আসতে ভরসা হয় না।",
+      "solution": "নেওয়ার সময় ছবি ও রসিদ, ত্রুটি দেখে লিখিত দাম, গ্রাহক রাজি হলে মেরামত, বদলানো যন্ত্রাংশ ফেরত।",
+      "details": "ফ্যান, ইস্ত্রি, রাইস কুকার ও ফোনের সাধারণ সমস্যা দিয়ে শুরু। দুই জন টেকনিশিয়ান ও এক জন রাইডার।",
+      "roles": [
+        {
+          "type": "TECHNICAL",
+          "title": "মেরামত টেকনিশিয়ান",
+          "description": "ফোন বা ঘরের যন্ত্রপাতি মেরামতে অভিজ্ঞ।",
+          "time": "FULL_TIME"
+        },
+        {
+          "type": "DISTRIBUTION",
+          "title": "পিক-আপ রাইডার",
+          "description": "যন্ত্র নিরাপদে আনা ও ফেরত দেওয়া।",
+          "time": "PART_TIME"
+        }
+      ]
+    },
+    {
+      "key": "tailoring-collective",
+      "en": "Women's home tailoring collective",
+      "title": "নারীদের ঘরে বসে সেলাই দল",
+      "category": "manufacturing",
+      "area": "Uposhohor",
+      "stage": "CONCEPT",
+      "visibility": "SUMMARY_PUBLIC",
+      "summary": "ঘরে বসে সেলাই করেন এমন নারীরা মিলে স্কুল ড্রেস ও ইউনিফর্মের বড় অর্ডার নেবেন।",
+      "problem": "একা একজন দর্জি বড় অর্ডার নিতে পারেন না, আর অর্ডার পেলেও সময়মতো শেষ করা কঠিন।",
+      "solution": "একজন দক্ষ দর্জির নেতৃত্বে ৫ থেকে ১০ জনের দল, একই মাপ ও নকশা, কাজ ভাগ করে নেওয়া এবং মান পরীক্ষা।",
+      "details": "একটি স্কুলের ড্রেসের নমুনা অর্ডার দিয়ে শুরু। আয় কাজের পরিমাণ অনুযায়ী ভাগ হবে।",
+      "roles": [
+        {
+          "type": "PRODUCTION",
+          "title": "প্রধান দর্জি",
+          "description": "নকশা, কাটিং ও দলের কাজ শেখানো।",
+          "time": "PART_TIME"
+        },
+        {
+          "type": "OPERATIONS",
+          "title": "অর্ডার ব্যবস্থাপক",
+          "description": "অর্ডার নেওয়া, কাপড় কেনা ও সময়মতো ডেলিভারি।",
+          "time": "PART_TIME"
+        }
+      ]
+    },
+    {
+      "key": "tool-library",
+      "en": "Shared tool library for tradespeople",
+      "title": "কারিগরদের জন্য যন্ত্রপাতি ভাড়ার ভান্ডার",
+      "category": "construction",
+      "area": "Talaimari",
+      "stage": "CONCEPT",
+      "visibility": "SUMMARY_PUBLIC",
+      "summary": "ড্রিল, মই, টেস্টারের মতো যন্ত্র কিনে না রেখে দিন হিসেবে ভাড়া নেওয়ার ব্যবস্থা।",
+      "problem": "নতুন কারিগর দামি যন্ত্র কিনতে পারেন না, তাই ভালো কাজ নিতে পারেন না।",
+      "solution": "যাচাই করা কারিগরদের জন্য অল্প জামানতে দিন হিসেবে ভাড়া, ফেরতের সময় যন্ত্র পরীক্ষা।",
+      "details": "২০ ধরনের যন্ত্র দিয়ে একটি ছোট ভান্ডার। KAAJ-এর হাতে-কলমে প্রশিক্ষণ কেন্দ্রের পাশে রাখা যেতে পারে।",
+      "roles": [
+        {
+          "type": "OPERATIONS",
+          "title": "ভান্ডার রক্ষক",
+          "description": "যন্ত্র দেওয়া-নেওয়া ও হিসাব রাখা।",
+          "time": "FULL_TIME"
+        },
+        {
+          "type": "TECHNICAL",
+          "title": "রক্ষণাবেক্ষণ টেকনিশিয়ান",
+          "description": "যন্ত্র পরীক্ষা ও মেরামত।",
+          "time": "FEW_HOURS_A_WEEK"
+        }
+      ]
+    },
+    {
+      "key": "compost",
+      "en": "Kitchen waste to compost for rooftop gardens",
+      "title": "রান্নাঘরের বর্জ্য থেকে ছাদবাগানের সার",
+      "category": "agriculture",
+      "area": "Padma R/A",
+      "stage": "CONCEPT",
+      "visibility": "SUMMARY_PUBLIC",
+      "summary": "বাসাবাড়ির রান্নাঘরের বর্জ্য সংগ্রহ করে জৈব সার বানিয়ে ছাদবাগানিদের কাছে বিক্রি।",
+      "problem": "রান্নাঘরের বর্জ্য ফেলে দেওয়া হয়, অথচ ছাদবাগানিরা ভালো জৈব সার খোঁজেন।",
+      "solution": "নির্দিষ্ট বাসা থেকে আলাদা করা বর্জ্য সংগ্রহ, ছোট জায়গায় কম্পোস্ট তৈরি, প্যাকেট করে বিক্রি।",
+      "details": "৫০টি বাসা ও একটি কম্পোস্ট ইউনিট দিয়ে তিন মাসের পরীক্ষা।",
+      "roles": [
+        {
+          "type": "OPERATIONS",
+          "title": "সংগ্রহ প্রধান",
+          "description": "বাসা থেকে নিয়মিত বর্জ্য সংগ্রহের ব্যবস্থা।",
+          "time": "PART_TIME"
+        },
+        {
+          "type": "PRODUCTION",
+          "title": "কম্পোস্ট টেকনিশিয়ান",
+          "description": "সার তৈরি ও মান দেখা।",
+          "time": "PART_TIME"
+        },
+        {
+          "type": "MARKETING",
+          "title": "বিক্রয়",
+          "description": "ছাদবাগানি ও নার্সারিতে বিক্রি।",
+          "time": "FLEXIBLE"
+        }
+      ]
+    },
+    {
+      "key": "shop-delivery",
+      "en": "Shop-to-door delivery for Shaheb Bazar",
+      "title": "সাহেব বাজারের দোকান থেকে বাসায় ডেলিভারি",
+      "category": "logistics",
+      "area": "Shaheb Bazar",
+      "stage": "CONCEPT",
+      "visibility": "SUMMARY_PUBLIC",
+      "summary": "ছোট দোকানগুলো একটি ডেলিভারি দল ভাগ করে নেবে, যাতে একই দিনে বাসায় পণ্য পৌঁছায়।",
+      "problem": "ছোট দোকান নিজে ডেলিভারি লোক রাখতে পারে না, তাই অনলাইন অর্ডার নিতে পারে না।",
+      "solution": "কয়েকটি দোকানের জন্য একটি দল, নির্দিষ্ট সময়ে পণ্য সংগ্রহ, এলাকা অনুযায়ী রুট এবং পৌঁছানোর প্রমাণ।",
+      "details": "১০টি দোকান ও ৩ জন রাইডার দিয়ে শুরু, শুধু শহরের ভেতরে।",
+      "roles": [
+        {
+          "type": "OPERATIONS",
+          "title": "ডিসপ্যাচ প্রধান",
+          "description": "অর্ডার ভাগ ও রুট ঠিক করা।",
+          "time": "FULL_TIME"
+        },
+        {
+          "type": "DISTRIBUTION",
+          "title": "রাইডার",
+          "description": "সাইকেল বা মোটরসাইকেলে ডেলিভারি।",
+          "time": "FLEXIBLE"
+        },
+        {
+          "type": "MARKETING",
+          "title": "দোকান যুক্ত করা",
+          "description": "দোকানদারদের বোঝানো ও যুক্ত করা।",
+          "time": "PART_TIME"
+        }
+      ]
+    },
+    {
+      "key": "call-area-ambassador",
+      "en": "P1 Area ambassador, one per thana",
+      "partnerCall": true,
+      "title": "KAAJ এলাকা প্রতিনিধি (প্রতি থানায় একজন)",
+      "category": "services",
+      "area": "Shaheb Bazar",
+      "stage": "VALIDATING",
+      "visibility": "SUMMARY_PUBLIC",
+      "summary": "KAAJ অংশীদার খুঁজছে: নিজের এলাকায় পরিচিত ও ভরসার মানুষ, যিনি কর্মী ও গ্রাহকদের KAAJ-এ আনবেন।",
+      "problem": "নতুন অ্যাপে মানুষ ভরসা পান পরিচিত মানুষের মুখে শুনে। প্রতিটি এলাকায় এমন একজন দরকার।",
+      "solution": "বোয়ালিয়া, মতিহার, রাজপাড়া ও শাহ মখদুম থানায় একজন করে প্রতিনিধি, যিনি কর্মীদের নিবন্ধন ও পরিচয় যাচাইয়ে সাহায্য করবেন।",
+      "details": "প্রথম ধাপ: ৩০ দিনে ২০ জন যাচাই করা কর্মী যুক্ত করা। এরপর দুই পক্ষ চাইলে লিখিত চুক্তি অ্যাপের বাইরে হবে।",
+      "roles": [
+        {
+          "type": "DISTRIBUTION",
+          "title": "এলাকা প্রতিনিধি",
+          "description": "নিজ থানায় কর্মী ও গ্রাহক যুক্ত করা, প্রশ্নের উত্তর দেওয়া।",
+          "time": "PART_TIME"
+        }
+      ]
+    },
+    {
+      "key": "call-trade-trainer",
+      "en": "P2 Trade trainer for the hands-on centre",
+      "partnerCall": true,
+      "title": "KAAJ প্রশিক্ষণ কেন্দ্রের ট্রেড প্রশিক্ষক",
+      "category": "education",
+      "area": "Shaheb Bazar",
+      "stage": "VALIDATING",
+      "visibility": "SUMMARY_PUBLIC",
+      "summary": "KAAJ অংশীদার খুঁজছে: অভিজ্ঞ ইলেকট্রিশিয়ান, প্লাম্বার, মেকানিক বা পরিচ্ছন্নতাকর্মী, যিনি নতুনদের হাতে-কলমে শেখাতে পারেন।",
+      "problem": "নতুনরা কাজ শিখতে চান, কিন্তু হাতে ধরে শেখানোর মতো ধৈর্যশীল অভিজ্ঞ মানুষ কম।",
+      "solution": "রাজশাহীতে KAAJ-এর নিজস্ব জায়গা ও যন্ত্রপাতি আছে। প্রশিক্ষক ছোট দলে নিরাপদ পদ্ধতিতে শেখাবেন।",
+      "details": "প্রথম ধাপ: একটি পরীক্ষামূলক ক্লাস নেওয়া। প্রশিক্ষককে KAAJ-এ মেন্টর হিসেবে যাচাই করা হবে।",
+      "roles": [
+        {
+          "type": "MENTOR",
+          "title": "ট্রেড প্রশিক্ষক",
+          "description": "নিজ পেশায় কয়েক বছরের অভিজ্ঞতা ও শেখানোর আগ্রহ।",
+          "time": "PART_TIME"
+        }
+      ]
+    },
+    {
+      "key": "call-crew-lead",
+      "en": "P3 Home-service crew lead",
+      "partnerCall": true,
+      "title": "হোম সার্ভিস দলনেতা",
+      "category": "services",
+      "area": "Padma R/A",
+      "stage": "VALIDATING",
+      "visibility": "SUMMARY_PUBLIC",
+      "summary": "KAAJ অংশীদার খুঁজছে: ৩ থেকে ৫ জনের যাচাই করা দল নিয়ে ভবনের কাজ সামলাতে পারেন এমন কারিগর।",
+      "problem": "ভবনের চুক্তি নিতে একজন দায়িত্বশীল দলনেতা লাগে, যিনি সময় ও মান ঠিক রাখবেন।",
+      "solution": "দলনেতা নিজের দল গড়বেন, KAAJ কাজ এনে দেবে এবং প্রতিটি কাজের রেকর্ড অ্যাপে থাকবে।",
+      "details": "প্রথম ধাপ: গড়ে ৪ তারা বা তার বেশি রেটিং নিয়ে ৫টি কাজ শেষ করা।",
+      "roles": [
+        {
+          "type": "OPERATIONS",
+          "title": "দলনেতা",
+          "description": "ইলেকট্রিক, প্লাম্বিং বা পরিচ্ছন্নতার কাজে অভিজ্ঞ ও দল চালাতে আগ্রহী।",
+          "time": "FULL_TIME"
+        }
+      ]
+    },
+    {
+      "key": "call-tailoring-lead",
+      "en": "P4 Women's tailoring unit lead",
+      "partnerCall": true,
+      "title": "নারী সেলাই ইউনিটের প্রধান",
+      "category": "manufacturing",
+      "area": "Uposhohor",
+      "stage": "VALIDATING",
+      "visibility": "SUMMARY_PUBLIC",
+      "summary": "KAAJ অংশীদার খুঁজছে: দক্ষ দর্জি, যিনি ঘরে বসে কাজ করা ৫ থেকে ১০ জন নারীকে সংগঠিত করতে পারেন।",
+      "problem": "বড় অর্ডার নিতে একজন অভিজ্ঞ মানুষ দরকার, যিনি মাপ, কাটিং ও মান দেখবেন।",
+      "solution": "প্রধান দর্জি দল গড়বেন ও শেখাবেন, KAAJ অর্ডার খুঁজতে ও হিসাব রাখতে সাহায্য করবে।",
+      "details": "প্রথম ধাপ: একটি নমুনা অর্ডার সময়মতো ডেলিভারি।",
+      "roles": [
+        {
+          "type": "PRODUCTION",
+          "title": "ইউনিট প্রধান",
+          "description": "সেলাইয়ে দক্ষ এবং অন্যদের শেখাতে ও সংগঠিত করতে পারেন।",
+          "time": "PART_TIME"
+        }
+      ]
+    },
+    {
+      "key": "call-agro-supply",
+      "en": "P5 Agro supply partner",
+      "partnerCall": true,
+      "title": "কৃষিপণ্য সরবরাহ অংশীদার",
+      "category": "agriculture",
+      "area": "Shaheb Bazar",
+      "stage": "VALIDATING",
+      "visibility": "SUMMARY_PUBLIC",
+      "summary": "KAAJ অংশীদার খুঁজছে: মৌসুমে বাছাই করা আম বা সবজি নিয়মিত দিতে পারেন এমন চাষি বা সংগ্রাহক।",
+      "problem": "শহরের ক্রেতা ভালো মানের পণ্য চান, কিন্তু নিয়মিত ও একই মানের সরবরাহ পাওয়া কঠিন।",
+      "solution": "আগে থেকে মান ও বাছাইয়ের নিয়ম ঠিক করা, নির্দিষ্ট দিনে সংগ্রহ এবং সময়মতো দাম পরিশোধ।",
+      "details": "প্রথম ধাপ: ঠিক করা মান অনুযায়ী একটি পরীক্ষামূলক চালান।",
+      "roles": [
+        {
+          "type": "SUPPLIER",
+          "title": "সরবরাহ অংশীদার",
+          "description": "নিজের বাগান বা খেত আছে, অথবা চাষিদের কাছ থেকে সংগ্রহ করেন।",
+          "time": "FLEXIBLE"
+        }
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "key": "electricians",
+      "en": "G1 Rajshahi electricians and technicians",
+      "name": "রাজশাহী ইলেকট্রিশিয়ান ও টেকনিশিয়ান",
+      "description": "ইলেকট্রিশিয়ান, এসি, ফ্রিজ ও ইলেকট্রনিক্স টেকনিশিয়ানদের জন্য। কাজের পরামর্শ, নিরাপত্তা ও প্রশিক্ষণের খবর।",
+      "visibility": "PUBLIC",
+      "womenOnly": false,
+      "jobCategory": "construction-trades"
+    },
+    {
+      "key": "plumbers",
+      "en": "G2 Rajshahi plumbers and sanitary workers",
+      "name": "রাজশাহী প্লাম্বার ও স্যানিটারি কর্মী",
+      "description": "প্লাম্বার, পাইপ ফিটার ও ট্যাংক পরিষ্কারকর্মীদের জন্য। নিরাপদ কাজের নিয়ম ও অভিজ্ঞতা ভাগ করুন।",
+      "visibility": "PUBLIC",
+      "womenOnly": false,
+      "jobCategory": "construction-trades"
+    },
+    {
+      "key": "cleaners-carers",
+      "en": "G3 Home cleaners and caregivers",
+      "name": "গৃহ পরিচ্ছন্নতা ও সেবাকর্মী",
+      "description": "পরিচ্ছন্নতাকর্মী, রাঁধুনি, শিশু ও বয়স্কদের সেবাকর্মীদের জন্য।",
+      "visibility": "PUBLIC",
+      "womenOnly": false,
+      "jobCategory": "home-services"
+    },
+    {
+      "key": "tutors",
+      "en": "G4 Rajshahi tutors",
+      "name": "রাজশাহী গৃহশিক্ষক",
+      "description": "স্কুল ও ভর্তি পরীক্ষার গৃহশিক্ষকদের জন্য। পড়ানোর কৌশল ও অভিভাবকের সঙ্গে আচরণ নিয়ে আলোচনা।",
+      "visibility": "PUBLIC",
+      "womenOnly": false,
+      "jobCategory": "education"
+    },
+    {
+      "key": "women-entrepreneurs",
+      "en": "G5 Women entrepreneurs of Rajshahi (women only; needs a verified woman moderator)",
+      "name": "রাজশাহীর নারী উদ্যোক্তা",
+      "description": "যে নারীরা ব্যবসা করছেন বা শুরু করতে চান তাঁদের জন্য। শুধু নারীরা যোগ দিতে পারবেন, মডারেটর অনুমোদন দেবেন।",
+      "visibility": "PUBLIC",
+      "womenOnly": true,
+      "jobCategory": null,
+      "holdUntilModerator": true
+    },
+    {
+      "key": "tailors-silk",
+      "en": "G6 Tailors and silk craft workers",
+      "name": "দর্জি ও সিল্ক কারিগর",
+      "description": "ঘরে বসে সেলাই, এমব্রয়ডারি ও সিল্কের কাজ করেন এমন কারিগরদের জন্য।",
+      "visibility": "PUBLIC",
+      "womenOnly": false,
+      "jobCategory": null
+    },
+    {
+      "key": "mango-agro",
+      "en": "G7 Mango and agro traders",
+      "name": "আম ও কৃষিপণ্য ব্যবসায়ী",
+      "description": "চাষি, সংগ্রাহক, প্যাকার ও বিক্রেতাদের জন্য। মৌসুমের খবর ও ন্যায্য দামের আলোচনা।",
+      "visibility": "PUBLIC",
+      "womenOnly": false,
+      "jobCategory": null
+    },
+    {
+      "key": "mechanics-drivers",
+      "en": "G8 Mechanics and drivers",
+      "name": "মেকানিক ও চালক",
+      "description": "মোটরসাইকেল, গাড়ি ও অটোরিকশার মেকানিক এবং চালকদের জন্য।",
+      "visibility": "PUBLIC",
+      "womenOnly": false,
+      "jobCategory": "transport-delivery"
+    },
+    {
+      "key": "freelancers",
+      "en": "G9 Freelancers and computer learners",
+      "name": "ফ্রিল্যান্সার ও কম্পিউটার শিক্ষার্থী",
+      "description": "কম্পিউটার শিখছেন বা অনলাইনে কাজ করছেন এমন মানুষদের জন্য।",
+      "visibility": "PUBLIC",
+      "womenOnly": false,
+      "jobCategory": "digital-business"
+    },
+    {
+      "key": "kaaj-help",
+      "en": "G10 KAAJ help and safety",
+      "name": "KAAJ সহায়তা ও নিরাপত্তা",
+      "description": "সবার জন্য: KAAJ দলের ঘোষণা, নিরাপত্তার পরামর্শ ও প্রশ্নের উত্তর। জরুরি বিপদে ৯৯৯-এ ফোন করুন।",
+      "visibility": "PUBLIC",
+      "womenOnly": false,
+      "jobCategory": null
+    }
+  ]
+}
