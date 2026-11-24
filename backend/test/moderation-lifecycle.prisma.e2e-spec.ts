@@ -1,6 +1,7 @@
 import "reflect-metadata";
 
 import {
+  Gender,
   AdminRole,
   ModerationLevel,
   PrismaClient,
@@ -257,6 +258,8 @@ databaseDescribe("moderation lifecycle with PostgreSQL", () => {
       kind: VerificationKind.IDENTITY,
       nidDocumentId: document.id,
       selfieDocumentId: selfie.id,
+      // R7 B1: identity is verified with a declared gender.
+      gender: Gender.FEMALE,
     });
     expect(request.status).toBe(VerificationStatus.PENDING);
     await adminOps.decideVerification(
