@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Inject,
   Injectable,
   NotFoundException,
@@ -15,6 +16,7 @@ import {
   DisputeStatus,
   JobActorType,
   JobStatus,
+  LocationType,
   PaymentMethod,
   PaymentStatus,
   Prisma,
@@ -40,6 +42,8 @@ import {
   ApplicationActionDto,
   AuditLogQueryDto,
   CampaignDto,
+  CampaignSegmentDto,
+  CampaignSendDto,
   CategoryDto,
   ConfigChangeDto,
   DisputeResolutionDto,
@@ -352,6 +356,7 @@ export class AdminOpsService {
 
   async impersonateReadOnly(
     id: string,
+    reason: string,
     actor: AdminActor,
     context: AdminRequestContext,
   ) {
@@ -378,7 +383,7 @@ export class AdminOpsService {
       "USER",
       id,
       null,
-      { scope: "support-view" },
+      { scope: "support-view", reason },
       context,
     );
     return {
@@ -1036,7 +1041,7 @@ export class AdminOpsService {
       "CATEGORY",
       saved.id,
       before ? serializeCategory(before) : null,
-      serializeCategory(saved),
+      { ...serializeCategory(saved), reason: input.reason },
       context,
     );
     // The app's catalogue is cached for an hour; without this, a deactivated
@@ -1097,7 +1102,7 @@ export class AdminOpsService {
       "SKILL",
       saved.id,
       before ? serializeSkill(before) : null,
-      serializeSkill(saved),
+      { ...serializeSkill(saved), reason: input.reason },
       context,
     );
     await this.catalog?.invalidateCache();
@@ -1126,14 +1131,15 @@ export class AdminOpsService {
     actor: AdminActor,
     context: AdminRequestContext,
   ) {
-    if (input.type !== "CITY" && !input.parentId) {
-      throw new ConflictException("Thana and area locations require a parent.");
-    }
-    const data = locationData(input);
     const before = id
-      ? await this.prisma.location.findUnique({ where: { id } })
+      ? await this.prisma.location.findUnique({
+          where: { id },
+          include: { _count: { select: { children: true } } },
+        })
       : null;
     if (id && !before) throw new NotFoundException();
+    await this.assertLocationPlacement(id, input, before?._count.children ?? 0);
+    const data = locationData(input);
     const saved = id
       ? await this.prisma.location.update({ where: { id }, data })
       : await this.prisma.location.create({ data });
@@ -1143,11 +1149,78 @@ export class AdminOpsService {
       "LOCATION",
       saved.id,
       before ? serializeLocation(before) : null,
-      serializeLocation(saved),
+      { ...serializeLocation(saved), reason: input.reason },
       context,
     );
     await this.catalog?.invalidateCache();
     return serializeLocation(saved);
+  }
+
+  /**
+   * CITY → THANA → AREA: a city has no parent, a thana sits in a city and an
+   * area in a thana; a location with children keeps its type. Coordinates
+   * come as a pair inside Bangladesh.
+   */
+  private async assertLocationPlacement(
+    id: string | null,
+    input: LocationDto,
+    childCount: number,
+  ) {
+    const expectedParent = LOCATION_PARENT_TYPE[input.type];
+    if (!expectedParent && input.parentId)
+      throw locationError("parentId", "A city has no parent location.");
+    if (expectedParent) {
+      if (!input.parentId)
+        throw locationError(
+          "parentId",
+          `A ${input.type.toLowerCase()} needs a parent ${expectedParent.toLowerCase()}.`,
+        );
+      if (input.parentId === id)
+        throw locationError("parentId", "A location cannot be its own parent.");
+      const parent = await this.prisma.location.findUnique({
+        where: { id: input.parentId },
+        select: { type: true },
+      });
+      if (!parent)
+        throw locationError("parentId", "The parent location does not exist.");
+      if (parent.type !== expectedParent)
+        throw locationError(
+          "parentId",
+          `A ${input.type.toLowerCase()} must sit in a ${expectedParent.toLowerCase()}, not a ${parent.type.toLowerCase()}.`,
+        );
+    }
+    if (id && childCount > 0) {
+      const current = await this.prisma.location.findUniqueOrThrow({
+        where: { id },
+        select: { type: true },
+      });
+      if (current.type !== input.type)
+        throw locationError(
+          "type",
+          "This location has sub-locations, so its type cannot change.",
+        );
+    }
+    const hasLat = input.lat !== undefined && input.lat !== null;
+    const hasLng = input.lng !== undefined && input.lng !== null;
+    if (hasLat !== hasLng)
+      throw locationError(
+        hasLat ? "lng" : "lat",
+        "Give both latitude and longitude.",
+      );
+    if (
+      hasLat &&
+      (input.lat! < BANGLADESH.minLat ||
+        input.lat! > BANGLADESH.maxLat ||
+        input.lng! < BANGLADESH.minLng ||
+        input.lng! > BANGLADESH.maxLng)
+    )
+      throw locationError(
+        hasLat &&
+          (input.lat! < BANGLADESH.minLat || input.lat! > BANGLADESH.maxLat)
+          ? "lat"
+          : "lng",
+        "The coordinates are outside Bangladesh.",
+      );
   }
 
   async config(actor: AdminActor, context: AdminRequestContext) {
@@ -1247,8 +1320,8 @@ export class AdminOpsService {
           "ADMIN_CONFIG_CHANGED",
           "CONFIG_REVISION",
           saved.id,
-          current.value_json as Prisma.InputJsonValue,
-          after,
+          { key, value: current.value_json as Prisma.InputJsonValue },
+          { key, value: after, reason: input.reason },
           context,
         ),
       });
@@ -1295,8 +1368,16 @@ export class AdminOpsService {
           "ADMIN_CONFIG_REVERTED",
           "CONFIG_REVISION",
           saved.id,
-          current.value_json as Prisma.InputJsonValue,
-          revision.before_json as Prisma.InputJsonValue,
+          {
+            key: revision.key,
+            value: current.value_json as Prisma.InputJsonValue,
+          },
+          {
+            key: revision.key,
+            value: revision.before_json as Prisma.InputJsonValue,
+            revertedRevisionId: revision.id,
+            reason,
+          },
           context,
         ),
       });
@@ -1786,7 +1867,8 @@ export class AdminOpsService {
     actor: AdminActor,
     context: AdminRequestContext,
   ) {
-    const where = campaignWhere(input.segment);
+    await this.assertSegmentTargetsExist(input.segment);
+    const where = campaignWhere(segmentJson(input.segment));
     const count = await this.prisma.user.count({ where });
     await this.audit(
       actor,
@@ -1796,7 +1878,7 @@ export class AdminOpsService {
       null,
       {
         name: input.name,
-        segment: input.segment as Prisma.InputJsonObject,
+        segment: segmentJson(input.segment),
         count,
       },
       context,
@@ -1814,12 +1896,14 @@ export class AdminOpsService {
    * driven by CampaignRunner, until everyone in the frozen audience has it.
    */
   async sendCampaign(
-    input: CampaignDto,
+    input: CampaignSendDto,
     actor: AdminActor,
     context: AdminRequestContext,
   ) {
+    await this.assertSegmentTargetsExist(input.segment);
+    const segment = segmentJson(input.segment);
     const audienceCount = Math.min(
-      await this.prisma.user.count({ where: campaignWhere(input.segment) }),
+      await this.prisma.user.count({ where: campaignWhere(segment) }),
       CAMPAIGN_AUDIENCE_CAP,
     );
     const now = this.clock.now();
@@ -1827,7 +1911,7 @@ export class AdminOpsService {
       const saved = await transaction.notificationCampaign.create({
         data: {
           name: input.name,
-          segment_json: input.segment as Prisma.InputJsonValue,
+          segment_json: segment,
           title: input.title,
           body: input.body,
           throttle_per_minute: input.throttlePerMinute,
@@ -1848,8 +1932,11 @@ export class AdminOpsService {
           saved.id,
           null,
           {
+            name: input.name,
+            segment,
             audienceCount,
             throttlePerMinute: input.throttlePerMinute,
+            reason: input.reason,
           },
           context,
         ),
@@ -1865,6 +1952,29 @@ export class AdminOpsService {
       sentCount: progress?.sentCount ?? 0,
       status: progress?.status ?? campaign.status,
     };
+  }
+
+  /** A segment that names a location or group that does not exist is a typo. */
+  private async assertSegmentTargetsExist(segment: CampaignSegmentDto) {
+    if (segment.locationId) {
+      const location = await this.prisma.location.findUnique({
+        where: { id: segment.locationId },
+        select: { id: true },
+      });
+      if (!location)
+        throw segmentError("locationId", "No location with this id.");
+    }
+    if (segment.communityGroupId) {
+      const group = await this.prisma.communityGroup.findUnique({
+        where: { id: segment.communityGroupId },
+        select: { id: true },
+      });
+      if (!group)
+        throw segmentError(
+          "communityGroupId",
+          "No community group with this id.",
+        );
+    }
   }
 
   /** One batch for every campaign still sending (oldest first). */
@@ -2284,6 +2394,43 @@ function diffKeys(
       : {};
   return [...new Set([...Object.keys(previous), ...Object.keys(after)])].filter(
     (key) => JSON.stringify(previous[key]) !== JSON.stringify(after[key]),
+  );
+}
+
+/** The parent each location type sits in (a city is the top). */
+const LOCATION_PARENT_TYPE: Record<LocationType, LocationType | null> = {
+  CITY: null,
+  THANA: LocationType.CITY,
+  AREA: LocationType.THANA,
+};
+
+/** A generous box around Bangladesh (Teknaf to Tetulia, Sundarbans to Sylhet). */
+const BANGLADESH = { minLat: 20.5, maxLat: 26.7, minLng: 88.0, maxLng: 92.7 };
+
+function fieldError(field: string, code: string, message: string) {
+  return new BadRequestException({
+    code,
+    message,
+    messageKey: `error.admin.${code.toLowerCase()}`,
+    field,
+    details: [{ field, rules: [code.toLowerCase()] }],
+  });
+}
+
+const locationError = (field: string, message: string) =>
+  fieldError(field, "LOCATION_INVALID", message);
+const segmentError = (field: string, message: string) =>
+  fieldError(`segment.${field}`, "CAMPAIGN_SEGMENT_INVALID", message);
+
+/** The validated segment as stored on the campaign (only known keys). */
+function segmentJson(segment: CampaignSegmentDto): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries({
+      status: segment.status,
+      role: segment.role,
+      locationId: segment.locationId,
+      communityGroupId: segment.communityGroupId,
+    }).filter((entry): entry is [string, string] => !!entry[1]),
   );
 }
 

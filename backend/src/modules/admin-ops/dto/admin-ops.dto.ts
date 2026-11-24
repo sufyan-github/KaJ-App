@@ -5,6 +5,9 @@ import {
   IsEnum,
   IsIn,
   IsInt,
+  IsLatitude,
+  IsLongitude,
+  ValidateNested,
   IsISO8601,
   IsObject,
   IsOptional,
@@ -159,7 +162,7 @@ export class GenderCorrectionDto extends ReasonDto {
   gender!: Gender;
 }
 
-export class SkillDto {
+export class SkillDto extends ReasonDto {
   @IsUUID()
   categoryId!: string;
 
@@ -185,7 +188,7 @@ export class SkillQueryDto {
   categoryId?: string;
 }
 
-export class CategoryDto {
+export class CategoryDto extends ReasonDto {
   @IsOptional()
   @IsUUID()
   parentId?: string;
@@ -246,7 +249,7 @@ export class CategoryDto {
   unsafeForStudents = false;
 }
 
-export class LocationDto {
+export class LocationDto extends ReasonDto {
   @IsOptional()
   @IsUUID()
   parentId?: string;
@@ -262,12 +265,15 @@ export class LocationDto {
   @MinLength(2)
   nameBn!: string;
 
+  /** Both or neither; inside Bangladesh (checked by the service). */
   @IsOptional()
   @Type(() => Number)
+  @IsLatitude()
   lat?: number;
 
   @IsOptional()
   @Type(() => Number)
+  @IsLongitude()
   lng?: number;
 
   @IsOptional()
@@ -328,6 +334,28 @@ export class DisputeResolutionDto extends ReasonDto {
   jobStatus?: JobStatus;
 }
 
+/**
+ * Who a campaign goes to. Unknown keys are refused (400), so a typo can no
+ * longer silently mean "everyone"; omitted keys mean "no filter".
+ */
+export class CampaignSegmentDto {
+  @IsOptional()
+  @IsEnum(UserStatus)
+  status?: UserStatus;
+
+  @IsOptional()
+  @IsIn(["CUSTOMER", "WORKER", "BUSINESS", "MENTOR"])
+  role?: "CUSTOMER" | "WORKER" | "BUSINESS" | "MENTOR";
+
+  @IsOptional()
+  @IsUUID()
+  locationId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  communityGroupId?: string;
+}
+
 export class CampaignDto {
   @IsString()
   @MinLength(3)
@@ -342,7 +370,9 @@ export class CampaignDto {
   body!: string;
 
   @IsObject()
-  segment!: Record<string, unknown>;
+  @ValidateNested()
+  @Type(() => CampaignSegmentDto)
+  segment!: CampaignSegmentDto;
 
   @Type(() => Number)
   @IsInt()
@@ -350,6 +380,17 @@ export class CampaignDto {
   @Max(1000)
   throttlePerMinute = 100;
 }
+
+/** Sending notifies real people, so it takes a typed reason. */
+export class CampaignSendDto extends CampaignDto {
+  @IsString()
+  @MinLength(8)
+  @MaxLength(500)
+  reason!: string;
+}
+
+/** A read-only view of one person's account is justified each time. */
+export class ImpersonationQueryDto extends ReasonDto {}
 
 export class EmailQueryDto {
   @Transform(({ value }: { value: unknown }) =>

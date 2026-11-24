@@ -14,6 +14,12 @@ import {
 
 /** POST/PUT /admin/business-categories — the sector taxonomy. */
 export class BusinessCategoryDto {
+  /** The typed operational reason, kept in the audit row. */
+  @IsString()
+  @MinLength(8)
+  @MaxLength(500)
+  reason!: string;
+
   @IsOptional()
   @IsUUID()
   parentId?: string | null;

@@ -27,6 +27,8 @@ import {
   ApplicationActionDto,
   AuditLogQueryDto,
   CampaignDto,
+  CampaignSendDto,
+  ImpersonationQueryDto,
   CategoryDto,
   ConfigChangeDto,
   DisputeResolutionDto,
@@ -111,10 +113,16 @@ export class AdminOpsController {
   @AdminRoles(AdminRole.ADMIN, AdminRole.SUPPORT)
   impersonate(
     @Param("id", new ParseUUIDPipe()) id: string,
+    @Query() query: ImpersonationQueryDto,
     @CurrentAdmin() actor: AdminActor,
     @Req() request: Request,
   ) {
-    return this.ops.impersonateReadOnly(id, actor, this.context(request));
+    return this.ops.impersonateReadOnly(
+      id,
+      query.reason,
+      actor,
+      this.context(request),
+    );
   }
 
   @Get("jobs")
@@ -434,7 +442,7 @@ export class AdminOpsController {
   @Policy(Policies.public())
   @AdminRoles(AdminRole.ADMIN)
   sendCampaign(
-    @Body() body: CampaignDto,
+    @Body() body: CampaignSendDto,
     @CurrentAdmin() actor: AdminActor,
     @Req() request: Request,
   ) {

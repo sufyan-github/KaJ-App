@@ -513,7 +513,11 @@ export class ModerationService {
           "USER",
           userId,
           { status: user.status, moderationLevel: previous },
-          { status: UserStatus.ACTIVE, moderationLevel: ModerationLevel.NONE },
+          {
+            status: UserStatus.ACTIVE,
+            moderationLevel: ModerationLevel.NONE,
+            reason: reason.trim(),
+          },
           context,
         ),
       });
@@ -713,6 +717,7 @@ export class ModerationService {
             reportId: report?.id ?? null,
             actionId: action.id,
             requireReverification: input.requireReverification ?? false,
+            reason: input.reason.trim(),
           },
           context,
         ),
