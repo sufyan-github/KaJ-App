@@ -1,0 +1,417 @@
+{
+  "courses": [
+    {
+      "slug": "business-management-basics",
+      "skillSlug": null,
+      "titleEn": "Business management basics",
+      "titleBn": "ব্যবসা পরিচালনার প্রাথমিক ধারণা",
+      "summaryEn": "Simple money and management habits for a small service business: working out cost, price and profit, keeping a daily cash book, managing materials, keeping customers, and hiring a helper.",
+      "summaryBn": "ছোট সেবা ব্যবসার জন্য টাকাপয়সা ও পরিচালনার সহজ অভ্যাস: খরচ, দাম ও লাভ হিসাব করা, দৈনিক ক্যাশ খাতা রাখা, মালপত্র সামলানো, গ্রাহক ধরে রাখা এবং সহকারী নেওয়া।",
+      "minutes": 30,
+      "estDataMb": 1,
+      "passMarkPct": 70,
+      "questionCount": 10,
+      "isSafetyCritical": false,
+      "sortOrder": 25,
+      "lessons": [
+        {
+          "titleEn": "Costs, price and profit",
+          "titleBn": "খরচ, দাম ও লাভ",
+          "summaryEn": "You will learn: how to work out the cost of a job, set a price and see your profit.\nStep 1: Write down the materials for the job and what each one costs. Example: tap and fittings ৳300.\nStep 2: Add your travel cost for the job. Example: rickshaw both ways ৳60.\nStep 3: Add a small share for the tools, phone and data that you use on every job. Example: ৳40.\nStep 4: Add them up to get the total cost. Example: ৳300 + ৳60 + ৳40 = ৳400.\nStep 5: Decide what your time and skill are worth for this job, and add it to the cost to get the price. Example: ৳400 + ৳300 = ৳700.\nStep 6: Check the profit by taking the cost away from the price. Example: ৳700 - ৳400 = ৳300.\nStep 7: If the customer bargains, do not go below your cost. At ৳400 you would be working for no profit.\nRemember: profit is the price minus all the costs, not the full amount you receive in your hand.",
+          "summaryBn": "আপনি শিখবেন: একটি কাজের খরচ কীভাবে হিসাব করবেন, দাম ঠিক করবেন এবং লাভ বের করবেন।\nধাপ ১: কাজের মালপত্র ও প্রতিটির দাম লিখুন। উদাহরণ: কল ও ফিটিংস ৳৩০০।\nধাপ ২: কাজে যাওয়া-আসার খরচ যোগ করুন। উদাহরণ: রিকশায় যাওয়া-আসা ৳৬০।\nধাপ ৩: প্রতিটি কাজে যে যন্ত্রপাতি, ফোন ও ডেটা ব্যবহার হয়, তার একটি ছোট অংশ যোগ করুন। উদাহরণ: ৳৪০।\nধাপ ৪: সব যোগ করে মোট খরচ বের করুন। উদাহরণ: ৳৩০০ + ৳৬০ + ৳৪০ = ৳৪০০।\nধাপ ৫: এই কাজে আপনার সময় ও দক্ষতার মূল্য কত তা ঠিক করুন এবং খরচের সঙ্গে যোগ করে দাম বের করুন। উদাহরণ: ৳৪০০ + ৳৩০০ = ৳৭০০।\nধাপ ৬: দাম থেকে খরচ বাদ দিয়ে লাভ মিলিয়ে নিন। উদাহরণ: ৳৭০০ - ৳৪০০ = ৳৩০০।\nধাপ ৭: গ্রাহক দরদাম করলে খরচের নিচে নামবেন না। ৳৪০০-তে রাজি হলে আপনি বিনা লাভে খাটবেন।\nমনে রাখুন: লাভ হলো দাম থেকে সব খরচ বাদ দেওয়ার পর যা থাকে, হাতে পাওয়া পুরো টাকা নয়।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Keeping a daily cash book",
+          "titleBn": "দৈনিক ক্যাশ খাতা রাখা",
+          "summaryEn": "You will learn: how to keep a simple daily cash book with money in, money out and balance.\nStep 1: Take a notebook and draw four columns: date and details, money in, money out, balance.\nStep 2: At the start of the day, write the money you have in hand and in your mobile account as the opening balance. Example: ৳500.\nStep 3: Each time a customer pays you, write it at once in the money in column. Example: ৳1,200 for two jobs.\nStep 4: Each time you spend on the business, write it in the money out column and keep the receipt. Example: materials and travel ৳400.\nStep 5: At the end of the day, work out the balance: opening balance plus money in, minus money out. Example: ৳500 + ৳1,200 - ৳400 = ৳1,300.\nStep 6: Count the cash in your hand and the money in your mobile account. It should match the balance in the book.\nStep 7: If it does not match, look for the missing entry the same evening, while you still remember the day.\nRemember: write every taka on the day it comes in or goes out. A cash book filled in later from memory will have mistakes.",
+          "summaryBn": "আপনি শিখবেন: টাকা আসা, টাকা যাওয়া ও ব্যালেন্স দিয়ে কীভাবে সহজ দৈনিক ক্যাশ খাতা রাখবেন।\nধাপ ১: একটি খাতা নিন এবং চারটি ঘর টানুন: তারিখ ও বিবরণ, টাকা এলো, টাকা গেল, ব্যালেন্স।\nধাপ ২: দিনের শুরুতে হাতে ও মোবাইল অ্যাকাউন্টে যত টাকা আছে তা শুরুর ব্যালেন্স হিসেবে লিখুন। উদাহরণ: ৳৫০০।\nধাপ ৩: গ্রাহক টাকা দিলে প্রতিবার সঙ্গে সঙ্গে টাকা এলো ঘরে লিখুন। উদাহরণ: দুটি কাজে ৳১,২০০।\nধাপ ৪: ব্যবসার জন্য খরচ করলে প্রতিবার টাকা গেল ঘরে লিখুন এবং রসিদ রেখে দিন। উদাহরণ: মালপত্র ও যাতায়াত ৳৪০০।\nধাপ ৫: দিনের শেষে ব্যালেন্স বের করুন: শুরুর ব্যালেন্সের সঙ্গে টাকা এলো যোগ করুন, টাকা গেল বাদ দিন। উদাহরণ: ৳৫০০ + ৳১,২০০ - ৳৪০০ = ৳১,৩০০।\nধাপ ৬: হাতের নগদ ও মোবাইল অ্যাকাউন্টের টাকা গুনে দেখুন। খাতার ব্যালেন্সের সঙ্গে মিলতে হবে।\nধাপ ৭: না মিললে সেদিন সন্ধ্যাতেই বাদ পড়া হিসাবটি খুঁজে বের করুন, যখন দিনের কথা মনে আছে।\nমনে রাখুন: প্রতিটি টাকা যেদিন আসে বা যায় সেদিনই লিখুন। পরে মনে করে লেখা খাতায় ভুল থাকবেই।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Stock and materials",
+          "titleBn": "মালপত্র ও মজুত",
+          "summaryEn": "You will learn: how to buy only the materials you will use and count your stock every week.\nStep 1: Make a list of the materials you use on most jobs, such as tape, screws, wire or cleaning liquid.\nStep 2: Look at last week's jobs and write how much of each item you used.\nStep 3: Buy enough for one or two weeks of work, not more. Money tied up in unused stock cannot be spent on anything else.\nStep 4: Keep materials in one dry, closed box or shelf, with the older items at the front so you use them first.\nStep 5: On the same day every week, count each item and write the number in your notebook.\nStep 6: Set a lowest number for each item. When the count falls to that number, add the item to your buying list.\nStep 7: Keep the receipt for every purchase and write the cost in your cash book.\nRemember: buy what you will use and count every week, so you do not run out in the middle of a job or waste money on extra stock.",
+          "summaryBn": "আপনি শিখবেন: কীভাবে শুধু দরকারি মালপত্র কিনবেন এবং প্রতি সপ্তাহে মজুত গুনবেন।\nধাপ ১: বেশির ভাগ কাজে যে মালপত্র লাগে তার তালিকা করুন, যেমন টেপ, স্ক্রু, তার বা পরিষ্কারের তরল।\nধাপ ২: গত সপ্তাহের কাজগুলো দেখে লিখুন কোন জিনিস কতটা খরচ হয়েছে।\nধাপ ৩: এক বা দুই সপ্তাহের কাজের মতো কিনুন, তার বেশি নয়। অব্যবহৃত মালে আটকে থাকা টাকা অন্য কিছুতে খরচ করা যায় না।\nধাপ ৪: মালপত্র একটি শুকনো, বন্ধ বাক্স বা তাকে রাখুন এবং পুরোনো জিনিস সামনে রাখুন, যাতে আগে সেগুলো ব্যবহার হয়।\nধাপ ৫: প্রতি সপ্তাহে একই দিনে প্রতিটি জিনিস গুনুন এবং সংখ্যা খাতায় লিখুন।\nধাপ ৬: প্রতিটি জিনিসের জন্য একটি সর্বনিম্ন সংখ্যা ঠিক করুন। গুনে সেই সংখ্যায় নেমে এলে জিনিসটি কেনার তালিকায় লিখুন।\nধাপ ৭: প্রতিটি কেনাকাটার রসিদ রাখুন এবং খরচ ক্যাশ খাতায় লিখুন।\nমনে রাখুন: যা লাগবে তা-ই কিনুন এবং প্রতি সপ্তাহে গুনুন, তাহলে কাজের মাঝখানে মাল ফুরাবে না এবং বাড়তি মালে টাকাও নষ্ট হবে না।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Finding and keeping customers",
+          "titleBn": "গ্রাহক পাওয়া ও ধরে রাখা",
+          "summaryEn": "You will learn: how good work, a follow-up message and honest reviews bring customers back.\nStep 1: Arrive on time, do the agreed work carefully and leave the place clean.\nStep 2: Before you leave, show the customer the finished work and ask if anything else needs attention.\nStep 3: Two or three days later, send a short polite message asking if everything is still working well.\nStep 4: If there is a problem with your work, go back and fix it quickly without arguing.\nStep 5: Ask a happy customer to leave an honest review in the app. Never ask for a false review.\nStep 6: Keep a private list of your customers with the date and the work done, so you remember them the next time they call.\nStep 7: Answer calls and messages the same day, even if only to say when you will be free.\nRemember: keeping an old customer costs less than finding a new one, and a happy customer tells other people about you.",
+          "summaryBn": "আপনি শিখবেন: ভালো কাজ, পরে খোঁজ নেওয়ার মেসেজ ও সৎ রিভিউ কীভাবে গ্রাহককে ফিরিয়ে আনে।\nধাপ ১: সময়মতো পৌঁছান, ঠিক করা কাজটি যত্ন নিয়ে করুন এবং জায়গা পরিষ্কার রেখে যান।\nধাপ ২: যাওয়ার আগে গ্রাহককে শেষ হওয়া কাজ দেখান এবং জিজ্ঞেস করুন আর কিছু দেখার আছে কি না।\nধাপ ৩: দুই-তিন দিন পর ভদ্রভাবে ছোট একটি মেসেজ পাঠিয়ে জানতে চান সব ঠিকঠাক চলছে কি না।\nধাপ ৪: আপনার কাজে কোনো সমস্যা থাকলে তর্ক না করে দ্রুত গিয়ে ঠিক করে দিন।\nধাপ ৫: সন্তুষ্ট গ্রাহককে অ্যাপে সৎ রিভিউ দিতে অনুরোধ করুন। কখনো মিথ্যা রিভিউ চাইবেন না।\nধাপ ৬: গ্রাহকদের একটি তালিকা নিজের কাছে রাখুন, তারিখ ও কাজের বিবরণসহ, যাতে পরেরবার ফোন করলে মনে পড়ে।\nধাপ ৭: ফোন ও মেসেজের উত্তর সেদিনই দিন, অন্তত কখন সময় হবে তা জানিয়ে দিন।\nমনে রাখুন: নতুন গ্রাহক খোঁজার চেয়ে পুরোনো গ্রাহক ধরে রাখায় খরচ কম, আর সন্তুষ্ট গ্রাহক অন্যদের কাছে আপনার কথা বলেন।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Hiring a helper and keeping business money separate",
+          "titleBn": "সহকারী নেওয়া ও ব্যবসার টাকা আলাদা রাখা",
+          "summaryEn": "You will learn: when to hire a helper, how to pay them on time and how to keep business money apart from family money.\nStep 1: Look back at your last month. If you often turned work away or needed a second pair of hands, a helper may pay off.\nStep 2: Work out whether the extra jobs will bring in more than the helper's wage. Example: extra profit of ৳2,400 a week against a wage of ৳1,500.\nStep 3: Before the first day, agree the wage, the work and the pay day, and write it down for both of you.\nStep 4: Pay the full wage on the agreed day, every time, and write it in the cash book.\nStep 5: Give the helper only work that they have been shown how to do safely.\nStep 6: Keep business money in a separate box or account from family money.\nStep 7: Pay yourself a fixed amount on a fixed day for the family. If you take more, write it in the cash book as money out.\nRemember: a helper who is paid on time stays and works well, and business money kept separate shows you whether the business is really earning.",
+          "summaryBn": "আপনি শিখবেন: কখন সহকারী নেবেন, কীভাবে সময়মতো মজুরি দেবেন এবং ব্যবসার টাকা সংসারের টাকা থেকে আলাদা রাখবেন।\nধাপ ১: গত মাসের কথা ভেবে দেখুন। প্রায়ই কাজ ফিরিয়ে দিতে হলে বা আরেক জোড়া হাত লাগলে সহকারী নেওয়া লাভজনক হতে পারে।\nধাপ ২: হিসাব করুন বাড়তি কাজ থেকে সহকারীর মজুরির চেয়ে বেশি আসবে কি না। উদাহরণ: সপ্তাহে বাড়তি লাভ ৳২,৪০০, আর মজুরি ৳১,৫০০।\nধাপ ৩: প্রথম দিনের আগেই মজুরি, কাজ ও টাকা দেওয়ার দিন ঠিক করুন এবং দুজনের জন্যই লিখে রাখুন।\nধাপ ৪: ঠিক করা দিনে প্রতিবার পুরো মজুরি দিন এবং ক্যাশ খাতায় লিখুন।\nধাপ ৫: সহকারীকে শুধু সেই কাজ দিন যা নিরাপদে করতে তাকে দেখিয়ে দেওয়া হয়েছে।\nধাপ ৬: ব্যবসার টাকা সংসারের টাকা থেকে আলাদা বাক্সে বা অ্যাকাউন্টে রাখুন।\nধাপ ৭: সংসারের জন্য নির্দিষ্ট দিনে নির্দিষ্ট টাকা নিজেকে দিন। বেশি নিলে ক্যাশ খাতায় টাকা গেল হিসেবে লিখুন।\nমনে রাখুন: সময়মতো মজুরি পেলে সহকারী থাকে ও ভালো কাজ করে, আর ব্যবসার টাকা আলাদা রাখলে বোঝা যায় ব্যবসা সত্যিই আয় করছে কি না।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": false
+        }
+      ],
+      "questions": [
+        {
+          "promptEn": "For one job you spend ৳500 on materials and ৳80 on travel, and you count ৳20 for tools and phone. What is the total cost?",
+          "promptBn": "একটি কাজে মালপত্রে ৳৫০০ ও যাতায়াতে ৳৮০ খরচ হলো, আর যন্ত্রপাতি ও ফোনের জন্য ধরলেন ৳২০। মোট খরচ কত?",
+          "options": [
+            { "id": "a", "en": "৳500", "bn": "৳৫০০" },
+            { "id": "b", "en": "৳580", "bn": "৳৫৮০" },
+            { "id": "c", "en": "৳600", "bn": "৳৬০০" },
+            { "id": "d", "en": "৳620", "bn": "৳৬২০" }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Total cost is materials plus travel plus the share for tools and phone: ৳500 + ৳80 + ৳20 = ৳600.",
+          "explanationBn": "মোট খরচ হলো মালপত্র, যাতায়াত এবং যন্ত্রপাতি ও ফোনের অংশের যোগফল: ৳৫০০ + ৳৮০ + ৳২০ = ৳৬০০।"
+        },
+        {
+          "promptEn": "A job costs you ৳600 and the customer pays ৳900. What is your profit?",
+          "promptBn": "একটি কাজে আপনার খরচ ৳৬০০, গ্রাহক দিলেন ৳৯০০। আপনার লাভ কত?",
+          "options": [
+            { "id": "a", "en": "৳300", "bn": "৳৩০০" },
+            { "id": "b", "en": "৳900", "bn": "৳৯০০" },
+            { "id": "c", "en": "৳600", "bn": "৳৬০০" },
+            { "id": "d", "en": "৳1,500", "bn": "৳১,৫০০" }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Profit is the price minus the cost: ৳900 - ৳600 = ৳300.",
+          "explanationBn": "লাভ হলো দাম থেকে খরচ বাদ দিলে যা থাকে: ৳৯০০ - ৳৬০০ = ৳৩০০।"
+        },
+        {
+          "promptEn": "Your opening balance is ৳800. During the day ৳1,500 comes in and ৳600 goes out. What is the balance at the end of the day?",
+          "promptBn": "আপনার শুরুর ব্যালেন্স ৳৮০০। সারা দিনে ৳১,৫০০ এলো এবং ৳৬০০ গেল। দিনের শেষে ব্যালেন্স কত?",
+          "options": [
+            { "id": "a", "en": "৳2,900", "bn": "৳২,৯০০" },
+            { "id": "b", "en": "৳2,300", "bn": "৳২,৩০০" },
+            { "id": "c", "en": "৳900", "bn": "৳৯০০" },
+            { "id": "d", "en": "৳1,700", "bn": "৳১,৭০০" }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Balance is opening balance plus money in, minus money out: ৳800 + ৳1,500 - ৳600 = ৳1,700.",
+          "explanationBn": "ব্যালেন্স হলো শুরুর ব্যালেন্সের সঙ্গে টাকা এলো যোগ, টাকা গেল বাদ: ৳৮০০ + ৳১,৫০০ - ৳৬০০ = ৳১,৭০০।"
+        },
+        {
+          "promptEn": "A customer pays you ৳400 in cash at midday. When do you write it in the cash book?",
+          "promptBn": "দুপুরে একজন গ্রাহক আপনাকে নগদ ৳৪০০ দিলেন। ক্যাশ খাতায় কখন লিখবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "At the end of the week",
+              "bn": "সপ্তাহের শেষে"
+            },
+            {
+              "id": "b",
+              "en": "At once, in the money in column",
+              "bn": "সঙ্গে সঙ্গে, টাকা এলো ঘরে"
+            },
+            {
+              "id": "c",
+              "en": "Only if the amount is large",
+              "bn": "শুধু টাকার পরিমাণ বড় হলে"
+            },
+            {
+              "id": "d",
+              "en": "Cash does not need to be written",
+              "bn": "নগদ টাকা লেখার দরকার নেই"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Entries written at once are correct, while entries written later from memory have mistakes.",
+          "explanationBn": "সঙ্গে সঙ্গে লিখলে হিসাব ঠিক থাকে, পরে মনে করে লিখলে ভুল হয়।"
+        },
+        {
+          "promptEn": "You have ৳2,000. Materials for two weeks of work cost ৳800. The shopkeeper tells you to spend the whole ৳2,000 so you never run out. What is the best choice?",
+          "promptBn": "আপনার কাছে ৳২,০০০ আছে। দুই সপ্তাহের কাজের মালপত্রের দাম ৳৮০০। দোকানদার বললেন পুরো ৳২,০০০-এর মাল কিনে নিন, তাহলে কখনো ফুরাবে না। সবচেয়ে ভালো সিদ্ধান্ত কোনটি?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Spend the whole ৳2,000 on materials",
+              "bn": "পুরো ৳২,০০০-এর মাল কেনা"
+            },
+            {
+              "id": "b",
+              "en": "Buy the two weeks of materials and keep the rest as cash",
+              "bn": "দুই সপ্তাহের মাল কেনা এবং বাকি টাকা হাতে রাখা"
+            },
+            {
+              "id": "c",
+              "en": "Buy nothing and borrow materials on each job",
+              "bn": "কিছু না কেনা এবং প্রতিটি কাজে মাল ধার করা"
+            },
+            {
+              "id": "d",
+              "en": "Borrow more money and buy even more",
+              "bn": "আরও টাকা ধার করে আরও বেশি মাল কেনা"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Money tied up in unused stock cannot be spent on anything else.",
+          "explanationBn": "অব্যবহৃত মালে আটকে থাকা টাকা অন্য কিছুতে খরচ করা যায় না।"
+        },
+        {
+          "promptEn": "How often should you count your materials?",
+          "promptBn": "মালপত্র কত দিন পরপর গোনা উচিত?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Only when something runs out during a job",
+              "bn": "শুধু কাজের মাঝখানে কিছু ফুরিয়ে গেলে"
+            },
+            { "id": "b", "en": "Once a year", "bn": "বছরে একবার" },
+            {
+              "id": "c",
+              "en": "Never, because you can remember it",
+              "bn": "কখনো না, কারণ মনে থাকে"
+            },
+            {
+              "id": "d",
+              "en": "On the same day every week, and write the number down",
+              "bn": "প্রতি সপ্তাহে একই দিনে, এবং সংখ্যা লিখে রাখা"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "A weekly count shows what is running low before you run out on a job.",
+          "explanationBn": "প্রতি সপ্তাহে গুনলে কাজের মাঝখানে ফুরানোর আগেই বোঝা যায় কোনটি কমে আসছে।"
+        },
+        {
+          "promptEn": "You finished a repair for a customer three days ago. What is a good way to keep this customer?",
+          "promptBn": "তিন দিন আগে আপনি একজন গ্রাহকের মেরামতের কাজ শেষ করেছেন। এই গ্রাহককে ধরে রাখার ভালো উপায় কোনটি?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Send a short polite message asking if everything is working well",
+              "bn": "ভদ্রভাবে ছোট একটি মেসেজ পাঠিয়ে জানতে চাওয়া সব ঠিকঠাক চলছে কি না"
+            },
+            {
+              "id": "b",
+              "en": "Call every day to ask for more work",
+              "bn": "প্রতিদিন ফোন করে আরও কাজ চাওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Wait until the customer complains",
+              "bn": "গ্রাহক অভিযোগ না করা পর্যন্ত অপেক্ষা করা"
+            },
+            {
+              "id": "d",
+              "en": "Ask the customer for extra money",
+              "bn": "গ্রাহকের কাছে বাড়তি টাকা চাওয়া"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "A polite follow-up shows you care about your work, and the customer remembers you.",
+          "explanationBn": "ভদ্রভাবে খোঁজ নিলে বোঝা যায় আপনি নিজের কাজের যত্ন নেন, আর গ্রাহক আপনাকে মনে রাখেন।"
+        },
+        {
+          "promptEn": "A customer calls to say the tap you fixed last week is leaking again. What do you do?",
+          "promptBn": "একজন গ্রাহক ফোন করে জানালেন, গত সপ্তাহে আপনি যে কল ঠিক করেছিলেন তা থেকে আবার পানি পড়ছে। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Argue that it is not your fault",
+              "bn": "তর্ক করবেন যে এটা আপনার দোষ নয়"
+            },
+            {
+              "id": "b",
+              "en": "Stop answering the customer's calls",
+              "bn": "গ্রাহকের ফোন ধরা বন্ধ করবেন"
+            },
+            {
+              "id": "c",
+              "en": "Go back quickly and fix it without arguing",
+              "bn": "তর্ক না করে দ্রুত গিয়ে ঠিক করে দেবেন"
+            },
+            {
+              "id": "d",
+              "en": "Ask for a good review first",
+              "bn": "আগে ভালো রিভিউ চাইবেন"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Fixing a problem with your work quickly keeps the customer's trust.",
+          "explanationBn": "নিজের কাজের সমস্যা দ্রুত ঠিক করে দিলে গ্রাহকের আস্থা থাকে।"
+        },
+        {
+          "promptEn": "You are taking on a helper from next week. What must be agreed before the first day?",
+          "promptBn": "আগামী সপ্তাহ থেকে আপনি একজন সহকারী নিচ্ছেন। প্রথম দিনের আগে কী ঠিক করে নিতেই হবে?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Nothing, you can decide later",
+              "bn": "কিছুই না, পরে ঠিক করা যাবে"
+            },
+            {
+              "id": "b",
+              "en": "Only the time to start work",
+              "bn": "শুধু কাজ শুরুর সময়"
+            },
+            {
+              "id": "c",
+              "en": "That the wage will be paid when you have spare money",
+              "bn": "হাতে বাড়তি টাকা থাকলে মজুরি দেওয়া হবে"
+            },
+            {
+              "id": "d",
+              "en": "The wage, the work and the pay day, written down for both",
+              "bn": "মজুরি, কাজ ও টাকা দেওয়ার দিন, দুজনের জন্যই লিখে রাখা"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "A written agreement before the first day prevents arguments about pay and work.",
+          "explanationBn": "প্রথম দিনের আগে লিখে ঠিক করে নিলে মজুরি ও কাজ নিয়ে ঝগড়া হয় না।"
+        },
+        {
+          "promptEn": "Your family needs ৳1,000 more than your fixed pay this month, and the business box has the money. What is the right way?",
+          "promptBn": "এই মাসে সংসারে আপনার নির্দিষ্ট টাকার চেয়ে ৳১,০০০ বেশি লাগবে, আর ব্যবসার বাক্সে টাকা আছে। সঠিক উপায় কোনটি?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Take it and write it in the cash book as money out",
+              "bn": "টাকা নেওয়া এবং ক্যাশ খাতায় টাকা গেল হিসেবে লেখা"
+            },
+            {
+              "id": "b",
+              "en": "Take it quietly and write nothing",
+              "bn": "চুপচাপ নেওয়া এবং কিছু না লেখা"
+            },
+            {
+              "id": "c",
+              "en": "Stop keeping the cash book this month",
+              "bn": "এই মাসে ক্যাশ খাতা রাখা বন্ধ করা"
+            },
+            {
+              "id": "d",
+              "en": "Take it from the helper's wage",
+              "bn": "সহকারীর মজুরি থেকে কেটে নেওয়া"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Writing it down keeps the cash book correct and shows what the business really earned.",
+          "explanationBn": "লিখে রাখলে ক্যাশ খাতা ঠিক থাকে এবং ব্যবসা আসলে কত আয় করল তা বোঝা যায়।"
+        },
+        {
+          "promptEn": "Your cost for a job is ৳400 and your price is ৳700. The customer bargains down to ৳350. What happens if you accept?",
+          "promptBn": "একটি কাজে আপনার খরচ ৳৪০০, দাম ৳৭০০। গ্রাহক দরদাম করে ৳৩৫০ বললেন। রাজি হলে কী হবে?",
+          "options": [
+            {
+              "id": "a",
+              "en": "You make ৳350 profit",
+              "bn": "আপনার ৳৩৫০ লাভ হবে"
+            },
+            {
+              "id": "b",
+              "en": "You lose ৳50 on the job",
+              "bn": "এই কাজে আপনার ৳৫০ লোকসান হবে"
+            },
+            {
+              "id": "c",
+              "en": "You make ৳50 profit",
+              "bn": "আপনার ৳৫০ লাভ হবে"
+            },
+            { "id": "d", "en": "Nothing changes", "bn": "কিছুই বদলাবে না" }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "A price below your cost is a loss: ৳350 - ৳400 leaves you ৳50 short.",
+          "explanationBn": "খরচের নিচে দাম মানে লোকসান: ৳৩৫০ থেকে ৳৪০০ বাদ দিলে ৳৫০ ঘাটতি থাকে।"
+        },
+        {
+          "promptEn": "At the end of the day your cash book says ৳1,300 but you count only ৳1,100. What do you do?",
+          "promptBn": "দিনের শেষে খাতায় ব্যালেন্স ৳১,৩০০, কিন্তু গুনে পেলেন মাত্র ৳১,১০০। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Change the book to ৳1,100 and forget it",
+              "bn": "খাতায় ৳১,১০০ লিখে বিষয়টি ভুলে যাবেন"
+            },
+            {
+              "id": "b",
+              "en": "Ignore it, because small gaps are normal",
+              "bn": "পাত্তা দেবেন না, কারণ অল্প গরমিল হয়ই"
+            },
+            {
+              "id": "c",
+              "en": "Look for the missing entry the same evening",
+              "bn": "সেদিন সন্ধ্যাতেই বাদ পড়া হিসাবটি খুঁজবেন"
+            },
+            {
+              "id": "d",
+              "en": "Add ৳200 from family money to make it match",
+              "bn": "মেলানোর জন্য সংসারের টাকা থেকে ৳২০০ যোগ করবেন"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "The same evening you still remember the day, so the missing entry is easy to find.",
+          "explanationBn": "সেদিন সন্ধ্যায় দিনের কথা মনে থাকে, তাই বাদ পড়া হিসাব সহজে খুঁজে পাওয়া যায়।"
+        },
+        {
+          "promptEn": "Today is your helper's pay day, but one of your customers has not paid you yet. What is the right thing to do?",
+          "promptBn": "আজ আপনার সহকারীর মজুরি দেওয়ার দিন, কিন্তু একজন গ্রাহক এখনো আপনাকে টাকা দেননি। কী করা ঠিক?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Pay the helper the full wage on the agreed day",
+              "bn": "ঠিক করা দিনেই সহকারীকে পুরো মজুরি দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Pay half now and the rest next month",
+              "bn": "এখন অর্ধেক দেওয়া, বাকিটা আগামী মাসে"
+            },
+            {
+              "id": "c",
+              "en": "Tell the helper to collect it from the customer",
+              "bn": "সহকারীকে গ্রাহকের কাছ থেকে টাকা তুলে নিতে বলা"
+            },
+            {
+              "id": "d",
+              "en": "Pay whenever you feel like it",
+              "bn": "যখন ইচ্ছা তখন দেওয়া"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "The wage was agreed with the helper, so a late customer is your problem and not theirs.",
+          "explanationBn": "মজুরি সহকারীর সঙ্গে ঠিক করা হয়েছে, তাই গ্রাহকের দেরি আপনার সমস্যা, সহকারীর নয়।"
+        },
+        {
+          "promptEn": "You want more good reviews in the app. What is the right way to get them?",
+          "promptBn": "আপনি অ্যাপে আরও ভালো রিভিউ চান। সেগুলো পাওয়ার সঠিক উপায় কোনটি?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Write them yourself from a friend's phone",
+              "bn": "বন্ধুর ফোন থেকে নিজেই লিখে দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Offer customers money for five stars",
+              "bn": "পাঁচ তারার জন্য গ্রাহককে টাকা দিতে চাওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Ask only your relatives to write them",
+              "bn": "শুধু আত্মীয়দের দিয়ে লেখানো"
+            },
+            {
+              "id": "d",
+              "en": "Do good work and ask happy customers for an honest review",
+              "bn": "ভালো কাজ করা এবং সন্তুষ্ট গ্রাহককে সৎ রিভিউ দিতে অনুরোধ করা"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Only honest reviews from real customers build trust that lasts.",
+          "explanationBn": "শুধু আসল গ্রাহকের সৎ রিভিউই টেকসই আস্থা গড়ে।"
+        }
+      ]
+    }
+  ]
+}

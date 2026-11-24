@@ -1,0 +1,397 @@
+{
+  "courses": [
+    {
+      "slug": "using-kaaj-safely",
+      "skillSlug": null,
+      "titleEn": "Using KAAJ safely",
+      "titleBn": "নিরাপদে KAAJ ব্যবহার",
+      "summaryEn": "How to keep your KAAJ account and yourself safe: the identity check, your OTP and password, doing a job through the app, and what to do when something goes wrong.",
+      "summaryBn": "KAAJ অ্যাকাউন্ট ও নিজেকে নিরাপদ রাখার উপায়: পরিচয় যাচাই, ওটিপি ও পাসওয়ার্ড, অ্যাপের মাধ্যমে কাজ করা, এবং সমস্যা হলে কী করবেন।",
+      "minutes": 15,
+      "estDataMb": 1,
+      "passMarkPct": 70,
+      "questionCount": 10,
+      "isSafetyCritical": false,
+      "sortOrder": 30,
+      "lessons": [
+        {
+          "titleEn": "Your account and identity check",
+          "titleBn": "আপনার অ্যাকাউন্ট ও পরিচয় যাচাই",
+          "summaryEn": "You will learn: why KAAJ checks who you are, and how to keep your account in your own hands.\nStep 1: When the app asks you to verify your identity, start the check from your own profile.\nStep 2: Take a clear photo of your own NID card in good light, with all four corners inside the frame and no glare on it.\nStep 3: Take the selfie yourself, facing the light, so that your face is clearly seen and can be matched with the photo on the NID.\nStep 4: Know the reason: the check shows other people that a real person is behind your profile, and it stops anyone else from opening an account in your name.\nStep 5: When a login code (OTP) comes by SMS, type it only into the KAAJ app yourself. Nobody from KAAJ will ever ask for your OTP by phone, message or chat.\nStep 6: Choose a password that is not your phone number or your date of birth, and tell it to nobody: not a friend, not a customer, not a person who says he is from KAAJ.\nStep 7: Do not let another person use your account, and do not send a photo of your NID to anyone in the chat. Give your NID only on the app's verification screen.\nRemember: Anyone who asks for your OTP or password is trying to take your account. The answer is always no.",
+          "summaryBn": "আপনি শিখবেন: KAAJ কেন আপনার পরিচয় যাচাই করে, এবং কীভাবে অ্যাকাউন্ট নিজের হাতে রাখবেন।\nধাপ ১: অ্যাপ পরিচয় যাচাই করতে বললে নিজের প্রোফাইল থেকে যাচাই শুরু করুন।\nধাপ ২: ভালো আলোতে নিজের এনআইডি কার্ডের পরিষ্কার ছবি তুলুন, যাতে চার কোনাই ফ্রেমের ভেতরে থাকে এবং কার্ডে আলোর ঝলক না পড়ে।\nধাপ ৩: সেলফি নিজেই তুলুন, আলোর দিকে মুখ করে, যাতে মুখ স্পষ্ট দেখা যায় এবং এনআইডির ছবির সঙ্গে মেলানো যায়।\nধাপ ৪: কারণটি জেনে রাখুন: এই যাচাই অন্যদের দেখায় যে আপনার প্রোফাইলের পেছনে একজন আসল মানুষ আছেন, এবং আপনার নামে অন্য কেউ অ্যাকাউন্ট খুলতে পারে না।\nধাপ ৫: এসএমএসে লগইন কোড (ওটিপি) এলে সেটি শুধু নিজে KAAJ অ্যাপে লিখুন। KAAJ-এর কেউ ফোনে, মেসেজে বা চ্যাটে কখনো আপনার ওটিপি চাইবে না।\nধাপ ৬: এমন পাসওয়ার্ড দিন যা আপনার ফোন নম্বর বা জন্মতারিখ নয়, এবং তা কাউকে বলবেন না: বন্ধুকে নয়, গ্রাহককে নয়, নিজেকে KAAJ-এর লোক বলা কাউকেও নয়।\nধাপ ৭: নিজের অ্যাকাউন্ট অন্য কাউকে ব্যবহার করতে দেবেন না, এবং চ্যাটে কাউকে নিজের এনআইডির ছবি পাঠাবেন না। এনআইডি শুধু অ্যাপের যাচাইয়ের পাতায় দিন।\nমনে রাখুন: যে আপনার ওটিপি বা পাসওয়ার্ড চায়, সে আপনার অ্যাকাউন্ট দখল করতে চায়। উত্তর সবসময় \"না\"।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Doing a job through KAAJ",
+          "titleBn": "KAAJ-এর মাধ্যমে কাজ করা",
+          "summaryEn": "You will learn: how to use the app's records, check-in and chat to protect yourself on every job.\nStep 1: Before you take a job, read all of it in the app: what the work is, where, when and for how much. If something is missing, ask in the in-app chat.\nStep 2: Agree the time and the price inside the app, so that both of you can see the same record later.\nStep 3: Keep talking in the in-app chat until you trust the person. A chat message can be reported if there is a problem. A phone call leaves no record.\nStep 4: Do not give your home address, NID number or mobile banking PIN in the chat. If someone asks you to pay money first to get a job, do not pay: report it.\nStep 5: Before you leave home, tell a family member or a friend the address of the job and the time you expect to finish.\nStep 6: When you reach the job, check in on the app, so that there is a record that you were at that place at that time.\nStep 7: If the place or the work is not what was written in the app, do not start. Write it in the chat, and leave if you feel uneasy.\nHazard: A job arranged outside the app leaves no record of who called you or where you went, and KAAJ cannot help with what it cannot see. Keep the talk and the agreement inside the app until you trust the person.\nRemember: Real work never asks you to pay first.",
+          "summaryBn": "আপনি শিখবেন: অ্যাপের রেকর্ড, চেক-ইন ও চ্যাট ব্যবহার করে প্রতিটি কাজে কীভাবে নিজেকে নিরাপদ রাখবেন।\nধাপ ১: কাজ নেওয়ার আগে অ্যাপে পুরো বিবরণ পড়ুন: কী কাজ, কোথায়, কখন এবং কত টাকায়। কিছু বাদ থাকলে অ্যাপের চ্যাটে জিজ্ঞেস করুন।\nধাপ ২: সময় ও দাম অ্যাপের ভেতরেই ঠিক করুন, যাতে পরে দুজনেই একই রেকর্ড দেখতে পান।\nধাপ ৩: মানুষটির ওপর আস্থা না আসা পর্যন্ত অ্যাপের চ্যাটেই কথা বলুন। সমস্যা হলে চ্যাটের মেসেজ রিপোর্ট করা যায়। ফোনের কথার কোনো রেকর্ড থাকে না।\nধাপ ৪: চ্যাটে বাসার ঠিকানা, এনআইডি নম্বর বা মোবাইল ব্যাংকিংয়ের পিন দেবেন না। কেউ কাজ পাইয়ে দেওয়ার জন্য আগে টাকা চাইলে দেবেন না: রিপোর্ট করুন।\nধাপ ৫: বাসা থেকে বের হওয়ার আগে পরিবারের কাউকে বা বন্ধুকে কাজের ঠিকানা এবং কখন শেষ হবে তা জানিয়ে যান।\nধাপ ৬: কাজের জায়গায় পৌঁছে অ্যাপে চেক-ইন করুন, যাতে রেকর্ড থাকে যে আপনি ওই সময়ে ওই জায়গায় ছিলেন।\nধাপ ৭: জায়গা বা কাজ অ্যাপে লেখার সঙ্গে না মিললে কাজ শুরু করবেন না। কথাটি চ্যাটে লিখুন, আর অস্বস্তি লাগলে চলে আসুন।\nঝুঁকি: অ্যাপের বাইরে ঠিক করা কাজে কে আপনাকে ডেকেছে বা আপনি কোথায় গেছেন তার কোনো রেকর্ড থাকে না, আর KAAJ যা দেখতে পায় না তাতে সাহায্য করতে পারে না। আস্থা না আসা পর্যন্ত কথা ও চুক্তি অ্যাপের ভেতরে রাখুন।\nমনে রাখুন: আসল কাজে কখনো আগে টাকা দিতে হয় না।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": true
+        },
+        {
+          "titleEn": "When something goes wrong",
+          "titleBn": "সমস্যা হলে কী করবেন",
+          "summaryEn": "You will learn: what to do when a person or a job on KAAJ feels wrong, and who to call when you are in danger.\nStep 1: If you are in danger right now, move to a safe place where there are other people and call 999 (police, fire service, ambulance).\nStep 2: For violence or harassment against a woman or a child, call 109. It is the helpline for women and children.\nStep 3: When you are safe, open that person's profile or the job in the app and report it. Choose the reason and write in a few words what happened, when and where.\nStep 4: Keep the proof: do not delete the chat, and take screenshots of the messages.\nStep 5: Block the person if you want no more contact. After a block, that person can no longer find you or contact you in the app.\nStep 6: Report a job post too if it looks false: it asks for money first, promises very high pay for little work, or calls you alone at night to a place that is not a workplace.\nHazard: KAAJ is not an emergency service. Staff read a report later, and a report does not send help to you at that moment. In danger, call 999 first and report in the app afterwards.\nRemember: 999 in danger, 109 for violence against women and children, and the report in the app for every other problem.",
+          "summaryBn": "আপনি শিখবেন: KAAJ-এ কোনো মানুষ বা কাজ সন্দেহজনক মনে হলে কী করবেন, এবং বিপদে কাকে ফোন করবেন।\nধাপ ১: এই মুহূর্তে বিপদে থাকলে লোকজন আছে এমন নিরাপদ জায়গায় সরে যান এবং ৯৯৯-এ ফোন করুন (পুলিশ, ফায়ার সার্ভিস, অ্যাম্বুলেন্স)।\nধাপ ২: নারী বা শিশুর ওপর নির্যাতন বা হয়রানি হলে ১০৯-এ ফোন করুন। এটি নারী ও শিশুদের জন্য হেল্পলাইন।\nধাপ ৩: নিরাপদ হওয়ার পর অ্যাপে ওই মানুষের প্রোফাইল বা কাজটি খুলে রিপোর্ট করুন। কারণ বেছে নিন এবং অল্প কথায় লিখুন কী হয়েছে, কখন, কোথায়।\nধাপ ৪: প্রমাণ রাখুন: চ্যাট মুছবেন না, এবং মেসেজের স্ক্রিনশট নিয়ে রাখুন।\nধাপ ৫: আর যোগাযোগ না চাইলে মানুষটিকে ব্লক করুন। ব্লক করলে তিনি অ্যাপে আপনাকে আর খুঁজে পাবেন না, যোগাযোগও করতে পারবেন না।\nধাপ ৬: কাজের পোস্ট ভুয়া মনে হলে সেটিও রিপোর্ট করুন: যেমন আগে টাকা চায়, অল্প কাজে অস্বাভাবিক বেশি টাকার লোভ দেখায়, বা রাতে একা এমন জায়গায় ডাকে যা কাজের জায়গা নয়।\nঝুঁকি: KAAJ কোনো জরুরি সেবা নয়। কর্মীরা রিপোর্ট পরে পড়েন, আর রিপোর্ট করলে সেই মুহূর্তে আপনার কাছে সাহায্য পৌঁছায় না। বিপদে আগে ৯৯৯-এ ফোন করুন, পরে অ্যাপে রিপোর্ট করুন।\nমনে রাখুন: বিপদে ৯৯৯, নারী ও শিশু নির্যাতনে ১০৯, আর বাকি সব সমস্যায় অ্যাপের রিপোর্ট।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": true
+        }
+      ],
+      "questions": [
+        {
+          "promptEn": "A man calls and says, \"I am from KAAJ. Your account will be closed unless you tell me the code we just sent by SMS.\" What do you do?",
+          "promptBn": "একজন ফোন করে বললেন, \"আমি KAAJ থেকে বলছি। এইমাত্র এসএমএসে যে কোড গেছে সেটি না বললে আপনার অ্যাকাউন্ট বন্ধ হয়ে যাবে।\" আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Tell him the code quickly, to save the account",
+              "bn": "অ্যাকাউন্ট বাঁচাতে দ্রুত কোডটি বলে দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Tell him only the first three digits",
+              "bn": "শুধু প্রথম তিনটি সংখ্যা বলা"
+            },
+            {
+              "id": "c",
+              "en": "Do not tell the code, and end the call",
+              "bn": "কোড না বলা, এবং ফোন কেটে দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Ask him for his name and then tell the code",
+              "bn": "তাঁর নাম জিজ্ঞেস করে তারপর কোড বলা"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Nobody from KAAJ asks for your OTP, and whoever has the code can take your account.",
+          "explanationBn": "KAAJ-এর কেউ আপনার ওটিপি চায় না, আর কোডটি যার হাতে যায় সে আপনার অ্যাকাউন্ট দখল করতে পারে।"
+        },
+        {
+          "promptEn": "Why does KAAJ ask for your NID and a selfie?",
+          "promptBn": "KAAJ কেন আপনার এনআইডি ও সেলফি চায়?",
+          "options": [
+            {
+              "id": "a",
+              "en": "To confirm that a real person is behind the profile",
+              "bn": "নিশ্চিত হতে যে প্রোফাইলের পেছনে একজন আসল মানুষ আছেন"
+            },
+            {
+              "id": "b",
+              "en": "To send a copy of your NID to every customer you work for",
+              "bn": "যাঁদের কাজ করবেন সেই প্রত্যেক গ্রাহকের কাছে আপনার এনআইডির কপি পাঠাতে"
+            },
+            {
+              "id": "c",
+              "en": "To give you a loan",
+              "bn": "আপনাকে ঋণ দিতে"
+            },
+            {
+              "id": "d",
+              "en": "To check your school results",
+              "bn": "আপনার স্কুলের ফলাফল দেখতে"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "The identity check lets people trust that a profile belongs to a real, known person.",
+          "explanationBn": "পরিচয় যাচাই থাকায় মানুষ ভরসা করতে পারেন যে প্রোফাইলটি একজন আসল, চেনা মানুষের।"
+        },
+        {
+          "promptEn": "A person you do not know writes: \"Call me on this number. We will fix the price by phone, no need for the app.\" What do you do?",
+          "promptBn": "অচেনা একজন লিখলেন: \"এই নম্বরে ফোন দিন। দাম ফোনেই ঠিক করব, অ্যাপের দরকার নেই।\" আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Call at once and agree everything by phone",
+              "bn": "এখনই ফোন করে সব ফোনেই ঠিক করা"
+            },
+            {
+              "id": "b",
+              "en": "Reply politely that you agree the time and price in the app, and keep talking in the chat",
+              "bn": "ভদ্রভাবে জানানো যে সময় ও দাম আপনি অ্যাপেই ঠিক করেন, এবং চ্যাটেই কথা চালিয়ে যাওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Send him your home address so that he can come and talk",
+              "bn": "কথা বলতে আসার জন্য তাঁকে বাসার ঠিকানা পাঠানো"
+            },
+            {
+              "id": "d",
+              "en": "Send him a photo of your NID to build trust",
+              "bn": "আস্থা তৈরি করতে তাঁকে এনআইডির ছবি পাঠানো"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "An agreement in the app is a record you can both see, and a phone call leaves nothing.",
+          "explanationBn": "অ্যাপের চুক্তি এমন রেকর্ড যা দুজনেই দেখতে পান, কিন্তু ফোনের কথার কিছুই থাকে না।"
+        },
+        {
+          "promptEn": "You reach the address in the app. The person there says the work is in another place far away and asks you to come along alone. What do you do?",
+          "promptBn": "আপনি অ্যাপে লেখা ঠিকানায় পৌঁছালেন। সেখানকার লোকটি বললেন কাজ অন্য এক দূরের জায়গায় এবং আপনাকে একা সঙ্গে যেতে বললেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Go along with him, because you have already come all this way",
+              "bn": "তাঁর সঙ্গে যাওয়া, কারণ এত দূর তো এসেই পড়েছেন"
+            },
+            {
+              "id": "b",
+              "en": "Go along, but switch off your phone to save charge",
+              "bn": "সঙ্গে যাওয়া, তবে চার্জ বাঁচাতে ফোন বন্ধ রাখা"
+            },
+            {
+              "id": "c",
+              "en": "Ask for more money and then go",
+              "bn": "বেশি টাকা চেয়ে তারপর যাওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Do not go: write in the chat that the job is not as posted",
+              "bn": "না যাওয়া: চ্যাটে লেখা যে কাজটি পোস্টের সঙ্গে মিলছে না"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "A job that changes place after you arrive is a warning sign, and nobody knows the new place.",
+          "explanationBn": "পৌঁছানোর পর কাজের জায়গা বদলে যাওয়া একটি সতর্ক সংকেত, আর নতুন জায়গার কথা কেউ জানে না।"
+        },
+        {
+          "promptEn": "At a job a man threatens to hit you and stands in the doorway. You manage to get outside. What do you do first?",
+          "promptBn": "একটি কাজে একজন আপনাকে মারার হুমকি দিলেন এবং দরজা আটকে দাঁড়ালেন। আপনি কোনোমতে বাইরে বের হলেন। সবার আগে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Go to a place with other people and call 999",
+              "bn": "লোকজন আছে এমন জায়গায় গিয়ে ৯৯৯-এ ফোন করা"
+            },
+            {
+              "id": "b",
+              "en": "Write a report in the app and wait there for KAAJ to send help",
+              "bn": "অ্যাপে রিপোর্ট লিখে KAAJ সাহায্য পাঠাবে বলে সেখানেই অপেক্ষা করা"
+            },
+            {
+              "id": "c",
+              "en": "Go back in to collect your payment",
+              "bn": "টাকা নিতে আবার ভেতরে যাওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Give him a bad review and go home",
+              "bn": "তাঁকে খারাপ রিভিউ দিয়ে বাসায় চলে যাওয়া"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Only 999 sends help right now, and an app report is read later.",
+          "explanationBn": "এখনই সাহায্য পাঠাতে পারে শুধু ৯৯৯, আর অ্যাপের রিপোর্ট পড়া হয় পরে।"
+        },
+        {
+          "promptEn": "A woman worker you know tells you that someone is harassing her. She is not in danger this minute. Which helpline is for violence against women and children?",
+          "promptBn": "আপনার চেনা একজন নারী কর্মী জানালেন যে কেউ তাঁকে হয়রানি করছে। এই মুহূর্তে তিনি বিপদে নেই। নারী ও শিশু নির্যাতনের জন্য হেল্পলাইন কোনটি?",
+          "options": [
+            {
+              "id": "a",
+              "en": "121",
+              "bn": "১২১"
+            },
+            {
+              "id": "b",
+              "en": "911",
+              "bn": "৯১১"
+            },
+            {
+              "id": "c",
+              "en": "109",
+              "bn": "১০৯"
+            },
+            {
+              "id": "d",
+              "en": "100",
+              "bn": "১০০"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "109 is the helpline for women and children, and 999 is for immediate danger.",
+          "explanationBn": "১০৯ হলো নারী ও শিশুদের জন্য হেল্পলাইন, আর এই মুহূর্তের বিপদে ৯৯৯।"
+        },
+        {
+          "promptEn": "Someone writes: \"Send 500 taka as a registration fee by mobile banking and the job is yours.\" What do you do?",
+          "promptBn": "কেউ লিখলেন: \"মোবাইল ব্যাংকিংয়ে ৫০০ টাকা রেজিস্ট্রেশন ফি পাঠান, কাজটি আপনার।\" আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Send the money quickly before someone else takes the job",
+              "bn": "অন্য কেউ কাজটি নেওয়ার আগে দ্রুত টাকা পাঠানো"
+            },
+            {
+              "id": "b",
+              "en": "Do not pay, and report the person in the app",
+              "bn": "টাকা না দেওয়া, এবং অ্যাপে মানুষটিকে রিপোর্ট করা"
+            },
+            {
+              "id": "c",
+              "en": "Send half now and half after the job",
+              "bn": "অর্ধেক এখন, অর্ধেক কাজের পরে পাঠানো"
+            },
+            {
+              "id": "d",
+              "en": "Send him your mobile banking PIN instead",
+              "bn": "টাকার বদলে মোবাইল ব্যাংকিংয়ের পিন পাঠানো"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Real work pays you, and a person who asks for money first is cheating.",
+          "explanationBn": "আসল কাজে আপনি টাকা পান, আর যে আগে টাকা চায় সে প্রতারণা করছে।"
+        },
+        {
+          "promptEn": "Your cousin has no NID. He asks to use your KAAJ account to take jobs. What is right?",
+          "promptBn": "আপনার চাচাতো ভাইয়ের এনআইডি নেই। তিনি আপনার KAAJ অ্যাকাউন্ট দিয়ে কাজ নিতে চান। কোনটি সঠিক?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Give him your password, because he is family and you trust him",
+              "bn": "পাসওয়ার্ড দিয়ে দেওয়া, কারণ তিনি পরিবারের লোক এবং আপনি তাঁকে বিশ্বাস করেন"
+            },
+            {
+              "id": "b",
+              "en": "Tell him the OTP each time he logs in",
+              "bn": "তিনি যতবার লগইন করবেন ততবার ওটিপি বলে দেওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Let him use it only for small jobs",
+              "bn": "শুধু ছোট কাজের জন্য ব্যবহার করতে দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Say no: whatever he does will go on your name",
+              "bn": "না বলা: তিনি যা করবেন সব আপনার নামে যাবে"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "The customer trusts the verified person on the profile, and you answer for everything done with your account.",
+          "explanationBn": "গ্রাহক প্রোফাইলের যাচাই করা মানুষটিকেই ভরসা করেন, আর আপনার অ্যাকাউন্ট দিয়ে করা সব কিছুর দায় আপনার।"
+        },
+        {
+          "promptEn": "After a finished job, a person keeps sending you rude messages. You want no more contact. What do you do in the app?",
+          "promptBn": "একটি কাজ শেষ হওয়ার পরও একজন আপনাকে বারবার বাজে মেসেজ পাঠাচ্ছেন। আপনি আর যোগাযোগ চান না। অ্যাপে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Report the person and block them",
+              "bn": "মানুষটিকে রিপোর্ট করা এবং ব্লক করা"
+            },
+            {
+              "id": "b",
+              "en": "Reply with the same rude words",
+              "bn": "একই রকম বাজে কথায় উত্তর দেওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Delete your own account",
+              "bn": "নিজের অ্যাকাউন্ট মুছে ফেলা"
+            },
+            {
+              "id": "d",
+              "en": "Send them your phone number to talk it over",
+              "bn": "কথা বলে মিটিয়ে নিতে নিজের ফোন নম্বর পাঠানো"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "A report tells KAAJ staff about it, and a block stops that person from contacting you in the app.",
+          "explanationBn": "রিপোর্ট করলে KAAJ-এর কর্মীরা বিষয়টি জানতে পারেন, আর ব্লক করলে মানুষটি অ্যাপে আপনার সঙ্গে যোগাযোগ করতে পারেন না।"
+        },
+        {
+          "promptEn": "A worker in danger writes a report in the app and waits for KAAJ to send someone. What is wrong with this?",
+          "promptBn": "বিপদে পড়া একজন কর্মী অ্যাপে রিপোর্ট লিখে অপেক্ষা করছেন যে KAAJ কাউকে পাঠাবে। এতে ভুল কোথায়?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Nothing is wrong, because KAAJ sends a team to you within minutes",
+              "bn": "কোনো ভুল নেই, কারণ KAAJ কয়েক মিনিটেই আপনার কাছে দল পাঠায়"
+            },
+            {
+              "id": "b",
+              "en": "The report should have been longer",
+              "bn": "রিপোর্টটি আরও বড় করে লেখা উচিত ছিল"
+            },
+            {
+              "id": "c",
+              "en": "KAAJ is not an emergency service: in danger you call 999 first",
+              "bn": "KAAJ কোনো জরুরি সেবা নয়: বিপদে আগে ৯৯৯-এ ফোন করতে হয়"
+            },
+            {
+              "id": "d",
+              "en": "He should have sent the report two times",
+              "bn": "রিপোর্টটি দুইবার পাঠানো উচিত ছিল"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Staff read reports later, so a report cannot bring help at that moment.",
+          "explanationBn": "কর্মীরা রিপোর্ট পরে পড়েন, তাই রিপোর্ট সেই মুহূর্তে সাহায্য আনতে পারে না।"
+        },
+        {
+          "promptEn": "You are going to a job at an address that is new to you. What is a good safety habit before you leave?",
+          "promptBn": "আপনি একটি অচেনা ঠিকানায় কাজে যাচ্ছেন। বের হওয়ার আগে নিরাপত্তার জন্য কোন অভ্যাসটি ভালো?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Tell nobody, so that your family does not worry",
+              "bn": "কাউকে না বলা, যাতে পরিবার চিন্তা না করে"
+            },
+            {
+              "id": "b",
+              "en": "Tell a family member or a friend the address and the time you expect to finish",
+              "bn": "পরিবারের কাউকে বা বন্ধুকে ঠিকানা এবং কখন শেষ হবে তা জানিয়ে যাওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Leave your phone at home so that it is not lost",
+              "bn": "হারিয়ে না যায় তাই ফোন বাসায় রেখে যাওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Post the customer's address on social media",
+              "bn": "গ্রাহকের ঠিকানা সামাজিক যোগাযোগ মাধ্যমে পোস্ট করা"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "If something goes wrong, someone knows where you are and when to start asking.",
+          "explanationBn": "কোনো সমস্যা হলে অন্তত একজন জানবেন আপনি কোথায় আছেন এবং কখন খোঁজ নিতে হবে।"
+        },
+        {
+          "promptEn": "Someone sent you threatening messages in the chat. What do you do with those messages?",
+          "promptBn": "কেউ চ্যাটে আপনাকে হুমকি দিয়ে মেসেজ পাঠিয়েছেন। মেসেজগুলো নিয়ে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Delete them all at once so that you can forget about them",
+              "bn": "ভুলে যাওয়ার জন্য এখনই সব মুছে ফেলা"
+            },
+            {
+              "id": "b",
+              "en": "Send them to all your friends",
+              "bn": "সব বন্ধুকে পাঠিয়ে দেওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Answer with threats of your own",
+              "bn": "নিজেও পাল্টা হুমকি দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Keep them, take screenshots and report the person",
+              "bn": "রেখে দেওয়া, স্ক্রিনশট নেওয়া এবং মানুষটিকে রিপোর্ট করা"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "The messages are your proof, and without them it is only your word.",
+          "explanationBn": "মেসেজগুলোই আপনার প্রমাণ, এগুলো না থাকলে থাকে শুধু আপনার মুখের কথা।"
+        }
+      ]
+    }
+  ]
+}

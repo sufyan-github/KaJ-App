@@ -1,0 +1,444 @@
+{
+  "courses": [
+    {
+      "slug": "appliance-technician-basics",
+      "skillSlug": "electrical-work",
+      "titleEn": "Appliance and electronics technician basics",
+      "titleBn": "গৃহস্থালি যন্ত্র ও ইলেকট্রনিক্স মেরামতের মূল বিষয়",
+      "summaryEn": "Opening an appliance safely, common fan faults, checking an iron and a rice cooker, giving a written price before the repair, and what a beginner must not open. This course teaches basic safe practice. It is not a licence.",
+      "summaryBn": "নিরাপদে যন্ত্র খোলা, ফ্যানের সাধারণ সমস্যা, ইস্ত্রি ও রাইস কুকার পরীক্ষা, মেরামতের আগে লিখিত দাম দেওয়া, এবং নতুন কর্মীর যা খোলা উচিত নয়। এই কোর্সে নিরাপদে কাজ করার মূল নিয়ম শেখানো হয়। এটি কোনো লাইসেন্স নয়।",
+      "minutes": 30,
+      "estDataMb": 1,
+      "passMarkPct": 70,
+      "questionCount": 10,
+      "isSafetyCritical": true,
+      "sortOrder": 11,
+      "lessons": [
+        {
+          "titleEn": "Unplug first, then open safely",
+          "titleBn": "আগে প্লাগ খুলুন, তারপর নিরাপদে যন্ত্র খুলুন",
+          "summaryEn": "You will learn: how to open an appliance safely, so that you do not get a shock and do not lose any parts.\nStep 1: Switch off the socket and pull the plug out, holding the plug and not the cord. Keep the plug where you can see it.\nStep 2: Wait. Let an iron or rice cooker cool down, and let a fan stop fully.\nStep 3: Work on a dry table with good light, away from water. Keep your hands dry.\nStep 4: Look before you open: check the cord, the plug and the body for cuts, burn marks and cracks. Many faults can be seen from outside.\nStep 5: Open the appliance with a screwdriver of the right size. Put the screws in a small bowl and take a photo at each stage.\nStep 6: Do not touch the metal ends of a capacitor inside. A capacitor can hold a charge after the plug is out.\nStep 7: Never put the plug in while the cover is off. Fit the cover back fully before you test the appliance.\nHazard: An appliance that is switched off but still plugged in can be live inside. Pull the plug out and keep it in sight before you open anything.\nRemember: Plug out, cool down, dry table, photos. Then open.",
+          "summaryBn": "আপনি শিখবেন: যন্ত্র কীভাবে নিরাপদে খুলতে হয়, যাতে শক না লাগে এবং কোনো পার্টস না হারায়।\nধাপ ১: সকেটের সুইচ বন্ধ করুন এবং তার না টেনে প্লাগ ধরে প্লাগ খুলুন। প্লাগটি চোখের সামনে রাখুন।\nধাপ ২: অপেক্ষা করুন। ইস্ত্রি বা রাইস কুকার ঠান্ডা হতে দিন, আর ফ্যান পুরোপুরি থামতে দিন।\nধাপ ৩: পানি থেকে দূরে, ভালো আলোয়, শুকনো টেবিলে কাজ করুন। হাত শুকনো রাখুন।\nধাপ ৪: খোলার আগে দেখুন: তার, প্লাগ ও বডিতে কাটা, পোড়া দাগ বা ফাটল আছে কি না। অনেক সমস্যা বাইরে থেকেই দেখা যায়।\nধাপ ৫: সঠিক মাপের স্ক্রু ড্রাইভার দিয়ে যন্ত্র খুলুন। স্ক্রুগুলো একটি ছোট বাটিতে রাখুন এবং প্রতিটি ধাপে ছবি তুলুন।\nধাপ ৬: ভেতরের ক্যাপাসিটরের ধাতব মাথায় হাত দেবেন না। প্লাগ খোলার পরেও ক্যাপাসিটরে চার্জ থাকতে পারে।\nধাপ ৭: কভার খোলা অবস্থায় কখনো প্লাগ লাগাবেন না। যন্ত্র পরীক্ষা করার আগে কভার পুরোপুরি লাগিয়ে নিন।\nঝুঁকি: সুইচ বন্ধ কিন্তু প্লাগ লাগানো যন্ত্রের ভেতরে কারেন্ট থাকতে পারে। কিছু খোলার আগে প্লাগ খুলে চোখের সামনে রাখুন।\nমনে রাখুন: প্লাগ খোলা, ঠান্ডা করা, শুকনো টেবিল, ছবি। তারপর খুলুন।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Common faults in a ceiling fan and table fan",
+          "titleBn": "সিলিং ফ্যান ও টেবিল ফ্যানের সাধারণ সমস্যা",
+          "summaryEn": "You will learn: the common faults of a table fan and a ceiling fan, and what to check first.\nStep 1: Make it safe. Table fan: pull the plug out. Ceiling fan: switch off the MCB and test the wires with a tester, because the wall switch alone is not enough.\nStep 2: Fan does not start at all: first try the socket with a lamp that works, then check the plug and cord for cuts and loose wires.\nStep 3: Fan hums but does not turn, or starts only when you push the blade: the capacitor is often weak. Fit one with the same value and voltage that is written on the old one.\nStep 4: Turn the blade by hand with the power off. If it is stiff, clean the dust and put one or two drops of machine oil on the shaft of a table fan.\nStep 5: Fan makes noise or shakes: tighten the blade screws and the guard, and look for a bent blade.\nStep 6: Speed does not change: on a table fan check the speed switch, and on a ceiling fan check the regulator.\nStep 7: Burning smell, a very hot body or a black motor coil: the coil is burnt. Do not run the fan. Tell the customer it needs rewinding by an experienced technician.\nHazard: A ceiling fan is wired to the house and hangs overhead. Switch off the MCB, test, and work from a firm ladder that another person holds.\nRemember: Check the power and cord first, then the capacitor, then the moving parts. A burnt coil is not a beginner's job.",
+          "summaryBn": "আপনি শিখবেন: টেবিল ফ্যান ও সিলিং ফ্যানের সাধারণ সমস্যা, এবং আগে কী দেখতে হয়।\nধাপ ১: আগে নিরাপদ করুন। টেবিল ফ্যান: প্লাগ খুলুন। সিলিং ফ্যান: MCB বন্ধ করে টেস্টার দিয়ে তার পরীক্ষা করুন, কারণ শুধু দেয়ালের সুইচ বন্ধ করা যথেষ্ট নয়।\nধাপ ২: ফ্যান একেবারেই চালু হয় না: আগে একটি ভালো বাতি লাগিয়ে সকেট পরীক্ষা করুন, তারপর প্লাগ ও তারে কাটা বা ঢিলা সংযোগ আছে কি না দেখুন।\nধাপ ৩: ফ্যান গুনগুন করে কিন্তু ঘোরে না, বা ব্লেড হাতে ঠেলে দিলে তবেই চালু হয়: সাধারণত ক্যাপাসিটর দুর্বল। পুরোনোটির গায়ে লেখা একই মান ও ভোল্টেজের ক্যাপাসিটর লাগান।\nধাপ ৪: বিদ্যুৎ বন্ধ রেখে ব্লেড হাতে ঘুরিয়ে দেখুন। শক্ত লাগলে ধুলো পরিষ্কার করুন এবং টেবিল ফ্যানের শ্যাফটে এক-দুই ফোঁটা মেশিন অয়েল দিন।\nধাপ ৫: ফ্যান শব্দ করে বা কাঁপে: ব্লেডের স্ক্রু ও জালি শক্ত করুন, এবং কোনো ব্লেড বাঁকা আছে কি না দেখুন।\nধাপ ৬: গতি বদলায় না: টেবিল ফ্যানে গতির সুইচ, আর সিলিং ফ্যানে রেগুলেটর পরীক্ষা করুন।\nধাপ ৭: পোড়া গন্ধ, খুব গরম বডি বা কালো হয়ে যাওয়া মোটরের কয়েল: কয়েল পুড়ে গেছে। ফ্যান চালাবেন না। গ্রাহককে বলুন এটি অভিজ্ঞ মিস্ত্রির কাছে রিওয়াইন্ডিং করাতে হবে।\nঝুঁকি: সিলিং ফ্যান বাসার লাইনের সঙ্গে যুক্ত এবং মাথার ওপরে ঝোলে। MCB বন্ধ করুন, পরীক্ষা করুন, এবং এমন শক্ত মইয়ে দাঁড়িয়ে কাজ করুন যা আরেকজন ধরে রেখেছেন।\nমনে রাখুন: আগে বিদ্যুৎ ও তার, তারপর ক্যাপাসিটর, তারপর ঘোরার অংশ দেখুন। পোড়া কয়েল নতুন কর্মীর কাজ নয়।",
+          "youtubeVideoId": null,
+          "durationS": 280,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Iron and rice cooker: cord, thermostat and element checks",
+          "titleBn": "ইস্ত্রি ও রাইস কুকার: তার, থার্মোস্ট্যাট ও হিটিং এলিমেন্ট পরীক্ষা",
+          "summaryEn": "You will learn: how to check the cord, thermostat and heating element of an iron or rice cooker with the plug out.\nStep 1: Pull the plug out and let the appliance cool fully. Take the inner pot out of a rice cooker.\nStep 2: Check the cord and plug first: look for cuts, burnt pins, and soft or broken places near the plug and where the cord enters the body. Most faults are here.\nStep 3: Set the multimeter to continuity, the beep setting. Touch its two probes to the two ends of each wire inside the cord. A beep means the wire is good.\nStep 4: If the cord is damaged, replace the whole cord with the same type. Do not join it with tape.\nStep 5: While it is cold, check the thermostat (on an iron, turn the dial to high first) or the thermal fuse with the multimeter. No beep means it is faulty. Replace it with a part of the same type and rating.\nStep 6: Check the heating element: touch the probes to its two ends. A steady reading means it is good. No reading means the element is broken.\nStep 7: Check for leakage: touch one probe to a plug pin and the other to the metal body. There must be no beep and no reading. If there is, the appliance is not safe to use.\nHazard: A thermostat or thermal fuse stops the appliance from overheating. Never join its two wires directly to make the appliance work: it can cause a fire.\nRemember: Plug out, then the cord, then the thermostat and element, and last the leakage check on the body.",
+          "summaryBn": "আপনি শিখবেন: প্লাগ খোলা অবস্থায় ইস্ত্রি বা রাইস কুকারের তার, থার্মোস্ট্যাট ও হিটিং এলিমেন্ট কীভাবে পরীক্ষা করতে হয়।\nধাপ ১: প্লাগ খুলুন এবং যন্ত্রটি পুরোপুরি ঠান্ডা হতে দিন। রাইস কুকারের ভেতরের পাত্র বের করে রাখুন।\nধাপ ২: আগে তার ও প্লাগ দেখুন: কাটা, পোড়া পিন, আর প্লাগের কাছে ও বডিতে ঢোকার জায়গায় নরম বা ভাঙা অংশ খুঁজুন। বেশির ভাগ সমস্যা এখানেই থাকে।\nধাপ ৩: মাল্টিমিটার কন্টিনিউটিতে, অর্থাৎ বিপ দেওয়ার ঘরে রাখুন। প্লাগের তারের ভেতরের প্রতিটি তারের দুই মাথায় দুই প্রোব ধরুন। বিপ দিলে তার ভালো।\nধাপ ৪: তার নষ্ট হলে একই ধরনের পুরো তার বদলে দিন। টেপ দিয়ে জোড়া দেবেন না।\nধাপ ৫: ঠান্ডা অবস্থায় মাল্টিমিটার দিয়ে থার্মোস্ট্যাট (ইস্ত্রিতে আগে ডায়াল বেশি তাপে ঘুরিয়ে নিন) বা থার্মাল ফিউজ পরীক্ষা করুন। বিপ না দিলে সেটি নষ্ট। একই ধরন ও রেটিংয়ের পার্টস দিয়ে বদলান।\nধাপ ৬: হিটিং এলিমেন্ট পরীক্ষা করুন: এর দুই মাথায় প্রোব ধরুন। স্থির রিডিং দেখালে ভালো। কোনো রিডিং না দেখালে এলিমেন্ট কেটে গেছে।\nধাপ ৭: লিকেজ পরীক্ষা করুন: একটি প্রোব প্লাগের পিনে আর অন্যটি ধাতব বডিতে ধরুন। বিপ বা রিডিং কিছুই আসা চলবে না। এলে যন্ত্রটি ব্যবহারের জন্য নিরাপদ নয়।\nঝুঁকি: থার্মোস্ট্যাট বা থার্মাল ফিউজ যন্ত্রকে অতিরিক্ত গরম হওয়া থেকে বাঁচায়। যন্ত্র চালু করার জন্য এর দুই তার কখনো সরাসরি জুড়ে দেবেন না: এতে আগুন লাগতে পারে।\nমনে রাখুন: প্লাগ খুলে আগে তার, তারপর থার্মোস্ট্যাট ও এলিমেন্ট, আর সবশেষে বডির লিকেজ পরীক্ষা।",
+          "youtubeVideoId": null,
+          "durationS": 300,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Tell the customer the fault and give a written price",
+          "titleBn": "গ্রাহককে সমস্যা জানান এবং লিখিত দাম দিন",
+          "summaryEn": "You will learn: how to explain the fault, give a written price before the repair, and show the old parts.\nStep 1: Find the fault first. Then show the customer the faulty part and explain it in simple words.\nStep 2: Before you repair, write the price: the cost of the part, your labour charge and the total in taka. Write it in the KAAJ chat or on paper.\nStep 3: Be honest if the repair is not worth it. If the cost is close to the price of a new appliance, say so and let the customer decide.\nStep 4: Start the repair only after the customer agrees to the written price.\nStep 5: If you find another fault after opening, stop. Tell the customer, write the new price and wait for the customer to agree.\nStep 6: Keep every part you replace. Show the old parts to the customer at the end and give them back.\nStep 7: When you finish, write what you replaced and the date in the chat or on the paper.\nRemember: Written price first, repair second, old parts shown at the end.",
+          "summaryBn": "আপনি শিখবেন: কীভাবে সমস্যা বুঝিয়ে বলতে হয়, মেরামতের আগে লিখিত দাম দিতে হয়, এবং পুরোনো পার্টস দেখাতে হয়।\nধাপ ১: আগে সমস্যা খুঁজে বের করুন। তারপর গ্রাহককে নষ্ট পার্টসটি দেখান এবং সহজ ভাষায় বুঝিয়ে বলুন।\nধাপ ২: মেরামতের আগে দাম লিখে দিন: পার্টসের দাম, আপনার মজুরি এবং মোট কত টাকা। KAAJ চ্যাটে বা কাগজে লিখুন।\nধাপ ৩: মেরামত করা লাভজনক না হলে সৎভাবে বলুন। খরচ নতুন যন্ত্রের দামের কাছাকাছি হলে তা জানান এবং গ্রাহককে সিদ্ধান্ত নিতে দিন।\nধাপ ৪: গ্রাহক লিখিত দামে রাজি হওয়ার পরেই মেরামত শুরু করুন।\nধাপ ৫: খোলার পর আরেকটি সমস্যা পেলে থামুন। গ্রাহককে জানান, নতুন দাম লিখুন এবং গ্রাহক রাজি হওয়া পর্যন্ত অপেক্ষা করুন।\nধাপ ৬: বদলানো প্রতিটি পার্টস রেখে দিন। কাজ শেষে পুরোনো পার্টসগুলো গ্রাহককে দেখান এবং ফেরত দিন।\nধাপ ৭: কাজ শেষে কী কী বদলেছেন এবং তারিখ চ্যাটে বা কাগজে লিখে দিন।\nমনে রাখুন: আগে লিখিত দাম, তারপর মেরামত, শেষে পুরোনো পার্টস দেখানো।",
+          "youtubeVideoId": null,
+          "durationS": 220,
+          "isSafety": false
+        },
+        {
+          "titleEn": "What a beginner must not open, and safe testing after repair",
+          "titleBn": "নতুন কর্মী যা খুলবেন না, এবং মেরামতের পর নিরাপদ পরীক্ষা",
+          "summaryEn": "You will learn: which appliances a beginner must not open, and how to test safely after a repair.\nStep 1: Do not open a microwave oven. Its capacitor can hold a deadly charge even after the plug is out.\nStep 2: Do not work on the gas system of a fridge or air conditioner: the compressor and the pipes. The gas is under pressure, and the work needs special tools and training.\nStep 3: Do not open an old picture-tube television or the power board of any television. They hold high voltage after the plug is out.\nStep 4: Tell the customer plainly that this job needs a trained technician, and do not charge for a repair you did not do.\nStep 5: After a repair that you are able to do, check before you fit the cover: every screw is back, no loose wire or spare screw is inside, and the earth wire is connected.\nStep 6: Fit the cover fully. With the plug still out, test with the multimeter between each plug pin and the metal body: there must be no beep.\nStep 7: Put the appliance on a dry table, plug it in and watch it for five minutes. If you see smoke or a spark, or notice a smell or a strange noise, pull the plug out at once.\nHazard: Some appliances can kill even with the plug out, because parts inside hold a charge. If you are not trained for that appliance, do not open it.\nRemember: Know your limit. Test every repair with the cover on, on a dry table, before you give it back.",
+          "summaryBn": "আপনি শিখবেন: নতুন কর্মী হিসেবে কোন যন্ত্রগুলো খুলবেন না, এবং মেরামতের পর কীভাবে নিরাপদে পরীক্ষা করবেন।\nধাপ ১: মাইক্রোওয়েভ ওভেন খুলবেন না। প্লাগ খোলার পরেও এর ক্যাপাসিটরে প্রাণঘাতী চার্জ থাকতে পারে।\nধাপ ২: ফ্রিজ বা এসির গ্যাসের অংশে, অর্থাৎ কম্প্রেসর ও পাইপে কাজ করবেন না। গ্যাস চাপে থাকে, এবং এ কাজে বিশেষ যন্ত্র ও প্রশিক্ষণ লাগে।\nধাপ ৩: পুরোনো পিকচার টিউবের টিভি বা যেকোনো টিভির পাওয়ার বোর্ড খুলবেন না। প্লাগ খোলার পরেও এগুলোতে উচ্চ ভোল্টেজ থাকে।\nধাপ ৪: গ্রাহককে পরিষ্কার করে বলুন যে এই কাজে প্রশিক্ষিত টেকনিশিয়ান লাগবে, এবং যে মেরামত করেননি তার টাকা নেবেন না।\nধাপ ৫: যে মেরামত আপনি করতে পারেন তা শেষে কভার লাগানোর আগে দেখুন: সব স্ক্রু লাগানো হয়েছে, ভেতরে ঢিলা তার বা বাড়তি স্ক্রু নেই, এবং আর্থ তার লাগানো আছে।\nধাপ ৬: কভার পুরোপুরি লাগান। প্লাগ খোলা রেখেই মাল্টিমিটার দিয়ে প্লাগের প্রতিটি পিন ও ধাতব বডির মধ্যে পরীক্ষা করুন: বিপ দেওয়া চলবে না।\nধাপ ৭: যন্ত্রটি শুকনো টেবিলে রেখে প্লাগ লাগান এবং পাঁচ মিনিট খেয়াল করুন। ধোঁয়া বা স্পার্ক দেখলে, কিংবা গন্ধ বা অস্বাভাবিক শব্দ পেলে সঙ্গে সঙ্গে প্লাগ খুলে ফেলুন।\nঝুঁকি: কিছু যন্ত্রের ভেতরের পার্টসে চার্জ জমে থাকে, তাই প্লাগ খোলা থাকলেও মৃত্যু হতে পারে। যে যন্ত্রের প্রশিক্ষণ আপনার নেই, সেটি খুলবেন না।\nমনে রাখুন: নিজের সীমা জানুন। ফেরত দেওয়ার আগে প্রতিটি মেরামত কভার লাগিয়ে, শুকনো টেবিলে পরীক্ষা করুন।",
+          "youtubeVideoId": null,
+          "durationS": 280,
+          "isSafety": true
+        }
+      ],
+      "questions": [
+        {
+          "promptEn": "A rice cooker is switched off at the socket, but the plug is still in. What do you do before you open it?",
+          "promptBn": "রাইস কুকারের সকেটের সুইচ বন্ধ, কিন্তু প্লাগ লাগানো আছে। খোলার আগে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Open it, because the switch is off",
+              "bn": "খুলে ফেলা, কারণ সুইচ তো বন্ধ"
+            },
+            {
+              "id": "b",
+              "en": "Pull the plug out and keep it where you can see it",
+              "bn": "প্লাগ খুলে চোখের সামনে রাখা"
+            },
+            {
+              "id": "c",
+              "en": "Open it wearing rubber gloves",
+              "bn": "রাবারের গ্লাভস পরে খোলা"
+            },
+            {
+              "id": "d",
+              "en": "Ask the customer to hold the switch off",
+              "bn": "গ্রাহককে সুইচ বন্ধ করে ধরে রাখতে বলা"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "A switched-off appliance can still be live inside while the plug is in.",
+          "explanationBn": "প্লাগ লাগানো থাকলে সুইচ বন্ধ যন্ত্রের ভেতরেও কারেন্ট থাকতে পারে।"
+        },
+        {
+          "promptEn": "Why do you take photos while you open an appliance?",
+          "promptBn": "যন্ত্র খোলার সময় ছবি তোলেন কেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "To post them online",
+              "bn": "অনলাইনে পোস্ট করার জন্য"
+            },
+            {
+              "id": "b",
+              "en": "To prove that the appliance is old",
+              "bn": "যন্ত্রটি পুরোনো তা প্রমাণ করার জন্য"
+            },
+            {
+              "id": "c",
+              "en": "To make the job look bigger",
+              "bn": "কাজটি বড় দেখানোর জন্য"
+            },
+            {
+              "id": "d",
+              "en": "To put the wires and parts back in the right place",
+              "bn": "তার ও পার্টস ঠিক জায়গায় ফিরিয়ে লাগানোর জন্য"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Photos show where each wire and part was before you took it out.",
+          "explanationBn": "ছবিতে দেখা যায় খোলার আগে কোন তার ও পার্টস কোথায় ছিল।"
+        },
+        {
+          "promptEn": "A table fan hums and starts only when you push the blade by hand. What do you check first?",
+          "promptBn": "টেবিল ফ্যান গুনগুন করে এবং ব্লেড হাতে ঠেলে দিলে তবেই চালু হয়। আগে কী দেখবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "The capacitor",
+              "bn": "ক্যাপাসিটর"
+            },
+            {
+              "id": "b",
+              "en": "The colour of the body",
+              "bn": "বডির রং"
+            },
+            {
+              "id": "c",
+              "en": "The guard",
+              "bn": "জালি"
+            },
+            {
+              "id": "d",
+              "en": "The length of the cord",
+              "bn": "তারের দৈর্ঘ্য"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "A weak capacitor cannot give the motor its starting push.",
+          "explanationBn": "দুর্বল ক্যাপাসিটর মোটরকে চালু হওয়ার ধাক্কা দিতে পারে না।"
+        },
+        {
+          "promptEn": "You are going to open a ceiling fan. How do you make it safe?",
+          "promptBn": "আপনি একটি সিলিং ফ্যান খুলতে যাচ্ছেন। কীভাবে নিরাপদ করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Switch off the wall switch only",
+              "bn": "শুধু দেয়ালের সুইচ বন্ধ করা"
+            },
+            {
+              "id": "b",
+              "en": "Wait for load-shedding",
+              "bn": "লোডশেডিংয়ের জন্য অপেক্ষা করা"
+            },
+            {
+              "id": "c",
+              "en": "Switch off the MCB and test the wires with a tester",
+              "bn": "MCB বন্ধ করে টেস্টার দিয়ে তার পরীক্ষা করা"
+            },
+            {
+              "id": "d",
+              "en": "Slow the fan down with the regulator",
+              "bn": "রেগুলেটর দিয়ে ফ্যানের গতি কমানো"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "The wall switch alone can leave a wire live at the fan.",
+          "explanationBn": "শুধু দেয়ালের সুইচ বন্ধ করলে ফ্যানের তারে কারেন্ট থেকে যেতে পারে।"
+        },
+        {
+          "promptEn": "The thermal fuse of a rice cooker is faulty. The customer tells you to join the two wires so that it works. What do you do?",
+          "promptBn": "রাইস কুকারের থার্মাল ফিউজ নষ্ট। গ্রাহক বলছেন দুই তার জুড়ে দিয়ে চালু করে দিন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Join the wires and tape them",
+              "bn": "তার জুড়ে টেপ পেঁচিয়ে দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Join them and charge less",
+              "bn": "জুড়ে দিয়ে কম টাকা নেওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Fit any fuse you have with you",
+              "bn": "হাতে যে ফিউজ আছে সেটিই লাগানো"
+            },
+            {
+              "id": "d",
+              "en": "Refuse, and replace the fuse with one of the same rating",
+              "bn": "মানা করা, এবং একই রেটিংয়ের ফিউজ দিয়ে বদলানো"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Without the right thermal fuse the cooker can overheat and start a fire.",
+          "explanationBn": "সঠিক থার্মাল ফিউজ ছাড়া কুকার অতিরিক্ত গরম হয়ে আগুন লাগতে পারে।"
+        },
+        {
+          "promptEn": "With the plug out, your multimeter beeps between a plug pin and the metal body of an iron. What does this mean?",
+          "promptBn": "প্লাগ খোলা অবস্থায় ইস্ত্রির প্লাগের পিন ও ধাতব বডির মধ্যে মাল্টিমিটার বিপ দিল। এর মানে কী?",
+          "options": [
+            {
+              "id": "a",
+              "en": "The iron is in good condition",
+              "bn": "ইস্ত্রি ভালো অবস্থায় আছে"
+            },
+            {
+              "id": "b",
+              "en": "Current can leak to the body, so the iron is not safe",
+              "bn": "বডিতে কারেন্ট লিক হতে পারে, তাই ইস্ত্রিটি নিরাপদ নয়"
+            },
+            {
+              "id": "c",
+              "en": "The multimeter battery is low",
+              "bn": "মাল্টিমিটারের ব্যাটারি কম"
+            },
+            {
+              "id": "d",
+              "en": "The iron will heat faster",
+              "bn": "ইস্ত্রি তাড়াতাড়ি গরম হবে"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "A connection between a pin and the body means the body can become live.",
+          "explanationBn": "পিন ও বডির মধ্যে সংযোগ থাকা মানে বডিতে কারেন্ট চলে আসতে পারে।"
+        },
+        {
+          "promptEn": "When do you give the customer the price?",
+          "promptBn": "গ্রাহককে দাম কখন জানাবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "In writing, before you start the repair",
+              "bn": "মেরামত শুরুর আগে, লিখিতভাবে"
+            },
+            {
+              "id": "b",
+              "en": "After the repair is finished",
+              "bn": "মেরামত শেষ হওয়ার পরে"
+            },
+            {
+              "id": "c",
+              "en": "Only if the customer asks",
+              "bn": "শুধু গ্রাহক জিজ্ঞেস করলে"
+            },
+            {
+              "id": "d",
+              "en": "By word of mouth, when you take the money",
+              "bn": "টাকা নেওয়ার সময়, মুখে মুখে"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "A written price before the repair avoids arguments later.",
+          "explanationBn": "মেরামতের আগে লিখিত দাম দিলে পরে ঝগড়া হয় না।"
+        },
+        {
+          "promptEn": "After opening a fan you find a second fault that will cost ৳300 more. What do you do?",
+          "promptBn": "ফ্যান খুলে আরেকটি সমস্যা পেলেন, যাতে আরও ৩০০ টাকা লাগবে। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Repair it and add ৳300 to the bill at the end",
+              "bn": "মেরামত করে শেষে বিলে ৩০০ টাকা যোগ করা"
+            },
+            {
+              "id": "b",
+              "en": "Ignore the second fault",
+              "bn": "দ্বিতীয় সমস্যাটি এড়িয়ে যাওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Stop, tell the customer, write the new price and wait for the customer to agree",
+              "bn": "থামা, গ্রাহককে জানানো, নতুন দাম লেখা এবং গ্রাহক রাজি হওয়া পর্যন্ত অপেক্ষা করা"
+            },
+            {
+              "id": "d",
+              "en": "Repair it with a used part and say nothing",
+              "bn": "কিছু না বলে পুরোনো পার্টস দিয়ে মেরামত করা"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "The customer must agree to any extra cost before you do the extra work.",
+          "explanationBn": "বাড়তি কাজের আগে বাড়তি খরচে গ্রাহকের সম্মতি লাগবে।"
+        },
+        {
+          "promptEn": "A customer brings a microwave oven that does not heat. You are a beginner. What do you do?",
+          "promptBn": "গ্রাহক একটি মাইক্রোওয়েভ ওভেন এনেছেন, যেটি গরম করছে না। আপনি নতুন কর্মী। কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Open it with the plug out and look inside",
+              "bn": "প্লাগ খুলে ভেতরটা খুলে দেখা"
+            },
+            {
+              "id": "b",
+              "en": "Open it wearing rubber gloves",
+              "bn": "রাবারের গ্লাভস পরে খোলা"
+            },
+            {
+              "id": "c",
+              "en": "Do not open it, and tell the customer it needs a trained technician",
+              "bn": "না খোলা, এবং গ্রাহককে বলা যে এতে প্রশিক্ষিত টেকনিশিয়ান লাগবে"
+            },
+            {
+              "id": "d",
+              "en": "Shake it to find the loose part",
+              "bn": "ঢিলা পার্টস খুঁজতে ঝাঁকিয়ে দেখা"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "The capacitor in a microwave oven can hold a deadly charge even with the plug out.",
+          "explanationBn": "প্লাগ খোলা থাকলেও মাইক্রোওয়েভ ওভেনের ক্যাপাসিটরে প্রাণঘাতী চার্জ থাকতে পারে।"
+        },
+        {
+          "promptEn": "You have repaired an iron and fitted its cover. How do you test it?",
+          "promptBn": "আপনি একটি ইস্ত্রি মেরামত করে কভার লাগিয়েছেন। কীভাবে পরীক্ষা করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "On a dry table, watching it for five minutes, ready to pull the plug out",
+              "bn": "শুকনো টেবিলে রেখে পাঁচ মিনিট খেয়াল করা, দরকার হলে প্লাগ খোলার জন্য প্রস্তুত থাকা"
+            },
+            {
+              "id": "b",
+              "en": "In the customer's hand, so that they can feel it",
+              "bn": "গ্রাহকের হাতে দিয়ে, যাতে তিনি বুঝতে পারেন"
+            },
+            {
+              "id": "c",
+              "en": "With the cover off, so that you can see inside",
+              "bn": "কভার খোলা রেখে, যাতে ভেতরটা দেখা যায়"
+            },
+            {
+              "id": "d",
+              "en": "On a wet cloth, so that it does not get too hot",
+              "bn": "ভেজা কাপড়ের ওপর রেখে, যাতে বেশি গরম না হয়"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Watching the closed appliance on a dry table lets you catch a fault before the customer uses it.",
+          "explanationBn": "কভার লাগানো যন্ত্র শুকনো টেবিলে রেখে খেয়াল করলে গ্রাহক ব্যবহারের আগেই সমস্যা ধরা পড়ে।"
+        },
+        {
+          "promptEn": "You replaced a fan capacitor. What do you do with the old one?",
+          "promptBn": "আপনি ফ্যানের ক্যাপাসিটর বদলেছেন। পুরোনোটি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Throw it away before the customer sees it",
+              "bn": "গ্রাহক দেখার আগে ফেলে দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Keep it to use in another customer's fan",
+              "bn": "অন্য গ্রাহকের ফ্যানে লাগানোর জন্য রেখে দেওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Sell it",
+              "bn": "বিক্রি করে দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Show it to the customer and give it back",
+              "bn": "গ্রাহককে দেখানো এবং ফেরত দেওয়া"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "The old part shows the customer that you really replaced it.",
+          "explanationBn": "পুরোনো পার্টস দেখে গ্রাহক বুঝতে পারেন যে আপনি সত্যিই সেটি বদলেছেন।"
+        },
+        {
+          "promptEn": "The cord of an iron is cut in the middle. What is the right repair?",
+          "promptBn": "ইস্ত্রির তার মাঝখানে কাটা। সঠিক মেরামত কোনটি?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Join the cut with tape",
+              "bn": "কাটা জায়গা টেপ দিয়ে জোড়া দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Replace the whole cord with the same type",
+              "bn": "একই ধরনের পুরো তার বদলে দেওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Shorten the cord and twist the wires together",
+              "bn": "তার ছোট করে ভেতরের তার পেঁচিয়ে জুড়ে দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Leave it and tell the customer to be careful",
+              "bn": "যেমন আছে রেখে গ্রাহককে সাবধানে থাকতে বলা"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "A taped joint on a hot appliance can open and give a shock or start a fire.",
+          "explanationBn": "গরম যন্ত্রে টেপের জোড়া খুলে গিয়ে শক লাগতে বা আগুন ধরতে পারে।"
+        },
+        {
+          "promptEn": "A fan smells of burning and the motor coil is black. What do you do?",
+          "promptBn": "ফ্যান থেকে পোড়া গন্ধ আসছে এবং মোটরের কয়েল কালো। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Do not run it, and tell the customer it needs rewinding by an experienced technician",
+              "bn": "ফ্যান না চালানো, এবং গ্রাহককে বলা যে অভিজ্ঞ মিস্ত্রির কাছে রিওয়াইন্ডিং করাতে হবে"
+            },
+            {
+              "id": "b",
+              "en": "Oil the coil and run it",
+              "bn": "কয়েলে তেল দিয়ে চালানো"
+            },
+            {
+              "id": "c",
+              "en": "Fit a bigger capacitor",
+              "bn": "বড় ক্যাপাসিটর লাগানো"
+            },
+            {
+              "id": "d",
+              "en": "Run it at low speed only",
+              "bn": "শুধু কম গতিতে চালানো"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "A burnt coil can catch fire if the fan is run again.",
+          "explanationBn": "পোড়া কয়েলের ফ্যান আবার চালালে আগুন লাগতে পারে।"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,473 @@
+{
+  "courses": [
+    {
+      "slug": "plumbing-basics",
+      "skillSlug": "plumbing",
+      "titleEn": "Plumbing basics",
+      "titleBn": "প্লাম্বিংয়ের মূল বিষয়",
+      "summaryEn": "Basic safe plumbing for home jobs: closing the water before any work, fixing a leaking tap, joining PVC pipes, cleaning a water tank safely, and knowing when to stop and call an experienced plumber. This course teaches basic safe practice. It is not a licence.",
+      "summaryBn": "বাসাবাড়ির প্লাম্বিং কাজের নিরাপদ মূল নিয়ম: কাজের আগে পানির লাইন বন্ধ করা, কল থেকে পানি পড়া ঠিক করা, পিভিসি পাইপ জোড়া দেওয়া, নিরাপদে পানির ট্যাংক পরিষ্কার করা, এবং কখন থেমে অভিজ্ঞ প্লাম্বার ডাকতে হবে। এই কোর্স নিরাপদে কাজের মূল নিয়ম শেখায়। এটি কোনো লাইসেন্স নয়।",
+      "minutes": 30,
+      "estDataMb": 1,
+      "passMarkPct": 70,
+      "questionCount": 10,
+      "isSafetyCritical": true,
+      "sortOrder": 12,
+      "lessons": [
+        {
+          "titleEn": "Tools, and closing the water before any work",
+          "titleBn": "সরঞ্জাম, এবং কাজের আগে পানির লাইন বন্ধ করা",
+          "summaryEn": "You will learn: which basic tools a plumber carries and how to close the water supply before any work.\nStep 1: Lay out your basic tools: adjustable wrench, pipe wrench, pliers, screwdrivers, hacksaw, thread tape, a bucket and old cloths.\nStep 2: Ask the customer where the stop valve is. In most homes the water comes down from a rooftop tank, so look for the valve on the pipe leaving the tank or on the line into the bathroom or kitchen.\nStep 3: Close the valve fully. A wheel valve closes when you turn it clockwise. A lever valve is closed when the handle sits across the pipe.\nStep 4: Open the lowest tap on that line and let the water left in the pipe run into a bucket.\nStep 5: Wait until the tap stops running. If water keeps coming, the valve is not closed or it is the wrong valve: find the right one before you loosen anything.\nStep 6: Tell the people in the home that the water is off and for how long, and ask them not to open the valve until you finish.\nHazard: If you open a tap or pipe while the supply is on, water sprays out under pressure, floods the room and can reach electric sockets. Always close the valve first and test at a tap.\nRemember: First see that no water comes from the tap, then put your tools on the pipe.",
+          "summaryBn": "আপনি শিখবেন: একজন প্লাম্বারের কাছে কোন কোন মূল সরঞ্জাম থাকে এবং যেকোনো কাজের আগে কীভাবে পানির লাইন বন্ধ করতে হয়।\nধাপ ১: মূল সরঞ্জাম সাজিয়ে নিন: অ্যাডজাস্টেবল রেঞ্চ, পাইপ রেঞ্চ, প্লায়ার্স, স্ক্রু ড্রাইভার, হ্যাকস, থ্রেড টেপ, একটি বালতি ও পুরোনো কাপড়।\nধাপ ২: গ্রাহককে জিজ্ঞেস করুন স্টপ ভালভ কোথায়। বেশির ভাগ বাসায় পানি ছাদের ট্যাংক থেকে নামে, তাই ট্যাংক থেকে বের হওয়া পাইপে অথবা বাথরুম বা রান্নাঘরে ঢোকার লাইনে ভালভ খুঁজুন।\nধাপ ৩: ভালভ পুরোপুরি বন্ধ করুন। চাকা ভালভ ঘড়ির কাঁটার দিকে ঘোরালে বন্ধ হয়। হাতলওয়ালা ভালভের হাতল পাইপের আড়াআড়ি থাকলে সেটি বন্ধ।\nধাপ ৪: ওই লাইনের সবচেয়ে নিচের কলটি খুলুন এবং পাইপে জমে থাকা পানি বালতিতে বের হতে দিন।\nধাপ ৫: কল থেকে পানি পড়া বন্ধ হওয়া পর্যন্ত অপেক্ষা করুন। পানি আসতেই থাকলে ভালভ বন্ধ হয়নি বা এটি ভুল ভালভ: কিছু খোলার আগে সঠিক ভালভ খুঁজে বের করুন।\nধাপ ৬: বাসার লোকদের জানান যে পানি বন্ধ আছে এবং কতক্ষণ থাকবে, আর কাজ শেষ না হওয়া পর্যন্ত ভালভ না খুলতে বলুন।\nঝুঁকি: লাইন চালু থাকা অবস্থায় কল বা পাইপ খুললে চাপে পানি ছিটকে বের হয়, ঘর ভেসে যায় এবং পানি বিদ্যুতের সকেটে পৌঁছাতে পারে। সবসময় আগে ভালভ বন্ধ করুন এবং কল খুলে পরীক্ষা করুন।\nমনে রাখুন: আগে দেখুন কলে পানি নেই, তারপর পাইপে সরঞ্জাম লাগান।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Fixing a leaking tap",
+          "titleBn": "কল থেকে পানি পড়া ঠিক করা",
+          "summaryEn": "You will learn: how to stop a dripping tap by replacing its washer or cartridge.\nStep 1: Close the water supply to the tap, then open the tap to check that no water comes.\nStep 2: Cover the basin drain with its plug or a cloth, so that small screws do not fall in.\nStep 3: Remove the handle: take off the top cap or the small screw, then lift the handle off.\nStep 4: Wrap a cloth round the nut of the tap so that the wrench does not scratch it, then unscrew the inner part anticlockwise.\nStep 5: Look at what is inside. An older tap has a rubber washer at the bottom of the spindle. A tap that opens with a short turn, or a mixer, has a cartridge.\nStep 6: Take the old washer or cartridge to the shop and buy a new one of the same size and type. Fit the new one the same way round as the old one.\nStep 7: Put the tap back together and tighten it firmly but without forcing, then open the water supply slowly.\nStep 8: Turn the tap on and off several times, and watch the spout and the base of the tap for two minutes for drops of water.\nRemember: Closing the handle harder does not fix a worn washer. Replace the part.",
+          "summaryBn": "আপনি শিখবেন: ওয়াশার বা কার্ট্রিজ বদলে কীভাবে কল থেকে ফোঁটা ফোঁটা পানি পড়া বন্ধ করতে হয়।\nধাপ ১: কলের পানির লাইন বন্ধ করুন, তারপর কল খুলে দেখে নিন যে পানি আসছে না।\nধাপ ২: বেসিনের ছিদ্র ছিপি বা কাপড় দিয়ে ঢেকে দিন, যাতে ছোট স্ক্রু ভেতরে পড়ে না যায়।\nধাপ ৩: হাতল খুলুন: ওপরের ঢাকনা বা ছোট স্ক্রু খুলে হাতলটি তুলে নিন।\nধাপ ৪: কলের নাটে কাপড় পেঁচিয়ে নিন যাতে রেঞ্চে দাগ না পড়ে, তারপর ভেতরের অংশটি ঘড়ির কাঁটার উল্টো দিকে ঘুরিয়ে খুলুন।\nধাপ ৫: ভেতরে কী আছে দেখুন। পুরোনো ধরনের কলে স্পিন্ডলের নিচে রাবারের ওয়াশার থাকে। যে কল সামান্য ঘোরালেই খোলে তাতে, বা মিক্সারে, কার্ট্রিজ থাকে।\nধাপ ৬: পুরোনো ওয়াশার বা কার্ট্রিজ দোকানে নিয়ে যান এবং একই মাপ ও ধরনের নতুনটি কিনুন। পুরোনোটি যেভাবে বসানো ছিল নতুনটি সেভাবেই বসান।\nধাপ ৭: কল আবার জোড়া লাগান এবং শক্ত করে আঁটুন তবে জোর খাটাবেন না, তারপর ধীরে ধীরে পানির লাইন খুলুন।\nধাপ ৮: কল কয়েকবার খুলুন ও বন্ধ করুন, এবং দুই মিনিট কলের মুখ ও গোড়ায় পানির ফোঁটা পড়ে কি না দেখুন।\nমনে রাখুন: হাতল জোরে আঁটলে ক্ষয়ে যাওয়া ওয়াশার ঠিক হয় না। অংশটি বদলাতে হবে।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Pipes and joints",
+          "titleBn": "পাইপ ও জোড়া",
+          "summaryEn": "You will learn: how to cut and join PVC or uPVC pipe, seal a threaded joint, and check for leaks.\nStep 1: Measure the pipe and mark the cutting line all the way round.\nStep 2: Hold the pipe steady and cut straight across with a hacksaw. A slanted cut makes a weak joint.\nStep 3: Remove the rough edges inside and outside the cut end with a file or sandpaper, then wipe the pipe end and the fitting clean and dry.\nStep 4: Push the pipe into the fitting without cement first to check the fit, and mark how far it goes in.\nStep 5: Spread a thin, even layer of solvent cement (PVC glue) on the pipe end and inside the fitting, push the pipe in up to the mark with a small twist, and hold it for about 30 seconds.\nStep 6: On a threaded joint, wind thread tape tightly round the outer thread for several turns, in the direction the fitting will turn when you tighten it. Then start it by hand and finish with the wrench, without forcing a plastic thread.\nStep 7: Let the cemented joint set for the time written on the tin. Then open the water slowly, wipe each joint with a dry cloth and watch for drops.\nHazard: Solvent cement gives off fumes that catch fire easily and make you dizzy. Work with a window open, keep flame and cigarettes away, and close the tin after every use.\nRemember: A straight cut, a clean dry end, and waiting before you open the water: these three make a joint that lasts.",
+          "summaryBn": "আপনি শিখবেন: কীভাবে পিভিসি বা ইউপিভিসি পাইপ কাটতে ও জোড়া দিতে হয়, প্যাঁচের জোড়া সিল করতে হয় এবং লিক পরীক্ষা করতে হয়।\nধাপ ১: পাইপ মেপে নিন এবং কাটার জায়গায় চারদিক ঘুরিয়ে দাগ দিন।\nধাপ ২: পাইপ শক্ত করে ধরে হ্যাকস দিয়ে সোজা কাটুন। বাঁকা কাটলে জোড়া দুর্বল হয়।\nধাপ ৩: রেত বা শিরিষ কাগজ দিয়ে কাটা মুখের ভেতর ও বাইরের খসখসে অংশ তুলে ফেলুন, তারপর পাইপের মুখ ও ফিটিং মুছে পরিষ্কার ও শুকনো করুন।\nধাপ ৪: আগে আঠা ছাড়া পাইপটি ফিটিংয়ে ঢুকিয়ে মাপ মিলিয়ে নিন এবং কতটুকু ঢোকে সেখানে দাগ দিন।\nধাপ ৫: পাইপের মুখে ও ফিটিংয়ের ভেতরে সলভেন্ট সিমেন্ট (পিভিসি আঠা) পাতলা ও সমান করে লাগান, সামান্য মোচড় দিয়ে দাগ পর্যন্ত ঢুকিয়ে দিন এবং প্রায় ৩০ সেকেন্ড চেপে ধরে রাখুন।\nধাপ ৬: প্যাঁচের জোড়ায় বাইরের প্যাঁচে থ্রেড টেপ টানটান করে কয়েক পাক পেঁচান, ফিটিং আঁটার সময় যেদিকে ঘুরবে সেদিকে। তারপর হাতে লাগিয়ে রেঞ্চ দিয়ে আঁটুন, তবে প্লাস্টিকের প্যাঁচে বেশি জোর দেবেন না।\nধাপ ৭: আঠার কৌটায় যত সময় লেখা আছে ততক্ষণ জোড়া শুকাতে দিন। তারপর ধীরে পানি ছাড়ুন, প্রতিটি জোড়া শুকনো কাপড়ে মুছে দেখুন পানির ফোঁটা আসে কি না।\nঝুঁকি: সলভেন্ট সিমেন্টের ভাপে সহজে আগুন ধরে এবং মাথা ঘোরে। জানালা খুলে কাজ করুন, আগুন ও সিগারেট দূরে রাখুন এবং প্রতিবার ব্যবহারের পর কৌটার মুখ বন্ধ করুন।\nমনে রাখুন: সোজা কাটা, পরিষ্কার ও শুকনো মুখ, আর পানি ছাড়ার আগে অপেক্ষা: এই তিনে জোড়া টেকে।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Cleaning a water tank safely",
+          "titleBn": "নিরাপদে পানির ট্যাংক পরিষ্কার করা",
+          "summaryEn": "You will learn: how to clean a rooftop or underground water tank without putting your life at risk.\nStep 1: Take a second person with you. One person works, and the other stays at the opening of the tank for the whole job and watches.\nStep 2: Switch off the water pump at its switch, tell the household, and close the valve on the line leaving the tank so that dirty water does not go into the house pipes.\nStep 3: Open the lid fully and let fresh air in for at least 30 minutes before any work. If the air inside smells bad or feels heavy, do not go in.\nStep 4: Drain the tank, then scrub the walls and floor with a long-handled brush and clean water, from outside the opening wherever you can reach. For light use a battery torch, never a mains bulb on a wire.\nStep 5: Lift the dirty water and sludge out with a bucket, and rinse the tank with clean water.\nStep 6: Put on rubber gloves and wash the walls and floor with bleach mixed in water as its label says. Never mix bleach with toilet cleaner or any other cleaner.\nStep 7: Wait for the time written on the label, then rinse and drain until the water is clear and the bleach smell is almost gone. Close the lid tightly and refill the tank.\nHazard: A closed tank can hold bad air with too little oxygen, and bleach fumes build up quickly inside. People die when they go in alone, and others die trying to save them. Never enter a closed or deep tank alone. If you feel dizzy, get out at once. If someone collapses inside, do not go in after them: call 999.\nRemember: If the job cannot be done with fresh air around you and a helper watching, stop and call an experienced team.",
+          "summaryBn": "আপনি শিখবেন: নিজের জীবন ঝুঁকিতে না ফেলে কীভাবে ছাদের বা মাটির নিচের পানির ট্যাংক পরিষ্কার করতে হয়।\nধাপ ১: সঙ্গে আরেকজনকে নিন। একজন কাজ করবেন, অন্যজন পুরো সময় ট্যাংকের মুখে দাঁড়িয়ে নজর রাখবেন।\nধাপ ২: পানির পাম্পের সুইচ বন্ধ করুন, বাসার লোকদের জানান, এবং ট্যাংক থেকে বের হওয়া লাইনের ভালভ বন্ধ করুন যাতে ময়লা পানি বাসার পাইপে না যায়।\nধাপ ৩: ঢাকনা পুরো খুলে দিন এবং কাজ শুরুর আগে অন্তত ৩০ মিনিট খোলা বাতাস ঢুকতে দিন। ভেতরের বাতাসে বাজে গন্ধ থাকলে বা বাতাস ভারী লাগলে ভেতরে নামবেন না।\nধাপ ৪: ট্যাংকের পানি বের করে দিন, তারপর লম্বা হাতলের ব্রাশ ও পরিষ্কার পানি দিয়ে দেয়াল ও তলা ঘষুন, যতটা সম্ভব মুখের বাইরে থেকে। আলোর জন্য ব্যাটারির টর্চ ব্যবহার করুন, তারে লাগানো বিদ্যুতের বাল্ব কখনো নয়।\nধাপ ৫: ময়লা পানি ও তলানি বালতি দিয়ে তুলে ফেলুন এবং পরিষ্কার পানি দিয়ে ট্যাংক ধুয়ে নিন।\nধাপ ৬: রাবারের গ্লাভস পরুন এবং লেবেলে যেভাবে লেখা আছে সেভাবে পানিতে ব্লিচ মিশিয়ে দেয়াল ও তলা ধুয়ে দিন। ব্লিচের সঙ্গে টয়লেট ক্লিনার বা অন্য কোনো পরিষ্কারক কখনো মেশাবেন না।\nধাপ ৭: লেবেলে লেখা সময় পর্যন্ত অপেক্ষা করুন, তারপর পানি পরিষ্কার না হওয়া এবং ব্লিচের গন্ধ প্রায় চলে না যাওয়া পর্যন্ত ধুয়ে পানি ফেলে দিন। ঢাকনা শক্ত করে বন্ধ করুন এবং ট্যাংক আবার ভরুন।\nঝুঁকি: বন্ধ ট্যাংকে কম অক্সিজেনের খারাপ বাতাস জমে থাকতে পারে, আর ব্লিচের ঝাঁঝ ভেতরে দ্রুত জমে। একা নামলে মানুষ মারা যায়, বাঁচাতে গিয়ে অন্যরাও মারা যায়। বন্ধ বা গভীর ট্যাংকে কখনো একা নামবেন না। মাথা ঘুরলে সঙ্গে সঙ্গে বের হয়ে আসুন। ভেতরে কেউ অজ্ঞান হয়ে পড়লে তাঁর পেছনে নামবেন না: ৯৯৯-এ ফোন করুন।\nমনে রাখুন: চারপাশে খোলা বাতাস এবং পাশে নজর রাখার লোক ছাড়া কাজটি করা না গেলে থামুন এবং অভিজ্ঞ দলকে ডাকুন।",
+          "youtubeVideoId": null,
+          "durationS": 300,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Height, wet floors, and when to stop",
+          "titleBn": "উঁচু জায়গা, ভেজা মেঝে, এবং কখন থামবেন",
+          "summaryEn": "You will learn: how to stay safe at height and on wet floors, keep the customer's home clean, and know when a job is beyond you.\nStep 1: Before you climb, stand the ladder on firm, dry, level ground and ask a person to hold its base.\nStep 2: On a roof, keep away from the edge. If the tank or pipe is beside an edge with no wall or railing, do not work there without a safety belt tied to a strong point.\nStep 3: In a wet bathroom, wear sandals or shoes that grip, mop the floor where you will stand, and switch off and unplug any water heater or pump before you work on its pipes.\nStep 4: Spread an old cloth or plastic sheet under your work and catch the water in a bucket.\nStep 5: When you finish, wipe the floor dry, take away the old parts and cut pieces of pipe, and show the customer the finished work.\nStep 6: Stop and call a more experienced plumber for the main sewer line or septic tank, for pipes hidden inside walls or floors, and for any job you have not done before.\nStep 7: Never work on a gas line. If you smell gas, do not light a flame or touch any switch, open the doors and windows, go outside, and tell the customer to call the gas company.\nHazard: A fall from a ladder or roof, or a slip on a wet floor, can break bones or kill. Never climb a ladder that nobody is holding, and never work at an open edge without protection.\nRemember: Saying \"this job needs a more experienced plumber\" is part of good work, not a weakness.",
+          "summaryBn": "আপনি শিখবেন: উঁচু জায়গায় ও ভেজা মেঝেতে কীভাবে নিরাপদ থাকবেন, গ্রাহকের বাসা কীভাবে পরিষ্কার রাখবেন, এবং কোন কাজ আপনার সাধ্যের বাইরে তা কীভাবে বুঝবেন।\nধাপ ১: ওঠার আগে মই শক্ত, শুকনো ও সমান জায়গায় দাঁড় করান এবং একজনকে মইয়ের গোড়া ধরে রাখতে বলুন।\nধাপ ২: ছাদে কিনারা থেকে দূরে থাকুন। ট্যাংক বা পাইপ যদি দেয়াল বা রেলিং ছাড়া কিনারার পাশে হয়, তবে শক্ত কিছুর সঙ্গে বাঁধা সেফটি বেল্ট ছাড়া সেখানে কাজ করবেন না।\nধাপ ৩: ভেজা বাথরুমে পিছলায় না এমন স্যান্ডেল বা জুতা পরুন, যেখানে দাঁড়াবেন সেখানকার মেঝে মুছে নিন, এবং গিজার বা পাম্পের পাইপে কাজ করার আগে সেটির সুইচ বন্ধ করে প্লাগ খুলে নিন।\nধাপ ৪: কাজের জায়গার নিচে পুরোনো কাপড় বা পলিথিন বিছিয়ে নিন এবং পানি বালতিতে ধরুন।\nধাপ ৫: কাজ শেষে মেঝে মুছে শুকনো করুন, পুরোনো অংশ ও পাইপের কাটা টুকরা সরিয়ে নিন, এবং গ্রাহককে শেষ হওয়া কাজটি দেখান।\nধাপ ৬: প্রধান সুয়ারেজ লাইন বা সেপটিক ট্যাংক, দেয়াল বা মেঝের ভেতরে লুকানো পাইপ, এবং আগে কখনো করেননি এমন কাজে থামুন এবং আরও অভিজ্ঞ প্লাম্বারকে ডাকুন।\nধাপ ৭: গ্যাসের লাইনে কখনো কাজ করবেন না। গ্যাসের গন্ধ পেলে আগুন জ্বালাবেন না, কোনো সুইচে হাত দেবেন না, দরজা-জানালা খুলে দিন, বাইরে চলে যান এবং গ্রাহককে গ্যাস কোম্পানিতে ফোন করতে বলুন।\nঝুঁকি: মই বা ছাদ থেকে পড়ে গেলে কিংবা ভেজা মেঝেতে পিছলে গেলে হাড় ভাঙতে পারে, মৃত্যুও হতে পারে। কেউ ধরে না থাকলে মইয়ে উঠবেন না, এবং সুরক্ষা ছাড়া খোলা কিনারায় কখনো কাজ করবেন না।\nমনে রাখুন: \"এই কাজে আরও অভিজ্ঞ প্লাম্বার লাগবে\" বলাটা ভালো কাজেরই অংশ, দুর্বলতা নয়।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": true
+        }
+      ],
+      "questions": [
+        {
+          "promptEn": "You arrive to change a kitchen tap. What do you do first?",
+          "promptBn": "আপনি রান্নাঘরের কল বদলাতে এসেছেন। সবার আগে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Unscrew the old tap quickly and fit the new one before much water comes out",
+              "bn": "বেশি পানি বের হওয়ার আগেই দ্রুত পুরোনো কল খুলে নতুনটি লাগিয়ে ফেলা"
+            },
+            {
+              "id": "b",
+              "en": "Ask the customer to hold a cloth over the pipe",
+              "bn": "গ্রাহককে পাইপের মুখে কাপড় চেপে ধরতে বলা"
+            },
+            {
+              "id": "c",
+              "en": "Close the stop valve and check at a tap that no water comes",
+              "bn": "স্টপ ভালভ বন্ধ করা এবং কল খুলে দেখা যে পানি আসছে না"
+            },
+            {
+              "id": "d",
+              "en": "Start working, because the tap is small",
+              "bn": "কাজ শুরু করা, কারণ কলটি ছোট"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "With the supply on, water sprays out under pressure and can flood the room and reach sockets.",
+          "explanationBn": "লাইন চালু থাকলে চাপে পানি ছিটকে বের হয়, ঘর ভেসে যেতে পারে এবং পানি সকেটে পৌঁছাতে পারে।"
+        },
+        {
+          "promptEn": "You closed a valve, but after several minutes the tap is still running. What do you do?",
+          "promptBn": "আপনি একটি ভালভ বন্ধ করেছেন, কিন্তু কয়েক মিনিট পরও কল থেকে পানি পড়ছে। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Start the work, because it is normal for some water to keep coming",
+              "bn": "কাজ শুরু করা, কারণ কিছু পানি আসতে থাকা স্বাভাবিক"
+            },
+            {
+              "id": "b",
+              "en": "Find the right valve before you loosen anything",
+              "bn": "কিছু খোলার আগে সঠিক ভালভ খুঁজে বের করা"
+            },
+            {
+              "id": "c",
+              "en": "Hit the valve with the wrench until the water stops",
+              "bn": "পানি বন্ধ না হওয়া পর্যন্ত রেঞ্চ দিয়ে ভালভে বাড়ি দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Bring a bigger bucket and work faster",
+              "bn": "বড় বালতি এনে আরও দ্রুত কাজ করা"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Water that keeps coming shows the line is still open, so it is not safe to open any joint.",
+          "explanationBn": "পানি আসতেই থাকলে বোঝা যায় লাইন এখনো খোলা, তাই কোনো জোড়া খোলা নিরাপদ নয়।"
+        },
+        {
+          "promptEn": "A tap still drips when it is closed hard. The customer says, \"Just tighten it more.\" What is the right fix?",
+          "promptBn": "জোরে বন্ধ করার পরও কল থেকে ফোঁটা পড়ছে। গ্রাহক বলছেন, \"আরেকটু জোরে আঁটলেই হবে।\" সঠিক সমাধান কোনটি?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Tighten the handle with a pipe wrench as hard as you can until the drip stops",
+              "bn": "ফোঁটা পড়া বন্ধ না হওয়া পর্যন্ত পাইপ রেঞ্চ দিয়ে যত জোরে পারা যায় হাতল আঁটা"
+            },
+            {
+              "id": "b",
+              "en": "Wrap thread tape round the spout",
+              "bn": "কলের মুখে থ্রেড টেপ পেঁচানো"
+            },
+            {
+              "id": "c",
+              "en": "Tell the customer that a small drip does not matter",
+              "bn": "গ্রাহককে বলা যে সামান্য ফোঁটা পড়লে কিছু হয় না"
+            },
+            {
+              "id": "d",
+              "en": "Close the water and replace the worn washer or cartridge",
+              "bn": "পানি বন্ধ করে ক্ষয়ে যাওয়া ওয়াশার বা কার্ট্রিজ বদলানো"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "A worn washer or cartridge cannot seal, and forcing the handle only damages the tap.",
+          "explanationBn": "ক্ষয়ে যাওয়া ওয়াশার বা কার্ট্রিজ পানি আটকাতে পারে না, আর হাতলে জোর দিলে কলই নষ্ট হয়।"
+        },
+        {
+          "promptEn": "You have taken out the old cartridge. How do you get the right new one?",
+          "promptBn": "আপনি পুরোনো কার্ট্রিজ খুলে বের করেছেন। সঠিক নতুনটি কীভাবে আনবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Take the old one to the shop and match it",
+              "bn": "পুরোনোটি দোকানে নিয়ে গিয়ে মিলিয়ে কেনা"
+            },
+            {
+              "id": "b",
+              "en": "Buy the biggest one in the shop, because a bigger one seals better",
+              "bn": "দোকানের সবচেয়ে বড়টি কেনা, কারণ বড়টি ভালো আটকায়"
+            },
+            {
+              "id": "c",
+              "en": "Buy any one, because all cartridges are the same",
+              "bn": "যেকোনো একটি কেনা, কারণ সব কার্ট্রিজ একই"
+            },
+            {
+              "id": "d",
+              "en": "Cut a piece of rubber from an old sandal",
+              "bn": "পুরোনো স্যান্ডেল থেকে রাবার কেটে নেওয়া"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Washers and cartridges come in many sizes, and only the matching one seals.",
+          "explanationBn": "ওয়াশার ও কার্ট্রিজ নানা মাপের হয়, আর শুধু মিলে যাওয়াটিই পানি আটকায়।"
+        },
+        {
+          "promptEn": "You are putting thread tape on a threaded pipe end. Which way do you wind it?",
+          "promptBn": "আপনি পাইপের প্যাঁচে থ্রেড টেপ লাগাচ্ছেন। কোন দিকে পেঁচাবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "In any direction, as long as you put on a thick layer of tape",
+              "bn": "যেকোনো দিকে, টেপ মোটা করে লাগালেই হলো"
+            },
+            {
+              "id": "b",
+              "en": "In the direction the fitting turns when you tighten it",
+              "bn": "ফিটিং আঁটার সময় যেদিকে ঘোরে সেদিকে"
+            },
+            {
+              "id": "c",
+              "en": "Against the direction of tightening",
+              "bn": "আঁটার উল্টো দিকে"
+            },
+            {
+              "id": "d",
+              "en": "Inside the fitting, not on the pipe",
+              "bn": "পাইপে নয়, ফিটিংয়ের ভেতরে"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Tape wound the other way unwinds and bunches up as the fitting is screwed on.",
+          "explanationBn": "উল্টো দিকে পেঁচালে ফিটিং লাগানোর সময় টেপ খুলে গিয়ে দলা পাকিয়ে যায়।"
+        },
+        {
+          "promptEn": "You have just joined a PVC pipe with solvent cement. The customer wants the water on at once. What do you do?",
+          "promptBn": "আপনি এইমাত্র সলভেন্ট সিমেন্ট দিয়ে পিভিসি পাইপ জোড়া দিয়েছেন। গ্রাহক এখনই পানি চালু করতে চান। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Open the water fully to test the joint",
+              "bn": "জোড়া পরীক্ষা করতে পুরো পানি ছেড়ে দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Put more cement round the outside of the joint and open the water at once",
+              "bn": "জোড়ার বাইরে চারদিকে আরও আঠা লাগিয়ে এখনই পানি ছেড়ে দেওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Wait for the time written on the tin, then open the water slowly",
+              "bn": "কৌটায় লেখা সময় পর্যন্ত অপেক্ষা করা, তারপর ধীরে পানি ছাড়া"
+            },
+            {
+              "id": "d",
+              "en": "Dry the joint with a flame to make it faster",
+              "bn": "তাড়াতাড়ি শুকাতে আগুনের তাপ দেওয়া"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "A joint that has not set can push apart under pressure, and the fumes catch fire near a flame.",
+          "explanationBn": "জোড়া না শুকালে পানির চাপে খুলে যেতে পারে, আর আগুনের কাছে আঠার ভাপে আগুন ধরে।"
+        },
+        {
+          "promptEn": "You come to clean an underground tank, but your helper has not come. The customer says, \"It is a quick job, just go in.\" What do you do?",
+          "promptBn": "আপনি মাটির নিচের ট্যাংক পরিষ্কার করতে এসেছেন, কিন্তু আপনার সহকারী আসেননি। গ্রাহক বলছেন, \"অল্প কাজ, নেমে পড়ুন।\" আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Do not go in without a second person watching",
+              "bn": "নজর রাখার দ্বিতীয় লোক ছাড়া না নামা"
+            },
+            {
+              "id": "b",
+              "en": "Go in quickly, hold your breath and finish in a few minutes",
+              "bn": "দম বন্ধ রেখে দ্রুত নেমে কয়েক মিনিটে কাজ সেরে ফেলা"
+            },
+            {
+              "id": "c",
+              "en": "Go in, but leave your phone at the opening",
+              "bn": "নেমে পড়া, তবে ফোনটি ট্যাংকের মুখে রেখে যাওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Pour in extra bleach first and then go in",
+              "bn": "আগে বেশি করে ব্লিচ ঢেলে তারপর নামা"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "A closed tank can hold bad air, and nobody would be there to see you fall or to call for help.",
+          "explanationBn": "বন্ধ ট্যাংকে খারাপ বাতাস থাকতে পারে, আর আপনি পড়ে গেলে দেখার বা সাহায্য ডাকার কেউ থাকবে না।"
+        },
+        {
+          "promptEn": "Your co-worker goes silent and collapses inside the tank. What do you do?",
+          "promptBn": "আপনার সহকর্মী ট্যাংকের ভেতরে হঠাৎ চুপ হয়ে গেলেন এবং পড়ে গেলেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Jump in at once and lift him out before it is too late",
+              "bn": "দেরি হওয়ার আগেই সঙ্গে সঙ্গে নেমে তাঁকে তুলে আনা"
+            },
+            {
+              "id": "b",
+              "en": "Pour water on him from above",
+              "bn": "ওপর থেকে তাঁর গায়ে পানি ঢালা"
+            },
+            {
+              "id": "c",
+              "en": "Wait ten minutes to see if he wakes up",
+              "bn": "জ্ঞান ফেরে কি না দেখতে দশ মিনিট অপেক্ষা করা"
+            },
+            {
+              "id": "d",
+              "en": "Stay outside, shout for help and call 999",
+              "bn": "বাইরে থাকা, চিৎকার করে লোক ডাকা এবং ৯৯৯-এ ফোন করা"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "The air that made him collapse will do the same to you, so going in makes two victims.",
+          "explanationBn": "যে বাতাসে তিনি অজ্ঞান হয়েছেন তাতে আপনিও অজ্ঞান হবেন, তখন বিপদে পড়বেন দুজন।"
+        },
+        {
+          "promptEn": "The rooftop tank stands beside an edge with no railing, and you have no safety belt. What is right?",
+          "promptBn": "ছাদের ট্যাংকটি রেলিং ছাড়া কিনারার পাশে, আর আপনার কাছে সেফটি বেল্ট নেই। কোনটি সঠিক?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Work carefully and do not look down",
+              "bn": "নিচে না তাকিয়ে সাবধানে কাজ করা"
+            },
+            {
+              "id": "b",
+              "en": "Do not work there, and tell the customer why",
+              "bn": "সেখানে কাজ না করা, এবং গ্রাহককে কারণ বলা"
+            },
+            {
+              "id": "c",
+              "en": "Ask the customer to hold your shirt",
+              "bn": "গ্রাহককে আপনার জামা ধরে রাখতে বলা"
+            },
+            {
+              "id": "d",
+              "en": "Work as fast as you can, so that you spend less time at the edge",
+              "bn": "কিনারায় কম সময় থাকতে যত দ্রুত পারা যায় কাজ সারা"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "One slip at an open edge is a fall, and care alone does not stop it.",
+          "explanationBn": "খোলা কিনারায় একবার পা পিছলালেই পড়ে যাবেন, শুধু সাবধান থাকলে তা ঠেকানো যায় না।"
+        },
+        {
+          "promptEn": "While fixing a kitchen sink you smell gas. The customer asks you to tighten the gas pipe too. What do you do?",
+          "promptBn": "রান্নাঘরের সিঙ্ক ঠিক করার সময় আপনি গ্যাসের গন্ধ পেলেন। গ্রাহক গ্যাসের পাইপটিও আঁটতে বলছেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Tighten the gas pipe with your pipe wrench",
+              "bn": "পাইপ রেঞ্চ দিয়ে গ্যাসের পাইপ আঁটা"
+            },
+            {
+              "id": "b",
+              "en": "Light a match to find where the gas is coming from",
+              "bn": "গ্যাস কোথা থেকে বের হচ্ছে দেখতে দেশলাই জ্বালানো"
+            },
+            {
+              "id": "c",
+              "en": "Do not touch the gas line: no flame or switches, open doors and windows, go outside and have the gas company called",
+              "bn": "গ্যাসের লাইনে হাত না দেওয়া: আগুন বা সুইচ নয়, দরজা-জানালা খোলা, বাইরে যাওয়া এবং গ্যাস কোম্পানিকে ফোন করানো"
+            },
+            {
+              "id": "d",
+              "en": "Switch on the exhaust fan and keep working",
+              "bn": "এগজস্ট ফ্যান চালিয়ে কাজ চালিয়ে যাওয়া"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Gas work is not a job for a beginner plumber, and a flame or a switch spark can set leaking gas on fire.",
+          "explanationBn": "গ্যাসের কাজ নতুন প্লাম্বারের কাজ নয়, আর আগুন বা সুইচের স্ফুলিঙ্গে লিক হওয়া গ্যাসে আগুন ধরতে পারে।"
+        },
+        {
+          "promptEn": "You are using solvent cement in a small bathroom. What must you do?",
+          "promptBn": "আপনি ছোট বাথরুমে সলভেন্ট সিমেন্ট ব্যবহার করছেন। আপনাকে কী করতেই হবে?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Open the window or door and keep flame and cigarettes away",
+              "bn": "জানালা বা দরজা খোলা রাখা এবং আগুন ও সিগারেট দূরে রাখা"
+            },
+            {
+              "id": "b",
+              "en": "Close the door and window so that the smell does not spread through the house",
+              "bn": "দরজা ও জানালা বন্ধ রাখা যাতে গন্ধ সারা বাসায় না ছড়ায়"
+            },
+            {
+              "id": "c",
+              "en": "Leave the tin open so that it is ready for the next joint",
+              "bn": "পরের জোড়ার জন্য কৌটা খোলা রেখে দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Smoke only when the tin is closed",
+              "bn": "কৌটা বন্ধ থাকলে তবেই ধূমপান করা"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "The fumes catch fire easily and cause dizziness when they build up in a closed room.",
+          "explanationBn": "বন্ধ ঘরে ভাপ জমলে সহজে আগুন ধরে এবং মাথা ঘোরে।"
+        },
+        {
+          "promptEn": "You are about to wash a tank with bleach. A bottle of toilet cleaner is also there. Should you mix them for a stronger clean?",
+          "promptBn": "আপনি ব্লিচ দিয়ে ট্যাংক ধুতে যাচ্ছেন। পাশে টয়লেট ক্লিনারের বোতলও আছে। বেশি পরিষ্কারের জন্য দুটো মেশাবেন কি?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Yes, half bleach and half toilet cleaner in one bucket",
+              "bn": "হ্যাঁ, এক বালতিতে অর্ধেক ব্লিচ ও অর্ধেক টয়লেট ক্লিনার"
+            },
+            {
+              "id": "b",
+              "en": "Yes, but only a little toilet cleaner",
+              "bn": "হ্যাঁ, তবে টয়লেট ক্লিনার সামান্য"
+            },
+            {
+              "id": "c",
+              "en": "Yes, if the tank is very dirty",
+              "bn": "হ্যাঁ, ট্যাংক খুব ময়লা হলে"
+            },
+            {
+              "id": "d",
+              "en": "No, never mix bleach with another cleaner",
+              "bn": "না, ব্লিচের সঙ্গে অন্য পরিষ্কারক কখনো মেশানো যাবে না"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Bleach mixed with toilet cleaner releases toxic gas, which is deadly inside a tank.",
+          "explanationBn": "ব্লিচের সঙ্গে টয়লেট ক্লিনার মেশালে বিষাক্ত গ্যাস তৈরি হয়, যা ট্যাংকের ভেতরে প্রাণঘাতী।"
+        },
+        {
+          "promptEn": "A damp patch shows that a pipe is leaking somewhere inside the wall. What do you do?",
+          "promptBn": "দেয়ালের ভেজা দাগ দেখে বোঝা যাচ্ছে ভেতরের কোনো পাইপ লিক করছে। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Break the wall open with a hammer and look",
+              "bn": "হাতুড়ি দিয়ে দেয়াল ভেঙে দেখা"
+            },
+            {
+              "id": "b",
+              "en": "Stop, and tell the customer it needs a more experienced plumber",
+              "bn": "থামা, এবং গ্রাহককে বলা যে এতে আরও অভিজ্ঞ প্লাম্বার লাগবে"
+            },
+            {
+              "id": "c",
+              "en": "Cover the damp patch with cement and paint so that it cannot be seen any more",
+              "bn": "ভেজা দাগের ওপর সিমেন্ট ও রং লাগিয়ে দেওয়া যাতে আর দেখা না যায়"
+            },
+            {
+              "id": "d",
+              "en": "Say nothing, because it is not your job",
+              "bn": "কিছু না বলা, কারণ এটা আপনার কাজ নয়"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Pipes hidden in walls run beside other pipes and electric wires, so opening the wall is not a beginner job.",
+          "explanationBn": "দেয়ালের ভেতরের পাইপের পাশে অন্য পাইপ ও বিদ্যুতের তার থাকে, তাই দেয়াল খোলা নতুনদের কাজ নয়।"
+        },
+        {
+          "promptEn": "The repair is finished. What do you do before you leave?",
+          "promptBn": "মেরামত শেষ হয়েছে। যাওয়ার আগে আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Leave quickly before any drip shows",
+              "bn": "ফোঁটা পড়া শুরু হওয়ার আগেই দ্রুত চলে যাওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Leave the old parts on the floor for the customer",
+              "bn": "পুরোনো অংশগুলো গ্রাহকের জন্য মেঝেতে রেখে যাওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Wipe the floor dry, take away old parts and check for drips together with the customer",
+              "bn": "মেঝে মুছে শুকনো করা, পুরোনো অংশ সরানো এবং গ্রাহকের সঙ্গে দেখে নেওয়া পানি পড়ছে কি না"
+            },
+            {
+              "id": "d",
+              "en": "Tell the customer not to use the tap for a week",
+              "bn": "গ্রাহককে এক সপ্তাহ কল ব্যবহার না করতে বলা"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "A wet floor can make someone slip, and checking together finds a leak before you go.",
+          "explanationBn": "ভেজা মেঝেতে কেউ পিছলে পড়তে পারেন, আর একসঙ্গে দেখলে যাওয়ার আগেই লিক ধরা পড়ে।"
+        }
+      ]
+    }
+  ]
+}

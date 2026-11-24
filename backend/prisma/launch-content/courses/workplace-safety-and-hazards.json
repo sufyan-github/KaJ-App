@@ -1,0 +1,444 @@
+{
+  "courses": [
+    {
+      "slug": "workplace-safety-and-hazards",
+      "skillSlug": null,
+      "titleEn": "Workplace safety and hazards",
+      "titleBn": "কর্মক্ষেত্রে নিরাপত্তা ও ঝুঁকি",
+      "summaryEn": "For every KAAJ worker: spotting hazards before you start, electricity and water, ladders and height, chemicals and lifting, and basic first aid with the emergency numbers 999 and 109. This course teaches basic safe practice. It is not a licence.",
+      "summaryBn": "প্রত্যেক KAAJ কর্মীর জন্য: কাজ শুরুর আগে ঝুঁকি চেনা, বিদ্যুৎ ও পানি, মই ও উঁচু জায়গার কাজ, রাসায়নিক ও ভারী জিনিস তোলা, এবং জরুরি নম্বর ৯৯৯ ও ১০৯-সহ প্রাথমিক চিকিৎসা। এই কোর্সে নিরাপদে কাজ করার মূল নিয়ম শেখানো হয়। এটি কোনো লাইসেন্স নয়।",
+      "minutes": 30,
+      "estDataMb": 1,
+      "passMarkPct": 70,
+      "questionCount": 10,
+      "isSafetyCritical": true,
+      "sortOrder": 20,
+      "lessons": [
+        {
+          "titleEn": "Spot the hazards before you start",
+          "titleBn": "কাজ শুরুর আগে ঝুঁকি চিনে নিন",
+          "summaryEn": "You will learn: how to look for dangers in the first two minutes, before you start any job.\nStep 1: Stop at the door and look at the whole work area before you put your tools down.\nStep 2: Look down: is the floor wet or slippery, and are there loose wires or things you can trip over?\nStep 3: Look up: is anything loose overhead, is a fan low, and are there electric wires near the roof or balcony?\nStep 4: Look for electricity, gas and fire: broken sockets, bare wires, a gas stove or cylinder close to your work.\nStep 5: If you smell gas, do not touch any switch and do not light a flame. Open the doors and windows, go outside and tell the customer.\nStep 6: Remove the easy hazards: dry the floor, move things out of the way, and ask the customer to keep children away.\nStep 7: Check that your way out is clear. If you cannot make the place safe, do not start, and tell the customer why.\nHazard: Many injuries happen when a worker starts in a hurry without looking. Look first, every time.\nRemember: Look down, look up, look around, then start. No job is worth an injury.",
+          "summaryBn": "আপনি শিখবেন: যেকোনো কাজ শুরুর আগে প্রথম দুই মিনিটে কীভাবে বিপদ খুঁজে দেখতে হয়।\nধাপ ১: দরজায় থামুন এবং সরঞ্জাম নামানোর আগে পুরো কাজের জায়গাটি দেখে নিন।\nধাপ ২: নিচে দেখুন: মেঝে ভেজা বা পিচ্ছিল কি না, এবং ছড়ানো তার বা হোঁচট খাওয়ার মতো কিছু আছে কি না।\nধাপ ৩: ওপরে দেখুন: মাথার ওপরে ঢিলা কিছু আছে কি না, ফ্যান নিচু কি না, এবং ছাদ বা বারান্দার কাছে বিদ্যুতের তার আছে কি না।\nধাপ ৪: বিদ্যুৎ, গ্যাস ও আগুনের ঝুঁকি খুঁজুন: ভাঙা সকেট, খোলা তার, কাজের জায়গার কাছে গ্যাসের চুলা বা সিলিন্ডার।\nধাপ ৫: গ্যাসের গন্ধ পেলে কোনো সুইচে হাত দেবেন না এবং আগুন জ্বালাবেন না। দরজা-জানালা খুলে দিন, বাইরে যান এবং গ্রাহককে জানান।\nধাপ ৬: সহজ ঝুঁকিগুলো সরিয়ে ফেলুন: মেঝে শুকিয়ে নিন, পথের জিনিস সরান, এবং গ্রাহককে বলুন শিশুদের দূরে রাখতে।\nধাপ ৭: বের হওয়ার পথ খোলা আছে কি না দেখুন। জায়গাটি নিরাপদ করতে না পারলে কাজ শুরু করবেন না, এবং কারণটি গ্রাহককে জানান।\nঝুঁকি: অনেক দুর্ঘটনা ঘটে যখন কর্মী না দেখে তাড়াহুড়ো করে কাজ শুরু করেন। প্রতিবার আগে দেখে নিন।\nমনে রাখুন: নিচে দেখুন, ওপরে দেখুন, চারপাশে দেখুন, তারপর শুরু করুন। কোনো কাজই আঘাত পাওয়ার মতো জরুরি নয়।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Electricity and water",
+          "titleBn": "বিদ্যুৎ ও পানি",
+          "summaryEn": "You will learn: how to stay safe from electric shock, most of all where there is water.\nStep 1: Dry your hands before you touch any switch, plug or appliance. Wear dry sandals or shoes, and do not stand barefoot on a wet floor.\nStep 2: Before you clean or move an appliance, switch it off and pull the plug out, holding the plug and not the cord.\nStep 3: Keep water away from sockets, multi-plugs and wires. Before you wash a floor, switch off the multi-plug, pull its plug out and lift it off the floor.\nStep 4: Look at the cord and plug before you use any appliance. If the cord is cut, the plug is burnt or a wire is bare, do not use it, and tell the customer.\nStep 5: If water is dripping on a socket or board, or the room is flooded, do not go in. Ask the customer to switch off the main switch first.\nStep 6: If you feel a tingle from a tap, a water pump or the body of an appliance, step back and do not touch it again. Ask the customer to switch off the main switch and call an electrician.\nStep 7: On roofs and outdoors, stay well away from overhead wires, do not carry long metal things near them, and never touch a wire that has fallen down.\nHazard: Water carries electricity into your body, and 220 volts can kill. Keep your hands dry, your feet dry and the plug out before you touch.\nRemember: Never bring water and electricity together. If something tingles, stop and have the main switch turned off.",
+          "summaryBn": "আপনি শিখবেন: বিদ্যুতের শক থেকে কীভাবে নিরাপদ থাকবেন, বিশেষ করে যেখানে পানি আছে।\nধাপ ১: কোনো সুইচ, প্লাগ বা যন্ত্রে হাত দেওয়ার আগে হাত শুকিয়ে নিন। শুকনো স্যান্ডেল বা জুতা পরুন, ভেজা মেঝেতে খালি পায়ে দাঁড়াবেন না।\nধাপ ২: কোনো যন্ত্র পরিষ্কার করা বা সরানোর আগে সুইচ বন্ধ করুন এবং তার না টেনে প্লাগ ধরে প্লাগ খুলুন।\nধাপ ৩: সকেট, মাল্টিপ্লাগ ও তার থেকে পানি দূরে রাখুন। মেঝে ধোয়ার আগে মাল্টিপ্লাগের সুইচ বন্ধ করুন, প্লাগ খুলুন এবং সেটি মেঝে থেকে তুলে রাখুন।\nধাপ ৪: যেকোনো যন্ত্র ব্যবহারের আগে তার ও প্লাগ দেখে নিন। তার কাটা, প্লাগ পোড়া বা ভেতরের তার বের হয়ে থাকলে সেটি ব্যবহার করবেন না, এবং গ্রাহককে জানান।\nধাপ ৫: সকেট বা বোর্ডের ওপর পানি পড়তে থাকলে, বা ঘরে পানি জমে থাকলে ভেতরে যাবেন না। আগে গ্রাহককে মেইন সুইচ বন্ধ করতে বলুন।\nধাপ ৬: কল, পানির পাম্প বা কোনো যন্ত্রের বডি ছুঁয়ে ঝিনঝিন লাগলে সরে আসুন এবং আর ছোঁবেন না। গ্রাহককে মেইন সুইচ বন্ধ করে ইলেকট্রিশিয়ান ডাকতে বলুন।\nধাপ ৭: ছাদে ও বাইরে মাথার ওপরের তার থেকে অনেক দূরে থাকুন, সেগুলোর কাছে লম্বা ধাতব জিনিস নেবেন না, এবং ছিঁড়ে পড়া তার কখনো ছোঁবেন না।\nঝুঁকি: পানি বিদ্যুৎকে আপনার শরীরে পৌঁছে দেয়, আর ২২০ ভোল্টে মৃত্যু হতে পারে। হাত দেওয়ার আগে হাত শুকনো, পা শুকনো এবং প্লাগ খোলা রাখুন।\nমনে রাখুন: পানি ও বিদ্যুৎ কখনো একসঙ্গে নয়। ঝিনঝিন লাগলে থামুন এবং মেইন সুইচ বন্ধ করান।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Working at height and ladders",
+          "titleBn": "উঁচু জায়গায় কাজ ও মইয়ের ব্যবহার",
+          "summaryEn": "You will learn: how to use a ladder safely, and when to refuse work at height.\nStep 1: Check the ladder: no cracked, bent or loose steps, and feet that do not slip. Do not climb on a chair, a drum or stacked bricks.\nStep 2: Stand the ladder on firm, level and dry ground. Open a folding ladder fully and lock it.\nStep 3: For a leaning ladder, put the foot 1 foot away from the wall for every 4 feet of height, and rest the top on something solid.\nStep 4: Ask a second person to hold the ladder at the bottom while you are on it.\nStep 5: Face the ladder as you climb and always keep three points on it: two hands and one foot, or two feet and one hand. Carry tools in a bag or belt, not in your hands.\nStep 6: Do not stand on the top two steps and do not lean out to the side. Climb down and move the ladder.\nStep 7: Keep the ladder away from electric wires, and do not use a ladder outdoors in rain or strong wind.\nHazard: A fall from only two metres can break bones or kill. Refuse work at a roof edge, outside a window or on a sunshade unless there is a guard rail, or a safety harness tied to a strong point.\nRemember: Firm ladder, a person holding it, three points on the ladder, no leaning out. No protection, no work at the edge.",
+          "summaryBn": "আপনি শিখবেন: মই কীভাবে নিরাপদে ব্যবহার করবেন, এবং কখন উঁচু জায়গার কাজ নিতে মানা করবেন।\nধাপ ১: মই দেখে নিন: কোনো ধাপ ফাটা, বাঁকা বা ঢিলা নয়, এবং পায়াগুলো পিছলায় না। চেয়ার, ড্রাম বা সাজানো ইটের ওপর উঠবেন না।\nধাপ ২: মই শক্ত, সমান ও শুকনো জায়গায় দাঁড় করান। ভাঁজ করা মই পুরোপুরি খুলে লক করুন।\nধাপ ৩: হেলান দেওয়া মইয়ের ক্ষেত্রে প্রতি ৪ ফুট উচ্চতার জন্য গোড়া দেয়াল থেকে ১ ফুট দূরে রাখুন, এবং মাথা শক্ত কিছুর ওপর ঠেকান।\nধাপ ৪: আপনি মইয়ে থাকার সময় আরেকজনকে নিচে মই ধরে রাখতে বলুন।\nধাপ ৫: মইয়ের দিকে মুখ করে উঠুন এবং সবসময় তিনটি জায়গা মইয়ে রাখুন: দুই হাত ও এক পা, অথবা দুই পা ও এক হাত। সরঞ্জাম হাতে নয়, ব্যাগ বা বেল্টে নিন।\nধাপ ৬: ওপরের দুই ধাপে দাঁড়াবেন না এবং পাশে ঝুঁকে কাজ করবেন না। নেমে এসে মই সরিয়ে নিন।\nধাপ ৭: মই বিদ্যুতের তার থেকে দূরে রাখুন, এবং বৃষ্টি বা জোরে বাতাসের সময় বাইরে মই ব্যবহার করবেন না।\nঝুঁকি: মাত্র দুই মিটার উঁচু থেকে পড়লেও হাড় ভাঙতে পারে বা মৃত্যু হতে পারে। রেলিং, অথবা শক্ত জায়গায় বাঁধা সেফটি হারনেস না থাকলে ছাদের কিনারে, জানালার বাইরে বা সানশেডের ওপর কাজ করবেন না।\nমনে রাখুন: শক্ত মই, একজন ধরে রাখবেন, মইয়ে তিন জায়গায় ধরা, পাশে ঝোঁকা নয়। সুরক্ষা না থাকলে কিনারে কাজ নয়।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Chemicals, cleaning products, lifting and carrying",
+          "titleBn": "রাসায়নিক ও পরিষ্কারক, ভারী জিনিস তোলা ও বহন",
+          "summaryEn": "You will learn: how to use chemicals safely, and how to lift a heavy load without hurting your back.\nStep 1: Read the label before you use any product. If a bottle has no label, do not use it.\nStep 2: Never mix two products. Bleach mixed with toilet cleaner or acid makes a poisonous gas.\nStep 3: Wear rubber gloves, open the windows and keep your face away from the product.\nStep 4: If a chemical touches your skin or eyes, rinse with clean water for 15 minutes. For the eyes, get medical help after rinsing.\nStep 5: Keep chemicals in their own closed bottles, never in a drinking-water bottle, and away from children and food.\nStep 6: Before you lift, tilt one corner of the load to feel its weight. If it is too heavy or too big, ask for help and do not lift it alone.\nStep 7: To lift, stand close with your feet apart, bend your knees, keep your back straight, hold the load close to your body and rise with your legs. To turn, move your feet and do not twist your waist.\nHazard: Mixed chemicals can harm your lungs, and lifting with a bent back can injure your spine. Use one product at a time, and lift with your legs.\nRemember: Read the label, never mix, bend your knees, and ask for help with heavy loads.",
+          "summaryBn": "আপনি শিখবেন: রাসায়নিক কীভাবে নিরাপদে ব্যবহার করবেন, এবং পিঠে আঘাত না পেয়ে কীভাবে ভারী জিনিস তুলবেন।\nধাপ ১: যেকোনো পরিষ্কারক ব্যবহারের আগে লেবেল পড়ুন। বোতলে লেবেল না থাকলে সেটি ব্যবহার করবেন না।\nধাপ ২: দুটি পরিষ্কারক কখনো মেশাবেন না। ব্লিচের সঙ্গে টয়লেট ক্লিনার বা অ্যাসিড মিশলে বিষাক্ত গ্যাস তৈরি হয়।\nধাপ ৩: রাবারের গ্লাভস পরুন, জানালা খুলে দিন এবং মুখ পরিষ্কারক থেকে দূরে রাখুন।\nধাপ ৪: রাসায়নিক ত্বকে বা চোখে লাগলে পরিষ্কার পানি দিয়ে ১৫ মিনিট ধুয়ে ফেলুন। চোখে লাগলে ধোয়ার পর চিকিৎসা নিন।\nধাপ ৫: রাসায়নিক তার নিজের বোতলে মুখ বন্ধ করে রাখুন, কখনো খাওয়ার পানির বোতলে নয়, এবং শিশু ও খাবার থেকে দূরে রাখুন।\nধাপ ৬: তোলার আগে জিনিসটির এক কোনা একটু কাত করে ওজন বুঝে নিন। বেশি ভারী বা বেশি বড় হলে সাহায্য চান, একা তুলবেন না।\nধাপ ৭: তোলার সময় দুই পা ফাঁক করে কাছে দাঁড়ান, হাঁটু ভাঁজ করুন, পিঠ সোজা রাখুন, জিনিসটি শরীরের কাছে ধরুন এবং পায়ের জোরে উঠুন। ঘোরার সময় পা সরান, কোমর মোচড়াবেন না।\nঝুঁকি: মেশানো রাসায়নিক ফুসফুসের ক্ষতি করতে পারে, আর পিঠ বাঁকিয়ে তুললে মেরুদণ্ডে আঘাত লাগতে পারে। একবারে একটি পরিষ্কারক ব্যবহার করুন, এবং পায়ের জোরে তুলুন।\nমনে রাখুন: লেবেল পড়ুন, কখনো মেশাবেন না, হাঁটু ভাঁজ করুন, আর ভারী জিনিসে সাহায্য চান।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Basic first aid, and when to call 999 or 109",
+          "titleBn": "প্রাথমিক চিকিৎসা, এবং কখন ৯৯৯ বা ১০৯-এ ফোন করবেন",
+          "summaryEn": "You will learn: basic first aid for cuts, burns and electric shock, and when to call 999 or 109.\nStep 1: Cut: press firmly on the wound with a clean cloth and keep pressing. Raise the hand or leg. When the bleeding stops, wash with clean water and cover with a clean bandage.\nStep 2: If the cut is deep, or the bleeding does not stop after 10 minutes of pressing, go to a hospital or call 999. If something is stuck in the wound, do not pull it out.\nStep 3: Burn: hold the burn under cool running water for 20 minutes. Take off rings or a watch near the burn before it swells.\nStep 4: Do not put ice, toothpaste, egg or oil on a burn, and do not burst blisters. Cover it loosely with a clean cloth. Go to a hospital for a large burn, a burn on the face or hands, or a burn from electricity or chemicals.\nStep 5: Electric shock: do not touch the person. Switch off the main switch or pull out the plug. If you cannot, push them away with a dry wooden stick.\nStep 6: When the power is off, call 999. If the person is not breathing, start chest compressions if you know how. Take every shock victim to a doctor.\nStep 7: Call 999 for fire, a serious injury, a person who is not breathing, or any danger to life. Call 109 if a woman or a child faces violence or harassment.\nHazard: A helper who touches a shocked person before the power is off gets the shock too. Cut the power first, then help.\nRemember: Press on a cut, cool a burn with water, cut the power in a shock. 999 for emergencies, 109 for violence against women and children.",
+          "summaryBn": "আপনি শিখবেন: কাটা, পোড়া ও বিদ্যুতের শকের প্রাথমিক চিকিৎসা, এবং কখন ৯৯৯ বা ১০৯-এ ফোন করবেন।\nধাপ ১: কাটা: পরিষ্কার কাপড় দিয়ে ক্ষতের ওপর জোরে চেপে ধরুন এবং চেপেই রাখুন। হাত বা পা উঁচু করে রাখুন। রক্ত বন্ধ হলে পরিষ্কার পানি দিয়ে ধুয়ে পরিষ্কার ব্যান্ডেজ দিয়ে ঢেকে দিন।\nধাপ ২: কাটা গভীর হলে, বা ১০ মিনিট চেপে রাখার পরও রক্ত বন্ধ না হলে হাসপাতালে যান অথবা ৯৯৯-এ ফোন করুন। ক্ষতে কিছু গেঁথে থাকলে সেটি টেনে বের করবেন না।\nধাপ ৩: পোড়া: পোড়া জায়গাটি ২০ মিনিট ঠান্ডা প্রবহমান পানির নিচে ধরে রাখুন। ফুলে ওঠার আগে পোড়া জায়গার কাছের আংটি বা ঘড়ি খুলে ফেলুন।\nধাপ ৪: পোড়া জায়গায় বরফ, টুথপেস্ট, ডিম বা তেল লাগাবেন না, এবং ফোসকা গালবেন না। পরিষ্কার কাপড় দিয়ে আলগা করে ঢেকে দিন। পোড়া বড় হলে, মুখে বা হাতে হলে, কিংবা বিদ্যুৎ বা রাসায়নিকে পুড়লে হাসপাতালে যান।\nধাপ ৫: বিদ্যুতের শক: মানুষটিকে ছোঁবেন না। মেইন সুইচ বন্ধ করুন বা প্লাগ খুলে ফেলুন। না পারলে শুকনো কাঠের লাঠি দিয়ে তাঁকে সরিয়ে দিন।\nধাপ ৬: বিদ্যুৎ বন্ধ হলে ৯৯৯-এ ফোন করুন। তিনি শ্বাস না নিলে এবং আপনার জানা থাকলে বুকে চাপ দেওয়া শুরু করুন। শক লাগা প্রত্যেককে ডাক্তারের কাছে নিন।\nধাপ ৭: আগুন, গুরুতর আঘাত, কেউ শ্বাস না নিলে, বা জীবনের যেকোনো ঝুঁকিতে ৯৯৯-এ ফোন করুন। কোনো নারী বা শিশু নির্যাতন বা হয়রানির শিকার হলে ১০৯-এ ফোন করুন।\nঝুঁকি: বিদ্যুৎ বন্ধ করার আগে শক লাগা মানুষকে ছুঁলে সাহায্যকারীরও শক লাগে। আগে বিদ্যুৎ বন্ধ করুন, তারপর সাহায্য করুন।\nমনে রাখুন: কাটায় চেপে ধরুন, পোড়ায় পানি দিন, শকে বিদ্যুৎ বন্ধ করুন। জরুরি অবস্থায় ৯৯৯, নারী ও শিশু নির্যাতনে ১০৯।",
+          "youtubeVideoId": null,
+          "durationS": 300,
+          "isSafety": true
+        }
+      ],
+      "questions": [
+        {
+          "promptEn": "You arrive for a kitchen job and smell gas. What do you do?",
+          "promptBn": "রান্নাঘরের কাজে গিয়ে গ্যাসের গন্ধ পেলেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Switch on the fan to clear the smell",
+              "bn": "গন্ধ দূর করতে ফ্যান চালানো"
+            },
+            {
+              "id": "b",
+              "en": "Light a match to find the leak",
+              "bn": "লিক খুঁজতে ম্যাচ জ্বালানো"
+            },
+            {
+              "id": "c",
+              "en": "Touch no switch, light no flame, open the doors and windows, go outside and tell the customer",
+              "bn": "কোনো সুইচে হাত না দেওয়া, আগুন না জ্বালানো, দরজা-জানালা খুলে বাইরে যাওয়া এবং গ্রাহককে জানানো"
+            },
+            {
+              "id": "d",
+              "en": "Start work and finish quickly",
+              "bn": "কাজ শুরু করে দ্রুত শেষ করা"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "A spark from a switch, or a flame, can set leaking gas on fire.",
+          "explanationBn": "সুইচের স্পার্ক বা আগুন থেকে লিক হওয়া গ্যাসে আগুন ধরে যেতে পারে।"
+        },
+        {
+          "promptEn": "When should you look for hazards at a work site?",
+          "promptBn": "কাজের জায়গায় ঝুঁকি কখন খুঁজে দেখবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Before you put your tools down and start",
+              "bn": "সরঞ্জাম নামিয়ে কাজ শুরুর আগে"
+            },
+            {
+              "id": "b",
+              "en": "After the job is finished",
+              "bn": "কাজ শেষ হওয়ার পরে"
+            },
+            {
+              "id": "c",
+              "en": "Only if the customer warns you",
+              "bn": "শুধু গ্রাহক সতর্ক করলে"
+            },
+            {
+              "id": "d",
+              "en": "Only on big jobs",
+              "bn": "শুধু বড় কাজে"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "A hazard that you find before starting can be removed before it hurts anyone.",
+          "explanationBn": "শুরুর আগে ঝুঁকি চোখে পড়লে কারও ক্ষতি হওয়ার আগেই তা সরানো যায়।"
+        },
+        {
+          "promptEn": "You must wash a floor. A multi-plug with a phone charger in it is lying on the floor. What do you do first?",
+          "promptBn": "আপনাকে মেঝে ধুতে হবে। মেঝেতে ফোনের চার্জার লাগানো একটি মাল্টিপ্লাগ পড়ে আছে। আগে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Wash carefully around it",
+              "bn": "সাবধানে তার চারপাশ ধোয়া"
+            },
+            {
+              "id": "b",
+              "en": "Switch it off, pull its plug out and lift it off the floor",
+              "bn": "সুইচ বন্ধ করা, প্লাগ খোলা এবং সেটি মেঝে থেকে তুলে রাখা"
+            },
+            {
+              "id": "c",
+              "en": "Cover it with a wet cloth",
+              "bn": "ভেজা কাপড় দিয়ে ঢেকে দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Push it aside with your wet foot",
+              "bn": "ভেজা পা দিয়ে একপাশে ঠেলে দেওয়া"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Water that reaches a live multi-plug can give a shock through the wet floor.",
+          "explanationBn": "চালু মাল্টিপ্লাগে পানি গেলে ভেজা মেঝে দিয়ে শক লাগতে পারে।"
+        },
+        {
+          "promptEn": "You touch a tap near the water pump and feel a tingle. What do you do?",
+          "promptBn": "পানির পাম্পের কাছের কল ছুঁয়ে ঝিনঝিন লাগল। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Hold it tighter to check again",
+              "bn": "আবার বোঝার জন্য শক্ত করে ধরা"
+            },
+            {
+              "id": "b",
+              "en": "Keep working, because it is only a small shock",
+              "bn": "কাজ চালিয়ে যাওয়া, কারণ এটি সামান্য শক"
+            },
+            {
+              "id": "c",
+              "en": "Pour water on the pump to cool it",
+              "bn": "পাম্প ঠান্ডা করতে তার ওপর পানি ঢালা"
+            },
+            {
+              "id": "d",
+              "en": "Step back, do not touch it again, and ask the customer to switch off the main switch and call an electrician",
+              "bn": "সরে আসা, আর না ছোঁয়া, এবং গ্রাহককে মেইন সুইচ বন্ধ করে ইলেকট্রিশিয়ান ডাকতে বলা"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "A tingle means current is leaking, and the next touch can be a full shock.",
+          "explanationBn": "ঝিনঝিন লাগা মানে কারেন্ট লিক হচ্ছে, পরের বার ছুঁলে পুরো শক লাগতে পারে।"
+        },
+        {
+          "promptEn": "You need to reach a ceiling light. The customer puts a plastic chair on a table for you. What do you do?",
+          "promptBn": "আপনাকে সিলিংয়ের লাইট পর্যন্ত পৌঁছাতে হবে। গ্রাহক টেবিলের ওপর একটি প্লাস্টিকের চেয়ার বসিয়ে দিলেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Climb on it carefully",
+              "bn": "সাবধানে তার ওপর ওঠা"
+            },
+            {
+              "id": "b",
+              "en": "Refuse, and use a firm ladder that a second person holds",
+              "bn": "মানা করা, এবং এমন শক্ত মই ব্যবহার করা যা আরেকজন ধরে রাখবেন"
+            },
+            {
+              "id": "c",
+              "en": "Put a second chair on top to get higher",
+              "bn": "আরও উঁচু হতে ওপরে আরেকটি চেয়ার বসানো"
+            },
+            {
+              "id": "d",
+              "en": "Jump up to reach the light",
+              "bn": "লাফ দিয়ে লাইট ধরার চেষ্টা করা"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "A chair on a table tips over easily, so climb only on a firm ladder that someone holds.",
+          "explanationBn": "টেবিলের ওপর চেয়ার সহজেই উল্টে যায়, তাই শুধু এমন শক্ত মইয়ে উঠুন যা কেউ ধরে রেখেছেন।"
+        },
+        {
+          "promptEn": "A customer asks you to clean the outside of a third-floor window while standing on the sunshade. There is no rail and no harness. What do you do?",
+          "promptBn": "গ্রাহক সানশেডের ওপর দাঁড়িয়ে তিনতলার জানালার বাইরের দিক পরিষ্কার করতে বলছেন। রেলিং বা হারনেস নেই। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Do it quickly",
+              "bn": "দ্রুত করে ফেলা"
+            },
+            {
+              "id": "b",
+              "en": "Do it barefoot for a better grip",
+              "bn": "ভালো করে পা আটকাতে খালি পায়ে করা"
+            },
+            {
+              "id": "c",
+              "en": "Tie a cloth rope around your waist and do it",
+              "bn": "কোমরে কাপড়ের দড়ি বেঁধে করা"
+            },
+            {
+              "id": "d",
+              "en": "Refuse the work",
+              "bn": "কাজটি করতে মানা করা"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Without a guard rail or a proper harness, one slip at that height can kill.",
+          "explanationBn": "রেলিং বা সঠিক হারনেস ছাড়া ওই উচ্চতায় একবার পা পিছলালেই মৃত্যু হতে পারে।"
+        },
+        {
+          "promptEn": "Toilet cleaner did not remove a stain. The customer tells you to pour bleach on top of it. What do you do?",
+          "promptBn": "টয়লেট ক্লিনারে দাগ উঠল না। গ্রাহক তার ওপর ব্লিচ ঢালতে বলছেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Do not mix them: rinse the cleaner away with water first, and use one product at a time",
+              "bn": "না মেশানো: আগে পানি দিয়ে ক্লিনার ধুয়ে ফেলা, এবং একবারে একটি পরিষ্কারক ব্যবহার করা"
+            },
+            {
+              "id": "b",
+              "en": "Pour the bleach and close the door",
+              "bn": "ব্লিচ ঢেলে দরজা বন্ধ করে দেওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Pour bleach and more toilet cleaner",
+              "bn": "ব্লিচ ও আরও টয়লেট ক্লিনার ঢালা"
+            },
+            {
+              "id": "d",
+              "en": "Mix the two in a bucket first",
+              "bn": "আগে বালতিতে দুটো মিশিয়ে নেওয়া"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Bleach mixed with toilet cleaner makes a poisonous gas.",
+          "explanationBn": "ব্লিচের সঙ্গে টয়লেট ক্লিনার মিশলে বিষাক্ত গ্যাস তৈরি হয়।"
+        },
+        {
+          "promptEn": "How do you lift a heavy box from the floor?",
+          "promptBn": "মেঝে থেকে ভারী বাক্স কীভাবে তুলবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Bend your back and pull it up fast",
+              "bn": "পিঠ বাঁকিয়ে দ্রুত টেনে তোলা"
+            },
+            {
+              "id": "b",
+              "en": "Hold it far from your body",
+              "bn": "শরীর থেকে দূরে ধরে রাখা"
+            },
+            {
+              "id": "c",
+              "en": "Bend your knees, keep your back straight and hold the box close",
+              "bn": "হাঁটু ভাঁজ করা, পিঠ সোজা রাখা এবং বাক্সটি শরীরের কাছে ধরা"
+            },
+            {
+              "id": "d",
+              "en": "Twist your waist as you lift",
+              "bn": "তোলার সময় কোমর মোচড়ানো"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Your legs are stronger than your back, so your legs should do the lifting.",
+          "explanationBn": "পিঠের চেয়ে পায়ের জোর বেশি, তাই তোলার কাজটি পা দিয়ে করা উচিত।"
+        },
+        {
+          "promptEn": "A co-worker burns a hand on a hot iron. What is the right first aid?",
+          "promptBn": "সহকর্মীর হাত গরম ইস্ত্রিতে পুড়ে গেল। সঠিক প্রাথমিক চিকিৎসা কোনটি?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Put toothpaste on it",
+              "bn": "টুথপেস্ট লাগানো"
+            },
+            {
+              "id": "b",
+              "en": "Hold it under cool running water for 20 minutes",
+              "bn": "২০ মিনিট ঠান্ডা প্রবহমান পানির নিচে ধরে রাখা"
+            },
+            {
+              "id": "c",
+              "en": "Put ice directly on it",
+              "bn": "সরাসরি বরফ লাগানো"
+            },
+            {
+              "id": "d",
+              "en": "Burst the blister",
+              "bn": "ফোসকা গেলে দেওয়া"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Cool running water takes the heat out of the skin and reduces the damage.",
+          "explanationBn": "ঠান্ডা প্রবহমান পানি ত্বক থেকে তাপ বের করে নেয় এবং ক্ষতি কমায়।"
+        },
+        {
+          "promptEn": "You cut your hand and it is bleeding heavily. What do you do first?",
+          "promptBn": "আপনার হাত কেটে অনেক রক্ত পড়ছে। আগে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Press firmly on the wound with a clean cloth and keep pressing",
+              "bn": "পরিষ্কার কাপড় দিয়ে ক্ষতের ওপর জোরে চেপে ধরা এবং চেপেই রাখা"
+            },
+            {
+              "id": "b",
+              "en": "Wash it under the tap for a long time",
+              "bn": "অনেকক্ষণ কলের নিচে ধোয়া"
+            },
+            {
+              "id": "c",
+              "en": "Leave it open to dry",
+              "bn": "শুকানোর জন্য খোলা রেখে দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Tie a wire tightly around your wrist",
+              "bn": "কবজিতে তার দিয়ে শক্ত করে বাঁধা"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Firm, steady pressure on the wound is the first step to stop bleeding.",
+          "explanationBn": "ক্ষতের ওপর জোরে ও একটানা চেপে রাখাই রক্ত বন্ধ করার প্রথম ধাপ।"
+        },
+        {
+          "promptEn": "A woman at your work site tells you she is beaten at home and asks where she can get help. Which helpline do you tell her?",
+          "promptBn": "কাজের জায়গায় একজন নারী জানালেন তাঁকে বাসায় মারধর করা হয়, এবং কোথায় সাহায্য পাবেন জানতে চাইলেন। তাঁকে কোন হেল্পলাইনের কথা বলবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "911",
+              "bn": "৯১১"
+            },
+            {
+              "id": "b",
+              "en": "100",
+              "bn": "১০০"
+            },
+            {
+              "id": "c",
+              "en": "112",
+              "bn": "১১২"
+            },
+            {
+              "id": "d",
+              "en": "109",
+              "bn": "১০৯"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "109 is the helpline for violence against women and children, and 999 is for any danger to life.",
+          "explanationBn": "১০৯ নারী ও শিশু নির্যাতনের হেল্পলাইন, আর জীবনের যেকোনো ঝুঁকিতে ৯৯৯।"
+        },
+        {
+          "promptEn": "A person is stuck to a live wire. What do you do first?",
+          "promptBn": "একজন কারেন্ট থাকা তারে আটকে গেছেন। আগে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Pull them by the arm",
+              "bn": "হাত ধরে টানা"
+            },
+            {
+              "id": "b",
+              "en": "Pour water on them",
+              "bn": "তাঁর গায়ে পানি ঢালা"
+            },
+            {
+              "id": "c",
+              "en": "Do not touch them, and switch off the main switch or pull out the plug",
+              "bn": "তাঁকে না ছোঁয়া, এবং মেইন সুইচ বন্ধ করা বা প্লাগ খুলে ফেলা"
+            },
+            {
+              "id": "d",
+              "en": "Wait for them to let go",
+              "bn": "তিনি নিজে ছেড়ে দেওয়া পর্যন্ত অপেক্ষা করা"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "If you touch them before the power is off, you get the shock too.",
+          "explanationBn": "বিদ্যুৎ বন্ধ করার আগে ছুঁলে আপনারও শক লাগবে।"
+        },
+        {
+          "promptEn": "At a job you see bare wires hanging over a wet floor, and you cannot make the place safe. What do you do?",
+          "promptBn": "কাজে গিয়ে দেখলেন ভেজা মেঝের ওপর খোলা তার ঝুলছে, এবং আপনি জায়গাটি নিরাপদ করতে পারছেন না। কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Work carefully around them",
+              "bn": "সাবধানে পাশ কাটিয়ে কাজ করা"
+            },
+            {
+              "id": "b",
+              "en": "Do not start, and tell the customer why",
+              "bn": "কাজ শুরু না করা, এবং কারণটি গ্রাহককে জানানো"
+            },
+            {
+              "id": "c",
+              "en": "Push the wires aside with your hand",
+              "bn": "হাত দিয়ে তারগুলো সরিয়ে দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Finish the job fast and leave",
+              "bn": "দ্রুত কাজ শেষ করে চলে যাওয়া"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "No job is worth an injury, so do not start work in a place you cannot make safe.",
+          "explanationBn": "কোনো কাজই আঘাত পাওয়ার মতো জরুরি নয়, তাই যে জায়গা নিরাপদ করতে পারছেন না সেখানে কাজ শুরু করবেন না।"
+        }
+      ]
+    }
+  ]
+}

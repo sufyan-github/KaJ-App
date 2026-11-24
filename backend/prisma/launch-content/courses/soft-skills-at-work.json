@@ -1,0 +1,435 @@
+{
+  "courses": [
+    {
+      "slug": "soft-skills-at-work",
+      "skillSlug": null,
+      "titleEn": "Soft skills at work",
+      "titleBn": "কাজের জায়গায় ভালো আচরণ ও অভ্যাস",
+      "summaryEn": "The habits that make customers and teams trust you: being on time and reliable, working well in a team, looking clean and showing respect in a home or shop, and keeping promises and admitting mistakes.",
+      "summaryBn": "যেসব অভ্যাসে গ্রাহক ও সহকর্মীরা আপনার ওপর ভরসা করেন: সময় মানা ও নির্ভরযোগ্য হওয়া, দলে মিলেমিশে কাজ করা, বাসা বা দোকানে পরিচ্ছন্ন থাকা ও সম্মান দেখানো, এবং কথা রাখা ও ভুল স্বীকার করা।",
+      "minutes": 20,
+      "estDataMb": 1,
+      "passMarkPct": 70,
+      "questionCount": 10,
+      "isSafetyCritical": false,
+      "sortOrder": 23,
+      "lessons": [
+        {
+          "titleEn": "Punctuality and reliability",
+          "titleBn": "সময় মানা ও নির্ভরযোগ্যতা",
+          "summaryEn": "You will learn: the daily habits that make you on time and dependable.\nStep 1: The night before, check tomorrow's jobs in the app, pack your tools and charge your phone.\nStep 2: Work out when to leave: take the start time, subtract the travel time, then subtract 15 more minutes for traffic, rain or a closed rail gate.\nStep 3: Set your alarm for the time you must leave home, not for the time the job starts.\nStep 4: Do not take two jobs too close together. Leave time between them for travel and for a job that runs late.\nStep 5: Accept only jobs you are sure you can do. Saying no early is more reliable than saying yes and not coming.\nStep 6: Finish on the day you promised. If the work will take longer, tell the customer before the promised time, not after it.\nRemember: reliability means doing what you said, when you said, every time. Customers call back the worker they can count on.",
+          "summaryBn": "আপনি শিখবেন: প্রতিদিনের কোন অভ্যাসগুলো আপনাকে সময়নিষ্ঠ ও নির্ভরযোগ্য করে।\nধাপ ১: আগের রাতে অ্যাপে পরদিনের কাজগুলো দেখে নিন, যন্ত্রপাতি গুছিয়ে রাখুন এবং ফোনে চার্জ দিন।\nধাপ ২: কখন বের হবেন হিসাব করুন: কাজ শুরুর সময় থেকে যাতায়াতের সময় বাদ দিন, তারপর যানজট, বৃষ্টি বা রেলগেট বন্ধ থাকার জন্য আরও ১৫ মিনিট বাদ দিন।\nধাপ ৩: অ্যালার্ম দিন বাসা থেকে বের হওয়ার সময়ে, কাজ শুরুর সময়ে নয়।\nধাপ ৪: খুব কাছাকাছি সময়ে দুটি কাজ নেবেন না। যাতায়াত এবং আগের কাজ দেরিতে শেষ হওয়ার জন্য মাঝখানে সময় রাখুন।\nধাপ ৫: যে কাজ নিশ্চিত করতে পারবেন শুধু সেটিই নিন। হ্যাঁ বলে না যাওয়ার চেয়ে আগেই না বলা বেশি নির্ভরযোগ্য।\nধাপ ৬: যে দিন কথা দিয়েছেন সে দিনই কাজ শেষ করুন। বেশি সময় লাগলে কথা দেওয়া সময়ের আগেই গ্রাহককে জানান, পরে নয়।\nমনে রাখুন: নির্ভরযোগ্যতা মানে যা বলেছেন তা যখন বলেছেন তখনই করা, প্রতিবার। যার ওপর ভরসা করা যায়, গ্রাহক তাঁকেই আবার ডাকেন।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Teamwork and taking instructions",
+          "titleBn": "দলে কাজ করা ও নির্দেশ বুঝে নেওয়া",
+          "summaryEn": "You will learn: how to take instructions correctly and work well with a senior, a helper or a team.\nStep 1: When you get an instruction, listen to the end, then repeat it back: \"So I cut three pipes, each two feet long. Correct?\"\nStep 2: If you do not understand, ask at once. Asking is not weakness. Guessing causes mistakes.\nStep 3: Know who is in charge of the job. If two people tell you different things, ask the person in charge which one to follow.\nStep 4: Finish your own part fully, then ask, \"What should I do next?\" Do not sit idle or look at your phone while others are working.\nStep 5: Before you leave or hand over the work, tell the team what is done and what is not: \"Two sockets are fitted. The third is not connected yet.\"\nStep 6: If you disagree, say so politely, away from the customer, and give your reason. Do not argue in front of the customer.\nStep 7: If someone tells you to do something unsafe, say no politely, explain the danger, and do not do it.\nRemember: a good team member listens, asks, finishes their own part and tells the others what is done.",
+          "summaryBn": "আপনি শিখবেন: কীভাবে নির্দেশ ঠিকমতো বুঝে নেবেন এবং ওস্তাদ, সহকারী বা দলের সঙ্গে মিলেমিশে কাজ করবেন।\nধাপ ১: নির্দেশ পেলে শেষ পর্যন্ত শুনুন, তারপর আবার বলে মিলিয়ে নিন: \"তাহলে তিনটি পাইপ কাটব, প্রতিটি দুই ফুট করে। ঠিক আছে?\"\nধাপ ২: না বুঝলে সঙ্গে সঙ্গে জিজ্ঞেস করুন। জিজ্ঞেস করা দুর্বলতা নয়। আন্দাজে করলে ভুল হয়।\nধাপ ৩: কাজের দায়িত্বে কে আছেন তা জেনে নিন। দুজন দুই রকম কথা বললে দায়িত্বে থাকা মানুষটিকে জিজ্ঞেস করুন কোনটি মানবেন।\nধাপ ৪: নিজের অংশ পুরোপুরি শেষ করুন, তারপর জিজ্ঞেস করুন, \"এরপর কী করব?\" অন্যরা কাজ করার সময় বসে থাকবেন না বা ফোন দেখবেন না।\nধাপ ৫: চলে যাওয়ার বা কাজ বুঝিয়ে দেওয়ার আগে দলকে বলুন কী হয়েছে আর কী হয়নি: \"দুটি সকেট লাগানো হয়েছে। তৃতীয়টিতে এখনো লাইন দেওয়া হয়নি।\"\nধাপ ৬: একমত না হলে ভদ্রভাবে, গ্রাহকের আড়ালে, কারণসহ বলুন। গ্রাহকের সামনে তর্ক করবেন না।\nধাপ ৭: কেউ অনিরাপদ কিছু করতে বললে ভদ্রভাবে না বলুন, বিপদটি বুঝিয়ে বলুন, এবং কাজটি করবেন না।\nমনে রাখুন: ভালো সহকর্মী শোনেন, জিজ্ঞেস করেন, নিজের অংশ শেষ করেন এবং কী হয়েছে তা অন্যদের জানান।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Appearance, cleanliness and respect",
+          "titleBn": "পোশাক, পরিচ্ছন্নতা ও সম্মান",
+          "summaryEn": "You will learn: how your appearance, cleanliness and manners show respect in someone's home or shop.\nStep 1: Before you leave home, wash your hands and face and put on clean clothes that are not torn. Carry a small towel, and a spare shirt if the work is dirty.\nStep 2: At the door, ask where to leave your shoes, and wipe your feet and your tool bag so that you bring no dirt inside.\nStep 3: Do not smoke, chew paan or tobacco, or spit anywhere in or near the home or shop.\nStep 4: Ask before you use anything: the bathroom, drinking water, a chair, or a socket for your tools or phone.\nStep 5: Spread an old cloth or newspaper under your work, so that dust and water do not fall on the floor or furniture.\nStep 6: Speak respectfully to everyone in the house: women, elders, children and house help. Do not stare, do not ask personal questions, and do not play music or talk loudly on the phone.\nStep 7: In a shop, work to one side so that the shop's customers can pass, and stop for a moment when the shopkeeper needs to serve someone.\nRemember: people look at you before they look at your work. A clean, polite worker is trusted from the first minute.",
+          "summaryBn": "আপনি শিখবেন: আপনার পোশাক, পরিচ্ছন্নতা ও ব্যবহার কীভাবে কারও বাসা বা দোকানে সম্মান দেখায়।\nধাপ ১: বাসা থেকে বের হওয়ার আগে হাত-মুখ ধুয়ে পরিষ্কার ও না-ছেঁড়া কাপড় পরুন। সঙ্গে একটি ছোট গামছা রাখুন, আর কাজ নোংরা হলে একটি বাড়তি জামা নিন।\nধাপ ২: দরজায় জিজ্ঞেস করুন জুতা কোথায় রাখবেন, এবং পা ও যন্ত্রপাতির ব্যাগ মুছে নিন, যাতে ভেতরে ময়লা না যায়।\nধাপ ৩: বাসা বা দোকানের ভেতরে বা আশপাশে ধূমপান করবেন না, পান বা জর্দা খাবেন না, থুতুও ফেলবেন না।\nধাপ ৪: কিছু ব্যবহারের আগে অনুমতি নিন: বাথরুম, খাবার পানি, চেয়ার, কিংবা যন্ত্র বা ফোন চার্জের সকেট।\nধাপ ৫: কাজের নিচে পুরোনো কাপড় বা খবরের কাগজ বিছিয়ে নিন, যাতে মেঝে বা আসবাবে ধুলো ও পানি না পড়ে।\nধাপ ৬: বাসার সবার সঙ্গে সম্মান দিয়ে কথা বলুন: নারী, বয়স্ক, শিশু ও গৃহকর্মী। একদৃষ্টে তাকাবেন না, ব্যক্তিগত প্রশ্ন করবেন না, গান বাজাবেন না বা ফোনে জোরে কথা বলবেন না।\nধাপ ৭: দোকানে এক পাশে কাজ করুন, যাতে ক্রেতারা চলাচল করতে পারেন, এবং দোকানদার কোনো ক্রেতাকে সামলানোর সময় একটু থামুন।\nমনে রাখুন: মানুষ আপনার কাজের আগে আপনাকে দেখে। পরিচ্ছন্ন ও ভদ্র কর্মীর ওপর প্রথম মিনিট থেকেই ভরসা জন্মে।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Keep promises and own up to mistakes",
+          "titleBn": "কথা রাখুন, ভুল স্বীকার করুন",
+          "summaryEn": "You will learn: how to make only promises you can keep, and what to do when you make a mistake.\nStep 1: Promise only what you are sure of. If a job may take two days, do not say one day.\nStep 2: Write every promise in your notebook or in the app chat: what you will do, and by when.\nStep 3: If you cannot keep a promise, tell the customer before the time passes and give a new time.\nStep 4: If you break or damage something, stop work and tell the customer at once. Do not hide it, and do not blame someone else.\nStep 5: Say three things: what happened, that you are sorry, and how you will put it right. \"I cracked this tile while drilling. I am sorry. I will replace it tomorrow at my own cost.\"\nStep 6: Put it right as you said, and show the customer the finished repair.\nStep 7: Afterwards, think about why it happened, and change one habit so that it does not happen again.\nRemember: customers forgive an honest mistake. They do not forgive a hidden one.",
+          "summaryBn": "আপনি শিখবেন: কীভাবে শুধু রাখতে পারবেন এমন কথাই দেবেন, এবং ভুল হলে কী করবেন।\nধাপ ১: যা নিশ্চিত পারবেন শুধু সেটুকুরই কথা দিন। কাজে দুই দিন লাগতে পারে মনে হলে এক দিন বলবেন না।\nধাপ ২: প্রতিটি কথা খাতায় বা অ্যাপের চ্যাটে লিখে রাখুন: কী করবেন, এবং কবের মধ্যে।\nধাপ ৩: কথা রাখতে না পারলে সময় পার হওয়ার আগেই গ্রাহককে জানান এবং নতুন সময় দিন।\nধাপ ৪: কিছু ভেঙে গেলে বা নষ্ট হলে কাজ থামিয়ে সঙ্গে সঙ্গে গ্রাহককে জানান। লুকাবেন না, অন্যের ঘাড়ে দোষও চাপাবেন না।\nধাপ ৫: তিনটি কথা বলুন: কী হয়েছে, আপনি দুঃখিত, এবং কীভাবে ঠিক করবেন। \"ড্রিল করতে গিয়ে এই টাইলটি ফেটে গেছে। আমি দুঃখিত। কাল নিজের খরচে বদলে দেব।\"\nধাপ ৬: যেভাবে বলেছেন সেভাবে ঠিক করে দিন, এবং ঠিক করা কাজটি গ্রাহককে দেখান।\nধাপ ৭: পরে ভেবে দেখুন কেন এমন হলো, এবং একটি অভ্যাস বদলান, যাতে আর না হয়।\nমনে রাখুন: সৎভাবে স্বীকার করা ভুল গ্রাহক মাফ করেন। লুকানো ভুল মাফ করেন না।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": false
+        }
+      ],
+      "questions": [
+        {
+          "promptEn": "Your job starts at 10:00 in the morning and the journey takes 30 minutes. When should you leave home?",
+          "promptBn": "আপনার কাজ শুরু সকাল ১০টায়, যেতে লাগে ৩০ মিনিট। বাসা থেকে কখন বের হওয়া উচিত?",
+          "options": [
+            {
+              "id": "a",
+              "en": "At 10:00",
+              "bn": "সকাল ১০টায়"
+            },
+            {
+              "id": "b",
+              "en": "At 9:45",
+              "bn": "৯টা ৪৫ মিনিটে"
+            },
+            {
+              "id": "c",
+              "en": "At 9:15",
+              "bn": "৯টা ১৫ মিনিটে"
+            },
+            {
+              "id": "d",
+              "en": "At 9:30",
+              "bn": "৯টা ৩০ মিনিটে"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Take off 30 minutes for travel and 15 more for delays on the road.",
+          "explanationBn": "যাতায়াতের ৩০ মিনিট এবং রাস্তায় দেরির জন্য আরও ১৫ মিনিট বাদ দিন।"
+        },
+        {
+          "promptEn": "You have a job from 10 to 12. Another customer on the far side of the town asks you to come at 12:00 the same day. What do you do?",
+          "promptBn": "আপনার সকাল ১০টা থেকে ১২টা পর্যন্ত একটি কাজ আছে। শহরের অন্য প্রান্তের আরেক গ্রাহক একই দিন ১২টায় আসতে বললেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Accept, and hope the first job ends early",
+              "bn": "রাজি হওয়া, আর আশা করা যে প্রথম কাজ আগে শেষ হবে"
+            },
+            {
+              "id": "b",
+              "en": "Accept, and leave the first job unfinished",
+              "bn": "রাজি হওয়া, এবং প্রথম কাজ অসমাপ্ত রেখে যাওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Accept, and arrive late without telling them",
+              "bn": "রাজি হওয়া, এবং না জানিয়ে দেরিতে পৌঁছানো"
+            },
+            {
+              "id": "d",
+              "en": "Offer the second customer a later time that you can surely keep",
+              "bn": "দ্বিতীয় গ্রাহককে এমন একটি পরের সময় বলা, যা আপনি নিশ্চিত রাখতে পারবেন"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Two jobs need a gap for travel and delays; a time you can keep is better than a time you cannot.",
+          "explanationBn": "দুই কাজের মাঝে যাতায়াত ও দেরির জন্য ফাঁক লাগে; যে সময় রাখতে পারবেন সেটিই বলা ভালো।"
+        },
+        {
+          "promptEn": "Your senior gives a long instruction and you did not understand one part. What do you do?",
+          "promptBn": "ওস্তাদ একটি লম্বা নির্দেশ দিলেন, তার একটি অংশ আপনি বোঝেননি। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Ask at once, then repeat the instruction back",
+              "bn": "সঙ্গে সঙ্গে জিজ্ঞেস করা, তারপর নির্দেশটি আবার বলে মিলিয়ে নেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Guess and start",
+              "bn": "আন্দাজ করে শুরু করে দেওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Stay quiet so that you do not look weak",
+              "bn": "দুর্বল না দেখাতে চুপ থাকা"
+            },
+            {
+              "id": "d",
+              "en": "Ask the customer instead of the senior",
+              "bn": "ওস্তাদের বদলে গ্রাহককে জিজ্ঞেস করা"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "One question now costs a few seconds; a wrong guess can cost hours and materials.",
+          "explanationBn": "এখন একটি প্রশ্নে কয়েক সেকেন্ড লাগে; ভুল আন্দাজে ঘণ্টার পর ঘণ্টা সময় ও মালামাল নষ্ট হতে পারে।"
+        },
+        {
+          "promptEn": "The senior in charge tells you to fit the pipe on the left wall. A helper tells you to fit it on the right wall. What do you do?",
+          "promptBn": "দায়িত্বে থাকা ওস্তাদ বললেন পাইপ বাঁ দেয়ালে বসাতে। এক সহকারী বললেন ডান দেয়ালে বসাতে। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Follow the helper, because he spoke last",
+              "bn": "সহকারীর কথা মানা, কারণ তিনি পরে বলেছেন"
+            },
+            {
+              "id": "b",
+              "en": "Ask the person in charge which one to follow",
+              "bn": "দায়িত্বে থাকা মানুষটিকে জিজ্ঞেস করা কোনটি মানবেন"
+            },
+            {
+              "id": "c",
+              "en": "Choose the easier one yourself",
+              "bn": "নিজে যেটি সহজ সেটি বেছে নেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Stop working and wait silently",
+              "bn": "কাজ থামিয়ে চুপচাপ বসে থাকা"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "One person is in charge of the job, and only that person can settle two different instructions.",
+          "explanationBn": "কাজের দায়িত্বে একজনই থাকেন, আর দুই রকম নির্দেশের মীমাংসা তিনিই করতে পারেন।"
+        },
+        {
+          "promptEn": "At a customer's home you need to charge the battery of your drill. What do you do?",
+          "promptBn": "গ্রাহকের বাসায় আপনার ড্রিলের ব্যাটারি চার্জ দিতে হবে। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Plug it into the nearest socket",
+              "bn": "কাছের সকেটে লাগিয়ে দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Unplug the customer's fan and use that socket",
+              "bn": "গ্রাহকের ফ্যানের প্লাগ খুলে সেই সকেট ব্যবহার করা"
+            },
+            {
+              "id": "c",
+              "en": "Ask the customer which socket you may use",
+              "bn": "গ্রাহককে জিজ্ঞেস করা কোন সকেট ব্যবহার করতে পারেন"
+            },
+            {
+              "id": "d",
+              "en": "Go into another room to look for a socket",
+              "bn": "সকেট খুঁজতে অন্য ঘরে যাওয়া"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Everything in the home belongs to the customer, so ask before you use it.",
+          "explanationBn": "বাসার সব কিছুই গ্রাহকের, তাই ব্যবহারের আগে অনুমতি নিন।"
+        },
+        {
+          "promptEn": "You are going to drill a wall in the customer's sitting room. What do you do before you start?",
+          "promptBn": "গ্রাহকের বসার ঘরের দেয়ালে ড্রিল করবেন। শুরুর আগে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Start; you can sweep at the end",
+              "bn": "শুরু করে দেওয়া; শেষে ঝাড়ু দিলেই হবে"
+            },
+            {
+              "id": "b",
+              "en": "Put the customer's cushion on the floor to catch the dust",
+              "bn": "ধুলো ধরতে গ্রাহকের কুশন মেঝেতে রাখা"
+            },
+            {
+              "id": "c",
+              "en": "Tell the family to clean up after you leave",
+              "bn": "পরিবারকে বলা, আপনি যাওয়ার পর পরিষ্কার করে নিতে"
+            },
+            {
+              "id": "d",
+              "en": "Spread an old cloth or newspaper under the work",
+              "bn": "কাজের নিচে পুরোনো কাপড় বা খবরের কাগজ বিছিয়ে নেওয়া"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Covering the floor first keeps dust off the customer's floor and furniture.",
+          "explanationBn": "আগে মেঝে ঢেকে নিলে গ্রাহকের মেঝে ও আসবাবে ধুলো পড়ে না।"
+        },
+        {
+          "promptEn": "You crack a floor tile while drilling. The customer is in another room and has not seen it. What do you do?",
+          "promptBn": "ড্রিল করতে গিয়ে মেঝের একটি টাইল ফেটে গেল। গ্রাহক অন্য ঘরে, দেখেননি। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Stop, tell the customer at once, say sorry, and say how you will put it right",
+              "bn": "থেমে সঙ্গে সঙ্গে গ্রাহককে জানানো, দুঃখ প্রকাশ করা এবং কীভাবে ঠিক করবেন তা বলা"
+            },
+            {
+              "id": "b",
+              "en": "Cover it with the doormat and say nothing",
+              "bn": "পাপোশ দিয়ে ঢেকে রাখা এবং কিছু না বলা"
+            },
+            {
+              "id": "c",
+              "en": "Say that it was already cracked",
+              "bn": "বলা যে আগে থেকেই ফাটা ছিল"
+            },
+            {
+              "id": "d",
+              "en": "Finish quickly and leave",
+              "bn": "তাড়াতাড়ি কাজ শেষ করে চলে যাওয়া"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "A hidden mistake is found later and destroys trust; an honest one can be put right.",
+          "explanationBn": "লুকানো ভুল পরে ধরা পড়ে এবং বিশ্বাস নষ্ট করে; স্বীকার করা ভুল ঠিক করে দেওয়া যায়।"
+        },
+        {
+          "promptEn": "You think a job will take two days. The customer asks, \"Can you finish it tomorrow?\" What do you say?",
+          "promptBn": "আপনার ধারণা কাজটিতে দুই দিন লাগবে। গ্রাহক জিজ্ঞেস করলেন, \"কালকের মধ্যে শেষ করতে পারবেন?\" আপনি কী বলবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "\"Yes, no problem,\" to keep them happy",
+              "bn": "খুশি রাখতে বলা, \"জি, কোনো সমস্যা নেই\""
+            },
+            {
+              "id": "b",
+              "en": "\"It may take two days. I will finish by the day after tomorrow.\"",
+              "bn": "\"দুই দিন লাগতে পারে। পরশুর মধ্যে শেষ করে দেব।\""
+            },
+            {
+              "id": "c",
+              "en": "\"I cannot say when it will be done.\"",
+              "bn": "\"কবে হবে বলতে পারছি না।\""
+            },
+            {
+              "id": "d",
+              "en": "\"Yes,\" and then work fast and carelessly",
+              "bn": "\"জি\" বলা, তারপর তাড়াহুড়ো করে যেনতেনভাবে কাজ করা"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Promise only what you are sure of; a two-day promise kept is better than a one-day promise broken.",
+          "explanationBn": "যা নিশ্চিত পারবেন তারই কথা দিন; এক দিনের ভাঙা কথার চেয়ে দুই দিনের রাখা কথা ভালো।"
+        },
+        {
+          "promptEn": "Your senior tells you to join a wire without switching off the main switch, \"to save time\". What do you do?",
+          "promptBn": "ওস্তাদ \"সময় বাঁচাতে\" মেইন সুইচ বন্ধ না করেই তার জোড়া দিতে বললেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Do it quickly and carefully",
+              "bn": "তাড়াতাড়ি ও সাবধানে করে ফেলা"
+            },
+            {
+              "id": "b",
+              "en": "Do it, because he is the senior",
+              "bn": "করে ফেলা, কারণ তিনি ওস্তাদ"
+            },
+            {
+              "id": "c",
+              "en": "Say no politely, explain the danger, and do not do it",
+              "bn": "ভদ্রভাবে না বলা, বিপদটি বুঝিয়ে বলা, এবং কাজটি না করা"
+            },
+            {
+              "id": "d",
+              "en": "Ask the helper to do it instead of you",
+              "bn": "নিজে না করে সহকারীকে দিয়ে করানো"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "A live wire can kill; no instruction and no saved time is worth a life.",
+          "explanationBn": "চালু লাইনের তারে মৃত্যু হতে পারে; কোনো নির্দেশ বা সময় বাঁচানো জীবনের চেয়ে বড় নয়।"
+        },
+        {
+          "promptEn": "You think your teammate is fitting something the wrong way. The customer is watching. What do you do?",
+          "promptBn": "আপনার মনে হচ্ছে সহকর্মী একটি জিনিস ভুলভাবে লাগাচ্ছেন। গ্রাহক দেখছেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Tell him loudly that he is wrong",
+              "bn": "জোরে বলা যে তিনি ভুল করছেন"
+            },
+            {
+              "id": "b",
+              "en": "Speak to him politely, away from the customer, and give your reason",
+              "bn": "গ্রাহকের আড়ালে তাঁকে ভদ্রভাবে কারণসহ বলা"
+            },
+            {
+              "id": "c",
+              "en": "Say nothing, because it is not your part",
+              "bn": "কিছু না বলা, কারণ ওটা আপনার অংশ নয়"
+            },
+            {
+              "id": "d",
+              "en": "Tell the customer that he does poor work",
+              "bn": "গ্রাহককে বলা যে তাঁর কাজ ভালো নয়"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Arguing in front of the customer makes the whole team look bad; a quiet word solves the problem.",
+          "explanationBn": "গ্রাহকের সামনে তর্ক করলে পুরো দলই ছোট হয়; আড়ালে শান্তভাবে বললে সমস্যা মেটে।"
+        },
+        {
+          "promptEn": "At noon you realise that you cannot finish today as you promised. What do you do?",
+          "promptBn": "দুপুরে বুঝলেন, কথা দেওয়া সত্ত্বেও আজ কাজ শেষ করতে পারবেন না। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Say nothing and leave in the evening",
+              "bn": "কিছু না বলে সন্ধ্যায় চলে যাওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Tell the customer tomorrow morning",
+              "bn": "কাল সকালে গ্রাহককে জানানো"
+            },
+            {
+              "id": "c",
+              "en": "Switch off your phone",
+              "bn": "ফোন বন্ধ করে রাখা"
+            },
+            {
+              "id": "d",
+              "en": "Tell the customer now and give a new finishing time",
+              "bn": "এখনই গ্রাহককে জানানো এবং কাজ শেষের নতুন সময় দেওয়া"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Bad news told early is a small problem; told late, it is a broken promise.",
+          "explanationBn": "খারাপ খবর আগে জানালে তা ছোট সমস্যা; দেরিতে জানালে তা কথা না রাখা।"
+        },
+        {
+          "promptEn": "You are working in a shop, and you have the habit of chewing paan. What is right?",
+          "promptBn": "আপনি একটি দোকানে কাজ করছেন, আর আপনার পান খাওয়ার অভ্যাস আছে। কোনটি সঠিক?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Do not chew or spit in or near the shop while you work",
+              "bn": "কাজের সময় দোকানের ভেতরে বা আশপাশে পান না খাওয়া ও থুতু না ফেলা"
+            },
+            {
+              "id": "b",
+              "en": "Chew, but spit just outside the door",
+              "bn": "খাওয়া, তবে দরজার ঠিক বাইরে থুতু ফেলা"
+            },
+            {
+              "id": "c",
+              "en": "Chew, and spit in a corner",
+              "bn": "খাওয়া, এবং এক কোনায় থুতু ফেলা"
+            },
+            {
+              "id": "d",
+              "en": "Offer paan to the shop's customers",
+              "bn": "দোকানের ক্রেতাদের পান সাধা"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Paan stains and spit make a place dirty and show disrespect to the owner.",
+          "explanationBn": "পানের দাগ ও থুতু জায়গা নোংরা করে এবং মালিকের প্রতি অসম্মান দেখায়।"
+        },
+        {
+          "promptEn": "You must leave at 4 pm, and a teammate will continue the wiring job. What do you do before you go?",
+          "promptBn": "বিকেল ৪টায় আপনাকে চলে যেতে হবে, আর ওয়্যারিংয়ের কাজ এক সহকর্মী চালিয়ে যাবেন। যাওয়ার আগে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Leave quietly; he will see what is left",
+              "bn": "চুপচাপ চলে যাওয়া; কী বাকি তা তিনি দেখে নেবেন"
+            },
+            {
+              "id": "b",
+              "en": "Tell only the customer",
+              "bn": "শুধু গ্রাহককে বলে যাওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Tell him exactly what is done and what is not done",
+              "bn": "তাঁকে ঠিক ঠিক বলা কী হয়েছে আর কী হয়নি"
+            },
+            {
+              "id": "d",
+              "en": "Send him a message at night",
+              "bn": "রাতে তাঁকে মেসেজ পাঠানো"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "A clear handover stops work being done twice, or being missed in a way that is dangerous.",
+          "explanationBn": "পরিষ্কারভাবে কাজ বুঝিয়ে দিলে একই কাজ দুবার হয় না, আবার কোনো কাজ বাদ পড়ে বিপদও হয় না।"
+        }
+      ]
+    }
+  ]
+}

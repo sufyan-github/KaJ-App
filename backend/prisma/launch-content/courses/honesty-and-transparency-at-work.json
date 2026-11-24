@@ -1,0 +1,381 @@
+{
+  "courses": [
+    {
+      "slug": "honesty-and-transparency-at-work",
+      "skillSlug": null,
+      "titleEn": "Honesty and transparency at work",
+      "titleBn": "কাজে সততা ও স্বচ্ছতা",
+      "summaryEn": "How honest work builds a steady income: clear prices and receipts, respect for the customer's property and privacy, owning up to mistakes, and keeping reviews and records truthful.",
+      "summaryBn": "সৎ কাজ কীভাবে নিয়মিত আয় গড়ে: পরিষ্কার দাম ও রসিদ, গ্রাহকের জিনিস ও গোপনীয়তার প্রতি সম্মান, ভুল স্বীকার করা, এবং রিভিউ ও রেকর্ড সত্য রাখা।",
+      "minutes": 15,
+      "estDataMb": 1,
+      "passMarkPct": 70,
+      "questionCount": 10,
+      "isSafetyCritical": false,
+      "sortOrder": 26,
+      "lessons": [
+        {
+          "titleEn": "Clear prices and receipts",
+          "titleBn": "পরিষ্কার দাম ও রসিদ",
+          "summaryEn": "You will learn: how to say the price before the work and give the customer a record of what they paid.\nStep 1: Look at the job first, then tell the customer the full price, with materials and labour shown separately.\nStep 2: Say clearly what the price covers and what it does not cover.\nStep 3: Write the agreed price in the app chat or on a paper note before you pick up a tool.\nStep 4: If you find that extra work is needed, stop, show the customer the problem and agree the new price before you go on.\nStep 5: Show the customer the shop receipt for any materials you bought for the job, and do not add a hidden amount.\nStep 6: When you are paid, give a written note with the date, the work done and the amount, or record the payment in the app.\nRemember: a price said before the work and a record given after it leave nothing to argue about.",
+          "summaryBn": "আপনি শিখবেন: কাজের আগে কীভাবে দাম বলবেন এবং গ্রাহককে টাকা দেওয়ার প্রমাণ দেবেন।\nধাপ ১: আগে কাজটি দেখুন, তারপর গ্রাহককে পুরো দাম বলুন, মালপত্র ও মজুরি আলাদা করে।\nধাপ ২: পরিষ্কার করে বলুন এই দামের মধ্যে কী আছে এবং কী নেই।\nধাপ ৩: যন্ত্র হাতে নেওয়ার আগে ঠিক হওয়া দাম অ্যাপের চ্যাটে বা কাগজে লিখে রাখুন।\nধাপ ৪: বাড়তি কাজ লাগবে দেখলে থামুন, গ্রাহককে সমস্যাটি দেখান এবং নতুন দাম ঠিক করে তারপর কাজ চালিয়ে যান।\nধাপ ৫: কাজের জন্য মালপত্র কিনলে দোকানের রসিদ গ্রাহককে দেখান এবং গোপনে বাড়তি টাকা যোগ করবেন না।\nধাপ ৬: টাকা পেলে তারিখ, কাজ ও টাকার পরিমাণ লিখে একটি কাগজ দিন, অথবা অ্যাপে টাকা পাওয়া রেকর্ড করুন।\nমনে রাখুন: কাজের আগে দাম বলা আর কাজের পরে প্রমাণ দেওয়া থাকলে ঝগড়া করার কিছু থাকে না।",
+          "youtubeVideoId": null,
+          "durationS": 210,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Respect property and privacy, and report mistakes at once",
+          "titleBn": "গ্রাহকের জিনিস ও গোপনীয়তার সম্মান, ভুল হলে সঙ্গে সঙ্গে জানানো",
+          "summaryEn": "You will learn: how to treat a customer's home and belongings with respect and what to do when something is damaged.\nStep 1: Work only in the rooms the customer shows you, and ask before you move furniture or open a cupboard.\nStep 2: Touch and use only what the job needs. Leave money, phones, jewellery and papers where they are.\nStep 3: Ask permission before you take a photo of your work, and keep people and personal things out of the picture.\nStep 4: Do not tell anyone the customer's address, phone number or what you saw in their home.\nStep 5: If you break, scratch or stain something, stop and tell the customer at once. Show them the damage.\nStep 6: Say sorry, explain what happened and agree how it will be repaired or paid for. If you cannot agree, report it in the app.\nStep 7: If you notice a mistake in your own work later, call the customer and offer to come back and fix it.\nRemember: a mistake you report yourself can be forgiven, but a mistake you hide destroys trust.",
+          "summaryBn": "আপনি শিখবেন: গ্রাহকের বাসা ও জিনিসপত্রের প্রতি কীভাবে সম্মান দেখাবেন এবং কিছু নষ্ট হলে কী করবেন।\nধাপ ১: গ্রাহক যে ঘর দেখিয়ে দেন শুধু সেখানেই কাজ করুন, এবং আসবাব সরানোর বা আলমারি খোলার আগে অনুমতি নিন।\nধাপ ২: কাজে যা লাগে শুধু তা-ই ধরুন ও ব্যবহার করুন। টাকা, ফোন, গয়না ও কাগজপত্র যেখানে আছে সেখানেই রেখে দিন।\nধাপ ৩: নিজের কাজের ছবি তোলার আগে অনুমতি নিন, এবং ছবিতে মানুষ বা ব্যক্তিগত জিনিস যেন না আসে।\nধাপ ৪: গ্রাহকের ঠিকানা, ফোন নম্বর বা তাঁর বাসায় যা দেখেছেন তা কাউকে বলবেন না।\nধাপ ৫: কিছু ভেঙে গেলে, আঁচড় পড়লে বা দাগ লাগলে থামুন এবং সঙ্গে সঙ্গে গ্রাহককে জানান। ক্ষতিটি তাঁকে দেখান।\nধাপ ৬: দুঃখ প্রকাশ করুন, কী হয়েছে বুঝিয়ে বলুন এবং কীভাবে মেরামত বা ক্ষতিপূরণ হবে তা ঠিক করুন। একমত না হলে অ্যাপে রিপোর্ট করুন।\nধাপ ৭: পরে নিজের কাজে ভুল চোখে পড়লে গ্রাহককে ফোন করুন এবং গিয়ে ঠিক করে দেওয়ার প্রস্তাব দিন।\nমনে রাখুন: নিজে জানানো ভুল ক্ষমা পেতে পারে, কিন্তু লুকানো ভুল আস্থা নষ্ট করে।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Why trust brings repeat work",
+          "titleBn": "আস্থা কেন বারবার কাজ এনে দেয়",
+          "summaryEn": "You will learn: how honest reviews, records kept in the app and saying no to bribes and shortcuts bring you more work.\nStep 1: Let customers write what they really think. Do not ask friends or family to post false reviews.\nStep 2: Write honest reviews of customers too: say what happened, without anger and without flattery.\nStep 3: Keep every job you found on the app inside the app, from the agreed price to the payment record.\nStep 4: If a customer offers a lower price to do the job outside the app, refuse politely. Without a record, neither of you has proof if something goes wrong.\nStep 5: If someone offers extra money to skip a safety step, use poor materials or do something dishonest, say no and explain why.\nStep 6: Do not give or take a bribe to win a job or to get a good review.\nStep 7: If you are pressed to do something unsafe or dishonest, leave the job and report it in the app.\nRemember: one dishonest job may earn a little today, but an honest name brings work for years.",
+          "summaryBn": "আপনি শিখবেন: সৎ রিভিউ, অ্যাপে রাখা রেকর্ড এবং ঘুষ ও ফাঁকিকে না বলা কীভাবে আপনাকে আরও কাজ এনে দেয়।\nধাপ ১: গ্রাহক যা সত্যিই মনে করেন তা-ই লিখতে দিন। বন্ধু বা আত্মীয়কে দিয়ে মিথ্যা রিভিউ লেখাবেন না।\nধাপ ২: আপনিও গ্রাহকের সৎ রিভিউ লিখুন: যা ঘটেছে তা-ই বলুন, রাগ ছাড়া এবং তোষামোদ ছাড়া।\nধাপ ৩: অ্যাপে পাওয়া প্রতিটি কাজ অ্যাপের ভেতরেই রাখুন, ঠিক হওয়া দাম থেকে টাকা পাওয়ার রেকর্ড পর্যন্ত।\nধাপ ৪: গ্রাহক অ্যাপের বাইরে কম দামে কাজ করাতে চাইলে ভদ্রভাবে না বলুন। রেকর্ড না থাকলে কোনো সমস্যা হলে দুজনের কারও কাছেই প্রমাণ থাকে না।\nধাপ ৫: কেউ বাড়তি টাকা দিয়ে নিরাপত্তার ধাপ বাদ দিতে, খারাপ মাল লাগাতে বা অসৎ কিছু করতে বললে না বলুন এবং কারণ বুঝিয়ে দিন।\nধাপ ৬: কাজ পেতে বা ভালো রিভিউ পেতে ঘুষ দেবেন না, নেবেনও না।\nধাপ ৭: অনিরাপদ বা অসৎ কিছু করতে চাপ দিলে কাজ ছেড়ে চলে আসুন এবং অ্যাপে রিপোর্ট করুন।\nমনে রাখুন: একটি অসৎ কাজে আজ সামান্য আয় হতে পারে, কিন্তু সৎ নাম বছরের পর বছর কাজ এনে দেয়।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": false
+        }
+      ],
+      "questions": [
+        {
+          "promptEn": "You arrive to repair a fan. When do you tell the customer the price?",
+          "promptBn": "আপনি একটি ফ্যান মেরামত করতে এসেছেন। গ্রাহককে দাম কখন বলবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "After the work is finished",
+              "bn": "কাজ শেষ হওয়ার পরে"
+            },
+            {
+              "id": "b",
+              "en": "Before starting, after you have looked at the job",
+              "bn": "কাজটি দেখে নিয়ে, শুরু করার আগে"
+            },
+            {
+              "id": "c",
+              "en": "Only if the customer asks",
+              "bn": "শুধু গ্রাহক জিজ্ঞেস করলে"
+            },
+            { "id": "d", "en": "The next day by phone", "bn": "পরদিন ফোনে" }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "A price said before the work lets the customer decide and leaves nothing to argue about.",
+          "explanationBn": "কাজের আগে দাম বললে গ্রাহক সিদ্ধান্ত নিতে পারেন এবং পরে ঝগড়ার কিছু থাকে না।"
+        },
+        {
+          "promptEn": "The customer pays you ৳600 in cash for the job. What do you do?",
+          "promptBn": "গ্রাহক কাজের জন্য আপনাকে নগদ ৳৬০০ দিলেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Put it in your pocket and leave",
+              "bn": "পকেটে রেখে চলে যাবেন"
+            },
+            {
+              "id": "b",
+              "en": "Say that cash needs no record",
+              "bn": "বলবেন নগদ টাকার রেকর্ড লাগে না"
+            },
+            {
+              "id": "c",
+              "en": "Promise to send a receipt some day",
+              "bn": "কোনো একদিন রসিদ পাঠাবেন বলে কথা দেবেন"
+            },
+            {
+              "id": "d",
+              "en": "Give a written note or record the payment in the app",
+              "bn": "লিখে একটি কাগজ দেবেন অথবা অ্যাপে টাকা পাওয়া রেকর্ড করবেন"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "A record of the payment protects both you and the customer.",
+          "explanationBn": "টাকা পাওয়ার প্রমাণ থাকলে আপনি ও গ্রাহক দুজনই সুরক্ষিত থাকেন।"
+        },
+        {
+          "promptEn": "While moving a table you scratch the customer's floor. Nobody saw it. What do you do?",
+          "promptBn": "টেবিল সরাতে গিয়ে গ্রাহকের মেঝেতে আঁচড় পড়ল। কেউ দেখেনি। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Stop, tell the customer at once and show the scratch",
+              "bn": "থেমে সঙ্গে সঙ্গে গ্রাহককে জানাবেন এবং আঁচড়টি দেখাবেন"
+            },
+            {
+              "id": "b",
+              "en": "Cover it with a mat",
+              "bn": "পাপোশ দিয়ে ঢেকে দেবেন"
+            },
+            {
+              "id": "c",
+              "en": "Finish quickly and leave",
+              "bn": "তাড়াতাড়ি কাজ শেষ করে চলে যাবেন"
+            },
+            {
+              "id": "d",
+              "en": "Say it was already there if asked",
+              "bn": "জিজ্ঞেস করলে বলবেন আগে থেকেই ছিল"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "A mistake you report yourself can be forgiven, but a hidden one destroys trust.",
+          "explanationBn": "নিজে জানানো ভুল ক্ষমা পেতে পারে, কিন্তু লুকানো ভুল আস্থা নষ্ট করে।"
+        },
+        {
+          "promptEn": "You want a photo of your finished work to show to future customers. What do you do first?",
+          "promptBn": "ভবিষ্যতের গ্রাহকদের দেখানোর জন্য আপনি শেষ হওয়া কাজের একটি ছবি চান। প্রথমে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Take it quietly when the customer is not looking",
+              "bn": "গ্রাহক না দেখলে চুপচাপ তুলে নেবেন"
+            },
+            {
+              "id": "b",
+              "en": "Take a photo of the whole room with the family in it",
+              "bn": "পরিবারের লোকজনসহ পুরো ঘরের ছবি তুলবেন"
+            },
+            {
+              "id": "c",
+              "en": "Ask the customer's permission and keep people and personal things out of the picture",
+              "bn": "গ্রাহকের অনুমতি নেবেন এবং ছবিতে মানুষ ও ব্যক্তিগত জিনিস রাখবেন না"
+            },
+            {
+              "id": "d",
+              "en": "Take it and post it with the address",
+              "bn": "ছবি তুলে ঠিকানাসহ পোস্ট করবেন"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "The home is the customer's private place, so a photo needs their permission.",
+          "explanationBn": "বাসা গ্রাহকের ব্যক্তিগত জায়গা, তাই ছবি তুলতে তাঁর অনুমতি লাগে।"
+        },
+        {
+          "promptEn": "A customer says: next time let us do it outside the app and I will pay ৳100 less. What do you do?",
+          "promptBn": "একজন গ্রাহক বললেন: পরেরবার অ্যাপের বাইরে করি, আমি ৳১০০ কম দেব। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Agree, because it is quicker",
+              "bn": "রাজি হবেন, কারণ এতে সময় বাঁচে"
+            },
+            {
+              "id": "b",
+              "en": "Agree, but ask for the cash first",
+              "bn": "রাজি হবেন, তবে আগে নগদ টাকা চাইবেন"
+            },
+            {
+              "id": "c",
+              "en": "Agree only for big jobs",
+              "bn": "শুধু বড় কাজের বেলায় রাজি হবেন"
+            },
+            {
+              "id": "d",
+              "en": "Refuse politely and keep the job in the app so you both have a record",
+              "bn": "ভদ্রভাবে না বলবেন এবং কাজ অ্যাপেই রাখবেন, যাতে দুজনের কাছেই রেকর্ড থাকে"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Without a record in the app, neither of you has proof if something goes wrong.",
+          "explanationBn": "অ্যাপে রেকর্ড না থাকলে কোনো সমস্যা হলে দুজনের কারও কাছেই প্রমাণ থাকে না।"
+        },
+        {
+          "promptEn": "You are new on the app and have no reviews yet. What is the honest way to get them?",
+          "promptBn": "আপনি অ্যাপে নতুন, এখনো কোনো রিভিউ নেই। রিভিউ পাওয়ার সৎ উপায় কোনটি?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Do good work and let real customers write what they think",
+              "bn": "ভালো কাজ করা এবং আসল গ্রাহক যা মনে করেন তা লিখতে দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Ask friends to write five-star reviews",
+              "bn": "বন্ধুদের দিয়ে পাঁচ তারার রিভিউ লেখানো"
+            },
+            {
+              "id": "c",
+              "en": "Pay someone to write reviews",
+              "bn": "টাকা দিয়ে কাউকে দিয়ে রিভিউ লেখানো"
+            },
+            {
+              "id": "d",
+              "en": "Write reviews yourself from another number",
+              "bn": "অন্য নম্বর থেকে নিজেই রিভিউ লেখা"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "False reviews are dishonest, and customers lose trust when the work does not match them.",
+          "explanationBn": "মিথ্যা রিভিউ অসৎ কাজ, আর কাজের সঙ্গে রিভিউ না মিললে গ্রাহকের আস্থা চলে যায়।"
+        },
+        {
+          "promptEn": "Halfway through a job you find extra work is needed that will cost ৳300 more. What do you do?",
+          "promptBn": "কাজের মাঝপথে দেখলেন বাড়তি কাজ লাগবে, তাতে আরও ৳৩০০ খরচ হবে। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Do it and add ৳300 to the bill at the end",
+              "bn": "কাজটি করে শেষে বিলে ৳৩০০ যোগ করবেন"
+            },
+            {
+              "id": "b",
+              "en": "Leave that part undone and say nothing",
+              "bn": "ওই অংশ না করে চুপ থাকবেন"
+            },
+            {
+              "id": "c",
+              "en": "Stop, show the customer the problem and agree the new price first",
+              "bn": "থামবেন, গ্রাহককে সমস্যাটি দেখাবেন এবং আগে নতুন দাম ঠিক করবেন"
+            },
+            {
+              "id": "d",
+              "en": "Leave the job and go home",
+              "bn": "কাজ ফেলে বাড়ি চলে যাবেন"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "The customer must agree to a new price before the extra work, not find it on the bill.",
+          "explanationBn": "বাড়তি কাজের আগেই গ্রাহকের নতুন দামে রাজি হওয়া দরকার, বিলে গিয়ে দেখা নয়।"
+        },
+        {
+          "promptEn": "A customer offers you extra money to skip a safety step so the job finishes faster. What do you do?",
+          "promptBn": "কাজ তাড়াতাড়ি শেষ করতে একজন গ্রাহক নিরাপত্তার একটি ধাপ বাদ দিতে বললেন এবং বাড়তি টাকা দিতে চাইলেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Take the money and skip the step",
+              "bn": "টাকা নিয়ে ধাপটি বাদ দেবেন"
+            },
+            {
+              "id": "b",
+              "en": "Say no and explain why the step is needed",
+              "bn": "না বলবেন এবং ধাপটি কেন দরকার তা বুঝিয়ে দেবেন"
+            },
+            {
+              "id": "c",
+              "en": "Skip the step but refuse the money",
+              "bn": "ধাপটি বাদ দেবেন, তবে টাকা নেবেন না"
+            },
+            {
+              "id": "d",
+              "en": "Skip it only this one time",
+              "bn": "শুধু এই একবার বাদ দেবেন"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "A safety step protects people, so no amount of money is a reason to skip it.",
+          "explanationBn": "নিরাপত্তার ধাপ মানুষকে রক্ষা করে, তাই কোনো টাকার জন্যই তা বাদ দেওয়া যায় না।"
+        },
+        {
+          "promptEn": "You bought materials for ৳250 for a job. The customer asks what they cost. What do you do?",
+          "promptBn": "একটি কাজের জন্য আপনি ৳২৫০-এর মালপত্র কিনেছেন। গ্রাহক জানতে চাইলেন কত লেগেছে। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Show the shop receipt and say the real amount",
+              "bn": "দোকানের রসিদ দেখাবেন এবং আসল দাম বলবেন"
+            },
+            { "id": "b", "en": "Say ৳400", "bn": "বলবেন ৳৪০০" },
+            {
+              "id": "c",
+              "en": "Say the receipt is lost and charge more",
+              "bn": "বলবেন রসিদ হারিয়ে গেছে এবং বেশি টাকা নেবেন"
+            },
+            {
+              "id": "d",
+              "en": "Refuse to answer",
+              "bn": "উত্তর দিতে রাজি হবেন না"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Showing the receipt proves there is no hidden amount in the price.",
+          "explanationBn": "রসিদ দেখালে প্রমাণ হয় দামের মধ্যে গোপনে বাড়তি কিছু নেই।"
+        },
+        {
+          "promptEn": "The day after a job, you realise at home that you forgot to tighten one fitting. What do you do?",
+          "promptBn": "কাজের পরদিন বাড়িতে বসে মনে পড়ল একটি ফিটিং টাইট করতে ভুলে গেছেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Hope the customer does not notice",
+              "bn": "আশা করবেন গ্রাহক খেয়াল করবেন না"
+            },
+            {
+              "id": "b",
+              "en": "Wait until the customer complains",
+              "bn": "গ্রাহক অভিযোগ না করা পর্যন্ত অপেক্ষা করবেন"
+            },
+            {
+              "id": "c",
+              "en": "Stop taking the customer's calls",
+              "bn": "গ্রাহকের ফোন ধরা বন্ধ করবেন"
+            },
+            {
+              "id": "d",
+              "en": "Call the customer and offer to come back and fix it",
+              "bn": "গ্রাহককে ফোন করে গিয়ে ঠিক করে দেওয়ার প্রস্তাব দেবেন"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Reporting your own mistake before it causes a problem builds trust.",
+          "explanationBn": "সমস্যা হওয়ার আগেই নিজের ভুল জানালে আস্থা বাড়ে।"
+        },
+        {
+          "promptEn": "A friend asks for the address of the customer whose house you worked in yesterday, and what was inside. What do you do?",
+          "promptBn": "এক বন্ধু জানতে চাইল গতকাল যে গ্রাহকের বাসায় কাজ করেছেন তাঁর ঠিকানা কী এবং ভেতরে কী কী আছে। আপনি কী করবেন?",
+          "options": [
+            { "id": "a", "en": "Tell him everything", "bn": "সব বলে দেবেন" },
+            {
+              "id": "b",
+              "en": "Tell him only the address",
+              "bn": "শুধু ঠিকানা বলবেন"
+            },
+            {
+              "id": "c",
+              "en": "Tell him nothing about the address or what you saw",
+              "bn": "ঠিকানা বা যা দেখেছেন তার কিছুই বলবেন না"
+            },
+            {
+              "id": "d",
+              "en": "Show him a photo of the house",
+              "bn": "বাসার একটি ছবি দেখাবেন"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "The customer's address and home are private, and sharing them can put the customer at risk.",
+          "explanationBn": "গ্রাহকের ঠিকানা ও বাসার কথা গোপনীয়, এবং তা জানালে গ্রাহক ঝুঁকিতে পড়তে পারেন।"
+        },
+        {
+          "promptEn": "Someone says he can get you more jobs if you pay him secretly. What do you do?",
+          "promptBn": "একজন বলল, গোপনে টাকা দিলে সে আপনাকে আরও কাজ পাইয়ে দেবে। আপনি কী করবেন?",
+          "options": [
+            { "id": "a", "en": "Pay him", "bn": "তাকে টাকা দেবেন" },
+            {
+              "id": "b",
+              "en": "Refuse, because you do not give or take bribes",
+              "bn": "না বলবেন, কারণ আপনি ঘুষ দেন না, নেনও না"
+            },
+            {
+              "id": "c",
+              "en": "Pay half now and half later",
+              "bn": "এখন অর্ধেক, পরে অর্ধেক দেবেন"
+            },
+            {
+              "id": "d",
+              "en": "Ask him for a lower rate",
+              "bn": "তার কাছে কম রেট চাইবেন"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Work won by a bribe is dishonest, and honest work is what brings customers back.",
+          "explanationBn": "ঘুষ দিয়ে পাওয়া কাজ অসৎ, আর সৎ কাজই গ্রাহককে ফিরিয়ে আনে।"
+        }
+      ]
+    }
+  ]
+}

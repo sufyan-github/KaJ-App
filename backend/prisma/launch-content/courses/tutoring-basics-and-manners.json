@@ -1,0 +1,435 @@
+{
+  "courses": [
+    {
+      "slug": "tutoring-basics-and-manners",
+      "skillSlug": "tutoring",
+      "titleEn": "Tutoring basics and manners",
+      "titleBn": "টিউশনির মূল বিষয় ও আদব-কায়দা",
+      "summaryEn": "For home tutors: how to plan a one-hour lesson, behave in a student's home, keep children safe with clear limits, and talk honestly with parents about progress, fees and complaints.",
+      "summaryBn": "গৃহশিক্ষকদের জন্য: এক ঘণ্টার পড়ানো কীভাবে সাজাবেন, শিক্ষার্থীর বাসায় কেমন আচরণ করবেন, পরিষ্কার সীমা মেনে শিশুকে কীভাবে নিরাপদ রাখবেন, এবং অগ্রগতি, বেতন ও অভিযোগ নিয়ে অভিভাবকের সঙ্গে কীভাবে খোলাখুলি কথা বলবেন।",
+      "minutes": 20,
+      "estDataMb": 1,
+      "passMarkPct": 70,
+      "questionCount": 10,
+      "isSafetyCritical": false,
+      "sortOrder": 14,
+      "lessons": [
+        {
+          "titleEn": "Plan a one-hour lesson",
+          "titleBn": "এক ঘণ্টার পড়ানোর পরিকল্পনা",
+          "summaryEn": "You will learn: how to plan a one-hour lesson in four parts: goal, explain, practise, check.\nStep 1: Before the lesson, write one small goal for the day in your notebook, such as \"The student can add fractions with the same denominator\".\nStep 2: First 5 minutes: look at the homework and ask two or three questions about the last lesson.\nStep 3: Next 15 minutes: explain the new topic with one easy example from daily life, and work one sum or sentence slowly on paper.\nStep 4: Next 25 minutes: let the student practise alone. Start with easy questions and make them harder. Watch quietly and help only where the student is stuck.\nStep 5: Next 10 minutes: check without helping. Give three short questions and ask the student to explain one answer in their own words.\nStep 6: Last 5 minutes: write a small homework task in the student's diary and say what you will teach next time.\nRemember: reaching one clear goal in each lesson is better than hurrying through a whole chapter.",
+          "summaryBn": "আপনি শিখবেন: এক ঘণ্টার পড়ানো কীভাবে চার ভাগে সাজাবেন: লক্ষ্য, বোঝানো, অনুশীলন, যাচাই।\nধাপ ১: পড়াতে যাওয়ার আগে খাতায় সেদিনের একটি ছোট লক্ষ্য লিখুন, যেমন \"শিক্ষার্থী একই হরের ভগ্নাংশ যোগ করতে পারবে\"।\nধাপ ২: প্রথম ৫ মিনিট: বাড়ির কাজ দেখুন এবং আগের দিনের পড়া থেকে দুই-তিনটি প্রশ্ন করুন।\nধাপ ৩: পরের ১৫ মিনিট: প্রতিদিনের জীবনের একটি সহজ উদাহরণ দিয়ে নতুন বিষয় বোঝান, এবং খাতায় একটি অঙ্ক বা বাক্য ধীরে ধীরে করে দেখান।\nধাপ ৪: পরের ২৫ মিনিট: শিক্ষার্থীকে নিজে অনুশীলন করতে দিন। সহজ প্রশ্ন দিয়ে শুরু করে ধীরে ধীরে কঠিন দিন। চুপচাপ দেখুন, যেখানে আটকে যায় শুধু সেখানে সাহায্য করুন।\nধাপ ৫: পরের ১০ মিনিট: সাহায্য না করে যাচাই করুন। তিনটি ছোট প্রশ্ন দিন এবং একটি উত্তর নিজের ভাষায় বুঝিয়ে বলতে বলুন।\nধাপ ৬: শেষ ৫ মিনিট: শিক্ষার্থীর ডায়েরিতে অল্প বাড়ির কাজ লিখে দিন এবং পরের দিন কী পড়াবেন তা বলুন।\nমনে রাখুন: তাড়াহুড়ো করে পুরো অধ্যায় শেষ করার চেয়ে প্রতিদিন একটি পরিষ্কার লক্ষ্য পূরণ করা ভালো।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Behaviour in a student's home",
+          "titleBn": "শিক্ষার্থীর বাসায় আচরণ",
+          "summaryEn": "You will learn: how to behave in a student's home so that the family trusts and respects you.\nStep 1: Arrive 5 minutes before the agreed time, start on time and teach the full hour. If you cannot come one day, tell the parent beforehand and make up the lesson on another day.\nStep 2: Wear clean, modest and simple clothes. Leave your shoes where the family leaves theirs.\nStep 3: When you enter, greet the elders, and sit only where the family asks you to sit.\nStep 4: Put your phone on silent and keep it in your bag for the whole lesson. Answer only an emergency call, and say sorry before you answer.\nStep 5: If the family offers tea or a snack, accept politely or refuse politely. Never ask for food, and do not comment on the house or on family matters.\nStep 6: Do not tell other families or students what you see or hear in this home.\nRemember: you are a guest and a teacher at the same time. The family watches how you behave as well as how you teach.",
+          "summaryBn": "আপনি শিখবেন: শিক্ষার্থীর বাসায় কেমন আচরণ করলে পরিবার আপনাকে বিশ্বাস ও সম্মান করবে।\nধাপ ১: ঠিক করা সময়ের ৫ মিনিট আগে পৌঁছান, সময়মতো শুরু করুন এবং পুরো এক ঘণ্টা পড়ান। কোনো দিন যেতে না পারলে আগেই অভিভাবককে জানান এবং অন্য একদিন পড়িয়ে পুষিয়ে দিন।\nধাপ ২: পরিষ্কার, শালীন ও সাধারণ পোশাক পরুন। পরিবারের লোকজন যেখানে জুতা রাখেন, সেখানেই জুতা রাখুন।\nধাপ ৩: ঘরে ঢুকে বড়দের সালাম বা শুভেচ্ছা জানান, এবং পরিবার যেখানে বসতে বলে শুধু সেখানেই বসুন।\nধাপ ৪: ফোন নীরব করে পুরো সময় ব্যাগে রাখুন। শুধু জরুরি ফোন ধরুন, আর ধরার আগে দুঃখ প্রকাশ করুন।\nধাপ ৫: চা-নাশতা দিলে ভদ্রভাবে নিন বা ভদ্রভাবে না বলুন। নিজে থেকে কখনো খাবার চাইবেন না, এবং বাসা বা পরিবারের বিষয় নিয়ে মন্তব্য করবেন না।\nধাপ ৬: এই বাসায় যা দেখেন বা শোনেন, তা অন্য পরিবার বা শিক্ষার্থীর কাছে বলবেন না।\nমনে রাখুন: আপনি একই সঙ্গে অতিথি ও শিক্ষক। পরিবার আপনার পড়ানোর পাশাপাশি আপনার আচরণও দেখে।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Child safety and boundaries",
+          "titleBn": "শিশুর নিরাপত্তা ও সীমারেখা",
+          "summaryEn": "You will learn: how to keep a child safe and keep clear limits between tutor and student.\nStep 1: Teach in an open place such as the sitting room, with the door open or a family member nearby. If no adult is at home, do not go in. Phone the parent and arrange another time.\nStep 2: Sit across the table or at the side with space between you. Do not touch the child, and do not let the child sit on your lap.\nStep 3: Never hit or pinch a child, pull their ears, or shame them with insults. If the child does not listen, stop for a minute, speak calmly, and tell the parent after the lesson.\nStep 4: Send all messages about lessons to the parent, not to the child. Do not chat privately with a child by phone or on social media, and do not ask for or send photos.\nStep 5: Do not give gifts or money in secret, and never ask a child to keep a secret from their parents.\nStep 6: If a child tells you something worrying, such as someone hitting them or touching them in a bad way: listen calmly, believe them, do not ask many questions, and do not promise to keep it secret. Say, \"You did the right thing by telling me.\"\nStep 7: The same day, tell a trusted adult who can protect the child, usually a parent. If the worry is about someone in the family, or you are not sure what to do, call the helpline 109 for advice. If the child is in danger right now, call 999.\nHazard: when an adult is alone with a child behind a closed door, the child can be harmed, and the tutor can also be wrongly accused. The one rule: never be alone with a child behind a closed door.\nRemember: the child's safety comes before the lesson, the fee and your own discomfort.",
+          "summaryBn": "আপনি শিখবেন: কীভাবে শিশুকে নিরাপদ রাখবেন এবং শিক্ষক ও শিক্ষার্থীর মধ্যে পরিষ্কার সীমা বজায় রাখবেন।\nধাপ ১: বসার ঘরের মতো খোলা জায়গায় পড়ান, দরজা খোলা রাখুন অথবা পরিবারের কেউ যেন কাছাকাছি থাকেন। বাসায় কোনো বড় মানুষ না থাকলে ভেতরে ঢুকবেন না। অভিভাবককে ফোন করে অন্য সময় ঠিক করুন।\nধাপ ২: টেবিলের উল্টো দিকে বা পাশে একটু দূরত্ব রেখে বসুন। শিশুকে স্পর্শ করবেন না এবং কোলে বসতে দেবেন না।\nধাপ ৩: শিশুকে কখনো মারবেন না, চিমটি কাটবেন না, কান মলবেন না বা গালি দিয়ে অপমান করবেন না। কথা না শুনলে এক মিনিট থামুন, শান্তভাবে কথা বলুন এবং পড়ানো শেষে অভিভাবককে জানান।\nধাপ ৪: পড়ার বিষয়ে সব মেসেজ অভিভাবককে পাঠান, শিশুকে নয়। ফোনে বা সামাজিক মাধ্যমে শিশুর সঙ্গে আলাদা করে চ্যাট করবেন না, ছবি চাইবেন না, পাঠাবেনও না।\nধাপ ৫: গোপনে উপহার বা টাকা দেবেন না, এবং মা-বাবার কাছে কিছু গোপন রাখতে শিশুকে কখনো বলবেন না।\nধাপ ৬: শিশু যদি চিন্তার কোনো কথা বলে, যেমন কেউ তাকে মারে বা খারাপভাবে স্পর্শ করে: শান্তভাবে শুনুন, বিশ্বাস করুন, বেশি প্রশ্ন করবেন না, এবং কথাটি গোপন রাখার কথা দেবেন না। বলুন, \"তুমি আমাকে বলে ঠিক কাজ করেছ।\"\nধাপ ৭: সেদিনই এমন একজন বিশ্বস্ত বড় মানুষকে জানান যিনি শিশুকে রক্ষা করতে পারেন, সাধারণত মা বা বাবা। চিন্তার বিষয়টি পরিবারের কাউকে নিয়ে হলে, বা কী করবেন বুঝতে না পারলে, পরামর্শের জন্য ১০৯ নম্বরে ফোন করুন। শিশু এখনই বিপদে থাকলে ৯৯৯-এ ফোন করুন।\nঝুঁকি: বন্ধ দরজার ভেতরে একজন বড় মানুষ শিশুর সঙ্গে একা থাকলে শিশুর ক্ষতি হতে পারে, আবার শিক্ষকের নামে মিথ্যা অভিযোগও উঠতে পারে। একটিই নিয়ম: বন্ধ দরজার ভেতরে শিশুর সঙ্গে কখনো একা থাকবেন না।\nমনে রাখুন: পড়া, বেতন বা আপনার অস্বস্তির চেয়ে শিশুর নিরাপত্তা আগে।",
+          "youtubeVideoId": null,
+          "durationS": 300,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Talking to parents",
+          "titleBn": "অভিভাবকের সঙ্গে কথা বলা",
+          "summaryEn": "You will learn: how to give honest progress reports, agree the fee and schedule clearly, and handle a complaint.\nStep 1: Before the first lesson, agree in writing in the app chat: which subjects, which days, what time, how long, the monthly fee and the date it will be paid.\nStep 2: Also agree beforehand what happens with missed lessons, holidays and exam time, so that nobody is surprised later.\nStep 3: Keep a small notebook: the date, what you taught, what homework you gave, and how the student did.\nStep 4: Once a month, talk to the parent for five minutes: what has improved, what is still weak, and what you will do about it. Show the notebook and the test marks.\nStep 5: Tell the truth. Do not promise a result such as \"A+ is guaranteed\", and do not hide a weak area to keep the job.\nStep 6: If a parent complains, listen to the end without interrupting, repeat the complaint in your own words, say what you will change and from which day, and ask again after two weeks whether it is better.\nRemember: parents trust the tutor who tells them about a problem early and honestly.",
+          "summaryBn": "আপনি শিখবেন: কীভাবে অগ্রগতির সত্য খবর দেবেন, বেতন ও সময়সূচি পরিষ্কারভাবে ঠিক করবেন, এবং অভিযোগ সামলাবেন।\nধাপ ১: প্রথম দিন পড়ানোর আগে অ্যাপের চ্যাটে লিখে ঠিক করুন: কোন বিষয়, কোন কোন দিন, কয়টায়, কতক্ষণ, মাসিক বেতন কত এবং কোন তারিখে দেওয়া হবে।\nধাপ ২: পড়া বাদ গেলে, ছুটির সময় ও পরীক্ষার সময় কী হবে, সেটাও আগে ঠিক করুন, যাতে পরে কেউ অবাক না হন।\nধাপ ৩: একটি ছোট খাতা রাখুন: তারিখ, কী পড়ালেন, কী বাড়ির কাজ দিলেন, এবং শিক্ষার্থী কেমন করল।\nধাপ ৪: মাসে একবার অভিভাবকের সঙ্গে পাঁচ মিনিট কথা বলুন: কোথায় উন্নতি হয়েছে, কোথায় এখনো দুর্বলতা আছে, এবং তা নিয়ে আপনি কী করবেন। খাতা ও পরীক্ষার নম্বর দেখান।\nধাপ ৫: সত্য বলুন। \"এ প্লাস নিশ্চিত\" এ রকম ফলের কথা দেবেন না, আর কাজ ধরে রাখতে দুর্বলতা লুকাবেন না।\nধাপ ৬: অভিভাবক অভিযোগ করলে মাঝখানে কথা না কেটে পুরোটা শুনুন, অভিযোগটি নিজের ভাষায় আবার বলুন, কী বদলাবেন ও কোন দিন থেকে তা জানান, এবং দুই সপ্তাহ পরে আবার জিজ্ঞেস করুন অবস্থা ভালো হয়েছে কি না।\nমনে রাখুন: যে শিক্ষক সমস্যার কথা আগেই সত্যভাবে জানান, অভিভাবক তাঁকেই বিশ্বাস করেন।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": false
+        }
+      ],
+      "questions": [
+        {
+          "promptEn": "You will teach fractions for one hour tomorrow. What should you do before the lesson?",
+          "promptBn": "আগামীকাল এক ঘণ্টা ভগ্নাংশ পড়াবেন। পড়াতে যাওয়ার আগে কী করা উচিত?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Plan to finish the whole chapter in one day",
+              "bn": "এক দিনেই পুরো অধ্যায় শেষ করার পরিকল্পনা করা"
+            },
+            {
+              "id": "b",
+              "en": "Write one small goal for the day in your notebook",
+              "bn": "খাতায় সেদিনের একটি ছোট লক্ষ্য লেখা"
+            },
+            {
+              "id": "c",
+              "en": "Decide what to teach after you arrive",
+              "bn": "পৌঁছানোর পর ঠিক করা কী পড়াবেন"
+            },
+            {
+              "id": "d",
+              "en": "Take only the guide book with the answers",
+              "bn": "শুধু উত্তরসহ গাইড বই নিয়ে যাওয়া"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "One small, clear goal tells you what to explain, practise and check in the hour.",
+          "explanationBn": "একটি ছোট, পরিষ্কার লক্ষ্য থাকলে এক ঘণ্টায় কী বোঝাবেন, কী অনুশীলন করাবেন ও কী যাচাই করবেন তা ঠিক থাকে।"
+        },
+        {
+          "promptEn": "During practice time the student is stuck on one step of a sum. What is the best thing to do?",
+          "promptBn": "অনুশীলনের সময় শিক্ষার্থী একটি অঙ্কের এক ধাপে আটকে গেছে। সবচেয়ে ভালো কাজ কোনটি?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Do the whole sum yourself so that no time is wasted",
+              "bn": "সময় বাঁচাতে পুরো অঙ্কটি নিজেই করে দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Tell the student to leave it and move to the next chapter",
+              "bn": "অঙ্কটি বাদ দিয়ে পরের অধ্যায়ে যেতে বলা"
+            },
+            {
+              "id": "c",
+              "en": "Scold the student for not listening",
+              "bn": "মন দিয়ে না শোনার জন্য বকা দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Help only at the step where the student is stuck, then let them finish",
+              "bn": "যে ধাপে আটকেছে শুধু সেখানে সাহায্য করা, তারপর নিজে শেষ করতে দেওয়া"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "The student learns by doing the work, so help only where it is needed.",
+          "explanationBn": "শিক্ষার্থী নিজে করে শেখে, তাই শুধু দরকারের জায়গায় সাহায্য করুন।"
+        },
+        {
+          "promptEn": "In the middle of a lesson your phone vibrates in your bag. A friend is calling. What do you do?",
+          "promptBn": "পড়ানোর মাঝখানে ব্যাগে আপনার ফোন কাঁপছে। এক বন্ধু ফোন করেছে। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Leave it in the bag and call back after the lesson",
+              "bn": "ফোন ব্যাগেই রেখে পড়ানো শেষে ফোন করা"
+            },
+            {
+              "id": "b",
+              "en": "Answer and talk quietly for a few minutes",
+              "bn": "ফোন ধরে কয়েক মিনিট আস্তে কথা বলা"
+            },
+            {
+              "id": "c",
+              "en": "Give the student a sum and reply by message",
+              "bn": "শিক্ষার্থীকে একটি অঙ্ক দিয়ে মেসেজে উত্তর দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Go outside to talk and come back",
+              "bn": "বাইরে গিয়ে কথা বলে ফিরে আসা"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "The lesson hour belongs to the student; only an emergency call may interrupt it.",
+          "explanationBn": "পড়ানোর সময়টুকু শিক্ষার্থীর; শুধু জরুরি ফোনেই তা থামানো যায়।"
+        },
+        {
+          "promptEn": "While teaching, you heard the family arguing in the next room. Later, another student's mother asks you about that family. What do you do?",
+          "promptBn": "পড়ানোর সময় পাশের ঘরে পরিবারের লোকজনের ঝগড়া শুনেছেন। পরে আরেক শিক্ষার্থীর মা ওই পরিবারের কথা জানতে চাইলেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Tell her what you heard, because she asked",
+              "bn": "তিনি জানতে চেয়েছেন, তাই যা শুনেছেন বলে দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Tell her a little and ask her to keep it secret",
+              "bn": "অল্প একটু বলা এবং গোপন রাখতে বলা"
+            },
+            {
+              "id": "c",
+              "en": "Say politely that you do not talk about one family in another home",
+              "bn": "ভদ্রভাবে বলা যে আপনি এক বাসার কথা অন্য বাসায় বলেন না"
+            },
+            {
+              "id": "d",
+              "en": "Tell the story without using names",
+              "bn": "নাম না বলে ঘটনাটি বলে দেওয়া"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "What you see or hear in a student's home stays there; this is how families come to trust you.",
+          "explanationBn": "শিক্ষার্থীর বাসায় যা দেখেন বা শোনেন তা সেখানেই থাকবে; এভাবেই পরিবারের বিশ্বাস তৈরি হয়।"
+        },
+        {
+          "promptEn": "You arrive for the lesson and only your 10-year-old student is at home. What should you do?",
+          "promptBn": "পড়াতে গিয়ে দেখলেন বাসায় শুধু আপনার ১০ বছরের শিক্ষার্থী একা আছে। কী করা উচিত?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Go in and teach as usual with the door closed",
+              "bn": "ভেতরে গিয়ে দরজা বন্ধ করে আগের মতোই পড়ানো"
+            },
+            {
+              "id": "b",
+              "en": "Do not go in; phone the parent and arrange another time",
+              "bn": "ভেতরে না ঢোকা; অভিভাবককে ফোন করে অন্য সময় ঠিক করা"
+            },
+            {
+              "id": "c",
+              "en": "Go in and teach quickly for half the time",
+              "bn": "ভেতরে গিয়ে তাড়াতাড়ি অর্ধেক সময় পড়ানো"
+            },
+            {
+              "id": "d",
+              "en": "Take the child somewhere outside to teach",
+              "bn": "শিশুকে বাইরে কোথাও নিয়ে গিয়ে পড়ানো"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Never be alone with a child when no other adult is near; this protects the child and you.",
+          "explanationBn": "কাছাকাছি অন্য বড় মানুষ না থাকলে শিশুর সঙ্গে একা থাকবেন না; এতে শিশু ও আপনি দুজনই সুরক্ষিত থাকেন।"
+        },
+        {
+          "promptEn": "A student tells you that a relative touches her in a way she does not like, and asks you to tell nobody. What is right?",
+          "promptBn": "এক শিক্ষার্থী বলল, এক আত্মীয় তাকে এমনভাবে স্পর্শ করে যা তার ভালো লাগে না, এবং আপনাকে কাউকে না বলতে অনুরোধ করল। কোনটি সঠিক?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Promise to keep the secret so that the child trusts you",
+              "bn": "শিশুর বিশ্বাস রাখতে গোপন রাখার কথা দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Ask many detailed questions, then go and confront the relative yourself",
+              "bn": "খুঁটিয়ে অনেক প্রশ্ন করা, তারপর নিজেই ওই আত্মীয়ের সঙ্গে বোঝাপড়া করতে যাওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Tell the child she has probably misunderstood",
+              "bn": "শিশুকে বলা যে সে হয়তো ভুল বুঝেছে"
+            },
+            {
+              "id": "d",
+              "en": "Listen calmly, do not promise secrecy, and the same day tell a trusted adult who can protect her, or call 109",
+              "bn": "শান্তভাবে শোনা, গোপন রাখার কথা না দেওয়া, এবং সেদিনই তাকে রক্ষা করতে পারেন এমন বিশ্বস্ত বড় মানুষকে জানানো বা ১০৯-এ ফোন করা"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "A child cannot stop harm alone, so a safe adult must be told; a promise of secrecy leaves the child unprotected.",
+          "explanationBn": "শিশু একা ক্ষতি থামাতে পারে না, তাই একজন নিরাপদ বড় মানুষকে জানাতেই হবে; গোপন রাখার কথা দিলে শিশু অরক্ষিত থেকে যায়।"
+        },
+        {
+          "promptEn": "A parent asks, \"If you teach my daughter, will she surely get A+?\" What is the best answer?",
+          "promptBn": "এক অভিভাবক জিজ্ঞেস করলেন, \"আপনি পড়ালে আমার মেয়ে কি এ প্লাস পাবেই?\" সবচেয়ে ভালো উত্তর কোনটি?",
+          "options": [
+            {
+              "id": "a",
+              "en": "\"Yes, A+ is guaranteed.\"",
+              "bn": "\"হ্যাঁ, এ প্লাস নিশ্চিত।\""
+            },
+            {
+              "id": "b",
+              "en": "\"That depends only on her luck.\"",
+              "bn": "\"সেটা শুধু তার ভাগ্যের ব্যাপার।\""
+            },
+            {
+              "id": "c",
+              "en": "\"I cannot promise a result, but I will teach regularly and tell you her progress every month.\"",
+              "bn": "\"ফলের কথা দিতে পারি না, তবে নিয়মিত পড়াব এবং প্রতি মাসে তার অগ্রগতি জানাব।\""
+            },
+            {
+              "id": "d",
+              "en": "\"Raise the fee and I will guarantee it.\"",
+              "bn": "\"বেতন বাড়ালে আমি নিশ্চয়তা দেব।\""
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Nobody can guarantee an exam result; honest reports are what build trust.",
+          "explanationBn": "পরীক্ষার ফল কেউ নিশ্চিত করতে পারে না; সত্য খবর দিলেই বিশ্বাস তৈরি হয়।"
+        },
+        {
+          "promptEn": "Before the first lesson, what should you and the parent agree in writing in the app chat?",
+          "promptBn": "প্রথম দিন পড়ানোর আগে অভিভাবকের সঙ্গে অ্যাপের চ্যাটে লিখে কী কী ঠিক করা উচিত?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Subjects, days, time, length of the lesson, monthly fee and payment date",
+              "bn": "বিষয়, দিন, সময়, কতক্ষণ পড়াবেন, মাসিক বেতন ও বেতনের তারিখ"
+            },
+            {
+              "id": "b",
+              "en": "Only the monthly fee",
+              "bn": "শুধু মাসিক বেতন"
+            },
+            {
+              "id": "c",
+              "en": "Nothing; decide after the first month",
+              "bn": "কিছুই না; এক মাস পরে ঠিক করা"
+            },
+            {
+              "id": "d",
+              "en": "Only the subjects",
+              "bn": "শুধু কোন বিষয় পড়াবেন"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "When everything is written down first, there is no argument later about the fee or the days.",
+          "explanationBn": "সব কিছু আগে লিখে ঠিক করলে পরে বেতন বা দিন নিয়ে ঝামেলা হয় না।"
+        },
+        {
+          "promptEn": "A student has not done the homework for the third time and is not paying attention. What do you do?",
+          "promptBn": "শিক্ষার্থী তৃতীয়বারও বাড়ির কাজ করেনি এবং পড়ায় মন দিচ্ছে না। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Slap the hand lightly so that the student remembers",
+              "bn": "মনে রাখার জন্য হাতে হালকা করে মারা"
+            },
+            {
+              "id": "b",
+              "en": "Make the student stand holding their ears",
+              "bn": "কান ধরে দাঁড় করিয়ে রাখা"
+            },
+            {
+              "id": "c",
+              "en": "Stop for a minute, speak calmly, and tell the parent after the lesson",
+              "bn": "এক মিনিট থেমে শান্তভাবে কথা বলা এবং পড়ানো শেষে অভিভাবককে জানানো"
+            },
+            {
+              "id": "d",
+              "en": "Call the student stupid in front of the family",
+              "bn": "পরিবারের সামনে তাকে বোকা বলা"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Hitting and shaming harm a child and teach nothing; calm words and the parent's help work better.",
+          "explanationBn": "মারধর ও অপমান শিশুর ক্ষতি করে, কিছু শেখায় না; শান্ত কথা ও অভিভাবকের সহায়তাই বেশি কাজে দেয়।"
+        },
+        {
+          "promptEn": "Your class 8 student sends you a friendly message at night on social media and wants to chat. What is right?",
+          "promptBn": "অষ্টম শ্রেণির শিক্ষার্থী রাতে সামাজিক মাধ্যমে আপনাকে মেসেজ পাঠিয়ে গল্প করতে চাইল। কোনটি সঠিক?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Do not chat privately; keep lesson messages with the parent, and tell the parent about it",
+              "bn": "আলাদা করে গল্প না করা; পড়ার মেসেজ অভিভাবকের সঙ্গেই রাখা, এবং অভিভাবককে বিষয়টি জানানো"
+            },
+            {
+              "id": "b",
+              "en": "Chat for a while so that the student feels close to you",
+              "bn": "কিছুক্ষণ গল্প করা, যাতে সে আপনাকে আপন ভাবে"
+            },
+            {
+              "id": "c",
+              "en": "Chat, but delete the messages afterwards",
+              "bn": "গল্প করা, তবে পরে মেসেজ মুছে ফেলা"
+            },
+            {
+              "id": "d",
+              "en": "Ask the student to send a photo",
+              "bn": "শিক্ষার্থীকে ছবি পাঠাতে বলা"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Private chats between an adult and a child are a risk for both; all messages go through the parent.",
+          "explanationBn": "বড় মানুষ ও শিশুর আলাদা চ্যাট দুজনের জন্যই ঝুঁকি; সব মেসেজ অভিভাবকের মাধ্যমে হবে।"
+        },
+        {
+          "promptEn": "Near the end of the lesson you want to check what the student has learned. What is the right way?",
+          "promptBn": "পড়ানোর শেষ দিকে দেখতে চান শিক্ষার্থী কতটা শিখেছে। সঠিক উপায় কোনটি?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Ask \"Did you understand?\" and accept \"yes\"",
+              "bn": "\"বুঝেছ?\" জিজ্ঞেস করা এবং \"হ্যাঁ\" শুনেই মেনে নেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Give three short questions and let the student answer without help",
+              "bn": "তিনটি ছোট প্রশ্ন দেওয়া এবং সাহায্য ছাড়া উত্তর করতে দেওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Explain the whole topic once more yourself",
+              "bn": "পুরো বিষয়টি নিজে আরেকবার বুঝিয়ে দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Give a lot of homework instead",
+              "bn": "এর বদলে অনেক বাড়ির কাজ দেওয়া"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Only work done without help shows what the student can really do.",
+          "explanationBn": "সাহায্য ছাড়া করা কাজেই বোঝা যায় শিক্ষার্থী আসলে কতটা পারে।"
+        },
+        {
+          "promptEn": "A parent complains that the marks have not improved in two months. What do you do first?",
+          "promptBn": "এক অভিভাবক অভিযোগ করলেন, দুই মাসেও নম্বর বাড়েনি। আপনি প্রথমে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Say that the student is lazy",
+              "bn": "বলা যে শিক্ষার্থী অলস"
+            },
+            {
+              "id": "b",
+              "en": "Say that the school teacher is at fault",
+              "bn": "বলা যে স্কুলের শিক্ষকের দোষ"
+            },
+            {
+              "id": "c",
+              "en": "Offer to lower your fee at once",
+              "bn": "সঙ্গে সঙ্গে বেতন কমানোর প্রস্তাব দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Listen to the end without interrupting, then repeat the complaint in your own words",
+              "bn": "কথা না কেটে পুরোটা শোনা, তারপর অভিযোগটি নিজের ভাষায় আবার বলা"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "A parent who feels heard will work with you on the solution.",
+          "explanationBn": "অভিভাবক যখন বোঝেন যে আপনি তাঁর কথা শুনেছেন, তখন সমাধানে তিনি আপনার সঙ্গে থাকেন।"
+        },
+        {
+          "promptEn": "You have a fever and cannot teach today. What should you do?",
+          "promptBn": "আপনার জ্বর, আজ পড়াতে যেতে পারবেন না। কী করা উচিত?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Stay at home and explain the next time you go",
+              "bn": "বাসায় থাকা এবং পরের দিন গিয়ে কারণ বলা"
+            },
+            {
+              "id": "b",
+              "en": "Send a message to the child",
+              "bn": "শিশুকে মেসেজ পাঠানো"
+            },
+            {
+              "id": "c",
+              "en": "Tell the parent before the lesson time and agree a day to make up the lesson",
+              "bn": "পড়ানোর সময়ের আগেই অভিভাবককে জানানো এবং পুষিয়ে দেওয়ার দিন ঠিক করা"
+            },
+            {
+              "id": "d",
+              "en": "Send a friend to teach in your place without asking",
+              "bn": "না জিজ্ঞেস করে নিজের বদলে এক বন্ধুকে পাঠানো"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Telling the parent early and making up the lesson shows that you are reliable.",
+          "explanationBn": "আগে জানালে এবং পড়া পুষিয়ে দিলে বোঝা যায় আপনি নির্ভরযোগ্য।"
+        }
+      ]
+    }
+  ]
+}
