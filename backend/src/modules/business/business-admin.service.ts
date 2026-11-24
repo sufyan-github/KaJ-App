@@ -108,7 +108,7 @@ export class BusinessAdminService {
         "BUSINESS_CATEGORY",
         saved.id,
         before ? serializeCategory(before) : null,
-        serializeCategory(saved),
+        { ...serializeCategory(saved), reason: input.reason },
       ),
     });
     return serializeCategory(saved);

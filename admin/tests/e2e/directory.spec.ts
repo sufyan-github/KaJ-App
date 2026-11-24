@@ -59,6 +59,9 @@ test("skills: lists by category and adds a skill", async ({ page }) => {
   await dialog.getByLabel("Slug").fill("window-clean");
   await dialog.getByLabel("English name").fill("Window cleaning");
   await dialog.getByLabel("Bangla name").fill("জানালা পরিষ্কার");
+  await dialog
+    .getByLabel("Required operational reason")
+    .fill("Requested by the operations lead.");
   await dialog.getByRole("button", { name: "Save skill" }).click();
   await expect
     .poll(() => created)

@@ -7,6 +7,12 @@ import { IsObject, IsString, MaxLength, MinLength } from "class-validator";
 export class CourseDocumentDto {
   @IsObject()
   document!: Record<string, unknown>;
+
+  /** The typed operational reason, kept in the audit row. */
+  @IsString()
+  @MinLength(8)
+  @MaxLength(500)
+  reason!: string;
 }
 
 export class PublishReasonDto {

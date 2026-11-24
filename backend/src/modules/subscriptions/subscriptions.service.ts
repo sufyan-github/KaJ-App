@@ -49,6 +49,7 @@ import {
   UpdateSubscriptionPlanDto,
 } from "./dto/subscriptions.dto";
 import {
+  AiSubscriptionFeatures,
   FREE_MODULES,
   moduleForFeature,
   SubscriptionFeatures,
@@ -58,10 +59,25 @@ const subscriptionInclude = {
   plan: true,
   payments: { orderBy: { created_at: "desc" as const }, take: 1 },
 } as const;
-const configuredSubscriptionFeatures = new Set<string>(
-  Object.values(SubscriptionFeatures),
-);
+/** Access rules an admin may edit: the Work keys and the paid AI keys. */
+const configuredSubscriptionFeatures = new Set<string>([
+  ...Object.values(SubscriptionFeatures),
+  ...Object.values(AiSubscriptionFeatures),
+]);
 const DAY_MS = 86_400_000;
+
+/**
+ * The digits of a Bangladeshi number as stored (+8801…), from any common way
+ * of typing it: "01612348080", "+880 1612-348080", "8801612348080", or a
+ * partial "1612348". Null when it is not a number.
+ */
+export function phoneSearch(value: string): string | null {
+  const digits = value.replace(/[\s()+-]/gu, "");
+  if (!/^\d{4,15}$/u.test(digits)) return null;
+  if (digits.startsWith("880")) return digits.slice(3);
+  if (digits.startsWith("0")) return digits.slice(1);
+  return digits;
+}
 /** Carrier renewals are only inferred from status, so keep a grace window. */
 export const CARRIER_GRACE_MS = 6 * 3_600_000;
 const OPERATOR_STATUS_REFRESH_MS = 60_000;
@@ -504,8 +520,28 @@ export class SubscriptionsService {
   }
 
   async adminList(query: SubscriptionQueryDto) {
+    const phone = query.search ? phoneSearch(query.search) : null;
     const items = await this.prisma.subscription.findMany({
-      where: query.status ? { status: query.status } : undefined,
+      where: {
+        ...(query.status ? { status: query.status } : {}),
+        ...(query.search
+          ? {
+              user: {
+                OR: [
+                  ...(phone ? [{ phone_e164: { contains: phone } }] : []),
+                  {
+                    profile: {
+                      display_name: {
+                        contains: query.search,
+                        mode: "insensitive" as const,
+                      },
+                    },
+                  },
+                ],
+              },
+            }
+          : {}),
+      },
       include: {
         ...subscriptionInclude,
         user: {

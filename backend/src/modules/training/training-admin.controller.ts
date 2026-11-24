@@ -51,7 +51,12 @@ export class TrainingAdminController {
     @CurrentAdmin() actor: AdminActor,
     @Req() request: Request,
   ) {
-    return this.courses.create(body.document, actor, context(request));
+    return this.courses.create(
+      body.document,
+      body.reason,
+      actor,
+      context(request),
+    );
   }
 
   @Put(":id")
@@ -63,7 +68,13 @@ export class TrainingAdminController {
     @CurrentAdmin() actor: AdminActor,
     @Req() request: Request,
   ) {
-    return this.courses.update(id, body.document, actor, context(request));
+    return this.courses.update(
+      id,
+      body.document,
+      body.reason,
+      actor,
+      context(request),
+    );
   }
 
   @Post(":id/publish")

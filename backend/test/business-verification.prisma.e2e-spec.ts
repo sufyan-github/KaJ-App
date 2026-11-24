@@ -260,6 +260,7 @@ databaseDescribe(
             slug,
             nameEn: "Fisheries",
             nameBn: "মৎস্য",
+            reason: "Catalogue change for the test.",
           },
           admin,
           context,
@@ -281,6 +282,7 @@ databaseDescribe(
             nameEn: "Fish farming",
             nameBn: "মাছ চাষ",
             isActive: false,
+            reason: "Catalogue change for the test.",
           },
           admin,
           context,
@@ -299,7 +301,12 @@ databaseDescribe(
         await expect(
           businessAdmin.saveCategory(
             null,
-            { slug, nameEn: "Duplicate", nameBn: "ডুপ্লিকেট" },
+            {
+              slug,
+              nameEn: "Duplicate",
+              nameBn: "ডুপ্লিকেট",
+              reason: "Catalogue change for the test.",
+            },
             admin,
             context,
           ),
@@ -317,6 +324,7 @@ databaseDescribe(
               slug: `${slug}-x`,
               nameEn: "Too deep",
               nameBn: "অনেক গভীর",
+              reason: "Catalogue change for the test.",
             },
             admin,
             context,

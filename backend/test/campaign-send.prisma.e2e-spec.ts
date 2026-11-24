@@ -88,6 +88,7 @@ databaseDescribe("admin campaign send continues past the first batch", () => {
       body: "A notice for the group.",
       segment: { communityGroupId: groupId },
       throttlePerMinute,
+      reason: "Batch delivery test for the group.",
     };
   }
 
