@@ -40,27 +40,28 @@ const course = (slug: string, isSafetyCritical: boolean) => ({
     {
       titleEn: "Lesson one",
       titleBn: "পাঠ এক",
-      summaryEn:
-        "You will learn: one thing.\nStep 1: Do it.\nRemember: be careful.",
-      summaryBn:
-        "আপনি শিখবেন: একটি বিষয়।\nধাপ ১: করুন।\nমনে রাখুন: সাবধান থাকুন।",
+      summaryEn: `You will learn: one thing.\n${isSafetyCritical ? "Hazard: it can hurt; stop and call a qualified person." : "Step 1: Do it."}\nRemember: be careful.`,
+      summaryBn: `আপনি শিখবেন: একটি বিষয়।\n${isSafetyCritical ? "ঝুঁকি: আঘাত লাগতে পারে; থামুন ও দক্ষ কাউকে ডাকুন।" : "ধাপ ১: করুন।"}\nমনে রাখুন: সাবধান থাকুন।`,
       youtubeVideoId: null,
       durationS: 120,
       isSafety: isSafetyCritical,
     },
   ],
-  questions: ["b", "c"].map((correct, index) => ({
-    promptEn: `Question ${index + 1}?`,
-    promptBn: `প্রশ্ন ${index + 1}?`,
-    options: ["a", "b", "c", "d"].map((id) => ({
-      id,
-      en: `Option ${id}`,
-      bn: `বিকল্প ${id}`,
-    })),
-    correctOptionId: correct,
-    explanationEn: "Because.",
-    explanationBn: "কারণ।",
-  })),
+  // Two checkpoint questions, then extras: at least 12 in all.
+  questions: ["b", "c", "a", "d", "b", "c", "a", "d", "b", "c", "a", "d"].map(
+    (correct, index) => ({
+      promptEn: `Question ${index + 1}?`,
+      promptBn: `প্রশ্ন ${index + 1}?`,
+      options: ["a", "b", "c", "d"].map((id) => ({
+        id,
+        en: `Option ${id}`,
+        bn: `বিকল্প ${id}`,
+      })),
+      correctOptionId: correct,
+      explanationEn: "Because.",
+      explanationBn: "কারণ।",
+    }),
+  ),
 });
 
 /** R7 launch content: `pnpm seed:launch` against a real database. */
@@ -481,6 +482,16 @@ databaseDescribe("launch content loader (PostgreSQL)", () => {
     expect(() =>
       parseLaunchCourseFile("mismatch.json", { courses: [lesson] }),
     ).toThrow(/lesson 1 summaryEn has 3 lines, summaryBn 1/u);
+    const unmarked = course("unmarked-hazard", true);
+    unmarked.lessons[0]!.isSafety = false;
+    expect(() =>
+      parseLaunchCourseFile("unmarked-hazard.json", { courses: [unmarked] }),
+    ).toThrow(/isSafety is false but it has "Hazard:" line/u);
+    const few = course("few-questions", false);
+    few.questions.splice(11);
+    expect(() =>
+      parseLaunchCourseFile("few-questions.json", { courses: [few] }),
+    ).toThrow(/11 questions; needs at least 12/u);
     const options3 = course("three-options", false);
     options3.questions[0]!.options.pop();
     expect(() =>

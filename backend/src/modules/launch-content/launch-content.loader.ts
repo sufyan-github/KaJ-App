@@ -107,7 +107,9 @@ const lines = (value: string) => value.split("\n").length;
 
 /**
  * The launch course conventions on top of the loader schema: Bangla and
- * English summaries line up, four options a–d, a correct option.
+ * English summaries line up, a lesson is marked isSafety exactly when it
+ * has a "Hazard:" line, two checkpoint questions per lesson and at least
+ * max(12, questionCount) questions, four options a–d, a correct option.
  */
 export function launchCourseIssues(course: CourseContent): string[] {
   const issues: string[] = [];
@@ -118,7 +120,19 @@ export function launchCourseIssues(course: CourseContent): string[] {
       issues.push(
         `${course.slug}: lesson ${index + 1} summaryEn has ${lines(lesson.summaryEn)} lines, summaryBn ${lines(lesson.summaryBn)}`,
       );
+    const hazard = lesson.summaryEn
+      .split("\n")
+      .some((line) => line.trim().startsWith("Hazard:"));
+    if (hazard !== lesson.isSafety)
+      issues.push(
+        `${course.slug}: lesson ${index + 1} isSafety is ${lesson.isSafety} but it ${hazard ? "has" : "has no"} "Hazard:" line`,
+      );
   });
+  const needed = Math.max(12, course.questionCount, course.lessons.length * 2);
+  if (course.questions.length < needed)
+    issues.push(
+      `${course.slug}: ${course.questions.length} questions; needs at least ${needed} (2 per lesson, max(12, questionCount))`,
+    );
   course.questions.forEach((question, index) => {
     const ids = question.options.map((option) => option.id);
     if (JSON.stringify(ids) !== JSON.stringify(OPTION_IDS))
