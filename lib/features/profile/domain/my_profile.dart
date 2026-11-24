@@ -166,3 +166,14 @@ class MyProfile {
 
   bool get isWorker => activeRole == 'WORKER';
 }
+
+/// Genders the API accepts, with their Bangla labels.
+const profileGenders = {
+  'FEMALE': 'নারী',
+  'MALE': 'পুরুষ',
+  'NON_BINARY': 'নন-বাইনারি',
+  'PREFER_NOT_TO_SAY': 'বলতে চাই না',
+};
+
+/// Trust levels that mean identity was verified (NID and selfie).
+const identityVerifiedLevels = {'IDENTITY', 'VERIFIED', 'SKILL', 'BUSINESS'};

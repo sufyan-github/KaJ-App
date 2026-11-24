@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/errors/failure.dart';
+import '../../../core/errors/failure_copy.dart';
 import '../../../core/localization/kaaj_localizations.dart';
 import '../../../core/permissions/permission_gateway.dart';
 import '../../../core/routing/app_router.dart';
@@ -13,6 +14,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/k_localized_text.dart';
 import '../../../core/widgets/k_primary_button.dart';
 import '../../business/business_routes.dart';
+import '../../profile/domain/my_profile.dart';
+import '../../profile/presentation/controllers/my_profile_provider.dart';
 import '../domain/trust_models.dart';
 import 'trust_safety_providers.dart';
 
@@ -222,10 +225,21 @@ class _VerificationCaptureScreenState
   bool _consent = false;
   bool _loading = false;
 
+  /// The gender declared with an identity request (B1). Prefilled from the
+  /// profile; required when the profile has none. The profile changes
+  /// only when the reviewer approves.
+  String? _gender;
+  bool _genderTouched = false;
+
   bool get _isIdentity => widget.kind == 'IDENTITY';
   bool get _hasRequiredImages => _isIdentity
       ? _nidImage != null && _selfieImage != null
       : _images.isNotEmpty;
+
+  String? _profileGender() => ref.watch(myProfileProvider).valueOrNull?.gender;
+
+  bool get _genderMissing =>
+      _isIdentity && (_genderTouched ? _gender : _profileGender()) == null;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -261,6 +275,33 @@ class _VerificationCaptureScreenState
             icon: Icons.face_retouching_natural,
             onCapture: () => _pickIdentity(selfie: true),
             onRemove: () => setState(() => _selfieImage = null),
+          ),
+          const SizedBox(height: KSpacing.md),
+          DropdownButtonFormField<String>(
+            key: const ValueKey('identity-gender'),
+            initialValue: _genderTouched ? _gender : _profileGender(),
+            isExpanded: true,
+            decoration: InputDecoration(
+              labelText: KaajLocalizations.text(context, 'লিঙ্গ'),
+              helperText: KaajLocalizations.text(
+                context,
+                'যাচাই অনুমোদন হলে এটি প্রোফাইলে বসবে এবং পরে আর বদলানো যাবে না। নারীদের দল ও সেশনে যোগ দিতে এটি লাগে।',
+              ),
+              helperMaxLines: 3,
+            ),
+            items: [
+              for (final entry in profileGenders.entries)
+                DropdownMenuItem(
+                  value: entry.key,
+                  child: KLocalizedText(entry.value),
+                ),
+            ],
+            onChanged: _loading
+                ? null
+                : (value) => setState(() {
+                    _gender = value;
+                    _genderTouched = true;
+                  }),
           ),
         ] else
           Wrap(
@@ -322,7 +363,9 @@ class _VerificationCaptureScreenState
         KPrimaryButton(
           label: 'নিরাপদে জমা দিন',
           isLoading: _loading,
-          onPressed: !_hasRequiredImages || !_consent ? null : _submit,
+          onPressed: !_hasRequiredImages || !_consent || _genderMissing
+              ? null
+              : _submit,
         ),
       ],
     ),
@@ -370,6 +413,9 @@ class _VerificationCaptureScreenState
         await repository.submitIdentityVerification(
           nid: _nidImage!,
           selfie: _selfieImage!,
+          gender: _genderTouched
+              ? _gender
+              : ref.read(myProfileProvider).valueOrNull?.gender,
         );
       } else {
         await repository.submitSkillVerification(_images);
@@ -381,7 +427,15 @@ class _VerificationCaptureScreenState
         context.pop();
       }
     } on Object catch (error) {
-      if (mounted) _snack(_message(error));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              failureText(context, error, 'যাচাই অনুরোধ জমা দেওয়া যায়নি।'),
+            ),
+          ),
+        );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }

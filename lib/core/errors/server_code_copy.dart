@@ -7,6 +7,10 @@
 
 /// Code to (Bangla, English).
 const serverCodeCopy = <String, ({String bn, String en})>{
+  "GENDER_REQUIRED": (
+    bn: "পরিচয় যাচাইয়ের সাথে আপনার লিঙ্গ বেছে নিন।",
+    en: "Choose your gender with the identity verification.",
+  ),
   "INVALID_REFERENCE": (
     bn: "বেছে নেওয়া একটি তথ্য আর নেই। হালনাগাদ করে আবার বেছে নিন।",
     en: "Something you chose no longer exists. Refresh and choose again.",
