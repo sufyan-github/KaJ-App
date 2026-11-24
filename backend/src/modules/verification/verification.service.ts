@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import {
+  Gender,
   Prisma,
   TrustLevel,
   VerificationKind,
@@ -87,7 +88,7 @@ export class VerificationService {
     const [profile, user] = await Promise.all([
       this.prisma.profile.findUnique({
         where: { user_id: userId },
-        select: { trust_level: true },
+        select: { trust_level: true, gender: true },
       }),
       this.prisma.user.findUnique({
         where: { id: userId },
@@ -95,6 +96,19 @@ export class VerificationService {
       }),
     ]);
     const currentTrust = profile?.trust_level ?? TrustLevel.NONE;
+    // R7 B1: identity is verified together with a declared gender; it is
+    // needed when the profile has none (the approval copies it there).
+    const declaredGender =
+      input.kind === VerificationKind.IDENTITY
+        ? (input.gender ?? profile?.gender ?? null)
+        : null;
+    if (input.kind === VerificationKind.IDENTITY && !declaredGender)
+      throw new BadRequestException({
+        code: "GENDER_REQUIRED",
+        message: "Choose your gender as it appears on your NID.",
+        messageKey: "error.verification.gender_required",
+        field: "gender",
+      });
     const required = prerequisiteFor(input.kind);
     if (!hasTrust(currentTrust, required))
       throw new ConflictException(
@@ -152,6 +166,7 @@ export class VerificationService {
           user_id: userId,
           kind: input.kind,
           status: VerificationStatus.PENDING,
+          declared_gender: declaredGender,
           business_profile_id: options.businessProfileId ?? null,
           documents_json: {
             documentIds: uniqueDocumentIds,
@@ -344,6 +359,7 @@ function serializeRequest(
     rejection_reason: string | null;
     reviewed_at: Date | null;
     created_at: Date;
+    declared_gender?: Gender | null;
   },
   documentIds: string[],
 ) {
@@ -351,6 +367,7 @@ function serializeRequest(
     id: request.id,
     kind: request.kind,
     status: request.status,
+    declaredGender: request.declared_gender ?? null,
     documentIds,
     rejectionReason: request.rejection_reason,
     reviewedAt: request.reviewed_at?.toISOString() ?? null,

@@ -1,6 +1,7 @@
 import "reflect-metadata";
 
 import {
+  Gender,
   AdminRole,
   PrismaClient,
   TrustLevel,
@@ -135,6 +136,8 @@ databaseDescribe("verification pipeline with PostgreSQL", () => {
       kind: VerificationKind.IDENTITY,
       nidDocumentId: linkedDocumentId,
       selfieDocumentId,
+      // R7 B1: identity is verified with a declared gender.
+      gender: Gender.FEMALE,
     });
     requestId = submitted.id;
     expect(submitted).toMatchObject({

@@ -24,6 +24,7 @@ import {
 import { RolesGuard } from "./common/guards/roles.guard";
 import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
 import { ResponseInterceptor } from "./common/interceptors/response.interceptor";
+import { IdempotencyInterceptor } from "./common/idempotency/idempotency";
 import { AbilityFactory } from "./common/policy/ability.factory";
 import { PolicyGuard } from "./common/policy/policy.guard";
 import { PolicyResourceResolver } from "./common/policy/policy-resource.resolver";
@@ -136,6 +137,8 @@ import { AiModule } from "./modules/ai/ai.module";
     { provide: APP_GUARD, useClass: UserRateLimitGuard },
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
     { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
+    // Inside the envelope: it keeps and replays the handler's own answer.
+    { provide: APP_INTERCEPTOR, useClass: IdempotencyInterceptor },
   ],
 })
 export class AppModule implements NestModule {

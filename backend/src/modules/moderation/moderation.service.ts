@@ -667,6 +667,11 @@ export class ModerationService {
           where: { user_id: userId, revoked_at: null },
           data: { revoked_at: now },
         });
+        // R7 B9: access tokens already issued stop working at once.
+        await transaction.user.update({
+          where: { id: userId },
+          data: { mobile_auth_version: { increment: 1 } },
+        });
         await transaction.adminSession.updateMany({
           where: { user_id: userId, revoked_at: null },
           data: { revoked_at: now },

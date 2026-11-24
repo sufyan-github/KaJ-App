@@ -331,27 +331,9 @@ export class JobsService {
         poster: ACTIVE_ACCOUNT,
         AND: [
           { OR: [{ expires_at: null }, { expires_at: { gt: this.now() } }] },
-          // W13: free-text search on title and description.
-          ...(text
-            ? [
-                {
-                  OR: [
-                    {
-                      title: {
-                        contains: text,
-                        mode: Prisma.QueryMode.insensitive,
-                      },
-                    },
-                    {
-                      description: {
-                        contains: text,
-                        mode: Prisma.QueryMode.insensitive,
-                      },
-                    },
-                  ],
-                },
-              ]
-            : []),
+          // W13: free-text search on title and description; R7 (M7) also
+          // the category, subcategory and skill names, in English or Bangla.
+          ...(text ? [textSearch(text)] : []),
         ],
         category_id: query.categoryId,
         // W13: a thana or city also finds its areas' jobs.
@@ -481,7 +463,8 @@ export class JobsService {
 
   async get(jobId: string, viewerUserId: string) {
     const job = await this.prisma.job.findFirst({
-      where: { id: jobId, deleted_at: null },
+      // R7 B5: learning rows are read through the learning routes.
+      where: { ...WORK_ONLY, id: jobId, deleted_at: null },
       include: {
         ...jobInclude,
         poster: {
@@ -648,7 +631,9 @@ export class JobsService {
     jobId: string,
     query: CursorQueryDto = {},
   ) {
-    await this.ownedJob(posterUserId, jobId);
+    const job = await this.ownedJob(posterUserId, jobId);
+    // R7 B5: a learning row's applicants are on the learning routes.
+    if (!isWork(job)) throw new NotFoundException();
     const limit = query.limit ?? 100;
     const hidden = await this.blocks.hiddenFrom(posterUserId);
     const rows = await this.prisma.application.findMany({
@@ -1859,6 +1844,21 @@ export class JobsService {
       throw new NotFoundException();
     return job;
   }
+}
+
+/** The feed's `q`: title, description, category and skill names. */
+function textSearch(text: string): Prisma.JobWhereInput {
+  const like = { contains: text, mode: Prisma.QueryMode.insensitive };
+  const named = { OR: [{ name_en: like }, { name_bn: like }] };
+  return {
+    OR: [
+      { title: like },
+      { description: like },
+      { category: named },
+      { subcategory: named },
+      { skills: { some: { skill: named } } },
+    ],
+  };
 }
 
 function parseWindow(startsAt?: string, endsAt?: string) {

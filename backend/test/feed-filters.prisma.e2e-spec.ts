@@ -144,4 +144,33 @@ databaseDescribe("feed filters (real HTTP)", () => {
     const searched = await feed(`q=${encodeURIComponent(`plumbing ${tag}`)}`);
     expect(searched).toEqual([fixed]);
   });
+
+  it("matches q against the category and skill names (R7, mobile M7)", async () => {
+    const skill = await api.db.skill.create({
+      data: {
+        slug: `feed-q-${tag}`,
+        name_en: `Loomcraft ${tag}`,
+        name_bn: `তাঁত ${tag}`,
+        category_id: categoryId,
+      },
+    });
+    const job = await post({ title: "Help needed", skillIds: [skill.id] });
+    const category = await api.db.category.findUniqueOrThrow({
+      where: { id: categoryId },
+    });
+    expect(await feed(`q=${encodeURIComponent(`loomcraft ${tag}`)}`)).toEqual([
+      job,
+    ]);
+    expect(await feed(`q=${encodeURIComponent(`তাঁত ${tag}`)}`)).toEqual([job]);
+    expect(
+      await feed(
+        `q=${encodeURIComponent(category.name_en)}&skillId=${skill.id}`,
+      ),
+    ).toEqual([job]);
+    expect(
+      await feed(
+        `q=${encodeURIComponent(`nothing ${tag}`)}&skillId=${skill.id}`,
+      ),
+    ).toEqual([]);
+  });
 });

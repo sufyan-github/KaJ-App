@@ -34,6 +34,7 @@ import {
   SubscriptionFeature,
   SubscriptionFeatures,
 } from "../subscriptions/subscription-feature";
+import { Idempotent } from "../../common/idempotency/idempotency";
 
 @ApiTags("jobs")
 @Controller()
@@ -44,6 +45,7 @@ export class JobsController {
   ) {}
 
   @Post("jobs")
+  @Idempotent("job-create")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
   @Policy(Policies.authenticated())
   @SubscriptionFeature(SubscriptionFeatures.jobPosting)
@@ -157,6 +159,7 @@ export class JobsController {
   }
 
   @Post("jobs/:id/applications")
+  @Idempotent("job-apply")
   @Roles(RoleMode.WORKER)
   @Policy(Policies.authenticated())
   @SubscriptionFeature(SubscriptionFeatures.jobApplication)
@@ -189,6 +192,7 @@ export class JobsController {
   }
 
   @Post("applications/:id/accept")
+  @Idempotent("application-accept")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
   @Policy(Policies.jobPoster({ source: "application" }))
   @SubscriptionFeature(SubscriptionFeatures.workerHiring)
@@ -201,6 +205,7 @@ export class JobsController {
   }
 
   @Post("workers/:workerId/booking-requests")
+  @Idempotent("booking-request")
   @UserRateLimit("booking-request")
   @Roles(RoleMode.CUSTOMER, RoleMode.BUSINESS)
   @Policy(Policies.authenticated())
@@ -214,6 +219,7 @@ export class JobsController {
   }
 
   @Post("assignments/:id/confirm")
+  @Idempotent("assignment-confirm")
   @Roles(RoleMode.WORKER)
   @Policy(Policies.assignedWorker())
   confirm(

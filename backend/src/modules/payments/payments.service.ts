@@ -21,6 +21,7 @@ import {
 import { NotificationsService } from "../notifications/notifications.service";
 import { JobStateMachine } from "../jobs/state-machine/job-state.machine";
 import { AssignmentStatus, JobActorType, JobStatus } from "@prisma/client";
+import { idempotencyKeyReusedError } from "../../common/idempotency/idempotency";
 
 export interface PaymentIntentResponse {
   agreedPoisha: string;
@@ -286,10 +287,7 @@ export class PaymentsService {
     const cacheKey = `idempotency:${actorUserId}:${idempotencyKey}`;
     const cached = await this.readCache(cacheKey);
     if (cached) {
-      if (cached.requestHash !== requestHash)
-        throw new ConflictException(
-          "This Idempotency-Key was already used for another request.",
-        );
+      if (cached.requestHash !== requestHash) throw idempotencyKeyReusedError();
       return cached.response;
     }
 
@@ -307,9 +305,7 @@ export class PaymentsService {
       });
       if (previous) {
         if (previous.request_hash !== requestHash)
-          throw new ConflictException(
-            "This Idempotency-Key was already used for another request.",
-          );
+          throw idempotencyKeyReusedError();
         if (previous.response_json)
           return previous.response_json as unknown as PaymentIntentResponse;
       }

@@ -32,6 +32,8 @@ import {
   CheckOutDto,
 } from "./dto/attendance.dto";
 import { distanceMetres, isInsideGeofence } from "./geofence";
+import { idempotencyKeyReusedError } from "../../common/idempotency/idempotency";
+import { WORK_ONLY } from "../jobs/opportunity";
 
 interface AttendanceSettings {
   geofenceRadiusM: number;
@@ -69,6 +71,8 @@ export class AttendanceService {
       where: {
         id: assignmentId,
         OR: [{ worker_user_id: userId }, { job: { poster_user_id: userId } }],
+        // R7 B5: learning enrolments have no work attendance.
+        job: WORK_ONLY,
       },
       include: { job: true, work_sessions: true },
     });
@@ -665,9 +669,7 @@ export class AttendanceService {
           existing.operation !== operation ||
           existing.request_hash !== requestHash
         ) {
-          throw new ConflictException(
-            "This Idempotency-Key was already used for a different request.",
-          );
+          throw idempotencyKeyReusedError();
         }
         if (existing.response_json) return existing.response_json as T;
       }

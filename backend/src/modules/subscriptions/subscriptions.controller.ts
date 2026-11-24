@@ -18,6 +18,7 @@ import { isBdappsSubscriberId } from "../../infra/bdapps/bdapps-subscriber";
 import { BdappsWebhookVerifier } from "../../infra/bdapps/bdapps-webhook.verifier";
 import { RequestSubscriptionDto } from "./dto/subscriptions.dto";
 import { SubscriptionsService } from "./subscriptions.service";
+import { Idempotent } from "../../common/idempotency/idempotency";
 
 @ApiTags("subscriptions")
 @Controller("subscriptions")
@@ -74,6 +75,7 @@ export class SubscriptionsController {
   }
 
   @Post("request")
+  @Idempotent("subscription-request")
   @Policy(Policies.authenticated())
   request(
     @CurrentUser() claims: AccessTokenClaims,

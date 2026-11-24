@@ -100,6 +100,28 @@ describe("availability calculator", () => {
     });
   });
 
+  it("measures coverage in whole minutes, so seconds on a job do not leave a gap", () => {
+    // R7 B2: rules are stored in minutes; a job posted at 16:26:05 Dhaka
+    // (Monday) for two hours is inside a 16:26-18:26 rule.
+    const result = calculateAvailability({
+      rules: [
+        { dayOfWeek: 1, startMinute: 16 * 60 + 26, endMinute: 18 * 60 + 26 },
+      ],
+      jobWindow: window("2026-09-07T10:26:05Z", "2026-09-07T12:26:05Z"),
+      minCoverage: 1,
+    });
+    expect(result).toMatchObject({ coverage: 1, isAvailable: true });
+    // A job shorter than a minute is still measured as it is.
+    const short = calculateAvailability({
+      rules: [
+        { dayOfWeek: 1, startMinute: 16 * 60 + 26, endMinute: 18 * 60 + 26 },
+      ],
+      jobWindow: window("2026-09-07T10:25:30Z", "2026-09-07T10:25:50Z"),
+      minCoverage: 1,
+    });
+    expect(short).toMatchObject({ coverage: 0, isAvailable: false });
+  });
+
   it("validates windows, thresholds, buffers, recurrence count, and rules", () => {
     const validWindow = window("2026-09-06T03:00:00Z", "2026-09-06T04:00:00Z");
     expect(() =>

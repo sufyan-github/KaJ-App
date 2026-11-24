@@ -319,6 +319,11 @@ export class ChatService {
     // A block stops a direct conversation; in a group, the two simply don't
     // see each other's messages (the group goes on for everyone else).
     if (!group) await this.assertNotBlocked(userId, other!.user_id);
+    // R7 B8 (D-12): "messages only after a hire" also holds in a job
+    // conversation opened before the setting changed. Chats both sides
+    // agreed to (introductions, consultations, collaborations) have no job.
+    if (!group && conversation.job_id)
+      await this.assertAcceptsMessagesFrom(other!.user_id, userId);
     const hidden = group ? new Set(await this.blocks.hiddenFrom(userId)) : null;
     const recipients = conversation.participants
       .map((item) => item.user_id)
@@ -598,7 +603,8 @@ export class ChatService {
 
   /**
    * The other person's "who can message me" choice. ENGAGED_ONLY waits for
-   * a hire between the two; existing conversations are not affected.
+   * a hire between the two. Checked when a job conversation is opened and
+   * on every send in one (R7 B8).
    */
   private async assertAcceptsMessagesFrom(
     recipientUserId: string,

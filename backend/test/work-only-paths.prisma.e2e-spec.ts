@@ -16,6 +16,7 @@ databaseDescribe("learning rows stay out of work routes (real HTTP)", () => {
   let mentor: Actor;
   let learner: Actor;
   let enrolmentId: string;
+  let opportunityId: string;
 
   beforeAll(async () => {
     api = await HttpHarness.start();
@@ -32,7 +33,7 @@ databaseDescribe("learning rows stay out of work routes (real HTTP)", () => {
       }),
       api.db.location.findFirstOrThrow({ where: { is_active: true } }),
     ]);
-    const opportunityId = (
+    opportunityId = (
       await api
         .post("learning-opportunities", mentor, {
           opportunityType: "APPRENTICESHIP",
@@ -79,6 +80,18 @@ databaseDescribe("learning rows stay out of work routes (real HTTP)", () => {
     }
     // The learning route still shows it.
     await api.get(`learning-enrolments/${enrolmentId}`, learner).expect(200);
+  });
+
+  it("answers 404 on the work read routes for a learning row", async () => {
+    // R7 B5: learning has its own routes; the work reads do not serve it.
+    for (const as of [mentor, learner]) {
+      await api.get(`jobs/${opportunityId}`, as).expect(404);
+      await api.get(`assignments/${enrolmentId}/attendance`, as).expect(404);
+    }
+    await api.get(`jobs/${opportunityId}/applications`, mentor).expect(404);
+    await api
+      .get(`learning-opportunities/${opportunityId}`, learner)
+      .expect(200);
   });
 
   it("refuses a payment intent on a learning row", async () => {

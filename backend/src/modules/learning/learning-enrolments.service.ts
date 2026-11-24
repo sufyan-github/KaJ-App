@@ -25,6 +25,8 @@ import {
 } from "./dto/learning.dto";
 import { termsText } from "./learning-terms";
 import { LEARNING_ONLY } from "./learning.service";
+import { pageArgs, pageResult } from "../../common/api/cursor-page";
+import { CursorQueryDto } from "../../common/api/cursor-query.dto";
 
 /** How a learning opportunity is delivered, as the learner reads it. */
 const DELIVERY_MODE: Record<
@@ -426,6 +428,83 @@ export class LearningEnrolmentsService {
   }
 
   /** The user's enrolments, as learner and as mentor. */
+  /**
+   * R7 (mobile M6): the learner's own learning applications, newest first.
+   * The mentor's name is masked unless they show it or accepted the learner.
+   */
+  async myApplications(learnerUserId: string, query: CursorQueryDto = {}) {
+    const limit = query.limit ?? 50;
+    const hidden = await this.blocks.hiddenFrom(learnerUserId);
+    const rows = await this.prisma.application.findMany({
+      where: {
+        worker_user_id: learnerUserId,
+        job: {
+          ...LEARNING_ONLY,
+          deleted_at: null,
+          poster_user_id: { notIn: hidden },
+        },
+      },
+      include: {
+        job: {
+          select: {
+            id: true,
+            title: true,
+            opportunity_type: true,
+            status: true,
+            starts_at: true,
+            ends_at: true,
+            poster_user_id: true,
+            poster: {
+              select: {
+                profile: {
+                  select: { display_name: true, show_full_name: true },
+                },
+              },
+            },
+          },
+        },
+        assignments: {
+          select: { id: true },
+          orderBy: { created_at: "desc" },
+          take: 1,
+        },
+      },
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
+      ...pageArgs({ limit, cursor: query.cursor }),
+    });
+    const { items, nextCursor } = pageResult(rows, limit);
+    return {
+      items: items.map((row) => ({
+        id: row.id,
+        status: row.status,
+        message: row.message,
+        appliedAt: row.created_at.toISOString(),
+        respondedAt: row.responded_at?.toISOString() ?? null,
+        withdrawnAt: row.withdrawn_at?.toISOString() ?? null,
+        enrolmentId: row.assignments[0]?.id ?? null,
+        opportunity: {
+          id: row.job.id,
+          title: row.job.title,
+          opportunityType: row.job.opportunity_type,
+          status: row.job.status,
+          startsAt: row.job.starts_at?.toISOString() ?? null,
+          endsAt: row.job.ends_at?.toISOString() ?? null,
+        },
+        mentor: {
+          userId: row.job.poster_user_id,
+          displayName: visibleDisplayName(
+            row.job.poster.profile?.display_name ?? "",
+            {
+              showFullName: row.job.poster.profile?.show_full_name ?? false,
+              hired: row.assignments.length > 0,
+            },
+          ),
+        },
+      })),
+      nextCursor,
+    };
+  }
+
   async enrolments(userId: string) {
     const rows = await this.prisma.assignment.findMany({
       where: {

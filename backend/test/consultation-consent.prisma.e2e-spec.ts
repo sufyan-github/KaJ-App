@@ -88,6 +88,42 @@ databaseDescribe("consultation consent and slot locking (real HTTP)", () => {
     expect(room.body.data.conversationId).toEqual(expect.any(String));
   });
 
+  it("masks names on the consultation until the expert accepts", async () => {
+    // R7: the session page showed the expert's full name to the requester
+    // before acceptance, while lists showed the masked one.
+    const expert = await api.actor([RoleMode.MENTOR, RoleMode.WORKER], {
+      displayName: "Rahima Khatun",
+    });
+    await api.db.profile.update({
+      where: { user_id: expert.id },
+      data: { mentor_status: MentorStatus.APPROVED, mentor_accepting: true },
+    });
+    const learner = await api.actor([RoleMode.CUSTOMER], {
+      displayName: "Karim Uddin",
+    });
+    const id = (
+      await book(learner, expert.id, await freeHour(learner, expert.id)).expect(
+        201,
+      )
+    ).body.data.id;
+    const names = async (as: Actor) => {
+      const data = (await api.get(`sessions/${id}`, as).expect(200)).body.data;
+      return JSON.stringify([data.host, data.expert, data.participants]);
+    };
+    for (const as of [learner, expert]) {
+      const text = await names(as);
+      expect(text).not.toContain("Rahima Khatun");
+      expect(text).not.toContain("Karim Uddin");
+    }
+    expect(await names(learner)).toContain("Rahima K.");
+
+    await api
+      .post(`sessions/${id}/respond`, expert, { accept: true })
+      .expect(201);
+    expect(await names(learner)).toContain("Rahima Khatun");
+    expect(await names(expert)).toContain("Karim Uddin");
+  });
+
   it("keeps the chat closed after the expert declines", async () => {
     const expert = await makeExpert();
     const learner = await api.actor([RoleMode.CUSTOMER]);
