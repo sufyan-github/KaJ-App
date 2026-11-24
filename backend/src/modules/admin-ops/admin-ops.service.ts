@@ -271,6 +271,8 @@ export class AdminOpsService {
           moderation_level: "NONE",
           restriction_ends_at: null,
           moderation_reason: null,
+          // R7 B9: the sessions revoked below end at once.
+          mobile_auth_version: { increment: 1 },
         },
       }),
       this.prisma.refreshToken.updateMany({
@@ -320,10 +322,16 @@ export class AdminOpsService {
     if (!exists) throw new NotFoundException();
     await assertMayActOnAccount(this.prisma, actor, id);
     const now = new Date();
-    const [mobile, admin] = await this.prisma.$transaction([
+    const [mobile, , admin] = await this.prisma.$transaction([
       this.prisma.refreshToken.updateMany({
         where: { user_id: id, revoked_at: null },
         data: { revoked_at: now },
+      }),
+      // R7 B9: bumping the version ends every access token at once (each
+      // request checks it), not when the 15-minute token expires.
+      this.prisma.user.update({
+        where: { id },
+        data: { mobile_auth_version: { increment: 1 } },
       }),
       this.prisma.adminSession.updateMany({
         where: { user_id: id, revoked_at: null },

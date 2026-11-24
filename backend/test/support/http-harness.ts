@@ -125,6 +125,7 @@ export class HttpHarness {
         roles,
         activeRole: roles[0]!,
         isAdmin: false,
+        mobileAuthVersion: user.mobile_auth_version,
       },
       randomUUID(),
     );
