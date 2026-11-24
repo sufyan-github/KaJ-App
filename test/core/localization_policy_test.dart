@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kaaj/core/localization/catalog_ai.dart';
 import 'package:kaaj/core/localization/catalog_business.dart';
 import 'package:kaaj/core/localization/catalog_community.dart';
+import 'package:kaaj/core/localization/catalog_home.dart';
 import 'package:kaaj/core/localization/catalog_ideas.dart';
 import 'package:kaaj/core/localization/generated_translation_catalog.dart';
 import 'package:kaaj/core/localization/kaaj_localizations.dart';
@@ -42,6 +43,7 @@ void main() {
       ...ideaTranslations,
       ...communityTranslations,
       ...aiTranslations,
+      ...homeTranslations,
     }.entries) {
       expect(
         entry.value,
@@ -58,6 +60,7 @@ void main() {
       ideaTranslations,
       communityTranslations,
       aiTranslations,
+      homeTranslations,
     ];
     final seen = <String>{};
     for (final catalog in catalogs) {

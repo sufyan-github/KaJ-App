@@ -178,8 +178,8 @@ void main() {
       expect(
         labels,
         language == 'en'
-            ? ['Home', 'Search', 'My activity', 'Messages', 'Profile']
-            : ['হোম', 'খুঁজুন', 'আমার কার্যক্রম', 'বার্তা', 'প্রোফাইল'],
+            ? ['Home', 'Search', 'Activity', 'Messages', 'Profile']
+            : ['হোম', 'খুঁজুন', 'কার্যক্রম', 'বার্তা', 'প্রোফাইল'],
       );
       expect(tester.takeException(), isNull);
     });
@@ -225,9 +225,7 @@ void main() {
       },
     );
   }
-  testWidgets('dashboard grid stays balanced at normal text size', (
-    tester,
-  ) async {
+  testWidgets('home hub stays balanced at normal text size', (tester) async {
     final onboarding = _MockOnboardingRepository();
     final auth = _MockAuthRepository();
     when(
@@ -253,9 +251,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('dashboard grid centers its content at 200% text', (
-    tester,
-  ) async {
+  testWidgets('home hub centers its tiles at 200% text', (tester) async {
     final onboarding = _MockOnboardingRepository();
     final auth = _MockAuthRepository();
     when(
@@ -277,12 +273,13 @@ void main() {
       ],
     );
 
+    // The hub tiles keep their labels centred, with no overflow.
     expect(
-      tester.widget<Text>(find.text('কাজ খুঁজুন')).textAlign,
+      tester.widget<Text>(find.text('কাজের সুযোগ')).textAlign,
       TextAlign.center,
     );
     expect(
-      tester.widget<Text>(find.text('খালি কাজ ও সময় দেখুন')).textAlign,
+      tester.widget<Text>(find.text('বুকিং ও কাজ')).textAlign,
       TextAlign.center,
     );
     expect(tester.takeException(), isNull);

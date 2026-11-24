@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'catalog_ai.dart';
 import 'catalog_business.dart';
 import 'catalog_community.dart';
+import 'catalog_home.dart';
 import 'catalog_ideas.dart';
 import 'generated_translation_catalog.dart';
 
@@ -22,7 +23,8 @@ abstract final class KaajLocalizations {
         businessTranslations[value] ??
         ideaTranslations[value] ??
         communityTranslations[value] ??
-        aiTranslations[value];
+        aiTranslations[value] ??
+        homeTranslations[value];
     if (translated != null) return _latinDigits(translated);
     final dynamicTranslation = _dynamicEnglish(value);
     return dynamicTranslation == value
