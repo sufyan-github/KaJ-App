@@ -132,19 +132,23 @@ class HomeStatsRow extends ConsumerWidget {
         ),
       ],
     ];
-    return Row(
-      children: [
-        for (final (index, stat) in stats.indexed) ...[
-          if (index > 0) const SizedBox(width: KSpacing.sm),
-          Expanded(
-            child: _StatTile(
-              label: stat.label,
-              value: stat.value,
-              onTap: () => context.push(stat.route),
+    // Equal heights, also when one label needs two lines.
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final (index, stat) in stats.indexed) ...[
+            if (index > 0) const SizedBox(width: KSpacing.sm),
+            Expanded(
+              child: _StatTile(
+                label: stat.label,
+                value: stat.value,
+                onTap: () => context.push(stat.route),
+              ),
             ),
-          ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
@@ -177,6 +181,7 @@ class _StatTile extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 180),
