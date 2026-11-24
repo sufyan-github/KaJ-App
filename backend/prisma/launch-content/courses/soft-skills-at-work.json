@@ -79,7 +79,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "Take off 30 minutes for travel and 15 more for delays on the road.",
-          "explanationBn": "যাতায়াতের ৩০ মিনিট এবং রাস্তায় দেরির জন্য আরও ১৫ মিনিট বাদ দিন।"
+          "explanationBn": "যাতায়াতের ৩০ মিনিট এবং রাস্তায় দেরির জন্য আরও ১৫ মিনিট বাদ দিন।",
+          "lesson": 1
         },
         {
           "promptEn": "You have a job from 10 to 12. Another customer on the far side of the town asks you to come at 12:00 the same day. What do you do?",
@@ -108,7 +109,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "Two jobs need a gap for travel and delays; a time you can keep is better than a time you cannot.",
-          "explanationBn": "দুই কাজের মাঝে যাতায়াত ও দেরির জন্য ফাঁক লাগে; যে সময় রাখতে পারবেন সেটিই বলা ভালো।"
+          "explanationBn": "দুই কাজের মাঝে যাতায়াত ও দেরির জন্য ফাঁক লাগে; যে সময় রাখতে পারবেন সেটিই বলা ভালো।",
+          "lesson": 1
         },
         {
           "promptEn": "Your senior gives a long instruction and you did not understand one part. What do you do?",
@@ -137,7 +139,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "One question now costs a few seconds; a wrong guess can cost hours and materials.",
-          "explanationBn": "এখন একটি প্রশ্নে কয়েক সেকেন্ড লাগে; ভুল আন্দাজে ঘণ্টার পর ঘণ্টা সময় ও মালামাল নষ্ট হতে পারে।"
+          "explanationBn": "এখন একটি প্রশ্নে কয়েক সেকেন্ড লাগে; ভুল আন্দাজে ঘণ্টার পর ঘণ্টা সময় ও মালামাল নষ্ট হতে পারে।",
+          "lesson": 2
         },
         {
           "promptEn": "The senior in charge tells you to fit the pipe on the left wall. A helper tells you to fit it on the right wall. What do you do?",
@@ -166,7 +169,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "One person is in charge of the job, and only that person can settle two different instructions.",
-          "explanationBn": "কাজের দায়িত্বে একজনই থাকেন, আর দুই রকম নির্দেশের মীমাংসা তিনিই করতে পারেন।"
+          "explanationBn": "কাজের দায়িত্বে একজনই থাকেন, আর দুই রকম নির্দেশের মীমাংসা তিনিই করতে পারেন।",
+          "lesson": 2
         },
         {
           "promptEn": "At a customer's home you need to charge the battery of your drill. What do you do?",
@@ -195,7 +199,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "Everything in the home belongs to the customer, so ask before you use it.",
-          "explanationBn": "বাসার সব কিছুই গ্রাহকের, তাই ব্যবহারের আগে অনুমতি নিন।"
+          "explanationBn": "বাসার সব কিছুই গ্রাহকের, তাই ব্যবহারের আগে অনুমতি নিন।",
+          "lesson": 3
         },
         {
           "promptEn": "You are going to drill a wall in the customer's sitting room. What do you do before you start?",
@@ -224,7 +229,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "Covering the floor first keeps dust off the customer's floor and furniture.",
-          "explanationBn": "আগে মেঝে ঢেকে নিলে গ্রাহকের মেঝে ও আসবাবে ধুলো পড়ে না।"
+          "explanationBn": "আগে মেঝে ঢেকে নিলে গ্রাহকের মেঝে ও আসবাবে ধুলো পড়ে না।",
+          "lesson": 3
         },
         {
           "promptEn": "You crack a floor tile while drilling. The customer is in another room and has not seen it. What do you do?",
@@ -253,7 +259,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "A hidden mistake is found later and destroys trust; an honest one can be put right.",
-          "explanationBn": "লুকানো ভুল পরে ধরা পড়ে এবং বিশ্বাস নষ্ট করে; স্বীকার করা ভুল ঠিক করে দেওয়া যায়।"
+          "explanationBn": "লুকানো ভুল পরে ধরা পড়ে এবং বিশ্বাস নষ্ট করে; স্বীকার করা ভুল ঠিক করে দেওয়া যায়।",
+          "lesson": 4
         },
         {
           "promptEn": "You think a job will take two days. The customer asks, \"Can you finish it tomorrow?\" What do you say?",
@@ -282,7 +289,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "Promise only what you are sure of; a two-day promise kept is better than a one-day promise broken.",
-          "explanationBn": "যা নিশ্চিত পারবেন তারই কথা দিন; এক দিনের ভাঙা কথার চেয়ে দুই দিনের রাখা কথা ভালো।"
+          "explanationBn": "যা নিশ্চিত পারবেন তারই কথা দিন; এক দিনের ভাঙা কথার চেয়ে দুই দিনের রাখা কথা ভালো।",
+          "lesson": 4
         },
         {
           "promptEn": "Your senior tells you to join a wire without switching off the main switch, \"to save time\". What do you do?",

@@ -23,9 +23,11 @@ import { AUTH_RATE_LIMITER, AuthRateLimiter } from "../auth/auth-rate-limiter";
 import { AccessTokenClaims } from "../auth/auth-token.service";
 import {
   CourseListQueryDto,
+  SubmitCheckpointDto,
   SubmitTrainingAttemptDto,
 } from "./dto/training.dto";
 import { TrainingAttemptsService } from "./training-attempts.service";
+import { TrainingCheckpointsService } from "./training-checkpoints.service";
 import { TrainingCertificatesService } from "./training-certificates.service";
 import { TrainingCoursesService } from "./training-courses.service";
 import { certificateLookupRateLimitError } from "./training.errors";
@@ -40,6 +42,7 @@ export class TrainingController {
     private readonly courses: TrainingCoursesService,
     private readonly attempts: TrainingAttemptsService,
     private readonly certificates: TrainingCertificatesService,
+    private readonly checkpoints: TrainingCheckpointsService,
     @Inject(AUTH_RATE_LIMITER) private readonly rateLimiter: AuthRateLimiter,
   ) {}
 
@@ -69,6 +72,27 @@ export class TrainingController {
     @Param("id", new ParseUUIDPipe()) id: string,
   ): Promise<void> {
     await this.courses.openLesson(claims.sub, id);
+  }
+
+  /** A lesson's checkpoint questions (no answers). */
+  @Get("training/lessons/:id/checkpoint")
+  @Policy(Policies.authenticated())
+  checkpoint(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+  ) {
+    return this.checkpoints.get(claims.sub, id);
+  }
+
+  /** Both right to pass; unlimited tries; never part of the certificate. */
+  @Post("training/lessons/:id/checkpoint")
+  @Policy(Policies.authenticated())
+  answerCheckpoint(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @Body() body: SubmitCheckpointDto,
+  ) {
+    return this.checkpoints.submit(claims.sub, id, body.answers);
   }
 
   @Post("training/courses/:id/attempts")

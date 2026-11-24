@@ -34,3 +34,12 @@ export class SubmitTrainingAttemptDto {
   @Type(() => TrainingAnswerDto)
   answers!: TrainingAnswerDto[];
 }
+
+/** POST /training/lessons/:id/checkpoint */
+export class SubmitCheckpointDto {
+  @IsArray()
+  @ArrayMaxSize(10)
+  @ValidateNested({ each: true })
+  @Type(() => TrainingAnswerDto)
+  answers!: TrainingAnswerDto[];
+}

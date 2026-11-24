@@ -79,7 +79,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "A final price for work you have not seen is only a guess, and guesses lead to arguments.",
-          "explanationBn": "না দেখা কাজের চূড়ান্ত দাম শুধুই আন্দাজ, আর আন্দাজ থেকেই ঝামেলা হয়।"
+          "explanationBn": "না দেখা কাজের চূড়ান্ত দাম শুধুই আন্দাজ, আর আন্দাজ থেকেই ঝামেলা হয়।",
+          "lesson": 1
         },
         {
           "promptEn": "Your labour is ৳600, materials are ৳350 and travel is ৳50. What is your estimate?",
@@ -108,7 +109,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "The estimate is labour, materials and travel added together.",
-          "explanationBn": "মজুরি, মালামাল ও যাতায়াত যোগ করেই হিসাব হয়।"
+          "explanationBn": "মজুরি, মালামাল ও যাতায়াত যোগ করেই হিসাব হয়।",
+          "lesson": 1
         },
         {
           "promptEn": "The customer asks, \"How much will it cost?\" Which answer is best?",
@@ -137,7 +139,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "One clear number with its parts shows the customer that the price is fair.",
-          "explanationBn": "ভাগসহ একটি পরিষ্কার অঙ্ক বললে গ্রাহক বোঝেন দাম ন্যায্য।"
+          "explanationBn": "ভাগসহ একটি পরিষ্কার অঙ্ক বললে গ্রাহক বোঝেন দাম ন্যায্য।",
+          "lesson": 2
         },
         {
           "promptEn": "You have said your price and the customer is silent, thinking. What do you do?",
@@ -166,7 +169,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "The customer needs time to think; lowering the price before they answer loses you money for no reason.",
-          "explanationBn": "গ্রাহকের ভাবার সময় দরকার; উত্তরের আগেই দাম কমালে অকারণে আপনার টাকা কমে।"
+          "explanationBn": "গ্রাহকের ভাবার সময় দরকার; উত্তরের আগেই দাম কমালে অকারণে আপনার টাকা কমে।",
+          "lesson": 2
         },
         {
           "promptEn": "You found a cracked pipe joint and showed it to the customer. Which message should you write in the app chat?",
@@ -195,7 +199,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "The message must name the work, the extra cost, the extra time and the new total, and ask for agreement.",
-          "explanationBn": "মেসেজে কাজ, বাড়তি টাকা, বাড়তি সময় ও নতুন মোট থাকতে হবে, এবং গ্রাহক রাজি কি না জিজ্ঞেস করতে হবে।"
+          "explanationBn": "মেসেজে কাজ, বাড়তি টাকা, বাড়তি সময় ও নতুন মোট থাকতে হবে, এবং গ্রাহক রাজি কি না জিজ্ঞেস করতে হবে।",
+          "lesson": 3
         },
         {
           "promptEn": "The customer says \"yes, do it\" by voice to ৳300 of extra work. What do you do before you start?",
@@ -224,7 +229,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "Spoken words are forgotten or remembered differently; the chat keeps the same words for both of you.",
-          "explanationBn": "মুখের কথা মানুষ ভুলে যায় বা আলাদাভাবে মনে রাখে; চ্যাটে দুজনের জন্য একই কথা থেকে যায়।"
+          "explanationBn": "মুখের কথা মানুষ ভুলে যায় বা আলাদাভাবে মনে রাখে; চ্যাটে দুজনের জন্য একই কথা থেকে যায়।",
+          "lesson": 3
         },
         {
           "promptEn": "Your materials and travel cost ৳400, and a fair wage for your time is ৳500. The customer offers ৳500 for the whole job. What do you do?",
@@ -253,7 +259,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "৳500 is below your lowest price of ৳900, so you would be working at a loss.",
-          "explanationBn": "৳৫০০ আপনার সর্বনিম্ন দাম ৳৯০০-এর নিচে, তাই এতে আপনার লোকসান হবে।"
+          "explanationBn": "৳৫০০ আপনার সর্বনিম্ন দাম ৳৯০০-এর নিচে, তাই এতে আপনার লোকসান হবে।",
+          "lesson": 4
         },
         {
           "promptEn": "The customer says, \"Another worker will do it for much less.\" What is the best reply?",
@@ -282,7 +289,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "You win trust by explaining your own work, not by attacking others or cutting your price below cost.",
-          "explanationBn": "অন্যকে ছোট করে বা খরচের নিচে দাম নামিয়ে নয়, নিজের কাজ বুঝিয়ে বলেই বিশ্বাস পাওয়া যায়।"
+          "explanationBn": "অন্যকে ছোট করে বা খরচের নিচে দাম নামিয়ে নয়, নিজের কাজ বুঝিয়ে বলেই বিশ্বাস পাওয়া যায়।",
+          "lesson": 4
         },
         {
           "promptEn": "The customer can pay only ৳800 and your price is ৳1,000. Which is a good offer?",

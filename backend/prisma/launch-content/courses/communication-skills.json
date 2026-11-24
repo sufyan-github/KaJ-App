@@ -79,7 +79,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "The customer may say something at the end that changes the whole job.",
-          "explanationBn": "শেষের দিকে গ্রাহক এমন কিছু বলতে পারেন যাতে পুরো কাজটাই বদলে যায়।"
+          "explanationBn": "শেষের দিকে গ্রাহক এমন কিছু বলতে পারেন যাতে পুরো কাজটাই বদলে যায়।",
+          "lesson": 1
         },
         {
           "promptEn": "The customer has explained the problem. Which reply is a good \"repeat back\"?",
@@ -108,7 +109,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "Repeating the details and asking \"Is that right?\" lets the customer correct a mistake before work starts.",
-          "explanationBn": "খুঁটিনাটি আবার বলে \"ঠিক বলেছি?\" জিজ্ঞেস করলে কাজ শুরুর আগেই গ্রাহক ভুল ধরিয়ে দিতে পারেন।"
+          "explanationBn": "খুঁটিনাটি আবার বলে \"ঠিক বলেছি?\" জিজ্ঞেস করলে কাজ শুরুর আগেই গ্রাহক ভুল ধরিয়ে দিতে পারেন।",
+          "lesson": 1
         },
         {
           "promptEn": "You phone a new customer for the first time. What do you say first?",
@@ -137,7 +139,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "The customer listens properly only after knowing who is calling.",
-          "explanationBn": "কে ফোন করেছেন তা জানার পরই গ্রাহক আপনার কথা মন দিয়ে শোনেন।"
+          "explanationBn": "কে ফোন করেছেন তা জানার পরই গ্রাহক আপনার কথা মন দিয়ে শোনেন।",
+          "lesson": 2
         },
         {
           "promptEn": "You need to tell the customer when you will come. Which is the clearest?",
@@ -166,7 +169,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "A day and an exact time let the customer plan, and leave no room for confusion.",
-          "explanationBn": "দিন ও নির্দিষ্ট সময় বললে গ্রাহক পরিকল্পনা করতে পারেন এবং ভুল বোঝার সুযোগ থাকে না।"
+          "explanationBn": "দিন ও নির্দিষ্ট সময় বললে গ্রাহক পরিকল্পনা করতে পারেন এবং ভুল বোঝার সুযোগ থাকে না।",
+          "lesson": 2
         },
         {
           "promptEn": "Which chat message is the best?",
@@ -195,7 +199,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "It has a greeting, full words, and the exact day, time and amount.",
-          "explanationBn": "এতে শুভেচ্ছা, পুরো শব্দ এবং নির্দিষ্ট দিন, সময় ও টাকার অঙ্ক আছে।"
+          "explanationBn": "এতে শুভেচ্ছা, পুরো শব্দ এবং নির্দিষ্ট দিন, সময় ও টাকার অঙ্ক আছে।",
+          "lesson": 3
         },
         {
           "promptEn": "You sent the customer a message one hour ago and there is no reply. The job is tomorrow afternoon. What do you do?",
@@ -224,7 +229,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "Customers are busy; one polite reminder is respectful, many messages are annoying.",
-          "explanationBn": "গ্রাহক ব্যস্ত থাকতে পারেন; একবার ভদ্রভাবে মনে করানো সম্মানজনক, বারবার মেসেজ বিরক্তিকর।"
+          "explanationBn": "গ্রাহক ব্যস্ত থাকতে পারেন; একবার ভদ্রভাবে মনে করানো সম্মানজনক, বারবার মেসেজ বিরক্তিকর।",
+          "lesson": 3
         },
         {
           "promptEn": "A customer shouts that the tap you repaired yesterday is leaking again. What do you do first?",
@@ -253,7 +259,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "An angry person calms down only after they feel heard.",
-          "explanationBn": "রাগান্বিত মানুষ তখনই শান্ত হন, যখন বোঝেন তাঁর কথা শোনা হয়েছে।"
+          "explanationBn": "রাগান্বিত মানুষ তখনই শান্ত হন, যখন বোঝেন তাঁর কথা শোনা হয়েছে।",
+          "lesson": 4
         },
         {
           "promptEn": "You look together and find that the water is coming from an old pipe that you did not work on. What is right?",
@@ -282,7 +289,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "Showing the facts calmly and offering a fair option solves the problem without a fight.",
-          "explanationBn": "শান্তভাবে আসল ঘটনা দেখিয়ে ন্যায্য প্রস্তাব দিলে ঝগড়া ছাড়াই সমস্যা মেটে।"
+          "explanationBn": "শান্তভাবে আসল ঘটনা দেখিয়ে ন্যায্য প্রস্তাব দিলে ঝগড়া ছাড়াই সমস্যা মেটে।",
+          "lesson": 4
         },
         {
           "promptEn": "On the phone you must give your mobile number to the customer. What is the best way?",

@@ -88,20 +88,38 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "Work that is not saved is lost when the power goes off, so save at once.",
-          "explanationBn": "সেভ না করা লেখা বিদ্যুৎ চলে গেলে হারিয়ে যায়, তাই সঙ্গে সঙ্গে সেভ করতে হবে।"
+          "explanationBn": "সেভ না করা লেখা বিদ্যুৎ চলে গেলে হারিয়ে যায়, তাই সঙ্গে সঙ্গে সেভ করতে হবে।",
+          "lesson": 1
         },
         {
           "promptEn": "You are typing your name in English and need a capital letter. Which key do you hold while pressing the letter?",
           "promptBn": "আপনি ইংরেজিতে নিজের নাম লিখছেন এবং বড় হাতের অক্ষর দরকার। অক্ষর চাপার সময় কোন বোতাম চেপে ধরবেন?",
           "options": [
-            { "id": "a", "en": "Backspace", "bn": "Backspace" },
-            { "id": "b", "en": "Enter", "bn": "Enter" },
-            { "id": "c", "en": "Space", "bn": "Space" },
-            { "id": "d", "en": "Shift", "bn": "Shift" }
+            {
+              "id": "a",
+              "en": "Backspace",
+              "bn": "Backspace"
+            },
+            {
+              "id": "b",
+              "en": "Enter",
+              "bn": "Enter"
+            },
+            {
+              "id": "c",
+              "en": "Space",
+              "bn": "Space"
+            },
+            {
+              "id": "d",
+              "en": "Shift",
+              "bn": "Shift"
+            }
           ],
           "correctOptionId": "d",
           "explanationEn": "Holding Shift with a letter makes a capital letter.",
-          "explanationBn": "Shift চেপে ধরে অক্ষর চাপলে বড় হাতের অক্ষর হয়।"
+          "explanationBn": "Shift চেপে ধরে অক্ষর চাপলে বড় হাতের অক্ষর হয়।",
+          "lesson": 1
         },
         {
           "promptEn": "A customer asks for a photo of your training certificate, and your phone has hundreds of photos. What makes it quickest to find?",
@@ -130,7 +148,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "A clear file name in one tidy folder lets you find a document in seconds.",
-          "explanationBn": "গোছানো একটি ফোল্ডারে পরিষ্কার নাম থাকলে কাগজ কয়েক সেকেন্ডে খুঁজে পাওয়া যায়।"
+          "explanationBn": "গোছানো একটি ফোল্ডারে পরিষ্কার নাম থাকলে কাগজ কয়েক সেকেন্ডে খুঁজে পাওয়া যায়।",
+          "lesson": 2
         },
         {
           "promptEn": "You are about to send a photo of your identity card. What must you do before you tap Send?",
@@ -159,7 +178,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "An identity card sent to the wrong person can be misused, so check the receiver first.",
-          "explanationBn": "পরিচয়পত্র ভুল লোকের হাতে গেলে অপব্যবহার হতে পারে, তাই আগে প্রাপক মিলিয়ে নিন।"
+          "explanationBn": "পরিচয়পত্র ভুল লোকের হাতে গেলে অপব্যবহার হতে পারে, তাই আগে প্রাপক মিলিয়ে নিন।",
+          "lesson": 2
         },
         {
           "promptEn": "A caller says he is from your mobile banking helpline. He says your account will be blocked unless you tell him the code that just came to your phone. What do you do?",
@@ -188,24 +208,38 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "Real staff never ask for your code, so anyone who asks is a scammer.",
-          "explanationBn": "আসল কর্মী কখনো কোড চান না, তাই যে চায় সে প্রতারক।"
+          "explanationBn": "আসল কর্মী কখনো কোড চান না, তাই যে চায় সে প্রতারক।",
+          "lesson": 3
         },
         {
           "promptEn": "You are making a password for a new account. Which one is the strongest?",
           "promptBn": "আপনি নতুন অ্যাকাউন্টের পাসওয়ার্ড বানাচ্ছেন। কোনটি সবচেয়ে শক্ত?",
           "options": [
-            { "id": "a", "en": "Nodi#4827Akash", "bn": "Nodi#4827Akash" },
-            { "id": "b", "en": "12345678", "bn": "12345678" },
+            {
+              "id": "a",
+              "en": "Nodi#4827Akash",
+              "bn": "Nodi#4827Akash"
+            },
+            {
+              "id": "b",
+              "en": "12345678",
+              "bn": "12345678"
+            },
             {
               "id": "c",
               "en": "Your name and year of birth",
               "bn": "আপনার নাম ও জন্মসাল"
             },
-            { "id": "d", "en": "Your phone number", "bn": "আপনার ফোন নম্বর" }
+            {
+              "id": "d",
+              "en": "Your phone number",
+              "bn": "আপনার ফোন নম্বর"
+            }
           ],
           "correctOptionId": "a",
           "explanationEn": "It is long and mixes letters, numbers and a symbol, and it is not your name, number or date of birth.",
-          "explanationBn": "এটি লম্বা, এতে অক্ষর, সংখ্যা ও চিহ্ন মেশানো আছে, এবং এটি আপনার নাম, নম্বর বা জন্মতারিখ নয়।"
+          "explanationBn": "এটি লম্বা, এতে অক্ষর, সংখ্যা ও চিহ্ন মেশানো আছে, এবং এটি আপনার নাম, নম্বর বা জন্মতারিখ নয়।",
+          "lesson": 3
         },
         {
           "promptEn": "You photographed your identity card for a form. When you zoom in, the number shines from the light and is hard to read. What do you do?",
@@ -234,7 +268,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "A photo that cannot be read gets the form rejected, so take it again.",
-          "explanationBn": "পড়া যায় না এমন ছবি দিলে ফর্ম বাতিল হয়, তাই আবার তুলতে হবে।"
+          "explanationBn": "পড়া যায় না এমন ছবি দিলে ফর্ম বাতিল হয়, তাই আবার তুলতে হবে।",
+          "lesson": 4
         },
         {
           "promptEn": "You are filling in an online form. How should you write your name and date of birth?",
@@ -263,7 +298,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "Details that do not match your papers get the form rejected.",
-          "explanationBn": "কাগজের সঙ্গে তথ্য না মিললে ফর্ম বাতিল হয়।"
+          "explanationBn": "কাগজের সঙ্গে তথ্য না মিললে ফর্ম বাতিল হয়।",
+          "lesson": 4
         },
         {
           "promptEn": "You sent ৳2,000 to a wrong number by mistake. What do you do first?",
@@ -292,7 +328,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "The sooner the helpline knows, the better the chance of getting the money back.",
-          "explanationBn": "হেল্পলাইন যত তাড়াতাড়ি জানবে, টাকা ফেরত পাওয়ার সম্ভাবনা তত বেশি।"
+          "explanationBn": "হেল্পলাইন যত তাড়াতাড়ি জানবে, টাকা ফেরত পাওয়ার সম্ভাবনা তত বেশি।",
+          "lesson": 5
         },
         {
           "promptEn": "You are sending money and the confirmation screen appears. What do you check before you enter your PIN?",
@@ -313,11 +350,16 @@
               "en": "The receiver's number and the amount",
               "bn": "প্রাপকের নম্বর ও টাকার পরিমাণ"
             },
-            { "id": "d", "en": "The colour of the screen", "bn": "পর্দার রং" }
+            {
+              "id": "d",
+              "en": "The colour of the screen",
+              "bn": "পর্দার রং"
+            }
           ],
           "correctOptionId": "c",
           "explanationEn": "One wrong digit sends the money to a stranger, so check the number and the amount first.",
-          "explanationBn": "একটি সংখ্যা ভুল হলে টাকা অচেনা লোকের কাছে চলে যায়, তাই আগে নম্বর ও পরিমাণ মিলিয়ে নিন।"
+          "explanationBn": "একটি সংখ্যা ভুল হলে টাকা অচেনা লোকের কাছে চলে যায়, তাই আগে নম্বর ও পরিমাণ মিলিয়ে নিন।",
+          "lesson": 5
         },
         {
           "promptEn": "A stranger calls and says: I sent ৳3,000 to your number by mistake, send it back now. What do you do first?",

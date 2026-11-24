@@ -65,40 +65,91 @@
           "promptEn": "For one job you spend ৳500 on materials and ৳80 on travel, and you count ৳20 for tools and phone. What is the total cost?",
           "promptBn": "একটি কাজে মালপত্রে ৳৫০০ ও যাতায়াতে ৳৮০ খরচ হলো, আর যন্ত্রপাতি ও ফোনের জন্য ধরলেন ৳২০। মোট খরচ কত?",
           "options": [
-            { "id": "a", "en": "৳500", "bn": "৳৫০০" },
-            { "id": "b", "en": "৳580", "bn": "৳৫৮০" },
-            { "id": "c", "en": "৳600", "bn": "৳৬০০" },
-            { "id": "d", "en": "৳620", "bn": "৳৬২০" }
+            {
+              "id": "a",
+              "en": "৳500",
+              "bn": "৳৫০০"
+            },
+            {
+              "id": "b",
+              "en": "৳580",
+              "bn": "৳৫৮০"
+            },
+            {
+              "id": "c",
+              "en": "৳600",
+              "bn": "৳৬০০"
+            },
+            {
+              "id": "d",
+              "en": "৳620",
+              "bn": "৳৬২০"
+            }
           ],
           "correctOptionId": "c",
           "explanationEn": "Total cost is materials plus travel plus the share for tools and phone: ৳500 + ৳80 + ৳20 = ৳600.",
-          "explanationBn": "মোট খরচ হলো মালপত্র, যাতায়াত এবং যন্ত্রপাতি ও ফোনের অংশের যোগফল: ৳৫০০ + ৳৮০ + ৳২০ = ৳৬০০।"
+          "explanationBn": "মোট খরচ হলো মালপত্র, যাতায়াত এবং যন্ত্রপাতি ও ফোনের অংশের যোগফল: ৳৫০০ + ৳৮০ + ৳২০ = ৳৬০০।",
+          "lesson": 1
         },
         {
           "promptEn": "A job costs you ৳600 and the customer pays ৳900. What is your profit?",
           "promptBn": "একটি কাজে আপনার খরচ ৳৬০০, গ্রাহক দিলেন ৳৯০০। আপনার লাভ কত?",
           "options": [
-            { "id": "a", "en": "৳300", "bn": "৳৩০০" },
-            { "id": "b", "en": "৳900", "bn": "৳৯০০" },
-            { "id": "c", "en": "৳600", "bn": "৳৬০০" },
-            { "id": "d", "en": "৳1,500", "bn": "৳১,৫০০" }
+            {
+              "id": "a",
+              "en": "৳300",
+              "bn": "৳৩০০"
+            },
+            {
+              "id": "b",
+              "en": "৳900",
+              "bn": "৳৯০০"
+            },
+            {
+              "id": "c",
+              "en": "৳600",
+              "bn": "৳৬০০"
+            },
+            {
+              "id": "d",
+              "en": "৳1,500",
+              "bn": "৳১,৫০০"
+            }
           ],
           "correctOptionId": "a",
           "explanationEn": "Profit is the price minus the cost: ৳900 - ৳600 = ৳300.",
-          "explanationBn": "লাভ হলো দাম থেকে খরচ বাদ দিলে যা থাকে: ৳৯০০ - ৳৬০০ = ৳৩০০।"
+          "explanationBn": "লাভ হলো দাম থেকে খরচ বাদ দিলে যা থাকে: ৳৯০০ - ৳৬০০ = ৳৩০০।",
+          "lesson": 1
         },
         {
           "promptEn": "Your opening balance is ৳800. During the day ৳1,500 comes in and ৳600 goes out. What is the balance at the end of the day?",
           "promptBn": "আপনার শুরুর ব্যালেন্স ৳৮০০। সারা দিনে ৳১,৫০০ এলো এবং ৳৬০০ গেল। দিনের শেষে ব্যালেন্স কত?",
           "options": [
-            { "id": "a", "en": "৳2,900", "bn": "৳২,৯০০" },
-            { "id": "b", "en": "৳2,300", "bn": "৳২,৩০০" },
-            { "id": "c", "en": "৳900", "bn": "৳৯০০" },
-            { "id": "d", "en": "৳1,700", "bn": "৳১,৭০০" }
+            {
+              "id": "a",
+              "en": "৳2,900",
+              "bn": "৳২,৯০০"
+            },
+            {
+              "id": "b",
+              "en": "৳2,300",
+              "bn": "৳২,৩০০"
+            },
+            {
+              "id": "c",
+              "en": "৳900",
+              "bn": "৳৯০০"
+            },
+            {
+              "id": "d",
+              "en": "৳1,700",
+              "bn": "৳১,৭০০"
+            }
           ],
           "correctOptionId": "d",
           "explanationEn": "Balance is opening balance plus money in, minus money out: ৳800 + ৳1,500 - ৳600 = ৳1,700.",
-          "explanationBn": "ব্যালেন্স হলো শুরুর ব্যালেন্সের সঙ্গে টাকা এলো যোগ, টাকা গেল বাদ: ৳৮০০ + ৳১,৫০০ - ৳৬০০ = ৳১,৭০০।"
+          "explanationBn": "ব্যালেন্স হলো শুরুর ব্যালেন্সের সঙ্গে টাকা এলো যোগ, টাকা গেল বাদ: ৳৮০০ + ৳১,৫০০ - ৳৬০০ = ৳১,৭০০।",
+          "lesson": 2
         },
         {
           "promptEn": "A customer pays you ৳400 in cash at midday. When do you write it in the cash book?",
@@ -127,7 +178,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "Entries written at once are correct, while entries written later from memory have mistakes.",
-          "explanationBn": "সঙ্গে সঙ্গে লিখলে হিসাব ঠিক থাকে, পরে মনে করে লিখলে ভুল হয়।"
+          "explanationBn": "সঙ্গে সঙ্গে লিখলে হিসাব ঠিক থাকে, পরে মনে করে লিখলে ভুল হয়।",
+          "lesson": 2
         },
         {
           "promptEn": "You have ৳2,000. Materials for two weeks of work cost ৳800. The shopkeeper tells you to spend the whole ৳2,000 so you never run out. What is the best choice?",
@@ -156,7 +208,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "Money tied up in unused stock cannot be spent on anything else.",
-          "explanationBn": "অব্যবহৃত মালে আটকে থাকা টাকা অন্য কিছুতে খরচ করা যায় না।"
+          "explanationBn": "অব্যবহৃত মালে আটকে থাকা টাকা অন্য কিছুতে খরচ করা যায় না।",
+          "lesson": 3
         },
         {
           "promptEn": "How often should you count your materials?",
@@ -167,7 +220,11 @@
               "en": "Only when something runs out during a job",
               "bn": "শুধু কাজের মাঝখানে কিছু ফুরিয়ে গেলে"
             },
-            { "id": "b", "en": "Once a year", "bn": "বছরে একবার" },
+            {
+              "id": "b",
+              "en": "Once a year",
+              "bn": "বছরে একবার"
+            },
             {
               "id": "c",
               "en": "Never, because you can remember it",
@@ -181,7 +238,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "A weekly count shows what is running low before you run out on a job.",
-          "explanationBn": "প্রতি সপ্তাহে গুনলে কাজের মাঝখানে ফুরানোর আগেই বোঝা যায় কোনটি কমে আসছে।"
+          "explanationBn": "প্রতি সপ্তাহে গুনলে কাজের মাঝখানে ফুরানোর আগেই বোঝা যায় কোনটি কমে আসছে।",
+          "lesson": 3
         },
         {
           "promptEn": "You finished a repair for a customer three days ago. What is a good way to keep this customer?",
@@ -210,7 +268,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "A polite follow-up shows you care about your work, and the customer remembers you.",
-          "explanationBn": "ভদ্রভাবে খোঁজ নিলে বোঝা যায় আপনি নিজের কাজের যত্ন নেন, আর গ্রাহক আপনাকে মনে রাখেন।"
+          "explanationBn": "ভদ্রভাবে খোঁজ নিলে বোঝা যায় আপনি নিজের কাজের যত্ন নেন, আর গ্রাহক আপনাকে মনে রাখেন।",
+          "lesson": 4
         },
         {
           "promptEn": "A customer calls to say the tap you fixed last week is leaking again. What do you do?",
@@ -239,7 +298,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "Fixing a problem with your work quickly keeps the customer's trust.",
-          "explanationBn": "নিজের কাজের সমস্যা দ্রুত ঠিক করে দিলে গ্রাহকের আস্থা থাকে।"
+          "explanationBn": "নিজের কাজের সমস্যা দ্রুত ঠিক করে দিলে গ্রাহকের আস্থা থাকে।",
+          "lesson": 4
         },
         {
           "promptEn": "You are taking on a helper from next week. What must be agreed before the first day?",
@@ -268,7 +328,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "A written agreement before the first day prevents arguments about pay and work.",
-          "explanationBn": "প্রথম দিনের আগে লিখে ঠিক করে নিলে মজুরি ও কাজ নিয়ে ঝগড়া হয় না।"
+          "explanationBn": "প্রথম দিনের আগে লিখে ঠিক করে নিলে মজুরি ও কাজ নিয়ে ঝগড়া হয় না।",
+          "lesson": 5
         },
         {
           "promptEn": "Your family needs ৳1,000 more than your fixed pay this month, and the business box has the money. What is the right way?",
@@ -297,7 +358,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "Writing it down keeps the cash book correct and shows what the business really earned.",
-          "explanationBn": "লিখে রাখলে ক্যাশ খাতা ঠিক থাকে এবং ব্যবসা আসলে কত আয় করল তা বোঝা যায়।"
+          "explanationBn": "লিখে রাখলে ক্যাশ খাতা ঠিক থাকে এবং ব্যবসা আসলে কত আয় করল তা বোঝা যায়।",
+          "lesson": 5
         },
         {
           "promptEn": "Your cost for a job is ৳400 and your price is ৳700. The customer bargains down to ৳350. What happens if you accept?",
@@ -318,7 +380,11 @@
               "en": "You make ৳50 profit",
               "bn": "আপনার ৳৫০ লাভ হবে"
             },
-            { "id": "d", "en": "Nothing changes", "bn": "কিছুই বদলাবে না" }
+            {
+              "id": "d",
+              "en": "Nothing changes",
+              "bn": "কিছুই বদলাবে না"
+            }
           ],
           "correctOptionId": "b",
           "explanationEn": "A price below your cost is a loss: ৳350 - ৳400 leaves you ৳50 short.",

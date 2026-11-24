@@ -88,7 +88,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "A hot silencer burns skin in a second, and it stays hot long after the engine stops.",
-          "explanationBn": "গরম সাইলেন্সারে এক সেকেন্ডেই চামড়া পুড়ে যায়, আর ইঞ্জিন বন্ধ করার অনেক পরেও সেটি গরম থাকে।"
+          "explanationBn": "গরম সাইলেন্সারে এক সেকেন্ডেই চামড়া পুড়ে যায়, আর ইঞ্জিন বন্ধ করার অনেক পরেও সেটি গরম থাকে।",
+          "lesson": 1
         },
         {
           "promptEn": "You have the fuel pipe open. A friend walks in and lights a cigarette beside you. What do you do?",
@@ -117,7 +118,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "Petrol vapour spreads through the air and one cigarette can light it.",
-          "explanationBn": "পেট্রোলের ভাপ বাতাসে ছড়িয়ে পড়ে, আর একটি সিগারেটেই তাতে আগুন ধরতে পারে।"
+          "explanationBn": "পেট্রোলের ভাপ বাতাসে ছড়িয়ে পড়ে, আর একটি সিগারেটেই তাতে আগুন ধরতে পারে।",
+          "lesson": 1
         },
         {
           "promptEn": "How do you read the engine oil level correctly?",
@@ -146,7 +148,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "A leaning bike or a running engine gives a false level.",
-          "explanationBn": "বাইক কাত থাকলে বা ইঞ্জিন চালু থাকলে তেলের মাপ ভুল দেখায়।"
+          "explanationBn": "বাইক কাত থাকলে বা ইঞ্জিন চালু থাকলে তেলের মাপ ভুল দেখায়।",
+          "lesson": 2
         },
         {
           "promptEn": "During the check, the brake light does not come on when the rear pedal is pressed. What do you do?",
@@ -175,7 +178,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "Without a brake light the driver behind cannot see that the bike is stopping.",
-          "explanationBn": "ব্রেক লাইট না জ্বললে পেছনের চালক বুঝতে পারেন না যে বাইক থামছে।"
+          "explanationBn": "ব্রেক লাইট না জ্বললে পেছনের চালক বুঝতে পারেন না যে বাইক থামছে।",
+          "lesson": 2
         },
         {
           "promptEn": "You are cleaning a chain. How should the chain be moved?",
@@ -204,7 +208,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "A chain driven by the engine pulls a cloth and fingers into the sprocket before you can react.",
-          "explanationBn": "ইঞ্জিনে ঘোরা চেইন চোখের পলকে কাপড় ও আঙুল স্প্রোকেটের ভেতরে টেনে নেয়।"
+          "explanationBn": "ইঞ্জিনে ঘোরা চেইন চোখের পলকে কাপড় ও আঙুল স্প্রোকেটের ভেতরে টেনে নেয়।",
+          "lesson": 3
         },
         {
           "promptEn": "After adjusting the chain, the mark on the left side does not match the mark on the right. What do you do?",
@@ -233,7 +238,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "Marks that do not match mean the rear wheel sits crooked, which wears the chain and tyre and makes the bike unsteady.",
-          "explanationBn": "দাগ না মিললে পেছনের চাকা বাঁকা বসে, এতে চেইন ও টায়ার ক্ষয় হয় এবং বাইক টলমল করে।"
+          "explanationBn": "দাগ না মিললে পেছনের চাকা বাঁকা বসে, এতে চেইন ও টায়ার ক্ষয় হয় এবং বাইক টলমল করে।",
+          "lesson": 3
         },
         {
           "promptEn": "The front brake lever feels soft and comes almost to the grip. The customer is in a hurry and says, \"It is almost fine, give it to me.\" What do you do?",
@@ -262,7 +268,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "A soft lever means the brake may not stop the bike in a sudden stop.",
-          "explanationBn": "লিভার নরম লাগার মানে হঠাৎ থামতে গেলে ব্রেক বাইক থামাতে নাও পারে।"
+          "explanationBn": "লিভার নরম লাগার মানে হঠাৎ থামতে গেলে ব্রেক বাইক থামাতে নাও পারে।",
+          "lesson": 4
         },
         {
           "promptEn": "You open a drum brake and find the shoes soaked with oil. What is right?",
@@ -291,7 +298,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "Oil soaks deep into the friction material, so the shoes slip even after they are wiped.",
-          "explanationBn": "তেল ঘষার অংশের গভীরে ঢুকে যায়, তাই মোছার পরও ব্রেক শু পিছলে যায়।"
+          "explanationBn": "তেল ঘষার অংশের গভীরে ঢুকে যায়, তাই মোছার পরও ব্রেক শু পিছলে যায়।",
+          "lesson": 4
         },
         {
           "promptEn": "You are removing a battery. Which terminal do you take off first?",
@@ -320,7 +328,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "With the negative off first, a spanner that touches the bike's body cannot make a spark.",
-          "explanationBn": "নেগেটিভ আগে খুললে রেঞ্চ বাইকের বডিতে লাগলেও স্ফুলিঙ্গ হয় না।"
+          "explanationBn": "নেগেটিভ আগে খুললে রেঞ্চ বাইকের বডিতে লাগলেও স্ফুলিঙ্গ হয় না।",
+          "lesson": 5
         },
         {
           "promptEn": "The customer asked only for an oil change. While working, you see that the rear tyre is badly worn. What do you do?",
@@ -349,7 +358,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "The customer decides and pays, but he can only decide if you tell him the truth.",
-          "explanationBn": "সিদ্ধান্ত ও খরচ গ্রাহকের, কিন্তু আপনি সত্য জানালে তবেই তিনি সিদ্ধান্ত নিতে পারেন।"
+          "explanationBn": "সিদ্ধান্ত ও খরচ গ্রাহকের, কিন্তু আপনি সত্য জানালে তবেই তিনি সিদ্ধান্ত নিতে পারেন।",
+          "lesson": 5
         },
         {
           "promptEn": "Spilled petrol catches fire on the workshop floor. What do you use?",

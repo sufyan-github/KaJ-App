@@ -17,7 +17,9 @@ import {
 import { z } from "zod";
 
 import {
+  lessonSteps,
   loadTrainingContent,
+  stepKindOf,
   trainingContentSchema,
   type CourseContent,
 } from "../training/content/training-content.loader";
@@ -110,6 +112,10 @@ const lines = (value: string) => value.split("\n").length;
  * English summaries line up, a lesson is marked isSafety exactly when it
  * has a "Hazard:" line, two checkpoint questions per lesson and at least
  * max(12, questionCount) questions, four options a–d, a correct option.
+ * Lesson steps (R8): each lesson's two checkpoint questions are the first
+ * questions in lesson order (`lesson` 1, 1, 2, 2, …) and no other question
+ * has a lesson; the summary lines name the same step kind in both languages,
+ * starting with "You will learn" and ending with "Remember".
  */
 export function launchCourseIssues(course: CourseContent): string[] {
   const issues: string[] = [];
@@ -126,6 +132,33 @@ export function launchCourseIssues(course: CourseContent): string[] {
     if (hazard !== lesson.isSafety)
       issues.push(
         `${course.slug}: lesson ${index + 1} isSafety is ${lesson.isSafety} but it ${hazard ? "has" : "has no"} "Hazard:" line`,
+      );
+  });
+  const expectedLessons = course.questions.map((_, index) =>
+    index < course.lessons.length * 2 ? Math.floor(index / 2) + 1 : null,
+  );
+  course.questions.forEach((question, index) => {
+    if (question.lesson !== expectedLessons[index])
+      issues.push(
+        `${course.slug}: question ${index + 1} should have lesson ${expectedLessons[index] ?? "none"} (has ${question.lesson ?? "none"})`,
+      );
+  });
+  course.lessons.forEach((lesson, index) => {
+    if (lesson.steps) return;
+    const en = lesson.summaryEn.split("\n");
+    const bn = lesson.summaryBn.split("\n");
+    en.forEach((line, row) => {
+      const kindEn = stepKindOf(line, "en");
+      const kindBn = stepKindOf(bn[row] ?? "", "bn");
+      if (kindEn !== kindBn)
+        issues.push(
+          `${course.slug}: lesson ${index + 1} line ${row + 1} is ${kindEn ?? "unmarked"} in English but ${kindBn ?? "unmarked"} in Bangla`,
+        );
+    });
+    const steps = lessonSteps(lesson);
+    if (steps[0]?.kind !== "LEARN" || steps.at(-1)?.kind !== "REMEMBER")
+      issues.push(
+        `${course.slug}: lesson ${index + 1} must start with "You will learn:" and end with "Remember:"`,
       );
   });
   const needed = Math.max(12, course.questionCount, course.lessons.length * 2);

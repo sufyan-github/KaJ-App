@@ -1,4 +1,19 @@
-import { IsObject, IsString, MaxLength, MinLength } from "class-validator";
+import {
+  IsIn,
+  IsInt,
+  IsObject,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+  MinLength,
+} from "class-validator";
+
+import {
+  STEP_IMAGE_MAX_BYTES,
+  STEP_IMAGE_MIME_TYPES,
+  type StepImageMime,
+} from "../training-step-images.service";
 
 /**
  * The course document is validated with the content loader's schema (one
@@ -20,4 +35,21 @@ export class PublishReasonDto {
   @MinLength(8)
   @MaxLength(500)
   reason!: string;
+}
+
+/** Upload purpose TRAINING_STEP_IMAGE. */
+export class StepImageSignDto {
+  @IsIn(STEP_IMAGE_MIME_TYPES)
+  mime!: StepImageMime;
+
+  @IsInt()
+  @Min(1)
+  @Max(STEP_IMAGE_MAX_BYTES)
+  sizeBytes!: number;
+}
+
+export class StepImageCompleteDto extends StepImageSignDto {
+  @IsString()
+  @MaxLength(300)
+  key!: string;
 }

@@ -35,7 +35,8 @@ databaseDescribe("Learn admin (services + real HTTP)", () => {
     estDataMb: 5,
     passMarkPct: 70,
     questionCount: 1,
-    isSafetyCritical: true,
+    // Locked-order publishing (checkpoints) is covered in lesson-steps tests.
+    isSafetyCritical: false,
     sortOrder: 0,
     lessons: [
       {
