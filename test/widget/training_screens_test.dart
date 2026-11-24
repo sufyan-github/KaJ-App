@@ -129,12 +129,16 @@ void main() {
           findsOneWidget,
         );
         expect(find.text('Wear gloves and open the windows.'), findsOneWidget);
-        expect(find.byKey(const ValueKey('take-test')), findsOneWidget);
         final texts = tester
             .widgetList<Text>(find.byType(Text))
             .map((text) => text.data ?? '')
             .where(_rewardWords.hasMatch);
         expect(texts, isEmpty);
+
+        // Back on the course page the test stays one tap away.
+        await tester.pageBack();
+        await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('take-test')), findsOneWidget);
       },
     );
   });

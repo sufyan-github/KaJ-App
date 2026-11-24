@@ -49,6 +49,30 @@ class TrainingRepository {
     await _dio.post<void>('/training/lessons/$lessonId/open');
   });
 
+  Future<LessonCheckpoint> checkpoint(String lessonId) => _guard(() async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      '/training/lessons/$lessonId/checkpoint',
+    );
+    return LessonCheckpoint.fromJson(_data(response.data));
+  });
+
+  /// One answer per question, all of them, every try.
+  Future<CheckpointResult> submitCheckpoint(
+    String lessonId,
+    Map<String, String> answers,
+  ) => _guard(() async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/training/lessons/$lessonId/checkpoint',
+      data: {
+        'answers': [
+          for (final entry in answers.entries)
+            {'questionId': entry.key, 'optionId': entry.value},
+        ],
+      },
+    );
+    return CheckpointResult.fromJson(_data(response.data));
+  });
+
   Future<TrainingAttempt> startAttempt(String courseId) => _guard(() async {
     final response = await _dio.post<Map<String, dynamic>>(
       '/training/courses/$courseId/attempts',

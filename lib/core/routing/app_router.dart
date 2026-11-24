@@ -35,6 +35,7 @@ import '../../features/profile/presentation/screens/phase2_hub_screens.dart';
 import '../../features/settings/presentation/settings_screens.dart';
 import '../../features/training/presentation/screens/certificates_screen.dart';
 import '../../features/training/presentation/screens/course_screen.dart';
+import '../../features/training/presentation/screens/lesson_screen.dart';
 import '../../features/training/presentation/screens/training_catalog_screen.dart';
 import '../../features/training/presentation/screens/training_test_screen.dart';
 import '../../features/trust_safety/presentation/attendance_screen.dart';
@@ -112,6 +113,9 @@ abstract final class AppRoutes {
   static String learningEnrolment(String id) => '/learn/enrolments/$id';
 
   static String trainingCourse(String id) => '/training/courses/$id';
+  static const trainingLessonPath = '/training/courses/:id/lessons/:lessonId';
+  static String trainingLesson(String courseId, String lessonId) =>
+      '/training/courses/$courseId/lessons/$lessonId';
   static String trainingTest(String id) => '/training/courses/$id/test';
   static String jobDetail(String id) => '/jobs/$id';
 
@@ -429,6 +433,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.trainingCoursePath,
         builder: (context, state) =>
             CourseScreen(courseId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.trainingLessonPath,
+        builder: (context, state) => LessonScreen(
+          courseId: state.pathParameters['id']!,
+          lessonId: state.pathParameters['lessonId']!,
+        ),
       ),
       GoRoute(
         path: AppRoutes.trainingTestPath,

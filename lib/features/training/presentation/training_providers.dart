@@ -28,6 +28,12 @@ final courseDetailProvider = FutureProvider.family<CourseDetail, String>(
   (ref, id) => ref.watch(trainingRepositoryProvider).course(id),
 );
 
+final lessonCheckpointProvider = FutureProvider.autoDispose
+    .family<LessonCheckpoint, String>(
+      (ref, lessonId) =>
+          ref.watch(trainingRepositoryProvider).checkpoint(lessonId),
+    );
+
 final myCertificatesProvider = FutureProvider<List<CertificateSummary>>(
   (ref) => ref.watch(trainingRepositoryProvider).myCertificates(),
 );

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,7 +11,6 @@ import '../../../../core/widgets/k_error_state.dart';
 import '../../../../core/widgets/k_localized_text.dart';
 import '../../domain/training_models.dart';
 import '../training_providers.dart';
-import '../widgets/lesson_video_section.dart';
 import '../widgets/training_ui.dart';
 
 class CourseScreen extends ConsumerStatefulWidget {
@@ -26,24 +23,6 @@ class CourseScreen extends ConsumerStatefulWidget {
 }
 
 class _CourseScreenState extends ConsumerState<CourseScreen> {
-  final Set<String> _openedHere = {};
-  String? _expandedLessonId;
-
-  void _toggle(TrainingLesson lesson) {
-    final expanding = _expandedLessonId != lesson.id;
-    setState(() => _expandedLessonId = expanding ? lesson.id : null);
-    if (expanding && !lesson.opened && _openedHere.add(lesson.id)) {
-      // A private checklist tick. Failure is harmless and is not retried.
-      unawaited(
-        ref.read(trainingRepositoryProvider).openLesson(lesson.id).then<void>((
-          _,
-        ) {
-          if (mounted) ref.invalidate(trainingCoursesProvider);
-        }, onError: (Object _) {}),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final detail = ref.watch(courseDetailProvider(widget.courseId));
@@ -59,7 +38,7 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
         ),
       ),
       bottomNavigationBar: detail.maybeWhen(
-        data: (value) => _TestBar(course: value.summary),
+        data: (value) => _TestBar(detail: value),
         orElse: () => null,
       ),
       body: detail.when(
@@ -109,18 +88,31 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
         CertificateStateLine(course: course),
         const SizedBox(height: KSpacing.lg),
         KLocalizedText('পাঠ', style: Theme.of(context).textTheme.titleMedium),
-        const KLocalizedText(
-          'পাঠ খোলার টিক শুধু আপনার নিজের হিসাবের জন্য। অভিজ্ঞ হলে পাঠ বাদ দিয়ে সরাসরি পরীক্ষা দিন।',
-          style: TextStyle(color: KColors.textSecondary),
+        // In a locked-order (safety) course there is no skipping straight
+        // to the test, so that hint goes.
+        KLocalizedText(
+          detail.lockedOrder
+              ? 'পাঠগুলো ক্রমানুসারে খোলে। প্রতিটি পাঠের শেষের প্রশ্নগুলো ঠিক হলে পরের পাঠ খুলবে, আর সব পাঠ শেষ হলে পরীক্ষা।'
+              : 'পাঠ খোলার টিক শুধু আপনার নিজের হিসাবের জন্য। অভিজ্ঞ হলে পাঠ বাদ দিয়ে সরাসরি পরীক্ষা দিন।',
+          key: const ValueKey('lessons-hint'),
+          style: const TextStyle(color: KColors.textSecondary),
         ),
+        if (detail.checkpointLessons > 0) ...[
+          const SizedBox(height: KSpacing.xs),
+          Text(
+            '${KaajLocalizations.text(context, 'প্রশ্ন শেষ হওয়া পাঠ:')} '
+            '${KFormat.count(context, detail.checkpointsPassed)} / '
+            '${KFormat.count(context, detail.checkpointLessons)}',
+            key: const ValueKey('checkpoint-progress'),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
         const SizedBox(height: KSpacing.sm),
         for (final lesson in detail.lessons)
           _LessonTile(
             lesson: lesson,
-            opened: lesson.opened || _openedHere.contains(lesson.id),
-            expanded: _expandedLessonId == lesson.id,
-            estimatedDataMb: detail.estimatedLessonDataMb(lesson),
-            onToggle: () => _toggle(lesson),
+            onOpen: () =>
+                context.push(AppRoutes.trainingLesson(course.id, lesson.id)),
           ),
         const SizedBox(height: KSpacing.xl),
       ],
@@ -154,111 +146,93 @@ class _SafetyNote extends StatelessWidget {
 }
 
 class _LessonTile extends StatelessWidget {
-  const _LessonTile({
-    required this.lesson,
-    required this.opened,
-    required this.expanded,
-    required this.estimatedDataMb,
-    required this.onToggle,
-  });
+  const _LessonTile({required this.lesson, required this.onOpen});
 
-  final int estimatedDataMb;
-  final bool expanded;
   final TrainingLesson lesson;
-  final VoidCallback onToggle;
-  final bool opened;
+  final VoidCallback onOpen;
 
   @override
   Widget build(BuildContext context) {
     final language = languageOf(context);
-    final notes = lesson.notesFor(language);
+    final (IconData icon, Color color, String state) = switch (lesson.state) {
+      LessonState.done => (Icons.check_circle, KColors.success, 'পাঠ শেষ'),
+      LessonState.locked => (
+        Icons.lock_outline,
+        KColors.textSecondary,
+        'পাঠ বন্ধ',
+      ),
+      LessonState.open =>
+        lesson.opened
+            ? (Icons.check_circle_outline, KColors.primary, 'খোলা হয়েছে')
+            : (Icons.circle_outlined, KColors.textSecondary, 'খোলা'),
+    };
     return Card(
       key: ValueKey('lesson-${lesson.id}'),
       margin: const EdgeInsets.symmetric(vertical: KSpacing.xs),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ListTile(
-            onTap: onToggle,
-            leading: Icon(
-              opened ? Icons.check_circle_outline : Icons.circle_outlined,
-              color: opened ? KColors.primary : KColors.textSecondary,
-            ),
-            title: Text(lesson.titleFor(language)),
-            subtitle: Row(
+      child: ListTile(
+        // A locked lesson says why instead of opening.
+        onTap: lesson.isLocked ? null : onOpen,
+        enabled: !lesson.isLocked,
+        leading: Icon(icon, color: color),
+        title: Text(lesson.titleFor(language)),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Wrap(
+              spacing: KSpacing.sm,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Icon(
-                  lesson.hasVideo
-                      ? Icons.ondemand_video_outlined
-                      : Icons.article_outlined,
-                  size: 16,
-                  color: KColors.textSecondary,
+                KLocalizedText(
+                  state,
+                  key: ValueKey('lesson-state-${lesson.id}'),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
                 ),
-                const SizedBox(width: KSpacing.xs),
-                Flexible(
-                  child: KLocalizedText(
-                    lesson.hasVideo ? 'ভিডিও ও নোট' : 'লেখা নোট',
+                KLocalizedText(
+                  lesson.hasVideo ? 'ভিডিও ও নোট' : 'লেখা নোট',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                if (lesson.checkpoint != null)
+                  KLocalizedText(
+                    'প্রশ্ন আছে',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
-                ),
-                if (lesson.isSafety) ...[
-                  const SizedBox(width: KSpacing.sm),
+                if (lesson.isSafety)
                   const Icon(
                     Icons.health_and_safety_outlined,
                     size: 16,
                     color: KColors.warning,
                   ),
-                ],
               ],
             ),
-            trailing: Icon(
-              expanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
-            ),
-          ),
-          if (expanded)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                KSpacing.md,
-                0,
-                KSpacing.md,
-                KSpacing.md,
+            if (lesson.isLocked)
+              KLocalizedText(
+                'আগের পাঠের প্রশ্নগুলো আগে শেষ করুন।',
+                key: ValueKey('lesson-locked-reason-${lesson.id}'),
+                style: Theme.of(context).textTheme.bodySmall,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (lesson.youtubeVideoId case final videoId?) ...[
-                    LessonVideoSection(
-                      videoId: videoId,
-                      estimatedDataMb: estimatedDataMb,
-                    ),
-                    const SizedBox(height: KSpacing.md),
-                  ],
-                  KLocalizedText(
-                    'নোট',
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  const SizedBox(height: KSpacing.xs),
-                  SelectableText(notes, key: const ValueKey('lesson-notes')),
-                ],
-              ),
-            ),
-        ],
+          ],
+        ),
+        trailing: lesson.isLocked ? null : const Icon(Icons.chevron_right),
       ),
     );
   }
 }
 
 class _TestBar extends ConsumerWidget {
-  const _TestBar({required this.course});
+  const _TestBar({required this.detail});
 
-  final CourseSummary course;
+  final CourseDetail detail;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final course = detail.summary;
     final now = ref.watch(trainingClockProvider)();
     final certified = course.hasCertificate;
     final limited = !certified && course.limitReachedAt(now);
+    final locked = !certified && detail.testLocked;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
@@ -278,13 +252,23 @@ class _TestBar extends ConsumerWidget {
               ),
               const SizedBox(height: KSpacing.xs),
             ],
+            if (locked) ...[
+              const KLocalizedText(
+                'প্রতিটি পাঠের প্রশ্ন শেষ করলে পরীক্ষা খুলবে।',
+                key: ValueKey('test-locked-reason'),
+                style: TextStyle(color: KColors.textSecondary),
+              ),
+              const SizedBox(height: KSpacing.xs),
+            ],
             FilledButton.icon(
               key: const ValueKey('take-test'),
-              onPressed: () => context.push(
-                certified
-                    ? AppRoutes.trainingCertificates
-                    : AppRoutes.trainingTest(course.id),
-              ),
+              onPressed: locked
+                  ? null
+                  : () => context.push(
+                      certified
+                          ? AppRoutes.trainingCertificates
+                          : AppRoutes.trainingTest(course.id),
+                    ),
               icon: Icon(
                 certified
                     ? Icons.workspace_premium_outlined
