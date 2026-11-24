@@ -1416,4 +1416,45 @@ const generatedEnglishTranslations = <String, String>{
   "আবেদন অপেক্ষমাণ": "Waiting",
   "আবেদন গৃহীত": "Accepted",
   "সময় পেরিয়ে গেছে": "Expired",
+  // Lesson steps and checkpoints
+  "আগের পাঠের প্রশ্নগুলো আগে শেষ করুন।":
+      "Finish the previous lesson's questions first.",
+  "আগের পাঠের প্রশ্নগুলো শেষ করলে এই পাঠ খুলবে। নিরাপত্তার কোর্সে পাঠগুলো ক্রমানুসারে খোলে।":
+      "This lesson opens once you finish the previous lesson's questions. In safety courses lessons open in order.",
+  "আপনি শিখবেন": "You will learn",
+  "এই পাঠ এখনো বন্ধ": "This lesson is still locked",
+  "এই পাঠে কোনো প্রশ্ন নেই।": "This lesson has no questions.",
+  "এই পাঠের সব প্রশ্নের উত্তর ঠিক হয়েছে।":
+      "You answered every question in this lesson correctly.",
+  "কোর্সে ফিরে আবার চেষ্টা করুন।": "Go back to the course and try again.",
+  "খোলা": "Open",
+  "খোলা হয়েছে": "Opened",
+  "ঠিক হয়নি। আবার বেছে নিন।": "Not quite. Choose again.",
+  "ধাপ": "Step",
+  "পরের পাঠ": "Next lesson",
+  "পাঠগুলো ক্রমানুসারে খোলে। প্রতিটি পাঠের শেষের প্রশ্নগুলো ঠিক হলে পরের পাঠ খুলবে, আর সব পাঠ শেষ হলে পরীক্ষা।":
+      "Lessons open in order. Answer the questions at the end of each lesson to open the next one; the test opens when every lesson is done.",
+  "পাঠটি পাওয়া যায়নি": "Lesson not found",
+  "পাঠ শেষ হয়েছে": "Lesson done",
+  "পাঠের প্রশ্ন": "Lesson questions",
+  "প্রতিটি পাঠের প্রশ্ন শেষ করলে পরীক্ষা খুলবে।":
+      "The test opens once you finish each lesson's questions.",
+  "প্রশ্ন": "Question",
+  "প্রশ্ন:": "Questions:",
+  "প্রশ্ন আছে": "Has questions",
+  "প্রশ্ন শুরু করুন": "Start the questions",
+  "প্রশ্ন শেষ হওয়া পাঠ:": "Lessons with questions done:",
+  "মনে রাখুন": "Remember",
+  "সবগুলো ঠিক হলে পাঠ শেষ হবে এবং পরের পাঠ খুলবে। যতবার খুশি চেষ্টা করা যাবে।":
+      "Get them all right to finish the lesson and open the next one. You can try as many times as you like.",
+  "অনুশীলনের জন্য। সবগুলো ঠিক হলে পাঠ শেষ হবে। যতবার খুশি চেষ্টা করা যাবে।":
+      "For practice. Get them all right to finish the lesson. You can try as many times as you like.",
+  "উত্তর জমা দিন": "Submit answers",
+  "পরের প্রশ্ন": "Next question",
+  "প্রশ্ন লোড করা যায়নি।": "Could not load the questions.",
+  "উত্তর জমা হয়নি।": "Could not send the answers.",
+  // Lesson labels
+  "বিপদের ঝুঁকি": "Hazard",
+  "পাঠ শেষ": "Done",
+  "পাঠ বন্ধ": "Locked",
 };

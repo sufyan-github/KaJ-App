@@ -240,6 +240,123 @@ List<CourseSummary> orderCoursesByRelevance(Iterable<CourseSummary> courses) {
   return indexed.map((entry) => entry.value).toList(growable: false);
 }
 
+/// Where a learner stands with a lesson. Older servers send no state:
+/// every lesson is then open.
+enum LessonState {
+  open,
+  locked,
+  done;
+
+  static LessonState parse(Object? value) => switch (value) {
+    'LOCKED' => locked,
+    'DONE' => done,
+    _ => open,
+  };
+}
+
+enum LessonStepKind {
+  learn,
+  step,
+  hazard,
+  remember;
+
+  static LessonStepKind parse(Object? value) => switch (value) {
+    'LEARN' => learn,
+    'HAZARD' => hazard,
+    'REMEMBER' => remember,
+    _ => step,
+  };
+}
+
+/// A step picture. [url] is signed for 24 h; cache by [cacheKey].
+class StepImage {
+  const StepImage({
+    required this.url,
+    required this.cacheKey,
+    required this.width,
+    required this.height,
+    this.altEn,
+    this.altBn,
+  });
+
+  static StepImage? maybe(Object? value) {
+    if (value is! Map) return null;
+    final json = Map<String, dynamic>.from(value);
+    final url = _string(json['url']);
+    final width = _int(json['width']);
+    final height = _int(json['height']);
+    if (url.isEmpty || width <= 0 || height <= 0) return null;
+    final key = _string(json['cacheKey']);
+    return StepImage(
+      url: url,
+      cacheKey: key.isEmpty ? url : key,
+      width: width,
+      height: height,
+      altEn: json['altEn'] as String?,
+      altBn: json['altBn'] as String?,
+    );
+  }
+
+  final String url;
+  final String cacheKey;
+  final int width;
+  final int height;
+  final String? altEn;
+  final String? altBn;
+
+  double get aspectRatio => width / height;
+
+  String? altFor(String languageCode) {
+    final text = pickLanguage(languageCode, altEn ?? '', altBn ?? '');
+    return text.trim().isEmpty ? null : text;
+  }
+}
+
+class LessonStep {
+  const LessonStep({
+    required this.id,
+    required this.kind,
+    required this.textEn,
+    required this.textBn,
+    this.image,
+  });
+
+  factory LessonStep.fromJson(Map<String, dynamic> json) => LessonStep(
+    id: _string(json['id']),
+    kind: LessonStepKind.parse(json['kind']),
+    textEn: _string(json['textEn']),
+    textBn: _string(json['textBn']),
+    image: StepImage.maybe(json['image']),
+  );
+
+  final String id;
+  final LessonStepKind kind;
+  final String textEn;
+  final String textBn;
+  final StepImage? image;
+
+  String textFor(String languageCode) =>
+      pickLanguage(languageCode, textEn, textBn);
+}
+
+/// A lesson that ends with its own questions.
+class LessonCheckpointInfo {
+  const LessonCheckpointInfo({
+    required this.questionCount,
+    required this.passed,
+  });
+
+  static LessonCheckpointInfo? maybe(Object? value) => value is Map
+      ? LessonCheckpointInfo(
+          questionCount: _int(value['questionCount']),
+          passed: value['passed'] == true,
+        )
+      : null;
+
+  final int questionCount;
+  final bool passed;
+}
+
 class TrainingLesson {
   const TrainingLesson({
     required this.id,
@@ -252,6 +369,9 @@ class TrainingLesson {
     required this.opened,
     this.youtubeVideoId,
     this.durationS,
+    this.state = LessonState.open,
+    this.checkpoint,
+    this.steps = const [],
   });
 
   factory TrainingLesson.fromJson(Map<String, dynamic> json) {
@@ -267,8 +387,22 @@ class TrainingLesson {
       durationS: json['durationS'] == null ? null : _int(json['durationS']),
       isSafety: json['isSafety'] == true,
       opened: json['opened'] == true,
+      state: LessonState.parse(json['state']),
+      checkpoint: LessonCheckpointInfo.maybe(json['checkpoint']),
+      steps: _maps(
+        json['steps'],
+      ).map(LessonStep.fromJson).toList(growable: false),
     );
   }
+
+  final LessonState state;
+  final LessonCheckpointInfo? checkpoint;
+
+  /// Step cards in order; empty on an older server (show the summary).
+  final List<LessonStep> steps;
+
+  bool get isLocked => state == LessonState.locked;
+  bool get isDone => state == LessonState.done;
 
   final int? durationS;
   final String id;
@@ -300,11 +434,21 @@ class TrainingLesson {
     durationS: durationS,
     isSafety: isSafety,
     opened: true,
+    state: state,
+    checkpoint: checkpoint,
+    steps: steps,
   );
 }
 
 class CourseDetail {
-  const CourseDetail({required this.summary, required this.lessons});
+  const CourseDetail({
+    required this.summary,
+    required this.lessons,
+    this.lockedOrder = false,
+    this.testLocked = false,
+    this.checkpointsPassed = 0,
+    this.checkpointLessons = 0,
+  });
 
   factory CourseDetail.fromJson(Map<String, dynamic> json) {
     final lessons = _maps(json['lessons']).map(TrainingLesson.fromJson).toList()
@@ -312,11 +456,33 @@ class CourseDetail {
     return CourseDetail(
       summary: CourseSummary.fromJson(json),
       lessons: List.unmodifiable(lessons),
+      lockedOrder: json['lockedOrder'] == true,
+      testLocked: json['testLocked'] == true,
+      checkpointsPassed: _int(json['checkpointsPassed']),
+      checkpointLessons: _int(json['checkpointLessons']),
     );
   }
 
   final List<TrainingLesson> lessons;
   final CourseSummary summary;
+
+  /// Lessons open one after another (safety-critical courses): no skipping
+  /// straight to the test.
+  final bool lockedOrder;
+
+  /// The test opens once every lesson is done.
+  final bool testLocked;
+  final int checkpointsPassed;
+  final int checkpointLessons;
+
+  TrainingLesson? lesson(String id) =>
+      lessons.where((item) => item.id == id).firstOrNull;
+
+  /// The lesson after [id], if any.
+  TrainingLesson? lessonAfter(String id) {
+    final index = lessons.indexWhere((item) => item.id == id);
+    return index < 0 || index + 1 >= lessons.length ? null : lessons[index + 1];
+  }
 
   /// A rough per-lesson share of the course data estimate, in whole MB.
   int estimatedLessonDataMb(TrainingLesson lesson) {
@@ -450,4 +616,89 @@ class TestResult {
   final bool passed;
   final List<QuestionResult> results;
   final int scorePct;
+}
+
+/// A lesson's questions (`GET /training/lessons/:id/checkpoint`). No
+/// answers are sent.
+class LessonCheckpoint {
+  const LessonCheckpoint({
+    required this.lessonId,
+    required this.passed,
+    required this.questions,
+  });
+
+  factory LessonCheckpoint.fromJson(Map<String, dynamic> json) =>
+      LessonCheckpoint(
+        lessonId: _string(json['lessonId']),
+        passed: json['passed'] == true,
+        questions: _maps(
+          json['questions'],
+        ).map(TestQuestion.fromJson).toList(growable: false),
+      );
+
+  final String lessonId;
+  final bool passed;
+  final List<TestQuestion> questions;
+}
+
+class CheckpointAnswerResult {
+  const CheckpointAnswerResult({
+    required this.questionId,
+    required this.correct,
+    required this.explanationEn,
+    required this.explanationBn,
+  });
+
+  factory CheckpointAnswerResult.fromJson(Map<String, dynamic> json) =>
+      CheckpointAnswerResult(
+        questionId: _string(json['questionId']),
+        correct: json['correct'] == true,
+        explanationEn: _string(json['explanationEn']),
+        explanationBn: _string(json['explanationBn']),
+      );
+
+  final String questionId;
+  final bool correct;
+  final String explanationEn;
+  final String explanationBn;
+
+  String explanationFor(String languageCode) =>
+      pickLanguage(languageCode, explanationEn, explanationBn);
+}
+
+/// `POST /training/lessons/:id/checkpoint`. The correct option is never
+/// sent: only right or wrong and the explanation.
+class CheckpointResult {
+  const CheckpointResult({
+    required this.passed,
+    required this.results,
+    required this.lessonState,
+    required this.testLocked,
+    this.nextLessonId,
+    this.nextLessonState,
+  });
+
+  factory CheckpointResult.fromJson(Map<String, dynamic> json) =>
+      CheckpointResult(
+        passed: json['passed'] == true,
+        results: _maps(
+          json['results'],
+        ).map(CheckpointAnswerResult.fromJson).toList(growable: false),
+        lessonState: LessonState.parse(json['lessonState']),
+        nextLessonId: json['nextLessonId'] as String?,
+        nextLessonState: json['nextLessonState'] == null
+            ? null
+            : LessonState.parse(json['nextLessonState']),
+        testLocked: json['testLocked'] == true,
+      );
+
+  final bool passed;
+  final List<CheckpointAnswerResult> results;
+  final LessonState lessonState;
+  final String? nextLessonId;
+  final LessonState? nextLessonState;
+  final bool testLocked;
+
+  CheckpointAnswerResult? resultFor(String questionId) =>
+      results.where((item) => item.questionId == questionId).firstOrNull;
 }

@@ -7,6 +7,22 @@
 
 /// Code to (Bangla, English).
 const serverCodeCopy = <String, ({String bn, String en})>{
+  "LESSON_LOCKED": (
+    bn: "এই পাঠ এখনো বন্ধ। আগের পাঠের প্রশ্নগুলো শেষ করুন।",
+    en: "This lesson is still locked. Finish the previous lesson's questions first.",
+  ),
+  "CHECKPOINT_UNAVAILABLE": (
+    bn: "এই পাঠে কোনো প্রশ্ন নেই।",
+    en: "This lesson has no questions.",
+  ),
+  "CHECKPOINT_ANSWERS_INVALID": (
+    bn: "উত্তরগুলো পড়া যায়নি। প্রশ্নগুলো আবার খুলে উত্তর দিন।",
+    en: "The answers could not be read. Open the questions again and answer them.",
+  ),
+  "TEST_LOCKED": (
+    bn: "প্রতিটি পাঠের প্রশ্ন শেষ করলে পরীক্ষা খুলবে। অ্যাপ হালনাগাদ রাখুন।",
+    en: "The test opens once you finish each lesson's questions. Keep the app updated.",
+  ),
   "IDEMPOTENCY_KEY_REUSED": (
     bn: "এই অনুরোধটি আগের একটি অনুরোধের সাথে মিলে গেছে। পাতাটি হালনাগাদ করে আবার চেষ্টা করুন।",
     en: "This request clashed with an earlier one. Refresh and try again.",

@@ -22,6 +22,7 @@ import 'package:kaaj/features/profile/presentation/screens/edit_profile_screen.d
 import 'package:kaaj/features/training/data/training_offer_store.dart';
 import 'package:kaaj/features/training/presentation/screens/certificates_screen.dart';
 import 'package:kaaj/features/training/presentation/screens/course_screen.dart';
+import 'package:kaaj/features/training/presentation/screens/lesson_screen.dart';
 import 'package:kaaj/features/training/presentation/screens/training_catalog_screen.dart';
 import 'package:kaaj/features/training/presentation/screens/training_test_screen.dart';
 import 'package:kaaj/features/training/presentation/training_providers.dart';
@@ -92,6 +93,13 @@ List<RouteBase> testRoutes({Widget? home}) => [
   GoRoute(
     path: AppRoutes.trainingCoursePath,
     builder: (_, state) => CourseScreen(courseId: state.pathParameters['id']!),
+  ),
+  GoRoute(
+    path: AppRoutes.trainingLessonPath,
+    builder: (_, state) => LessonScreen(
+      courseId: state.pathParameters['id']!,
+      lessonId: state.pathParameters['lessonId']!,
+    ),
   ),
   GoRoute(
     path: AppRoutes.trainingTestPath,
