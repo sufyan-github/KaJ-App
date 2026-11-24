@@ -23,9 +23,20 @@ const refuse = (status: number, message: string) =>
 export async function POST(request: Request) {
   if (!(await cookies()).get(SESSION_COOKIE)?.value)
     return refuse(401, "Sign in required.");
+  // Same-origin only. request.url is not always the address the browser used
+  // (dev servers, proxies), so compare the Origin's host with Host.
   const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin)
-    return refuse(403, "Cross-site upload refused.");
+  const host = request.headers.get("host");
+  if (origin) {
+    let originHost: string | null = null;
+    try {
+      originHost = new URL(origin).host;
+    } catch {
+      originHost = null;
+    }
+    if (!host || originHost !== host)
+      return refuse(403, "Cross-site upload refused.");
+  }
 
   let target: URL;
   try {

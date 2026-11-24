@@ -71,8 +71,8 @@ test("the publish refusal names the short lessons", () => {
     409,
     "COURSE_CHECKPOINTS_INCOMPLETE",
     [
-      { field: "lessons.4", rules: ["checkpoint_count"] },
-      { field: "lessons.2", rules: ["checkpoint_count"] },
+      { field: "lessons.3", rules: ["checkpoint_count"] },
+      { field: "lessons.1", rules: ["checkpoint_count"] },
     ],
     null,
   );
@@ -82,10 +82,10 @@ test("the publish refusal names the short lessons", () => {
     "x",
     409,
     "COURSE_CHECKPOINTS_INCOMPLETE",
-    [{ field: "lessons.3", rules: ["checkpoint_count"] }],
+    [{ field: "lessons.2", rules: ["checkpoint_count"] }],
     null,
   );
-  assert.match(checkpointRefusal(one)!, /^Lesson 3 need/u);
+  assert.match(checkpointRefusal(one)!, /^Lesson 3 needs exactly 2/u);
   assert.equal(checkpointRefusal(new Error("other")), null);
   assert.equal(
     checkpointRefusal(new AdminApiError("x", 409, "CONFLICT", [], null)),

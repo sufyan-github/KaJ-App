@@ -337,8 +337,8 @@ test("publishing names the lessons that are short of checkpoint questions", asyn
             code: "COURSE_CHECKPOINTS_INCOMPLETE",
             message: "Checkpoints incomplete.",
             details: [
-              { field: "lessons.3", rules: ["checkpoint_count"] },
               { field: "lessons.2", rules: ["checkpoint_count"] },
+              { field: "lessons.1", rules: ["checkpoint_count"] },
             ],
           },
         }),
@@ -353,7 +353,7 @@ test("publishing names the lessons that are short of checkpoint questions", asyn
     .getByRole("button", { name: "Publish" })
     .click();
   await expect(page.getByRole("dialog")).toContainText(
-    "Lessons 2 and 3 need exactly 2 checkpoint questions each",
+    "Lessons 2 and 3 need exactly 2 checkpoint questions before",
   );
 });
 

@@ -93,14 +93,17 @@ export function incompleteCheckpointLessons(
     .map(({ lesson }) => lesson);
 }
 
-/** Lesson numbers named in a COURSE_CHECKPOINTS_INCOMPLETE error. */
+/**
+ * Lesson numbers (1-based) named in a COURSE_CHECKPOINTS_INCOMPLETE error.
+ * `field` is a document path, "lessons.<0-based index>".
+ */
 export function lessonsFromCheckpointError(
   details: ReadonlyArray<{ field?: string; rules?: string[] }> | undefined,
 ): number[] {
   return (details ?? [])
     .map((detail) => /^lessons\.(\d+)$/u.exec(detail.field ?? "")?.[1])
     .filter((value): value is string => value !== undefined)
-    .map(Number)
+    .map((index) => Number(index) + 1)
     .sort((a, b) => a - b);
 }
 
@@ -213,7 +216,8 @@ export function checkpointRefusal(error: unknown): string | null {
   if (!(error instanceof AdminApiError)) return null;
   if (error.code !== "COURSE_CHECKPOINTS_INCOMPLETE") return null;
   const lessons = lessonsFromCheckpointError(error.details);
+  const needs = lessons.length === 1 ? "needs" : "need";
   return lessons.length
-    ? `${lessonList(lessons)} need exactly ${CHECKPOINT_QUESTIONS_PER_LESSON} checkpoint questions each before this safety-critical course can be published.`
+    ? `${lessonList(lessons)} ${needs} exactly ${CHECKPOINT_QUESTIONS_PER_LESSON} checkpoint questions before this safety-critical course can be published.`
     : `Every lesson needs exactly ${CHECKPOINT_QUESTIONS_PER_LESSON} checkpoint questions before this safety-critical course can be published.`;
 }
