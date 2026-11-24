@@ -12,7 +12,6 @@ import {
   LocationType,
   Prisma,
   PrismaClient,
-  RoleMode,
   TrustLevel,
 } from "@prisma/client";
 import { z } from "zod";
@@ -25,7 +24,7 @@ import {
 import { hasTrust } from "../verification/trust-level";
 
 /**
- * Launch content (`pnpm seed:launch`): the founder's approved ideas, partner
+ * Launch content (`pnpm seed:launch`): the founder-approved ideas, partner
  * calls, community groups and courses. Idempotent: ideas and groups are
  * matched by `seed_key`, courses by slug, so a re-run updates and never
  * duplicates. Review-only fields (`_note`, `en`) are accepted and ignored.
@@ -157,14 +156,15 @@ export function parseLaunchCourseFile(
 export class LaunchContentError extends Error {}
 
 export interface LaunchContentOptions {
-  founderPhone: string | undefined;
-  founderName?: string;
-  /** Outside production only: create the founder as a local test user. */
-  createFounder?: boolean;
+  /** LAUNCH_OWNER_EMAIL: the admin account that owns the content. */
+  ownerEmail?: string;
+  /** ADMIN_SEED_EMAIL: the fallback when LAUNCH_OWNER_EMAIL is unset. */
+  adminSeedEmail?: string;
+  /** LAUNCH_OWNER_NAME: the owner's display name (default "KAAJ"). */
+  ownerName?: string;
   womenModeratorPhone?: string;
   /** Publish safety-critical courses (only after a trainer's review). */
   publishSafety?: boolean;
-  production: boolean;
 }
 
 export interface LaunchContentInput {
@@ -179,7 +179,7 @@ interface Tally {
 }
 
 export interface LaunchContentResult {
-  founder: { userId: string; created: boolean };
+  owner: { userId: string; email: string; profileUpdated: boolean };
   ideas: Tally;
   groups: Tally & { held: Array<{ key: string; reason: string }> };
   courses: {
@@ -192,7 +192,7 @@ export interface LaunchContentResult {
   };
 }
 
-const E164 = /^\+[1-9]\d{7,14}$/u;
+const OWNER_AREA = "Shaheb Bazar";
 const tally = (): Tally => ({ created: [], updated: [], unchanged: [] });
 
 /**
@@ -211,13 +211,19 @@ export async function loadLaunchContent(
   if (!unique(courses, (course) => course.slug))
     throw new LaunchContentError("Course slugs must be unique across files.");
 
-  const founder = await resolveFounder(prisma, options);
   const refs = await resolveReferences(prisma, content);
+  const owner = await resolveOwner(prisma, options);
+  owner.profileUpdated = await ensureOwnerProfile(
+    prisma,
+    owner.userId,
+    options.ownerName,
+    refs.ownerAreaId,
+  );
 
   const ideas = tally();
   for (const idea of content.ideas) {
     const outcome = await prisma.$transaction((transaction) =>
-      upsertIdea(transaction, idea, founder.userId, refs),
+      upsertIdea(transaction, idea, owner.userId, refs),
     );
     ideas[outcome].push(idea.key);
   }
@@ -233,7 +239,7 @@ export async function loadLaunchContent(
       groups.held.push({ key: group.key, reason: womanModerator.reason });
       continue;
     }
-    const ownerId = needsWoman ? womanModerator.userId! : founder.userId;
+    const ownerId = needsWoman ? womanModerator.userId! : owner.userId;
     const outcome = await prisma.$transaction((transaction) =>
       upsertGroup(transaction, group, ownerId, refs),
     );
@@ -261,7 +267,7 @@ export async function loadLaunchContent(
   });
 
   return {
-    founder,
+    owner,
     ideas,
     groups,
     courses: {
@@ -277,53 +283,91 @@ export async function loadLaunchContent(
   };
 }
 
-async function resolveFounder(
+/**
+ * The owner is an admin account: LAUNCH_OWNER_EMAIL, else ADMIN_SEED_EMAIL,
+ * else the only admin. Never created here.
+ */
+async function resolveOwner(
   prisma: PrismaClient,
   options: LaunchContentOptions,
-): Promise<LaunchContentResult["founder"]> {
-  const phone = options.founderPhone?.trim();
-  if (!phone || !E164.test(phone))
-    throw new LaunchContentError(
-      "Set LAUNCH_FOUNDER_PHONE to the founder's phone in E.164 form, e.g. +8801XXXXXXXXX.",
-    );
-  const existing = await prisma.user.findUnique({
-    where: { phone_e164: phone },
-    select: { id: true, status: true, deleted_at: true },
-  });
-  if (existing) {
-    if (existing.status !== "ACTIVE" || existing.deleted_at)
-      throw new LaunchContentError(
-        `The founder account ${phone} is not active (status ${existing.status}).`,
-      );
-    return { userId: existing.id, created: false };
-  }
-  if (!options.createFounder)
-    throw new LaunchContentError(
-      `No account has the phone ${phone} (LAUNCH_FOUNDER_PHONE). The founder must sign up in the app first; nothing was loaded.` +
-        (options.production
-          ? ""
-          : " For a local test database you may pass --create-founder."),
-    );
-  if (options.production)
-    throw new LaunchContentError(
-      "--create-founder is refused in production: the founder signs up in the app.",
-    );
-  const created = await prisma.user.create({
-    data: {
-      phone_e164: phone,
-      status: "ACTIVE",
-      role_modes: [RoleMode.BUSINESS, RoleMode.CUSTOMER],
-      active_role: RoleMode.BUSINESS,
-      profile: {
-        create: {
-          display_name: options.founderName?.trim() || "KAAJ Founder",
-          trust_level: TrustLevel.IDENTITY,
-        },
-      },
+): Promise<LaunchContentResult["owner"]> {
+  const explicit = options.ownerEmail?.trim();
+  const fallback = options.adminSeedEmail?.trim();
+  const email = explicit || fallback;
+  const admins = await prisma.user.findMany({
+    where: {
+      is_admin: true,
+      ...(email
+        ? { email: { equals: email, mode: Prisma.QueryMode.insensitive } }
+        : {}),
     },
-    select: { id: true },
+    select: { id: true, email: true, status: true, deleted_at: true },
+    take: 3,
   });
-  return { userId: created.id, created: true };
+  const source = explicit
+    ? "LAUNCH_OWNER_EMAIL"
+    : fallback
+      ? "ADMIN_SEED_EMAIL"
+      : "the only admin account";
+  if (admins.length === 0)
+    throw new LaunchContentError(
+      email
+        ? `No admin account has the email ${email} (${source}); nothing was loaded. Set LAUNCH_OWNER_EMAIL to an admin's email.`
+        : "There is no admin account to own the launch content; nothing was loaded.",
+    );
+  if (admins.length > 1)
+    throw new LaunchContentError(
+      "More than one admin account exists; set LAUNCH_OWNER_EMAIL to the one that owns the launch content. Nothing was loaded.",
+    );
+  const admin = admins[0]!;
+  if (admin.status !== "ACTIVE" || admin.deleted_at)
+    throw new LaunchContentError(
+      `The owner admin account ${admin.email ?? admin.id} is not active (status ${admin.status}); nothing was loaded.`,
+    );
+  return { userId: admin.id, email: admin.email ?? "", profileUpdated: false };
+}
+
+/**
+ * Cards show the owner's name: a profile named LAUNCH_OWNER_NAME (or "KAAJ"
+ * when it has none), shown in full, placed in Shaheb Bazar if unplaced.
+ * The trust level is never changed.
+ */
+async function ensureOwnerProfile(
+  prisma: PrismaClient,
+  userId: string,
+  ownerName: string | undefined,
+  areaId: string,
+): Promise<boolean> {
+  const name = ownerName?.trim();
+  const profile = await prisma.profile.findUnique({
+    where: { user_id: userId },
+    select: {
+      display_name: true,
+      show_full_name: true,
+      primary_location_id: true,
+    },
+  });
+  if (!profile) {
+    await prisma.profile.create({
+      data: {
+        user_id: userId,
+        display_name: name || "KAAJ",
+        show_full_name: true,
+        primary_location_id: areaId,
+      },
+    });
+    return true;
+  }
+  const data: Prisma.ProfileUpdateInput = {};
+  const displayName = name || (profile.display_name.trim() ? null : "KAAJ");
+  if (displayName && displayName !== profile.display_name)
+    data.display_name = displayName;
+  if (!profile.show_full_name) data.show_full_name = true;
+  if (!profile.primary_location_id)
+    data.primary_location = { connect: { id: areaId } };
+  if (Object.keys(data).length === 0) return false;
+  await prisma.profile.update({ where: { user_id: userId }, data });
+  return true;
 }
 
 async function resolveWomanModerator(
@@ -335,7 +379,7 @@ async function resolveWomanModerator(
     return {
       userId: null,
       reason:
-        "held: women-only, set LAUNCH_WOMEN_MODERATOR_PHONE to a verified woman's account",
+        "women-only: set LAUNCH_WOMEN_MODERATOR_PHONE to a verified woman's account",
     };
   const user = await prisma.user.findUnique({
     where: { phone_e164: phone },
@@ -353,7 +397,7 @@ async function resolveWomanModerator(
   )
     return {
       userId: null,
-      reason: `held: LAUNCH_WOMEN_MODERATOR_PHONE ${phone} is not an active, identity-verified woman`,
+      reason: `women-only: LAUNCH_WOMEN_MODERATOR_PHONE ${phone} is not an active, identity-verified woman`,
     };
   return { userId: user.id, reason: "" };
 }
@@ -363,6 +407,8 @@ interface References {
   jobCategory: Map<string, string>;
   area: Map<string, string>;
   cityId: string | null;
+  /** Shaheb Bazar: the owner's area when their profile has none. */
+  ownerAreaId: string;
 }
 
 async function resolveReferences(
@@ -377,6 +423,7 @@ async function resolveReferences(
   ];
   const areaNames = [
     ...new Set([
+      OWNER_AREA,
       ...content.ideas.map((idea) => idea.area),
       ...content.groups.flatMap((group) => group.area ?? []),
     ]),
@@ -427,7 +474,13 @@ async function resolveReferences(
     throw new LaunchContentError(
       `Launch content references that are not in the database (load reference data first): ${problems.join("; ")}.`,
     );
-  return { businessCategory, jobCategory, area, cityId: city?.id ?? null };
+  return {
+    businessCategory,
+    jobCategory,
+    area,
+    cityId: city?.id ?? null,
+    ownerAreaId: area.get(OWNER_AREA)!,
+  };
 }
 
 async function upsertIdea(

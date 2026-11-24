@@ -11,14 +11,14 @@ import {
 // Loads the founder-approved launch content: ideas, partner calls, community
 // groups and courses from prisma/launch-content/. Safe to re-run (matched by
 // seed_key and course slug). Deliberately not part of `seed`, the build or
-// the deploy: run it on purpose, once the founder has signed up.
+// the deploy: run it on purpose.
 //
-// Usage: pnpm seed:launch [--create-founder] [--publish-safety] [--dir path]
-//   LAUNCH_FOUNDER_PHONE (E.164, required)   the founder's existing account
-//   LAUNCH_FOUNDER_NAME                     the name for --create-founder
-//   LAUNCH_WOMEN_MODERATOR_PHONE            a verified woman to moderate
-//                                           women-only groups (else held)
-//   --create-founder   outside production only: create that account locally
+// Usage: pnpm seed:launch [--publish-safety] [--dir path]
+//   LAUNCH_OWNER_EMAIL            the admin account that owns the content
+//                                 (else ADMIN_SEED_EMAIL, else the only admin)
+//   LAUNCH_OWNER_NAME             its display name (default "KAAJ")
+//   LAUNCH_WOMEN_MODERATOR_PHONE  a verified woman to moderate women-only
+//                                 groups (else they are held)
 //   --publish-safety   publish safety-critical courses (after a trainer's review)
 async function main() {
   const args = process.argv.slice(2);
@@ -44,18 +44,17 @@ async function main() {
       prisma,
       { ideasAndGroups: readJson(join(dir, "ideas-and-groups.json")), courses },
       {
-        founderPhone: process.env.LAUNCH_FOUNDER_PHONE,
-        founderName: process.env.LAUNCH_FOUNDER_NAME,
+        ownerEmail: process.env.LAUNCH_OWNER_EMAIL,
+        adminSeedEmail: process.env.ADMIN_SEED_EMAIL,
+        ownerName: process.env.LAUNCH_OWNER_NAME,
         womenModeratorPhone: process.env.LAUNCH_WOMEN_MODERATOR_PHONE,
-        createFounder: args.includes("--create-founder"),
         publishSafety: args.includes("--publish-safety"),
-        production: process.env.NODE_ENV === "production",
       },
     );
     const count = (items: unknown[]) => items.length;
     console.log(
       [
-        `Founder: ${result.founder.userId}${result.founder.created ? " (created as a local test user)" : ""}`,
+        `Owner: ${result.owner.email} (${result.owner.userId})${result.owner.profileUpdated ? ", profile name/area set" : ""}`,
         `Ideas: ${count(result.ideas.created)} created, ${count(result.ideas.updated)} updated, ${count(result.ideas.unchanged)} unchanged`,
         `Groups: ${count(result.groups.created)} created, ${count(result.groups.updated)} updated, ${count(result.groups.unchanged)} unchanged, ${count(result.groups.held)} held`,
         ...result.groups.held.map(

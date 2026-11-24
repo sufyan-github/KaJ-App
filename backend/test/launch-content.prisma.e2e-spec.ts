@@ -153,16 +153,31 @@ databaseDescribe("launch content loader (PostgreSQL)", () => {
     ],
   });
 
-  const founderOptions = async (
+  /** An admin owner (not identity-verified), as on a real launch. */
+  const makeAdmin = async (profile?: { display_name: string }) => {
+    const email = `owner-${randomUUID().slice(0, 8)}@kaj.test`;
+    const user = await prisma.user.create({
+      data: {
+        phone_e164: phone(),
+        email,
+        is_admin: true,
+        status: "ACTIVE",
+        role_modes: [RoleMode.CUSTOMER, RoleMode.WORKER, RoleMode.BUSINESS],
+        active_role: RoleMode.CUSTOMER,
+        ...(profile ? { profile: { create: profile } } : {}),
+      },
+    });
+    return { id: user.id, email };
+  };
+  const ownerOptions = async (
     extra: Partial<LaunchContentOptions> = {},
-  ): Promise<LaunchContentOptions> => {
-    const founder = await api.actor([RoleMode.BUSINESS], {
-      trust: TrustLevel.IDENTITY,
-    });
-    const row = await prisma.user.findUniqueOrThrow({
-      where: { id: founder.id },
-    });
-    return { founderPhone: row.phone_e164!, production: false, ...extra };
+  ): Promise<LaunchContentOptions & { ownerId: string }> => {
+    const admin = await makeAdmin();
+    return {
+      ownerEmail: admin.email.toUpperCase(),
+      ownerId: admin.id,
+      ...extra,
+    };
   };
 
   beforeEach(() => {
@@ -178,28 +193,41 @@ databaseDescribe("launch content loader (PostgreSQL)", () => {
     await api?.close();
   });
 
-  it("refuses to load without an existing founder, and never invents one in production", async () => {
-    const missing = phone();
+  it("refuses to load without exactly one matching admin, and never creates one", async () => {
+    const before = await prisma.user.count();
     await expect(
       loadLaunchContent(prisma, content(), {
-        founderPhone: missing,
-        production: false,
+        ownerEmail: `nobody-${tag}@kaj.test`,
       }),
-    ).rejects.toThrow(/must sign up in the app first/u);
+    ).rejects.toThrow(/No admin account has the email/u);
+    // A non-admin with that email is not the owner.
+    const plain = await api.actor([RoleMode.CUSTOMER]);
+    await prisma.user.update({
+      where: { id: plain.id },
+      data: { email: `plain-${tag}@kaj.test` },
+    });
     await expect(
       loadLaunchContent(prisma, content(), {
-        founderPhone: missing,
-        createFounder: true,
-        production: true,
+        ownerEmail: `plain-${tag}@kaj.test`,
       }),
-    ).rejects.toThrow(/refused in production/u);
+    ).rejects.toThrow(/No admin account has the email/u);
+    // The seed email is the fallback; with no email, two admins are ambiguous.
     await expect(
       loadLaunchContent(prisma, content(), {
-        founderPhone: undefined,
-        production: false,
+        adminSeedEmail: `seed-${tag}@kaj.test`,
+      }),
+    ).rejects.toThrow(/ADMIN_SEED_EMAIL/u);
+    await makeAdmin();
+    await makeAdmin();
+    await expect(loadLaunchContent(prisma, content(), {})).rejects.toThrow(
+      /More than one admin account/u,
+    );
+    await expect(
+      loadLaunchContent(prisma, content(), {
+        ownerEmail: `nobody-${tag}@kaj.test`,
       }),
     ).rejects.toBeInstanceOf(LaunchContentError);
-    expect(await prisma.user.count({ where: { phone_e164: missing } })).toBe(0);
+    expect(await prisma.user.count()).toBe(before + 3);
     expect(
       await prisma.businessIdea.count({
         where: { seed_key: { startsWith: `t-${tag}` } },
@@ -207,23 +235,95 @@ databaseDescribe("launch content loader (PostgreSQL)", () => {
     ).toBe(0);
   });
 
-  it("creates a local founder with --create-founder outside production", async () => {
-    const local = phone();
+  it("names the owner KAAJ, shows it in full and places it, without changing trust", async () => {
+    const bare = await makeAdmin();
     const result = await loadLaunchContent(prisma, content(), {
-      founderPhone: local,
-      founderName: "Local Founder",
-      createFounder: true,
-      production: false,
+      ownerEmail: bare.email,
     });
-    expect(result.founder.created).toBe(true);
+    expect(result.owner).toMatchObject({
+      userId: bare.id,
+      profileUpdated: true,
+    });
     const profile = await prisma.profile.findUniqueOrThrow({
-      where: { user_id: result.founder.userId },
+      where: { user_id: bare.id },
+      include: { primary_location: true },
     });
-    expect(profile.display_name).toBe("Local Founder");
+    expect(profile).toMatchObject({
+      display_name: "KAAJ",
+      show_full_name: true,
+      trust_level: TrustLevel.NONE,
+    });
+    expect(profile.primary_location?.name_en).toBe("Shaheb Bazar");
+
+    // An existing name stays unless LAUNCH_OWNER_NAME is set.
+    tag = randomUUID().slice(0, 8);
+    const named = await makeAdmin({ display_name: "Shirin Akter" });
+    await loadLaunchContent(prisma, content(), { ownerEmail: named.email });
+    const kept = await prisma.profile.findUniqueOrThrow({
+      where: { user_id: named.id },
+    });
+    expect(kept).toMatchObject({
+      display_name: "Shirin Akter",
+      show_full_name: true,
+    });
+    tag = randomUUID().slice(0, 8);
+    await loadLaunchContent(prisma, content(), {
+      ownerEmail: named.email,
+      ownerName: "KAAJ Team",
+    });
+    const renamed = await prisma.profile.findUniqueOrThrow({
+      where: { user_id: named.id },
+    });
+    expect(renamed.display_name).toBe("KAAJ Team");
+    expect(renamed.trust_level).toBe(kept.trust_level);
+  });
+
+  it("lets a reader ask for access, ask about a role and join a group of an unverified owner", async () => {
+    const options = await ownerOptions();
+    await loadLaunchContent(prisma, content(), options);
+    const idea = await prisma.businessIdea.findUniqueOrThrow({
+      where: { seed_key: `t-${tag}-idea` },
+      include: { roles: { orderBy: { sort_order: "asc" } } },
+    });
+    const group = await prisma.communityGroup.findUniqueOrThrow({
+      where: { seed_key: `t-${tag}-group` },
+    });
+    const reader = await api.actor([RoleMode.WORKER], {
+      trust: TrustLevel.IDENTITY,
+    });
+    const listed = await api.get(`ideas/${idea.id}`, reader).expect(200);
+    expect(JSON.stringify(listed.body.data)).toContain("KAAJ");
+    await api
+      .post(`ideas/${idea.id}/access-requests`, reader, {
+        acceptConfidentiality: true,
+        message: "I would like to read the details.",
+      })
+      .expect(201);
+    const collaboration = await api
+      .post("collaboration-requests", reader, {
+        subjectType: "IDEA",
+        subjectId: idea.id,
+        ideaRoleId: idea.roles[0]!.id,
+        message: "I can coordinate this part-time.",
+      })
+      .expect(201);
+    await api.post(`community/groups/${group.id}/join`, reader).expect(201);
+
+    // The owner can answer, unverified too.
+    const owner = await api.tokenFor(options.ownerId, [RoleMode.BUSINESS]);
+    await api
+      .post(`ideas/${idea.id}/access-requests/${reader.id}/approve`, owner)
+      .expect(201);
+    await api
+      .post(
+        `collaboration-requests/${collaboration.body.data.id}/accept`,
+        owner,
+      )
+      .expect(201);
   });
 
   it("loads ideas, groups and courses once, and a re-run duplicates nothing", async () => {
-    const options = await founderOptions();
+    const options = await ownerOptions();
     const first = await loadLaunchContent(prisma, content(), options);
     expect(first.ideas.created).toEqual([`t-${tag}-idea`, `t-${tag}-call`]);
     expect(first.groups.created).toEqual([`t-${tag}-group`]);
@@ -239,7 +339,7 @@ databaseDescribe("launch content loader (PostgreSQL)", () => {
         category: true,
       },
     });
-    expect(idea.owner_user_id).toBe(first.founder.userId);
+    expect(idea.owner_user_id).toBe(options.ownerId);
     expect(idea.location?.name_en).toBe("Shaheb Bazar");
     expect(idea.category.slug).toBe("food");
     expect(idea.roles.map((role) => role.arrangement)).toEqual([
@@ -254,7 +354,7 @@ databaseDescribe("launch content loader (PostgreSQL)", () => {
     expect(group.location?.name_en).toBe("Rajshahi");
     expect(group.members).toEqual([
       expect.objectContaining({
-        user_id: first.founder.userId,
+        user_id: options.ownerId,
         role: GroupMemberRole.MODERATOR,
         status: "ACTIVE",
       }),
@@ -291,10 +391,10 @@ databaseDescribe("launch content loader (PostgreSQL)", () => {
   });
 
   it("holds the women-only group until a verified woman can moderate it", async () => {
-    const options = await founderOptions();
+    const options = await ownerOptions();
     const held = await loadLaunchContent(prisma, content(), options);
     expect(held.groups.held).toEqual([
-      { key: `t-${tag}-women`, reason: expect.stringContaining("held") },
+      { key: `t-${tag}-women`, reason: expect.stringContaining("women-only") },
     ]);
     expect(
       await prisma.communityGroup.count({
@@ -342,7 +442,7 @@ databaseDescribe("launch content loader (PostgreSQL)", () => {
   });
 
   it("publishes regular courses and keeps safety-critical ones unpublished unless asked", async () => {
-    const options = await founderOptions();
+    const options = await ownerOptions();
     const result = await loadLaunchContent(prisma, content(), options);
     expect(result.courses.heldUnpublished).toEqual([`t-${tag}-safety`]);
     const published = async (slug: string) =>
@@ -360,7 +460,7 @@ databaseDescribe("launch content loader (PostgreSQL)", () => {
   });
 
   it("validates everything before writing anything", async () => {
-    const options = await founderOptions();
+    const options = await ownerOptions();
     const bad = content();
     bad.ideasAndGroups.ideas[0]!.area = "Nowhere Bazar";
     await expect(loadLaunchContent(prisma, bad, options)).rejects.toThrow(
