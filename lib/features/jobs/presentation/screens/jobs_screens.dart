@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../core/errors/failure_copy.dart';
 import '../../../../core/formatting/kaaj_format.dart';
@@ -567,6 +569,11 @@ class CreateJobScreen extends ConsumerStatefulWidget {
 
 class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
   final _form = GlobalKey<FormState>();
+
+  /// The idempotency key for the post being sent, and the body it was used
+  /// with.
+  String? _submitKey;
+  String? _submittedBody;
   final _title = TextEditingController();
   final _description = TextEditingController();
   final _amount = TextEditingController();
@@ -835,26 +842,37 @@ class _CreateJobScreenState extends ConsumerState<CreateJobScreen> {
       return;
     }
     setState(() => _saving = true);
+    final payload = <String, dynamic>{
+      'title': _title.text.trim(),
+      'description': _description.text.trim(),
+      'categoryId': _categoryId,
+      'skillIds': _skillId == null ? <String>[] : [_skillId],
+      'jobType': 'ONE_TIME',
+      'paymentModel': 'FIXED',
+      'budgetMinPoisha': '${int.parse(_amount.text) * 100}',
+      'budgetMaxPoisha': '${int.parse(_amount.text) * 100}',
+      'locationId': locationId,
+      'startsAt': startsAt.toUtc().toIso8601String(),
+      'endsAt': endsAt.toUtc().toIso8601String(),
+      'businessProfileId': ?widget.businessProfileId,
+      // Stored with 6 decimal places (~0.1 m) by the API.
+      if (_site case final site?) ...{
+        'lat': double.parse(site.latitude.toStringAsFixed(6)),
+        'lng': double.parse(site.longitude.toStringAsFixed(6)),
+      },
+    };
+    // One key per post: a retry of the same post (after a lost answer on a
+    // weak connection) reuses it, so the server never creates it twice; an
+    // edited post gets a new one.
+    final body = jsonEncode(payload);
+    if (body != _submittedBody) {
+      _submittedBody = body;
+      _submitKey = const Uuid().v4();
+    }
     try {
-      await ref.read(jobsRepositoryProvider).createAndPublishJob({
-        'title': _title.text.trim(),
-        'description': _description.text.trim(),
-        'categoryId': _categoryId,
-        'skillIds': _skillId == null ? <String>[] : [_skillId],
-        'jobType': 'ONE_TIME',
-        'paymentModel': 'FIXED',
-        'budgetMinPoisha': '${int.parse(_amount.text) * 100}',
-        'budgetMaxPoisha': '${int.parse(_amount.text) * 100}',
-        'locationId': locationId,
-        'startsAt': startsAt.toUtc().toIso8601String(),
-        'endsAt': endsAt.toUtc().toIso8601String(),
-        'businessProfileId': ?widget.businessProfileId,
-        // Stored with 6 decimal places (~0.1 m) by the API.
-        if (_site case final site?) ...{
-          'lat': double.parse(site.latitude.toStringAsFixed(6)),
-          'lng': double.parse(site.longitude.toStringAsFixed(6)),
-        },
-      });
+      await ref
+          .read(jobsRepositoryProvider)
+          .createAndPublishJob(payload, actionKey: _submitKey);
       ref.invalidate(jobFeedProvider);
       ref.invalidate(myJobsProvider);
       if (mounted) context.pop();

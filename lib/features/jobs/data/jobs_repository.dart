@@ -108,21 +108,26 @@ class JobsRepository {
   /// draft, because each call minted its own key. If publishing fails the
   /// draft id is still returned inside the failure so the caller can offer to
   /// resume it rather than orphaning it.
-  Future<String> createAndPublishJob(Map<String, dynamic> payload) async {
-    final actionKey = const Uuid().v4();
+  ///
+  /// The caller passes [actionKey] to make a retry of the same post reuse
+  /// the key: the server then replays the first answer instead of creating
+  /// a second job (IDEMPOTENCY_KEY_REUSED if the body changed).
+  Future<String> createAndPublishJob(
+    Map<String, dynamic> payload, {
+    String? actionKey,
+  }) async {
+    final key = actionKey ?? const Uuid().v4();
     String? draftId;
     try {
       final created = await _dio.post<Map<String, dynamic>>(
         '/jobs',
         data: payload,
-        options: Options(headers: {'Idempotency-Key': 'job-create-$actionKey'}),
+        options: Options(headers: {'Idempotency-Key': 'job-create-$key'}),
       );
       draftId = _data(created.data)['id'] as String;
       await _dio.post<Map<String, dynamic>>(
         '/jobs/$draftId/publish',
-        options: Options(
-          headers: {'Idempotency-Key': 'job-publish-$actionKey'},
-        ),
+        options: Options(headers: {'Idempotency-Key': 'job-publish-$key'}),
       );
       return draftId;
     } on Object catch (error) {
