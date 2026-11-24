@@ -302,7 +302,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "Explanation 1.",
-          "explanationBn": "ব্যাখ্যা 1।"
+          "explanationBn": "ব্যাখ্যা 1।",
+          "lesson": 1
         },
         {
           "promptEn": "Fixture question 2?",
@@ -326,7 +327,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "Explanation 2.",
-          "explanationBn": "ব্যাখ্যা 2।"
+          "explanationBn": "ব্যাখ্যা 2।",
+          "lesson": 1
         },
         {
           "promptEn": "Fixture question 3?",

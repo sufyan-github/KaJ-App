@@ -9,6 +9,7 @@ import { EvidenceLevel, Prisma } from "@prisma/client";
 import { CLOCK, type Clock } from "../../common/time/clock";
 import { PrismaService } from "../../infra/prisma/prisma.service";
 import { NotificationsService } from "../notifications/notifications.service";
+import { TrainingCheckpointsService } from "./training-checkpoints.service";
 import {
   certificateInclude,
   serializeCertificate,
@@ -20,6 +21,7 @@ import {
   trainingAttemptLimitError,
   trainingAttemptSubmittedError,
   trainingUnavailableError,
+  testLockedError,
 } from "./training.errors";
 import {
   ATTEMPT_DURATION_MS,
@@ -41,6 +43,7 @@ export class TrainingAttemptsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly checkpoints: TrainingCheckpointsService,
     @Optional() @Inject(CLOCK) private readonly clock?: Clock,
   ) {}
 
@@ -52,9 +55,20 @@ export class TrainingAttemptsService {
     const now = this.now();
     const course = await this.prisma.trainingCourse.findFirst({
       where: { id: courseId, is_published: true },
-      select: { id: true, version: true, question_count: true },
+      select: {
+        id: true,
+        version: true,
+        question_count: true,
+        is_safety_critical: true,
+      },
     });
     if (!course) throw new NotFoundException();
+    // Locked order: every lesson's checkpoint before the final test.
+    if (
+      course.is_safety_critical &&
+      (await this.checkpoints.progress(userId, course)).testLocked
+    )
+      throw testLockedError();
 
     const [certificate, open, failures] = await Promise.all([
       this.prisma.trainingCertificate.findFirst({

@@ -88,7 +88,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "With the supply on, water sprays out under pressure and can flood the room and reach sockets.",
-          "explanationBn": "লাইন চালু থাকলে চাপে পানি ছিটকে বের হয়, ঘর ভেসে যেতে পারে এবং পানি সকেটে পৌঁছাতে পারে।"
+          "explanationBn": "লাইন চালু থাকলে চাপে পানি ছিটকে বের হয়, ঘর ভেসে যেতে পারে এবং পানি সকেটে পৌঁছাতে পারে।",
+          "lesson": 1
         },
         {
           "promptEn": "You closed a valve, but after several minutes the tap is still running. What do you do?",
@@ -117,7 +118,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "Water that keeps coming shows the line is still open, so it is not safe to open any joint.",
-          "explanationBn": "পানি আসতেই থাকলে বোঝা যায় লাইন এখনো খোলা, তাই কোনো জোড়া খোলা নিরাপদ নয়।"
+          "explanationBn": "পানি আসতেই থাকলে বোঝা যায় লাইন এখনো খোলা, তাই কোনো জোড়া খোলা নিরাপদ নয়।",
+          "lesson": 1
         },
         {
           "promptEn": "A tap still drips when it is closed hard. The customer says, \"Just tighten it more.\" What is the right fix?",
@@ -146,7 +148,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "A worn washer or cartridge cannot seal, and forcing the handle only damages the tap.",
-          "explanationBn": "ক্ষয়ে যাওয়া ওয়াশার বা কার্ট্রিজ পানি আটকাতে পারে না, আর হাতলে জোর দিলে কলই নষ্ট হয়।"
+          "explanationBn": "ক্ষয়ে যাওয়া ওয়াশার বা কার্ট্রিজ পানি আটকাতে পারে না, আর হাতলে জোর দিলে কলই নষ্ট হয়।",
+          "lesson": 2
         },
         {
           "promptEn": "You have taken out the old cartridge. How do you get the right new one?",
@@ -175,7 +178,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "Washers and cartridges come in many sizes, and only the matching one seals.",
-          "explanationBn": "ওয়াশার ও কার্ট্রিজ নানা মাপের হয়, আর শুধু মিলে যাওয়াটিই পানি আটকায়।"
+          "explanationBn": "ওয়াশার ও কার্ট্রিজ নানা মাপের হয়, আর শুধু মিলে যাওয়াটিই পানি আটকায়।",
+          "lesson": 2
         },
         {
           "promptEn": "You are putting thread tape on a threaded pipe end. Which way do you wind it?",
@@ -204,7 +208,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "Tape wound the other way unwinds and bunches up as the fitting is screwed on.",
-          "explanationBn": "উল্টো দিকে পেঁচালে ফিটিং লাগানোর সময় টেপ খুলে গিয়ে দলা পাকিয়ে যায়।"
+          "explanationBn": "উল্টো দিকে পেঁচালে ফিটিং লাগানোর সময় টেপ খুলে গিয়ে দলা পাকিয়ে যায়।",
+          "lesson": 3
         },
         {
           "promptEn": "You have just joined a PVC pipe with solvent cement. The customer wants the water on at once. What do you do?",
@@ -233,7 +238,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "A joint that has not set can push apart under pressure, and the fumes catch fire near a flame.",
-          "explanationBn": "জোড়া না শুকালে পানির চাপে খুলে যেতে পারে, আর আগুনের কাছে আঠার ভাপে আগুন ধরে।"
+          "explanationBn": "জোড়া না শুকালে পানির চাপে খুলে যেতে পারে, আর আগুনের কাছে আঠার ভাপে আগুন ধরে।",
+          "lesson": 3
         },
         {
           "promptEn": "You come to clean an underground tank, but your helper has not come. The customer says, \"It is a quick job, just go in.\" What do you do?",
@@ -262,7 +268,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "A closed tank can hold bad air, and nobody would be there to see you fall or to call for help.",
-          "explanationBn": "বন্ধ ট্যাংকে খারাপ বাতাস থাকতে পারে, আর আপনি পড়ে গেলে দেখার বা সাহায্য ডাকার কেউ থাকবে না।"
+          "explanationBn": "বন্ধ ট্যাংকে খারাপ বাতাস থাকতে পারে, আর আপনি পড়ে গেলে দেখার বা সাহায্য ডাকার কেউ থাকবে না।",
+          "lesson": 4
         },
         {
           "promptEn": "Your co-worker goes silent and collapses inside the tank. What do you do?",
@@ -291,7 +298,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "The air that made him collapse will do the same to you, so going in makes two victims.",
-          "explanationBn": "যে বাতাসে তিনি অজ্ঞান হয়েছেন তাতে আপনিও অজ্ঞান হবেন, তখন বিপদে পড়বেন দুজন।"
+          "explanationBn": "যে বাতাসে তিনি অজ্ঞান হয়েছেন তাতে আপনিও অজ্ঞান হবেন, তখন বিপদে পড়বেন দুজন।",
+          "lesson": 4
         },
         {
           "promptEn": "The rooftop tank stands beside an edge with no railing, and you have no safety belt. What is right?",
@@ -320,7 +328,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "One slip at an open edge is a fall, and care alone does not stop it.",
-          "explanationBn": "খোলা কিনারায় একবার পা পিছলালেই পড়ে যাবেন, শুধু সাবধান থাকলে তা ঠেকানো যায় না।"
+          "explanationBn": "খোলা কিনারায় একবার পা পিছলালেই পড়ে যাবেন, শুধু সাবধান থাকলে তা ঠেকানো যায় না।",
+          "lesson": 5
         },
         {
           "promptEn": "While fixing a kitchen sink you smell gas. The customer asks you to tighten the gas pipe too. What do you do?",
@@ -349,7 +358,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "Gas work is not a job for a beginner plumber, and a flame or a switch spark can set leaking gas on fire.",
-          "explanationBn": "গ্যাসের কাজ নতুন প্লাম্বারের কাজ নয়, আর আগুন বা সুইচের স্ফুলিঙ্গে লিক হওয়া গ্যাসে আগুন ধরতে পারে।"
+          "explanationBn": "গ্যাসের কাজ নতুন প্লাম্বারের কাজ নয়, আর আগুন বা সুইচের স্ফুলিঙ্গে লিক হওয়া গ্যাসে আগুন ধরতে পারে।",
+          "lesson": 5
         },
         {
           "promptEn": "You are using solvent cement in a small bathroom. What must you do?",

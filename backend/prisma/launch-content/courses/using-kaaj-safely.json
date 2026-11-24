@@ -70,7 +70,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "Nobody from KAAJ asks for your OTP, and whoever has the code can take your account.",
-          "explanationBn": "KAAJ-এর কেউ আপনার ওটিপি চায় না, আর কোডটি যার হাতে যায় সে আপনার অ্যাকাউন্ট দখল করতে পারে।"
+          "explanationBn": "KAAJ-এর কেউ আপনার ওটিপি চায় না, আর কোডটি যার হাতে যায় সে আপনার অ্যাকাউন্ট দখল করতে পারে।",
+          "lesson": 1
         },
         {
           "promptEn": "Why does KAAJ ask for your NID and a selfie?",
@@ -99,7 +100,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "The identity check lets people trust that a profile belongs to a real, known person.",
-          "explanationBn": "পরিচয় যাচাই থাকায় মানুষ ভরসা করতে পারেন যে প্রোফাইলটি একজন আসল, চেনা মানুষের।"
+          "explanationBn": "পরিচয় যাচাই থাকায় মানুষ ভরসা করতে পারেন যে প্রোফাইলটি একজন আসল, চেনা মানুষের।",
+          "lesson": 1
         },
         {
           "promptEn": "A person you do not know writes: \"Call me on this number. We will fix the price by phone, no need for the app.\" What do you do?",
@@ -128,7 +130,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "An agreement in the app is a record you can both see, and a phone call leaves nothing.",
-          "explanationBn": "অ্যাপের চুক্তি এমন রেকর্ড যা দুজনেই দেখতে পান, কিন্তু ফোনের কথার কিছুই থাকে না।"
+          "explanationBn": "অ্যাপের চুক্তি এমন রেকর্ড যা দুজনেই দেখতে পান, কিন্তু ফোনের কথার কিছুই থাকে না।",
+          "lesson": 2
         },
         {
           "promptEn": "You reach the address in the app. The person there says the work is in another place far away and asks you to come along alone. What do you do?",
@@ -157,7 +160,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "A job that changes place after you arrive is a warning sign, and nobody knows the new place.",
-          "explanationBn": "পৌঁছানোর পর কাজের জায়গা বদলে যাওয়া একটি সতর্ক সংকেত, আর নতুন জায়গার কথা কেউ জানে না।"
+          "explanationBn": "পৌঁছানোর পর কাজের জায়গা বদলে যাওয়া একটি সতর্ক সংকেত, আর নতুন জায়গার কথা কেউ জানে না।",
+          "lesson": 2
         },
         {
           "promptEn": "At a job a man threatens to hit you and stands in the doorway. You manage to get outside. What do you do first?",
@@ -186,7 +190,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "Only 999 sends help right now, and an app report is read later.",
-          "explanationBn": "এখনই সাহায্য পাঠাতে পারে শুধু ৯৯৯, আর অ্যাপের রিপোর্ট পড়া হয় পরে।"
+          "explanationBn": "এখনই সাহায্য পাঠাতে পারে শুধু ৯৯৯, আর অ্যাপের রিপোর্ট পড়া হয় পরে।",
+          "lesson": 3
         },
         {
           "promptEn": "A woman worker you know tells you that someone is harassing her. She is not in danger this minute. Which helpline is for violence against women and children?",
@@ -215,7 +220,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "109 is the helpline for women and children, and 999 is for immediate danger.",
-          "explanationBn": "১০৯ হলো নারী ও শিশুদের জন্য হেল্পলাইন, আর এই মুহূর্তের বিপদে ৯৯৯।"
+          "explanationBn": "১০৯ হলো নারী ও শিশুদের জন্য হেল্পলাইন, আর এই মুহূর্তের বিপদে ৯৯৯।",
+          "lesson": 3
         },
         {
           "promptEn": "Someone writes: \"Send 500 taka as a registration fee by mobile banking and the job is yours.\" What do you do?",

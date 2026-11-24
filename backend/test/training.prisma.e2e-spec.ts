@@ -481,6 +481,19 @@ databaseDescribe("training MVP and quick wins with PostgreSQL", () => {
 
   it("refuses to grade an expired attempt", async () => {
     const id = await courseId("fixture-electrical-safety");
+    // A safety-critical course: the lesson checkpoint comes first.
+    const lesson = await db.trainingLesson.findFirstOrThrow({
+      where: { course_id: id },
+    });
+    const checkpoint = await db.trainingQuestion.findMany({
+      where: { lesson_id: lesson.id, is_active: true },
+    });
+    await post(`training/lessons/${lesson.id}/checkpoint`, worker, {
+      answers: checkpoint.map((question) => ({
+        questionId: question.id,
+        optionId: question.correct_option_id,
+      })),
+    }).expect(201);
     const attempt = (
       await post(`training/courses/${id}/attempts`, worker).expect(201)
     ).body.data as Started;

@@ -88,7 +88,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "A switched-off appliance can still be live inside while the plug is in.",
-          "explanationBn": "প্লাগ লাগানো থাকলে সুইচ বন্ধ যন্ত্রের ভেতরেও কারেন্ট থাকতে পারে।"
+          "explanationBn": "প্লাগ লাগানো থাকলে সুইচ বন্ধ যন্ত্রের ভেতরেও কারেন্ট থাকতে পারে।",
+          "lesson": 1
         },
         {
           "promptEn": "Why do you take photos while you open an appliance?",
@@ -117,7 +118,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "Photos show where each wire and part was before you took it out.",
-          "explanationBn": "ছবিতে দেখা যায় খোলার আগে কোন তার ও পার্টস কোথায় ছিল।"
+          "explanationBn": "ছবিতে দেখা যায় খোলার আগে কোন তার ও পার্টস কোথায় ছিল।",
+          "lesson": 1
         },
         {
           "promptEn": "A table fan hums and starts only when you push the blade by hand. What do you check first?",
@@ -146,7 +148,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "A weak capacitor cannot give the motor its starting push.",
-          "explanationBn": "দুর্বল ক্যাপাসিটর মোটরকে চালু হওয়ার ধাক্কা দিতে পারে না।"
+          "explanationBn": "দুর্বল ক্যাপাসিটর মোটরকে চালু হওয়ার ধাক্কা দিতে পারে না।",
+          "lesson": 2
         },
         {
           "promptEn": "You are going to open a ceiling fan. How do you make it safe?",
@@ -175,7 +178,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "The wall switch alone can leave a wire live at the fan.",
-          "explanationBn": "শুধু দেয়ালের সুইচ বন্ধ করলে ফ্যানের তারে কারেন্ট থেকে যেতে পারে।"
+          "explanationBn": "শুধু দেয়ালের সুইচ বন্ধ করলে ফ্যানের তারে কারেন্ট থেকে যেতে পারে।",
+          "lesson": 2
         },
         {
           "promptEn": "The thermal fuse of a rice cooker is faulty. The customer tells you to join the two wires so that it works. What do you do?",
@@ -204,7 +208,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "Without the right thermal fuse the cooker can overheat and start a fire.",
-          "explanationBn": "সঠিক থার্মাল ফিউজ ছাড়া কুকার অতিরিক্ত গরম হয়ে আগুন লাগতে পারে।"
+          "explanationBn": "সঠিক থার্মাল ফিউজ ছাড়া কুকার অতিরিক্ত গরম হয়ে আগুন লাগতে পারে।",
+          "lesson": 3
         },
         {
           "promptEn": "With the plug out, your multimeter beeps between a plug pin and the metal body of an iron. What does this mean?",
@@ -233,7 +238,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "A connection between a pin and the body means the body can become live.",
-          "explanationBn": "পিন ও বডির মধ্যে সংযোগ থাকা মানে বডিতে কারেন্ট চলে আসতে পারে।"
+          "explanationBn": "পিন ও বডির মধ্যে সংযোগ থাকা মানে বডিতে কারেন্ট চলে আসতে পারে।",
+          "lesson": 3
         },
         {
           "promptEn": "When do you give the customer the price?",
@@ -262,7 +268,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "A written price before the repair avoids arguments later.",
-          "explanationBn": "মেরামতের আগে লিখিত দাম দিলে পরে ঝগড়া হয় না।"
+          "explanationBn": "মেরামতের আগে লিখিত দাম দিলে পরে ঝগড়া হয় না।",
+          "lesson": 4
         },
         {
           "promptEn": "After opening a fan you find a second fault that will cost ৳300 more. What do you do?",
@@ -291,7 +298,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "The customer must agree to any extra cost before you do the extra work.",
-          "explanationBn": "বাড়তি কাজের আগে বাড়তি খরচে গ্রাহকের সম্মতি লাগবে।"
+          "explanationBn": "বাড়তি কাজের আগে বাড়তি খরচে গ্রাহকের সম্মতি লাগবে।",
+          "lesson": 4
         },
         {
           "promptEn": "A customer brings a microwave oven that does not heat. You are a beginner. What do you do?",
@@ -320,7 +328,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "The capacitor in a microwave oven can hold a deadly charge even with the plug out.",
-          "explanationBn": "প্লাগ খোলা থাকলেও মাইক্রোওয়েভ ওভেনের ক্যাপাসিটরে প্রাণঘাতী চার্জ থাকতে পারে।"
+          "explanationBn": "প্লাগ খোলা থাকলেও মাইক্রোওয়েভ ওভেনের ক্যাপাসিটরে প্রাণঘাতী চার্জ থাকতে পারে।",
+          "lesson": 5
         },
         {
           "promptEn": "You have repaired an iron and fitted its cover. How do you test it?",
@@ -349,7 +358,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "Watching the closed appliance on a dry table lets you catch a fault before the customer uses it.",
-          "explanationBn": "কভার লাগানো যন্ত্র শুকনো টেবিলে রেখে খেয়াল করলে গ্রাহক ব্যবহারের আগেই সমস্যা ধরা পড়ে।"
+          "explanationBn": "কভার লাগানো যন্ত্র শুকনো টেবিলে রেখে খেয়াল করলে গ্রাহক ব্যবহারের আগেই সমস্যা ধরা পড়ে।",
+          "lesson": 5
         },
         {
           "promptEn": "You replaced a fan capacitor. What do you do with the old one?",

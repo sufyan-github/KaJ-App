@@ -88,7 +88,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "A spark from a switch, or a flame, can set leaking gas on fire.",
-          "explanationBn": "সুইচের স্পার্ক বা আগুন থেকে লিক হওয়া গ্যাসে আগুন ধরে যেতে পারে।"
+          "explanationBn": "সুইচের স্পার্ক বা আগুন থেকে লিক হওয়া গ্যাসে আগুন ধরে যেতে পারে।",
+          "lesson": 1
         },
         {
           "promptEn": "When should you look for hazards at a work site?",
@@ -117,7 +118,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "A hazard that you find before starting can be removed before it hurts anyone.",
-          "explanationBn": "শুরুর আগে ঝুঁকি চোখে পড়লে কারও ক্ষতি হওয়ার আগেই তা সরানো যায়।"
+          "explanationBn": "শুরুর আগে ঝুঁকি চোখে পড়লে কারও ক্ষতি হওয়ার আগেই তা সরানো যায়।",
+          "lesson": 1
         },
         {
           "promptEn": "You must wash a floor. A multi-plug with a phone charger in it is lying on the floor. What do you do first?",
@@ -146,7 +148,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "Water that reaches a live multi-plug can give a shock through the wet floor.",
-          "explanationBn": "চালু মাল্টিপ্লাগে পানি গেলে ভেজা মেঝে দিয়ে শক লাগতে পারে।"
+          "explanationBn": "চালু মাল্টিপ্লাগে পানি গেলে ভেজা মেঝে দিয়ে শক লাগতে পারে।",
+          "lesson": 2
         },
         {
           "promptEn": "You touch a tap near the water pump and feel a tingle. What do you do?",
@@ -175,7 +178,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "A tingle means current is leaking, and the next touch can be a full shock.",
-          "explanationBn": "ঝিনঝিন লাগা মানে কারেন্ট লিক হচ্ছে, পরের বার ছুঁলে পুরো শক লাগতে পারে।"
+          "explanationBn": "ঝিনঝিন লাগা মানে কারেন্ট লিক হচ্ছে, পরের বার ছুঁলে পুরো শক লাগতে পারে।",
+          "lesson": 2
         },
         {
           "promptEn": "You need to reach a ceiling light. The customer puts a plastic chair on a table for you. What do you do?",
@@ -204,7 +208,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "A chair on a table tips over easily, so climb only on a firm ladder that someone holds.",
-          "explanationBn": "টেবিলের ওপর চেয়ার সহজেই উল্টে যায়, তাই শুধু এমন শক্ত মইয়ে উঠুন যা কেউ ধরে রেখেছেন।"
+          "explanationBn": "টেবিলের ওপর চেয়ার সহজেই উল্টে যায়, তাই শুধু এমন শক্ত মইয়ে উঠুন যা কেউ ধরে রেখেছেন।",
+          "lesson": 3
         },
         {
           "promptEn": "A customer asks you to clean the outside of a third-floor window while standing on the sunshade. There is no rail and no harness. What do you do?",
@@ -233,7 +238,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "Without a guard rail or a proper harness, one slip at that height can kill.",
-          "explanationBn": "রেলিং বা সঠিক হারনেস ছাড়া ওই উচ্চতায় একবার পা পিছলালেই মৃত্যু হতে পারে।"
+          "explanationBn": "রেলিং বা সঠিক হারনেস ছাড়া ওই উচ্চতায় একবার পা পিছলালেই মৃত্যু হতে পারে।",
+          "lesson": 3
         },
         {
           "promptEn": "Toilet cleaner did not remove a stain. The customer tells you to pour bleach on top of it. What do you do?",
@@ -262,7 +268,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "Bleach mixed with toilet cleaner makes a poisonous gas.",
-          "explanationBn": "ব্লিচের সঙ্গে টয়লেট ক্লিনার মিশলে বিষাক্ত গ্যাস তৈরি হয়।"
+          "explanationBn": "ব্লিচের সঙ্গে টয়লেট ক্লিনার মিশলে বিষাক্ত গ্যাস তৈরি হয়।",
+          "lesson": 4
         },
         {
           "promptEn": "How do you lift a heavy box from the floor?",
@@ -291,7 +298,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "Your legs are stronger than your back, so your legs should do the lifting.",
-          "explanationBn": "পিঠের চেয়ে পায়ের জোর বেশি, তাই তোলার কাজটি পা দিয়ে করা উচিত।"
+          "explanationBn": "পিঠের চেয়ে পায়ের জোর বেশি, তাই তোলার কাজটি পা দিয়ে করা উচিত।",
+          "lesson": 4
         },
         {
           "promptEn": "A co-worker burns a hand on a hot iron. What is the right first aid?",
@@ -320,7 +328,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "Cool running water takes the heat out of the skin and reduces the damage.",
-          "explanationBn": "ঠান্ডা প্রবহমান পানি ত্বক থেকে তাপ বের করে নেয় এবং ক্ষতি কমায়।"
+          "explanationBn": "ঠান্ডা প্রবহমান পানি ত্বক থেকে তাপ বের করে নেয় এবং ক্ষতি কমায়।",
+          "lesson": 5
         },
         {
           "promptEn": "You cut your hand and it is bleeding heavily. What do you do first?",
@@ -349,7 +358,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "Firm, steady pressure on the wound is the first step to stop bleeding.",
-          "explanationBn": "ক্ষতের ওপর জোরে ও একটানা চেপে রাখাই রক্ত বন্ধ করার প্রথম ধাপ।"
+          "explanationBn": "ক্ষতের ওপর জোরে ও একটানা চেপে রাখাই রক্ত বন্ধ করার প্রথম ধাপ।",
+          "lesson": 5
         },
         {
           "promptEn": "A woman at your work site tells you she is beaten at home and asks where she can get help. Which helpline do you tell her?",

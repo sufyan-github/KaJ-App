@@ -657,6 +657,7 @@ model User {
   subscriptions                     Subscription[]
   subscription_payments             SubscriptionPayment[]
   training_lesson_opens             TrainingLessonOpen[]
+  training_lesson_checkpoints       TrainingLessonCheckpoint[]
   training_attempts                 TrainingAttempt[]
   training_certificates             TrainingCertificate[]
   recorded_learning_sessions        LearningSession[]           @relation("LearningSessionRecorder")
@@ -2512,6 +2513,13 @@ model AuditLog {
   @@map("audit_logs")
 }
 
+enum TrainingStepKind {
+  LEARN
+  STEP
+  HAZARD
+  REMEMBER
+}
+
 model TrainingCourse {
   id                 String                @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   slug               String                @unique
@@ -2542,8 +2550,8 @@ model TrainingCourse {
 }
 
 model TrainingLesson {
-  id               String               @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  course_id        String               @db.Uuid
+  id               String                     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  course_id        String                     @db.Uuid
   sort_order       Int
   title_en         String
   title_bn         String
@@ -2551,28 +2559,81 @@ model TrainingLesson {
   summary_bn       String
   youtube_video_id String?
   duration_s       Int?
-  is_safety        Boolean              @default(false)
-  course           TrainingCourse       @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  is_safety        Boolean                    @default(false)
+  /// Bumped when this lesson's text, steps or checkpoint questions change; a
+  /// checkpoint pass counts only for the revision it was made on.
+  revision         Int                        @default(1)
+  course           TrainingCourse             @relation(fields: [course_id], references: [id], onDelete: Cascade)
   opens            TrainingLessonOpen[]
+  steps            TrainingLessonStep[]
+  questions        TrainingQuestion[]
+  checkpoints      TrainingLessonCheckpoint[]
 
   @@unique([course_id, sort_order])
   @@map("training_lessons")
 }
 
 model TrainingQuestion {
-  id                String         @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
-  course_id         String         @db.Uuid
+  id                String          @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  course_id         String          @db.Uuid
   prompt_en         String
   prompt_bn         String
   options_json      Json
   correct_option_id String
   explanation_en    String
   explanation_bn    String
-  is_active         Boolean        @default(true)
-  course            TrainingCourse @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  is_active         Boolean         @default(true)
+  /// Authored position (uuid v7 ids are not ordered within one insert).
+  sort_order        Int             @default(0)
+  /// A checkpoint question for this lesson (also in the final-test pool).
+  lesson_id         String?         @db.Uuid
+  course            TrainingCourse  @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  lesson            TrainingLesson? @relation(fields: [lesson_id], references: [id], onDelete: SetNull)
 
   @@index([course_id, is_active])
+  @@index([lesson_id, is_active])
   @@map("training_questions")
+}
+
+/// A card on the lesson page: what you will learn, a step, a hazard, a reminder.
+model TrainingLessonStep {
+  id           String           @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  lesson_id    String           @db.Uuid
+  sort_order   Int
+  kind         TrainingStepKind
+  text_en      String
+  text_bn      String
+  image_key    String?
+  image_width  Int?
+  image_height Int?
+  image_alt_en String?
+  image_alt_bn String?
+  created_at   DateTime         @default(now())
+  lesson       TrainingLesson   @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
+
+  @@unique([lesson_id, sort_order])
+  @@index([image_key])
+  @@map("training_lesson_steps")
+}
+
+/// A learner's checkpoint for one lesson: unlimited tries, never part of the certificate.
+model TrainingLessonCheckpoint {
+  id              String         @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  user_id         String         @db.Uuid
+  lesson_id       String         @db.Uuid
+  course_version  Int
+  lesson_revision Int
+  attempts        Int            @default(0)
+  passed_at       DateTime?
+  last_attempt_at DateTime?
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+  user            User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  lesson          TrainingLesson @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, lesson_id])
+  @@index([lesson_id])
+  @@map("training_lesson_checkpoints")
 }
 
 // Private progress only: opening a lesson never earns anything.

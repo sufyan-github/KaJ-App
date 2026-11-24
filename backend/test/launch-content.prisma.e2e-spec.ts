@@ -58,6 +58,8 @@ const course = (slug: string, isSafetyCritical: boolean) => ({
         bn: `বিকল্প ${id}`,
       })),
       correctOptionId: correct,
+      // The first two are lesson 1's checkpoint.
+      lesson: index < 2 ? 1 : null,
       explanationEn: "Because.",
       explanationBn: "কারণ।",
     }),
@@ -492,6 +494,20 @@ databaseDescribe("launch content loader (PostgreSQL)", () => {
     expect(() =>
       parseLaunchCourseFile("few-questions.json", { courses: [few] }),
     ).toThrow(/11 questions; needs at least 12/u);
+    // Lesson steps: the first two questions are lesson 1's checkpoint.
+    const unlinked = course("unlinked", false);
+    unlinked.questions[1]!.lesson = null;
+    expect(() =>
+      parseLaunchCourseFile("unlinked.json", { courses: [unlinked] }),
+    ).toThrow(/question 2 should have lesson 1/u);
+    const mixed = course("mixed-kinds", false);
+    mixed.lessons[0]!.summaryBn = mixed.lessons[0]!.summaryBn.replace(
+      "মনে রাখুন:",
+      "ধাপ ২:",
+    );
+    expect(() =>
+      parseLaunchCourseFile("mixed-kinds.json", { courses: [mixed] }),
+    ).toThrow(/line 3 is REMEMBER in English but STEP in Bangla/u);
     const options3 = course("three-options", false);
     options3.questions[0]!.options.pop();
     expect(() =>

@@ -15,6 +15,12 @@ import {
   type CertificateRecord,
 } from "./training-certificates.service";
 import { attemptAllowance, FAILED_ATTEMPT_WINDOW_MS } from "./training.rules";
+import { storedSteps } from "./content/training-content.loader";
+import { TrainingCheckpointsService } from "./training-checkpoints.service";
+import { TrainingStepImagesService } from "./training-step-images.service";
+
+/** Step picture URLs: long enough for the app to cache by cacheKey. */
+const STEP_IMAGE_URL_SECONDS = 24 * 60 * 60;
 
 export type CourseRelevance = "MY_SKILL" | "GENERAL" | "OTHER";
 export type CourseScope = "mine" | "all";
@@ -46,6 +52,8 @@ export function courseRelevance(
 export class TrainingCoursesService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly checkpoints: TrainingCheckpointsService,
+    private readonly images: TrainingStepImagesService,
     @Optional() @Inject(CLOCK) private readonly clock?: Clock,
   ) {}
 
@@ -81,7 +89,12 @@ export class TrainingCoursesService {
       where: { id: courseId, is_published: true },
       include: {
         ...courseInclude,
-        lessons: { orderBy: { sort_order: "asc" } },
+        lessons: {
+          orderBy: { sort_order: "asc" },
+          include: {
+            steps: { orderBy: { sort_order: "asc" } },
+          },
+        },
       },
     });
     if (!course) throw new NotFoundException();
@@ -100,9 +113,45 @@ export class TrainingCoursesService {
         })
       ).map((row) => row.lesson_id),
     );
+    const progress = await this.checkpoints.progress(userId, course);
+    const progressById = new Map(
+      progress.lessons.map((lesson) => [lesson.id, lesson]),
+    );
+    const lessons = await Promise.all(
+      course.lessons.map(async (lesson) => {
+        const state = progressById.get(lesson.id)!;
+        const ids = new Map(
+          lesson.steps.map((step) => [step.sort_order, step.id]),
+        );
+        return {
+          state: state.state,
+          checkpoint:
+            state.checkpointCount > 0
+              ? { questionCount: state.checkpointCount, passed: state.passed }
+              : null,
+          steps: await Promise.all(
+            storedSteps(lesson).map(async (step, index) => ({
+              // Derived steps (none stored yet) get a stable synthetic id.
+              id: ids.get(index + 1) ?? `${lesson.id}:${index + 1}`,
+              kind: step.kind,
+              textEn: step.en,
+              textBn: step.bn,
+              image: step.image
+                ? await this.stepImage(lesson, index, step)
+                : null,
+            })),
+          ),
+        };
+      }),
+    );
     return {
       ...summary!,
-      lessons: course.lessons.map((lesson) => ({
+      lockedOrder: progress.lockedOrder,
+      testLocked: progress.testLocked,
+      checkpointsPassed: progress.checkpointsPassed,
+      checkpointLessons: progress.checkpointLessons,
+      lessons: course.lessons.map((lesson, index) => ({
+        ...lessons[index]!,
         id: lesson.id,
         sortOrder: lesson.sort_order,
         titleEn: lesson.title_en,
@@ -114,6 +163,33 @@ export class TrainingCoursesService {
         isSafety: lesson.is_safety,
         opened: opened.has(lesson.id),
       })),
+    };
+  }
+
+  private async stepImage(
+    lesson: {
+      steps: ReadonlyArray<{
+        sort_order: number;
+        image_width: number | null;
+        image_height: number | null;
+      }>;
+    },
+    index: number,
+    step: { image: string | null; altEn: string | null; altBn: string | null },
+  ) {
+    const row = lesson.steps.find((item) => item.sort_order === index + 1);
+    const signed = await this.images.signedImage(
+      step.image!,
+      STEP_IMAGE_URL_SECONDS,
+    );
+    return {
+      url: signed.url,
+      cacheKey: step.image!,
+      width: row?.image_width ?? null,
+      height: row?.image_height ?? null,
+      altEn: step.altEn,
+      altBn: step.altBn,
+      expiresAt: signed.expiresAt.toISOString(),
     };
   }
 
