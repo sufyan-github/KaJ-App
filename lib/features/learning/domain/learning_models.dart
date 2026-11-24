@@ -559,3 +559,61 @@ class LearningFilter {
   @override
   int get hashCode => Object.hash(kind, terms, mode, skillId, locationId);
 }
+
+/// One of my own applications to learn with a mentor
+/// (`GET /me/learning-applications`).
+class MyLearningApplication {
+  const MyLearningApplication({
+    required this.id,
+    required this.status,
+    required this.opportunityId,
+    required this.title,
+    required this.kind,
+    this.appliedAt,
+    this.enrolmentId,
+    this.mentorName,
+  });
+
+  factory MyLearningApplication.fromJson(Map<String, dynamic> json) {
+    final opportunity = json['opportunity'];
+    final mentor = json['mentor'];
+    return MyLearningApplication(
+      id: json['id'] as String? ?? '',
+      status: json['status'] as String? ?? '',
+      opportunityId: opportunity is Map
+          ? opportunity['id'] as String? ?? ''
+          : '',
+      title: opportunity is Map ? opportunity['title'] as String? ?? '' : '',
+      kind: LearningKind.parse(
+        opportunity is Map ? opportunity['opportunityType'] : null,
+      ),
+      appliedAt: DateTime.tryParse(json['appliedAt'] as String? ?? ''),
+      enrolmentId: json['enrolmentId'] as String?,
+      mentorName: mentor is Map ? mentor['displayName'] as String? : null,
+    );
+  }
+
+  final String id;
+  final String status;
+  final String opportunityId;
+  final String title;
+  final LearningKind kind;
+  final DateTime? appliedAt;
+
+  /// Set once the mentor accepted: open the enrolment.
+  final String? enrolmentId;
+
+  /// Masked until accepted.
+  final String? mentorName;
+}
+
+/// How a learning application stands, in Bangla (catalog has English).
+String learningApplicationStatusLabel(String status) => switch (status) {
+  'PENDING' => 'আবেদন অপেক্ষমাণ',
+  'SHORTLISTED' => 'বাছাই তালিকায়',
+  'ACCEPTED' => 'আবেদন গৃহীত',
+  'REJECTED' => 'নেওয়া হয়নি',
+  'WITHDRAWN' => 'প্রত্যাহার করেছেন',
+  'EXPIRED' => 'সময় পেরিয়ে গেছে',
+  _ => 'অজানা',
+};

@@ -1407,4 +1407,13 @@ const generatedEnglishTranslations = <String, String>{
   "যাচাই অনুরোধ জমা দেওয়া যায়নি।":
       "Could not submit the verification request.",
   "লিঙ্গ": "Gender",
+  // R7 M6: learning applications
+  "আমার শেখার আবেদন": "My learning applications",
+  "বাছাই তালিকায়": "Shortlisted",
+  "নেওয়া হয়নি": "Not accepted",
+  "প্রত্যাহার করেছেন": "Withdrawn",
+  // R7 M6: status
+  "আবেদন অপেক্ষমাণ": "Waiting",
+  "আবেদন গৃহীত": "Accepted",
+  "সময় পেরিয়ে গেছে": "Expired",
 };

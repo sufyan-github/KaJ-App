@@ -140,6 +140,29 @@ class LearningRepository {
     );
   });
 
+  /// My own learning applications, newest first, one page at a time.
+  Future<List<MyLearningApplication>> myApplications({String? cursor}) =>
+      _guard(() async {
+        final response = await _dio.get<Map<String, dynamic>>(
+          '/me/learning-applications',
+          queryParameters: {'cursor': ?cursor},
+        );
+        final items = _data(response.data)['items'];
+        return PagedList(
+          items is List
+              ? items
+                    .whereType<Map>()
+                    .map(
+                      (item) => MyLearningApplication.fromJson(
+                        Map<String, dynamic>.from(item),
+                      ),
+                    )
+                    .toList(growable: false)
+              : const <MyLearningApplication>[],
+          nextCursor: PagedList.cursorFrom(response.data),
+        );
+      });
+
   Future<List<LearningEnrolment>> enrolments() => _guard(() async {
     final response = await _dio.get<Map<String, dynamic>>(
       '/learning-enrolments',

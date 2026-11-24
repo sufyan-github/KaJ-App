@@ -16,6 +16,7 @@ import '../../../core/widgets/k_error_state.dart';
 import '../../../core/widgets/k_localized_text.dart';
 import '../../../core/widgets/k_primary_button.dart';
 import '../../../core/widgets/k_text_field.dart';
+import '../../../core/widgets/load_more.dart';
 import '../../chat/presentation/controllers/chat_providers.dart';
 import '../../jobs/domain/job_models.dart';
 import '../../jobs/presentation/widgets/review_dialog.dart';
@@ -580,6 +581,94 @@ class _SessionDialogState extends ConsumerState<_SessionDialog> {
 }
 
 /// The persons enrolments, as learner or mentor, for My activity.
+/// My activity, Learn: my applications to learn with a mentor, with load
+/// more. Hidden when there are none or the server has no such list yet.
+class MyLearningApplicationsSection extends ConsumerStatefulWidget {
+  const MyLearningApplicationsSection({super.key});
+
+  @override
+  ConsumerState<MyLearningApplicationsSection> createState() =>
+      _MyLearningApplicationsSectionState();
+}
+
+class _MyLearningApplicationsSectionState
+    extends ConsumerState<MyLearningApplicationsSection> {
+  final _more = MorePages<MyLearningApplication>();
+
+  @override
+  Widget build(BuildContext context) {
+    final applications = ref.watch(myLearningApplicationsProvider);
+    return applications.when(
+      loading: () => const LinearProgressIndicator(),
+      error: (error, _) => ErrorMapper.from(error).kind == FailureKind.notFound
+          ? const SizedBox.shrink()
+          : Text(failureText(context, error, 'আবেদনের তালিকা লোড করা যায়নি।')),
+      data: (firstPage) {
+        final items = _more.merge(firstPage);
+        if (items.isEmpty) return const SizedBox.shrink();
+        return Column(
+          key: const ValueKey('my-learning-applications'),
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            KLocalizedText(
+              'আমার শেখার আবেদন',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            for (final item in items)
+              Card(
+                key: ValueKey('learning-application-${item.id}'),
+                child: ListTile(
+                  leading: const Icon(
+                    Icons.assignment_outlined,
+                    color: KColors.primary,
+                  ),
+                  title: Text(item.title),
+                  subtitle: Text(
+                    [
+                      KaajLocalizations.text(
+                        context,
+                        learningApplicationStatusLabel(item.status),
+                      ),
+                      KaajLocalizations.text(
+                        context,
+                        learningKindLabel(item.kind),
+                      ),
+                      if (item.mentorName case final name? when name.isNotEmpty)
+                        name,
+                      if (item.appliedAt case final at?)
+                        KFormat.date(context, at),
+                    ].join(' · '),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(
+                    item.enrolmentId == null
+                        ? AppRoutes.learningOpportunity(item.opportunityId)
+                        : AppRoutes.learningEnrolment(item.enrolmentId!),
+                  ),
+                ),
+              ),
+            if (_more.hasMore)
+              LoadMoreButton(
+                key: const ValueKey('learning-applications-load-more'),
+                loading: _more.loading,
+                failed: _more.failed,
+                onPressed: () => _more.loadNext(
+                  (cursor) => ref
+                      .read(learningRepositoryProvider)
+                      .myApplications(cursor: cursor),
+                  () {
+                    if (mounted) setState(() {});
+                  },
+                ),
+              ),
+            const SizedBox(height: KSpacing.md),
+          ],
+        );
+      },
+    );
+  }
+}
+
 class MyEnrolmentsSection extends ConsumerWidget {
   const MyEnrolmentsSection({super.key});
 

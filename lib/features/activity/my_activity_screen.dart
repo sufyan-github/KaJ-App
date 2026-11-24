@@ -108,7 +108,8 @@ class MyLearningSection extends ConsumerWidget {
       ref
         ..invalidate(trainingCoursesProvider(CourseScope.mine))
         ..invalidate(myCertificatesProvider)
-        ..invalidate(learningEnrolmentsProvider);
+        ..invalidate(learningEnrolmentsProvider)
+        ..invalidate(myLearningApplicationsProvider);
       await ref
           .read(trainingCoursesProvider(CourseScope.mine).future)
           .then<void>((_) {}, onError: (_) {});
@@ -140,6 +141,7 @@ class MyLearningSection extends ConsumerWidget {
           ),
           const SizedBox(height: KSpacing.md),
           // Learning with a mentor, as learner or mentor.
+          const MyLearningApplicationsSection(),
           const MyEnrolmentsSection(),
           ...courses.when(
             loading: () => const [
