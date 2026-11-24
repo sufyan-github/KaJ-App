@@ -53,9 +53,11 @@ abstract final class KaajLocalizations {
       ' দিন আগে': ' days ago',
       ' ঘণ্টা আগে': ' hours ago',
       ' মিনিট আগে': ' minutes ago',
+      // Longer phrases first: ' ঘণ্টা ' would otherwise eat the
+      // ' ঘণ্টা বাকি' of a deadline.
+      ' ঘণ্টা বাকি': ' hours remaining',
       ' দিন ': ' days ',
       ' ঘণ্টা ': ' hours ',
-      ' ঘণ্টা বাকি': ' hours remaining',
       ' কাজের ছবি': ' work photo',
       ' বিভাগের সব পোস্ট': ' · all posts',
       '-এর সব কাজ দেখুন': ' · view all jobs',

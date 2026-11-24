@@ -29,10 +29,9 @@ const _groupFormCodes = {
       'শুধু নারীদের দল শুরু করতে প্রোফাইলে লিঙ্গ নারী দেওয়া থাকতে হয়।',
 };
 
-/// "12 members" in either language.
+/// "1 member" / "12 members" / "১২ জন সদস্য".
 String memberCountText(BuildContext context, int count) =>
-    '${KFormat.count(context, count)} '
-    '${KaajLocalizations.text(context, 'জন সদস্য')}';
+    KFormat.members(context, count);
 
 String membershipLabel(GroupMembership membership) {
   if (membership.active) return groupRoleLabel(membership.role);

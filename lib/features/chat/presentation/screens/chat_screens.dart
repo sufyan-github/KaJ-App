@@ -240,7 +240,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
               ),
               if (_isGroup && participants != null)
                 Text(
-                  '${KFormat.count(context, participants)} ${KaajLocalizations.text(context, 'জন সদস্য')}',
+                  KFormat.members(context, participants),
                   key: const ValueKey('chat-participants'),
                   style: const TextStyle(fontSize: 12),
                 ),

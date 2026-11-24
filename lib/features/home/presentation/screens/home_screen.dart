@@ -67,17 +67,25 @@ class HomeScreen extends ConsumerWidget {
         ),
         automaticallyImplyLeading: false,
         actions: [
-          IconButton(
-            tooltip: KaajLocalizations.text(context, 'নোটিফিকেশন'),
-            onPressed: () => context.push(AppRoutes.notifications),
-            icon: Badge(
-              isLabelVisible: unreadNotifications > 0,
-              label: KLocalizedText(
-                unreadNotifications > 99
-                    ? '৯৯+'
-                    : _banglaNumber(unreadNotifications),
+          // One spoken label: "Notifications, 2 unread", not just "2".
+          Semantics(
+            key: const ValueKey('home-bell'),
+            button: true,
+            excludeSemantics: true,
+            label: bellSemanticsLabel(context, unreadNotifications),
+            onTap: () => context.push(AppRoutes.notifications),
+            child: IconButton(
+              tooltip: KaajLocalizations.text(context, 'নোটিফিকেশন'),
+              onPressed: () => context.push(AppRoutes.notifications),
+              icon: Badge(
+                isLabelVisible: unreadNotifications > 0,
+                label: KLocalizedText(
+                  unreadNotifications > 99
+                      ? '৯৯+'
+                      : _banglaNumber(unreadNotifications),
+                ),
+                child: const Icon(Icons.notifications_none_rounded),
               ),
-              child: const Icon(Icons.notifications_none_rounded),
             ),
           ),
           IconButton(
@@ -393,4 +401,13 @@ class _PopularCategories extends ConsumerWidget {
       ],
     );
   }
+}
+
+/// What a screen reader says for the bell.
+String bellSemanticsLabel(BuildContext context, int unread) {
+  final title = KaajLocalizations.text(context, 'নোটিফিকেশন');
+  if (unread <= 0) return title;
+  return KaajLocalizations.isEnglish(context)
+      ? '$title, $unread unread'
+      : '$title, ${_banglaNumber(unread)}টি অপঠিত';
 }
