@@ -1,0 +1,435 @@
+{
+  "courses": [
+    {
+      "slug": "communication-skills",
+      "skillSlug": null,
+      "titleEn": "Communication skills",
+      "titleBn": "যোগাযোগের দক্ষতা",
+      "summaryEn": "How to listen to a customer and repeat back what they want, speak clearly on the phone, write short polite chat messages, and stay calm with an angry customer.",
+      "summaryBn": "গ্রাহকের কথা মন দিয়ে শুনে আবার বলে মিলিয়ে নেওয়া, ফোনে পরিষ্কারভাবে কথা বলা, চ্যাটে ছোট ও ভদ্র মেসেজ লেখা, এবং রাগান্বিত গ্রাহকের সামনে শান্ত থাকা।",
+      "minutes": 20,
+      "estDataMb": 1,
+      "passMarkPct": 70,
+      "questionCount": 10,
+      "isSafetyCritical": false,
+      "sortOrder": 21,
+      "lessons": [
+        {
+          "titleEn": "Listen first, then repeat back",
+          "titleBn": "আগে শুনুন, তারপর মিলিয়ে নিন",
+          "summaryEn": "You will learn: how to listen to the customer fully and repeat back the job, so that you both understand the same thing.\nStep 1: Stop what you are doing, turn to the customer, and look at what they are showing you.\nStep 2: Let the customer finish. Do not interrupt, and do not offer a solution yet.\nStep 3: Ask questions that need more than a yes or no: \"Since when?\", \"What exactly happens?\", \"What have you tried already?\"\nStep 4: Ask the customer to show you the problem, not only to describe it: the tap that drips, or the switch that does not work.\nStep 5: Repeat it back in your own words: \"So the bedroom fan turns slowly and makes a noise, and you want it fixed today. Is that right?\"\nStep 6: Wait until the customer says \"yes\" or corrects you. Write the main points in your notebook or in the app chat.\nRemember: two minutes of careful listening saves two hours of wrong work.",
+          "summaryBn": "আপনি শিখবেন: কীভাবে গ্রাহকের কথা পুরোটা শুনবেন এবং কাজটি আবার বলে মিলিয়ে নেবেন, যাতে দুজন একই জিনিস বোঝেন।\nধাপ ১: হাতের কাজ থামান, গ্রাহকের দিকে ফিরুন এবং তিনি যা দেখাচ্ছেন সেদিকে তাকান।\nধাপ ২: গ্রাহককে কথা শেষ করতে দিন। মাঝখানে কথা কাটবেন না, এখনই সমাধানও বলবেন না।\nধাপ ৩: এমন প্রশ্ন করুন যার উত্তর শুধু হ্যাঁ বা না নয়: \"কবে থেকে হচ্ছে?\", \"ঠিক কী হয়?\", \"আগে কী কী চেষ্টা করেছেন?\"\nধাপ ৪: সমস্যাটি শুধু মুখে না শুনে নিজের চোখে দেখিয়ে দিতে বলুন: যে কল থেকে পানি পড়ে, বা যে সুইচ কাজ করে না।\nধাপ ৫: নিজের ভাষায় আবার বলুন: \"তাহলে শোবার ঘরের ফ্যান আস্তে ঘোরে আর শব্দ করে, এবং আপনি আজই ঠিক করাতে চান। ঠিক বলেছি?\"\nধাপ ৬: গ্রাহক \"হ্যাঁ\" বলা বা ভুল ধরিয়ে দেওয়া পর্যন্ত অপেক্ষা করুন। মূল কথাগুলো খাতায় বা অ্যাপের চ্যাটে লিখে রাখুন।\nমনে রাখুন: দুই মিনিট মন দিয়ে শুনলে দুই ঘণ্টার ভুল কাজ বেঁচে যায়।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Speak clearly on the phone",
+          "titleBn": "ফোনে পরিষ্কারভাবে কথা বলুন",
+          "summaryEn": "You will learn: how to make a short, clear phone call in three parts: name, purpose, time.\nStep 1: Before you call, go to a quiet place and keep the job details in front of you. Do not call very early in the morning or late at night unless it is urgent.\nStep 2: Greet the customer, then say your name and your work: \"Assalamu alaikum. I am Rahim, a plumber from KAAJ.\"\nStep 3: Ask, \"Can you talk for one minute now?\" If not, ask when to call back, and call at exactly that time.\nStep 4: Say the purpose of the call in one sentence: \"I am calling about the repair of your kitchen tap.\"\nStep 5: Say the day and the time in full: \"I will come tomorrow, Tuesday, at 10 in the morning.\"\nStep 6: Speak slowly and a little louder than usual. Say phone numbers and house numbers one digit at a time, and ask the customer to repeat them.\nStep 7: Before you end the call, repeat what you agreed and say thank you.\nRemember: name, purpose, time. If the customer knows these three things, the call has done its job.",
+          "summaryBn": "আপনি শিখবেন: কীভাবে তিন ভাগে ছোট ও পরিষ্কার ফোন করবেন: নাম, কারণ, সময়।\nধাপ ১: ফোন করার আগে নিরিবিলি জায়গায় যান এবং কাজের তথ্য সামনে রাখুন। জরুরি না হলে খুব সকালে বা গভীর রাতে ফোন করবেন না।\nধাপ ২: শুভেচ্ছা জানিয়ে নিজের নাম ও কাজ বলুন: \"আসসালামু আলাইকুম। আমি রহিম, KAAJ থেকে প্লাম্বার বলছি।\"\nধাপ ৩: জিজ্ঞেস করুন, \"এখন এক মিনিট কথা বলা যাবে?\" না হলে কখন ফোন করবেন জেনে নিন এবং ঠিক সেই সময়ে ফোন করুন।\nধাপ ৪: এক বাক্যে ফোনের কারণ বলুন: \"আপনার রান্নাঘরের কল মেরামতের বিষয়ে ফোন করেছি।\"\nধাপ ৫: দিন ও সময় পুরোটা বলুন: \"আমি আগামীকাল মঙ্গলবার সকাল ১০টায় আসব।\"\nধাপ ৬: ধীরে এবং স্বাভাবিকের চেয়ে একটু জোরে বলুন। ফোন নম্বর ও বাসার নম্বর একটি একটি করে সংখ্যা বলুন এবং গ্রাহককে আবার বলতে বলুন।\nধাপ ৭: ফোন রাখার আগে যা ঠিক হলো তা আবার বলুন এবং ধন্যবাদ দিন।\nমনে রাখুন: নাম, কারণ, সময়। গ্রাহক এই তিনটি জানলে ফোনের কাজ হয়ে গেছে।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Write short, polite chat messages",
+          "titleBn": "চ্যাটে ছোট ও ভদ্র মেসেজ লিখুন",
+          "summaryEn": "You will learn: how to write a short, polite chat message that the customer understands the first time.\nStep 1: Start with a short greeting, such as \"Assalamu alaikum\" or \"Good morning\".\nStep 2: Write about one thing in each message, in two or three short sentences: what, when, how much.\nStep 3: Write full words in the language the customer uses. Do not use shortcuts such as \"k\" or \"tmrw\", and do not write English in all capital letters.\nStep 4: Give exact details. Write \"tomorrow, Tuesday, 10 am\", not \"soon\". Write \"৳500\", not \"some money\".\nStep 5: Read the message once before you send it. Check the date, the time and the amount.\nStep 6: Reply to the customer's messages quickly. If you need time, write, \"I have seen your message. I will reply by 5 pm.\"\nStep 7: If the customer does not reply, wait a few hours and send one polite reminder. Do not send message after message, and do not message late at night unless it is urgent.\nRemember: a chat message stays as a written record, so never write when you are angry.",
+          "summaryBn": "আপনি শিখবেন: কীভাবে এমন ছোট ও ভদ্র মেসেজ লিখবেন যা গ্রাহক একবার পড়েই বোঝেন।\nধাপ ১: ছোট শুভেচ্ছা দিয়ে শুরু করুন, যেমন \"আসসালামু আলাইকুম\" বা \"শুভ সকাল\"।\nধাপ ২: এক মেসেজে একটি বিষয় লিখুন, দুই-তিনটি ছোট বাক্যে: কী, কখন, কত টাকা।\nধাপ ৩: গ্রাহক যে ভাষায় লেখেন সেই ভাষায় পুরো শব্দ লিখুন। \"k\" বা \"tmrw\"-এর মতো সংক্ষেপ লিখবেন না, আর ইংরেজি সব বড় হাতের অক্ষরে লিখবেন না।\nধাপ ৪: নির্দিষ্ট তথ্য দিন। \"শিগগির\" না লিখে লিখুন \"আগামীকাল মঙ্গলবার সকাল ১০টা\"। \"কিছু টাকা\" না লিখে লিখুন \"৳৫০০\"।\nধাপ ৫: পাঠানোর আগে মেসেজটি একবার পড়ুন। তারিখ, সময় ও টাকার অঙ্ক মিলিয়ে নিন।\nধাপ ৬: গ্রাহকের মেসেজের উত্তর দ্রুত দিন। সময় লাগলে লিখুন, \"আপনার মেসেজ দেখেছি। বিকেল ৫টার মধ্যে জানাচ্ছি।\"\nধাপ ৭: গ্রাহক উত্তর না দিলে কয়েক ঘণ্টা অপেক্ষা করে একবার ভদ্রভাবে মনে করিয়ে দিন। একের পর এক মেসেজ পাঠাবেন না, আর জরুরি না হলে গভীর রাতে মেসেজ করবেন না।\nমনে রাখুন: চ্যাটের মেসেজ লিখিত প্রমাণ হয়ে থেকে যায়, তাই রাগের মাথায় কখনো লিখবেন না।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Stay calm with an angry customer",
+          "titleBn": "রাগান্বিত গ্রাহকের সামনে শান্ত থাকুন",
+          "summaryEn": "You will learn: how to stay calm with an angry customer and turn a complaint into a solution.\nStep 1: Stand still, keep your voice low and slow, and let the customer finish. Do not argue and do not raise your voice.\nStep 2: Show that you have heard: \"I understand. The tap is leaking again and you are upset.\"\nStep 3: First say sorry for the trouble: \"I am sorry for this trouble.\" You can find out later whose fault it is.\nStep 4: Find the facts together: look at the work with the customer, and read what was agreed in the app chat.\nStep 5: Offer a clear solution with a time. If the mistake is yours, say, \"I will fix it now at no extra cost.\" If it is not, explain calmly, show the reason, and offer a fair price for the new work.\nStep 6: When the work is done, ask, \"Is it all right now?\" and write a short note in the app chat about what you did.\nStep 7: If the customer insults or threatens you, or you feel unsafe, do not answer back. Leave politely and report it in the app. In an emergency, call 999.\nRemember: the customer is angry about the problem, not about you. Solve the problem and the anger goes away.",
+          "summaryBn": "আপনি শিখবেন: কীভাবে রাগান্বিত গ্রাহকের সামনে শান্ত থাকবেন এবং অভিযোগকে সমাধানে নিয়ে যাবেন।\nধাপ ১: স্থির হয়ে দাঁড়ান, গলা নিচু ও ধীর রাখুন এবং গ্রাহককে কথা শেষ করতে দিন। তর্ক করবেন না, গলাও চড়াবেন না।\nধাপ ২: বোঝান যে আপনি শুনেছেন: \"বুঝতে পারছি। কল থেকে আবার পানি পড়ছে, তাই আপনি বিরক্ত।\"\nধাপ ৩: আগে অসুবিধার জন্য দুঃখ প্রকাশ করুন: \"এই অসুবিধার জন্য আমি দুঃখিত।\" দোষ কার, তা পরে দেখা যাবে।\nধাপ ৪: একসঙ্গে আসল ঘটনা দেখুন: গ্রাহককে নিয়ে কাজটি দেখুন এবং অ্যাপের চ্যাটে কী ঠিক হয়েছিল তা পড়ুন।\nধাপ ৫: সময়সহ পরিষ্কার সমাধান দিন। ভুল আপনার হলে বলুন, \"বাড়তি টাকা ছাড়াই এখনই ঠিক করে দিচ্ছি।\" ভুল আপনার না হলে শান্তভাবে বুঝিয়ে বলুন, কারণটি দেখান এবং নতুন কাজের ন্যায্য দাম বলুন।\nধাপ ৬: কাজ শেষ হলে জিজ্ঞেস করুন, \"এখন ঠিক আছে তো?\" এবং কী করলেন তা অ্যাপের চ্যাটে ছোট করে লিখে রাখুন।\nধাপ ৭: গ্রাহক গালি বা হুমকি দিলে, অথবা নিজেকে অনিরাপদ মনে হলে পাল্টা জবাব দেবেন না। ভদ্রভাবে সরে যান এবং অ্যাপে রিপোর্ট করুন। জরুরি অবস্থায় ৯৯৯-এ ফোন করুন।\nমনে রাখুন: গ্রাহকের রাগ সমস্যার ওপর, আপনার ওপর নয়। সমস্যা মিটলে রাগও চলে যায়।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": false
+        }
+      ],
+      "questions": [
+        {
+          "promptEn": "A customer begins to explain a problem with her water pump. After a few words you think you already know the fault. What do you do?",
+          "promptBn": "এক গ্রাহক তাঁর পানির পাম্পের সমস্যা বলতে শুরু করলেন। দু-এক কথা শুনেই আপনার মনে হলো সমস্যাটি আপনি জানেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Stop her and say what the fault is",
+              "bn": "তাঁকে থামিয়ে সমস্যাটি কী তা বলে দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Start opening the pump while she is talking",
+              "bn": "তিনি কথা বলার সময়ই পাম্প খুলতে শুরু করা"
+            },
+            {
+              "id": "c",
+              "en": "Let her finish, then ask questions",
+              "bn": "তাঁকে কথা শেষ করতে দেওয়া, তারপর প্রশ্ন করা"
+            },
+            {
+              "id": "d",
+              "en": "Tell her that so much detail is not needed",
+              "bn": "বলা যে এত কথা জানার দরকার নেই"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "The customer may say something at the end that changes the whole job.",
+          "explanationBn": "শেষের দিকে গ্রাহক এমন কিছু বলতে পারেন যাতে পুরো কাজটাই বদলে যায়।"
+        },
+        {
+          "promptEn": "The customer has explained the problem. Which reply is a good \"repeat back\"?",
+          "promptBn": "গ্রাহক সমস্যাটি বুঝিয়ে বললেন। আবার বলে মিলিয়ে নেওয়ার ভালো উদাহরণ কোনটি?",
+          "options": [
+            {
+              "id": "a",
+              "en": "\"OK, understood.\"",
+              "bn": "\"আচ্ছা, বুঝেছি।\""
+            },
+            {
+              "id": "b",
+              "en": "\"I will see what I can do.\"",
+              "bn": "\"দেখি কী করা যায়।\""
+            },
+            {
+              "id": "c",
+              "en": "\"All old fans do this.\"",
+              "bn": "\"পুরোনো ফ্যান এ রকমই করে।\""
+            },
+            {
+              "id": "d",
+              "en": "\"So the bedroom fan turns slowly and makes a noise, and you want it fixed today. Is that right?\"",
+              "bn": "\"তাহলে শোবার ঘরের ফ্যান আস্তে ঘোরে আর শব্দ করে, এবং আপনি আজই ঠিক করাতে চান। ঠিক বলেছি?\""
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Repeating the details and asking \"Is that right?\" lets the customer correct a mistake before work starts.",
+          "explanationBn": "খুঁটিনাটি আবার বলে \"ঠিক বলেছি?\" জিজ্ঞেস করলে কাজ শুরুর আগেই গ্রাহক ভুল ধরিয়ে দিতে পারেন।"
+        },
+        {
+          "promptEn": "You phone a new customer for the first time. What do you say first?",
+          "promptBn": "নতুন গ্রাহককে প্রথমবার ফোন করেছেন। প্রথমে কী বলবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "A greeting, then your name and your work",
+              "bn": "শুভেচ্ছা, তারপর নিজের নাম ও কাজ"
+            },
+            {
+              "id": "b",
+              "en": "\"Hello, who is speaking?\"",
+              "bn": "\"হ্যালো, কে বলছেন?\""
+            },
+            {
+              "id": "c",
+              "en": "\"Where exactly is your house?\"",
+              "bn": "\"আপনার বাসাটা ঠিক কোথায়?\""
+            },
+            {
+              "id": "d",
+              "en": "\"How much will you pay?\"",
+              "bn": "\"কত টাকা দেবেন?\""
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "The customer listens properly only after knowing who is calling.",
+          "explanationBn": "কে ফোন করেছেন তা জানার পরই গ্রাহক আপনার কথা মন দিয়ে শোনেন।"
+        },
+        {
+          "promptEn": "You need to tell the customer when you will come. Which is the clearest?",
+          "promptBn": "গ্রাহককে জানাতে হবে আপনি কখন আসবেন। কোনটি সবচেয়ে পরিষ্কার?",
+          "options": [
+            {
+              "id": "a",
+              "en": "\"I will come soon.\"",
+              "bn": "\"শিগগিরই আসব।\""
+            },
+            {
+              "id": "b",
+              "en": "\"I will come tomorrow, Tuesday, at 10 in the morning.\"",
+              "bn": "\"আগামীকাল মঙ্গলবার সকাল ১০টায় আসব।\""
+            },
+            {
+              "id": "c",
+              "en": "\"I will come some time tomorrow.\"",
+              "bn": "\"কাল কোনো এক সময় আসব।\""
+            },
+            {
+              "id": "d",
+              "en": "\"I will come when I am free.\"",
+              "bn": "\"ফাঁকা হলে আসব।\""
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "A day and an exact time let the customer plan, and leave no room for confusion.",
+          "explanationBn": "দিন ও নির্দিষ্ট সময় বললে গ্রাহক পরিকল্পনা করতে পারেন এবং ভুল বোঝার সুযোগ থাকে না।"
+        },
+        {
+          "promptEn": "Which chat message is the best?",
+          "promptBn": "কোন চ্যাট মেসেজটি সবচেয়ে ভালো?",
+          "options": [
+            {
+              "id": "a",
+              "en": "\"k cmng tmrw\"",
+              "bn": "\"k cmng tmrw\""
+            },
+            {
+              "id": "b",
+              "en": "\"WHERE IS YOUR HOUSE??? REPLY FAST!!!\"",
+              "bn": "\"বাসা কোথায়??? তাড়াতাড়ি উত্তর দিন!!!\""
+            },
+            {
+              "id": "c",
+              "en": "\"Assalamu alaikum. I will come tomorrow, Tuesday, at 10 am to repair the kitchen tap. The charge is ৳500 as agreed.\"",
+              "bn": "\"আসসালামু আলাইকুম। আগামীকাল মঙ্গলবার সকাল ১০টায় রান্নাঘরের কল মেরামত করতে আসব। কথা অনুযায়ী মজুরি ৳৫০০।\""
+            },
+            {
+              "id": "d",
+              "en": "\"Coming. Keep the money ready.\"",
+              "bn": "\"আসছি। টাকা রেডি রাখবেন।\""
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "It has a greeting, full words, and the exact day, time and amount.",
+          "explanationBn": "এতে শুভেচ্ছা, পুরো শব্দ এবং নির্দিষ্ট দিন, সময় ও টাকার অঙ্ক আছে।"
+        },
+        {
+          "promptEn": "You sent the customer a message one hour ago and there is no reply. The job is tomorrow afternoon. What do you do?",
+          "promptBn": "এক ঘণ্টা আগে গ্রাহককে মেসেজ পাঠিয়েছেন, উত্তর আসেনি। কাজ আগামীকাল বিকেলে। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Send five more messages one after another",
+              "bn": "একের পর এক আরও পাঁচটি মেসেজ পাঠানো"
+            },
+            {
+              "id": "b",
+              "en": "Phone again and again until they answer",
+              "bn": "না ধরা পর্যন্ত বারবার ফোন করা"
+            },
+            {
+              "id": "c",
+              "en": "Cancel the job",
+              "bn": "কাজটি বাতিল করা"
+            },
+            {
+              "id": "d",
+              "en": "Wait a few hours, then send one polite reminder",
+              "bn": "কয়েক ঘণ্টা অপেক্ষা করে একবার ভদ্রভাবে মনে করিয়ে দেওয়া"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Customers are busy; one polite reminder is respectful, many messages are annoying.",
+          "explanationBn": "গ্রাহক ব্যস্ত থাকতে পারেন; একবার ভদ্রভাবে মনে করানো সম্মানজনক, বারবার মেসেজ বিরক্তিকর।"
+        },
+        {
+          "promptEn": "A customer shouts that the tap you repaired yesterday is leaking again. What do you do first?",
+          "promptBn": "গ্রাহক চিৎকার করে বললেন, গতকাল আপনি যে কল ঠিক করেছেন তা থেকে আবার পানি পড়ছে। আপনি প্রথমে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Listen until they finish, keep your voice low, and say sorry for the trouble",
+              "bn": "কথা শেষ না হওয়া পর্যন্ত শোনা, গলা নিচু রাখা এবং অসুবিধার জন্য দুঃখ প্রকাশ করা"
+            },
+            {
+              "id": "b",
+              "en": "Say loudly that your work was perfect",
+              "bn": "জোরে বলা যে আপনার কাজ নিখুঁত ছিল"
+            },
+            {
+              "id": "c",
+              "en": "Tell them it must be their own fault",
+              "bn": "বলা যে দোষ নিশ্চয়ই তাঁদেরই"
+            },
+            {
+              "id": "d",
+              "en": "Walk away without a word",
+              "bn": "একটি কথাও না বলে চলে যাওয়া"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "An angry person calms down only after they feel heard.",
+          "explanationBn": "রাগান্বিত মানুষ তখনই শান্ত হন, যখন বোঝেন তাঁর কথা শোনা হয়েছে।"
+        },
+        {
+          "promptEn": "You look together and find that the water is coming from an old pipe that you did not work on. What is right?",
+          "promptBn": "একসঙ্গে দেখে বুঝলেন, পানি পড়ছে একটি পুরোনো পাইপ থেকে, যেখানে আপনি কাজ করেননি। কোনটি সঠিক?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Say \"this is not my problem\" and leave",
+              "bn": "\"এটা আমার দায় নয়\" বলে চলে যাওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Repair it without saying anything and demand money at the end",
+              "bn": "কিছু না বলে মেরামত করা এবং শেষে টাকা দাবি করা"
+            },
+            {
+              "id": "c",
+              "en": "Show the customer the pipe, explain calmly, and offer a fair price for the new work",
+              "bn": "গ্রাহককে পাইপটি দেখানো, শান্তভাবে বুঝিয়ে বলা এবং নতুন কাজের ন্যায্য দাম বলা"
+            },
+            {
+              "id": "d",
+              "en": "Argue until the customer admits they were wrong",
+              "bn": "গ্রাহক ভুল স্বীকার না করা পর্যন্ত তর্ক করা"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Showing the facts calmly and offering a fair option solves the problem without a fight.",
+          "explanationBn": "শান্তভাবে আসল ঘটনা দেখিয়ে ন্যায্য প্রস্তাব দিলে ঝগড়া ছাড়াই সমস্যা মেটে।"
+        },
+        {
+          "promptEn": "On the phone you must give your mobile number to the customer. What is the best way?",
+          "promptBn": "ফোনে গ্রাহককে আপনার মোবাইল নম্বর দিতে হবে। সবচেয়ে ভালো উপায় কোনটি?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Say it fast in one breath",
+              "bn": "এক নিঃশ্বাসে তাড়াতাড়ি বলা"
+            },
+            {
+              "id": "b",
+              "en": "Say it slowly, one digit at a time, and ask the customer to repeat it",
+              "bn": "ধীরে একটি একটি করে সংখ্যা বলা এবং গ্রাহককে আবার বলতে বলা"
+            },
+            {
+              "id": "c",
+              "en": "Say only the last four digits",
+              "bn": "শুধু শেষ চারটি সংখ্যা বলা"
+            },
+            {
+              "id": "d",
+              "en": "Tell them to find it themselves",
+              "bn": "নিজে খুঁজে নিতে বলা"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Numbers are easily misheard on the phone; repeating them catches the mistake.",
+          "explanationBn": "ফোনে সংখ্যা সহজেই ভুল শোনা যায়; আবার বললে ভুল ধরা পড়ে।"
+        },
+        {
+          "promptEn": "The customer describes the problem but you do not fully understand it. What do you do?",
+          "promptBn": "গ্রাহক সমস্যাটি বললেন, কিন্তু আপনি পুরোটা বুঝতে পারেননি। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Pretend that you understood",
+              "bn": "বোঝার ভান করা"
+            },
+            {
+              "id": "b",
+              "en": "Start work and find out on the way",
+              "bn": "কাজ শুরু করে দেওয়া, করতে করতে বোঝা যাবে"
+            },
+            {
+              "id": "c",
+              "en": "Say that the problem is too hard",
+              "bn": "বলা যে সমস্যাটি খুব কঠিন"
+            },
+            {
+              "id": "d",
+              "en": "Ask the customer to show you the problem, and ask more questions",
+              "bn": "গ্রাহককে সমস্যাটি দেখিয়ে দিতে বলা এবং আরও প্রশ্ন করা"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Seeing the problem yourself is surer than guessing from words.",
+          "explanationBn": "কথা শুনে আন্দাজ করার চেয়ে নিজের চোখে দেখা বেশি নিশ্চিত।"
+        },
+        {
+          "promptEn": "It is 11:30 at night. You remember that you have not confirmed tomorrow's 3 pm job. It is not urgent. What do you do?",
+          "promptBn": "রাত সাড়ে ১১টা। মনে পড়ল, আগামীকাল বিকেল ৩টার কাজটি নিশ্চিত করা হয়নি। বিষয়টি জরুরি নয়। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Phone the customer now",
+              "bn": "এখনই গ্রাহককে ফোন করা"
+            },
+            {
+              "id": "b",
+              "en": "Send several messages now so that they notice",
+              "bn": "এখনই কয়েকটি মেসেজ পাঠানো, যাতে চোখে পড়ে"
+            },
+            {
+              "id": "c",
+              "en": "Send one clear message in the morning",
+              "bn": "সকালে একটি পরিষ্কার মেসেজ পাঠানো"
+            },
+            {
+              "id": "d",
+              "en": "Go tomorrow without confirming",
+              "bn": "নিশ্চিত না করেই কাল চলে যাওয়া"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Late-night calls and messages disturb the family; the morning is early enough for a 3 pm job.",
+          "explanationBn": "গভীর রাতের ফোন ও মেসেজ পরিবারকে বিরক্ত করে; বিকেল ৩টার কাজের জন্য সকালে জানানোই যথেষ্ট।"
+        },
+        {
+          "promptEn": "An angry customer starts to insult and threaten you. What is right?",
+          "promptBn": "রাগান্বিত গ্রাহক আপনাকে গালি ও হুমকি দিতে শুরু করলেন। কোনটি সঠিক?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Leave politely without answering back, and report it in the app",
+              "bn": "পাল্টা জবাব না দিয়ে ভদ্রভাবে সরে যাওয়া এবং অ্যাপে রিপোর্ট করা"
+            },
+            {
+              "id": "b",
+              "en": "Insult them in return",
+              "bn": "পাল্টা গালি দেওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Threaten to undo the work",
+              "bn": "কাজ নষ্ট করে দেওয়ার হুমকি দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Call your friends to come and argue",
+              "bn": "তর্ক করার জন্য বন্ধুদের ডেকে আনা"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Your safety comes first, and answering back only makes the danger bigger.",
+          "explanationBn": "আপনার নিরাপত্তাই আগে, আর পাল্টা জবাব দিলে বিপদ শুধু বাড়ে।"
+        },
+        {
+          "promptEn": "You phone a customer and she says, \"I am busy now.\" What do you do?",
+          "promptBn": "গ্রাহককে ফোন করলে তিনি বললেন, \"এখন ব্যস্ত আছি।\" আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Keep talking quickly",
+              "bn": "তাড়াতাড়ি কথা বলে যাওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Say that you will not call again",
+              "bn": "বলা যে আর ফোন করবেন না"
+            },
+            {
+              "id": "c",
+              "en": "Call again after two minutes",
+              "bn": "দুই মিনিট পর আবার ফোন করা"
+            },
+            {
+              "id": "d",
+              "en": "Ask when to call back, and call at exactly that time",
+              "bn": "কখন ফোন করবেন জেনে নেওয়া এবং ঠিক সেই সময়ে ফোন করা"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Calling at the time the customer chose shows respect for their time.",
+          "explanationBn": "গ্রাহকের বলা সময়ে ফোন করলে তাঁর সময়ের প্রতি সম্মান দেখানো হয়।"
+        }
+      ]
+    }
+  ]
+}

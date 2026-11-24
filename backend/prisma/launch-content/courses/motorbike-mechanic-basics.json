@@ -1,0 +1,473 @@
+{
+  "courses": [
+    {
+      "slug": "motorbike-mechanic-basics",
+      "skillSlug": null,
+      "titleEn": "Motorbike mechanic basics",
+      "titleBn": "মোটরসাইকেল মেকানিকের মূল বিষয়",
+      "summaryEn": "Basic safe motorbike servicing: workshop safety, regular checks, engine oil and chain care, brakes, fuel and battery safety, and telling the customer honestly what was done. This course teaches basic safe practice. It is not a licence.",
+      "summaryBn": "মোটরসাইকেল সার্ভিসিংয়ের নিরাপদ মূল নিয়ম: ওয়ার্কশপে নিরাপত্তা, নিয়মিত পরীক্ষা, ইঞ্জিন অয়েল ও চেইনের যত্ন, ব্রেক, জ্বালানি ও ব্যাটারির নিরাপত্তা, এবং কী কাজ হয়েছে তা গ্রাহককে সৎভাবে জানানো। এই কোর্স নিরাপদে কাজের মূল নিয়ম শেখায়। এটি কোনো লাইসেন্স নয়।",
+      "minutes": 30,
+      "estDataMb": 1,
+      "passMarkPct": 70,
+      "questionCount": 10,
+      "isSafetyCritical": true,
+      "sortOrder": 13,
+      "lessons": [
+        {
+          "titleEn": "Workshop safety",
+          "titleBn": "ওয়ার্কশপে নিরাপত্তা",
+          "summaryEn": "You will learn: how to set up the bike and your work place so that nobody is burned, crushed or hurt.\nStep 1: Switch the engine off and take the key out before you touch anything.\nStep 2: Wait until the engine and silencer are cool. The silencer stays hot for a long time: hold your hand near it, not on it, to check.\nStep 3: Put the bike on its centre stand on flat, hard ground and rock it gently to check that it is steady.\nStep 4: Keep cigarettes, matches and open flame out of the workshop, and keep petrol in a closed container away from the work.\nStep 5: Tie back loose sleeves, scarves and long hair, and take off rings before you work near the chain or wheels.\nStep 6: Put each tool back in its place after use, and wipe up spilled oil from the floor at once.\nStep 7: Keep a fire extinguisher or a bucket of dry sand near the door, and know where it is.\nHazard: Petrol vapour catches fire from one spark or cigarette, and a bike that falls off its stand can crush a hand or foot. No smoking near fuel, and never work on a bike that is not steady on its stand.\nRemember: Engine off, engine cool, bike steady: only then pick up your tools.",
+          "summaryBn": "আপনি শিখবেন: কীভাবে বাইক ও কাজের জায়গা এমনভাবে প্রস্তুত করবেন যাতে কেউ পুড়ে না যান, চাপা না পড়েন বা আঘাত না পান।\nধাপ ১: কোনো কিছুতে হাত দেওয়ার আগে ইঞ্জিন বন্ধ করুন এবং চাবি খুলে নিন।\nধাপ ২: ইঞ্জিন ও সাইলেন্সার ঠান্ডা হওয়া পর্যন্ত অপেক্ষা করুন। সাইলেন্সার অনেকক্ষণ গরম থাকে: বোঝার জন্য হাত কাছে নিন, গায়ে লাগাবেন না।\nধাপ ৩: সমান ও শক্ত মেঝেতে বাইক সেন্টার স্ট্যান্ডে তুলুন এবং হালকা নাড়া দিয়ে দেখুন বাইক স্থির আছে কি না।\nধাপ ৪: সিগারেট, দেশলাই ও খোলা আগুন ওয়ার্কশপের বাইরে রাখুন, আর পেট্রোল মুখবন্ধ পাত্রে কাজের জায়গা থেকে দূরে রাখুন।\nধাপ ৫: চেইন বা চাকার কাছে কাজের আগে ঢিলা হাতা, ওড়না বা গামছা ও লম্বা চুল বেঁধে নিন এবং আংটি খুলে রাখুন।\nধাপ ৬: ব্যবহারের পর প্রতিটি সরঞ্জাম নিজের জায়গায় রাখুন, এবং মেঝেতে তেল পড়লে সঙ্গে সঙ্গে মুছে ফেলুন।\nধাপ ৭: দরজার কাছে একটি ফায়ার এক্সটিংগুইশার বা এক বালতি শুকনো বালু রাখুন, এবং সেটি কোথায় আছে জেনে রাখুন।\nঝুঁকি: একটি স্ফুলিঙ্গ বা সিগারেট থেকেই পেট্রোলের ভাপে আগুন ধরে, আর স্ট্যান্ড থেকে বাইক পড়লে হাত বা পা থেঁতলে যেতে পারে। জ্বালানির কাছে ধূমপান নয়, এবং স্ট্যান্ডে স্থির নয় এমন বাইকে কখনো কাজ করবেন না।\nমনে রাখুন: ইঞ্জিন বন্ধ, ইঞ্জিন ঠান্ডা, বাইক স্থির: তারপরই সরঞ্জাম হাতে নিন।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Daily and weekly checks",
+          "titleBn": "প্রতিদিনের ও সাপ্তাহিক পরীক্ষা",
+          "summaryEn": "You will learn: the quick checks that find most problems before they become dangerous.\nStep 1: Tyres: look for cuts, nails and tread that is worn flat, and check the air pressure with a gauge against the figure on the bike's sticker or in its manual.\nStep 2: Lights: check the headlight on high and low, the tail light, the brake light with each brake separately, the indicators on both sides, and the horn.\nStep 3: Brakes: squeeze the front lever and press the rear pedal. Both must feel firm, and the wheel must not turn when you hold the brake and push the bike.\nStep 4: Chain: with the engine off, move the middle of the lower run of the chain up and down with a finger. On most bikes the movement should be about 2 to 3 cm (check the manual), and the chain must not be dry or rusty.\nStep 5: Engine oil: stand the bike upright on level ground with the engine off for a few minutes, then read the dipstick or the glass window. The oil must be between the two marks.\nStep 6: Look under the engine and on the front fork legs for fresh drops of oil, and check that the mirrors and the stand are not loose.\nStep 7: Explain the habit to the rider: a quick look at tyres, lights and brakes every day; air pressure, chain and oil every week.\nRemember: A two-minute check every day costs far less than a breakdown on the road.",
+          "summaryBn": "আপনি শিখবেন: কোন ছোট ছোট পরীক্ষায় বেশির ভাগ সমস্যা বিপজ্জনক হওয়ার আগেই ধরা পড়ে।\nধাপ ১: টায়ার: কাটা দাগ, পেরেক ও ক্ষয়ে সমান হয়ে যাওয়া খাঁজ আছে কি না দেখুন, এবং গেজ দিয়ে হাওয়ার চাপ মেপে বাইকের স্টিকার বা ম্যানুয়ালে লেখা মাপের সঙ্গে মিলিয়ে নিন।\nধাপ ২: বাতি: হেডলাইটের হাই ও লো, পেছনের বাতি, দুই ব্রেক আলাদা করে চেপে ব্রেক লাইট, দুই পাশের ইন্ডিকেটর এবং হর্ন পরীক্ষা করুন।\nধাপ ৩: ব্রেক: সামনের লিভার চাপুন এবং পেছনের প্যাডেলে চাপ দিন। দুটোই শক্ত লাগতে হবে, এবং ব্রেক ধরে বাইক ঠেললে চাকা ঘোরা চলবে না।\nধাপ ৪: চেইন: ইঞ্জিন বন্ধ রেখে চেইনের নিচের অংশের মাঝখানে আঙুল দিয়ে ওপর-নিচ করুন। বেশির ভাগ বাইকে নড়াচড়া প্রায় ২ থেকে ৩ সেমি হওয়া উচিত (ম্যানুয়াল দেখে নিন), আর চেইন শুকনো বা মরিচা ধরা থাকা চলবে না।\nধাপ ৫: ইঞ্জিন অয়েল: বাইক সমান জায়গায় সোজা দাঁড় করিয়ে ইঞ্জিন কয়েক মিনিট বন্ধ রাখুন, তারপর ডিপস্টিক বা কাচের জানালায় দেখুন। তেল দুই দাগের মাঝখানে থাকতে হবে।\nধাপ ৬: ইঞ্জিনের নিচে ও সামনের ফর্কের গায়ে তাজা তেলের ফোঁটা আছে কি না দেখুন, এবং আয়না ও স্ট্যান্ড ঢিলা কি না পরীক্ষা করুন।\nধাপ ৭: চালককে অভ্যাসটি বুঝিয়ে দিন: টায়ার, বাতি ও ব্রেক প্রতিদিন এক নজর; হাওয়ার চাপ, চেইন ও তেল প্রতি সপ্তাহে।\nমনে রাখুন: প্রতিদিন দুই মিনিটের পরীক্ষার খরচ রাস্তায় বাইক নষ্ট হওয়ার চেয়ে অনেক কম।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Changing engine oil and caring for the chain",
+          "titleBn": "ইঞ্জিন অয়েল বদলানো ও চেইনের যত্ন",
+          "summaryEn": "You will learn: how to change the engine oil, and how to clean, oil and adjust the chain.\nStep 1: Run the engine for two or three minutes so that the oil is warm, not hot. Then switch off, take the key out and put the bike on its centre stand.\nStep 2: Put a tray under the engine, open the oil filler cap, then loosen the drain bolt with the right size of spanner and let all the oil run out.\nStep 3: Wipe the drain bolt clean, check its washer, and tighten the bolt firmly but without forcing: the engine case is soft aluminium and its thread strips easily.\nStep 4: Pour in the grade and amount of oil written in the bike's manual or on the engine. Run the engine for one minute and switch off, then check the oil level and look for a leak at the drain bolt.\nStep 5: Cleaning the chain: with the engine off and the gear in neutral, turn the rear wheel by hand, clean the chain with a brush and a little kerosene, wipe it dry, then put chain oil on the inner side. Never clean it with petrol.\nStep 6: Adjusting the chain: loosen the rear axle nut, turn the adjusters on both sides by the same amount until the slack is right, and check that the marks on both sides match.\nStep 7: Tighten the axle nut fully, spin the wheel by hand to see that it turns freely, then check the rear brake again, because moving the wheel changes the brake adjustment.\nHazard: Hot oil burns the skin, and a moving chain cuts off fingers. Never clean or oil the chain with the engine running. Turn the wheel only by hand and keep your fingers away from the sprocket.\nRemember: Keep old oil in a closed container. Never pour it into a drain or onto the ground.",
+          "summaryBn": "আপনি শিখবেন: কীভাবে ইঞ্জিন অয়েল বদলাতে হয়, এবং চেইন পরিষ্কার করতে, তেল দিতে ও অ্যাডজাস্ট করতে হয়।\nধাপ ১: ইঞ্জিন দুই-তিন মিনিট চালিয়ে তেল হালকা গরম করুন, বেশি গরম নয়। তারপর ইঞ্জিন বন্ধ করে চাবি খুলে নিন এবং বাইক সেন্টার স্ট্যান্ডে তুলুন।\nধাপ ২: ইঞ্জিনের নিচে একটি ট্রে রাখুন, তেল ঢালার মুখের ঢাকনা খুলুন, তারপর সঠিক মাপের রেঞ্চ দিয়ে ড্রেন বোল্ট খুলে সব তেল বের হতে দিন।\nধাপ ৩: ড্রেন বোল্ট মুছে পরিষ্কার করুন, ওয়াশার ঠিক আছে কি না দেখুন, এবং বোল্ট শক্ত করে আঁটুন তবে জোর খাটাবেন না: ইঞ্জিনের গা নরম অ্যালুমিনিয়ামের, প্যাঁচ সহজেই কেটে যায়।\nধাপ ৪: বাইকের ম্যানুয়ালে বা ইঞ্জিনের গায়ে যে গ্রেড ও পরিমাণ লেখা আছে সেই তেল ঢালুন। ইঞ্জিন এক মিনিট চালিয়ে বন্ধ করুন, তারপর তেলের মাপ এবং ড্রেন বোল্টে লিক আছে কি না দেখুন।\nধাপ ৫: চেইন পরিষ্কার: ইঞ্জিন বন্ধ ও গিয়ার নিউট্রালে রেখে পেছনের চাকা হাতে ঘোরান, ব্রাশ ও সামান্য কেরোসিন দিয়ে চেইন পরিষ্কার করুন, মুছে শুকান, তারপর চেইনের ভেতরের দিকে চেইন অয়েল দিন। পেট্রোল দিয়ে কখনো পরিষ্কার করবেন না।\nধাপ ৬: চেইন অ্যাডজাস্ট: পেছনের এক্সেল নাট ঢিলা করুন, দুই পাশের অ্যাডজাস্টার সমান পরিমাণ ঘোরান যতক্ষণ না ঢিলা ঠিক হয়, এবং দুই পাশের দাগ মিলেছে কি না দেখে নিন।\nধাপ ৭: এক্সেল নাট পুরো আঁটুন, হাতে চাকা ঘুরিয়ে দেখুন সহজে ঘোরে কি না, তারপর পেছনের ব্রেক আবার পরীক্ষা করুন, কারণ চাকা সরালে ব্রেকের অ্যাডজাস্ট বদলে যায়।\nঝুঁকি: গরম তেলে চামড়া পুড়ে যায়, আর চলন্ত চেইনে আঙুল কেটে যায়। ইঞ্জিন চালু রেখে কখনো চেইন পরিষ্কার করবেন না বা তেল দেবেন না। চাকা শুধু হাতে ঘোরান এবং আঙুল স্প্রোকেট থেকে দূরে রাখুন।\nমনে রাখুন: পুরোনো তেল মুখবন্ধ পাত্রে জমা রাখুন। নর্দমায় বা মাটিতে কখনো ফেলবেন না।",
+          "youtubeVideoId": null,
+          "durationS": 300,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Brakes",
+          "titleBn": "ব্রেক",
+          "summaryEn": "You will learn: how to check brake pads and shoes, how to adjust a brake cable, and why a bike is never handed back with a weak brake.\nStep 1: Disc brake: look at the pads inside the caliper with a torch. If the friction material is worn down to its groove, or is thinner than about 2 mm, the pads must be replaced.\nStep 2: Drum brake: hold the brake fully on and look at the wear pointer on the brake arm beside the wheel. If the pointer has reached the end mark, the shoes must be replaced.\nStep 3: On a disc brake, look at the brake fluid window near the handlebar: the fluid must be above the lower mark. If it is low, or the lever feels soft, an experienced mechanic must find the cause.\nStep 4: Cable or rod brake: turn the adjuster nut until the tip of the lever moves freely about 1 to 2 cm before the brake starts to grip (check the manual).\nStep 5: With the wheel off the ground, spin it by hand. It must turn freely when the brake is released and stop firmly when the brake is applied.\nStep 6: Keep oil and grease off the disc, pads and shoes. Wipe the disc with a clean cloth, and replace pads or shoes that are soaked with oil.\nStep 7: If a brake is not fully right and cannot be fixed today, tell the customer clearly that the bike is not safe to ride, and write it down.\nHazard: A brake that feels \"almost fine\" in the workshop is the one that fails in a sudden stop on the road. Never hand a bike with a weak brake to the customer as \"fine\".\nRemember: A brake is either right or not right. There is no \"almost\".",
+          "summaryBn": "আপনি শিখবেন: কীভাবে ব্রেক প্যাড ও ব্রেক শু পরীক্ষা করতে হয়, ব্রেকের তার অ্যাডজাস্ট করতে হয়, এবং কেন দুর্বল ব্রেক নিয়ে বাইক কখনো ফেরত দেওয়া হয় না।\nধাপ ১: ডিস্ক ব্রেক: টর্চ দিয়ে ক্যালিপারের ভেতরে প্যাড দেখুন। প্যাডের ঘষার অংশ ক্ষয়ে খাঁজ পর্যন্ত নেমে গেলে, বা প্রায় ২ মিমির চেয়ে পাতলা হলে, প্যাড বদলাতে হবে।\nধাপ ২: ড্রাম ব্রেক: ব্রেক পুরো চেপে ধরে চাকার পাশে ব্রেকের হাতের কাঁটাটি দেখুন। কাঁটা শেষ দাগে পৌঁছে গেলে ব্রেক শু বদলাতে হবে।\nধাপ ৩: ডিস্ক ব্রেকে হ্যান্ডেলের কাছে ব্রেক ফ্লুইডের জানালা দেখুন: ফ্লুইড নিচের দাগের ওপরে থাকতে হবে। ফ্লুইড কম থাকলে, বা লিভার নরম লাগলে, একজন অভিজ্ঞ মেকানিককে কারণ খুঁজে বের করতে হবে।\nধাপ ৪: তার বা রডের ব্রেক: অ্যাডজাস্টার নাট ঘুরিয়ে এমন করুন যাতে ব্রেক ধরার আগে লিভারের মাথা প্রায় ১ থেকে ২ সেমি ফাঁকা নড়ে (ম্যানুয়াল দেখে নিন)।\nধাপ ৫: চাকা মাটি থেকে তোলা অবস্থায় হাতে ঘোরান। ব্রেক ছাড়া অবস্থায় চাকা সহজে ঘুরবে এবং ব্রেক চাপলে শক্তভাবে থেমে যাবে।\nধাপ ৬: ডিস্ক, প্যাড ও শু-তে তেল বা গ্রিজ লাগতে দেবেন না। ডিস্ক পরিষ্কার কাপড় দিয়ে মুছুন, আর প্যাড বা শু তেলে ভিজে গেলে বদলে ফেলুন।\nধাপ ৭: কোনো ব্রেক পুরোপুরি ঠিক না হলে এবং আজ ঠিক করা না গেলে গ্রাহককে পরিষ্কার বলুন যে বাইকটি চালানো নিরাপদ নয়, এবং কথাটি লিখে রাখুন।\nঝুঁকি: ওয়ার্কশপে যে ব্রেক \"প্রায় ঠিক\" মনে হয়, রাস্তায় হঠাৎ থামতে গেলে সেটিই কাজ করে না। দুর্বল ব্রেকের বাইক কখনো \"ঠিক আছে\" বলে গ্রাহকের হাতে দেবেন না।\nমনে রাখুন: ব্রেক হয় ঠিক, নয়তো ঠিক নয়। \"প্রায় ঠিক\" বলে কিছু নেই।",
+          "youtubeVideoId": null,
+          "durationS": 300,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Fuel, battery, test ride and honest reporting",
+          "titleBn": "জ্বালানি, ব্যাটারি, টেস্ট রাইড ও সৎভাবে জানানো",
+          "summaryEn": "You will learn: how to handle fuel and the battery safely, how to do a test ride, and how to report honestly to the customer.\nStep 1: Work on the fuel tap, fuel pipe or carburettor only when the engine is cool, in open air, with no flame or cigarette nearby. Catch the fuel in a container that closes, and wipe up any spill at once.\nStep 2: If fuel catches fire, use the fire extinguisher or dry sand, never water. If it does not go out at once, get everyone out and call 999.\nStep 3: To remove the battery, switch off the key, take off the negative (minus) terminal first and the positive (plus) terminal second. To fit it, connect positive first and negative last.\nStep 4: Do not let a spanner touch both terminals together, or the positive terminal and the body of the bike together. Keep the battery upright, and wash any acid off your skin with plenty of water.\nStep 5: Test ride: ride only with the customer's permission, wearing a helmet, on a quiet road, at low speed, and test both brakes in the first few metres.\nStep 6: After the ride, look again for oil or fuel leaks and check that every nut and bolt you touched is tight.\nStep 7: Tell the customer three things: what you did, which parts you changed (show the old parts), and what still needs attention and how soon.\nHazard: Petrol vapour and battery gas both catch fire from one spark, and a spanner across the two terminals burns your hand and can burst the battery. No flame near fuel or a battery, and always take the negative terminal off first.\nRemember: An honest \"your rear tyre still needs changing\" brings the customer back. A hidden problem brings an accident.",
+          "summaryBn": "আপনি শিখবেন: কীভাবে জ্বালানি ও ব্যাটারি নিরাপদে নাড়াচাড়া করবেন, টেস্ট রাইড দেবেন, এবং গ্রাহককে সৎভাবে সব জানাবেন।\nধাপ ১: ফুয়েল ট্যাপ, তেলের পাইপ বা কার্বুরেটরে কাজ করুন শুধু ইঞ্জিন ঠান্ডা থাকলে, খোলা বাতাসে, এবং কাছে কোনো আগুন বা সিগারেট না থাকলে। তেল মুখবন্ধ করা যায় এমন পাত্রে ধরুন, এবং পড়ে গেলে সঙ্গে সঙ্গে মুছে ফেলুন।\nধাপ ২: তেলে আগুন ধরলে ফায়ার এক্সটিংগুইশার বা শুকনো বালু ব্যবহার করুন, পানি কখনো নয়। সঙ্গে সঙ্গে না নিভলে সবাইকে বের করে আনুন এবং ৯৯৯-এ ফোন করুন।\nধাপ ৩: ব্যাটারি খোলার সময় চাবি বন্ধ করুন, আগে নেগেটিভ (মাইনাস) টার্মিনাল খুলুন, পরে পজিটিভ (প্লাস) টার্মিনাল। লাগানোর সময় আগে পজিটিভ, শেষে নেগেটিভ লাগান।\nধাপ ৪: রেঞ্চ যেন একসঙ্গে দুই টার্মিনালে, অথবা একসঙ্গে পজিটিভ টার্মিনাল ও বাইকের বডিতে না লাগে। ব্যাটারি সোজা রাখুন, আর চামড়ায় অ্যাসিড লাগলে প্রচুর পানি দিয়ে ধুয়ে ফেলুন।\nধাপ ৫: টেস্ট রাইড: শুধু গ্রাহকের অনুমতি নিয়ে, হেলমেট পরে, ফাঁকা রাস্তায়, কম গতিতে চালান, এবং প্রথম কয়েক মিটারেই দুই ব্রেক পরীক্ষা করুন।\nধাপ ৬: রাইডের পর আবার দেখুন তেল বা জ্বালানি লিক করছে কি না, এবং যেসব নাট-বোল্টে হাত দিয়েছেন সেগুলো আঁটা আছে কি না।\nধাপ ৭: গ্রাহককে তিনটি কথা বলুন: কী কী কাজ করেছেন, কোন কোন অংশ বদলেছেন (পুরোনো অংশ দেখান), এবং আর কী ঠিক করা দরকার ও কত দিনের মধ্যে।\nঝুঁকি: পেট্রোলের ভাপ ও ব্যাটারির গ্যাস দুটোতেই একটি স্ফুলিঙ্গ থেকে আগুন ধরে, আর রেঞ্চ দুই টার্মিনালে একসঙ্গে লাগলে হাত পোড়ে এবং ব্যাটারি ফেটে যেতে পারে। জ্বালানি বা ব্যাটারির কাছে আগুন নয়, এবং সবসময় নেগেটিভ টার্মিনাল আগে খুলুন।\nমনে রাখুন: \"আপনার পেছনের টায়ার বদলানো দরকার\" সৎভাবে বললে গ্রাহক আবার আসেন। সমস্যা লুকালে দুর্ঘটনা ঘটে।",
+          "youtubeVideoId": null,
+          "durationS": 300,
+          "isSafety": true
+        }
+      ],
+      "questions": [
+        {
+          "promptEn": "A bike has just come in after a long ride, and you need to work beside the silencer. What do you do first?",
+          "promptBn": "একটি বাইক লম্বা পথ চালিয়ে এইমাত্র এসেছে, আর আপনাকে সাইলেন্সারের পাশে কাজ করতে হবে। সবার আগে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Start at once and work carefully, because the customer is waiting",
+              "bn": "এখনই সাবধানে কাজ শুরু করা, কারণ গ্রাহক অপেক্ষা করছেন"
+            },
+            {
+              "id": "b",
+              "en": "Switch off, take the key out and wait until it is cool",
+              "bn": "ইঞ্জিন বন্ধ করে চাবি খুলে নেওয়া এবং ঠান্ডা হওয়া পর্যন্ত অপেক্ষা করা"
+            },
+            {
+              "id": "c",
+              "en": "Pour cold water on the engine",
+              "bn": "ইঞ্জিনে ঠান্ডা পানি ঢালা"
+            },
+            {
+              "id": "d",
+              "en": "Keep the engine running so that it stays warm",
+              "bn": "ইঞ্জিন গরম রাখতে চালু রেখে দেওয়া"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "A hot silencer burns skin in a second, and it stays hot long after the engine stops.",
+          "explanationBn": "গরম সাইলেন্সারে এক সেকেন্ডেই চামড়া পুড়ে যায়, আর ইঞ্জিন বন্ধ করার অনেক পরেও সেটি গরম থাকে।"
+        },
+        {
+          "promptEn": "You have the fuel pipe open. A friend walks in and lights a cigarette beside you. What do you do?",
+          "promptBn": "আপনি তেলের পাইপ খুলে কাজ করছেন। এক বন্ধু এসে আপনার পাশে সিগারেট ধরালেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Keep working, because one cigarette is too small to be a danger",
+              "bn": "কাজ চালিয়ে যাওয়া, কারণ একটি সিগারেট এত ছোট যে বিপদ হবে না"
+            },
+            {
+              "id": "b",
+              "en": "Ask him to stand one step back",
+              "bn": "তাঁকে এক পা পিছিয়ে দাঁড়াতে বলা"
+            },
+            {
+              "id": "c",
+              "en": "Cover the fuel pipe with your hand",
+              "bn": "হাত দিয়ে তেলের পাইপ চেপে ধরা"
+            },
+            {
+              "id": "d",
+              "en": "Stop work until he has left the workshop",
+              "bn": "তিনি ওয়ার্কশপের বাইরে না যাওয়া পর্যন্ত কাজ থামিয়ে রাখা"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Petrol vapour spreads through the air and one cigarette can light it.",
+          "explanationBn": "পেট্রোলের ভাপ বাতাসে ছড়িয়ে পড়ে, আর একটি সিগারেটেই তাতে আগুন ধরতে পারে।"
+        },
+        {
+          "promptEn": "How do you read the engine oil level correctly?",
+          "promptBn": "ইঞ্জিন অয়েলের মাপ সঠিকভাবে কীভাবে দেখবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Bike upright on level ground, engine off for a few minutes",
+              "bn": "বাইক সমান জায়গায় সোজা দাঁড় করিয়ে, ইঞ্জিন কয়েক মিনিট বন্ধ রেখে"
+            },
+            {
+              "id": "b",
+              "en": "Bike leaning on its side stand while the engine is still running",
+              "bn": "বাইক সাইড স্ট্যান্ডে কাত করে, ইঞ্জিন চালু থাকা অবস্থায়"
+            },
+            {
+              "id": "c",
+              "en": "Straight after a fast ride, on a slope",
+              "bn": "জোরে চালিয়ে আসার পরপরই, ঢালু জায়গায়"
+            },
+            {
+              "id": "d",
+              "en": "By looking at the colour of the smoke",
+              "bn": "ধোঁয়ার রং দেখে"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "A leaning bike or a running engine gives a false level.",
+          "explanationBn": "বাইক কাত থাকলে বা ইঞ্জিন চালু থাকলে তেলের মাপ ভুল দেখায়।"
+        },
+        {
+          "promptEn": "During the check, the brake light does not come on when the rear pedal is pressed. What do you do?",
+          "promptBn": "পরীক্ষার সময় দেখলেন পেছনের প্যাডেল চাপলে ব্রেক লাইট জ্বলছে না। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Ignore it, because the brake itself still stops the bike well",
+              "bn": "গুরুত্ব না দেওয়া, কারণ ব্রেক তো বাইক ভালোই থামাচ্ছে"
+            },
+            {
+              "id": "b",
+              "en": "Tell the customer to use hand signals",
+              "bn": "গ্রাহককে হাতের ইশারা ব্যবহার করতে বলা"
+            },
+            {
+              "id": "c",
+              "en": "Tell the customer and fix it before the bike leaves",
+              "bn": "গ্রাহককে জানানো এবং বাইক যাওয়ার আগে ঠিক করে দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Remove the bulb so that nobody notices",
+              "bn": "বাল্ব খুলে ফেলা যাতে কেউ খেয়াল না করে"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Without a brake light the driver behind cannot see that the bike is stopping.",
+          "explanationBn": "ব্রেক লাইট না জ্বললে পেছনের চালক বুঝতে পারেন না যে বাইক থামছে।"
+        },
+        {
+          "promptEn": "You are cleaning a chain. How should the chain be moved?",
+          "promptBn": "আপনি চেইন পরিষ্কার করছেন। চেইন কীভাবে ঘোরাবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Start the engine and put it in first gear on the stand",
+              "bn": "স্ট্যান্ডে রেখে ইঞ্জিন চালু করে প্রথম গিয়ার দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Engine off, gear in neutral, turn the rear wheel by hand with fingers away from the sprocket",
+              "bn": "ইঞ্জিন বন্ধ ও গিয়ার নিউট্রালে রেখে পেছনের চাকা হাতে ঘোরানো, আঙুল স্প্রোকেট থেকে দূরে রেখে"
+            },
+            {
+              "id": "c",
+              "en": "Ask a helper to open the throttle slowly",
+              "bn": "সহকারীকে আস্তে আস্তে এক্সিলারেটর ঘোরাতে বলা"
+            },
+            {
+              "id": "d",
+              "en": "Hold a cloth on the chain while the engine turns it",
+              "bn": "ইঞ্জিন চেইন ঘোরানোর সময় চেইনে কাপড় চেপে ধরা"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "A chain driven by the engine pulls a cloth and fingers into the sprocket before you can react.",
+          "explanationBn": "ইঞ্জিনে ঘোরা চেইন চোখের পলকে কাপড় ও আঙুল স্প্রোকেটের ভেতরে টেনে নেয়।"
+        },
+        {
+          "promptEn": "After adjusting the chain, the mark on the left side does not match the mark on the right. What do you do?",
+          "promptBn": "চেইন অ্যাডজাস্ট করার পর দেখলেন বাঁ পাশের দাগ ডান পাশের দাগের সঙ্গে মিলছে না। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Tighten the axle nut and finish",
+              "bn": "এক্সেল নাট এঁটে কাজ শেষ করা"
+            },
+            {
+              "id": "b",
+              "en": "Put more oil on the chain",
+              "bn": "চেইনে আরও তেল দেওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Tell the customer that it will settle by itself after a few days of riding",
+              "bn": "গ্রাহককে বলা যে কয়েক দিন চালালে এটা নিজে থেকেই ঠিক হয়ে যাবে"
+            },
+            {
+              "id": "d",
+              "en": "Adjust again until both sides match, then tighten the nut",
+              "bn": "দুই পাশ না মেলা পর্যন্ত আবার অ্যাডজাস্ট করা, তারপর নাট আঁটা"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Marks that do not match mean the rear wheel sits crooked, which wears the chain and tyre and makes the bike unsteady.",
+          "explanationBn": "দাগ না মিললে পেছনের চাকা বাঁকা বসে, এতে চেইন ও টায়ার ক্ষয় হয় এবং বাইক টলমল করে।"
+        },
+        {
+          "promptEn": "The front brake lever feels soft and comes almost to the grip. The customer is in a hurry and says, \"It is almost fine, give it to me.\" What do you do?",
+          "promptBn": "সামনের ব্রেকের লিভার নরম লাগছে এবং প্রায় গ্রিপ পর্যন্ত চলে আসছে। গ্রাহকের তাড়া আছে, বলছেন, \"প্রায় ঠিকই আছে, দিয়ে দিন।\" আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Tell him clearly that the bike is not safe to ride until the brake is fixed, and get an experienced mechanic to check it",
+              "bn": "পরিষ্কার বলা যে ব্রেক ঠিক না হওয়া পর্যন্ত বাইক চালানো নিরাপদ নয়, এবং অভিজ্ঞ মেকানিককে দিয়ে দেখানো"
+            },
+            {
+              "id": "b",
+              "en": "Hand it over, because the rear brake still works",
+              "bn": "দিয়ে দেওয়া, কারণ পেছনের ব্রেক তো কাজ করছে"
+            },
+            {
+              "id": "c",
+              "en": "Tell him to ride slowly and say nothing more",
+              "bn": "আস্তে চালাতে বলা এবং আর কিছু না বলা"
+            },
+            {
+              "id": "d",
+              "en": "Tighten the lever screw so that it feels harder",
+              "bn": "লিভারের স্ক্রু এঁটে দেওয়া যাতে শক্ত লাগে"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "A soft lever means the brake may not stop the bike in a sudden stop.",
+          "explanationBn": "লিভার নরম লাগার মানে হঠাৎ থামতে গেলে ব্রেক বাইক থামাতে নাও পারে।"
+        },
+        {
+          "promptEn": "You open a drum brake and find the shoes soaked with oil. What is right?",
+          "promptBn": "ড্রাম ব্রেক খুলে দেখলেন ব্রেক শু তেলে ভিজে গেছে। কোনটি সঠিক?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Wipe them well with a clean cloth and fit them back again",
+              "bn": "পরিষ্কার কাপড় দিয়ে ভালো করে মুছে আবার লাগিয়ে দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Burn the oil off with a flame",
+              "bn": "আগুনে ধরে তেল পুড়িয়ে ফেলা"
+            },
+            {
+              "id": "c",
+              "en": "Replace the shoes and find where the oil came from",
+              "bn": "ব্রেক শু বদলানো এবং তেল কোথা থেকে এল তা খুঁজে বের করা"
+            },
+            {
+              "id": "d",
+              "en": "Tighten the brake more to make up for it",
+              "bn": "ঘাটতি পোষাতে ব্রেক আরও টাইট করে দেওয়া"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Oil soaks deep into the friction material, so the shoes slip even after they are wiped.",
+          "explanationBn": "তেল ঘষার অংশের গভীরে ঢুকে যায়, তাই মোছার পরও ব্রেক শু পিছলে যায়।"
+        },
+        {
+          "promptEn": "You are removing a battery. Which terminal do you take off first?",
+          "promptBn": "আপনি ব্যাটারি খুলছেন। কোন টার্মিনাল আগে খুলবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Positive first",
+              "bn": "আগে পজিটিভ"
+            },
+            {
+              "id": "b",
+              "en": "Negative first",
+              "bn": "আগে নেগেটিভ"
+            },
+            {
+              "id": "c",
+              "en": "Both together, to save time",
+              "bn": "সময় বাঁচাতে দুটো একসঙ্গে"
+            },
+            {
+              "id": "d",
+              "en": "It makes no difference",
+              "bn": "যেকোনোটি, কোনো পার্থক্য নেই"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "With the negative off first, a spanner that touches the bike's body cannot make a spark.",
+          "explanationBn": "নেগেটিভ আগে খুললে রেঞ্চ বাইকের বডিতে লাগলেও স্ফুলিঙ্গ হয় না।"
+        },
+        {
+          "promptEn": "The customer asked only for an oil change. While working, you see that the rear tyre is badly worn. What do you do?",
+          "promptBn": "গ্রাহক শুধু ইঞ্জিন অয়েল বদলাতে বলেছেন। কাজের সময় দেখলেন পেছনের টায়ার খুব ক্ষয়ে গেছে। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Say nothing, because he did not ask about it",
+              "bn": "কিছু না বলা, কারণ তিনি এটা নিয়ে কিছু বলেননি"
+            },
+            {
+              "id": "b",
+              "en": "Change the tyre without asking him and add the cost to the bill",
+              "bn": "তাঁকে না জিজ্ঞেস করে টায়ার বদলে খরচ বিলে যোগ করা"
+            },
+            {
+              "id": "c",
+              "en": "Tell him the tyre is fine so that he is not worried",
+              "bn": "তিনি যেন চিন্তা না করেন তাই বলা যে টায়ার ঠিক আছে"
+            },
+            {
+              "id": "d",
+              "en": "Show him the tyre and say how soon it must be changed",
+              "bn": "তাঁকে টায়ারটি দেখানো এবং কত দিনের মধ্যে বদলাতে হবে তা বলা"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "The customer decides and pays, but he can only decide if you tell him the truth.",
+          "explanationBn": "সিদ্ধান্ত ও খরচ গ্রাহকের, কিন্তু আপনি সত্য জানালে তবেই তিনি সিদ্ধান্ত নিতে পারেন।"
+        },
+        {
+          "promptEn": "Spilled petrol catches fire on the workshop floor. What do you use?",
+          "promptBn": "ওয়ার্কশপের মেঝেতে পড়া পেট্রোলে আগুন ধরে গেল। আপনি কী ব্যবহার করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "The fire extinguisher or dry sand, never water",
+              "bn": "ফায়ার এক্সটিংগুইশার বা শুকনো বালু, পানি কখনো নয়"
+            },
+            {
+              "id": "b",
+              "en": "A bucket of water thrown on the fire from close by",
+              "bn": "কাছ থেকে আগুনে ছুড়ে দেওয়া এক বালতি পানি"
+            },
+            {
+              "id": "c",
+              "en": "A wet cloth to beat the flames until they go out",
+              "bn": "আগুন না নেভা পর্যন্ত বাড়ি দিতে ভেজা কাপড়"
+            },
+            {
+              "id": "d",
+              "en": "A fan to blow the flames away",
+              "bn": "আগুন উড়িয়ে দিতে ফ্যান"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Burning petrol floats on water and spreads, while sand or an extinguisher cuts off the air.",
+          "explanationBn": "জ্বলন্ত পেট্রোল পানির ওপর ভেসে ছড়িয়ে পড়ে, কিন্তু বালু বা এক্সটিংগুইশার বাতাস বন্ধ করে দেয়।"
+        },
+        {
+          "promptEn": "You check a chain and the lower run moves up and down about 6 cm. What do you do?",
+          "promptBn": "চেইন পরীক্ষা করে দেখলেন নিচের অংশ প্রায় ৬ সেমি ওপর-নিচ নড়ছে। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Leave it, because a loose chain is safer",
+              "bn": "যেমন আছে রেখে দেওয়া, কারণ ঢিলা চেইন বেশি নিরাপদ"
+            },
+            {
+              "id": "b",
+              "en": "Tighten it until the chain does not move up or down at all",
+              "bn": "চেইন ওপর-নিচে একটুও না নড়া পর্যন্ত টাইট করা"
+            },
+            {
+              "id": "c",
+              "en": "Adjust it to about 2 to 3 cm, as the manual says",
+              "bn": "ম্যানুয়াল অনুযায়ী প্রায় ২ থেকে ৩ সেমিতে অ্যাডজাস্ট করা"
+            },
+            {
+              "id": "d",
+              "en": "Put on more chain oil",
+              "bn": "আরও চেইন অয়েল দেওয়া"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "A chain that is too loose can jump off the sprocket, and one that is too tight wears out and can snap.",
+          "explanationBn": "বেশি ঢিলা চেইন স্প্রোকেট থেকে খুলে যেতে পারে, আর বেশি টাইট চেইন ক্ষয় হয় ও ছিঁড়ে যেতে পারে।"
+        },
+        {
+          "promptEn": "How tight should the oil drain bolt be?",
+          "promptBn": "তেলের ড্রেন বোল্ট কতটা আঁটবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "As tight as you can, with a pipe on the spanner",
+              "bn": "রেঞ্চে পাইপ লাগিয়ে যত জোরে পারা যায়"
+            },
+            {
+              "id": "b",
+              "en": "Firm but not forced, with a good washer",
+              "bn": "ভালো ওয়াশার দিয়ে শক্ত করে, তবে জোর না খাটিয়ে"
+            },
+            {
+              "id": "c",
+              "en": "Only by fingers",
+              "bn": "শুধু আঙুল দিয়ে"
+            },
+            {
+              "id": "d",
+              "en": "A little loose, so that the next change is easy",
+              "bn": "একটু ঢিলা, যাতে পরের বার খোলা সহজ হয়"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "The engine case is soft aluminium, so too much force strips the thread and too little lets the oil leak.",
+          "explanationBn": "ইঞ্জিনের গা নরম অ্যালুমিনিয়ামের, তাই বেশি জোরে প্যাঁচ কেটে যায় আর কম আঁটলে তেল লিক করে।"
+        },
+        {
+          "promptEn": "You want to test ride a customer's bike after a brake job. What is the right way?",
+          "promptBn": "ব্রেকের কাজ শেষে আপনি গ্রাহকের বাইকে টেস্ট রাইড দিতে চান। সঠিক নিয়ম কোনটি?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Take it on the main road at full speed to test it properly",
+              "bn": "ভালো করে পরীক্ষা করতে বড় রাস্তায় পুরো গতিতে চালানো"
+            },
+            {
+              "id": "b",
+              "en": "Ride without a helmet, because it is a short ride",
+              "bn": "হেলমেট ছাড়া চালানো, কারণ পথ অল্প"
+            },
+            {
+              "id": "c",
+              "en": "Take it out while the customer is away, to save time",
+              "bn": "সময় বাঁচাতে গ্রাহক না থাকা অবস্থায় বের করা"
+            },
+            {
+              "id": "d",
+              "en": "With the customer's permission, helmet on, quiet road, low speed, testing both brakes in the first few metres",
+              "bn": "গ্রাহকের অনুমতি নিয়ে, হেলমেট পরে, ফাঁকা রাস্তায়, কম গতিতে, প্রথম কয়েক মিটারেই দুই ব্রেক পরীক্ষা করে"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "If the repair is wrong, you find it at low speed on a quiet road, not in traffic.",
+          "explanationBn": "মেরামতে ভুল থাকলে তা ফাঁকা রাস্তায় কম গতিতেই ধরা পড়ে, ভিড়ের মধ্যে নয়।"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,406 @@
+{
+  "courses": [
+    {
+      "slug": "negotiation-and-fair-pricing",
+      "skillSlug": null,
+      "titleEn": "Negotiation and fair pricing",
+      "titleBn": "দরদাম ও ন্যায্য দাম",
+      "summaryEn": "How to estimate a job from time, materials and travel, state your price with confidence, agree any extra work in writing in the app chat, and say no politely to an unfair price.",
+      "summaryBn": "সময়, মালামাল ও যাতায়াত ধরে কাজের হিসাব করা, আত্মবিশ্বাসের সঙ্গে দাম বলা, বাড়তি কাজ অ্যাপের চ্যাটে লিখে ঠিক করা, এবং অন্যায্য দামে ভদ্রভাবে না বলা।",
+      "minutes": 20,
+      "estDataMb": 1,
+      "passMarkPct": 70,
+      "questionCount": 10,
+      "isSafetyCritical": false,
+      "sortOrder": 22,
+      "lessons": [
+        {
+          "titleEn": "Estimate the job: time, materials, travel",
+          "titleBn": "কাজের হিসাব: সময়, মালামাল, যাতায়াত",
+          "summaryEn": "You will learn: how to work out a fair price from time, materials and travel before you tell the customer.\nStep 1: See the job first, or ask the customer for photos. Do not give a final price for work you have not seen.\nStep 2: Time: estimate how many hours the work needs, add a little extra for surprises, and multiply by your rate for one hour or one day.\nStep 3: Materials: write a list of everything you need with its market price. Keep the shop receipt to show the customer.\nStep 4: Travel: add the real cost of going and coming back by rickshaw, auto or bus.\nStep 5: Add the three amounts. Example: labour ৳600, materials ৳350, travel ৳50. Total ৳1,000.\nStep 6: Compare your total with the usual rate for this kind of job in your area. If yours is much higher or much lower, check your numbers again.\nStep 7: Write the estimate in your notebook before you speak to the customer.\nRemember: a price you have calculated is easy to explain. A price you have guessed is hard to defend.",
+          "summaryBn": "আপনি শিখবেন: গ্রাহককে দাম বলার আগে সময়, মালামাল ও যাতায়াত ধরে কীভাবে ন্যায্য দাম হিসাব করবেন।\nধাপ ১: আগে কাজটি নিজে দেখুন, অথবা গ্রাহকের কাছে ছবি চান। না দেখা কাজের চূড়ান্ত দাম বলবেন না।\nধাপ ২: সময়: কাজে কত ঘণ্টা লাগবে আন্দাজ করুন, হঠাৎ সমস্যার জন্য একটু বাড়তি সময় ধরুন, এবং আপনার এক ঘণ্টা বা এক দিনের মজুরি দিয়ে গুণ করুন।\nধাপ ৩: মালামাল: যা যা লাগবে বাজারদরসহ তার তালিকা লিখুন। গ্রাহককে দেখানোর জন্য দোকানের রসিদ রেখে দিন।\nধাপ ৪: যাতায়াত: রিকশা, অটো বা বাসে যাওয়া-আসার আসল খরচ যোগ করুন।\nধাপ ৫: তিনটি অঙ্ক যোগ করুন। উদাহরণ: মজুরি ৳৬০০, মালামাল ৳৩৫০, যাতায়াত ৳৫০। মোট ৳১,০০০।\nধাপ ৬: আপনার এলাকায় এ ধরনের কাজের চলতি দরের সঙ্গে মোট অঙ্ক মিলিয়ে দেখুন। অনেক বেশি বা অনেক কম হলে হিসাব আবার দেখুন।\nধাপ ৭: গ্রাহকের সঙ্গে কথা বলার আগে হিসাবটি খাতায় লিখে নিন।\nমনে রাখুন: হিসাব করা দাম সহজে বোঝানো যায়। আন্দাজে বলা দামে টিকে থাকা কঠিন।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": false
+        },
+        {
+          "titleEn": "State your price with confidence",
+          "titleBn": "আত্মবিশ্বাসের সঙ্গে দাম বলুন",
+          "summaryEn": "You will learn: how to say your price clearly and explain what it covers.\nStep 1: Say the price as one clear number: \"The full job will cost ৳1,000.\" Do not say \"give what you like\".\nStep 2: Explain it in parts: \"৳600 is labour, ৳350 is for the tap and fittings, ৳50 is travel.\"\nStep 3: Say what is included and what is not: \"This covers changing the tap and testing it. It does not cover the pipe inside the wall.\"\nStep 4: Say how long it will take and when the payment is due: \"It will take two hours. You pay after you have checked the work.\"\nStep 5: Then stop talking and wait for the customer's answer. Do not lower your price before they have replied.\nStep 6: Write the price and what it covers in the app chat, and ask the customer to reply in writing that they agree.\nRemember: a calm voice and a clear breakdown show that the price is fair. You do not need to apologise for it.",
+          "summaryBn": "আপনি শিখবেন: কীভাবে পরিষ্কারভাবে দাম বলবেন এবং দামের মধ্যে কী কী আছে তা বুঝিয়ে দেবেন।\nধাপ ১: দাম একটি পরিষ্কার অঙ্কে বলুন: \"পুরো কাজে ৳১,০০০ লাগবে।\" \"যা খুশি দেবেন\" বলবেন না।\nধাপ ২: ভাগ করে বুঝিয়ে দিন: \"৳৬০০ মজুরি, ৳৩৫০ কল ও ফিটিংসের দাম, ৳৫০ যাতায়াত।\"\nধাপ ৩: কী এর মধ্যে আছে আর কী নেই তা বলুন: \"এর মধ্যে কল বদলানো ও পরীক্ষা করে দেখা আছে। দেয়ালের ভেতরের পাইপের কাজ এর মধ্যে নেই।\"\nধাপ ৪: কত সময় লাগবে এবং টাকা কখন দিতে হবে তা বলুন: \"দুই ঘণ্টা লাগবে। আপনি কাজ দেখে নেওয়ার পর টাকা দেবেন।\"\nধাপ ৫: এরপর চুপ করে গ্রাহকের উত্তরের অপেক্ষা করুন। তিনি উত্তর দেওয়ার আগেই নিজে থেকে দাম কমাবেন না।\nধাপ ৬: দাম ও তার মধ্যে কী কী আছে তা অ্যাপের চ্যাটে লিখুন, এবং গ্রাহক রাজি থাকলে তা লিখে জানাতে বলুন।\nমনে রাখুন: শান্ত গলা আর পরিষ্কার হিসাবই দেখায় দাম ন্যায্য। দামের জন্য মাফ চাওয়ার দরকার নেই।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Agree changes before extra work",
+          "titleBn": "বাড়তি কাজের আগে লিখে ঠিক করুন",
+          "summaryEn": "You will learn: what to do when extra work appears: stop, show, agree a new price in writing, then continue.\nStep 1: When you find extra work, or the customer asks for something more, stop before you do it.\nStep 2: Show the customer the problem. Point at it or take a photo.\nStep 3: Explain what the extra work is, how much more money and time it needs, and what will happen if it is not done.\nStep 4: Write it in the app chat: \"Extra work: change the cracked pipe joint. ৳300 more and one hour more. New total ৳1,300. Do you agree?\"\nStep 5: Wait until the customer writes \"yes\" in the chat. If they agree by voice, write it in the chat yourself and ask them to confirm.\nStep 6: If the customer says no, finish only the agreed work, and write in the chat what you left undone.\nStep 7: If the extra work is unsafe or beyond your skill, say so, and tell the customer to call a qualified person.\nRemember: if it is not written in the chat, treat it as not agreed.",
+          "summaryBn": "আপনি শিখবেন: বাড়তি কাজ দেখা দিলে কী করবেন: থামুন, দেখান, লিখে নতুন দাম ঠিক করুন, তারপর কাজ করুন।\nধাপ ১: বাড়তি কাজ চোখে পড়লে বা গ্রাহক আরও কিছু করতে বললে, তা করার আগে থামুন।\nধাপ ২: গ্রাহককে সমস্যাটি দেখান। আঙুল দিয়ে দেখিয়ে দিন বা ছবি তুলুন।\nধাপ ৩: বুঝিয়ে বলুন বাড়তি কাজটি কী, বাড়তি কত টাকা ও কত সময় লাগবে, এবং না করলে কী হবে।\nধাপ ৪: অ্যাপের চ্যাটে লিখুন: \"বাড়তি কাজ: ফাটা পাইপের জয়েন্ট বদলানো। আরও ৳৩০০ ও আরও এক ঘণ্টা লাগবে। নতুন মোট ৳১,৩০০। আপনি কি রাজি?\"\nধাপ ৫: গ্রাহক চ্যাটে \"হ্যাঁ\" লেখা পর্যন্ত অপেক্ষা করুন। তিনি মুখে রাজি হলে আপনি নিজেই চ্যাটে লিখে তাঁকে নিশ্চিত করতে বলুন।\nধাপ ৬: গ্রাহক রাজি না হলে শুধু আগে ঠিক করা কাজটুকু শেষ করুন, এবং কী বাকি রইল তা চ্যাটে লিখে রাখুন।\nধাপ ৭: বাড়তি কাজটি অনিরাপদ বা আপনার দক্ষতার বাইরে হলে সে কথা বলুন, এবং গ্রাহককে যোগ্য ও দক্ষ লোক ডাকতে বলুন।\nমনে রাখুন: যা চ্যাটে লেখা নেই, তা ঠিক হয়নি বলেই ধরুন।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Say no politely to an unfair price",
+          "titleBn": "অন্যায্য দামে ভদ্রভাবে না বলুন",
+          "summaryEn": "You will learn: how to know your lowest fair price, refuse an unfair offer politely, and avoid working at a loss.\nStep 1: Before you bargain, work out your lowest price: materials, travel, and a fair wage for your time. Below this price you lose money.\nStep 2: When the customer asks for less, do not say yes or no at once. Ask, \"What price were you thinking of?\" and listen.\nStep 3: If you can, reduce the work and not only the price: \"For ৳800 I can change the tap, but not the second joint.\"\nStep 4: If you give a discount, keep it small and give a reason: \"You are giving me two jobs together, so I can take ৳50 off.\"\nStep 5: If the offer is below your lowest price, say no politely: \"I am sorry, I cannot do good work at that price. My price is ৳1,000. Please tell me if you change your mind.\"\nStep 6: Do not speak badly about other workers. Never use cheaper or unsafe materials to match a low price.\nStep 7: Leave politely and stay friendly in the chat. Many customers come back later.\nRemember: it is better to lose one job than to work at a loss.",
+          "summaryBn": "আপনি শিখবেন: কীভাবে নিজের সর্বনিম্ন ন্যায্য দাম জানবেন, অন্যায্য প্রস্তাবে ভদ্রভাবে না বলবেন, এবং লোকসানে কাজ করা এড়াবেন।\nধাপ ১: দরদাম শুরুর আগে নিজের সর্বনিম্ন দাম হিসাব করুন: মালামাল, যাতায়াত ও আপনার সময়ের ন্যায্য মজুরি। এর নিচে গেলে আপনার লোকসান।\nধাপ ২: গ্রাহক কম দিতে চাইলে সঙ্গে সঙ্গে হ্যাঁ বা না বলবেন না। জিজ্ঞেস করুন, \"আপনি কত ভাবছিলেন?\" এবং শুনুন।\nধাপ ৩: সম্ভব হলে শুধু দাম নয়, কাজও কমান: \"৳৮০০-তে কল বদলে দিতে পারব, কিন্তু দ্বিতীয় জয়েন্টের কাজ হবে না।\"\nধাপ ৪: ছাড় দিলে অল্প দিন এবং কারণ বলুন: \"আপনি একসঙ্গে দুটি কাজ দিচ্ছেন, তাই ৳৫০ কম নিতে পারি।\"\nধাপ ৫: প্রস্তাব আপনার সর্বনিম্ন দামের নিচে হলে ভদ্রভাবে না বলুন: \"দুঃখিত, এই দামে ভালো কাজ করা সম্ভব নয়। আমার দাম ৳১,০০০। মত বদলালে আমাকে জানাবেন।\"\nধাপ ৬: অন্য কর্মীদের নামে খারাপ কথা বলবেন না। কম দাম মেলাতে গিয়ে কখনো সস্তা বা অনিরাপদ মালামাল ব্যবহার করবেন না।\nধাপ ৭: ভদ্রভাবে বিদায় নিন এবং চ্যাটে ভালো ব্যবহার বজায় রাখুন। অনেক গ্রাহক পরে আবার ফিরে আসেন।\nমনে রাখুন: লোকসানে কাজ করার চেয়ে একটি কাজ হাতছাড়া হওয়া ভালো।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": false
+        }
+      ],
+      "questions": [
+        {
+          "promptEn": "A customer phones and asks, \"My pipe is leaking, how much to repair it?\" You have not seen it. What do you say?",
+          "promptBn": "এক গ্রাহক ফোনে জিজ্ঞেস করলেন, \"আমার পাইপ থেকে পানি পড়ছে, ঠিক করতে কত লাগবে?\" আপনি কাজটি দেখেননি। আপনি কী বলবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "A very low price, so that you get the job",
+              "bn": "খুব কম একটি দাম, যাতে কাজটি পান"
+            },
+            {
+              "id": "b",
+              "en": "A very high price, to be safe",
+              "bn": "নিরাপদ থাকতে খুব বেশি একটি দাম"
+            },
+            {
+              "id": "c",
+              "en": "\"We will see after the work is done.\"",
+              "bn": "\"কাজ শেষ হলে দেখা যাবে।\""
+            },
+            {
+              "id": "d",
+              "en": "\"Please send photos or let me see it first, then I will tell you the price.\"",
+              "bn": "\"আগে ছবি পাঠান বা আমাকে দেখতে দিন, তারপর দাম জানাব।\""
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "A final price for work you have not seen is only a guess, and guesses lead to arguments.",
+          "explanationBn": "না দেখা কাজের চূড়ান্ত দাম শুধুই আন্দাজ, আর আন্দাজ থেকেই ঝামেলা হয়।"
+        },
+        {
+          "promptEn": "Your labour is ৳600, materials are ৳350 and travel is ৳50. What is your estimate?",
+          "promptBn": "আপনার মজুরি ৳৬০০, মালামাল ৳৩৫০ এবং যাতায়াত ৳৫০। আপনার হিসাব কত দাঁড়ায়?",
+          "options": [
+            {
+              "id": "a",
+              "en": "৳600",
+              "bn": "৳৬০০"
+            },
+            {
+              "id": "b",
+              "en": "৳1,000",
+              "bn": "৳১,০০০"
+            },
+            {
+              "id": "c",
+              "en": "৳950",
+              "bn": "৳৯৫০"
+            },
+            {
+              "id": "d",
+              "en": "৳650",
+              "bn": "৳৬৫০"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "The estimate is labour, materials and travel added together.",
+          "explanationBn": "মজুরি, মালামাল ও যাতায়াত যোগ করেই হিসাব হয়।"
+        },
+        {
+          "promptEn": "The customer asks, \"How much will it cost?\" Which answer is best?",
+          "promptBn": "গ্রাহক জিজ্ঞেস করলেন, \"কত লাগবে?\" কোন উত্তরটি সবচেয়ে ভালো?",
+          "options": [
+            {
+              "id": "a",
+              "en": "\"The full job is ৳1,000: ৳600 labour, ৳350 materials and ৳50 travel.\"",
+              "bn": "\"পুরো কাজে ৳১,০০০ লাগবে: ৳৬০০ মজুরি, ৳৩৫০ মালামাল আর ৳৫০ যাতায়াত।\""
+            },
+            {
+              "id": "b",
+              "en": "\"Give what you like.\"",
+              "bn": "\"যা খুশি দেবেন।\""
+            },
+            {
+              "id": "c",
+              "en": "\"Somewhere between ৳500 and ৳2,000.\"",
+              "bn": "\"৳৫০০ থেকে ৳২,০০০-এর মধ্যে কিছু একটা।\""
+            },
+            {
+              "id": "d",
+              "en": "\"I will tell you at the end.\"",
+              "bn": "\"শেষে বলব।\""
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "One clear number with its parts shows the customer that the price is fair.",
+          "explanationBn": "ভাগসহ একটি পরিষ্কার অঙ্ক বললে গ্রাহক বোঝেন দাম ন্যায্য।"
+        },
+        {
+          "promptEn": "You have said your price and the customer is silent, thinking. What do you do?",
+          "promptBn": "আপনি দাম বলেছেন, গ্রাহক চুপ করে ভাবছেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Lower the price at once",
+              "bn": "সঙ্গে সঙ্গে দাম কমিয়ে দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Keep talking to fill the silence",
+              "bn": "চুপ না থেকে কথা বলে যাওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Wait calmly for the answer",
+              "bn": "শান্তভাবে উত্তরের অপেক্ষা করা"
+            },
+            {
+              "id": "d",
+              "en": "Start the work without an answer",
+              "bn": "উত্তর ছাড়াই কাজ শুরু করা"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "The customer needs time to think; lowering the price before they answer loses you money for no reason.",
+          "explanationBn": "গ্রাহকের ভাবার সময় দরকার; উত্তরের আগেই দাম কমালে অকারণে আপনার টাকা কমে।"
+        },
+        {
+          "promptEn": "You found a cracked pipe joint and showed it to the customer. Which message should you write in the app chat?",
+          "promptBn": "ফাটা পাইপের জয়েন্ট পেয়ে গ্রাহককে দেখিয়েছেন। অ্যাপের চ্যাটে কোন মেসেজটি লেখা উচিত?",
+          "options": [
+            {
+              "id": "a",
+              "en": "\"There is more work. It will cost more.\"",
+              "bn": "\"আরও কাজ আছে। টাকা বেশি লাগবে।\""
+            },
+            {
+              "id": "b",
+              "en": "\"Extra work: change the cracked joint. ৳300 more and one hour more. New total ৳1,300. Do you agree?\"",
+              "bn": "\"বাড়তি কাজ: ফাটা জয়েন্ট বদলানো। আরও ৳৩০০ ও আরও এক ঘণ্টা লাগবে। নতুন মোট ৳১,৩০০। আপনি কি রাজি?\""
+            },
+            {
+              "id": "c",
+              "en": "\"I am doing the joint also.\"",
+              "bn": "\"জয়েন্টের কাজটাও করে দিচ্ছি।\""
+            },
+            {
+              "id": "d",
+              "en": "No message, because you have already shown it",
+              "bn": "কোনো মেসেজ নয়, কারণ দেখানো তো হয়েই গেছে"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "The message must name the work, the extra cost, the extra time and the new total, and ask for agreement.",
+          "explanationBn": "মেসেজে কাজ, বাড়তি টাকা, বাড়তি সময় ও নতুন মোট থাকতে হবে, এবং গ্রাহক রাজি কি না জিজ্ঞেস করতে হবে।"
+        },
+        {
+          "promptEn": "The customer says \"yes, do it\" by voice to ৳300 of extra work. What do you do before you start?",
+          "promptBn": "৳৩০০-এর বাড়তি কাজে গ্রাহক মুখে বললেন, \"হ্যাঁ, করে দিন।\" শুরু করার আগে আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Start, because a spoken yes is enough",
+              "bn": "শুরু করা, কারণ মুখের হ্যাঁ-ই যথেষ্ট"
+            },
+            {
+              "id": "b",
+              "en": "Ask a neighbour to be a witness",
+              "bn": "প্রতিবেশীকে সাক্ষী রাখা"
+            },
+            {
+              "id": "c",
+              "en": "Take the extra money in cash first and write nothing",
+              "bn": "আগে বাড়তি টাকা নগদ নেওয়া, কিছু না লেখা"
+            },
+            {
+              "id": "d",
+              "en": "Write it in the app chat yourself and ask the customer to confirm",
+              "bn": "নিজে অ্যাপের চ্যাটে লিখে গ্রাহককে নিশ্চিত করতে বলা"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Spoken words are forgotten or remembered differently; the chat keeps the same words for both of you.",
+          "explanationBn": "মুখের কথা মানুষ ভুলে যায় বা আলাদাভাবে মনে রাখে; চ্যাটে দুজনের জন্য একই কথা থেকে যায়।"
+        },
+        {
+          "promptEn": "Your materials and travel cost ৳400, and a fair wage for your time is ৳500. The customer offers ৳500 for the whole job. What do you do?",
+          "promptBn": "আপনার মালামাল ও যাতায়াতে লাগবে ৳৪০০, আর আপনার সময়ের ন্যায্য মজুরি ৳৫০০। গ্রাহক পুরো কাজের জন্য ৳৫০০ দিতে চাইলেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Politely say no and tell them your price again",
+              "bn": "ভদ্রভাবে না বলা এবং নিজের দাম আবার জানানো"
+            },
+            {
+              "id": "b",
+              "en": "Accept, because any job is better than no job",
+              "bn": "রাজি হওয়া, কারণ কাজ না থাকার চেয়ে যেকোনো কাজ ভালো"
+            },
+            {
+              "id": "c",
+              "en": "Accept, and use cheaper materials to save money",
+              "bn": "রাজি হওয়া, আর খরচ বাঁচাতে সস্তা মালামাল লাগানো"
+            },
+            {
+              "id": "d",
+              "en": "Get angry and say they are cheating you",
+              "bn": "রেগে গিয়ে বলা যে তিনি আপনাকে ঠকাচ্ছেন"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "৳500 is below your lowest price of ৳900, so you would be working at a loss.",
+          "explanationBn": "৳৫০০ আপনার সর্বনিম্ন দাম ৳৯০০-এর নিচে, তাই এতে আপনার লোকসান হবে।"
+        },
+        {
+          "promptEn": "The customer says, \"Another worker will do it for much less.\" What is the best reply?",
+          "promptBn": "গ্রাহক বললেন, \"আরেকজন তো অনেক কমে করে দেবে।\" সবচেয়ে ভালো উত্তর কোনটি?",
+          "options": [
+            {
+              "id": "a",
+              "en": "\"That worker does bad work.\"",
+              "bn": "\"ওই লোকের কাজ খারাপ।\""
+            },
+            {
+              "id": "b",
+              "en": "\"Then I will do it for even less than him.\"",
+              "bn": "\"তাহলে আমি তার চেয়েও কমে করে দেব।\""
+            },
+            {
+              "id": "c",
+              "en": "Explain politely what your price covers, and do not go below your lowest price",
+              "bn": "ভদ্রভাবে বুঝিয়ে বলা আপনার দামে কী কী আছে, এবং সর্বনিম্ন দামের নিচে না নামা"
+            },
+            {
+              "id": "d",
+              "en": "Say nothing and leave angrily",
+              "bn": "কিছু না বলে রাগ করে চলে যাওয়া"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "You win trust by explaining your own work, not by attacking others or cutting your price below cost.",
+          "explanationBn": "অন্যকে ছোট করে বা খরচের নিচে দাম নামিয়ে নয়, নিজের কাজ বুঝিয়ে বলেই বিশ্বাস পাওয়া যায়।"
+        },
+        {
+          "promptEn": "The customer can pay only ৳800 and your price is ৳1,000. Which is a good offer?",
+          "promptBn": "গ্রাহক মাত্র ৳৮০০ দিতে পারবেন, আর আপনার দাম ৳১,০০০। কোন প্রস্তাবটি ভালো?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Do all the work for ৳800, but with poor materials",
+              "bn": "৳৮০০-তেই সব কাজ করা, তবে খারাপ মালামাল দিয়ে"
+            },
+            {
+              "id": "b",
+              "en": "Do all the work and ask for ৳1,000 at the end",
+              "bn": "সব কাজ করে শেষে ৳১,০০০ চাওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Refuse and block the customer",
+              "bn": "না বলে গ্রাহককে ব্লক করে দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Offer less work for ৳800 and say clearly what is left out",
+              "bn": "৳৮০০-তে কম কাজের প্রস্তাব দেওয়া এবং কী বাদ থাকবে তা পরিষ্কার বলা"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Reducing the work keeps the price fair for both sides, with nothing hidden.",
+          "explanationBn": "কাজ কমালে কিছু না লুকিয়েই দাম দুই পক্ষের জন্য ন্যায্য থাকে।"
+        },
+        {
+          "promptEn": "Why should you keep the shop receipt for the materials you buy?",
+          "promptBn": "কেনা মালামালের দোকানের রসিদ কেন রেখে দেবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "To add extra money to the bill",
+              "bn": "বিলে বাড়তি টাকা যোগ করতে"
+            },
+            {
+              "id": "b",
+              "en": "To show the customer the real cost of the materials",
+              "bn": "গ্রাহককে মালামালের আসল দাম দেখাতে"
+            },
+            {
+              "id": "c",
+              "en": "There is no need to keep it",
+              "bn": "রাখার দরকার নেই"
+            },
+            {
+              "id": "d",
+              "en": "To show it to other workers",
+              "bn": "অন্য কর্মীদের দেখাতে"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "A receipt proves the cost of the materials and stops arguments about it.",
+          "explanationBn": "রসিদ মালামালের দাম প্রমাণ করে এবং তা নিয়ে তর্ক বন্ধ করে।"
+        },
+        {
+          "promptEn": "The customer does not agree to the extra work. What do you do?",
+          "promptBn": "গ্রাহক বাড়তি কাজে রাজি হলেন না। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Do the extra work anyway and ask for the money later",
+              "bn": "তবুও বাড়তি কাজ করা এবং পরে টাকা চাওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Leave all the work unfinished",
+              "bn": "সব কাজ অসমাপ্ত রেখে চলে যাওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Finish only the agreed work, and write in the chat what was left undone",
+              "bn": "শুধু ঠিক করা কাজটুকু শেষ করা, এবং কী বাকি রইল তা চ্যাটে লিখে রাখা"
+            },
+            {
+              "id": "d",
+              "en": "Do the agreed work badly",
+              "bn": "ঠিক করা কাজটিও খারাপভাবে করা"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "The customer decides about extra work, and the written note shows what you did and did not do.",
+          "explanationBn": "বাড়তি কাজের সিদ্ধান্ত গ্রাহকের, আর লিখে রাখলে বোঝা যায় আপনি কী করেছেন ও কী করেননি।"
+        },
+        {
+          "promptEn": "During a water-pipe job, the customer asks you to also move the gas line of the stove for extra money. You have not learned gas work. What do you do?",
+          "promptBn": "পানির লাইনের কাজের সময় গ্রাহক বাড়তি টাকায় চুলার গ্যাসের লাইনও সরিয়ে দিতে বললেন। গ্যাসের কাজ আপনি শেখেননি। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Say that it is beyond your skill, and tell the customer to call a qualified person",
+              "bn": "বলা যে এটি আপনার দক্ষতার বাইরে, এবং যোগ্য ও দক্ষ লোক ডাকতে বলা"
+            },
+            {
+              "id": "b",
+              "en": "Try it, because the extra money is good",
+              "bn": "চেষ্টা করা, কারণ বাড়তি টাকা ভালো"
+            },
+            {
+              "id": "c",
+              "en": "Do it at a low price",
+              "bn": "কম দামে করে দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Watch a video first and then do it",
+              "bn": "আগে ভিডিও দেখে নিয়ে করে দেওয়া"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Unsafe work beyond your skill can hurt people; no extra money is worth that.",
+          "explanationBn": "দক্ষতার বাইরের অনিরাপদ কাজে মানুষের ক্ষতি হতে পারে; কোনো বাড়তি টাকাই এর যোগ্য নয়।"
+        }
+      ]
+    }
+  ]
+}

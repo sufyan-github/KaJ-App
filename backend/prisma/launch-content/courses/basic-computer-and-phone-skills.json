@@ -1,0 +1,441 @@
+{
+  "courses": [
+    {
+      "slug": "basic-computer-and-phone-skills",
+      "skillSlug": "data-entry",
+      "titleEn": "Basic computer and phone skills",
+      "titleBn": "কম্পিউটার ও ফোনের প্রাথমিক দক্ষতা",
+      "summaryEn": "First steps with a computer and a smartphone: typing in Bangla and English, saving and sending files, filling in online forms, and keeping your passwords, codes and mobile banking money safe from fraud.",
+      "summaryBn": "কম্পিউটার ও স্মার্টফোনের প্রথম পাঠ: বাংলা ও ইংরেজিতে লেখা, ফাইল সেভ করা ও পাঠানো, অনলাইন ফর্ম পূরণ, এবং পাসওয়ার্ড, কোড ও মোবাইল ব্যাংকিংয়ের টাকা প্রতারণা থেকে নিরাপদ রাখা।",
+      "minutes": 30,
+      "estDataMb": 1,
+      "passMarkPct": 70,
+      "questionCount": 10,
+      "isSafetyCritical": false,
+      "sortOrder": 24,
+      "lessons": [
+        {
+          "titleEn": "Keyboard, typing and saving a file",
+          "titleBn": "কিবোর্ড, টাইপ করা ও ফাইল সেভ করা",
+          "summaryEn": "You will learn: how to type in Bangla and English on a keyboard and save your work as a file.\nStep 1: Sit straight and find the main keys: letters, numbers, Space, Enter, Backspace and Shift.\nStep 2: Open a writing program and click on the blank page so the cursor blinks there.\nStep 3: Type a short line in English. Hold Shift with a letter to make a capital letter, and press Backspace to rub out a mistake.\nStep 4: Change the keyboard language to Bangla from the language button on the screen, then type the same line in Bangla.\nStep 5: Press Ctrl and S together to save. Choose a folder and give the file a clear name, such as your name and the date.\nStep 6: Close the file, open the folder and open the file again to check that it was saved.\nStep 7: While you work, press Ctrl and S every few minutes.\nRemember: work that is not saved is lost when the power goes off, so save early and save often.",
+          "summaryBn": "আপনি শিখবেন: কিবোর্ডে বাংলা ও ইংরেজিতে কীভাবে লিখবেন এবং লেখা ফাইল হিসেবে সেভ করবেন।\nধাপ ১: সোজা হয়ে বসুন এবং মূল বোতামগুলো চিনে নিন: অক্ষর, সংখ্যা, Space, Enter, Backspace ও Shift।\nধাপ ২: লেখার প্রোগ্রাম খুলুন এবং সাদা পাতায় ক্লিক করুন, যাতে কার্সর সেখানে জ্বলে-নেভে।\nধাপ ৩: ইংরেজিতে ছোট একটি লাইন লিখুন। বড় হাতের অক্ষর লিখতে Shift চেপে ধরে অক্ষর চাপুন, আর ভুল মুছতে Backspace চাপুন।\nধাপ ৪: পর্দার ভাষা বোতাম থেকে কিবোর্ডের ভাষা বাংলা করুন, তারপর একই লাইন বাংলায় লিখুন।\nধাপ ৫: সেভ করতে Ctrl ও S একসঙ্গে চাপুন। একটি ফোল্ডার বেছে নিন এবং ফাইলের পরিষ্কার নাম দিন, যেমন আপনার নাম ও তারিখ।\nধাপ ৬: ফাইল বন্ধ করুন, ফোল্ডার খুলুন এবং ফাইলটি আবার খুলে দেখুন সেভ হয়েছে কি না।\nধাপ ৭: কাজ করার সময় কয়েক মিনিট পরপর Ctrl ও S চাপুন।\nমনে রাখুন: সেভ না করা লেখা বিদ্যুৎ চলে গেলে হারিয়ে যায়, তাই শুরুতেই সেভ করুন এবং বারবার সেভ করুন।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Folders, photos and documents on your phone",
+          "titleBn": "ফোনে ফোল্ডার, ছবি ও কাগজপত্র",
+          "summaryEn": "You will learn: how to find photos and documents on your phone, keep them in folders and send a file to someone.\nStep 1: Open the file manager app on your phone and look at the main folders: photos, downloads and documents.\nStep 2: Make a new folder, name it Work papers, and move the photos of your important documents into it.\nStep 3: Rename each file so the name says what is inside, such as Identity card front or Training certificate.\nStep 4: To send a file, press and hold it, tap Share, then choose the messaging app or email.\nStep 5: Check the receiver's name or number before you tap Send. Send photos of your identity card only to a person or office you trust.\nStep 6: Delete blurred photos and extra copies of the same photo so the phone has free space.\nStep 7: Keep a second copy of important documents on a memory card or in online storage.\nRemember: a clear file name and one tidy folder save you time every time someone asks for a document.",
+          "summaryBn": "আপনি শিখবেন: ফোনে ছবি ও কাগজপত্র কীভাবে খুঁজবেন, ফোল্ডারে গুছিয়ে রাখবেন এবং কাউকে ফাইল পাঠাবেন।\nধাপ ১: ফোনের ফাইল ম্যানেজার অ্যাপ খুলুন এবং মূল ফোল্ডারগুলো দেখুন: ছবি, ডাউনলোড ও ডকুমেন্ট।\nধাপ ২: নতুন একটি ফোল্ডার বানান, নাম দিন কাজের কাগজ, এবং দরকারি কাগজের ছবিগুলো সেখানে সরিয়ে নিন।\nধাপ ৩: প্রতিটি ফাইলের নাম বদলে এমন নাম দিন যা দেখে বোঝা যায় ভেতরে কী আছে, যেমন পরিচয়পত্র সামনের দিক বা প্রশিক্ষণের সনদ।\nধাপ ৪: ফাইল পাঠাতে ফাইলটি চেপে ধরে রাখুন, Share চাপুন, তারপর মেসেজ অ্যাপ বা ইমেইল বেছে নিন।\nধাপ ৫: Send চাপার আগে প্রাপকের নাম বা নম্বর মিলিয়ে নিন। পরিচয়পত্রের ছবি শুধু বিশ্বস্ত ব্যক্তি বা অফিসকে পাঠান।\nধাপ ৬: ঝাপসা ছবি আর একই ছবির বাড়তি কপি মুছে ফেলুন, যাতে ফোনে জায়গা খালি থাকে।\nধাপ ৭: দরকারি কাগজের আরেকটি কপি মেমোরি কার্ডে বা অনলাইন স্টোরেজে রাখুন।\nমনে রাখুন: পরিষ্কার নাম আর গোছানো একটি ফোল্ডার থাকলে কেউ কাগজ চাইলে প্রতিবার আপনার সময় বাঁচে।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Passwords, OTP codes and scam calls",
+          "titleBn": "পাসওয়ার্ড, OTP কোড ও প্রতারণার ফোন",
+          "summaryEn": "You will learn: how to make a strong password, keep your OTP codes secret and spot a scam call or message.\nStep 1: Make a password of at least 8 characters that mixes letters, numbers and a symbol. Do not use your name, phone number or date of birth.\nStep 2: Use a different password for each important account, and set a screen lock on your phone.\nStep 3: An OTP is a one-time code sent to your phone. Type it only into the app or website that you opened yourself.\nStep 4: If anyone asks for your OTP, PIN or password by phone or message, say no and end the call.\nStep 5: Do not tap links in messages about prizes, blocked accounts or urgent payments. Open the app yourself and check there.\nStep 6: If you told someone a code by mistake, change your password and PIN at once and call the provider's official helpline.\nHazard: scammers pretend to be from a bank, a company or a helpline and rush you until you give a code, then they take the money from your account. The one rule: never tell an OTP, PIN or password to anyone.\nRemember: real staff never ask for your code. Anyone who asks for it is a scammer.",
+          "summaryBn": "আপনি শিখবেন: কীভাবে শক্ত পাসওয়ার্ড বানাবেন, OTP কোড গোপন রাখবেন এবং প্রতারণার ফোন বা মেসেজ চিনবেন।\nধাপ ১: অন্তত ৮ অক্ষরের পাসওয়ার্ড বানান, যাতে অক্ষর, সংখ্যা ও একটি চিহ্ন মেশানো থাকে। নিজের নাম, ফোন নম্বর বা জন্মতারিখ ব্যবহার করবেন না।\nধাপ ২: প্রতিটি দরকারি অ্যাকাউন্টে আলাদা পাসওয়ার্ড দিন এবং ফোনে স্ক্রিন লক চালু রাখুন।\nধাপ ৩: OTP হলো আপনার ফোনে আসা একবার ব্যবহারের কোড। এটি শুধু সেই অ্যাপ বা ওয়েবসাইটে লিখুন যা আপনি নিজে খুলেছেন।\nধাপ ৪: কেউ ফোনে বা মেসেজে আপনার OTP, PIN বা পাসওয়ার্ড চাইলে না বলুন এবং ফোন কেটে দিন।\nধাপ ৫: পুরস্কার, অ্যাকাউন্ট বন্ধ বা জরুরি টাকা পাঠানোর মেসেজের লিংকে চাপ দেবেন না। নিজে অ্যাপ খুলে সেখানে দেখে নিন।\nধাপ ৬: ভুল করে কাউকে কোড বলে ফেললে সঙ্গে সঙ্গে পাসওয়ার্ড ও PIN বদলে ফেলুন এবং সেবাদাতার অফিসিয়াল হেল্পলাইনে ফোন করুন।\nঝুঁকি: প্রতারকেরা ব্যাংক, কোম্পানি বা হেল্পলাইনের লোক সেজে তাড়া দিয়ে কোড নিয়ে নেয়, তারপর আপনার অ্যাকাউন্টের টাকা তুলে নেয়। একটাই নিয়ম: OTP, PIN বা পাসওয়ার্ড কাউকে বলবেন না।\nমনে রাখুন: আসল কর্মী কখনো আপনার কোড চান না। যে কোড চায়, সে প্রতারক।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Filling in an online form and uploading a document photo",
+          "titleBn": "অনলাইন ফর্ম পূরণ ও কাগজের ছবি আপলোড",
+          "summaryEn": "You will learn: how to fill in an online form correctly and upload a clear photo of a document.\nStep 1: Keep your identity card and other papers beside you, and copy your name, date of birth and numbers exactly as they are written.\nStep 2: Fill in every box marked with a star. Tap each box and read its label before you type.\nStep 3: Lay the document flat on a plain table in good daylight, with no shadow from your hand or phone.\nStep 4: Hold the phone straight above the document so all four corners are inside the picture, then take the photo.\nStep 5: Zoom in on the photo. If any word is blurred, cut off or shining from the light, take it again.\nStep 6: Tap Upload, choose the photo, and wait until the form shows the file name or a small picture.\nStep 7: Read the whole form once more, tap Submit, and save a screenshot of the confirmation message.\nRemember: a form with a wrong number or a blurred photo gets rejected, so check before you submit.",
+          "summaryBn": "আপনি শিখবেন: অনলাইন ফর্ম কীভাবে ঠিকভাবে পূরণ করবেন এবং কাগজের পরিষ্কার ছবি আপলোড করবেন।\nধাপ ১: পরিচয়পত্র ও অন্য কাগজ পাশে রাখুন, এবং নাম, জন্মতারিখ ও নম্বর কাগজে যেমন লেখা আছে হুবহু তেমন লিখুন।\nধাপ ২: তারকা চিহ্ন দেওয়া প্রতিটি ঘর পূরণ করুন। লেখার আগে ঘরে চাপ দিয়ে ঘরের নাম পড়ে নিন।\nধাপ ৩: কাগজটি সাদামাটা টেবিলে সমান করে রাখুন, দিনের ভালো আলোতে, যাতে হাত বা ফোনের ছায়া না পড়ে।\nধাপ ৪: ফোন কাগজের ঠিক ওপরে সোজা করে ধরুন, যাতে চার কোনাই ছবির ভেতরে থাকে, তারপর ছবি তুলুন।\nধাপ ৫: ছবিটি বড় করে দেখুন। কোনো লেখা ঝাপসা, কাটা বা আলোয় চকচকে হলে আবার তুলুন।\nধাপ ৬: Upload চাপুন, ছবিটি বেছে নিন, এবং ফর্মে ফাইলের নাম বা ছোট ছবি দেখা না যাওয়া পর্যন্ত অপেক্ষা করুন।\nধাপ ৭: পুরো ফর্ম আরেকবার পড়ুন, Submit চাপুন, এবং নিশ্চিতকরণ বার্তার স্ক্রিনশট রেখে দিন।\nমনে রাখুন: ভুল নম্বর বা ঝাপসা ছবি থাকলে ফর্ম বাতিল হয়, তাই জমা দেওয়ার আগে মিলিয়ে নিন।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": false
+        },
+        {
+          "titleEn": "Mobile banking safety",
+          "titleBn": "মোবাইল ব্যাংকিংয়ে নিরাপত্তা",
+          "summaryEn": "You will learn: how to send money safely by mobile banking and what to do if you send it to a wrong number.\nStep 1: Ask the receiver to say or write their number, type it, then read it back one digit at a time.\nStep 2: Check the amount and the receiver's number on the confirmation screen before you enter your PIN.\nStep 3: Cover the screen with your hand when you type your PIN. Never write the PIN on the phone cover or save it in a message.\nStep 4: After sending, keep the confirmation message with the transaction ID, and check your balance.\nStep 5: If you sent money to a wrong number, call the provider's helpline at once on the number shown inside the app, and give the transaction ID.\nStep 6: If a stranger calls and says they sent you money by mistake, check your own balance in the app first. Do not send money back because of a call or a message alone; tell them to call the helpline.\nHazard: one wrong digit sends your money to a stranger, and anyone who knows your PIN can empty your account. The one rule: check the number twice and never tell anyone your PIN.\nRemember: the sooner you call the helpline after a wrong transfer, the better the chance of getting the money back.",
+          "summaryBn": "আপনি শিখবেন: মোবাইল ব্যাংকিংয়ে কীভাবে নিরাপদে টাকা পাঠাবেন এবং ভুল নম্বরে টাকা চলে গেলে কী করবেন।\nধাপ ১: প্রাপককে নম্বর বলতে বা লিখে দিতে বলুন, নম্বরটি লিখুন, তারপর একটি একটি করে সংখ্যা পড়ে মিলিয়ে নিন।\nধাপ ২: PIN দেওয়ার আগে নিশ্চিতকরণ পর্দায় টাকার পরিমাণ ও প্রাপকের নম্বর দেখে নিন।\nধাপ ৩: PIN লেখার সময় হাত দিয়ে পর্দা আড়াল করুন। PIN কখনো ফোনের কভারে লিখে রাখবেন না বা মেসেজে সেভ করবেন না।\nধাপ ৪: টাকা পাঠানোর পর লেনদেন নম্বরসহ নিশ্চিতকরণ মেসেজ রেখে দিন এবং ব্যালেন্স দেখে নিন।\nধাপ ৫: ভুল নম্বরে টাকা চলে গেলে সঙ্গে সঙ্গে অ্যাপের ভেতরে দেওয়া নম্বরে সেবাদাতার হেল্পলাইনে ফোন করুন এবং লেনদেন নম্বর জানান।\nধাপ ৬: অচেনা কেউ ফোন করে যদি বলে ভুল করে আপনাকে টাকা পাঠিয়েছে, আগে নিজে অ্যাপে ব্যালেন্স দেখুন। শুধু ফোন বা মেসেজের কথায় টাকা ফেরত পাঠাবেন না; তাকে হেল্পলাইনে ফোন করতে বলুন।\nঝুঁকি: একটি সংখ্যা ভুল হলে টাকা অচেনা লোকের কাছে চলে যায়, আর আপনার PIN যে জানে সে অ্যাকাউন্ট খালি করে দিতে পারে। একটাই নিয়ম: নম্বর দুবার মিলিয়ে নিন এবং PIN কাউকে বলবেন না।\nমনে রাখুন: ভুল লেনদেনের পর যত তাড়াতাড়ি হেল্পলাইনে ফোন করবেন, টাকা ফেরত পাওয়ার সম্ভাবনা তত বেশি।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": true
+        }
+      ],
+      "questions": [
+        {
+          "promptEn": "You have typed half a page and the lights start to flicker. What should you do first?",
+          "promptBn": "আপনি আধা পাতা লিখেছেন, এমন সময় বাতি কাঁপতে শুরু করল। প্রথমে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Type faster to finish the page",
+              "bn": "পাতা শেষ করতে আরও দ্রুত লিখবেন"
+            },
+            {
+              "id": "b",
+              "en": "Press Ctrl and S to save the file",
+              "bn": "Ctrl ও S চেপে ফাইল সেভ করবেন"
+            },
+            {
+              "id": "c",
+              "en": "Change the keyboard language",
+              "bn": "কিবোর্ডের ভাষা বদলাবেন"
+            },
+            {
+              "id": "d",
+              "en": "Close the program without saving",
+              "bn": "সেভ না করেই প্রোগ্রাম বন্ধ করবেন"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Work that is not saved is lost when the power goes off, so save at once.",
+          "explanationBn": "সেভ না করা লেখা বিদ্যুৎ চলে গেলে হারিয়ে যায়, তাই সঙ্গে সঙ্গে সেভ করতে হবে।"
+        },
+        {
+          "promptEn": "You are typing your name in English and need a capital letter. Which key do you hold while pressing the letter?",
+          "promptBn": "আপনি ইংরেজিতে নিজের নাম লিখছেন এবং বড় হাতের অক্ষর দরকার। অক্ষর চাপার সময় কোন বোতাম চেপে ধরবেন?",
+          "options": [
+            { "id": "a", "en": "Backspace", "bn": "Backspace" },
+            { "id": "b", "en": "Enter", "bn": "Enter" },
+            { "id": "c", "en": "Space", "bn": "Space" },
+            { "id": "d", "en": "Shift", "bn": "Shift" }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Holding Shift with a letter makes a capital letter.",
+          "explanationBn": "Shift চেপে ধরে অক্ষর চাপলে বড় হাতের অক্ষর হয়।"
+        },
+        {
+          "promptEn": "A customer asks for a photo of your training certificate, and your phone has hundreds of photos. What makes it quickest to find?",
+          "promptBn": "একজন গ্রাহক আপনার প্রশিক্ষণের সনদের ছবি চাইলেন, অথচ ফোনে শত শত ছবি। কী করলে সবচেয়ে তাড়াতাড়ি খুঁজে পাবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Keeping it in a named folder with a clear file name",
+              "bn": "নাম দেওয়া ফোল্ডারে পরিষ্কার ফাইলের নাম দিয়ে রাখা"
+            },
+            {
+              "id": "b",
+              "en": "Scrolling through every photo each time",
+              "bn": "প্রতিবার সব ছবি ঘেঁটে দেখা"
+            },
+            {
+              "id": "c",
+              "en": "Taking a new photo of it every time",
+              "bn": "প্রতিবার নতুন করে ছবি তোলা"
+            },
+            {
+              "id": "d",
+              "en": "Leaving it only in the downloads folder",
+              "bn": "শুধু ডাউনলোড ফোল্ডারে ফেলে রাখা"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "A clear file name in one tidy folder lets you find a document in seconds.",
+          "explanationBn": "গোছানো একটি ফোল্ডারে পরিষ্কার নাম থাকলে কাগজ কয়েক সেকেন্ডে খুঁজে পাওয়া যায়।"
+        },
+        {
+          "promptEn": "You are about to send a photo of your identity card. What must you do before you tap Send?",
+          "promptBn": "আপনি পরিচয়পত্রের ছবি পাঠাতে যাচ্ছেন। Send চাপার আগে কী করতেই হবে?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Delete the photo from your phone",
+              "bn": "ফোন থেকে ছবিটি মুছে ফেলা"
+            },
+            {
+              "id": "b",
+              "en": "Send it to several numbers to be sure",
+              "bn": "নিশ্চিত হতে কয়েকটি নম্বরে পাঠানো"
+            },
+            {
+              "id": "c",
+              "en": "Check the receiver's name or number, and that you trust them",
+              "bn": "প্রাপকের নাম বা নম্বর মিলিয়ে নেওয়া এবং তিনি বিশ্বস্ত কি না দেখা"
+            },
+            {
+              "id": "d",
+              "en": "Make the photo smaller so it cannot be read",
+              "bn": "ছবি এত ছোট করা যাতে পড়া না যায়"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "An identity card sent to the wrong person can be misused, so check the receiver first.",
+          "explanationBn": "পরিচয়পত্র ভুল লোকের হাতে গেলে অপব্যবহার হতে পারে, তাই আগে প্রাপক মিলিয়ে নিন।"
+        },
+        {
+          "promptEn": "A caller says he is from your mobile banking helpline. He says your account will be blocked unless you tell him the code that just came to your phone. What do you do?",
+          "promptBn": "একজন ফোন করে বলল সে আপনার মোবাইল ব্যাংকিং হেল্পলাইন থেকে বলছে। এইমাত্র ফোনে আসা কোডটি না বললে নাকি অ্যাকাউন্ট বন্ধ হয়ে যাবে। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Tell him the code quickly",
+              "bn": "তাড়াতাড়ি কোডটি বলে দেবেন"
+            },
+            {
+              "id": "b",
+              "en": "Tell him only half of the code",
+              "bn": "কোডের অর্ধেক বলবেন"
+            },
+            {
+              "id": "c",
+              "en": "Refuse, end the call and tell the code to no one",
+              "bn": "না বলবেন, ফোন কেটে দেবেন এবং কোড কাউকে বলবেন না"
+            },
+            {
+              "id": "d",
+              "en": "Send him the code by message instead",
+              "bn": "ফোনে না বলে মেসেজে কোড পাঠাবেন"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Real staff never ask for your code, so anyone who asks is a scammer.",
+          "explanationBn": "আসল কর্মী কখনো কোড চান না, তাই যে চায় সে প্রতারক।"
+        },
+        {
+          "promptEn": "You are making a password for a new account. Which one is the strongest?",
+          "promptBn": "আপনি নতুন অ্যাকাউন্টের পাসওয়ার্ড বানাচ্ছেন। কোনটি সবচেয়ে শক্ত?",
+          "options": [
+            { "id": "a", "en": "Nodi#4827Akash", "bn": "Nodi#4827Akash" },
+            { "id": "b", "en": "12345678", "bn": "12345678" },
+            {
+              "id": "c",
+              "en": "Your name and year of birth",
+              "bn": "আপনার নাম ও জন্মসাল"
+            },
+            { "id": "d", "en": "Your phone number", "bn": "আপনার ফোন নম্বর" }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "It is long and mixes letters, numbers and a symbol, and it is not your name, number or date of birth.",
+          "explanationBn": "এটি লম্বা, এতে অক্ষর, সংখ্যা ও চিহ্ন মেশানো আছে, এবং এটি আপনার নাম, নম্বর বা জন্মতারিখ নয়।"
+        },
+        {
+          "promptEn": "You photographed your identity card for a form. When you zoom in, the number shines from the light and is hard to read. What do you do?",
+          "promptBn": "ফর্মের জন্য আপনি পরিচয়পত্রের ছবি তুলেছেন। বড় করে দেখলেন আলোয় নম্বরটি চকচক করছে, পড়া কঠিন। কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Upload it anyway",
+              "bn": "যেমন আছে তেমনই আপলোড করবেন"
+            },
+            {
+              "id": "b",
+              "en": "Make the photo smaller and upload it",
+              "bn": "ছবি ছোট করে আপলোড করবেন"
+            },
+            {
+              "id": "c",
+              "en": "Leave the photo out of the form",
+              "bn": "ফর্মে ছবি দেবেন না"
+            },
+            {
+              "id": "d",
+              "en": "Take the photo again in good light with no shine",
+              "bn": "ভালো আলোতে, চকচক না করে এমনভাবে আবার ছবি তুলবেন"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "A photo that cannot be read gets the form rejected, so take it again.",
+          "explanationBn": "পড়া যায় না এমন ছবি দিলে ফর্ম বাতিল হয়, তাই আবার তুলতে হবে।"
+        },
+        {
+          "promptEn": "You are filling in an online form. How should you write your name and date of birth?",
+          "promptBn": "আপনি অনলাইন ফর্ম পূরণ করছেন। নাম ও জন্মতারিখ কীভাবে লিখবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "With the short name your friends use",
+              "bn": "বন্ধুরা যে ডাকনামে ডাকে সেটি দিয়ে"
+            },
+            {
+              "id": "b",
+              "en": "Exactly as they are written on your identity card",
+              "bn": "পরিচয়পত্রে যেমন লেখা আছে হুবহু তেমন"
+            },
+            {
+              "id": "c",
+              "en": "In any way, because the office will correct it",
+              "bn": "যেমন খুশি, কারণ অফিস ঠিক করে নেবে"
+            },
+            {
+              "id": "d",
+              "en": "Leave them blank and explain later",
+              "bn": "ফাঁকা রেখে পরে বুঝিয়ে বলবেন"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Details that do not match your papers get the form rejected.",
+          "explanationBn": "কাগজের সঙ্গে তথ্য না মিললে ফর্ম বাতিল হয়।"
+        },
+        {
+          "promptEn": "You sent ৳2,000 to a wrong number by mistake. What do you do first?",
+          "promptBn": "আপনি ভুল করে ভুল নম্বরে ৳২,০০০ পাঠিয়ে ফেলেছেন। প্রথমে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Call the provider's helpline at once and give the transaction ID",
+              "bn": "সঙ্গে সঙ্গে সেবাদাতার হেল্পলাইনে ফোন করে লেনদেন নম্বর জানাবেন"
+            },
+            {
+              "id": "b",
+              "en": "Wait a few days to see if it comes back",
+              "bn": "টাকা ফেরে কি না দেখতে কয়েক দিন অপেক্ষা করবেন"
+            },
+            {
+              "id": "c",
+              "en": "Give your PIN to someone who says he can fix it",
+              "bn": "যে বলে ঠিক করে দেবে তাকে PIN দিয়ে দেবেন"
+            },
+            {
+              "id": "d",
+              "en": "Delete the confirmation message",
+              "bn": "নিশ্চিতকরণ মেসেজটি মুছে ফেলবেন"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "The sooner the helpline knows, the better the chance of getting the money back.",
+          "explanationBn": "হেল্পলাইন যত তাড়াতাড়ি জানবে, টাকা ফেরত পাওয়ার সম্ভাবনা তত বেশি।"
+        },
+        {
+          "promptEn": "You are sending money and the confirmation screen appears. What do you check before you enter your PIN?",
+          "promptBn": "আপনি টাকা পাঠাচ্ছেন, নিশ্চিতকরণ পর্দা এসেছে। PIN দেওয়ার আগে কী মিলিয়ে নেবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "The battery level of the phone",
+              "bn": "ফোনের চার্জ কত আছে"
+            },
+            {
+              "id": "b",
+              "en": "The time on the clock",
+              "bn": "ঘড়িতে কয়টা বাজে"
+            },
+            {
+              "id": "c",
+              "en": "The receiver's number and the amount",
+              "bn": "প্রাপকের নম্বর ও টাকার পরিমাণ"
+            },
+            { "id": "d", "en": "The colour of the screen", "bn": "পর্দার রং" }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "One wrong digit sends the money to a stranger, so check the number and the amount first.",
+          "explanationBn": "একটি সংখ্যা ভুল হলে টাকা অচেনা লোকের কাছে চলে যায়, তাই আগে নম্বর ও পরিমাণ মিলিয়ে নিন।"
+        },
+        {
+          "promptEn": "A stranger calls and says: I sent ৳3,000 to your number by mistake, send it back now. What do you do first?",
+          "promptBn": "অচেনা একজন ফোন করে বলল: ভুল করে আপনার নম্বরে ৳৩,০০০ পাঠিয়েছি, এখনই ফেরত দিন। প্রথমে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Send the money back at once",
+              "bn": "সঙ্গে সঙ্গে টাকা ফেরত পাঠাবেন"
+            },
+            {
+              "id": "b",
+              "en": "Send back half of it",
+              "bn": "অর্ধেক টাকা ফেরত পাঠাবেন"
+            },
+            {
+              "id": "c",
+              "en": "Tell him your PIN so he can take it back",
+              "bn": "সে যেন নিজে তুলে নিতে পারে সে জন্য PIN বলে দেবেন"
+            },
+            {
+              "id": "d",
+              "en": "Check your own balance in the app and tell him to call the helpline",
+              "bn": "নিজে অ্যাপে ব্যালেন্স দেখবেন এবং তাকে হেল্পলাইনে ফোন করতে বলবেন"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Scammers use this story, so check your own balance and let the helpline handle it.",
+          "explanationBn": "প্রতারকেরা এই গল্প বলে, তাই নিজে ব্যালেন্স দেখুন এবং বিষয়টি হেল্পলাইনের হাতে ছেড়ে দিন।"
+        },
+        {
+          "promptEn": "A message says you have won a prize and must tap a link and enter your PIN to receive it. What do you do?",
+          "promptBn": "একটি মেসেজে লেখা আপনি পুরস্কার জিতেছেন, পেতে হলে লিংকে চাপ দিয়ে PIN দিতে হবে। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Tap the link and enter the PIN",
+              "bn": "লিংকে চাপ দিয়ে PIN দেবেন"
+            },
+            {
+              "id": "b",
+              "en": "Do not tap the link, because it is a scam",
+              "bn": "লিংকে চাপ দেবেন না, কারণ এটি প্রতারণা"
+            },
+            {
+              "id": "c",
+              "en": "Forward the message to your friends",
+              "bn": "মেসেজটি বন্ধুদের পাঠিয়ে দেবেন"
+            },
+            {
+              "id": "d",
+              "en": "Reply with your password",
+              "bn": "উত্তরে আপনার পাসওয়ার্ড লিখে পাঠাবেন"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "Prize messages with links are a common way to steal a PIN.",
+          "explanationBn": "লিংকসহ পুরস্কারের মেসেজ PIN চুরি করার একটি চেনা কৌশল।"
+        },
+        {
+          "promptEn": "You saved a letter yesterday but cannot find it today. Which habit prevents this?",
+          "promptBn": "গতকাল একটি চিঠি সেভ করেছিলেন, আজ খুঁজে পাচ্ছেন না। কোন অভ্যাস থাকলে এমন হয় না?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Choosing a folder and giving the file a clear name when you save",
+              "bn": "সেভ করার সময় ফোল্ডার বেছে নেওয়া এবং ফাইলের পরিষ্কার নাম দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Saving with any name in any place",
+              "bn": "যেকোনো নামে যেকোনো জায়গায় সেভ করা"
+            },
+            {
+              "id": "c",
+              "en": "Never switching off the computer",
+              "bn": "কম্পিউটার কখনো বন্ধ না করা"
+            },
+            {
+              "id": "d",
+              "en": "Typing the letter again each time",
+              "bn": "প্রতিবার চিঠিটি নতুন করে লেখা"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "A chosen folder and a clear name tell you where the file is and what it is.",
+          "explanationBn": "বেছে নেওয়া ফোল্ডার ও পরিষ্কার নাম থাকলে ফাইল কোথায় আছে এবং কী আছে তা জানা থাকে।"
+        },
+        {
+          "promptEn": "You told a caller your OTP by mistake. What do you do now?",
+          "promptBn": "আপনি ভুল করে একজনকে ফোনে OTP বলে ফেলেছেন। এখন কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Wait and see what happens",
+              "bn": "কী হয় দেখার জন্য অপেক্ষা করবেন"
+            },
+            {
+              "id": "b",
+              "en": "Switch the phone off for a day",
+              "bn": "এক দিন ফোন বন্ধ রাখবেন"
+            },
+            {
+              "id": "c",
+              "en": "Change your password and PIN at once and call the official helpline",
+              "bn": "সঙ্গে সঙ্গে পাসওয়ার্ড ও PIN বদলাবেন এবং অফিসিয়াল হেল্পলাইনে ফোন করবেন"
+            },
+            {
+              "id": "d",
+              "en": "Call the same person back and ask him not to use it",
+              "bn": "ওই লোককে আবার ফোন করে কোড ব্যবহার না করতে বলবেন"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "Changing the password and PIN quickly and telling the helpline can stop the thief.",
+          "explanationBn": "দ্রুত পাসওয়ার্ড ও PIN বদলে হেল্পলাইনে জানালে চোরকে থামানো যেতে পারে।"
+        }
+      ]
+    }
+  ]
+}

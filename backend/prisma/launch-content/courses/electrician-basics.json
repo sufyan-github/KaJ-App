@@ -1,0 +1,511 @@
+{
+  "courses": [
+    {
+      "slug": "electrician-basics",
+      "skillSlug": "electrical-work",
+      "titleEn": "Electrician basics",
+      "titleBn": "ইলেকট্রিশিয়ানের কাজের মূল বিষয়",
+      "summaryEn": "Tools and protective gear, making a line safe before you touch it, how a house circuit works, replacing a switch or socket, common fan and light faults, and when to refuse a job. This course teaches basic safe practice. It is not a licence.",
+      "summaryBn": "সরঞ্জাম ও সুরক্ষা সামগ্রী, হাত দেওয়ার আগে লাইন নিরাপদ করা, বাসার সার্কিট যেভাবে কাজ করে, সুইচ বা সকেট বদলানো, ফ্যান ও লাইটের সাধারণ সমস্যা, এবং কখন কাজ নিতে মানা করবেন। এই কোর্সে নিরাপদে কাজ করার মূল নিয়ম শেখানো হয়। এটি কোনো লাইসেন্স নয়।",
+      "minutes": 35,
+      "estDataMb": 1,
+      "passMarkPct": 70,
+      "questionCount": 10,
+      "isSafetyCritical": true,
+      "sortOrder": 10,
+      "lessons": [
+        {
+          "titleEn": "Tools and protective gear for a beginner",
+          "titleBn": "নতুনদের জন্য সরঞ্জাম ও সুরক্ষা সামগ্রী",
+          "summaryEn": "You will learn: which tools and protective gear a beginner electrician must carry to every job.\nStep 1: Carry a tester to check whether a wire is live, and a multimeter too if you can.\nStep 2: Carry insulated screwdrivers, pliers, a wire stripper and a cutter whose handle covers are whole.\nStep 3: Wear dry shoes with rubber soles. Never work barefoot or in wet sandals.\nStep 4: Carry insulation tape, a torch for dark places or load-shedding, and a marker and paper for labels.\nStep 5: Check every tool before the job. If the handle cover is cracked or the metal shows through, do not use it.\nStep 6: Take off rings, watch and metal chains, and keep your hands and tools dry.\nHazard: A tool with a broken handle cover can pass current into your hand. Use only tools with whole, dry handle covers.\nRemember: Good tools and dry rubber-soled shoes come before any electrical work.",
+          "summaryBn": "আপনি শিখবেন: নতুন ইলেকট্রিশিয়ানকে প্রতিটি কাজে কোন সরঞ্জাম ও সুরক্ষা সামগ্রী সঙ্গে রাখতে হয়।\nধাপ ১: তারে কারেন্ট আছে কি না দেখার জন্য একটি টেস্টার রাখুন, সম্ভব হলে একটি মাল্টিমিটারও রাখুন।\nধাপ ২: ইনসুলেটেড স্ক্রু ড্রাইভার, প্লায়ার্স, তার ছোলার যন্ত্র ও কাটার রাখুন, যেগুলোর হাতলের কভার অক্ষত।\nধাপ ৩: রাবারের সোলের শুকনো জুতা পরুন। খালি পায়ে বা ভেজা স্যান্ডেলে কখনো কাজ করবেন না।\nধাপ ৪: ইনসুলেশন টেপ, অন্ধকার জায়গা বা লোডশেডিংয়ের জন্য টর্চ, আর লেবেল লেখার জন্য মার্কার ও কাগজ রাখুন।\nধাপ ৫: কাজের আগে প্রতিটি সরঞ্জাম দেখে নিন। হাতলের কভার ফাটা থাকলে বা ভেতরের ধাতু দেখা গেলে সেটি ব্যবহার করবেন না।\nধাপ ৬: আংটি, ঘড়ি ও ধাতুর চেইন খুলে রাখুন, এবং হাত ও সরঞ্জাম শুকনো রাখুন।\nঝুঁকি: হাতলের কভার ভাঙা সরঞ্জাম দিয়ে কারেন্ট আপনার হাতে চলে আসতে পারে। শুধু অক্ষত ও শুকনো কভারের সরঞ্জাম ব্যবহার করুন।\nমনে রাখুন: যেকোনো বৈদ্যুতিক কাজের আগে ভালো সরঞ্জাম আর রাবারের সোলের শুকনো জুতা চাই।",
+          "youtubeVideoId": null,
+          "durationS": 210,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Make it safe before you touch",
+          "titleBn": "হাত দেওয়ার আগে লাইন নিরাপদ করুন",
+          "summaryEn": "You will learn: the steps to do, in order, before you touch any wire.\nStep 1: While the power is still on, touch your tester to a working socket. It must light. A tester that does not light here cannot be trusted.\nStep 2: Switch off the main switch or the MCB for the circuit. If the house has an IPS or a generator, switch that off too.\nStep 3: Tell everyone in the house that you are working and that nobody must switch the power on.\nStep 4: Put a label or tape on the switch that says \"Work in progress. Do not switch on.\"\nStep 5: Test every wire and terminal you will touch. The tester must not light on any of them.\nStep 6: If the tester lights, stop and do not touch. Find the right switch, turn it off, and test again.\nHazard: A wire can be live when the light is off, when the wrong MCB is off, or when load-shedding ends suddenly. Never trust a switch alone: test every wire before you touch it.\nRemember: Check the tester, switch off, tell the household, label the switch, test the wire. Every job, every time.",
+          "summaryBn": "আপনি শিখবেন: যেকোনো তারে হাত দেওয়ার আগে যে ধাপগুলো পরপর করতে হয়।\nধাপ ১: বিদ্যুৎ চালু থাকা অবস্থায় আপনার টেস্টারটি একটি চালু সকেটে ধরুন। টেস্টার জ্বলতে হবে। এখানে না জ্বললে সেই টেস্টারের ওপর ভরসা করা যাবে না।\nধাপ ২: মেইন সুইচ অথবা ওই লাইনের MCB বন্ধ করুন। বাসায় আইপিএস বা জেনারেটর থাকলে সেটিও বন্ধ করুন।\nধাপ ৩: বাসার সবাইকে জানান যে আপনি কাজ করছেন এবং কেউ যেন বিদ্যুৎ চালু না করেন।\nধাপ ৪: সুইচের ওপর লেবেল বা টেপ লাগিয়ে লিখে দিন: \"কাজ চলছে। সুইচ অন করবেন না।\"\nধাপ ৫: যে তার ও টার্মিনালে হাত দেবেন তার প্রতিটি টেস্টার দিয়ে পরীক্ষা করুন। কোনোটিতেই টেস্টার জ্বলা চলবে না।\nধাপ ৬: টেস্টার জ্বললে থামুন, হাত দেবেন না। সঠিক সুইচটি খুঁজে বন্ধ করুন এবং আবার পরীক্ষা করুন।\nঝুঁকি: লাইট বন্ধ থাকলেও, ভুল MCB বন্ধ করলে, বা লোডশেডিং শেষে হঠাৎ বিদ্যুৎ এলে তারে কারেন্ট থাকতে পারে। শুধু সুইচের ওপর ভরসা করবেন না: হাত দেওয়ার আগে প্রতিটি তার পরীক্ষা করুন।\nমনে রাখুন: টেস্টার যাচাই, সুইচ বন্ধ, বাসার সবাইকে জানানো, সুইচে লেবেল, তার পরীক্ষা। প্রতিটি কাজে, প্রতিবার।",
+          "youtubeVideoId": null,
+          "durationS": 240,
+          "isSafety": true
+        },
+        {
+          "titleEn": "How a house circuit works",
+          "titleBn": "বাসার সার্কিট যেভাবে কাজ করে",
+          "summaryEn": "You will learn: how electricity travels through a house circuit and what each part does.\nStep 1: Look at the board: the 220 volt supply comes from the meter to the main switch, and then to the MCBs. 220 volts is enough to kill.\nStep 2: Know the phase wire: it brings the power to the switch and the load. It is the wire that makes your tester light.\nStep 3: Know the neutral wire: it carries the current back from the load. It can also give a shock, so treat it like a live wire.\nStep 4: Know the earth wire: it takes leaking current safely into the ground, so the metal body of a fan or iron does not shock anyone. Never cut or remove it.\nStep 5: Know the MCB: it switches off by itself when too much current flows or there is a short circuit. Never tie it up, and never fit a bigger one to stop it tripping.\nStep 6: Know the load: the bulb, fan or appliance that uses the power. The switch must always be on the phase wire, not on the neutral.\nHazard: Wire colours are not the same in every house, and a wrongly connected neutral can be live. Do not trust the colour: test every wire with your tester.\nRemember: Phase brings the power, neutral takes it back, earth protects people, and the MCB protects the wires.",
+          "summaryBn": "আপনি শিখবেন: বাসার সার্কিটে বিদ্যুৎ কীভাবে চলে এবং প্রতিটি অংশের কাজ কী।\nধাপ ১: বোর্ডটি দেখুন: ২২০ ভোল্টের লাইন মিটার থেকে মেইন সুইচে আসে, তারপর MCB-গুলোতে যায়। ২২০ ভোল্টে মানুষের মৃত্যু হতে পারে।\nধাপ ২: ফেজ তার চিনুন: এটি সুইচ ও লোড পর্যন্ত বিদ্যুৎ নিয়ে আসে। এই তারেই আপনার টেস্টার জ্বলে।\nধাপ ৩: নিউট্রাল তার চিনুন: এটি লোড থেকে কারেন্ট ফিরিয়ে নিয়ে যায়। এতেও শক লাগতে পারে, তাই একে কারেন্ট থাকা তারের মতোই ধরুন।\nধাপ ৪: আর্থ তার চিনুন: এটি লিক হওয়া কারেন্ট নিরাপদে মাটিতে পাঠায়, তাই ফ্যান বা ইস্ত্রির ধাতব বডিতে কারও শক লাগে না। এই তার কখনো কাটবেন না বা খুলে ফেলবেন না।\nধাপ ৫: MCB চিনুন: বেশি কারেন্ট গেলে বা শর্ট সার্কিট হলে এটি নিজে থেকেই বন্ধ হয়ে যায়। এটি কখনো বেঁধে রাখবেন না, আর ট্রিপ করা ঠেকাতে বড় MCB লাগাবেন না।\nধাপ ৬: লোড চিনুন: যে বাল্ব, ফ্যান বা যন্ত্র বিদ্যুৎ খরচ করে। সুইচ সবসময় ফেজ তারে বসবে, নিউট্রালে নয়।\nঝুঁকি: সব বাসায় তারের রং এক রকম নয়, আর ভুল সংযোগের কারণে নিউট্রালেও কারেন্ট থাকতে পারে। রং দেখে ভরসা করবেন না: প্রতিটি তার টেস্টার দিয়ে পরীক্ষা করুন।\nমনে রাখুন: ফেজ বিদ্যুৎ আনে, নিউট্রাল ফিরিয়ে নেয়, আর্থ মানুষকে রক্ষা করে, আর MCB তারকে রক্ষা করে।",
+          "youtubeVideoId": null,
+          "durationS": 270,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Replacing a switch or socket safely",
+          "titleBn": "নিরাপদে সুইচ বা সকেট বদলানো",
+          "summaryEn": "You will learn: how to replace a damaged switch or socket with the power off.\nStep 1: Switch off the MCB or main switch, label it, and tell the household, as in lesson 2.\nStep 2: Unscrew the cover plate and pull the switch or socket gently out of the box. Do not touch the wires yet.\nStep 3: Touch your tester to every terminal and wire. Go on only if the tester does not light on any of them.\nStep 4: Take a photo or draw which wire goes to which terminal. Then loosen the screws and take the wires out one at a time.\nStep 5: Look at the wires. If the cover of a wire is burnt, black or cracking, stop and call a qualified electrician.\nStep 6: Use a new switch or socket of the same ampere rating. Put each wire, including the earth wire, in the same terminal as before, and tighten each screw firmly.\nStep 7: Fold the wires back without pinching them, screw the cover on fully, then switch the power on and test with a lamp or fan.\nHazard: A loose screw, or bare copper touching the box, causes sparks, fire or shock. Tighten every terminal and pull each wire lightly to check that it holds.\nRemember: Power off and tested, photo first, same wire to the same terminal, every screw tight.",
+          "summaryBn": "আপনি শিখবেন: বিদ্যুৎ বন্ধ রেখে নষ্ট সুইচ বা সকেট কীভাবে বদলাতে হয়।\nধাপ ১: দ্বিতীয় পাঠের মতো MCB বা মেইন সুইচ বন্ধ করুন, তাতে লেবেল লাগান এবং বাসার সবাইকে জানান।\nধাপ ২: কভার প্লেটের স্ক্রু খুলে সুইচ বা সকেটটি আস্তে করে বক্স থেকে বের করুন। এখনই তারে হাত দেবেন না।\nধাপ ৩: প্রতিটি টার্মিনাল ও তারে টেস্টার ধরুন। কোনোটিতেই টেস্টার না জ্বললে তবেই এগোন।\nধাপ ৪: কোন তার কোন টার্মিনালে আছে তার ছবি তুলুন বা এঁকে রাখুন। তারপর স্ক্রু ঢিলা করে একটি একটি করে তার খুলুন।\nধাপ ৫: তারগুলো দেখুন। কোনো তারের কভার পোড়া, কালো বা ফাটা হলে থামুন এবং দক্ষ ইলেকট্রিশিয়ান ডাকুন।\nধাপ ৬: একই অ্যাম্পিয়ারের নতুন সুইচ বা সকেট নিন। আর্থ তারসহ প্রতিটি তার আগের টার্মিনালেই লাগান এবং প্রতিটি স্ক্রু শক্ত করে আঁটুন।\nধাপ ৭: তারগুলো চাপ না দিয়ে ভাঁজ করে ভেতরে রাখুন, কভার পুরোপুরি আটকান, তারপর বিদ্যুৎ চালু করে একটি বাতি বা ফ্যান দিয়ে পরীক্ষা করুন।\nঝুঁকি: স্ক্রু ঢিলা থাকলে বা খোলা তামা বক্সে লাগলে স্পার্ক, আগুন বা শক হতে পারে। প্রতিটি টার্মিনাল শক্ত করুন এবং প্রতিটি তার হালকা টেনে দেখুন সেটি আটকে আছে কি না।\nমনে রাখুন: বিদ্যুৎ বন্ধ ও পরীক্ষা করা, আগে ছবি, একই তার একই টার্মিনালে, প্রতিটি স্ক্রু শক্ত।",
+          "youtubeVideoId": null,
+          "durationS": 280,
+          "isSafety": true
+        },
+        {
+          "titleEn": "Fans, lights and common faults",
+          "titleBn": "ফ্যান, লাইট ও সাধারণ সমস্যা",
+          "summaryEn": "You will learn: what to check first when a light or fan does not work, starting with the simplest thing.\nStep 1: Ask the customer what happened: did it stop suddenly, and was there a smell, a spark or a noise? Check that it is not load-shedding.\nStep 2: Look at the MCB. If it has tripped, switch it on once. If it trips again, leave it off: there is a fault in the line.\nStep 3: Light does not work: switch it off and fit a bulb that you know is good. If it still does not light, switch off the MCB, test with your tester, and check the holder for loose wires or burn marks.\nStep 4: Fan hums but does not turn, or turns slowly: the capacitor is often weak. With the MCB off and the wires tested, fit a capacitor of the same value. Hold the old one by its body, not by its metal ends.\nStep 5: Fan speed does not change: the regulator is often faulty. Replace it with the MCB off, the same way as a switch.\nStep 6: Fan shakes or makes noise: with the fan stopped and the MCB off, tighten the blade screws and look at the hook and its pin. If the hook is loose or rusted, tell the customer not to use the fan.\nStep 7: Burning smell, black marks, melted plastic or a hot switch: switch off the MCB and call a qualified electrician.\nHazard: Fan work joins two dangers: electricity and height. Switch off the MCB, not only the wall switch, and stand on a firm ladder that another person holds.\nRemember: Check the simple things first: power, MCB, bulb, capacitor, regulator. If anything is burnt, stop.",
+          "summaryBn": "আপনি শিখবেন: লাইট বা ফ্যান না চললে সবচেয়ে সহজ জিনিস থেকে শুরু করে আগে কী কী দেখতে হয়।\nধাপ ১: গ্রাহককে জিজ্ঞেস করুন কী হয়েছিল: হঠাৎ বন্ধ হয়েছে কি না, গন্ধ, স্পার্ক বা শব্দ হয়েছিল কি না। লোডশেডিং চলছে কি না তাও দেখে নিন।\nধাপ ২: MCB দেখুন। ট্রিপ করে থাকলে একবার চালু করুন। আবার ট্রিপ করলে বন্ধই রাখুন: লাইনে সমস্যা আছে।\nধাপ ৩: লাইট জ্বলছে না: সুইচ বন্ধ করে একটি ভালো বাল্ব লাগিয়ে দেখুন। তবুও না জ্বললে MCB বন্ধ করুন, টেস্টার দিয়ে পরীক্ষা করুন, এবং হোল্ডারে ঢিলা তার বা পোড়া দাগ আছে কি না দেখুন।\nধাপ ৪: ফ্যান গুনগুন করে কিন্তু ঘোরে না, বা আস্তে ঘোরে: সাধারণত ক্যাপাসিটর দুর্বল। MCB বন্ধ করে ও তার পরীক্ষা করে একই মানের ক্যাপাসিটর লাগান। পুরোনোটি বডি ধরে খুলুন, ধাতব মাথায় হাত দেবেন না।\nধাপ ৫: ফ্যানের গতি বদলায় না: সাধারণত রেগুলেটর নষ্ট। MCB বন্ধ রেখে সুইচ বদলানোর মতো করেই এটি বদলান।\nধাপ ৬: ফ্যান কাঁপে বা শব্দ করে: ফ্যান থামিয়ে ও MCB বন্ধ করে ব্লেডের স্ক্রু শক্ত করুন এবং হুক ও তার পিন দেখুন। হুক ঢিলা বা মরিচা ধরা হলে গ্রাহককে ফ্যানটি চালাতে মানা করুন।\nধাপ ৭: পোড়া গন্ধ, কালো দাগ, গলা প্লাস্টিক বা গরম সুইচ দেখলে MCB বন্ধ করুন এবং দক্ষ ইলেকট্রিশিয়ান ডাকুন।\nঝুঁকি: ফ্যানের কাজে দুটি বিপদ একসঙ্গে থাকে: বিদ্যুৎ ও উচ্চতা। শুধু দেয়ালের সুইচ নয়, MCB বন্ধ করুন, এবং এমন শক্ত মইয়ে দাঁড়ান যা আরেকজন ধরে রেখেছেন।\nমনে রাখুন: আগে সহজ জিনিস দেখুন: বিদ্যুৎ, MCB, বাল্ব, ক্যাপাসিটর, রেগুলেটর। কিছু পোড়া দেখলে থামুন।",
+          "youtubeVideoId": null,
+          "durationS": 300,
+          "isSafety": true
+        },
+        {
+          "titleEn": "When to refuse a job, and what to do in a shock",
+          "titleBn": "কখন কাজ নিতে মানা করবেন, আর শক লাগলে কী করবেন",
+          "summaryEn": "You will learn: which jobs a beginner must refuse, and what to do if someone gets an electric shock.\nStep 1: Refuse any work on the meter, the service line from the pole, or the wires before the main switch. They stay live even when the main switch is off. Tell the customer to call the electricity office.\nStep 2: Refuse electrical work in wet places: a wet floor, a bathroom in use, a flooded room or in the rain. Wait until the place is dry.\nStep 3: Refuse to repair burnt, melted or blackened wiring, or a board that is hot or smells. Switch off the main switch and tell the customer to call a qualified electrician.\nStep 4: Say it plainly: \"This job is not safe for me to do. Please call a qualified electrician.\" Do not take a dangerous job for the money.\nStep 5: If someone gets a shock, do not touch them. First switch off the main switch or pull out the plug.\nStep 6: If you cannot cut the power, stand on something dry and push the person away from the wire with a dry wooden stick. Never use metal or anything wet.\nStep 7: Call 999. If the person is not breathing, start chest compressions if you know how. Take every shock victim to a doctor, even if they say they feel fine.\nHazard: If you touch a person who is still touching the wire, the current passes into you too. Cut the power before you touch them.\nRemember: Saying no to a dangerous job is good work. In a shock: do not touch, cut the power, call 999.",
+          "summaryBn": "আপনি শিখবেন: নতুন কর্মী হিসেবে কোন কাজগুলো নিতে মানা করবেন, এবং কারও বিদ্যুতের শক লাগলে কী করবেন।\nধাপ ১: মিটার, খুঁটি থেকে আসা সার্ভিস লাইন বা মেইন সুইচের আগের তারের কোনো কাজ করবেন না। মেইন সুইচ বন্ধ থাকলেও এগুলোতে কারেন্ট থাকে। গ্রাহককে বিদ্যুৎ অফিসে জানাতে বলুন।\nধাপ ২: ভেজা জায়গায় বিদ্যুতের কাজ করবেন না: ভেজা মেঝে, ব্যবহার চলছে এমন বাথরুম, পানি জমা ঘর বা বৃষ্টির মধ্যে। জায়গা শুকানো পর্যন্ত অপেক্ষা করুন।\nধাপ ৩: পোড়া, গলা বা কালো হয়ে যাওয়া তার, কিংবা গরম বা গন্ধ বের হওয়া বোর্ড মেরামত করবেন না। মেইন সুইচ বন্ধ করুন এবং গ্রাহককে দক্ষ ইলেকট্রিশিয়ান ডাকতে বলুন।\nধাপ ৪: পরিষ্কার করে বলুন: \"এই কাজটি আমার জন্য নিরাপদ নয়। দয়া করে একজন দক্ষ ইলেকট্রিশিয়ান ডাকুন।\" টাকার জন্য বিপজ্জনক কাজ নেবেন না।\nধাপ ৫: কারও শক লাগলে তাঁকে ছোঁবেন না। আগে মেইন সুইচ বন্ধ করুন বা প্লাগ খুলে ফেলুন।\nধাপ ৬: বিদ্যুৎ বন্ধ করতে না পারলে শুকনো কিছুর ওপর দাঁড়িয়ে শুকনো কাঠের লাঠি দিয়ে তাঁকে তার থেকে সরিয়ে দিন। ধাতু বা ভেজা কিছু কখনো ব্যবহার করবেন না।\nধাপ ৭: ৯৯৯-এ ফোন করুন। তিনি শ্বাস না নিলে এবং আপনার জানা থাকলে বুকে চাপ দেওয়া শুরু করুন। শক লাগা প্রত্যেককে ডাক্তারের কাছে নিন, তিনি ভালো আছেন বললেও।\nঝুঁকি: তার ধরে থাকা মানুষকে ছুঁলে কারেন্ট আপনার শরীরেও চলে আসবে। তাঁকে ছোঁয়ার আগে বিদ্যুৎ বন্ধ করুন।\nমনে রাখুন: বিপজ্জনক কাজে না বলাই ভালো কাজ। শক লাগলে: ছোঁবেন না, বিদ্যুৎ বন্ধ করুন, ৯৯৯-এ ফোন করুন।",
+          "youtubeVideoId": null,
+          "durationS": 300,
+          "isSafety": true
+        }
+      ],
+      "questions": [
+        {
+          "promptEn": "You take out your pliers and see that the handle cover is cracked and the metal shows through. What do you do?",
+          "promptBn": "প্লায়ার্স বের করে দেখলেন হাতলের কভার ফাটা এবং ভেতরের ধাতু দেখা যাচ্ছে। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Wrap your hand in a cloth and use them",
+              "bn": "হাতে কাপড় পেঁচিয়ে সেটি ব্যবহার করা"
+            },
+            {
+              "id": "b",
+              "en": "Use them, but only for small jobs",
+              "bn": "ব্যবহার করা, তবে শুধু ছোট কাজে"
+            },
+            {
+              "id": "c",
+              "en": "Do not use them, and use a tool with a whole, dry handle cover",
+              "bn": "সেটি ব্যবহার না করা, এবং অক্ষত ও শুকনো কভারের সরঞ্জাম ব্যবহার করা"
+            },
+            {
+              "id": "d",
+              "en": "Wet the handle so it grips better",
+              "bn": "ভালো করে ধরার জন্য হাতল ভিজিয়ে নেওয়া"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "A broken handle cover can pass current into your hand.",
+          "explanationBn": "হাতলের ভাঙা কভার দিয়ে কারেন্ট আপনার হাতে চলে আসতে পারে।"
+        },
+        {
+          "promptEn": "You are going to an electrical job. What should you wear on your feet?",
+          "promptBn": "আপনি বিদ্যুতের কাজে যাচ্ছেন। পায়ে কী থাকা উচিত?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Dry shoes with rubber soles",
+              "bn": "রাবারের সোলের শুকনো জুতা"
+            },
+            {
+              "id": "b",
+              "en": "Nothing, so that you can feel the floor",
+              "bn": "খালি পা, যাতে মেঝে বোঝা যায়"
+            },
+            {
+              "id": "c",
+              "en": "Wet sandals",
+              "bn": "ভেজা স্যান্ডেল"
+            },
+            {
+              "id": "d",
+              "en": "Anything, it makes no difference",
+              "bn": "যেকোনো কিছু, কোনো পার্থক্য নেই"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "Dry rubber soles help to stop current passing through your body to the ground.",
+          "explanationBn": "শুকনো রাবারের সোল কারেন্টকে আপনার শরীর দিয়ে মাটিতে যেতে বাধা দেয়।"
+        },
+        {
+          "promptEn": "You have switched off the MCB. What must you do before you touch the wire?",
+          "promptBn": "আপনি MCB বন্ধ করেছেন। তারে হাত দেওয়ার আগে কী করতেই হবে?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Nothing more, the MCB is off",
+              "bn": "আর কিছু না, MCB তো বন্ধ"
+            },
+            {
+              "id": "b",
+              "en": "Test the wire with a tester that you have checked on a live point",
+              "bn": "চালু লাইনে যাচাই করা টেস্টার দিয়ে তারটি পরীক্ষা করা"
+            },
+            {
+              "id": "c",
+              "en": "Touch the wire quickly with the back of your hand",
+              "bn": "হাতের উল্টো পিঠ দিয়ে তারটি দ্রুত ছুঁয়ে দেখা"
+            },
+            {
+              "id": "d",
+              "en": "Ask the customer whether the wire is live",
+              "bn": "তারে কারেন্ট আছে কি না গ্রাহককে জিজ্ঞেস করা"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "The wrong MCB may be off, so only a test with a working tester shows that the wire has no power.",
+          "explanationBn": "ভুল MCB বন্ধ হয়ে থাকতে পারে, তাই ভালো টেস্টার দিয়ে পরীক্ষা করলেই কেবল বোঝা যায় তারে কারেন্ট নেই।"
+        },
+        {
+          "promptEn": "Why do you touch your tester to a working socket before you switch off the power?",
+          "promptBn": "বিদ্যুৎ বন্ধ করার আগে টেস্টারটি চালু সকেটে ধরে দেখেন কেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "To charge the tester",
+              "bn": "টেস্টার চার্জ করার জন্য"
+            },
+            {
+              "id": "b",
+              "en": "To find out the voltage of the house",
+              "bn": "বাসার ভোল্টেজ জানার জন্য"
+            },
+            {
+              "id": "c",
+              "en": "To show the customer that you are working",
+              "bn": "গ্রাহককে দেখানোর জন্য যে আপনি কাজ করছেন"
+            },
+            {
+              "id": "d",
+              "en": "To be sure that the tester itself works",
+              "bn": "টেস্টারটি নিজে ঠিক আছে কি না নিশ্চিত হওয়ার জন্য"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "A broken tester stays dark even on a live wire, so you must see it light first.",
+          "explanationBn": "নষ্ট টেস্টার কারেন্ট থাকা তারেও জ্বলে না, তাই আগে সেটি জ্বলতে দেখা দরকার।"
+        },
+        {
+          "promptEn": "An MCB trips every time the customer switches it on. The customer asks you to fit a bigger MCB. What do you do?",
+          "promptBn": "গ্রাহক চালু করলেই একটি MCB বারবার ট্রিপ করছে। গ্রাহক বড় MCB লাগিয়ে দিতে বলছেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Fit the bigger MCB",
+              "bn": "বড় MCB লাগিয়ে দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Refuse, keep the MCB off and look for the fault",
+              "bn": "মানা করা, MCB বন্ধ রাখা এবং সমস্যা খোঁজা"
+            },
+            {
+              "id": "c",
+              "en": "Tie the MCB lever up with wire",
+              "bn": "তার দিয়ে MCB-র হাতল বেঁধে রাখা"
+            },
+            {
+              "id": "d",
+              "en": "Join the wires directly without an MCB",
+              "bn": "MCB ছাড়া তার সরাসরি জুড়ে দেওয়া"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "A bigger MCB lets the wires overheat and can start a fire.",
+          "explanationBn": "বড় MCB লাগালে তার অতিরিক্ত গরম হয়ে আগুন লাগতে পারে।"
+        },
+        {
+          "promptEn": "What does the earth wire do?",
+          "promptBn": "আর্থ তারের কাজ কী?",
+          "options": [
+            {
+              "id": "a",
+              "en": "It brings power to the switch",
+              "bn": "সুইচে বিদ্যুৎ নিয়ে আসা"
+            },
+            {
+              "id": "b",
+              "en": "It makes the fan turn faster",
+              "bn": "ফ্যান জোরে ঘোরানো"
+            },
+            {
+              "id": "c",
+              "en": "It takes leaking current safely into the ground",
+              "bn": "লিক হওয়া কারেন্ট নিরাপদে মাটিতে পাঠানো"
+            },
+            {
+              "id": "d",
+              "en": "It lowers the electricity bill",
+              "bn": "বিদ্যুৎ বিল কমানো"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "With a good earth, the metal body of an appliance does not shock the person who touches it.",
+          "explanationBn": "আর্থ ঠিক থাকলে যন্ত্রের ধাতব বডি ছুঁলে শক লাগে না।"
+        },
+        {
+          "promptEn": "You are about to take the wires out of an old socket. What do you do first, so that you can put them back correctly?",
+          "promptBn": "পুরোনো সকেট থেকে তার খুলতে যাচ্ছেন। পরে ঠিকভাবে লাগানোর জন্য আগে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Take a photo or draw which wire goes to which terminal",
+              "bn": "কোন তার কোন টার্মিনালে আছে তার ছবি তোলা বা এঁকে রাখা"
+            },
+            {
+              "id": "b",
+              "en": "Pull all the wires out together",
+              "bn": "সব তার একসঙ্গে টেনে খোলা"
+            },
+            {
+              "id": "c",
+              "en": "Cut the wires short",
+              "bn": "তারগুলো কেটে ছোট করা"
+            },
+            {
+              "id": "d",
+              "en": "Remember the colours only",
+              "bn": "শুধু রং মনে রাখা"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "A photo shows exactly which wire goes to which terminal.",
+          "explanationBn": "ছবিতে ঠিক দেখা যায় কোন তার কোন টার্মিনালে যাবে।"
+        },
+        {
+          "promptEn": "You open a socket and see that the cover of the wires is black and cracking. What do you do?",
+          "promptBn": "সকেট খুলে দেখলেন তারের কভার কালো ও ফাটা। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Wrap tape on it and fit the new socket",
+              "bn": "টেপ পেঁচিয়ে নতুন সকেট লাগিয়ে দেওয়া"
+            },
+            {
+              "id": "b",
+              "en": "Cut off the black part and continue",
+              "bn": "কালো অংশ কেটে ফেলে কাজ চালিয়ে যাওয়া"
+            },
+            {
+              "id": "c",
+              "en": "Fit the socket quickly before it gets worse",
+              "bn": "আরও খারাপ হওয়ার আগে দ্রুত সকেট লাগিয়ে দেওয়া"
+            },
+            {
+              "id": "d",
+              "en": "Stop, keep the power off and tell the customer to call a qualified electrician",
+              "bn": "থামা, বিদ্যুৎ বন্ধ রাখা এবং গ্রাহককে দক্ষ ইলেকট্রিশিয়ান ডাকতে বলা"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "Burnt wiring means a deeper fault that a beginner must not repair.",
+          "explanationBn": "পোড়া তার মানে ভেতরে বড় সমস্যা আছে, যা নতুন কর্মীর মেরামত করা উচিত নয়।"
+        },
+        {
+          "promptEn": "There is power, but the ceiling fan only hums and does not turn. What do you check first?",
+          "promptBn": "বিদ্যুৎ আছে, কিন্তু সিলিং ফ্যান শুধু গুনগুন করে, ঘোরে না। আগে কী দেখবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "The meter",
+              "bn": "মিটার"
+            },
+            {
+              "id": "b",
+              "en": "The capacitor",
+              "bn": "ক্যাপাসিটর"
+            },
+            {
+              "id": "c",
+              "en": "The service line",
+              "bn": "সার্ভিস লাইন"
+            },
+            {
+              "id": "d",
+              "en": "The colour of the blades",
+              "bn": "ব্লেডের রং"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "A weak capacitor is the most common reason a fan hums without turning.",
+          "explanationBn": "ফ্যান গুনগুন করে কিন্তু না ঘোরার সবচেয়ে সাধারণ কারণ দুর্বল ক্যাপাসিটর।"
+        },
+        {
+          "promptEn": "You switch a tripped MCB back on and it trips again at once. What is right?",
+          "promptBn": "ট্রিপ করা MCB চালু করলেন, সঙ্গে সঙ্গে আবার ট্রিপ করল। কোনটি সঠিক?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Keep switching it on until it stays on",
+              "bn": "চালু না থাকা পর্যন্ত বারবার চালু করা"
+            },
+            {
+              "id": "b",
+              "en": "Hold the lever up with your finger",
+              "bn": "আঙুল দিয়ে হাতল ধরে রাখা"
+            },
+            {
+              "id": "c",
+              "en": "Leave it off, because there is a fault in the line",
+              "bn": "বন্ধ রাখা, কারণ লাইনে সমস্যা আছে"
+            },
+            {
+              "id": "d",
+              "en": "Fit a bigger MCB",
+              "bn": "বড় MCB লাগানো"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "An MCB that trips again is warning you of a short circuit or too much load.",
+          "explanationBn": "MCB আবার ট্রিপ করা মানে শর্ট সার্কিট বা অতিরিক্ত লোডের সতর্কবার্তা।"
+        },
+        {
+          "promptEn": "A customer asks you to tighten a loose wire at the meter. What do you do?",
+          "promptBn": "গ্রাহক মিটারের একটি ঢিলা তার শক্ত করে দিতে বলছেন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Refuse, and tell the customer to call the electricity office",
+              "bn": "মানা করা, এবং গ্রাহককে বিদ্যুৎ অফিসে জানাতে বলা"
+            },
+            {
+              "id": "b",
+              "en": "Switch off the main switch and tighten it",
+              "bn": "মেইন সুইচ বন্ধ করে তারটি শক্ত করা"
+            },
+            {
+              "id": "c",
+              "en": "Do it wearing rubber sandals",
+              "bn": "রাবারের স্যান্ডেল পরে কাজটি করা"
+            },
+            {
+              "id": "d",
+              "en": "Do it quickly during load-shedding",
+              "bn": "লোডশেডিংয়ের সময় দ্রুত করে ফেলা"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "The meter and the service line stay live even when the main switch is off.",
+          "explanationBn": "মেইন সুইচ বন্ধ থাকলেও মিটার ও সার্ভিস লাইনে কারেন্ট থাকে।"
+        },
+        {
+          "promptEn": "A person is holding a live wire and cannot let go. What do you do first?",
+          "promptBn": "একজন কারেন্ট থাকা তার ধরে আছেন এবং ছাড়তে পারছেন না। আগে কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Pull them away by the hand",
+              "bn": "হাত ধরে টেনে সরানো"
+            },
+            {
+              "id": "b",
+              "en": "Do not touch them, and switch off the main switch",
+              "bn": "তাঁকে না ছোঁয়া, এবং মেইন সুইচ বন্ধ করা"
+            },
+            {
+              "id": "c",
+              "en": "Throw water on them",
+              "bn": "তাঁর গায়ে পানি ঢালা"
+            },
+            {
+              "id": "d",
+              "en": "Run to find a doctor",
+              "bn": "ডাক্তার খুঁজতে দৌড়ে যাওয়া"
+            }
+          ],
+          "correctOptionId": "b",
+          "explanationEn": "If you touch them while the power is on, the current passes into you too.",
+          "explanationBn": "বিদ্যুৎ চালু থাকা অবস্থায় তাঁকে ছুঁলে কারেন্ট আপনার শরীরেও চলে আসবে।"
+        },
+        {
+          "promptEn": "It is load-shedding. The customer says there is no power now, so you can change the switch quickly. What do you do?",
+          "promptBn": "লোডশেডিং চলছে। গ্রাহক বলছেন এখন বিদ্যুৎ নেই, তাই দ্রুত সুইচটি বদলে দিন। আপনি কী করবেন?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Change it quickly before the power returns",
+              "bn": "বিদ্যুৎ আসার আগে দ্রুত বদলে ফেলা"
+            },
+            {
+              "id": "b",
+              "en": "Work with one hand only",
+              "bn": "শুধু এক হাতে কাজ করা"
+            },
+            {
+              "id": "c",
+              "en": "Ask the customer to watch for the power",
+              "bn": "বিদ্যুৎ এল কি না গ্রাহককে খেয়াল রাখতে বলা"
+            },
+            {
+              "id": "d",
+              "en": "Switch off the MCB, label it and test the wires, as on any other job",
+              "bn": "অন্য যেকোনো কাজের মতোই MCB বন্ধ করা, লেবেল লাগানো ও তার পরীক্ষা করা"
+            }
+          ],
+          "correctOptionId": "d",
+          "explanationEn": "The power can return at any moment, so the line must be switched off and tested.",
+          "explanationBn": "যেকোনো মুহূর্তে বিদ্যুৎ চলে আসতে পারে, তাই লাইন বন্ধ করে পরীক্ষা করতেই হবে।"
+        },
+        {
+          "promptEn": "You are connecting a light switch. Which wire must the switch be on?",
+          "promptBn": "আপনি লাইটের সুইচ লাগাচ্ছেন। সুইচ কোন তারে বসবে?",
+          "options": [
+            {
+              "id": "a",
+              "en": "The phase wire",
+              "bn": "ফেজ তারে"
+            },
+            {
+              "id": "b",
+              "en": "The neutral wire",
+              "bn": "নিউট্রাল তারে"
+            },
+            {
+              "id": "c",
+              "en": "The earth wire",
+              "bn": "আর্থ তারে"
+            },
+            {
+              "id": "d",
+              "en": "Any wire, it makes no difference",
+              "bn": "যেকোনো তারে, কোনো পার্থক্য নেই"
+            }
+          ],
+          "correctOptionId": "a",
+          "explanationEn": "With the switch on the phase wire, power does not reach the holder when the switch is off.",
+          "explanationBn": "সুইচ ফেজ তারে থাকলে সুইচ বন্ধ করলে হোল্ডারে বিদ্যুৎ পৌঁছায় না।"
+        },
+        {
+          "promptEn": "The house has an IPS. You have switched off the main switch. What else must you do before you work?",
+          "promptBn": "বাসায় আইপিএস আছে। আপনি মেইন সুইচ বন্ধ করেছেন। কাজের আগে আর কী করতে হবে?",
+          "options": [
+            {
+              "id": "a",
+              "en": "Nothing, the main switch is enough",
+              "bn": "কিছু না, মেইন সুইচই যথেষ্ট"
+            },
+            {
+              "id": "b",
+              "en": "Switch on a fan to use up the power",
+              "bn": "বিদ্যুৎ শেষ করতে একটি ফ্যান চালানো"
+            },
+            {
+              "id": "c",
+              "en": "Switch off the IPS too, then test the wires",
+              "bn": "আইপিএসও বন্ধ করা, তারপর তার পরীক্ষা করা"
+            },
+            {
+              "id": "d",
+              "en": "Disconnect the meter",
+              "bn": "মিটারের সংযোগ খুলে ফেলা"
+            }
+          ],
+          "correctOptionId": "c",
+          "explanationEn": "An IPS can feed the wires even when the main switch is off.",
+          "explanationBn": "মেইন সুইচ বন্ধ থাকলেও আইপিএস থেকে তারে বিদ্যুৎ আসতে পারে।"
+        }
+      ]
+    }
+  ]
+}
