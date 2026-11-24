@@ -58,6 +58,8 @@ const course = (slug: string, isSafetyCritical: boolean) => ({
         bn: `বিকল্প ${id}`,
       })),
       correctOptionId: correct,
+      // The first two are lesson 1's checkpoint.
+      lesson: index < 2 ? 1 : null,
       explanationEn: "Because.",
       explanationBn: "কারণ।",
     }),

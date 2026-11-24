@@ -80,6 +80,8 @@ export const ADMIN_ROUTE_ROLES = {
   "POST training/courses": ["ADMIN"],
   "POST training/courses/:id/publish": ["ADMIN"],
   "POST training/courses/:id/unpublish": ["ADMIN"],
+  "POST training/step-images/complete": ["ADMIN"],
+  "POST training/step-images/sign": ["ADMIN"],
   "POST users/:id/moderation": ["ADMIN", "MODERATOR"],
   "POST users/:id/moderation/restore": ["ADMIN", "MODERATOR"],
   "POST users/:id/reset-sessions": ["ADMIN", "SUPPORT"],

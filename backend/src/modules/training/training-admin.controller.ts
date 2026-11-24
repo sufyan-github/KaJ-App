@@ -20,8 +20,14 @@ import {
   AdminActor,
   AdminRequestContext,
 } from "../admin-auth/admin-auth.types";
-import { CourseDocumentDto, PublishReasonDto } from "./dto/training-admin.dto";
+import {
+  CourseDocumentDto,
+  PublishReasonDto,
+  StepImageCompleteDto,
+  StepImageSignDto,
+} from "./dto/training-admin.dto";
 import { TrainingAdminService } from "./training-admin.service";
+import { TrainingStepImagesService } from "./training-step-images.service";
 
 /** Course authoring for the admin console (admin session + TOTP). */
 @Controller("admin/training/courses")
@@ -111,6 +117,30 @@ export class TrainingAdminController {
       actor,
       context(request),
     );
+  }
+}
+
+/** Step pictures (upload purpose TRAINING_STEP_IMAGE): course editors only. */
+@Controller("admin/training/step-images")
+@UseGuards(AdminSessionGuard)
+export class TrainingStepImagesController {
+  constructor(private readonly images: TrainingStepImagesService) {}
+
+  @Post("sign")
+  @Policy(Policies.public())
+  @AdminRoles(AdminRole.ADMIN)
+  sign(@Body() body: StepImageSignDto, @CurrentAdmin() actor: AdminActor) {
+    return this.images.sign(actor.userId, body);
+  }
+
+  @Post("complete")
+  @Policy(Policies.public())
+  @AdminRoles(AdminRole.ADMIN)
+  complete(
+    @Body() body: StepImageCompleteDto,
+    @CurrentAdmin() actor: AdminActor,
+  ) {
+    return this.images.complete(actor.userId, body);
   }
 }
 

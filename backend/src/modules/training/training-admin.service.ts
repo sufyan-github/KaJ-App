@@ -14,8 +14,30 @@ import {
 import {
   CourseContent,
   courseSchema,
+  lessonSteps,
+  lessonsWithoutTwoCheckpoints,
+  storedSteps,
   upsertCourse,
 } from "./content/training-content.loader";
+import {
+  TrainingStepImagesService,
+  trainingImageInvalid,
+} from "./training-step-images.service";
+
+const PREVIEW_SECONDS = 5 * 60;
+
+/** 409: a locked-order course needs two checkpoint questions per lesson. */
+export function checkpointsIncompleteError(lessons: readonly number[]) {
+  return new ConflictException({
+    code: "COURSE_CHECKPOINTS_INCOMPLETE",
+    message: `A safety-critical course needs exactly 2 checkpoint questions for every lesson (lessons ${lessons.join(", ")} do not).`,
+    messageKey: "error.training.checkpoints_incomplete",
+    details: lessons.map((lesson) => ({
+      field: `lessons.${lesson - 1}`,
+      rules: ["checkpoint_count"],
+    })),
+  });
+}
 
 /**
  * P1.5 course authoring. A course is edited as one document (metadata,
@@ -27,7 +49,10 @@ import {
  */
 @Injectable()
 export class TrainingAdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly images: TrainingStepImagesService,
+  ) {}
 
   async list() {
     const rows = await this.prisma.trainingCourse.findMany({
@@ -72,11 +97,20 @@ export class TrainingAdminService {
       where: { id },
       include: {
         skill: { select: { slug: true } },
-        lessons: { orderBy: { sort_order: "asc" } },
-        questions: { where: { is_active: true }, orderBy: { id: "asc" } },
+        lessons: {
+          orderBy: { sort_order: "asc" },
+          include: { steps: { orderBy: { sort_order: "asc" } } },
+        },
+        questions: {
+          where: { is_active: true },
+          orderBy: [{ sort_order: "asc" }, { id: "asc" }],
+        },
       },
     });
     if (!course) throw new NotFoundException();
+    const lessonNumber = new Map(
+      course.lessons.map((lesson, index) => [lesson.id, index + 1]),
+    );
     const document: CourseContent = {
       slug: course.slug,
       skillSlug: course.skill?.slug ?? null,
@@ -98,6 +132,8 @@ export class TrainingAdminService {
         youtubeVideoId: lesson.youtube_video_id,
         durationS: lesson.duration_s,
         isSafety: lesson.is_safety,
+        // Stored steps, or the ones derived from the summary (round-trips).
+        steps: storedSteps(lesson),
       })),
       questions: course.questions.map((question) => ({
         promptEn: question.prompt_en,
@@ -107,13 +143,30 @@ export class TrainingAdminService {
         correctOptionId: question.correct_option_id,
         explanationEn: question.explanation_en,
         explanationBn: question.explanation_bn,
+        lesson: question.lesson_id
+          ? (lessonNumber.get(question.lesson_id) ?? null)
+          : null,
       })),
     };
+    // Read-only previews for the editor; not part of the saved document.
+    const lessons = await Promise.all(
+      document.lessons.map(async (lesson) => ({
+        ...lesson,
+        steps: await Promise.all(
+          (lesson.steps ?? []).map(async (step) => ({
+            ...step,
+            imagePreviewUrl: step.image
+              ? await this.images.url(step.image, PREVIEW_SECONDS)
+              : null,
+          })),
+        ),
+      })),
+    );
     return {
       id: course.id,
       version: course.version,
       isPublished: course.is_published,
-      document,
+      document: { ...document, lessons },
     };
   }
 
@@ -124,6 +177,7 @@ export class TrainingAdminService {
     context: AdminRequestContext,
   ) {
     const course = parseCourse(raw);
+    await this.assertImagesExist(course, new Set());
     const exists = await this.prisma.trainingCourse.findUnique({
       where: { slug: course.slug },
       select: { id: true },
@@ -171,6 +225,15 @@ export class TrainingAdminService {
         messageKey: "error.training.slug_immutable",
         field: "slug",
       });
+    if (existing.is_published && course.isSafetyCritical) {
+      const missing = lessonsWithoutTwoCheckpoints(
+        course.lessons.length,
+        course.questions.map((question) => question.lesson),
+      );
+      if (missing.length > 0) throw checkpointsIncompleteError(missing);
+    }
+    const imagesBefore = await this.courseImageKeys(id);
+    await this.assertImagesExist(course, imagesBefore);
     const skillId = await this.skillId(course.skillSlug);
     const outcome = await this.prisma.$transaction(async (transaction) => {
       const result = await upsertCourse(transaction, course, skillId, false);
@@ -190,6 +253,15 @@ export class TrainingAdminService {
         });
       return result;
     });
+    // A picture no step uses any more is deleted from storage.
+    const imagesAfter = await this.courseImageKeys(id);
+    for (const key of imagesBefore) {
+      if (imagesAfter.has(key)) continue;
+      const elsewhere = await this.prisma.trainingLessonStep.count({
+        where: { image_key: key },
+      });
+      if (elsewhere === 0) await this.images.remove(key);
+    }
     return { outcome, ...(await this.document(id)) };
   }
 
@@ -222,6 +294,27 @@ export class TrainingAdminService {
       throw new ConflictException(
         "A course needs questions before publishing.",
       );
+    if (published && existing.is_safety_critical) {
+      const [lessons, checkpoints] = await Promise.all([
+        this.prisma.trainingLesson.findMany({
+          where: { course_id: id },
+          orderBy: { sort_order: "asc" },
+          select: { id: true },
+        }),
+        this.prisma.trainingQuestion.findMany({
+          where: { course_id: id, is_active: true, lesson_id: { not: null } },
+          select: { lesson_id: true },
+        }),
+      ]);
+      const number = new Map(
+        lessons.map((lesson, index) => [lesson.id, index + 1]),
+      );
+      const missing = lessonsWithoutTwoCheckpoints(
+        lessons.length,
+        checkpoints.map((row) => number.get(row.lesson_id!) ?? null),
+      );
+      if (missing.length > 0) throw checkpointsIncompleteError(missing);
+    }
     await this.prisma.$transaction([
       this.prisma.trainingCourse.update({
         where: { id },
@@ -239,6 +332,31 @@ export class TrainingAdminService {
       }),
     ]);
     return this.document(id);
+  }
+
+  private async courseImageKeys(courseId: string): Promise<Set<string>> {
+    const rows = await this.prisma.trainingLessonStep.findMany({
+      where: { lesson: { course_id: courseId }, image_key: { not: null } },
+      select: { image_key: true },
+    });
+    return new Set(rows.map((row) => row.image_key!));
+  }
+
+  /** Every new picture key must be an uploaded step picture. */
+  private async assertImagesExist(
+    course: CourseContent,
+    known: ReadonlySet<string>,
+  ) {
+    for (const [index, lesson] of course.lessons.entries())
+      for (const step of lessonSteps(lesson))
+        if (
+          step.image &&
+          !known.has(step.image) &&
+          !(await this.images.exists(step.image))
+        )
+          throw trainingImageInvalid(
+            `Lesson ${index + 1}: the picture ${step.image} was not uploaded (use the step picture upload first).`,
+          );
   }
 
   private async skillId(slug: string | null) {
