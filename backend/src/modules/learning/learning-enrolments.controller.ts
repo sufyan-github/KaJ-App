@@ -5,10 +5,12 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from "@nestjs/common";
 import { RoleMode } from "@prisma/client";
 import { ApiTags } from "@nestjs/swagger";
 
+import { CursorQueryDto } from "../../common/api/cursor-query.dto";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { Roles } from "../../common/decorators/roles.decorator";
 import { Policy } from "../../common/policy/policy.decorator";
@@ -75,6 +77,16 @@ export class LearningEnrolmentsController {
     @Body() body: WithdrawLearningDto,
   ) {
     return this.enrolments.withdrawEnrolment(claims.sub, id, body);
+  }
+
+  /** R7 (mobile M6): my own learning applications, newest first. */
+  @Get("me/learning-applications")
+  @Policy(Policies.authenticated())
+  myApplications(
+    @CurrentUser() claims: AccessTokenClaims,
+    @Query() query: CursorQueryDto,
+  ) {
+    return this.enrolments.myApplications(claims.sub, query);
   }
 
   @Get("learning-enrolments")
