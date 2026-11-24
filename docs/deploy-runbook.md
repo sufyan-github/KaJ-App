@@ -100,7 +100,7 @@ Must **not** be set in production: `OTP_FIXED_CODE`, `ADMIN_SEED_*`.
 
 Optional: `SENTRY_DSN` (unused today), `DEFAULT_LOCALE`, `DEFAULT_TIMEZONE`, `PLATFORM_FEE_DEFAULT_BPS`, `JWT_ACCESS_TTL`, `JWT_REFRESH_TTL`, `OTP_*` limits.
 
-Admin console (separate Next.js service): `KAJ_API_URL` = the API's https base URL.
+Admin console (separate Next.js service): `KAJ_API_URL` = the API's https base URL; `KAJ_STORAGE_ORIGINS` = the object storage origin(s), space separated (e.g. `https://<bucket-host>`). It is used for the document-preview CSP and by the console's same-origin upload relay (`/api/admin/uploads`, step pictures), which only forwards PUTs to these origins. The relay PUTs server-side to the presigned URL with the returned `requiredHeaders` (`content-type`) and the exact byte length; no browser CORS is involved.
 
 ## 4. Trust proxy (`TRUST_PROXY_HOPS`)
 
