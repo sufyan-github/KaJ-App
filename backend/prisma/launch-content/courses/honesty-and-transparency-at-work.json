@@ -62,11 +62,16 @@
               "en": "Only if the customer asks",
               "bn": "শুধু গ্রাহক জিজ্ঞেস করলে"
             },
-            { "id": "d", "en": "The next day by phone", "bn": "পরদিন ফোনে" }
+            {
+              "id": "d",
+              "en": "The next day by phone",
+              "bn": "পরদিন ফোনে"
+            }
           ],
           "correctOptionId": "b",
           "explanationEn": "A price said before the work lets the customer decide and leaves nothing to argue about.",
-          "explanationBn": "কাজের আগে দাম বললে গ্রাহক সিদ্ধান্ত নিতে পারেন এবং পরে ঝগড়ার কিছু থাকে না।"
+          "explanationBn": "কাজের আগে দাম বললে গ্রাহক সিদ্ধান্ত নিতে পারেন এবং পরে ঝগড়ার কিছু থাকে না।",
+          "lesson": 1
         },
         {
           "promptEn": "The customer pays you ৳600 in cash for the job. What do you do?",
@@ -95,7 +100,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "A record of the payment protects both you and the customer.",
-          "explanationBn": "টাকা পাওয়ার প্রমাণ থাকলে আপনি ও গ্রাহক দুজনই সুরক্ষিত থাকেন।"
+          "explanationBn": "টাকা পাওয়ার প্রমাণ থাকলে আপনি ও গ্রাহক দুজনই সুরক্ষিত থাকেন।",
+          "lesson": 1
         },
         {
           "promptEn": "While moving a table you scratch the customer's floor. Nobody saw it. What do you do?",
@@ -124,7 +130,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "A mistake you report yourself can be forgiven, but a hidden one destroys trust.",
-          "explanationBn": "নিজে জানানো ভুল ক্ষমা পেতে পারে, কিন্তু লুকানো ভুল আস্থা নষ্ট করে।"
+          "explanationBn": "নিজে জানানো ভুল ক্ষমা পেতে পারে, কিন্তু লুকানো ভুল আস্থা নষ্ট করে।",
+          "lesson": 2
         },
         {
           "promptEn": "You want a photo of your finished work to show to future customers. What do you do first?",
@@ -153,7 +160,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "The home is the customer's private place, so a photo needs their permission.",
-          "explanationBn": "বাসা গ্রাহকের ব্যক্তিগত জায়গা, তাই ছবি তুলতে তাঁর অনুমতি লাগে।"
+          "explanationBn": "বাসা গ্রাহকের ব্যক্তিগত জায়গা, তাই ছবি তুলতে তাঁর অনুমতি লাগে।",
+          "lesson": 2
         },
         {
           "promptEn": "A customer says: next time let us do it outside the app and I will pay ৳100 less. What do you do?",
@@ -182,7 +190,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "Without a record in the app, neither of you has proof if something goes wrong.",
-          "explanationBn": "অ্যাপে রেকর্ড না থাকলে কোনো সমস্যা হলে দুজনের কারও কাছেই প্রমাণ থাকে না।"
+          "explanationBn": "অ্যাপে রেকর্ড না থাকলে কোনো সমস্যা হলে দুজনের কারও কাছেই প্রমাণ থাকে না।",
+          "lesson": 3
         },
         {
           "promptEn": "You are new on the app and have no reviews yet. What is the honest way to get them?",
@@ -211,7 +220,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "False reviews are dishonest, and customers lose trust when the work does not match them.",
-          "explanationBn": "মিথ্যা রিভিউ অসৎ কাজ, আর কাজের সঙ্গে রিভিউ না মিললে গ্রাহকের আস্থা চলে যায়।"
+          "explanationBn": "মিথ্যা রিভিউ অসৎ কাজ, আর কাজের সঙ্গে রিভিউ না মিললে গ্রাহকের আস্থা চলে যায়।",
+          "lesson": 3
         },
         {
           "promptEn": "Halfway through a job you find extra work is needed that will cost ৳300 more. What do you do?",
@@ -280,7 +290,11 @@
               "en": "Show the shop receipt and say the real amount",
               "bn": "দোকানের রসিদ দেখাবেন এবং আসল দাম বলবেন"
             },
-            { "id": "b", "en": "Say ৳400", "bn": "বলবেন ৳৪০০" },
+            {
+              "id": "b",
+              "en": "Say ৳400",
+              "bn": "বলবেন ৳৪০০"
+            },
             {
               "id": "c",
               "en": "Say the receipt is lost and charge more",
@@ -329,7 +343,11 @@
           "promptEn": "A friend asks for the address of the customer whose house you worked in yesterday, and what was inside. What do you do?",
           "promptBn": "এক বন্ধু জানতে চাইল গতকাল যে গ্রাহকের বাসায় কাজ করেছেন তাঁর ঠিকানা কী এবং ভেতরে কী কী আছে। আপনি কী করবেন?",
           "options": [
-            { "id": "a", "en": "Tell him everything", "bn": "সব বলে দেবেন" },
+            {
+              "id": "a",
+              "en": "Tell him everything",
+              "bn": "সব বলে দেবেন"
+            },
             {
               "id": "b",
               "en": "Tell him only the address",
@@ -354,7 +372,11 @@
           "promptEn": "Someone says he can get you more jobs if you pay him secretly. What do you do?",
           "promptBn": "একজন বলল, গোপনে টাকা দিলে সে আপনাকে আরও কাজ পাইয়ে দেবে। আপনি কী করবেন?",
           "options": [
-            { "id": "a", "en": "Pay him", "bn": "তাকে টাকা দেবেন" },
+            {
+              "id": "a",
+              "en": "Pay him",
+              "bn": "তাকে টাকা দেবেন"
+            },
             {
               "id": "b",
               "en": "Refuse, because you do not give or take bribes",

@@ -79,7 +79,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "One small, clear goal tells you what to explain, practise and check in the hour.",
-          "explanationBn": "একটি ছোট, পরিষ্কার লক্ষ্য থাকলে এক ঘণ্টায় কী বোঝাবেন, কী অনুশীলন করাবেন ও কী যাচাই করবেন তা ঠিক থাকে।"
+          "explanationBn": "একটি ছোট, পরিষ্কার লক্ষ্য থাকলে এক ঘণ্টায় কী বোঝাবেন, কী অনুশীলন করাবেন ও কী যাচাই করবেন তা ঠিক থাকে।",
+          "lesson": 1
         },
         {
           "promptEn": "During practice time the student is stuck on one step of a sum. What is the best thing to do?",
@@ -108,7 +109,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "The student learns by doing the work, so help only where it is needed.",
-          "explanationBn": "শিক্ষার্থী নিজে করে শেখে, তাই শুধু দরকারের জায়গায় সাহায্য করুন।"
+          "explanationBn": "শিক্ষার্থী নিজে করে শেখে, তাই শুধু দরকারের জায়গায় সাহায্য করুন।",
+          "lesson": 1
         },
         {
           "promptEn": "In the middle of a lesson your phone vibrates in your bag. A friend is calling. What do you do?",
@@ -137,7 +139,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "The lesson hour belongs to the student; only an emergency call may interrupt it.",
-          "explanationBn": "পড়ানোর সময়টুকু শিক্ষার্থীর; শুধু জরুরি ফোনেই তা থামানো যায়।"
+          "explanationBn": "পড়ানোর সময়টুকু শিক্ষার্থীর; শুধু জরুরি ফোনেই তা থামানো যায়।",
+          "lesson": 2
         },
         {
           "promptEn": "While teaching, you heard the family arguing in the next room. Later, another student's mother asks you about that family. What do you do?",
@@ -166,7 +169,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "What you see or hear in a student's home stays there; this is how families come to trust you.",
-          "explanationBn": "শিক্ষার্থীর বাসায় যা দেখেন বা শোনেন তা সেখানেই থাকবে; এভাবেই পরিবারের বিশ্বাস তৈরি হয়।"
+          "explanationBn": "শিক্ষার্থীর বাসায় যা দেখেন বা শোনেন তা সেখানেই থাকবে; এভাবেই পরিবারের বিশ্বাস তৈরি হয়।",
+          "lesson": 2
         },
         {
           "promptEn": "You arrive for the lesson and only your 10-year-old student is at home. What should you do?",
@@ -195,7 +199,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "Never be alone with a child when no other adult is near; this protects the child and you.",
-          "explanationBn": "কাছাকাছি অন্য বড় মানুষ না থাকলে শিশুর সঙ্গে একা থাকবেন না; এতে শিশু ও আপনি দুজনই সুরক্ষিত থাকেন।"
+          "explanationBn": "কাছাকাছি অন্য বড় মানুষ না থাকলে শিশুর সঙ্গে একা থাকবেন না; এতে শিশু ও আপনি দুজনই সুরক্ষিত থাকেন।",
+          "lesson": 3
         },
         {
           "promptEn": "A student tells you that a relative touches her in a way she does not like, and asks you to tell nobody. What is right?",
@@ -224,7 +229,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "A child cannot stop harm alone, so a safe adult must be told; a promise of secrecy leaves the child unprotected.",
-          "explanationBn": "শিশু একা ক্ষতি থামাতে পারে না, তাই একজন নিরাপদ বড় মানুষকে জানাতেই হবে; গোপন রাখার কথা দিলে শিশু অরক্ষিত থেকে যায়।"
+          "explanationBn": "শিশু একা ক্ষতি থামাতে পারে না, তাই একজন নিরাপদ বড় মানুষকে জানাতেই হবে; গোপন রাখার কথা দিলে শিশু অরক্ষিত থেকে যায়।",
+          "lesson": 3
         },
         {
           "promptEn": "A parent asks, \"If you teach my daughter, will she surely get A+?\" What is the best answer?",
@@ -253,7 +259,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "Nobody can guarantee an exam result; honest reports are what build trust.",
-          "explanationBn": "পরীক্ষার ফল কেউ নিশ্চিত করতে পারে না; সত্য খবর দিলেই বিশ্বাস তৈরি হয়।"
+          "explanationBn": "পরীক্ষার ফল কেউ নিশ্চিত করতে পারে না; সত্য খবর দিলেই বিশ্বাস তৈরি হয়।",
+          "lesson": 4
         },
         {
           "promptEn": "Before the first lesson, what should you and the parent agree in writing in the app chat?",
@@ -282,7 +289,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "When everything is written down first, there is no argument later about the fee or the days.",
-          "explanationBn": "সব কিছু আগে লিখে ঠিক করলে পরে বেতন বা দিন নিয়ে ঝামেলা হয় না।"
+          "explanationBn": "সব কিছু আগে লিখে ঠিক করলে পরে বেতন বা দিন নিয়ে ঝামেলা হয় না।",
+          "lesson": 4
         },
         {
           "promptEn": "A student has not done the homework for the third time and is not paying attention. What do you do?",

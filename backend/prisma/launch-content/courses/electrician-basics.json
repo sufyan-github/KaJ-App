@@ -97,7 +97,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "A broken handle cover can pass current into your hand.",
-          "explanationBn": "হাতলের ভাঙা কভার দিয়ে কারেন্ট আপনার হাতে চলে আসতে পারে।"
+          "explanationBn": "হাতলের ভাঙা কভার দিয়ে কারেন্ট আপনার হাতে চলে আসতে পারে।",
+          "lesson": 1
         },
         {
           "promptEn": "You are going to an electrical job. What should you wear on your feet?",
@@ -126,7 +127,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "Dry rubber soles help to stop current passing through your body to the ground.",
-          "explanationBn": "শুকনো রাবারের সোল কারেন্টকে আপনার শরীর দিয়ে মাটিতে যেতে বাধা দেয়।"
+          "explanationBn": "শুকনো রাবারের সোল কারেন্টকে আপনার শরীর দিয়ে মাটিতে যেতে বাধা দেয়।",
+          "lesson": 1
         },
         {
           "promptEn": "You have switched off the MCB. What must you do before you touch the wire?",
@@ -155,7 +157,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "The wrong MCB may be off, so only a test with a working tester shows that the wire has no power.",
-          "explanationBn": "ভুল MCB বন্ধ হয়ে থাকতে পারে, তাই ভালো টেস্টার দিয়ে পরীক্ষা করলেই কেবল বোঝা যায় তারে কারেন্ট নেই।"
+          "explanationBn": "ভুল MCB বন্ধ হয়ে থাকতে পারে, তাই ভালো টেস্টার দিয়ে পরীক্ষা করলেই কেবল বোঝা যায় তারে কারেন্ট নেই।",
+          "lesson": 2
         },
         {
           "promptEn": "Why do you touch your tester to a working socket before you switch off the power?",
@@ -184,7 +187,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "A broken tester stays dark even on a live wire, so you must see it light first.",
-          "explanationBn": "নষ্ট টেস্টার কারেন্ট থাকা তারেও জ্বলে না, তাই আগে সেটি জ্বলতে দেখা দরকার।"
+          "explanationBn": "নষ্ট টেস্টার কারেন্ট থাকা তারেও জ্বলে না, তাই আগে সেটি জ্বলতে দেখা দরকার।",
+          "lesson": 2
         },
         {
           "promptEn": "An MCB trips every time the customer switches it on. The customer asks you to fit a bigger MCB. What do you do?",
@@ -213,7 +217,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "A bigger MCB lets the wires overheat and can start a fire.",
-          "explanationBn": "বড় MCB লাগালে তার অতিরিক্ত গরম হয়ে আগুন লাগতে পারে।"
+          "explanationBn": "বড় MCB লাগালে তার অতিরিক্ত গরম হয়ে আগুন লাগতে পারে।",
+          "lesson": 3
         },
         {
           "promptEn": "What does the earth wire do?",
@@ -242,7 +247,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "With a good earth, the metal body of an appliance does not shock the person who touches it.",
-          "explanationBn": "আর্থ ঠিক থাকলে যন্ত্রের ধাতব বডি ছুঁলে শক লাগে না।"
+          "explanationBn": "আর্থ ঠিক থাকলে যন্ত্রের ধাতব বডি ছুঁলে শক লাগে না।",
+          "lesson": 3
         },
         {
           "promptEn": "You are about to take the wires out of an old socket. What do you do first, so that you can put them back correctly?",
@@ -271,7 +277,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "A photo shows exactly which wire goes to which terminal.",
-          "explanationBn": "ছবিতে ঠিক দেখা যায় কোন তার কোন টার্মিনালে যাবে।"
+          "explanationBn": "ছবিতে ঠিক দেখা যায় কোন তার কোন টার্মিনালে যাবে।",
+          "lesson": 4
         },
         {
           "promptEn": "You open a socket and see that the cover of the wires is black and cracking. What do you do?",
@@ -300,7 +307,8 @@
           ],
           "correctOptionId": "d",
           "explanationEn": "Burnt wiring means a deeper fault that a beginner must not repair.",
-          "explanationBn": "পোড়া তার মানে ভেতরে বড় সমস্যা আছে, যা নতুন কর্মীর মেরামত করা উচিত নয়।"
+          "explanationBn": "পোড়া তার মানে ভেতরে বড় সমস্যা আছে, যা নতুন কর্মীর মেরামত করা উচিত নয়।",
+          "lesson": 4
         },
         {
           "promptEn": "There is power, but the ceiling fan only hums and does not turn. What do you check first?",
@@ -329,7 +337,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "A weak capacitor is the most common reason a fan hums without turning.",
-          "explanationBn": "ফ্যান গুনগুন করে কিন্তু না ঘোরার সবচেয়ে সাধারণ কারণ দুর্বল ক্যাপাসিটর।"
+          "explanationBn": "ফ্যান গুনগুন করে কিন্তু না ঘোরার সবচেয়ে সাধারণ কারণ দুর্বল ক্যাপাসিটর।",
+          "lesson": 5
         },
         {
           "promptEn": "You switch a tripped MCB back on and it trips again at once. What is right?",
@@ -358,7 +367,8 @@
           ],
           "correctOptionId": "c",
           "explanationEn": "An MCB that trips again is warning you of a short circuit or too much load.",
-          "explanationBn": "MCB আবার ট্রিপ করা মানে শর্ট সার্কিট বা অতিরিক্ত লোডের সতর্কবার্তা।"
+          "explanationBn": "MCB আবার ট্রিপ করা মানে শর্ট সার্কিট বা অতিরিক্ত লোডের সতর্কবার্তা।",
+          "lesson": 5
         },
         {
           "promptEn": "A customer asks you to tighten a loose wire at the meter. What do you do?",
@@ -387,7 +397,8 @@
           ],
           "correctOptionId": "a",
           "explanationEn": "The meter and the service line stay live even when the main switch is off.",
-          "explanationBn": "মেইন সুইচ বন্ধ থাকলেও মিটার ও সার্ভিস লাইনে কারেন্ট থাকে।"
+          "explanationBn": "মেইন সুইচ বন্ধ থাকলেও মিটার ও সার্ভিস লাইনে কারেন্ট থাকে।",
+          "lesson": 6
         },
         {
           "promptEn": "A person is holding a live wire and cannot let go. What do you do first?",
@@ -416,7 +427,8 @@
           ],
           "correctOptionId": "b",
           "explanationEn": "If you touch them while the power is on, the current passes into you too.",
-          "explanationBn": "বিদ্যুৎ চালু থাকা অবস্থায় তাঁকে ছুঁলে কারেন্ট আপনার শরীরেও চলে আসবে।"
+          "explanationBn": "বিদ্যুৎ চালু থাকা অবস্থায় তাঁকে ছুঁলে কারেন্ট আপনার শরীরেও চলে আসবে।",
+          "lesson": 6
         },
         {
           "promptEn": "It is load-shedding. The customer says there is no power now, so you can change the switch quickly. What do you do?",
