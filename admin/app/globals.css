@@ -1131,3 +1131,203 @@ td.empty-row {
   height: 100%;
   background: var(--green);
 }
+.dialog.wide {
+  width: min(1180px, 100%);
+}
+.course-editor {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.editor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px 14px;
+}
+.editor-grid textarea {
+  min-height: 70px;
+}
+.lesson-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 860px) {
+  .lesson-layout {
+    grid-template-columns: 1fr;
+  }
+}
+.lesson-list ol {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.lesson-list button {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+}
+.lesson-list button.active {
+  border-color: var(--green);
+  box-shadow: inset 3px 0 0 var(--green);
+}
+.checkpoint-count {
+  font-weight: 700;
+}
+.checkpoint-count.ok {
+  color: var(--green);
+}
+.checkpoint-count.short {
+  color: #a4471f;
+}
+.step-list,
+.question-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.step-editor,
+.question-editor {
+  border: 1px solid var(--line);
+  border-left-width: 4px;
+  border-radius: 12px;
+  padding: 12px;
+  background: #fff;
+}
+.step-editor.step-hazard {
+  border-left-color: #c2410c;
+}
+.step-editor.step-learn {
+  border-left-color: #2563eb;
+}
+.step-editor.step-remember {
+  border-left-color: #7c3aed;
+}
+.step-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.step-head .actions {
+  margin-left: auto;
+}
+.step-picture {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+@media (max-width: 700px) {
+  .step-picture {
+    grid-template-columns: 1fr;
+  }
+}
+.picture-box {
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  background: #f4f6f5;
+  overflow: hidden;
+  font-size: 11px;
+  text-align: center;
+  padding: 6px;
+}
+.picture-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.picture-rules {
+  margin: 6px 0;
+  padding-left: 18px;
+  font-size: 11px;
+  color: var(--muted);
+}
+label.upload input[type="file"] {
+  display: block;
+  margin-top: 4px;
+}
+.notice-warning {
+  padding: 8px 10px;
+  border-left: 3px solid #c2410c;
+  background: #fff4ec;
+  font-size: 12px;
+}
+.problems {
+  color: #a4471f;
+  font-size: 12px;
+}
+.editor-footer {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 8px;
+}
+.option-row {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.checkpoint-summary {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+}
+.lesson-preview .phone-frame {
+  max-width: 380px;
+  margin: 10px auto;
+  padding: 14px;
+  border: 8px solid #1f2a25;
+  border-radius: 26px;
+  background: #f7f8f6;
+  display: grid;
+  gap: 10px;
+}
+.learner-card {
+  padding: 12px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid var(--line);
+}
+.learner-card header {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.learner-card img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+.learner-card.card-hazard {
+  border: 2px solid #c2410c;
+  background: #fff4ec;
+}
+.learner-card.card-checkpoint {
+  border-color: var(--green);
+}
+.preview-question {
+  border: 0;
+  padding: 0;
+  margin: 0 0 10px;
+}

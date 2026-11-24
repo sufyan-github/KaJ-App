@@ -8,6 +8,7 @@ import {
   localizedEntityName,
   setActiveAdminLocale,
   tr,
+  UserFacingError,
 } from "@/lib/admin-i18n";
 import {
   useData,
@@ -35,6 +36,11 @@ import {
   usePagedView,
 } from "./ui";
 import { Staff } from "./views/staff";
+import { CourseEditor } from "./views/course-editor";
+import {
+  type CourseDocument,
+  checkpointRefusal,
+} from "@/lib/course-document.ts";
 import { AuditTrail } from "./views/audit";
 import { AiUsage } from "./ai-usage";
 import {
@@ -2708,7 +2714,7 @@ type CourseItem = {
   lessons: number;
   activeQuestions: number;
 };
-const NEW_COURSE_TEMPLATE = {
+const NEW_COURSE_TEMPLATE: CourseDocument = {
   slug: "new-course",
   skillSlug: null,
   titleEn: "",
@@ -2728,9 +2734,10 @@ function Courses() {
   const { data, loading, error, reload } = useData<{ items: CourseItem[] }>(
     "training/courses",
   );
+  const can = useCan();
   const [editing, setEditing] = useState<{
     id: string | null;
-    text: string;
+    document: CourseDocument;
   } | null>(null);
   const [publishing, setPublishing] = useState<{
     item: CourseItem;
@@ -2746,7 +2753,7 @@ function Courses() {
             onClick={() =>
               setEditing({
                 id: null,
-                text: JSON.stringify(NEW_COURSE_TEMPLATE, null, 2),
+                document: structuredClone(NEW_COURSE_TEMPLATE),
               })
             }
           >
@@ -2775,21 +2782,20 @@ function Courses() {
               <Badge value={item.isPublished ? "PUBLISHED" : "DRAFT"} />
             </td>
             <td className="actions">
-              <Can
-                route={["GET training/courses/:id", "PUT training/courses/:id"]}
-              >
+              <Can route="GET training/courses/:id">
                 <button
                   onClick={async () => {
-                    const course = await adminApi<{ document: unknown }>(
-                      `training/courses/${item.id}`,
-                    );
-                    setEditing({
-                      id: item.id,
-                      text: JSON.stringify(course.document, null, 2),
-                    });
+                    try {
+                      const course = await adminApi<{
+                        document: CourseDocument;
+                      }>(`training/courses/${item.id}`);
+                      setEditing({ id: item.id, document: course.document });
+                    } catch (caught) {
+                      setMessage(friendlyAdminError(caught));
+                    }
                   }}
                 >
-                  {tr("Edit")}
+                  {tr(can("PUT training/courses/:id") ? "Edit" : "View")}
                 </button>
               </Can>
               <Can route="POST training/courses/:id/publish">
@@ -2807,24 +2813,13 @@ function Courses() {
       </DataTable>
       {editing && (
         <CourseEditor
-          initial={editing.text}
-          isNew={editing.id === null}
+          courseId={editing.id}
+          initial={editing.document}
           onClose={() => setEditing(null)}
-          onSave={async (document, reason) => {
-            const saved = editing.id
-              ? await adminApi<{ outcome: string; version: number }>(
-                  `training/courses/${editing.id}`,
-                  json("PUT", { document, reason }),
-                )
-              : await adminApi<{ version: number }>(
-                  "training/courses",
-                  json("POST", { document, reason }),
-                );
+          onSaved={async (saved) => {
             setMessage(
               `${tr("Saved")}: v${saved.version}${
-                "outcome" in saved
-                  ? ` (${humanize(String(saved.outcome))})`
-                  : ""
+                saved.outcome ? ` (${humanize(String(saved.outcome))})` : ""
               }`,
             );
             setEditing(null);
@@ -2838,84 +2833,24 @@ function Courses() {
           confirmLabel={publishing.publish ? "Publish" : "Unpublish"}
           onClose={() => setPublishing(null)}
           onConfirm={async (reason) => {
-            await adminApi(
-              `training/courses/${publishing.item.id}/${
-                publishing.publish ? "publish" : "unpublish"
-              }`,
-              json("POST", { reason }),
-            );
+            try {
+              await adminApi(
+                `training/courses/${publishing.item.id}/${
+                  publishing.publish ? "publish" : "unpublish"
+                }`,
+                json("POST", { reason }),
+              );
+            } catch (caught) {
+              // Name the lessons that are short of checkpoint questions.
+              const refusal = checkpointRefusal(caught);
+              throw refusal ? new UserFacingError(refusal) : caught;
+            }
             setPublishing(null);
             await reload();
           }}
         />
       )}
     </State>
-  );
-}
-function CourseEditor({
-  initial,
-  isNew,
-  onClose,
-  onSave,
-}: {
-  initial: string;
-  isNew: boolean;
-  onClose: () => void;
-  onSave: (document: unknown, reason: string) => Promise<void>;
-}) {
-  const [text, setText] = useState(initial);
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-  return (
-    <Dialog title={tr(isNew ? "New course" : "Edit course")} onClose={onClose}>
-      <form
-        onSubmit={async (event) => {
-          event.preventDefault();
-          let document: unknown;
-          try {
-            document = JSON.parse(text);
-          } catch {
-            setError(tr("The course document is not valid JSON."));
-            return;
-          }
-          const reason = String(
-            new FormData(event.currentTarget).get("reason") ?? "",
-          );
-          setBusy(true);
-          try {
-            await onSave(document, reason);
-          } catch (caught) {
-            setError(friendlyAdminError(caught));
-            setBusy(false);
-          }
-        }}
-      >
-        <p>
-          {tr(
-            "Changing lessons or questions creates a new version; earlier certificates stop counting for it.",
-          )}
-        </p>
-        <label>
-          {tr("Course document (JSON)")}
-          <textarea
-            className="code-editor"
-            rows={20}
-            value={text}
-            onChange={(event) => setText(event.target.value)}
-            spellCheck={false}
-          />
-        </label>
-        <ReasonField />
-        {error && (
-          <p className="error" role="alert">
-            {error}
-          </p>
-        )}
-        <button className="primary" disabled={busy}>
-          {tr(busy ? "Applying…" : "Save course")}
-        </button>
-      </form>
-    </Dialog>
   );
 }
 type CertificateItem = {

@@ -357,15 +357,18 @@ export function Dialog({
   title,
   onClose,
   children,
+  wide,
 }: {
   title: string;
   onClose: () => void;
   children: ReactNode;
+  /** A large working dialog (the course editor). */
+  wide?: boolean;
 }) {
   return (
     <div className="dialog-backdrop" role="presentation">
       <section
-        className="dialog"
+        className={wide ? "dialog wide" : "dialog"}
         role="dialog"
         aria-modal="true"
         aria-label={tr(title)}
