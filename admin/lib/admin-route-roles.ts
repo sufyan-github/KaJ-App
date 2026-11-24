@@ -98,7 +98,6 @@ export const ADMIN_ROUTE_ROLES = {
   "PUT subscriptions/access-rules/:featureKey": ["ADMIN"],
   "PUT subscriptions/plans/:id": ["ADMIN"],
   "PUT training/courses/:id": ["ADMIN"],
-  // R7 B1: support/admin correction of a verified person's gender.
   "PUT users/:id/gender": ["ADMIN", "SUPPORT"],
 } as const satisfies Record<string, readonly AdminRole[]>;
 

@@ -94,3 +94,15 @@ test("ideas and introductions are for content moderators only", () => {
   assert.ok(!keys("SUPPORT").includes("attendance"));
   assert.ok(!keys("FINANCE").includes("attendance"));
 });
+
+test("only ADMIN edits courses and uploads step pictures; MODERATOR reads", () => {
+  for (const route of [
+    "PUT training/courses/:id",
+    "POST training/step-images/sign",
+    "POST training/step-images/complete",
+  ] as const) {
+    assert.equal(canCall("ADMIN", route), true, route);
+    assert.equal(canCall("MODERATOR", route), false, route);
+  }
+  assert.equal(canCall("MODERATOR", "GET training/courses/:id"), true);
+});

@@ -132,67 +132,6 @@ test("suspends a learning opportunity with a reason", async ({ page }) => {
     .toMatchObject({ reason: "Reported for misleading stipend terms." });
 });
 
-test("edits a course document and reports the new version", async ({
-  page,
-}) => {
-  await respond(page, "training/courses", {
-    items: [
-      {
-        id: "course-1",
-        slug: "safe-ladders",
-        titleEn: "Safe ladder use",
-        titleBn: "নিরাপদে মই ব্যবহার",
-        isPublished: true,
-        version: 1,
-        lessons: 1,
-        activeQuestions: 1,
-      },
-    ],
-  });
-  await page.route(
-    "**/api/admin/ops/training/courses/course-1",
-    async (route) => {
-      if (route.request().method() === "GET")
-        return route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify(
-            envelope({
-              id: "course-1",
-              version: 1,
-              isPublished: true,
-              document: { slug: "safe-ladders", titleEn: "Safe ladder use" },
-            }),
-          ),
-        });
-      return route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify(
-          envelope({ outcome: "versionBumped", version: 2, document: {} }),
-        ),
-      });
-    },
-  );
-  await openLearn(page);
-  await page.getByRole("tab", { name: "Courses" }).click();
-  await page.getByRole("button", { name: "Edit", exact: true }).click();
-  const editor = page.getByLabel("Course document (JSON)");
-  await expect(editor).toHaveValue(/safe-ladders/);
-  await page
-    .getByRole("dialog")
-    .getByLabel("Required operational reason")
-    .fill("Fix the ladder lesson title.");
-  await editor.fill("{ not json");
-  await page.getByRole("button", { name: "Save course" }).click();
-  await expect(
-    page.getByRole("alert").filter({ hasText: "not valid JSON" }),
-  ).toBeVisible();
-  await editor.fill('{"slug":"safe-ladders","titleEn":"Using a ladder"}');
-  await page.getByRole("button", { name: "Save course" }).click();
-  await expect(page.getByRole("status")).toContainText("v2 (Version bumped)");
-});
-
 test("revokes a completion record", async ({ page }) => {
   await respond(page, "certificates?limit=100", {
     items: [

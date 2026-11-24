@@ -228,7 +228,11 @@ export function localizedEntityName(nameEn: string, nameBn?: string | null) {
   return activeLocale === "bn" && nameBn?.trim() ? nameBn : nameEn;
 }
 
+/** A message written for the operator (shown as is, translated if known). */
+export class UserFacingError extends Error {}
+
 export function friendlyAdminError(error: unknown): string {
+  if (error instanceof UserFacingError) return tr(error.message);
   const message = error instanceof Error ? error.message : String(error);
   if (activeLocale !== "bn") return message;
   if (/unauthor|session|sign.?in/iu.test(message)) {
