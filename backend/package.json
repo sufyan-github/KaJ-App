@@ -15,6 +15,7 @@
     "seed": "prisma db seed",
     "seed:demo": "tsx prisma/demo-seed.ts",
     "seed:reference": "tsx prisma/reference-data-load.ts",
+    "seed:launch": "tsx prisma/launch-content-seed.ts",
     "seed:training": "tsx prisma/training-seed.ts",
     "start": "node dist/main.js",
     "test": "jest --maxWorkers=1",

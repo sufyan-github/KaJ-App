@@ -943,6 +943,8 @@ model CommunityGroup {
   women_only         Boolean                @default(false)
   location_id        String?                @db.Uuid
   category_id        String?                @db.Uuid
+  /// Launch content: the stable key `pnpm seed:launch` matches on.
+  seed_key           String?                @unique
   /// Set by moderation.
   hidden_at          DateTime?
   hidden_reason      String?
@@ -1140,6 +1142,9 @@ model BusinessIdea {
   ai_analyzed_at        DateTime?
   converted_business_id String?          @unique @db.Uuid
   converted_at          DateTime?
+  /// Launch content: the stable key `pnpm seed:launch` matches on (null for
+  /// ideas people create in the app).
+  seed_key              String?          @unique
   /// Set by moderation: hidden from everyone but the owner.
   hidden_at             DateTime?
   hidden_reason         String?

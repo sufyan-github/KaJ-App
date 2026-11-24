@@ -65,6 +65,7 @@ Enum values can't be removed in PostgreSQL; rollbacks leave them in place (unuse
 | 31  | `20261121140000_more_checks`                        | R3: 10 CHECKs added NOT VALID (reviews not self, report priority 0–9, ledger amount > 0, assignment price ≥ 0, business name and session title not blank, introduction expiry after creation, idea view basis, job workers in range, job budget ordered) | none (new and changed rows only)                                                                                                                                 | down.sql drops them                                                                                          |
 | 32  | `20261121140100_validate_more_checks`               | Validates each; one that old rows break stays NOT VALID with a NOTICE (the deploy does not fail)                                                                                                                                                         | Read the NOTICEs in the deploy log; see §6.2                                                                                                                     | —                                                                                                            |
 | 33  | `20261122090000_verification_declared_gender`       | R7 B1: nullable `verification_requests.declared_gender` (Gender)                                                                                                                                                                                         | None                                                                                                                                                             |
+| 34  | `20261124090000_launch_content_seed_key`            | Launch content: nullable unique `seed_key` on `business_ideas` and `community_groups`                                                                                                                                                                    | None                                                                                                                                                             |
 
 Indexes are created inside Prisma's migration transaction (not `CONCURRENTLY`). At pilot scale the locks are short. If a table has grown large, run the `CREATE INDEX` statements by hand with `CONCURRENTLY` first, then let the migration's `IF NOT EXISTS` / Prisma state catch up (`prisma migrate resolve --applied <name>` only after checking the result matches the migration exactly).
 
@@ -210,7 +211,30 @@ Do this:
 4. Set `GATEWAY_STORAGE_DIR` (and `GATEWAY_LOG_FILE`) to a folder outside `public_html`, e.g. `/home/<user>/kaaj-gateway-storage`, mode `0700`.
 5. Verify from outside: `curl -s -o /dev/null -w '%{http_code}' https://<host>/kaaj-bdapps-gateway.env` and `…/bdapps/.env` → 403 or 404, never 200.
 
-## 8. What this runbook does not cover
+## 8. Launch content (`pnpm seed:launch`)
+
+The founder-approved launch content lives in `backend/prisma/launch-content/`: `ideas-and-groups.json` (ideas, partner calls, community groups) and `courses/<slug>.json` (one course per file, the training-content format). CI checks every file (`test/launch-content-files.spec.ts`): the loader schemas, four options a–d with a correct one, and Bangla and English summaries with the same number of lines.
+
+It is **never** part of `seed`, the build or the deploy. Run it on purpose, once:
+
+1. The reference data is loaded (business and work categories, Rajshahi areas) and migration 34 is applied.
+2. The founder has signed up in the app with the phone you will use. The loader never creates an account in production; with a missing founder it stops before writing anything.
+3. Optional: a verified woman (identity-verified, gender female) who will moderate the women-only group has signed up. Without her, that group is **held** (not created) and the summary says so. Re-run later with her phone to create it.
+
+```bash
+cd backend
+LAUNCH_FOUNDER_PHONE=+8801XXXXXXXXX \
+LAUNCH_WOMEN_MODERATOR_PHONE=+8801YYYYYYYYY \
+corepack pnpm seed:launch
+```
+
+- Ideas and partner calls belong to the founder, with every role's arrangement `UNDECIDED`. Groups are moderated by the founder (the women-only group by the woman moderator only). Groups without an area are placed in the city (Rajshahi).
+- Courses are published, except those marked `isSafetyCritical`: they load **unpublished** until a qualified trainer has reviewed them. Then run again with `--publish-safety` (or publish them in the admin console).
+- Re-running is safe: ideas and groups are matched by `seed_key`, courses by slug. Changed text updates in place (a course's version goes up when its lessons or questions change); a role taken out of the content is closed, not deleted; an arrangement the founder chose later in the app is kept.
+- It prints a summary (created, updated, unchanged, held, unpublished) and then the full result as JSON.
+- `--create-founder` (with `LAUNCH_FOUNDER_NAME`) creates the founder as a local test user. It is refused when `NODE_ENV=production`; use it only for a local or test database.
+
+## 9. What this runbook does not cover
 
 - Render service creation, DNS and TLS (owner's account actions).
 - Mobile release and store listing.
